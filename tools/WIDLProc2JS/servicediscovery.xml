@@ -1,0 +1,1020 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="discovery" id="::discovery">
+    <webidl>module discovery {&#13;
+&#13;
+        [NoInterfaceObject] interface DiscoveryInterface  {&#13;
+&#13;
+                 <ref>PendingOperation</ref> findServices(in <ref>ServiceType</ref> serviceType, in <ref>FindCallBack</ref> findCallBack, in optional <ref>Options</ref> options, in optional <ref>Filter</ref> filter)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                 DOMString getServiceId(in DOMString sharedFunctionId)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                 <ref>Service</ref> createService()&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);                                                          &#13;
+        };              &#13;
+&#13;
+        [NoInterfaceObject] interface ServiceType {&#13;
+&#13;
+                attribute DOMString api;&#13;
+        };&#13;
+                &#13;
+&#13;
+        [Callback, NoInterfaceObject] interface FindCallBack {&#13;
+&#13;
+                 void onFound(in <ref>Service</ref> service);        &#13;
+&#13;
+                 void onLost(in <ref>Service</ref> service);        &#13;
+&#13;
+                void onError(in <ref>DiscoveryError</ref> error);                 &#13;
+        };&#13;
+        &#13;
+&#13;
+        &#13;
+        [NoInterfaceObject] interface Service {&#13;
+&#13;
+                const unsigned short SERVICE_INITATING = 0;             &#13;
+&#13;
+                const unsigned short SERVICE_AVAILABLE = 1;&#13;
+&#13;
+                const unsigned short SERVICE_UNAVAILABLE = 2;&#13;
+&#13;
+                readonly attribute unsigned short state;&#13;
+&#13;
+                readonly attribute DOMString api;&#13;
+&#13;
+                readonly attribute DOMString id;&#13;
+&#13;
+                readonly attribute DOMString displayName;&#13;
+&#13;
+                readonly attribute DOMString description;&#13;
+&#13;
+                readonly attribute DOMString icon;&#13;
+&#13;
+                <ref>PendingOperation</ref> bind(in <ref>BindCallBack</ref> bindCallBack, in optional DOMString serviceId)&#13;
+                raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                void unbind()&#13;
+                raises(<ref>DiscoveryExceptions</ref>);&#13;
+        };&#13;
+        &#13;
+&#13;
+         &#13;
+         [Callback, NoInterfaceObject] interface BindCallBack {&#13;
+&#13;
+                 void onBind(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onUnbind(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onServiceAvailable(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onServiceUnavailable(in <ref>Service</ref> service);        &#13;
+&#13;
+                void onError(in <ref>DiscoveryError</ref> error); &#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface Options {&#13;
+&#13;
+                attribute unsigned short timeout;&#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface Filter {&#13;
+&#13;
+                attribute DOMString[] zoneId;&#13;
+                 &#13;
+&#13;
+                attribute boolean remoteServices;&#13;
+&#13;
+&#13;
+                attribute <ref>ServiceLocation</ref>? serviceLocation;      &#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface ServiceLocation {&#13;
+&#13;
+                attribute double? latitude;&#13;
+&#13;
+&#13;
+                attribute double? longitude;&#13;
+                &#13;
+&#13;
+                attribute double accuracy;              &#13;
+        };&#13;
+        &#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+                void cancel();&#13;
+        };&#13;
+  &#13;
+&#13;
+        [NoInterfaceObject] interface DiscoveryError {&#13;
+&#13;
+                 const unsigned short FIND_SERVICE_CANCELED = 101;&#13;
+&#13;
+                 const unsigned short FIND_SERVICE_TIMEOUT = 102;                &#13;
+&#13;
+                 const unsigned short PERMISSION_DENIED_ERROR  = 103;&#13;
+        };&#13;
+  &#13;
+&#13;
+        exception DiscoveryExceptions {&#13;
+&#13;
+                 const unsigned short INVALID_ARGUMENT_ERROR = 101;&#13;
+        };&#13;
+        &#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface WebinosDiscovery {&#13;
+&#13;
+                readonly attribute <ref>DiscoveryInterface</ref> discovery;&#13;
+        };&#13;
+&#13;
+    <ref>webinoscore::Webinos</ref> implements <ref>WebinosDiscovery</ref>;&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The Discovery API 
+        </brief>
+       <description>
+        <p>
+The Webinos Discovery API provide web applications with an API to find and bind to services. 
+The API is not limited to the local device but enables the possibility to find services in a 
+zone of trusted personal devices or services exposed by legacy methods such as Bluetooth SD, mDNS or UPnP.
+        </p>
+        <p>
+Usage of the API assumes that the web application using the API is installed, trusted and that the user is
+authenticated/authorized to use the API.
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/discovery">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Anders Isberg &#60;anders.isberg@sonyericsson.com&#62;
+        </author>
+        <version>
+ 0.5 
+        </version>
+    </descriptive>
+    <Interface name="DiscoveryInterface" id="::discovery::DiscoveryInterface">
+      <webidl>        [NoInterfaceObject] interface DiscoveryInterface  {&#13;
+&#13;
+                 <ref>PendingOperation</ref> findServices(in <ref>ServiceType</ref> serviceType, in <ref>FindCallBack</ref> findCallBack, in optional <ref>Options</ref> options, in optional <ref>Filter</ref> filter)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                 DOMString getServiceId(in DOMString sharedFunctionId)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                 <ref>Service</ref> createService()&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);                                                          &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The DiscoveryInterface interface provides functionality for discovery of services. 
+The API supports the possibility to find services based on a given service type either in 
+a personal zone of devices or via other legacy discovery methods such as mDNS or UPnP. When searching for a service type
+the operation can be restricted by providing certain constraints and/or context information.  
+          </brief>
+         <description>
+          <p>
+The code example below shows how an application initiates a search query
+to find a geolocation service. Whenever a service is found, a new selection item
+is added to the option list. Once the user selects a service, the usage of the service authorized and an implementation of
+the API is instantiated.  
+          </p>
+         </description>
+          <Code>        var findHandle = 0;
+        var serviceHandle = 0;
+        var geoServices = {};
+        var serviceId;
+        
+        // Callback that displays a list of found services in a HTML selection list
+        // The selection list is dynamically extended every time a new service is discovered.   
+        function serviceFoundCB(service) {      
+                var selectlist = document.getElementById('servicelist');
+                var option = document.createElement('option');
+        
+                option.value = service.id;
+                option.id = service.id;
+                option.appendChild(document.createTextNode(service.displayName));
+                geoServices[service.id] = service;
+                selectlist.appendChild(option);
+        }
+        
+        // Callback that removes a service from the selection list of found services, when the service is not available any longer, e.g. out of coverage. 
+        function serviceLostCB(service) {       
+                var option = document.getElementById(service.id);
+        
+                geoServices[service.id] = NULL;
+                option.parentNode.removeChild(option);
+        }
+        
+        // Success callback when bind has been successfully executed on the service object. 
+        function bindCB(myLocationService) {
+                alert('Service ' + myLocationService.displayName + ' ready to use');
+                myLocationService.navigator.geolocation.getCurrentPosition(showMap);
+        }
+        
+        // Select callback method that is invoked when user selects an option in the selection list 
+        function serviceSelected(service) {     
+                // Stops the findServices operation
+                findHandle.cancel();
+        
+                // Binds to the service to initiate an authorized object used to
+                // invoke services.  
+                serviceHandle = service.bind({onBind:bindCB});
+        }
+        
+        if (serviceId) {
+                // If serviceId is known bind to the service directly
+                 
+                serviceHandle = window.webinos.discovery.createServices().bind({onBind:bindCB}, serviceId);
+        } 
+        else {
+                // Initiate a search query for a service of the type geolocation
+                findHandle = window.webinos.discovery.findServices({api:'http://webinos.org/api/geolocation'}, {onFound:serviceFoundCB, onLost:serviceLostCB});
+        
+                var selectlist = document.getElementById('servicelist');
+                selectlist.addEventListener(&quot;change&quot;, function (e) {
+                        var service = geoServices[e.target.value];
+                        if (service) {
+                                serviceSelected(service);
+                        }
+                }, false);      
+        }
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="findServices" id="::discovery::DiscoveryInterface::findServices">
+        <webidl>                 <ref>PendingOperation</ref> findServices(in <ref>ServiceType</ref> serviceType, in <ref>FindCallBack</ref> findCallBack, in optional <ref>Options</ref> options, in optional <ref>Filter</ref> filter)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);</webidl>
+        <descriptive>
+            <brief>
+ The findServices method initiates an asynchronous search query for services matching the requested serviceType and filter parameters. The method continues to run until the findServices method is canceled by the application or when maximum search timer expires.
+            </brief>
+           <description>
+            <p>
+The zones in which services are to be searched are expected to be managed by the Webinos runtime engine (rather than the application developer).
+As an example on how this zone management can be presented by a runtime engine:
+            </p>
+            <p>
+<img src="http://dev.webinos.org/specifications/draft/infobar.png" alt="Illustration of possible Infobar" /><br /> Infobar offering to add new personal zones            </p>
+            <p>
+This infobar would lead to a personal zones management UI:
+            </p>
+            <p>
+<img src="http://dev.webinos.org/specifications/draft/pz-add-ui.png" alt="Personal zone management UI" /><br />Personal zone management UI            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation"/>
+        <ArgumentList>
+          <Argument in="in" name="serviceType">
+            <descriptive>
+                <description><p>
+ An input argument that defines which type of service that is requested.
+                </p></description>
+            </descriptive>
+            <Type name="ServiceType"/>
+          </Argument>
+          <Argument in="in" name="findCallBack">
+            <descriptive>
+                <description><p>
+ Callback interface used to report the outcome of the search process. 
+                </p></description>
+            </descriptive>
+            <Type name="FindCallBack"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="options">
+            <descriptive>
+                <description><p>
+ Defines search options. 
+                </p></description>
+            </descriptive>
+            <Type name="Options"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="filter">
+            <descriptive>
+                <description><p>
+ Defines a filter that be used to limit the service operation to certain constraints and context information. 
+                </p></description>
+            </descriptive>
+            <Type name="Filter"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DiscoveryExceptions">
+            <descriptive>
+                <description><p>
+ 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="getServiceId" id="::discovery::DiscoveryInterface::getServiceId">
+        <webidl>                 DOMString getServiceId(in DOMString sharedFunctionId)&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);</webidl>
+        <descriptive>
+            <brief>
+ The getServiceId method generates a service identity that can be shared to other peers to directly bind to a service without invoking a findServices operation.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+        <ArgumentList>
+          <Argument in="in" name="sharedFunctionId">
+            <descriptive>
+                <description><p>
+ Identity of the service exposed with the webinos:shared-function element in the manifest.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DiscoveryExceptions">
+            <descriptive>
+                <description><p>
+ 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="createService" id="::discovery::DiscoveryInterface::createService">
+        <webidl>                 <ref>Service</ref> createService()&#13;
+                 raises(<ref>DiscoveryExceptions</ref>);</webidl>
+        <descriptive>
+            <brief>
+        The createService method creates an instance of a Service object. 
+The method is used when the service identity is known and the 
+application wants to bind to a service directly without searching 
+for services with the findServices method. 
+            </brief>
+        </descriptive>
+        <Type name="Service"/>
+        <ArgumentList/>
+        <Raises>
+          <RaiseException name="DiscoveryExceptions">
+            <descriptive>
+                <description><p>
+ 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="ServiceType" id="::discovery::ServiceType">
+      <webidl>        [NoInterfaceObject] interface ServiceType {&#13;
+&#13;
+                attribute DOMString api;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The Service Type interface is used to define which type of service that is requested. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="api" id="::discovery::ServiceType::api">
+        <webidl>                attribute DOMString api;</webidl>
+        <descriptive>
+            <brief>
+ URI used to identify the requested API's feature set. The URI shall be globally unique.  
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="FindCallBack" id="::discovery::FindCallBack">
+      <webidl>        [Callback, NoInterfaceObject] interface FindCallBack {&#13;
+&#13;
+                 void onFound(in <ref>Service</ref> service);        &#13;
+&#13;
+                 void onLost(in <ref>Service</ref> service);        &#13;
+&#13;
+                void onError(in <ref>DiscoveryError</ref> error);                 &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ FindCallBack interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onFound" id="::discovery::FindCallBack::onFound">
+        <webidl>                 void onFound(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback used whenever a new service is found.      
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the found service.
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onLost" id="::discovery::FindCallBack::onLost">
+        <webidl>                 void onLost(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback used whenever a service that was previously found is not available any longer.       
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the lost service.
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onError" id="::discovery::FindCallBack::onError">
+        <webidl>                void onError(in <ref>DiscoveryError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous error callback.   
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ Error code. 
+                </p></description>
+            </descriptive>
+            <Type name="DiscoveryError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="Service" id="::discovery::Service">
+      <webidl>        [NoInterfaceObject] interface Service {&#13;
+&#13;
+                const unsigned short SERVICE_INITATING = 0;             &#13;
+&#13;
+                const unsigned short SERVICE_AVAILABLE = 1;&#13;
+&#13;
+                const unsigned short SERVICE_UNAVAILABLE = 2;&#13;
+&#13;
+                readonly attribute unsigned short state;&#13;
+&#13;
+                readonly attribute DOMString api;&#13;
+&#13;
+                readonly attribute DOMString id;&#13;
+&#13;
+                readonly attribute DOMString displayName;&#13;
+&#13;
+                readonly attribute DOMString description;&#13;
+&#13;
+                readonly attribute DOMString icon;&#13;
+&#13;
+                <ref>PendingOperation</ref> bind(in <ref>BindCallBack</ref> bindCallBack, in optional DOMString serviceId)&#13;
+                raises(<ref>DiscoveryExceptions</ref>);&#13;
+&#13;
+                void unbind()&#13;
+                raises(<ref>DiscoveryExceptions</ref>);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Service interface provides an API to bind to a specific service and monitoring
+the current state of the service in an asynchronous manner. The process of binding
+to a service involves:
+1. mutual authentication between the service and the personal zone
+2. in case of cross zone interworking, mutual authentication between the zones
+3. agreement on data handling obligations as set out in the service's privacy policy
+4. verifying access privileges and checks the need for elevated privileges
+5. instantiate an implementation of the api that can be used by applications to request services from the requested API.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="SERVICE_INITATING" value="0" id="::discovery::Service::SERVICE_INITATING">
+        <webidl>                const unsigned short SERVICE_INITATING = 0;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing the service is in the process of binding to the service. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SERVICE_AVAILABLE" value="1" id="::discovery::Service::SERVICE_AVAILABLE">
+        <webidl>                const unsigned short SERVICE_AVAILABLE = 1;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing the service is available and is ready to be used by the application.  
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SERVICE_UNAVAILABLE" value="2" id="::discovery::Service::SERVICE_UNAVAILABLE">
+        <webidl>                const unsigned short SERVICE_UNAVAILABLE = 2;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing the service is unavailable. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="state" id="::discovery::Service::state">
+        <webidl>                readonly attribute unsigned short state;</webidl>
+        <descriptive>
+            <brief>
+ Current service state of the Service. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="api" id="::discovery::Service::api">
+        <webidl>                readonly attribute DOMString api;</webidl>
+        <descriptive>
+            <brief>
+ API is a global unique URI identifying the feature set provided when the bind has been successfully executed.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="id" id="::discovery::Service::id">
+        <webidl>                readonly attribute DOMString id;</webidl>
+        <descriptive>
+            <brief>
+ Id is a globally unique id representing the binding to the service. The id can be used
+to resume the binding again to the service without invoking the 
+findServices process again. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="displayName" id="::discovery::Service::displayName">
+        <webidl>                readonly attribute DOMString displayName;</webidl>
+        <descriptive>
+            <brief>
+ A human readable name of the service. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="description" id="::discovery::Service::description">
+        <webidl>                readonly attribute DOMString description;</webidl>
+        <descriptive>
+            <brief>
+ An URL referring to a detailed description of the service. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="icon" id="::discovery::Service::icon">
+        <webidl>                readonly attribute DOMString icon;</webidl>
+        <descriptive>
+            <brief>
+ Icon is an URL referring to an icon that represents the service. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Operation name="bind" id="::discovery::Service::bind">
+        <webidl>                <ref>PendingOperation</ref> bind(in <ref>BindCallBack</ref> bindCallBack, in optional DOMString serviceId)&#13;
+                raises(<ref>DiscoveryExceptions</ref>);</webidl>
+        <descriptive>
+            <brief>
+ bind Binds to the service uniquely identified by the service identity.  
+            </brief>
+        </descriptive>
+        <Type name="PendingOperation"/>
+        <ArgumentList>
+          <Argument in="in" name="bindCallBack">
+            <descriptive>
+                <description><p>
+ Callback issued if a service is found.  The callback is called every time a new service is found matching the serviceType and filter. 
+                </p></description>
+            </descriptive>
+            <Type name="BindCallBack"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="serviceId">
+            <descriptive>
+                <description><p>
+ Unique id of the binding to the particular service. If no serviceId is provided as an in parameter, the id attribute in the Service interface will be used to bind the service.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DiscoveryExceptions">
+            <descriptive>
+                <description><p>
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="unbind" id="::discovery::Service::unbind">
+        <webidl>                void unbind()&#13;
+                raises(<ref>DiscoveryExceptions</ref>);</webidl>
+        <descriptive>
+            <brief>
+ unbind Releases all resources and connections allocated by the service object.  
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+        <Raises>
+          <RaiseException name="DiscoveryExceptions">
+            <descriptive>
+                <description><p>
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="BindCallBack" id="::discovery::BindCallBack">
+      <webidl>         [Callback, NoInterfaceObject] interface BindCallBack {&#13;
+&#13;
+                 void onBind(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onUnbind(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onServiceAvailable(in <ref>Service</ref> service);&#13;
+&#13;
+                 void onServiceUnavailable(in <ref>Service</ref> service);        &#13;
+&#13;
+                void onError(in <ref>DiscoveryError</ref> error); &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Bind success callback interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onBind" id="::discovery::BindCallBack::onBind">
+        <webidl>                 void onBind(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous success callback.      
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the service.
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onUnbind" id="::discovery::BindCallBack::onUnbind">
+        <webidl>                 void onUnbind(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback used when a service is unbound.      
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the service.
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onServiceAvailable" id="::discovery::BindCallBack::onServiceAvailable">
+        <webidl>                 void onServiceAvailable(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that the service is available again
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the service.      
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onServiceUnavailable" id="::discovery::BindCallBack::onServiceUnavailable">
+        <webidl>                 void onServiceUnavailable(in <ref>Service</ref> service);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous indicating the service is temporarily unavailable.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="service">
+            <descriptive>
+                <description><p>
+ An input argument representing the service.
+                </p></description>
+            </descriptive>
+            <Type name="Service"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onError" id="::discovery::BindCallBack::onError">
+        <webidl>                void onError(in <ref>DiscoveryError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous error callback.   
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ Error code. 
+                </p></description>
+            </descriptive>
+            <Type name="DiscoveryError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="Options" id="::discovery::Options">
+      <webidl>        [NoInterfaceObject] interface Options {&#13;
+&#13;
+                attribute unsigned short timeout;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Option interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="timeout" id="::discovery::Options::timeout">
+        <webidl>                attribute unsigned short timeout;</webidl>
+        <descriptive>
+            <brief>
+        A timeout value for the findService operation in seconds between 0-65535. 
+Default value is 120 seconds. It is possible to disable the timeout by setting 
+the timeout value to Number.POSITIVE_INFINITY.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+    </Interface>
+    <Interface name="Filter" id="::discovery::Filter">
+      <webidl>        [NoInterfaceObject] interface Filter {&#13;
+&#13;
+                attribute DOMString[] zoneId;&#13;
+                 &#13;
+&#13;
+                attribute boolean remoteServices;&#13;
+&#13;
+&#13;
+                attribute <ref>ServiceLocation</ref>? serviceLocation;      &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Filter interface 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="zoneId" id="::discovery::Filter::zoneId">
+        <webidl>                attribute DOMString[] zoneId;</webidl>
+        <descriptive>
+            <brief>
+        Identities of personal zones that will be used to search for services in addition to 
+the person zone of the user logged into to the device and all personal zones that 
+has been defined via the personal zone management UI.  
+            </brief>
+        </descriptive>
+        <Type type="array">
+          <Type type="DOMString"/>
+        </Type>
+      </Attribute>
+      <Attribute name="remoteServices" id="::discovery::Filter::remoteServices">
+        <webidl>                attribute boolean remoteServices;</webidl>
+        <descriptive>
+            <brief>
+        Remote Services If remoteService is false the findServices method will limit the search for services that are  
+connected directly to the device or to the same local IP network. If remoteServices is true, the findServices  
+method will extend the search for services outside the local IP network. Default value is false. 
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="serviceLocation" id="::discovery::Filter::serviceLocation">
+        <webidl>                attribute <ref>ServiceLocation</ref>? serviceLocation;</webidl>
+        <descriptive>
+            <brief>
+        Service Location With the serviceLocation attribute it is possible to indicate where the service shall be located.
+If the service location is Null, the location of the service is not considered during the findServices process.  
+            </brief>
+        </descriptive>
+        <Type name="ServiceLocation" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="ServiceLocation" id="::discovery::ServiceLocation">
+      <webidl>        [NoInterfaceObject] interface ServiceLocation {&#13;
+&#13;
+                attribute double? latitude;&#13;
+&#13;
+&#13;
+                attribute double? longitude;&#13;
+                &#13;
+&#13;
+                attribute double accuracy;              &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ ServiceLocation interface 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="latitude" id="::discovery::ServiceLocation::latitude">
+        <webidl>                attribute double? latitude;</webidl>
+        <descriptive>
+            <brief>
+        The latitude attribute is the geographic coordinate specified in decimal degrees. 
+If the latitude is Null the latitude of the device invoking the findServices method will be used.       
+            </brief>
+        </descriptive>
+        <Type type="double" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="longitude" id="::discovery::ServiceLocation::longitude">
+        <webidl>                attribute double? longitude;</webidl>
+        <descriptive>
+            <brief>
+        The longitude attribute is the geographic coordinate specified in decimal degrees.      
+If the longitude is Null the longitude of the device invoking the findServices method will be used.
+            </brief>
+        </descriptive>
+        <Type type="double" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="accuracy" id="::discovery::ServiceLocation::accuracy">
+        <webidl>                attribute double accuracy;</webidl>
+        <descriptive>
+            <brief>
+        The accuracy denotes the accuracy level of the latitude and longitude coordinates in meters.            
+This is used to limit the geographical area for finding services.
+            </brief>
+        </descriptive>
+        <Type type="double"/>
+      </Attribute>
+    </Interface>
+    <Interface name="PendingOperation" id="::discovery::PendingOperation">
+      <webidl>        [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+                void cancel();&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Pending Operation interface 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::discovery::PendingOperation::cancel">
+        <webidl>                void cancel();</webidl>
+        <descriptive>
+            <brief>
+ Cancels the pending asynchronous operation and allocated resources are released.  
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="DiscoveryError" id="::discovery::DiscoveryError">
+      <webidl>        [NoInterfaceObject] interface DiscoveryError {&#13;
+&#13;
+                 const unsigned short FIND_SERVICE_CANCELED = 101;&#13;
+&#13;
+                 const unsigned short FIND_SERVICE_TIMEOUT = 102;                &#13;
+&#13;
+                 const unsigned short PERMISSION_DENIED_ERROR  = 103;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Discovery specific errors.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="FIND_SERVICE_CANCELED" value="101" id="::discovery::DiscoveryError::FIND_SERVICE_CANCELED">
+        <webidl>                 const unsigned short FIND_SERVICE_CANCELED = 101;</webidl>
+        <descriptive>
+            <brief>
+ The discovery process was canceled by the application
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="FIND_SERVICE_TIMEOUT" value="102" id="::discovery::DiscoveryError::FIND_SERVICE_TIMEOUT">
+        <webidl>                 const unsigned short FIND_SERVICE_TIMEOUT = 102;</webidl>
+        <descriptive>
+            <brief>
+ The discovery process was canceled since the timeout timer expired. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="103" id="::discovery::DiscoveryError::PERMISSION_DENIED_ERROR">
+        <webidl>                 const unsigned short PERMISSION_DENIED_ERROR  = 103;</webidl>
+        <descriptive>
+            <brief>
+ Not Authorized to use the service.  
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Exception name="DiscoveryExceptions" id="::discovery::DiscoveryExceptions">
+      <webidl>        exception DiscoveryExceptions {&#13;
+&#13;
+                 const unsigned short INVALID_ARGUMENT_ERROR = 101;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Discovery specific exceptions.
+          </brief>
+      </descriptive>
+      <Const name="INVALID_ARGUMENT_ERROR" value="101" id="::discovery::DiscoveryExceptions::INVALID_ARGUMENT_ERROR">
+        <webidl>                 const unsigned short INVALID_ARGUMENT_ERROR = 101;</webidl>
+        <descriptive>
+            <brief>
+ The property cannot be currently retrieved
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Exception>
+    <Interface name="WebinosDiscovery" id="::discovery::WebinosDiscovery">
+      <webidl>        [NoInterfaceObject] interface WebinosDiscovery {&#13;
+&#13;
+                readonly attribute <ref>DiscoveryInterface</ref> discovery;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosDiscovery interface describes the part of the Discovery
+API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="discovery" id="::discovery::WebinosDiscovery::discovery">
+        <webidl>                readonly attribute <ref>DiscoveryInterface</ref> discovery;</webidl>
+        <descriptive>
+            <brief>
+ webinos.discovery object.
+            </brief>
+        </descriptive>
+        <Type name="DiscoveryInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosDiscovery">
+      <webidl>    <ref>webinoscore::Webinos</ref> implements <ref>WebinosDiscovery</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

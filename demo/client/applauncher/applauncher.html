@@ -1,0 +1,128 @@
+<html>
+<head>
+	<title>webinos app launcher</title>
+	<script type="text/javascript" src="../webinos.js"></script>
+	<script type="text/javascript"
+		src="http://code.jquery.com/jquery-1.5.2.js"></script>
+	<script type="text/javascript">
+
+	function logObj(obj, name){
+		for (var myKey in obj){
+			console.log(name + "["+myKey +"] = "+obj[myKey]);
+			if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + "." + myKey);
+		}
+	}
+	
+	
+            $(document).ready(function() {
+                function fillPZAddrs(data) {
+                    var pzhId, connectedPzp, connectedPzh;
+			        if(data.from !== "virgin_pzp") {
+			            pzhId = data.payload.message.pzhId;
+			            connectedPzp = data.payload.message.connectedPzp;
+		                connectedPzh = data.payload.message.connectedPzh;
+			        }
+		            var pzpId = data.from;		           
+		            
+		            if(document.getElementById('pzh_pzp_list'))
+		                document.getElementById('pzh_pzp_list').innerHTML="";
+                }
+                webinos.session.addListener('registeredBrowser', fillPZAddrs);
+
+                function printInfo(data) {
+                    $('#message').append('<li>'+data.payload.message+'</li>');
+                }
+                webinos.session.addListener('info', printInfo);
+                
+                	var launcherAPIS = [];
+            	    var appLauncherToUse;
+                    $('#findService').bind('click', function() {
+                	    webinos.discovery.findServices(new ServiceType('http://webinos.org/api/applauncher'), 
+						{onFound: function (service) {
+							
+							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
+								launcherAPIS[service.serviceAddress] = service;
+							
+                	    	$('#messages').append('<li> AppLauncher API found: ' + service.api + ' @ ' + service.serviceAddress + '</li>');
+
+                	    	logObj(service, "Service");
+                	    }});
+                    });
+                    
+                    $('#cls').bind('click', function() {
+                    	document.getElementById("messages").innerHTML = "";
+                    }); 
+                    
+                    $('#bind').bind('click', function() {
+                    	
+                    	appLauncherToUse = launcherAPIS[$('#pzh_pzp_list option:selected').val()];
+                    	
+                    	appLauncherToUse.bind({onBind:function(){
+                        	$('#messages').append('<li> AppLauncher API ' + appLauncherToUse.api + ' bound.</li>');
+                        }});
+                    }); 
+                    
+                    
+                    $('#launchApp').bind('click', function() {
+                    	
+                    	
+                    	var appID = $("#textOut").val();
+                    	var startParams = [];
+                    	startParams.push($("#textOutParam").val());
+                    	
+                    	console.log(startParams);
+                    	
+                    	appLauncherToUse.launchApplication(
+                    			function (){
+                    				$('#messages').append('<li> App launched </li>');
+                    			},
+                    			function (){
+                    				$('#messages').append('<li> Error while launching App</li>');                    		
+                    			},
+                    			appID,
+                    			startParams
+	                    );
+                    	
+                    });
+
+                     
+                     $('#isInstalled').bind('click', function() {
+                    	 appLauncherToUse.appInstalled();
+                     });
+                     
+                    
+            });
+        </script>
+     
+</head>
+<body>
+	<div >
+		<div >
+			<p>
+				<div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+				<button id="cls">Clear</button><button id="findService">Find AppLauncher Service</button>
+				<button id="bind">Bind</button>
+		    	<button id="launchApp">Launch Application</button>
+		    	<button id="isInstalled">App Installed?</button>
+			</p>
+			<p><div>
+				1. Press "Find AppLauncher Service" Button
+			to get the AppLauncher Service<br>2. Press "Bind" button to bind the found service.<br>3. Add AppID to launch and params (this currently just passes the string and tries to launch a native process)<br></p>
+			</div><p>
+				<div>
+				AppID
+				<textarea id="textOut" rows="1" cols="60">C:\Users\apa\AppData\Local\Google\Chrome\Application\chrome.exe</textarea>
+				</div>
+				<div>
+				Param
+				<textarea id="textOutParam" rows="1" cols="60">www.webinos.org --kiosk --new-window</textarea>
+				</div>
+			</p>
+		</div>
+		<div >
+			<ul id="messages">
+			</ul>
+		</div>
+	</div>
+</body>
+</html>

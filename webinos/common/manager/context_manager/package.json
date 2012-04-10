@@ -1,0 +1,26 @@
+{ "name": "context_manager"
+, "publishConfig": { "tag": "alpha" }
+, "description": "The Context Manager"
+, "keywords": [ "context manager"]
+, "version": "0.0.1"
+, "author": "Christos Ntanos <cntanos@epu.ntua.gr>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 , "contrib": "./contrib"
+                 }
+, "main": "./lib/contextInterception.js"
+, "dependencies":
+  { "jsorm-i18n": "2.0.4"
+  }
+, "bundleDependencies":
+  [ "fs"
+  , "path"
+  ]
+}

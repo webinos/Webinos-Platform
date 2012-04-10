@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="AppLauncher" id="::AppLauncher">
+    <webidl>module AppLauncher {&#13;
+&#13;
+&#13;
+  typedef sequence&lt;object> ObjectArray;&#13;
+&#13;
+&#13;
+  typedef DOMString applicationID;&#13;
+&#13;
+&#13;
+  exception AppLauncherException {&#13;
+&#13;
+    unsigned short code;        &#13;
+    DOMString message;&#13;
+  };&#13;
+  &#13;
+  &#13;
+&#13;
+  &#13;
+  &#13;
+  [NoInterfaceObject] interface AppLauncherManager {&#13;
+&#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> launchApplication(in <ref>SuccessCallback</ref> successCallback,&#13;
+                                       in <ref>ErrorCallback</ref> errorCallback,&#13;
+                                       in <ref>applicationID</ref> appID,&#13;
+                                       in optional <ref>ObjectArray</ref> params)&#13;
+                       raises( <ref>AppLauncherException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+       &#13;
+    boolean AppInstalled(in <ref>applicationID</ref> appID)&#13;
+            raises( <ref>AppLauncherException</ref>);&#13;
+    };&#13;
+    &#13;
+&#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface SuccessCallback{&#13;
+&#13;
+      void onSuccess();&#13;
+    };&#13;
+    &#13;
+    &#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface ErrorCallback{&#13;
+&#13;
+      void onError(in <ref>LaucherAPIError</ref> error);&#13;
+    };&#13;
+&#13;
+    &#13;
+&#13;
+    [NoInterfaceObject] interface LauncherAPIError {&#13;
+    &#13;
+        readonly attribute unsigned short code;&#13;
+        &#13;
+        readonly attribute DOMString message;&#13;
+        &#13;
+        const unsigned short      UNKNOWN_ERR                    = 0;&#13;
+        const unsigned short      NOT_SUPPORTED_ERR              = 9;&#13;
+        const unsigned short      TYPE_MISMATCH_ERR              = 17;&#13;
+        const unsigned short      SECURITY_ERR                   = 18;&#13;
+        const unsigned short      NETWORK_ERR                    = 19;&#13;
+        const unsigned short      INVALID_APP_ID                 = 100; &#13;
+        const unsigned short      APP_NOT_FOUND                  = 101; &#13;
+        const unsigned short      NO_RESOURCES                   = 102; &#13;
+        const unsigned short      ALREADY_STARTED                = 103; &#13;
+        const unsigned short      POLICY_NOT_ALLOWED             = 104; &#13;
+    };&#13;
+    &#13;
+&#13;
+     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosLauncher {&#13;
+&#13;
+                readonly attribute <ref>AppLauncherManager</ref> launcher;&#13;
+        };&#13;
+&#13;
+&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>WebinosLauncher</ref>;&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The application execution API (AppLauncher) allows activation of webinos applications installed locally on the device. Functionality defined in this version of the specification refers to webinos Phase 1 scope. 
+        </brief>
+       <description>
+        <p>
+The application execution API allows activation of webinos applications installed locally on the device. The API is modelled after BONDI v1.1 AppLauncher API.
+        </p>
+        <p>
+Operation of the API is guided by application execution policies, which can be modified by user. 
+The policies control the following aspects of API operation: <br/>- Enable/disable of activation of native applications <br/>- Enable/disable of activation of webinos installable applications <br/>- Enable/disable of notifications to users when a webinos application attempts to activate another application <br/>- Enable/disable of application ability to discover installed applications <br/>- Enable/disable of logging of operations performed using the API <br/>        </p>
+        <p>
+The application execution API provides mechanisms for webinos applications to check if specific webinos application is installed in the device. 
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/applauncher.launch">
+          <descriptive>
+           <description>
+            <p>
+Start webinos application - allows to invoke webinos application identified by a unique identifier.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/applauncher.check">
+          <descriptive>
+           <description>
+            <p>
+Check if application is installed - allow to test of an application identified by a specific application ID is installed on the device.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Michael Vakulenko &#60;michael@visionmobile.com&#62;
+        </author>
+        <version>
+ 0.1 
+        </version>
+    </descriptive>
+    <Typedef name="ObjectArray" id="::AppLauncher::ObjectArray">
+      <webidl>  typedef sequence&lt;object> ObjectArray;</webidl>
+      <descriptive>
+          <brief>
+ Array of DOMStrings.
+          </brief>
+      </descriptive>
+      <Type type="sequence">
+        <Type type="object"/>
+      </Type>
+    </Typedef>
+    <Typedef name="applicationID" id="::AppLauncher::applicationID">
+      <webidl>  typedef DOMString applicationID;</webidl>
+      <descriptive>
+          <brief>
+ Application ID for identifying installed webinos applications. 
+NOTE: This definition could be moved to webinos core module in the future.
+          </brief>
+      </descriptive>
+      <Type type="DOMString"/>
+    </Typedef>
+    <Exception name="AppLauncherException" id="::AppLauncher::AppLauncherException">
+      <webidl>  exception AppLauncherException {&#13;
+&#13;
+    unsigned short code;        &#13;
+    DOMString message;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Exception definition for AppLauncher module. Error codes are defined in LauncherAPIError interface.
+          </brief>
+      </descriptive>
+      <ExceptionField name="code" id="::AppLauncher::AppLauncherException::code">
+        <webidl>    unsigned short code;</webidl>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::AppLauncher::AppLauncherException::message">
+        <webidl>    DOMString message;</webidl>
+        <Type type="DOMString"/>
+      </ExceptionField>
+    </Exception>
+    <Interface name="AppLauncherManager" id="::AppLauncher::AppLauncherManager">
+      <webidl>  [NoInterfaceObject] interface AppLauncherManager {&#13;
+&#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> launchApplication(in <ref>SuccessCallback</ref> successCallback,&#13;
+                                       in <ref>ErrorCallback</ref> errorCallback,&#13;
+                                       in <ref>applicationID</ref> appID,&#13;
+                                       in optional <ref>ObjectArray</ref> params)&#13;
+                       raises( <ref>AppLauncherException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+       &#13;
+    boolean AppInstalled(in <ref>applicationID</ref> appID)&#13;
+            raises( <ref>AppLauncherException</ref>);&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ NOTE: <br/>- applicationID type will be defined in webinoscore module. Each application will have a unique ID coming from its manifest file. applicationID is a string composed of ID from the app certificate and identifiers assigned by the maker of the app. For the purposes of phase 1 AppLauncher API, we can assume the ID is a string that will be known to the application that starts another application and is known to the runtime based on manifests of installed apps. <br/>          </brief>
+         <description>
+          <p>
+This is the main interface for the AppLauncher API.
+          </p>
+         </description>
+          <Code>        // Define the launchApplication success callback.
+        function launchedCallback(response)   {
+               alert(&quot;Webinos application launched successfully&quot;);
+        }
+
+
+        // Define the error callback
+        function errorCallback(response) {
+                        alert( &quot;The following error: &quot; +  response.code + &quot;, occurred&quot;);
+        }
+
+
+        // Activate webinos application, if the application is installed in the device.
+        var appinstalled = webinos.AppLauncher.AppInstalled( appID);
+
+        if ( appinstalled)  {
+            webinos.AppLauncher.launchApplication(launchedCallback, errorCallback, appID, null);
+        }                      
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="launchApplication" id="::AppLauncher::AppLauncherManager::launchApplication">
+        <webidl>    <ref>PendingOperation</ref> launchApplication(in <ref>SuccessCallback</ref> successCallback,&#13;
+                                       in <ref>ErrorCallback</ref> errorCallback,&#13;
+                                       in <ref>applicationID</ref> appID,&#13;
+                                       in optional <ref>ObjectArray</ref> params)&#13;
+                       raises( <ref>AppLauncherException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Starts a webinos applicaiton identified by appID. The method is asynchronous. If the app was started successfuly, successCallback is invoked. In case of error, errorCallback is called.
+            </brief>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ A pending operation object
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback invoked when a requested webinos app was activated successfully. 
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback invoked if activation of webinos app was not successful.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument in="in" name="appID">
+            <descriptive>
+                <description><p>
+ Identifies webinos application that needs to be activated.
+                </p></description>
+            </descriptive>
+            <Type name="applicationID"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="params">
+            <descriptive>
+                <description><p>
+ Optional set of parameters for starting the application.
+                </p></description>
+            </descriptive>
+            <Type name="ObjectArray"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="AppLauncherException">
+            <descriptive>
+                <description><p>
+ Thrown when activation of the application was not successful.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="AppInstalled" id="::AppLauncher::AppLauncherManager::AppInstalled">
+        <webidl>    boolean AppInstalled(in <ref>applicationID</ref> appID)&#13;
+            raises( <ref>AppLauncherException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Reports if a specific webinos application is installed in the device. The method is synchronous.
+            </brief>
+        </descriptive>
+        <Type type="boolean">
+          <descriptive>
+              <description><p>
+ True if the application is installed, false if the application is not installed.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="appID">
+            <descriptive>
+                <description><p>
+ Identifies webinos application presence of which needs to be tested.
+                </p></description>
+            </descriptive>
+            <Type name="applicationID"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="AppLauncherException">
+            <descriptive>
+                <description><p>
+ Thrown when activation of the application was not successful.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="SuccessCallback" id="::AppLauncher::SuccessCallback">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface SuccessCallback{&#13;
+&#13;
+      void onSuccess();&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines the callback for a asynchronous launchApplication method.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::AppLauncher::SuccessCallback::onSuccess">
+        <webidl>      void onSuccess();</webidl>
+        <descriptive>
+            <brief>
+ This method is called if function app was launched successfully.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="ErrorCallback" id="::AppLauncher::ErrorCallback">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface ErrorCallback{&#13;
+&#13;
+      void onError(in <ref>LaucherAPIError</ref> error);&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines the callback for a failed activation of asynchronous launchApplication method.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::AppLauncher::ErrorCallback::onError">
+        <webidl>      void onError(in <ref>LaucherAPIError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ This method is called if asychronous launchApplication method fails.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ contains information about the error 
+                </p></description>
+            </descriptive>
+            <Type name="LaucherAPIError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="LauncherAPIError" id="::AppLauncher::LauncherAPIError">
+      <webidl>    [NoInterfaceObject] interface LauncherAPIError {&#13;
+    &#13;
+        readonly attribute unsigned short code;&#13;
+        &#13;
+        readonly attribute DOMString message;&#13;
+        &#13;
+        const unsigned short      UNKNOWN_ERR                    = 0;&#13;
+        const unsigned short      NOT_SUPPORTED_ERR              = 9;&#13;
+        const unsigned short      TYPE_MISMATCH_ERR              = 17;&#13;
+        const unsigned short      SECURITY_ERR                   = 18;&#13;
+        const unsigned short      NETWORK_ERR                    = 19;&#13;
+        const unsigned short      INVALID_APP_ID                 = 100; &#13;
+        const unsigned short      APP_NOT_FOUND                  = 101; &#13;
+        const unsigned short      NO_RESOURCES                   = 102; &#13;
+        const unsigned short      ALREADY_STARTED                = 103; &#13;
+        const unsigned short      POLICY_NOT_ALLOWED             = 104; &#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ API-specific error handling  interface
+          </brief>
+         <description>
+          <p>
+The LaucnherAPIError interface describes error interface for the Launcher API.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="code" id="::AppLauncher::LauncherAPIError::code">
+        <webidl>        readonly attribute unsigned short code;</webidl>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="message" id="::AppLauncher::LauncherAPIError::message">
+        <webidl>        readonly attribute DOMString message;</webidl>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Const name="UNKNOWN_ERR" value="0" id="::AppLauncher::LauncherAPIError::UNKNOWN_ERR">
+        <webidl>        const unsigned short      UNKNOWN_ERR                    = 0;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NOT_SUPPORTED_ERR" value="9" id="::AppLauncher::LauncherAPIError::NOT_SUPPORTED_ERR">
+        <webidl>        const unsigned short      NOT_SUPPORTED_ERR              = 9;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TYPE_MISMATCH_ERR" value="17" id="::AppLauncher::LauncherAPIError::TYPE_MISMATCH_ERR">
+        <webidl>        const unsigned short      TYPE_MISMATCH_ERR              = 17;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SECURITY_ERR" value="18" id="::AppLauncher::LauncherAPIError::SECURITY_ERR">
+        <webidl>        const unsigned short      SECURITY_ERR                   = 18;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NETWORK_ERR" value="19" id="::AppLauncher::LauncherAPIError::NETWORK_ERR">
+        <webidl>        const unsigned short      NETWORK_ERR                    = 19;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_APP_ID" value="100" id="::AppLauncher::LauncherAPIError::INVALID_APP_ID">
+        <webidl>        const unsigned short      INVALID_APP_ID                 = 100;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="APP_NOT_FOUND" value="101" id="::AppLauncher::LauncherAPIError::APP_NOT_FOUND">
+        <webidl>        const unsigned short      APP_NOT_FOUND                  = 101;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NO_RESOURCES" value="102" id="::AppLauncher::LauncherAPIError::NO_RESOURCES">
+        <webidl>        const unsigned short      NO_RESOURCES                   = 102;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="ALREADY_STARTED" value="103" id="::AppLauncher::LauncherAPIError::ALREADY_STARTED">
+        <webidl>        const unsigned short      ALREADY_STARTED                = 103;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="POLICY_NOT_ALLOWED" value="104" id="::AppLauncher::LauncherAPIError::POLICY_NOT_ALLOWED">
+        <webidl>        const unsigned short      POLICY_NOT_ALLOWED             = 104;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Interface name="PendingOperation" id="::AppLauncher::PendingOperation">
+      <webidl>     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };</webidl>
+      <descriptive>
+          <brief>
+ The PendingOperation interface
+          </brief>
+         <description>
+          <p>
+The PendingOperation interface describes operation of cancellable aynchronous methods.
+Cancellable asynchronous methods return PendingOperation objects exporting methods for
+cancelling the operation. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::AppLauncher::PendingOperation::cancel">
+        <webidl>        void cancel ();</webidl>
+        <descriptive>
+            <brief>
+ Cancel method for cancelling asynchronous operation
+            </brief>
+           <description>
+            <p>
+Cancel ongoing asynchronous method call. Upon calling this method the runtime must immediately stop
+the pending operation and return.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosLauncher" id="::AppLauncher::WebinosLauncher">
+      <webidl>        [NoInterfaceObject] interface WebinosLauncher {&#13;
+&#13;
+                readonly attribute <ref>AppLauncherManager</ref> launcher;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosLauncher interface describes the part of the App Execution
+API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="launcher" id="::AppLauncher::WebinosLauncher::launcher">
+        <webidl>                readonly attribute <ref>AppLauncherManager</ref> launcher;</webidl>
+        <descriptive>
+            <brief>
+ webinos.launcher object.
+            </brief>
+        </descriptive>
+        <Type name="AppLauncherManager"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosLauncher">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>WebinosLauncher</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

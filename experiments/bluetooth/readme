@@ -1,0 +1,11 @@
+Bluetooth discovery module:
+
+A simple bluetooth discovery module using libev to communicate between a background thread and the main thread used by node.js. bluetooth.js provides a test wrapper. This module could be improved by changes to the bluetooth code to enable an indefinite search time with a means to start and stop search. The underlying bluetooth library seems to keep track of which devices have already been seen.
+
+The threading stuff is adapted from an example, see http://bravenewmethod.wordpress.com/tag/addon/
+
+Writing threaded Node.js extension requires some care. All Javascript in Node.js is executed in single main thread, so you can not simply call the V8 engine directly from your background thread. That would cause segfault. Recommended way to do this is to spawn new thread on background and use the libev events to wake up the main thread to execute the Javascript callbacks.
+
+Node.js framework has lots of ready stuff for implementing extensions, but there is no simple example how to implement this kind extension so here it is.
+
+

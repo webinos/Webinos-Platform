@@ -1,0 +1,11 @@
+uniqueID
+
+Code
+----
+
+This is a VERY early implementation of a unique identifier. The aim of this lib is to provide a length variable UUID for certificates generation.
+The UUID must be reproduceble on the same machine because it depends just on hardware characteristics and user details.
+
+A test file is provided in test folder.
+
+Available UUID length: 40, 256, 512 bit. Currently using sha1, sha256 and sha512 as hash algorithms.

@@ -1,0 +1,278 @@
+/**
+ * Licensed to OMTP Ltd. (OMTP) under one or more contributor license agreements. 
+ * See the NOTICE file distributed with this work for additional information regarding 
+ * copyright ownership. 
+ * 
+ * The Reference Implementation (save for such parts of the reference implementation made 
+ * available under separate terms and conditions) is made available under the terms of the 
+ * Apache License, version 2.0, subject to the condition that any "Works" and "Derivative 
+ * Works" used or distributed for commercial purposes must be and remain compliant with the
+ * BONDI specification as promulgated by OMTP in each release. Your implementation of the 
+ * Reference Implementation (whether object or source) must maintain these conditions, and 
+ * you must notify any recipient of this condition in a conspicuous way.
+ * 
+ * You may not use this BONDI Reference Implementation except in compliance with the License. 
+ * 
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 or at 
+ * http://bondi.omtp.org/BONDI LICENSE-2.0 
+ * 
+ */
+
+import "oaidl.idl";
+import "ocidl.idl";
+import "atliface.idl";
+
+enum WindowMode
+{
+	Bondi_WindowMode_All,
+	Bondi_WindowMode_Application,
+	Bondi_WindowMode_Floating,
+	Bondi_WindowMode_Fullscreen,
+	Bondi_WindowMode_Mini
+};
+
+[
+	object,
+	uuid(5B36A6A6-BB7B-470A-992A-112F8BA99D21),
+	dual,
+	nonextensible,
+	helpstring("IBondiWidgetSignature Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetSignature : IDispatch
+{
+	[helpstring("method Create")] HRESULT Create([in] BSTR path,[in]BSTR certFile,[in]BSTR keyFile);
+//	[helpstring("method Verify")] HRESULT Verify([in] BSTR path,[in]BSTR signatureFile);
+	[propget, id(18), helpstring("property CommonName")] HRESULT CommonName([out, retval] BSTR* pVal);
+	[propget, id(19), helpstring("property RootCommonName")] HRESULT RootCommonName([out, retval] BSTR* pVal);
+	[propget, id(20), helpstring("property Fingerprint")] HRESULT Fingerprint([out, retval] BSTR* pVal);
+	[propget, id(21), helpstring("property RootFingerprint")] HRESULT RootFingerprint([out, retval] BSTR* pVal);
+};
+
+[
+	object,
+	uuid(1523F42F-6E51-4F0A-BB2B-E284AD8FC49C),
+	dual,
+	nonextensible,
+	helpstring("IBondiFeatureParam Interface"),
+	pointer_default(unique)
+]
+interface IBondiFeatureParam : IDispatch
+{
+	[propget, id(1), helpstring("property Name")] HRESULT Name([out, retval] BSTR* pVal);
+//	[propput, id(1), helpstring("property Name")] HRESULT Name([in] BSTR newVal);
+	[propget, id(2), helpstring("property Value")] HRESULT Value([out, retval] BSTR* pVal);
+//	[propput, id(2), helpstring("property Value")] HRESULT Value([in] BSTR newVal);
+};
+
+[
+	object,
+	uuid(85121816-EE65-4BAA-AA54-79EB0B0B0076),
+	dual,
+	nonextensible,
+	helpstring("IBondiWidgetFeature Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetFeature : IDispatch
+{
+	[propget, helpstring("property ParamCount")] HRESULT ParamCount([out, retval] ULONG* pVal);
+	[propget, helpstring("property Param")] HRESULT Param([in] ULONG idx, [out, retval] IBondiFeatureParam** pVal);
+	[propget, helpstring("property Name")] HRESULT Name([out, retval] BSTR* pVal);
+	[propget, helpstring("property Required")] HRESULT Required([out, retval] VARIANT_BOOL* pVal);
+};
+
+[
+	object,
+	uuid(09D7AAD5-591F-4433-8144-8370B8647C7B),
+	dual,
+	nonextensible,
+	helpstring("IBondiWidgetPreference Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetPreference : IDispatch{
+	[propget, id(1), helpstring("property Name")] HRESULT Name([out, retval] BSTR* pVal);
+//	[propput, id(1), helpstring("property Name")] HRESULT Name([in] BSTR newVal);
+	[propget, id(2), helpstring("property Value")] HRESULT Value([out, retval] BSTR* pVal);
+//	[propput, id(2), helpstring("property Value")] HRESULT Value([in] BSTR newVal);
+	[propget, helpstring("property ReadOnly")] HRESULT ReadOnly([out, retval] VARIANT_BOOL* pVal);
+};
+
+[
+	object,
+	uuid(844C8A4A-49FF-46A5-A167-0E38E50C7D94),
+	dual,
+	nonextensible,
+	helpstring("IBondiWidgetProperties Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetProperties : IDispatch{
+	[propget, id(1), helpstring("property Id")] HRESULT Id([out, retval] BSTR* pVal);
+	[propget, id(2), helpstring("property Name")] HRESULT Name([out, retval] BSTR* pVal);
+	[propget, id(3), helpstring("property StartFile")] HRESULT StartFile([out, retval] BSTR* pVal);
+	[propget, id(4), helpstring("property AuthorName")] HRESULT AuthorName([out, retval] BSTR* pVal);
+	[propget, id(5), helpstring("property AuthorEmail")] HRESULT AuthorEmail([out, retval] BSTR* pVal);
+	[propget, id(6), helpstring("property AuthorURL")] HRESULT AuthorURL([out, retval] BSTR* pVal);
+	[propget, id(7), helpstring("property Description")] HRESULT Description([out, retval] BSTR* pVal);
+	[propget, id(8), helpstring("property License")] HRESULT License([out, retval] BSTR* pVal);
+	[propget, id(9), helpstring("property Version")] HRESULT Version([out, retval] BSTR* pVal);
+	[propget, id(10), helpstring("property IconCount")] HRESULT IconCount([out, retval] USHORT* pVal);
+	[propget, id(12), helpstring("property Width")] HRESULT Width([out, retval] ULONG* pVal);
+	[propget, id(13), helpstring("property Height")] HRESULT Height([out, retval] ULONG* pVal);
+	[propget, id(14), helpstring("property ViewModes")] HRESULT ViewModes([out, retval] BSTR* pVal);
+	[propget, id(16), helpstring("property FeatureCount")] HRESULT FeatureCount([out, retval] ULONG* pVal);
+	[propget, id(17), helpstring("property Feature")] HRESULT Feature([in] ULONG idx, [out, retval] IBondiWidgetFeature** pVal);
+	[propget, id(18), helpstring("property DistributorCommonName")] HRESULT DistributorCommonName([out, retval] BSTR* pVal);
+	[propget, id(19), helpstring("property DistributorRootCommonName")] HRESULT DistributorRootCommonName([out, retval] BSTR* pVal);
+	[propget, id(20), helpstring("property DistributorFingerprint")] HRESULT DistributorFingerprint([out, retval] BSTR* pVal);
+	[propget, id(21), helpstring("property DistributorRootFingerprint")] HRESULT DistributorRootFingerprint([out, retval] BSTR* pVal);
+	[propget, id(22), helpstring("property AuthorCommonName")] HRESULT AuthorCommonName([out, retval] BSTR* pVal);
+	[propget, id(23), helpstring("property AuthorRootCommonName")] HRESULT AuthorRootCommonName([out, retval] BSTR* pVal);
+	[propget, id(24), helpstring("property AuthorFingerprint")] HRESULT AuthorFingerprint([out, retval] BSTR* pVal);
+	[propget, id(25), helpstring("property AuthorRootFingerprint")] HRESULT AuthorRootFingerprint([out, retval] BSTR* pVal);
+	[propget, id(26), helpstring("property InstallURI")] HRESULT InstallURI([out, retval] BSTR* pVal);
+	[propget, id(28), helpstring("property PreferenceCount")] HRESULT PreferenceCount([out, retval] ULONG* pVal);
+	[propget, id(29), helpstring("property Preference")] HRESULT Preference([in] ULONG idx, [out, retval] IBondiWidgetPreference** pVal);
+	[propget, id(31), helpstring("property ShortName")] HRESULT ShortName([out, retval] BSTR* pVal);
+	[propget, id(32), helpstring("property StartFileEncoding")] HRESULT StartFileEncoding([out, retval] BSTR* pVal);
+	[propget, id(33), helpstring("property StartFileContentType")] HRESULT StartFileContentType([out, retval] BSTR* pVal);
+	[propget, id(34), helpstring("property LicenseHref")] HRESULT LicenseHref([out, retval] BSTR* pVal);
+	[propget, id(35), helpstring("property LicenseFile")] HRESULT LicenseFile([out, retval] BSTR* pVal);
+	[id(36), helpstring("method GetIcon")] HRESULT GetIcon([in] ULONG idx, [out] BSTR* path, [out] ULONG* width, [out] ULONG* height);
+};
+
+[
+	object,
+	uuid(0EC88BA2-EFD0-4314-8267-3D4CCF821A24),
+	helpstring("IBondiWidgetAppConfig Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetAppConfig : IUnknown{
+	[helpstring("method Load")] HRESULT Load([in] BSTR path);
+	[helpstring("method GetSetting")] HRESULT GetSetting([in] BSTR key, [out,retval] BSTR* val);
+	[helpstring("method PutSetting")] HRESULT PutSetting([in] BSTR key, [in] BSTR val);
+	[helpstring("method GetBondiSetting")] HRESULT GetBondiSetting([in] BSTR key, [out,retval] BSTR* val);
+	[helpstring("method PutBondiSetting")] HRESULT PutBondiSetting([in] BSTR key, [in] BSTR val,[in] VARIANT_BOOL readOnly);
+};
+[
+	object,
+	uuid(38460685-C27F-4408-936E-E43A6D9026E9),
+	helpstring("IBondiWidget Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidget : IUnknown{
+	[propget, helpstring("property Configuration")] HRESULT Configuration([out, retval] IBondiWidgetProperties** pVal);
+	[propget, helpstring("property InstalledRoot")] HRESULT InstalledRoot([out, retval] BSTR* pVal);
+	[helpstring("method Load")] HRESULT Load([in] BSTR path, [in] BSTR locales, [in] VARIANT_BOOL requireChain, [out,retval]BSTR* msg);
+	[helpstring("method Install")] HRESULT Install([in] BSTR path,[in]BSTR localeList,[in]VARIANT_BOOL overwrite,[in]VARIANT_BOOL silent);
+	[propget, helpstring("property RuntimeId")] HRESULT RuntimeId([out, retval] LONG* pVal);
+	[propget, helpstring("property AppSettings")] HRESULT AppSettings([out, retval] IBondiWidgetAppConfig** pVal);
+	[propget, helpstring("property DistributorDigitalSignature")] HRESULT DistributorDigitalSignature([out, retval] IBondiWidgetSignature** pVal);
+	[propget, helpstring("property AuthorDigitalSignature")] HRESULT AuthorDigitalSignature([out, retval] IBondiWidgetSignature** pVal);
+};
+[
+	object,
+	uuid(32A5DEAA-B8A6-4A64-97C4-A154C473FD89),
+	helpstring("IBondiWidgetLibrary Interface"),
+	pointer_default(unique)
+]
+interface IBondiWidgetLibrary : IUnknown{
+	[helpstring("method RemoteInstall")] HRESULT RemoteInstall([in] BSTR url, [out,retval] IBondiWidget** widget);
+	[helpstring("method LocalInstall")] HRESULT LocalInstall([in] BSTR path,[in]VARIANT_BOOL overwrite,[in]VARIANT_BOOL silent, [out,retval] IBondiWidget** widget);	
+	[helpstring("method GetInstalled")] HRESULT GetInstalled([in,out] LONG* count, [out,size_is(*count)] IBondiWidget** widgets[]);
+	[helpstring("method Uninstall")] HRESULT Uninstall([in] BSTR name);
+};
+[
+	object,
+	uuid(3824BE99-59C1-41F1-A15C-ABCB953B45DE),
+	dual,
+	nonextensible,
+	helpstring("IBondiSigningHelper Interface"),
+	pointer_default(unique)
+]
+interface IBondiSigningHelper : IDispatch{
+	[id(1), helpstring("method Sign")] HRESULT Sign([in] BSTR sourceDir, [in] BSTR targetFile, [in] BSTR certPath, [in] BSTR certKeyPath);
+};
+
+[
+	uuid(8F6D42DD-17A8-49C8-9625-63B136CA651A),
+	version(1.0),
+	helpstring("package 1.0 Type Library")
+]
+library packageLib
+{
+	importlib("stdole2.tlb");
+	interface IDocHostUIHandlerDispatch;
+	interface IAxWinAmbientDispatchEx;
+	[
+		uuid(A267963E-A428-4588-AB15-14633B2D97AE),
+		helpstring("BondiWidgetLibrary Class")
+	]
+	coclass BondiWidgetLibrary
+	{
+		[default] interface IBondiWidgetLibrary;
+	};
+	[
+		uuid(222B5BB5-C275-4B8E-A1EC-F35353E11155),
+		helpstring("BondiWidget Class")
+	]
+	coclass BondiWidget
+	{
+		[default] interface IBondiWidget;
+	};
+	[
+		uuid(82977F39-76BD-46C3-BAAC-54F1AA78C1D7),
+		helpstring("BondiWidgetProperties Class")
+	]
+	coclass BondiWidgetProperties
+	{
+		[default] interface IBondiWidgetProperties;
+	};
+	[
+		uuid(4D282BAF-BBC8-4D16-87EE-93A857A50448),
+		helpstring("BondiWidgetSignature Class")
+	]
+	coclass BondiWidgetSignature
+	{
+		[default] interface IBondiWidgetSignature;
+	};
+	[
+		uuid(F1F45029-4AB0-4F1D-AD69-34B90B8F60ED),
+		helpstring("BondiWidgetFeature Class")
+	]
+	coclass BondiWidgetFeature
+	{
+		[default] interface IBondiWidgetFeature;
+	};
+	[
+		uuid(8FC14FA6-4907-4357-9A92-3C0DB3B415D7),
+		helpstring("BondiWidgetAppConfig Class")
+	]
+	coclass BondiWidgetAppConfig
+	{
+		[default] interface IBondiWidgetAppConfig;
+	};
+	[
+		uuid(C8632F86-0BF6-4BAC-BABE-798B18BB13DC),
+		helpstring("BondiSigningHelper Class")
+	]
+	coclass BondiSigningHelper
+	{
+		[default] interface IBondiSigningHelper;
+	};
+	[
+		uuid(0487B7C4-81F8-4AB8-A9B4-C7328C9B1AB5),
+		helpstring("BondiFeatureParam Class")
+	]
+	coclass BondiFeatureParam
+	{
+		[default] interface IBondiFeatureParam;
+	};
+	[
+		uuid(CDF2B86E-50CD-443B-B5CD-8EDB833894DE),
+		helpstring("BondiWidgetPreference Class")
+	]
+	coclass BondiWidgetPreference
+	{
+		[default] interface IBondiWidgetPreference;
+	};
+};

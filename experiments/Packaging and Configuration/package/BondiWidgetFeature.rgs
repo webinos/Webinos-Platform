@@ -1,0 +1,26 @@
+HKCR
+{
+	Bondi.BondiWidgetFeature.1 = s 'BondiWidgetFeature Class'
+	{
+		CLSID = s '{F1F45029-4AB0-4F1D-AD69-34B90B8F60ED}'
+	}
+	Bondi.BondiWidgetFeature = s 'BondiWidgetFeature Class'
+	{
+		CLSID = s '{F1F45029-4AB0-4F1D-AD69-34B90B8F60ED}'
+		CurVer = s 'Bondi.BondiWidgetFeature.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F1F45029-4AB0-4F1D-AD69-34B90B8F60ED} = s 'BondiWidgetFeature Class'
+		{
+			ProgID = s 'Bondi.BondiWidgetFeature.1'
+			VersionIndependentProgID = s 'Bondi.BondiWidgetFeature'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{8F6D42DD-17A8-49C8-9625-63B136CA651A}'
+		}
+	}
+}

@@ -1,0 +1,78 @@
+// policyShim.idl : IDL source for policyShim
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (policyShim.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(F6A60B36-8730-404D-9B15-F6156635A784),
+	dual,
+	nonextensible,
+	helpstring("ITestPolicy Interface"),
+	pointer_default(unique)
+]
+interface ITestPolicy : IDispatch{
+    [id(1), helpstring("method Test")] HRESULT Test([in] BSTR policyXML, [in] BSTR requestXML, [out,retval] BSTR* result);
+};
+[
+	object,
+	uuid(FB620411-0578-493D-9D78-4B8B75835EA5),
+	dual,
+	nonextensible,
+	helpstring("IBondiPolicyDoc Interface"),
+	pointer_default(unique)
+]
+interface IBondiPolicyDoc : IDispatch{
+	[id(1), helpstring("method Load")] HRESULT Load([in] BSTR filePath);
+	[id(2), helpstring("method LoadXML")] HRESULT LoadXML([in] BSTR policyXML);
+	[id(3), helpstring("method GetDecision")] HRESULT GetDecision([in] BSTR query, [out,retval] BSTR* decision);
+};
+[
+	object,
+	uuid(97CFA29A-3ACB-4A1B-802D-12E3B383D33C),
+	dual,
+	nonextensible,
+	helpstring("IBondiPolicyQuery Interface"),
+	pointer_default(unique)
+]
+interface IBondiPolicyQuery : IDispatch{
+	[id(1), helpstring("method LoadXML")] HRESULT LoadXML([in] BSTR queryXML);
+	[id(2), helpstring("method GetDecision")] HRESULT GetDecision([in] IDispatch* policyDoc, [out,retval] BSTR* decision);
+};
+[
+	uuid(A7F46B90-08C2-4815-8A62-EB5B32531EF2),
+	version(1.0),
+	helpstring("policyShim 1.0 Type Library")
+]
+library policyShimLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(E37E5169-2ED0-4CED-B5E3-9C70DA7467B5),
+		helpstring("TestPolicy Class")
+	]
+	coclass TestPolicy
+	{
+		[default] interface ITestPolicy;
+	};
+	[
+		uuid(02E24E4F-6605-4CF9-8FAD-99AEEEB1E876),
+		helpstring("BondiPolicyDoc Class")
+	]
+	coclass BondiPolicyDoc
+	{
+		[default] interface IBondiPolicyDoc;
+	};
+	[
+		uuid(EF38F6A6-F065-4470-A1B2-C9E2BB0F0C4A),
+		helpstring("BondiPolicyQuery Class")
+	]
+	coclass BondiPolicyQuery
+	{
+		[default] interface IBondiPolicyQuery;
+	};
+};

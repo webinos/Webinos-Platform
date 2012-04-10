@@ -1,0 +1,26 @@
+{ "name": "pzp",
+  "version": "0.1.0",
+  "description": "Webinos device functionality is implemented in PZP",
+  "main": "./lib/pzp_sessionHandling.js",
+  "author": "Habib Virji  <habib.virji@samsung.com>",
+  "repositories": 
+   { "type": "git",
+     "url": "http://dev.webinos.org/git/wp4.git"
+   },
+  "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de",
+    "url": ""
+  },
+  "directories": {
+    "lib": "./lib",
+    "test":"./test"
+  },
+ "dependencies":{
+  "websocket":"1.0.2",
+  "schema": "0.2.0"
+ }
+}
+
+
+
+   

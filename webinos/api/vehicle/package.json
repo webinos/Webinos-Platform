@@ -1,0 +1,18 @@
+{ "name": "vehicle",
+  "version": "0.0.1",
+  "main": "./lib/webinos.vehicle.rpc.js",
+  "directories": {
+    "lib": "./lib"
+  },
+  "maintainers": [ {
+    "name": "Simon Isenberg",
+    "email": "Simon.Isenberg@bmw.de"
+  } ],
+  "description": "Vehicle API",
+  "keywords": [ "vehicle" ],
+  "repositories": [ {
+    "type": "git",
+    "url": "http://dev.webinos.org/git/wp4.git",
+    "path": "webinos/api/vehicle"
+  } ]
+}

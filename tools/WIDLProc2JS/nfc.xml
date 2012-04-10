@@ -1,0 +1,1671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="nfc" id="::nfc">
+    <webidl>module nfc {&#13;
+&#13;
+&#13;
+        typedef <ref>NFCTagTechnology</ref>[]      NFCTagTechnologyArray;&#13;
+&#13;
+&#13;
+        typedef <ref>NdefRecord</ref>[]      NdefRecordArray;&#13;
+&#13;
+&#13;
+        typedef octet[] ByteArray;&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+                boolean cancel();&#13;
+        };&#13;
+&#13;
+        &#13;
+&#13;
+        interface NFCTag : <ref>Event</ref> {&#13;
+&#13;
+&#13;
+                readonly attribute <ref>ByteArray</ref> tagId;&#13;
+                &#13;
+&#13;
+                readonly attribute <ref>NFCTagTechnologyArray</ref> techList;&#13;
+                &#13;
+&#13;
+                void initNFCTagEvent(in DOMString type,&#13;
+                                     in boolean bubbles,&#13;
+                                     in boolean cancelable,&#13;
+                                     in <ref>ByteArray</ref> tagId,&#13;
+                                     in unsigned short technologyType,&#13;
+                                     in unsigned short ndefType,&#13;
+                                     in unsigned short ndefRecType,&#13;
+                                     in DOMString? ndefRecordTextPayload,&#13;
+                                     in optional <ref>ByteArray</ref> ndefRecordBinaryPayload&#13;
+                                     );&#13;
+                                                                 &#13;
+        };&#13;
+&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface NFCTagTechnology {&#13;
+&#13;
+&#13;
+                const unsigned short TECH_OTHERS = 0;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCA = 1;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCB = 2;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCF = 3;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCV = 4;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_ISODEP = 5;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NDEF = 6;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned short type;&#13;
+                &#13;
+&#13;
+                readonly attribute boolean isConnected;&#13;
+                &#13;
+&#13;
+                void connect();&#13;
+&#13;
+&#13;
+                void close();&#13;
+                &#13;
+        };&#13;
+&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface NFCTagTechnologyNdef : <ref>NFCTagTechnology</ref> {&#13;
+        &#13;
+&#13;
+                const unsigned short NDEFTYPE_OTHERS = 0;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE1 = 1;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE2 = 2;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE3 = 3;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE4 = 4;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_MIFARECLASSIC = 5;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned short ndefType;&#13;
+                &#13;
+&#13;
+                readonly attribute boolean isWritable;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned long maxNdefMessageSize;&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> makeReadOnly(in <ref>SuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>NdefMessage</ref> readCachedNdefMessage();&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> readNdefMessage(in <ref>NdefSuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> writeNdefMessage(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref>? errorCallback, <ref>NdefMessage</ref> message)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>NdefMessage</ref> createNdefMessage();&#13;
+&#13;
+        };&#13;
+        &#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface NdefMessage {&#13;
+        &#13;
+&#13;
+                const unsigned short NDEFRECTYPE_UNKNOWN = 0;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_URI = 1;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_MEDIA = 2;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_EMPTY = 3;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_RTD = 4;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_EXTERNALRTD = 5;&#13;
+&#13;
+&#13;
+                readonly attribute <ref>NdefRecordArray</ref> ndefRecords;&#13;
+                &#13;
+&#13;
+                void addTextNdefRecord(in unsigned short type, in optional DOMString payload)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                void addBinaryNdefRecord(in unsigned short type, in <ref>ByteArray</ref> payload)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+        };&#13;
+        &#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface NdefRecord {&#13;
+        &#13;
+&#13;
+                readonly attribute unsigned short type;&#13;
+                &#13;
+&#13;
+                readonly attribute DOMString textPayload;&#13;
+                &#13;
+&#13;
+                readonly attribute <ref>ByteArray</ref> binaryPayload;&#13;
+                &#13;
+        };&#13;
+        &#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface NfcError {&#13;
+            &#13;
+&#13;
+                readonly attribute unsigned short code;&#13;
+&#13;
+&#13;
+                readonly attribute DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR = 0;&#13;
+&#13;
+&#13;
+                const unsigned short IO_ERR = 1;&#13;
+                &#13;
+        };&#13;
+&#13;
+&#13;
+&#13;
+        exception NfcException {&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR = 0;&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERR       = 1;&#13;
+&#13;
+&#13;
+                unsigned short code;&#13;
+&#13;
+&#13;
+                DOMString message;&#13;
+&#13;
+        };&#13;
+        &#13;
+        &#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject] interface SuccessCallback {&#13;
+                void onsuccess();&#13;
+        };&#13;
+&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject] interface ErrorCallback {&#13;
+                void onError(in <ref>NfcError</ref> error);&#13;
+        };&#13;
+&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject] interface NdefSuccessCallback {&#13;
+                void onSuccess(in <ref>NdefMessage</ref> obj);&#13;
+        };&#13;
+        &#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Near Field Communication (NFC) is an international standard (ISO/IEC 
+18092) that specifies an interface and protocol for simple wireless 
+interconnection of closely coupled devices operating at 13.56 MHz. 
+(http://www.nfc-forum.org/specs/spec_list/).
+There are three groups of application scenarios for NFC: The first one 
+is to hold a device close to a wireless tag to exchange some digital 
+information or data. The second is to hold two devices close to each 
+other in order to exchange some information or data between them. The 
+third one is to make payments by holding mobile phones close to point of 
+sales terminals instead of swiping smart cards.
+        </brief>
+       <description>
+        <p>
+Near Field Communication is a kind of radio-frequency identification 
+(RFID) technology that uses short-hold wireless communication to 
+transfer messages between wireless NFC devices and NFC tags. The 
+wireless tags are physically attached onto/ mounted nearby a physical 
+object.
+        </p>
+        <p>
+The most common use case is for an NFC device to read the identifier 
+and/or the contents of an NFC tag. Another quite common use case is for 
+an NFC device to write content to an NFC tag, if the NFC tag allows 
+this. The webinos NFC module supports both. There is also a third use 
+case where NFC devices pretend to be contactless smart cards e.g. for 
+payment or ticketing purposes. In general, our objective is with the 
+webinos NFC module is to enable free competition for NFC applications. 
+This means that the goal is to allow any application developers to fully 
+operate on any of these modes.
+        </p>
+        <p>
+The purpose of an NFC tag is to provide a small amount of digital data 
+about the physical object that it is associated with - or to help 
+perform a task for the user. One can use either the tag identifier, or 
+some data stored on the tag, to achieve this.
+        </p>
+        <p>
+An NFC tag can be viewed as a wireless bar code. It can be read by NFC 
+devices within a range of up to 10 centimetres. The amount of power and 
+resources needed by the NFC device to read and write to an NFC tag is 
+very low.
+        </p>
+        <p>
+- NFC APPLICATIONS AND USE CASES
+        </p>
+        <p>
+NFC technology is increasingly taking part in every day activities. NFC 
+enables digital data to be associated with real world objects. NFC tags 
+are more advanced than printed bar codes, because one can store a few 
+kilobytes of data on each NFC tag in addition to using its identifier.
+        </p>
+        <p>
+NFC is a wireless standard where messages must be exchanged and 
+communicated in a standardised way. This makes NFC very suitable for a 
+wide range of ubiquitous applications. Example applications are within 
+logistics, health care, social media, infotainment, gaming, mobile 
+payments, access to places, system access, inventory control, exchange 
+of business cards, email addresses, web links, images, and so on.
+        </p>
+        <p>
+- NFC CORE CONCEPTS
+        </p>
+        <p>
+The core concepts of the NFC standard are:
+        </p>
+        <p>
+* The NFC devices and NFC tags
+* The NFC Data Exchange Format
+        </p>
+        <p>
+NFC devices are are typically mobile phones or computers with some NFC 
+hardware and a driver installed. Such devices are typically active and 
+try to detect tags, or other devices, nearby. The devices and tags can 
+be provided with identifiers, and these can be both fixed or dynamic 
+depending on the application.
+        </p>
+        <p>
+NFC tags can be worn by people or attached to objects in the 
+environment. It enables identification and exchange of a small amount of 
+data in the form of standardised messages that can contain up to several 
+data records each. Each data record contains a header identifying the 
+data followed by the actual data itself. It is completely up to 
+application developers to identify the data, to understand it, and to 
+use the data. Please note that sometimes the term payload is also being 
+used in NFC. Payload in an NFC context simply refers to the raw data or 
+information being stored.
+        </p>
+        <p>
+- THE NFC DATA EXCHANGE FORMAT
+        </p>
+        <p>
+The NFC Forum has specified the NFC Data Exchange Format (NDEF) to 
+enable interoperability when exchanging data between NFC devices and NFC 
+tags. NDEF is a standard that specifies the NDEF data structure format 
+along with rules on how to compose an NDEF message as a complete 
+collection of NDEF records. An NDEF message is a lightweight, binary 
+message format.
+        </p>
+        <p>
+It defines how to package application data as NDEF records. NDEF only 
+specified the data structure format to exchange application specific 
+data in an interoperable way. It does not define any record types in 
+detail. Providing the record header and the actual record data is 
+completely up to the application developer to do.
+        </p>
+        <p>
+NDEF is a compact and lightweight binary format. It can contain any data 
+such as web links, business cards, tiny applications, images, and so on. 
+It is up the application developers to define and fill it with literally 
+any data suitable or needed for the application. It is the capabilities 
+of the NFC target that matters. Most NFC tags have generally a few 
+kilobytes of available memory to store the data (payload). NFC devices 
+typically have much more memory available. There are currently four 
+types of NFC tags defined in the standard: type1, type 2, type 3, and 
+type 4. The type vary because of computing capabilities and low level 
+commands, but all NFC targets have to support the exchange of NDEF 
+messages and records.
+        </p>
+        <p>
+The advantage of NDEF is that it abstracts away from the specific NFC 
+tags/ targets. An NDEF message consists of a set of NDEF records. Each 
+record must carry data/ payload. The type of data can for instance be 
+web links, MIME media types, or pre-defined NFC data types.
+An NDEF record consists of two parts: 1) the header part, and 2) the 
+data (payload) part. The compact header part specifies the: i) type of 
+data, ii) the length of the data in terms of octets, and iii) an 
+optional data identifier. The optional data identifier could for 
+instance be used by applications to nest data and records, or for other 
+purposes such as signing. i) and ii) are mandatory to specify in the 
+header of a record. Also, the data (payload) part needs to be provided 
+to the record. The approach to specifying headers allows for compact the 
+identification of standardised data formats across NFC applications. It 
+also allows for the identification of new and custom data formats for 
+any future NFC application.
+        </p>
+        <p>
+The NDEF message format can accommodate literally any information or 
+data of known and initially unknown sizes. It allows an arbitrary set of 
+information and data to be grouped together into a single message. It 
+also allows for the compact encapsulation of well-known data such as web 
+links. An NDEF message is not a general message description or document 
+format like MIME media types, HTML, XML and so on. Rather, the purpose 
+is to enable applications to take advantage of such descriptions and 
+formats by encapsulating any of these as NDEF messages and records.
+        </p>
+        <p>
+The data (payload) length is an unsigned integer indicating the number 
+of octets in the payload. A compact, short-record layout is provided for 
+very small payloads. The optional payload identifier enables association 
+of multiple data (payloads) and cross-referencing between them. NDEF 
+payloads may include nested NDEF messages or chains
+of linked chunks of unknown length at the time the data is generated.
+        </p>
+        <p>
+- BRIEFLY HOW NFC RADIOS AND MODULES WORK
+        </p>
+        <p>
+NFC tags differ from many other RFID tags mainly because of the signal 
+range of the NFC transceivers. Some RFID tags can be read from 100 
+meters, which is the case when you drive a car through a toll ring with 
+an RFID tag. Such long range wireless tag needs an embedded battery to 
+be able to broadcast the identifier/ data back to the reader. However, 
+because the signal reach of NFC tags and devices is only a few 
+centimetres, the actual NFC tags require no battery. Instead, the active 
+NFC device activates the passive NFC tag with an electro-magnetic field. 
+This field is sufficient to power the NFC chip and drive the data exchange.
+        </p>
+        <p>
+- PLANNED OPERATING MODES FOR THE WEBINOS NFC
+        </p>
+        <p>
+NFC devices can run in either reader-writer mode, peer-to-peer mode, or 
+card emulation mode. These three modes are based on the ISO/IEC 18092 
+NFC IP-1 and ISO/IEC 14443 contactless smart card standards. Webinos aim 
+to provide all three modes:
+        </p>
+        <p>
+1. NFC reader/writer mode - the NFC device can read and write data to 
+NFC tags. This is the original intention of the NFC technologies. We 
+foresee that most NFC applications will be using this mode in the 
+beginning. One use case is to hold a mobile towards a smart poster to 
+obtain information about a concert.
+        </p>
+        <p>
+2. NFC peer to peer mode - two NFC devices exchange data with each other 
+when held close. The devices can connect and share any data/ files 
+through the NFC Logical Link Control Protocol (LLCP). This capability 
+was added to the NFC standard because of the introduction of NFC 
+adapters to mobile phones.
+        </p>
+        <p>
+3. NFC card emulation mode - an NFC device appears to another NFC device 
+as a contactless smart card. It makes the NFC device appear as a 
+contactless smart card for payment/ ticketing to other NFC devices. A 
+contactless card an NFC tag with a tiny, secure application embedded on 
+it. Therefore, one needs to emulate cards through the execution of tiny, 
+secure payment applications towards the NFC module.
+        </p>
+        <p>
+The implementation priority for the webinos NFC module is in the order 
+if the above three modes: We first will provide the NFC reader/writer 
+mode, then we will deliver the NFC peer to peer mode. Finally, we aim to 
+get the NFC card emulation mode implemented, however, at the moment this 
+latter mode has a lower priority in webinos.
+        </p>
+        <p>
+This specification provides a new DOM event (&quot;nfctag&quot;) to discover when a nfc tag
+enters the field of the device.
+        </p>
+       </description>
+        <Code> window.addEventListener(&quot;nfctag&quot;, nfcListener, true);
+
+ function nfcListener(event)
+ {
+   var techSelected = null;
+   var techSupported = event.tag.techList;
+   if(techSupported.length > 0) {
+     for (var index=0; index &#60; techSupported.length; index++) {
+       if(techSupported[index].type == techSupported[index].TECH_NDEF) {
+         techSelected = techSupported[index];
+       }
+     }
+   }
+   if(techSelected) {
+     var ndefMessage = techSelected.readCachedNdefMessage();
+     for (var index=0; index &#60; ndefMessage.ndefRecords.length) {
+       if(ndefMessage.ndefRecords[index].type = ndefMessage.NDEFRECTYPE_URI)
+                        alert(&quot;uri found: &quot;+ndefMessage.ndefRecords[index].textPayload);
+     }
+   }
+ }
+ </Code>
+        <def-api-feature identifier="http://webinos.org/api/nfc">
+          <descriptive>
+           <description>
+            <p>
+Acccess to all the module. This feature provides access to the whole API.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/nfc.read">
+          <descriptive>
+           <description>
+            <p>
+Acccess to all the module except write operations.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Hans Myrhaug (AmbieSense Ltd.) &#60;hans@ambiesense.com&#62;
+        </author>
+        <author>
+ Stefano Vercelli (Telecom Italia) &#60;stefano.vercelli@telecomitalia.it&#62;
+        </author>
+        <version>
+ 0.4
+        </version>
+    </descriptive>
+    <Typedef name="NFCTagTechnologyArray" id="::nfc::NFCTagTechnologyArray">
+      <webidl>        typedef <ref>NFCTagTechnology</ref>[]      NFCTagTechnologyArray;</webidl>
+      <descriptive>
+          <brief>
+ Array of NFCTagTechnology.
+          </brief>
+      </descriptive>
+      <Type type="array">
+        <Type name="NFCTagTechnology"/>
+      </Type>
+    </Typedef>
+    <Typedef name="NdefRecordArray" id="::nfc::NdefRecordArray">
+      <webidl>        typedef <ref>NdefRecord</ref>[]      NdefRecordArray;</webidl>
+      <descriptive>
+          <brief>
+ Array of NdefRecord.
+          </brief>
+      </descriptive>
+      <Type type="array">
+        <Type name="NdefRecord"/>
+      </Type>
+    </Typedef>
+    <Typedef name="ByteArray" id="::nfc::ByteArray">
+      <webidl>        typedef octet[] ByteArray;</webidl>
+      <descriptive>
+          <brief>
+ Array of 8-bit unsigned integer values.
+          </brief>
+      </descriptive>
+      <Type type="array">
+        <Type type="octet"/>
+      </Type>
+    </Typedef>
+    <Interface name="PendingOperation" id="::nfc::PendingOperation">
+      <webidl>        [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+                boolean cancel();&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Definition of pending op.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::nfc::PendingOperation::cancel">
+        <webidl>                boolean cancel();</webidl>
+        <descriptive>
+            <brief>
+ Cancel the async op.
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="NFCTag" id="::nfc::NFCTag">
+      <webidl>        interface NFCTag : <ref>Event</ref> {&#13;
+&#13;
+&#13;
+                readonly attribute <ref>ByteArray</ref> tagId;&#13;
+                &#13;
+&#13;
+                readonly attribute <ref>NFCTagTechnologyArray</ref> techList;&#13;
+                &#13;
+&#13;
+                void initNFCTagEvent(in DOMString type,&#13;
+                                     in boolean bubbles,&#13;
+                                     in boolean cancelable,&#13;
+                                     in <ref>ByteArray</ref> tagId,&#13;
+                                     in unsigned short technologyType,&#13;
+                                     in unsigned short ndefType,&#13;
+                                     in unsigned short ndefRecType,&#13;
+                                     in DOMString? ndefRecordTextPayload,&#13;
+                                     in optional <ref>ByteArray</ref> ndefRecordBinaryPayload&#13;
+                                     );&#13;
+                                                                 &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ NFC tag event.
+          </brief>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="Event"/>
+      </InterfaceInheritance>
+      <Attribute readonly="readonly" name="tagId" id="::nfc::NFCTag::tagId">
+        <webidl>                readonly attribute <ref>ByteArray</ref> tagId;</webidl>
+        <descriptive>
+            <brief>
+ The identifier of the tag.
+            </brief>
+        </descriptive>
+        <Type name="ByteArray"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="techList" id="::nfc::NFCTag::techList">
+        <webidl>                readonly attribute <ref>NFCTagTechnologyArray</ref> techList;</webidl>
+        <descriptive>
+            <brief>
+ The list of technologies supported by the tag.
+            </brief>
+        </descriptive>
+        <Type name="NFCTagTechnologyArray"/>
+      </Attribute>
+      <Operation name="initNFCTagEvent" id="::nfc::NFCTag::initNFCTagEvent">
+        <webidl>                void initNFCTagEvent(in DOMString type,&#13;
+                                     in boolean bubbles,&#13;
+                                     in boolean cancelable,&#13;
+                                     in <ref>ByteArray</ref> tagId,&#13;
+                                     in unsigned short technologyType,&#13;
+                                     in unsigned short ndefType,&#13;
+                                     in unsigned short ndefRecType,&#13;
+                                     in DOMString? ndefRecordTextPayload,&#13;
+                                     in optional <ref>ByteArray</ref> ndefRecordBinaryPayload&#13;
+                                     );</webidl>
+        <descriptive>
+            <brief>
+ Method to set initial values of NFCTag event.  
+            </brief>
+           <description>
+            <p>
+The initNFCTagEvent() method must initialize the event in a manner analogous to the initEvent() method in http://www.w3.org/TR/2010/WD-DOM-Level-3-Events-20100907/.
+The method can for example be used with document.createEvent() and EventTarget.dispatchEvent() to simulate a specific event.
+At the moment it should simulate a read only ndef Tag containing a ndefMessage that includes a single ndefRecord.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ Event type i.e. 'sensor'
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" name="tagId">
+            <descriptive>
+                <description><p>
+ id of the tag
+                </p></description>
+            </descriptive>
+            <Type name="ByteArray"/>
+          </Argument>
+          <Argument in="in" name="technologyType">
+            <descriptive>
+                <description><p>
+ type of technology supported by the tag; at the moment it must be ndef.
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="ndefType">
+            <descriptive>
+                <description><p>
+ type of ndef supported (see constants defined in NFCTagTechnologyNdef)
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="ndefRecType">
+            <descriptive>
+                <description><p>
+ type of ndef record (see constants defined in NdefMessage)
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="ndefRecordTextPayload">
+            <descriptive>
+                <description><p>
+ textual payload of the ndef record
+                </p></description>
+            </descriptive>
+            <Type type="DOMString" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="ndefRecordBinaryPayload">
+            <descriptive>
+                <description><p>
+ binary payload of the ndef record
+                </p></description>
+            </descriptive>
+            <Type name="ByteArray"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="NFCTagTechnology" id="::nfc::NFCTagTechnology">
+      <webidl>        [NoInterfaceObject] interface NFCTagTechnology {&#13;
+&#13;
+&#13;
+                const unsigned short TECH_OTHERS = 0;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCA = 1;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCB = 2;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCF = 3;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NFCV = 4;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_ISODEP = 5;&#13;
+                &#13;
+&#13;
+                const unsigned short TECH_NDEF = 6;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned short type;&#13;
+                &#13;
+&#13;
+                readonly attribute boolean isConnected;&#13;
+                &#13;
+&#13;
+                void connect();&#13;
+&#13;
+&#13;
+                void close();&#13;
+                &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ NFC technology.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="TECH_OTHERS" value="0" id="::nfc::NFCTagTechnology::TECH_OTHERS">
+        <webidl>                const unsigned short TECH_OTHERS = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a non supported technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_NFCA" value="1" id="::nfc::NFCTagTechnology::TECH_NFCA">
+        <webidl>                const unsigned short TECH_NFCA = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a NfcA technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_NFCB" value="2" id="::nfc::NFCTagTechnology::TECH_NFCB">
+        <webidl>                const unsigned short TECH_NFCB = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a NfcB technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_NFCF" value="3" id="::nfc::NFCTagTechnology::TECH_NFCF">
+        <webidl>                const unsigned short TECH_NFCF = 3;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a NfcF technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_NFCV" value="4" id="::nfc::NFCTagTechnology::TECH_NFCV">
+        <webidl>                const unsigned short TECH_NFCV = 4;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a NfcV technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_ISODEP" value="5" id="::nfc::NFCTagTechnology::TECH_ISODEP">
+        <webidl>                const unsigned short TECH_ISODEP = 5;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a IsoDep technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TECH_NDEF" value="6" id="::nfc::NFCTagTechnology::TECH_NDEF">
+        <webidl>                const unsigned short TECH_NDEF = 6;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Ndef technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="type" id="::nfc::NFCTagTechnology::type">
+        <webidl>                readonly attribute unsigned short type;</webidl>
+        <descriptive>
+            <brief>
+ Type of technology.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="isConnected" id="::nfc::NFCTagTechnology::isConnected">
+        <webidl>                readonly attribute boolean isConnected;</webidl>
+        <descriptive>
+            <brief>
+ Attribute indicating if the tag is connected or not.
+            </brief>
+           <description>
+            <p>
+TODO: check if it is needed.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Operation name="connect" id="::nfc::NFCTagTechnology::connect">
+        <webidl>                void connect();</webidl>
+        <descriptive>
+            <brief>
+ Connects to the tag.
+            </brief>
+           <description>
+            <p>
+TODO: check if it is needed.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="close" id="::nfc::NFCTagTechnology::close">
+        <webidl>                void close();</webidl>
+        <descriptive>
+            <brief>
+ Closes connection to the tag.
+            </brief>
+           <description>
+            <p>
+TODO: check if it is needed.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="NFCTagTechnologyNdef" id="::nfc::NFCTagTechnologyNdef">
+      <webidl>        [NoInterfaceObject] interface NFCTagTechnologyNdef : <ref>NFCTagTechnology</ref> {&#13;
+        &#13;
+&#13;
+                const unsigned short NDEFTYPE_OTHERS = 0;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE1 = 1;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE2 = 2;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE3 = 3;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_NFCFORUMTYPE4 = 4;&#13;
+                &#13;
+&#13;
+                const unsigned short NDEFTYPE_MIFARECLASSIC = 5;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned short ndefType;&#13;
+                &#13;
+&#13;
+                readonly attribute boolean isWritable;&#13;
+                &#13;
+&#13;
+                readonly attribute unsigned long maxNdefMessageSize;&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> makeReadOnly(in <ref>SuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>NdefMessage</ref> readCachedNdefMessage();&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> readNdefMessage(in <ref>NdefSuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>PendingOperation</ref> writeNdefMessage(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref>? errorCallback, <ref>NdefMessage</ref> message)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                <ref>NdefMessage</ref> createNdefMessage();&#13;
+&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Ndef technology.
+          </brief>
+          <Code> window.addEventListener(&quot;nfctag&quot;, nfcListener, true);
+
+ function nfcListener(event)
+ {
+   var techSelected = null;
+   var techSupported = event.tag.techList;
+   if(techSupported.length > 0) {
+     for (var index=0; index &#60; techSupported.length; index++) {
+       if(techSupported[index].type == techSupported[index].TECH_NDEF) {
+         techSelected = techSupported[index];
+       }
+     }
+   }
+   // write to the tag
+   if(techSelected) {
+     var newMsg = techSelected.createNdefMessage();
+     newMsg.addTextNdefRecord(newMsg.NDEFRECTYPE_URI, &quot;http://webinos.org&quot;);
+     techSelected.writeNdefMessage(wSuccess, wError, newMsg);
+   }
+ }
+
+ function wSuccess()
+ {
+   alert(&quot;write successfull&quot;);
+ }
+
+ function wError()
+ {
+   alert(&quot;write error&quot;);
+ }
+
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="NFCTagTechnology"/>
+      </InterfaceInheritance>
+      <Const name="NDEFTYPE_OTHERS" value="0" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_OTHERS">
+        <webidl>                const unsigned short NDEFTYPE_OTHERS = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a non supported Ndef format.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFTYPE_NFCFORUMTYPE1" value="1" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_NFCFORUMTYPE1">
+        <webidl>                const unsigned short NDEFTYPE_NFCFORUMTYPE1 = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Nfc forum type 1 Ndef tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFTYPE_NFCFORUMTYPE2" value="2" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_NFCFORUMTYPE2">
+        <webidl>                const unsigned short NDEFTYPE_NFCFORUMTYPE2 = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Nfc forum type 2 Ndef tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFTYPE_NFCFORUMTYPE3" value="3" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_NFCFORUMTYPE3">
+        <webidl>                const unsigned short NDEFTYPE_NFCFORUMTYPE3 = 3;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Nfc forum type 3 Ndef tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFTYPE_NFCFORUMTYPE4" value="4" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_NFCFORUMTYPE4">
+        <webidl>                const unsigned short NDEFTYPE_NFCFORUMTYPE4 = 4;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Nfc forum type 4 Ndef tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFTYPE_MIFARECLASSIC" value="5" id="::nfc::NFCTagTechnologyNdef::NDEFTYPE_MIFARECLASSIC">
+        <webidl>                const unsigned short NDEFTYPE_MIFARECLASSIC = 5;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a Mifare classic Ndef formatted tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="ndefType" id="::nfc::NFCTagTechnologyNdef::ndefType">
+        <webidl>                readonly attribute unsigned short ndefType;</webidl>
+        <descriptive>
+            <brief>
+ Attribute indicating the type of Ndef tag.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="isWritable" id="::nfc::NFCTagTechnologyNdef::isWritable">
+        <webidl>                readonly attribute boolean isWritable;</webidl>
+        <descriptive>
+            <brief>
+ Attribute indicating if the tag is writable or not.
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="maxNdefMessageSize" id="::nfc::NFCTagTechnologyNdef::maxNdefMessageSize">
+        <webidl>                readonly attribute unsigned long maxNdefMessageSize;</webidl>
+        <descriptive>
+            <brief>
+ Attribute indicating the maximum size of Ndef messages.
+            </brief>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Operation name="makeReadOnly" id="::nfc::NFCTagTechnologyNdef::makeReadOnly">
+        <webidl>                <ref>PendingOperation</ref> makeReadOnly(in <ref>SuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ This method makes a tag read-only.
+            </brief>
+           <description>
+            <p>
+When the operation is fully completed the onsuccess method of the successCallback is called.
+Otherwise, the errorCallback will be invoked with an appropriate error code amongst the following:
+            </p>
+            <ul>
+              <li>
+IO_ERR: if the write operation fails.
+              </li>
+            </ul>
+            <ul/>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of success.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCallback"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of failure.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback" nullable="nullable"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="NfcException">
+            <descriptive>
+                <description><p>
+ with error code INVALID_ARGUMENT_ERR if parameters are of the wrong type
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="readCachedNdefMessage" id="::nfc::NFCTagTechnologyNdef::readCachedNdefMessage">
+        <webidl>                <ref>NdefMessage</ref> readCachedNdefMessage();</webidl>
+        <descriptive>
+            <brief>
+ Retrieves the Ndef message received at discovery time.
+            </brief>
+        </descriptive>
+        <Type name="NdefMessage">
+          <descriptive>
+              <description><p>
+ The Ndef message received at discovery time.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="readNdefMessage" id="::nfc::NFCTagTechnologyNdef::readNdefMessage">
+        <webidl>                <ref>PendingOperation</ref> readNdefMessage(in <ref>NdefSuccessCallback</ref> successCallback, in optional <ref>ErrorCallback</ref>? errorCallback)&#13;
+                        raises(<ref>NfcException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ This method reads a Ndef message.
+            </brief>
+           <description>
+            <p>
+When the operation is fully completed the onsuccess method of the successCallback is called.
+Otherwise, the errorCallback will be invoked with an appropriate error code amongst the following:
+            </p>
+            <ul>
+              <li>
+IO_ERR: if the read operation fails.
+              </li>
+            </ul>
+            <ul/>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of success.
+                </p></description>
+            </descriptive>
+            <Type name="NdefSuccessCallback"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of failure.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback" nullable="nullable"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="NfcException">
+            <descriptive>
+                <description><p>
+ with error code INVALID_ARGUMENT_ERR if parameters are of the wrong type
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="writeNdefMessage" id="::nfc::NFCTagTechnologyNdef::writeNdefMessage">
+        <webidl>                <ref>PendingOperation</ref> writeNdefMessage(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref>? errorCallback, <ref>NdefMessage</ref> message)&#13;
+                        raises(<ref>NfcException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Writes a Ndef message to the tag.
+            </brief>
+           <description>
+            <p>
+When the operation is fully completed the onsuccess method of the successCallback is called.
+Otherwise, the errorCallback will be invoked with an appropriate error code amongst the following:
+            </p>
+            <ul>
+              <li>
+IO_ERR: if the write operation fails.
+              </li>
+            </ul>
+            <ul/>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of success.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ function to be invoked in case of failure.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback" nullable="nullable"/>
+          </Argument>
+          <Argument name="message">
+            <descriptive>
+                <description><p>
+ The message to be written.
+                </p></description>
+            </descriptive>
+            <Type name="NdefMessage"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="NfcException">
+            <descriptive>
+                <description><p>
+ with error code INVALID_ARGUMENT_ERR if parameters are of the wrong type
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="createNdefMessage" id="::nfc::NFCTagTechnologyNdef::createNdefMessage">
+        <webidl>                <ref>NdefMessage</ref> createNdefMessage();</webidl>
+        <descriptive>
+            <brief>
+ Create a new Ndef message.
+            </brief>
+        </descriptive>
+        <Type name="NdefMessage">
+          <descriptive>
+              <description><p>
+ The new Ndef message; it is empty, that is does not contain ndef records.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="NdefMessage" id="::nfc::NdefMessage">
+      <webidl>        [NoInterfaceObject] interface NdefMessage {&#13;
+        &#13;
+&#13;
+                const unsigned short NDEFRECTYPE_UNKNOWN = 0;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_URI = 1;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_MEDIA = 2;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_EMPTY = 3;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_RTD = 4;&#13;
+&#13;
+&#13;
+                const unsigned short NDEFRECTYPE_EXTERNALRTD = 5;&#13;
+&#13;
+&#13;
+                readonly attribute <ref>NdefRecordArray</ref> ndefRecords;&#13;
+                &#13;
+&#13;
+                void addTextNdefRecord(in unsigned short type, in optional DOMString payload)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+&#13;
+                void addBinaryNdefRecord(in unsigned short type, in <ref>ByteArray</ref> payload)&#13;
+                        raises(<ref>NfcException</ref>);&#13;
+                &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Ndef message.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="NDEFRECTYPE_UNKNOWN" value="0" id="::nfc::NdefMessage::NDEFRECTYPE_UNKNOWN">
+        <webidl>                const unsigned short NDEFRECTYPE_UNKNOWN = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying an unknown Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFRECTYPE_URI" value="1" id="::nfc::NdefMessage::NDEFRECTYPE_URI">
+        <webidl>                const unsigned short NDEFRECTYPE_URI = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a uri Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFRECTYPE_MEDIA" value="2" id="::nfc::NdefMessage::NDEFRECTYPE_MEDIA">
+        <webidl>                const unsigned short NDEFRECTYPE_MEDIA = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a media Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFRECTYPE_EMPTY" value="3" id="::nfc::NdefMessage::NDEFRECTYPE_EMPTY">
+        <webidl>                const unsigned short NDEFRECTYPE_EMPTY = 3;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying an empty Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFRECTYPE_RTD" value="4" id="::nfc::NdefMessage::NDEFRECTYPE_RTD">
+        <webidl>                const unsigned short NDEFRECTYPE_RTD = 4;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying a RTD Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NDEFRECTYPE_EXTERNALRTD" value="5" id="::nfc::NdefMessage::NDEFRECTYPE_EXTERNALRTD">
+        <webidl>                const unsigned short NDEFRECTYPE_EXTERNALRTD = 5;</webidl>
+        <descriptive>
+            <brief>
+ Constant identifying an external RTD Ndef record type.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="ndefRecords" id="::nfc::NdefMessage::ndefRecords">
+        <webidl>                readonly attribute <ref>NdefRecordArray</ref> ndefRecords;</webidl>
+        <descriptive>
+            <brief>
+ List of Ndef records.
+            </brief>
+        </descriptive>
+        <Type name="NdefRecordArray"/>
+      </Attribute>
+      <Operation name="addTextNdefRecord" id="::nfc::NdefMessage::addTextNdefRecord">
+        <webidl>                void addTextNdefRecord(in unsigned short type, in optional DOMString payload)&#13;
+                        raises(<ref>NfcException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Adds a text record to the Ndef message.
+            </brief>
+           <description>
+            <p>
+TODO add exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ The type of the ndef record
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="payload">
+            <descriptive>
+                <description><p>
+ The text payload of the record
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="NfcException">
+            <descriptive>
+                <description><p>
+ with error code INVALID_ARGUMENT_ERR if parameters are of the wrong type
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="addBinaryNdefRecord" id="::nfc::NdefMessage::addBinaryNdefRecord">
+        <webidl>                void addBinaryNdefRecord(in unsigned short type, in <ref>ByteArray</ref> payload)&#13;
+                        raises(<ref>NfcException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Adds a binary record to the Ndef message.
+            </brief>
+           <description>
+            <p>
+TODO add exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ The type of the ndef record
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="payload">
+            <descriptive>
+                <description><p>
+ The binary payload of the record
+                </p></description>
+            </descriptive>
+            <Type name="ByteArray"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="NfcException">
+            <descriptive>
+                <description><p>
+ with error code INVALID_ARGUMENT_ERR if parameters are of the wrong type
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="NdefRecord" id="::nfc::NdefRecord">
+      <webidl>        [NoInterfaceObject] interface NdefRecord {&#13;
+        &#13;
+&#13;
+                readonly attribute unsigned short type;&#13;
+                &#13;
+&#13;
+                readonly attribute DOMString textPayload;&#13;
+                &#13;
+&#13;
+                readonly attribute <ref>ByteArray</ref> binaryPayload;&#13;
+                &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Ndef record.
+          </brief>
+         <description>
+          <p>
+Chunk of records are assembled by the underlying implementation and returned as
+a single Ndef record.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="type" id="::nfc::NdefRecord::type">
+        <webidl>                readonly attribute unsigned short type;</webidl>
+        <descriptive>
+            <brief>
+ The type of the record.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="textPayload" id="::nfc::NdefRecord::textPayload">
+        <webidl>                readonly attribute DOMString textPayload;</webidl>
+        <descriptive>
+            <brief>
+ The textual payload of the record.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="binaryPayload" id="::nfc::NdefRecord::binaryPayload">
+        <webidl>                readonly attribute <ref>ByteArray</ref> binaryPayload;</webidl>
+        <descriptive>
+            <brief>
+ The binary payload of the record.
+            </brief>
+        </descriptive>
+        <Type name="ByteArray"/>
+      </Attribute>
+    </Interface>
+    <Interface name="NfcError" id="::nfc::NfcError">
+      <webidl>        [NoInterfaceObject] interface NfcError {&#13;
+            &#13;
+&#13;
+                readonly attribute unsigned short code;&#13;
+&#13;
+&#13;
+                readonly attribute DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR = 0;&#13;
+&#13;
+&#13;
+                const unsigned short IO_ERR = 1;&#13;
+                &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Interface for reporting Nfc specific errors.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="code" id="::nfc::NfcError::code">
+        <webidl>                readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Code assigned when an error has occurred in Nfc API processing.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="message" id="::nfc::NfcError::message">
+        <webidl>                readonly attribute DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Human readable message assigned when an error has occurred in Nfc API processing.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Const name="UNKNOWN_ERR" value="0" id="::nfc::NfcError::UNKNOWN_ERR">
+        <webidl>                const unsigned short UNKNOWN_ERR = 0;</webidl>
+        <descriptive>
+            <brief>
+ Unknown error.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="IO_ERR" value="1" id="::nfc::NfcError::IO_ERR">
+        <webidl>                const unsigned short IO_ERR = 1;</webidl>
+        <descriptive>
+            <brief>
+ I/O error.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Exception name="NfcException" id="::nfc::NfcException">
+      <webidl>        exception NfcException {&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR = 0;&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERR       = 1;&#13;
+&#13;
+&#13;
+                unsigned short code;&#13;
+&#13;
+&#13;
+                DOMString message;&#13;
+&#13;
+        };</webidl>
+      <Const name="UNKNOWN_ERR" value="0" id="::nfc::NfcException::UNKNOWN_ERR">
+        <webidl>                const unsigned short UNKNOWN_ERR = 0;</webidl>
+        <descriptive>
+            <brief>
+ Unknown error.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERR" value="1" id="::nfc::NfcException::INVALID_ARGUMENT_ERR">
+        <webidl>                const unsigned short INVALID_ARGUMENT_ERR       = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested method was invoked.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <ExceptionField name="code" id="::nfc::NfcException::code">
+        <webidl>                unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Error code.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::nfc::NfcException::message">
+        <webidl>                DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Error message.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </ExceptionField>
+    </Exception>
+    <Interface name="SuccessCallback" id="::nfc::SuccessCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject] interface SuccessCallback {&#13;
+                void onsuccess();&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback to be invoked in case of success.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::nfc::SuccessCallback::onsuccess">
+        <webidl>                void onsuccess();</webidl>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="ErrorCallback" id="::nfc::ErrorCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject] interface ErrorCallback {&#13;
+                void onError(in <ref>NfcError</ref> error);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback to be invoked when an error occurs.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::nfc::ErrorCallback::onError">
+        <webidl>                void onError(in <ref>NfcError</ref> error);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <Type name="NfcError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="NdefSuccessCallback" id="::nfc::NdefSuccessCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject] interface NdefSuccessCallback {&#13;
+                void onSuccess(in <ref>NdefMessage</ref> obj);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback to be invoked when reading a Ndef message.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::nfc::NdefSuccessCallback::onSuccess">
+        <webidl>                void onSuccess(in <ref>NdefMessage</ref> obj);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="obj">
+            <Type name="NdefMessage"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PZP" default="help">
+
+  <!-- 
+    The local.properties file is created and updated by the 'android'
+    Tool. It contains the path to the SDK. It should *NOT* be checked into
+    Version Control Systems.
+  -->
+
+  <property file="local.properties" />
+
+  <!--
+    The build.properties file can be created by you and is never touched
+    by the 'android' tool. This is the place to change some of the
+    default property values used by the Ant rules.
+    Here are some properties you may want to change/update:
+
+    source.dir
+       The name of the source directory. Default is 'src'.
+    out.dir
+       The name of the output directory. Default is 'bin'.
+
+    Properties related to the SDK location or the project target should
+    be updated using the 'android' tool with the 'update' action.
+
+    This file is an integral part of the build system for your
+    application and should be checked into Version Control Systems.
+
+  -->
+  <property file="build.properties" />
+
+  <!-- 
+    The default.properties file is created and updated by the 'android'
+    tool, as well as ADT.
+
+    This file is an integral part of the build system for your
+    application and should be checked into Version Control Systems.
+  -->
+  <property file="default.properties" />
+
+  <!--
+    apkbuilder is confused by about.html file in jetty jars
+    simplest solution is to remove these files from the jars
+  -->
+
+  <!--
+     Custom Android task to deal with the project target, and import the
+      proper rules. This requires ant 1.6.0 or above.
+  -->
+  <path id="android.antlibs">
+    <pathelement path="${sdk.dir}/tools/lib/anttasks.jar" />
+    <pathelement path="${sdk.dir}/tools/lib/sdklib.jar" />
+    <pathelement path="${sdk.dir}/tools/lib/androidprefs.jar" />
+  </path>
+
+  <taskdef name="setup"
+   classname="com.android.ant.SetupTask"
+   classpathref="android.antlibs" />
+
+  <setup />
+</project>

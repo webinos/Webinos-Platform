@@ -1,0 +1,26 @@
+HKCR
+{
+	bondi.BondiWidgetAppConfig.1 = s 'BondiWidgetAppConfig Class'
+	{
+		CLSID = s '{8FC14FA6-4907-4357-9A92-3C0DB3B415D7}'
+	}
+	bondi.BondiWidgetAppConfig = s 'BondiWidgetAppConfig Class'
+	{
+		CLSID = s '{8FC14FA6-4907-4357-9A92-3C0DB3B415D7}'
+		CurVer = s 'bondi.BondiWidgetAppConfig.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {8FC14FA6-4907-4357-9A92-3C0DB3B415D7} = s 'BondiWidgetAppConfig Class'
+		{
+			ProgID = s 'bondi.BondiWidgetAppConfig.1'
+			VersionIndependentProgID = s 'bondi.BondiWidgetAppConfig'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{}'
+		}
+	}
+}

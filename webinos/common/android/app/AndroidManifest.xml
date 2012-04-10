@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="org.webinos.app"
+      android:versionCode="1"
+      android:versionName="1.0" android:installLocation="auto">
+<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"></uses-permission>
+<uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"></uses-permission>
+<uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
+<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
+<uses-permission android:name="android.permission.READ_SMS"></uses-permission>
+<uses-permission android:name="android.permission.WRITE_SMS"></uses-permission>
+<uses-permission android:name="android.permission.RECEIVE_SMS"></uses-permission>
+
+    <application android:label="@string/app_name" android:icon="@drawable/webinos_icon">
+        <activity android:name="org.webinos.app.anode.AnodeActivity"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="org.webinos.app.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="org.webinos.app.pzp.ConfigActivity"
+                  android:label="@string/pzp_activity_name"
+                  android:launchMode="singleTop"
+                  android:taskAffinity="org.webinos.app.pzp"
+                  android:alwaysRetainTaskState="true"
+                  android:allowTaskReparenting="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="org.webinos.impl.PromptActivity"
+            	  android:label="@string/app_name">
+            
+        </activity>
+        <activity android:name=".wrt.ui.WidgetInstallActivity"
+            	  android:label="@string/app_name">
+        </activity>
+        <activity android:name=".wrt.ui.WidgetDownloadActivity"
+            	  android:label="@string/app_name">
+            <intent-filter>
+				<action android:name="org.webinos.app.wgt.INSTALL" />
+			</intent-filter>
+            <intent-filter>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:scheme="http" android:mimeType="application/widget" />
+				<data android:scheme="https" android:mimeType="application/widget" />
+				<data android:scheme="file" android:mimeType="application/widget" />
+			</intent-filter>
+            </activity>
+        <activity android:name="org.webinos.app.wrt.ui.WidgetUninstallActivity" android:label="@string/uninstall_activity_title"/>
+        <activity android:name="org.webinos.app.wrt.ui.WidgetSettingsActivity" android:label="@string/settings_activity_title"/>
+        <activity android:name="org.webinos.app.wrt.ui.WidgetListActivity" 
+            	  android:label="@string/list_activity_title"
+                  android:exported="true"
+                  android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:enabled="true" android:label="@string/anode_receiver" android:exported="true" android:description="@string/anode_receiver_description" android:name=".anode.AnodeReceiver">
+            <intent-filter>
+                <action android:name="org.webinos.app.START" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.STOP" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.STOPALL" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.module.INSTALL" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.module.UNINSTALL" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.wgt.INSTALL" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.webinos.app.wgt.UNINSTALL" />
+            </intent-filter>
+            </receiver>
+        <service android:exported="true" android:enabled="true" android:name=".anode.AnodeService" android:description="@string/anode_service_description" android:label="@string/anode_service"></service>
+        <service android:name=".wrt.channel.WebinosSocketService">
+            <intent-filter>
+                <action android:name="org.webinos.wrt.channel.SERVER" />
+            </intent-filter>
+        </service>
+        <provider android:name=".wrt.provider.WidgetContentProvider" android:authorities="org.webinos.wrt"></provider>
+        
+    </application>
+</manifest>

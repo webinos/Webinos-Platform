@@ -1,0 +1,56 @@
+<!doctype html>
+<title>webinos ready example</title>
+
+<script src="webinos.js"></script>
+
+<script>
+// Notifies listeners when the DOM finished parsing (while images and css may still load)
+// Equivalent to jquery's ready()
+(function() {
+
+	var readyListener = [];
+	
+	var loaded = function() {
+		window.removeEventListener("load", loaded, false);
+		document.removeEventListener("DOMContentLoaded", loaded, false);
+		
+		for (var i = 0; i < readyListener.length; i++) {
+			setTimeout(readyListener[i], 1);
+		}
+		readyListener = [];
+	};
+
+	// The case where ready() is called after the DOM is loaded already
+	if (document.readyState === "complete") {
+		// Handle it asynchronously to allow scripts the opportunity to delay ready
+		return setTimeout(loaded, 1);
+	}
+	
+	if (document.addEventListener) {
+		document.addEventListener("DOMContentLoaded", loaded, false);
+
+		// A fallback to window.onload, that will always work
+		window.addEventListener("load", loaded, false);
+	}
+
+	// Call this to register your DOM ready listener function
+	ready = function(listener) {
+		readyListener.push(listener);
+	}
+
+})();
+</script>
+
+<script>
+ready(function() {
+    webinos.discovery.findServices(
+            new ServiceType('http://webinos.org/api/test'),
+            {onFound: function (service) {
+                var $dump = document.getElementById('dump');
+                $dump.innerText += 'found service: ' + service.displayName + ' on ' + service.serviceAddress;
+                $dump.appendChild(document.createElement('br'));
+            }});
+});
+</script>
+
+<div id="dump"></div>

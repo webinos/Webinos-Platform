@@ -1,0 +1,26 @@
+{ "name": "context"
+, "publishConfig": { "tag": "alpha" }
+, "description": "The Context API"
+, "keywords": [ "context API"]
+, "version": "0.0.1"
+, "author": "Christos Ntanos <cntanos@epu.ntua.gr>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+              
+                 }
+, "main": "./lib/webinos.rpc.context.js"
+, "dependencies":
+  { "JSORMDB": "1.3"
+  }
+, "bundleDependencies":
+  [ "fs"
+  , "path"
+  ]
+}

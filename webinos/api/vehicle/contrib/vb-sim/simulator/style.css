@@ -1,0 +1,464 @@
+/*******************************************************************************
+*  Code contributed to the webinos project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+* Copyright 2012 BMW AG
+******************************************************************************/
+@charset "UTF-8";
+			html, body{
+			padding: 0;
+			margin: 0;
+			font-family: Helvetica, Arial, sans-serif;
+			font-size: 12px;
+			font-stretch:condensed;
+			
+			}
+			html{
+				
+  	background-color:  #585E59;
+	background: url(rauschen.png), -moz-linear-gradient(top, #585E59, #363D38) ; 
+	background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#585E59), to(#363D38)), url(rauschen.png); 
+	background: url(rauschen.png), -webkit-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), -o-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), -ms-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), linear-gradient(top, #585E59, #363D38); 
+				margin: 0 0 0 0;
+				padding: 0 0 0 0;
+			}
+				
+			body{
+				margin: 0 0 0 0;
+				padding: 0 0 0 0;
+				/*background-image: url(testbed_bg2.png) */;
+				background-repeat: repeat-x; background-position:top;
+				
+				}
+			p{margin: 0; padding:0; line-height: 140%} 
+			
+			#functions{
+				width: 250px;
+				padding: 1px 0 0 0;
+				float:left;
+			}
+			
+			#status{
+				background-color: #fff;
+				opacity: 0.8;
+				width: 650px;
+				padding: 5px;
+				color: #626262;
+				position: absolute; 
+				bottom: 10px;
+				font-size: 10px;
+				text-transform:uppercase;
+				margin: 0 auto 0 auto 0;;
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				font-weight:bold;
+	
+			}
+			
+			#info{
+				font-size: 24px;
+				margin-left: 280px;
+				width: 600px;
+				color: #fff;
+				font-size: 50px;
+				padding: 1px 0 0 0;
+			
+			}
+
+			/* added for discovery demo */
+			#loader{
+				margin: 0;
+				padding: 20px 0;
+				margin-left: 100px;
+				opacity: 0.9;
+				
+			}
+
+			#content{
+				margin-left: auto;
+				margin-right: auto;
+				padding-top: 20px;
+				padding-bottom: 100px;
+				width: 880px;
+				}
+			
+			select,.button{
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				border: 1px solid #a0a0a0;
+				
+                height: 22px;
+                
+				background: url(rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				
+				color: #fff;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 250px;
+				box-shadow: #000000 0px 0px 5px;
+				text-transform:uppercase;
+                text-align: right;
+			}
+			
+            
+            input{
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				
+				background: url(rauschen.png), -moz-linear-gradient(top, #fff, #eee); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #fff, #eee); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #fff, #eee); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #fff, #eee); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				border: 0px;
+				color: #000;
+				padding: 3px;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 250px;
+				text-transform:uppercase;
+                text-align: center;
+			}
+            
+			input[type=text]{
+                border-top-left-radius: 0px;	
+                border-top-right-radius	4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-left-radius: 0px;
+				
+				background: url(rauschen.png), -moz-linear-gradient(top, #fff, #eee); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #fff, #eee); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #fff, #eee); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #fff, #eee); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				border: 0px;
+				color: #000;
+				padding: 4px 10px 4px 0px;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 145px;
+				margin: 0px 0px 2px 0px;
+                text-transform:uppercase;
+                text-align: right;
+			}
+            
+			input[type=button]{
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				border: 1px solid #a0a0a0;
+				
+				background: url(rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				
+				color: #fff;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 250px;
+				box-shadow: #000000 0px 0px 5px;
+				text-transform:uppercase;
+			}
+			
+			 input[type=button]:hover{
+			 	background: url(rauschen.png), -moz-linear-gradient(top, #959595, #626262); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#959595), to(#626262)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #959595, #626262); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #959595, #626262); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #959595, #626262); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #959595, #626262); /* W3C Standard */
+			 }
+			 
+			 input[type=button]:active{
+			 			 	background: url(rauschen.png), -moz-linear-gradient(top, #959595, #626262); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#959595), to(#626262)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #959595, #626262); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #959595, #626262); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #959595, #626262); /* IE */
+
+			 	box-shadow: none;
+			 }
+			.running{
+				background: url(rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(rauschen.png); /* Safari, Chrome*/
+				background: url(rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */			
+				color: #000;
+			
+			
+			}			
+			select{
+                border-top-left-radius: 0px;	
+                border-top-right-radius	4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-left-radius: 0px;
+				
+				background: url(rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(rauschen.png); /* Safari, Chrome*/
+				background: url(rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+				background:  url(rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
+				
+				color: #000;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 150px;
+				box-shadow: #000000 0px 0px 5px;
+				text-transform:uppercase;
+			}
+			
+			
+			select[disabled],input[disabled]{
+				opacity: 0.5;
+				}
+			h2{
+				font-size: 14px;
+				color: #ffff00;
+				text-shadow: #000000 1px 1px 2px;
+				text-transform:uppercase;
+				
+				}
+			#message{
+					font-weight:normal;
+			}
+			
+			
+			#status.error{
+								background: url(rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+				
+				
+				background:  url(rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
+				opacity 1.0;
+				color: #FFF;
+			}
+			h3{
+				text-transform:uppercase;
+				font-weight: bold;
+				color: #ffff00;
+				font-size: 11px;
+				border-bottom: 1px #fff dotted;
+				text-shadow: #000000 1px 1px 2px;
+				
+				}
+				#info p{font-size: 14px; margin: 0; padding 0;}
+				
+				#pdcApp{
+					height: 200px;
+					width: 650px;
+					background: url(pdc.jpg);
+					background-repeat: none; background-position:center; */
+					
+				
+				}
+			
+			#pdcFront{
+				margin-left: 184px;
+				margin-top: 31px;
+				
+			}
+			
+			#pdcRear{
+				margin-top: 31px;
+				margin-left: 138px;
+			}
+			
+			#pdcLauncher{
+				visibility: hidden;
+			}
+
+            
+            label{
+                border-top-left-radius: 4px;	
+                border-top-right-radius	0px;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 4px;
+                border: 0px;
+                
+
+				background: url(rauschen.png), -moz-linear-gradient(top, #ccc, #ddd); /* Firefox */
+				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#fff), to(#eee)), url(rauschen.png); /* Safari, Chrome*/
+				 background: url(rauschen.png), -webkit-linear-gradient(top, #ccc, #ddd); /* Safari, Chrome - neue Syntax! */
+				background:  url(rauschen.png), -o-linear-gradient(top, #ccc, #ddd); /* Opera */
+				background:  url(rauschen.png), -ms-linear-gradient(top, #ccc, #ddd); /* IE */
+				background:  url(rauschen.png), linear-gradient(top, #ccc, #ddd); /* W3C Standard */
+				border: 0px;
+				color: #000;
+				padding: 3px;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:normal;
+				font-size:10px;
+                display: block;
+                float: left;
+                clear: left;
+                text-align: left;
+                width: 97px;
+                border-right:1px #ccc solid;
+                text-shadow: #ccc 1px 1px 1px;
+				
+            }
+
+            div#info label{
+            	clear: none;
+            	float: left;
+            	display: block;
+            	padding: 1px 0px 2px 2px;
+            
+            }
+            
+            div#info input[type=text]{
+            	width: 500px;
+            	text-align: left;
+            	padding-left: 5px;
+            }
+            label.select{
+                background: none;
+                border-radius: 0px
+                border: 0px;
+				color: #fff;
+				padding: 3px;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:normal;
+				font-size:10px;
+                display: block;
+                float: left;
+                text-align: left;
+                width: 92px;
+                border-right: 0px;
+                text-shadow: none;
+				
+            }
+            label.box{
+          		    background: none;
+                border-radius: 0px
+                border: 0px;
+				color: #fff;
+				padding: 3px;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:normal;
+				font-size:10px;
+                display: block;
+                float: left;
+                text-align: left;
+                width: 147px;
+                border-right: 0px;
+                text-shadow: none;
+				
+            
+            
+            }
+            
+            #functions p, #info p{
+            	margin-bottom: 1px;
+            	margin-top: 2px;
+            }
+
+			 #functions p.input{
+            	margin-bottom: 5px;
+            }
+            
+            #footer{
+            	position: fixed;
+            	bottom: 0px;
+            	width: 100%;
+            	height: 40px;
+            background-color:  #585E59;
+	background: url(rauschen.png), -moz-linear-gradient(top, #585E59, #363D38) ; 
+	background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#585E59), to(#363D38)), url(rauschen.png); 
+	background: url(rauschen.png), -webkit-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), -o-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), -ms-linear-gradient(top, #585E59, #363D38); 
+	background:  url(rauschen.png), linear-gradient(top, #585E59, #363D38); 
+	box-shadow: #000000 0px 0px 10px;
+	
+            }
+            
+    		h4{
+    			margin: 10px 0 5px 0;
+    			padding: 0;
+    			font-size: 11px;
+    			text-transform: uppercase;
+    			font-weight: normal;
+
+    			border-bottom: 1px #fff dotted;
+				text-shadow: #000000 1px 1px 2px;
+    		}        
+            
+            #spacer{
+            	clear: both;
+            	float: none;
+            	width: 880px;
+            	height: 100px;
+            	margin-left: auto;
+            	margin-right: auto;
+            }
+            
+    .cf {
+	  display: inline-block;
+	}
+	.cf[id] {
+	  display: block;
+	  overflow: hidden;
+	}

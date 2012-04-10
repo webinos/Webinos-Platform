@@ -1,0 +1,30 @@
+def set_options(opt):
+  opt.tool_options("compiler_cxx")
+
+def configure(conf):
+  conf.check_tool("compiler_cxx")
+  conf.check_tool("node_addon")
+
+
+def build(bld):
+  obj = bld.new_task_gen("cxx", "shlib", "node_addon")
+  obj.cxxflags = ["-g", "-L./core/policymanager", "-L./core"]
+  obj.target = "pm"
+  obj.source = ["pm.cc",
+	"core/policymanager/PolicyManager.cpp",
+	"core/policymanager/Condition.cpp",
+	"core/policymanager/Globals.cpp",
+	"core/policymanager/IPolicyBase.cpp",
+	"core/policymanager/Policy.cpp",
+	"core/policymanager/PolicySet.cpp",
+	"core/policymanager/Request.cpp",
+	"core/policymanager/Rule.cpp",
+	"core/policymanager/Subject.cpp",
+	"core/common.cpp",
+	"../contrib/xmltools/tinyxml.cpp",
+	"../contrib/xmltools/slre.cpp",
+	"../contrib/xmltools/tinystr.cpp",
+	"../contrib/xmltools/tinyxmlparser.cpp",
+	"../contrib/xmltools/tinyxmlerror.cpp"
+  ]
+

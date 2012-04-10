@@ -1,0 +1,10 @@
+Demo for Service Discovery using XMPP
+
+Shown during the June 2011 webinos meeting in Sofia Antipolis. Instructions for use are at http://dev.webinos.org/redmine/projects/wp4/wiki/Existing_Demos#TNO. A live version is available at http://xmpp.servicelab.org/xmppdemo/.
+
+Installation instructions: put all files in a directory that is server by a web server. Then connect to that web server using one or more clients.
+
+
+Have fun!
+Victor Klos
+

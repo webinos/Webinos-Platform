@@ -1,0 +1,10 @@
+; policyShim.def : Declares the module parameters.
+
+LIBRARY      "policyShim.DLL"
+
+EXPORTS
+	DllCanUnloadNow		PRIVATE
+	DllGetClassObject	PRIVATE
+	DllRegisterServer	PRIVATE
+	DllUnregisterServer	PRIVATE
+	DllInstall		PRIVATE

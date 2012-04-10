@@ -1,0 +1,40 @@
+NFC discovery module:
+
+This is built by changing to this directory and running the following command:
+
+    node-waf configure build
+
+To test, plug in the SLC3711 USB contactless reader and run:
+
+    node nfc.js
+
+Note that the wscript file is used by node-waf to deterimine how to compile C and C++ files, as well as dealing with any required native libraries.
+
+A simple near field communications discovery module using libev to communicate between a background thread and the main thread used by node.js. nfc.js provides a test wrapper. This module finds the first NFC reader and then scans for NFC passive devices such as RFID tags.
+
+The code is designed for Linux, and relies on libnfc. It is compatible with the SCM SCL3711 USB NFC dongle. Lib NFC is available from:
+
+   http://www.libnfc.org/documentation/introduction
+
+It depends on libusb and libpcsclite. You also need to copy pn53x.rules to /etc/udev/rules.d/ and reboot to avoid having to run node as root (a bad idea!).
+
+   http://libnfc.googlecode.com/svn/tags/libnfc-1.3.4/pn53x.rules
+
+The threading stuff is adapted from an example, see http://bravenewmethod.wordpress.com/tag/addon/
+
+Writing threaded Node.js extension requires some care. All Javascript in Node.js is executed in single main thread, so you can not simply call the V8 engine directly from your background thread. That would cause segfault. Recommended way to do this is to spawn new thread on background and use the libev events to wake up the main thread to execute the Javascript callbacks.
+
+Node.js framework has lots of ready stuff for implementing extensions, but there is no simple example how to implement this kind extension so here it is.
+
+----
+
+Each type of NFC device requires a different description. nfc-utils.c provides support for printing to stdout, but that isn't much good for calling back to node.js. We therefore need a means to write to an expanding string, i.e. a printf look alike that takes a flex string and expands it as needed. One idea is to create a temporary file and write to that with fprintf then read it in as a string.
+Another is to take the source code for printf and modify it to suit our needs!
+
+ %02x
+ %01x
+ %d
+ %s
+
+These could be replaced by print_hex2, print_hex1, print_string
+

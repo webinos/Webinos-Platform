@@ -1,0 +1,1317 @@
+[
+   {
+      "APIname" : "ApplicationLauncherAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "CalendarAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "ContactsAPI",
+      "ContextObjects" : [
+         {
+            "methods" : [
+               {
+                  "Errors" : [],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "required" : false,
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : false,
+                              "objectName" : "pwd",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "type",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "usr",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "authenticate",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "type" : "boolean"
+                     }
+                  ]
+               },
+               {
+                  "Errors" : [],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "required" : false,
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "type",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "isAlreadyAuthenticated",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "type" : "boolean"
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyContactsLogin"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "required" : false,
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "type",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "getAllContacts",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "displayName",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "emails",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "photos",
+                              "type" : "array"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "revision",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "urls",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "addresses",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "formatted",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "pref",
+                                    "type" : "boolean"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "streetAddress",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "birthday",
+                              "type" : "date"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "id",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "name",
+                              "type" : "object",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "familyName",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "formatted",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "givenName",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "phoneNumbers",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "pref",
+                                    "type" : "boolean"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyContacts"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "required" : false,
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "fields",
+                              "type" : "object",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "addresses",
+                                    "required" : false,
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "emails",
+                                    "required" : false,
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "name",
+                                    "required" : false,
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "phoneNumbers",
+                                    "required" : false,
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "type",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "find",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "displayName",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "emails",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "photos",
+                              "type" : "array"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "revision",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "urls",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "addresses",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "formatted",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "pref",
+                                    "type" : "boolean"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "streetAddress",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "birthday",
+                              "type" : "date"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "id",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "name",
+                              "type" : "object",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "familyName",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "formatted",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "givenName",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "phoneNumbers",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "pref",
+                                    "type" : "boolean"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "value",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "type",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MySearchedContacts"
+         }
+      ],
+      "URI" : "http://www.w3.org/ns/api-perms/contacts"
+   },
+   {
+      "APIname" : "ContextAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "DeviceInteractionAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "DeviceOrientationAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "DevicestatusAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "Devicestatusvocabulary",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "EventhandlingAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "FileAPIDirectoriesandSystem",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "FileReaderAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "FileWriterAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "GalleryAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "GenericSensorActuatorAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "GeolocationAPI",
+      "ContextObjects" : [
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "PositionError",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : false,
+                              "objectName" : "code",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "message",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "0",
+                        "required" : false,
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "",
+                              "required" : true,
+                              "type" : "Object",
+                              "values" : [
+                                 {
+                                    "logged" : false,
+                                    "objectName" : "enableHighAccuracy",
+                                    "required" : false,
+                                    "type" : "boolean"
+                                 },
+                                 {
+                                    "logged" : false,
+                                    "objectName" : "maximumAge",
+                                    "type" : "long"
+                                 },
+                                 {
+                                    "logged" : false,
+                                    "objectName" : "timeout",
+                                    "type" : "long"
+                                 }
+                              ]
+                           }
+                        ]
+                     },
+                     {
+                        "logged" : false,
+                        "objectName" : "1",
+                        "required" : true,
+                        "type" : "number"
+                     }
+                  ],
+                  "objectName" : "watchPosition",
+                  "outputs" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "timestamp",
+                        "type" : "DOMTimeStamp"
+                     },
+                     {
+                        "logged" : true,
+                        "objectName" : "coords",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : false,
+                              "objectName" : "accuracy",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "altitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "altitudeAccuracy",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "heading",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "latitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "longitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "speed",
+                              "type" : "double"
+                           }
+                        ]
+                     }
+                  ]
+               },
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "PositionError",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : false,
+                              "objectName" : "code",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "message",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "enableHighAccuracy",
+                        "required" : false,
+                        "type" : "boolean"
+                     },
+                     {
+                        "logged" : false,
+                        "objectName" : "maximumAge",
+                        "type" : "long"
+                     },
+                     {
+                        "logged" : false,
+                        "objectName" : "timeout",
+                        "type" : "long"
+                     }
+                  ],
+                  "objectName" : "getCurrentPosition",
+                  "outputs" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "timestamp",
+                        "type" : "DOMTimeStamp"
+                     },
+                     {
+                        "logged" : true,
+                        "objectName" : "coords",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : false,
+                              "objectName" : "accuracy",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "altitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "altitudeAccuracy",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "heading",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "latitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "longitude",
+                              "type" : "double"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "speed",
+                              "type" : "double"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyPositions"
+         }
+      ],
+      "URI" : "http://www.w3.org/ns/api-perms/geolocation",
+      "otherMethods" : [
+         {
+            "Errors" : [],
+            "inputs" : [
+               {
+                  "logged" : false,
+                  "objectName" : "watchId",
+                  "type" : "long"
+               }
+            ],
+            "objectName" : "clearWatch",
+            "outputs" : []
+         }
+      ]
+   },
+   {
+      "APIname" : "MediaCaptureAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "MessagingAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "NFCAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "PaymentAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "PlatformattestationAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "ServiceDicoveryAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "TVAPI",
+      "ContextObjects" : [
+         {
+            "methods" : [
+               {
+                  "Errors" : [],
+                  "inputs" : [],
+                  "objectName" : "getTVSources",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "",
+                        "type" : "array",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "channelList",
+                              "type" : "array",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "channelType",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "longName",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "name",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "stream",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : false,
+                                    "objectName" : "tvsource",
+                                    "type" : "object"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "name",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyTVChannels"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "0",
+                        "required" : false,
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "channelType",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "longName",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "name",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "stream",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : false,
+                              "objectName" : "tvsource",
+                              "type" : "object"
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "setChannel",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "channelType",
+                        "type" : "DOMString"
+                     },
+                     {
+                        "logged" : true,
+                        "objectName" : "longName",
+                        "type" : "DOMString"
+                     },
+                     {
+                        "logged" : true,
+                        "objectName" : "name",
+                        "type" : "DOMString"
+                     },
+                     {
+                        "logged" : true,
+                        "objectName" : "stream",
+                        "type" : "DOMString"
+                     },
+                     {
+                        "logged" : false,
+                        "objectName" : "tvsource",
+                        "type" : "object"
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyChannelChanged"
+         }
+      ],
+      "URI" : "http://webinos.org/api/tv",
+      "otherMethods" : []
+   },
+   {
+      "APIname" : "UserAuthenticationAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "UserProfileAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "VehicleAPI",
+      "ContextObjects" : [
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "climate-all" : null,
+                              "climate-driver" : null,
+                              "climate-passenger-front" : null,
+                              "climate-passenger-rear-left" : null,
+                              "climate-passenger-rear-right" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "acStatus",
+                              "type" : "boolean"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "desiredTemperature",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "ventLevel",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "ventMode",
+                              "type" : "boolean"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "zone",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyClimate"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "destination-cancelled" : null,
+                              "destination-changed" : null,
+                              "destination-reached" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "Address",
+                              "type" : "object",
+                              "values" : [
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "additionalInformation",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "city",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "country",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "county",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "postalCode",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "premises",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "region",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "street",
+                                    "type" : "DOMString"
+                                 },
+                                 {
+                                    "logged" : true,
+                                    "objectName" : "streetNumber",
+                                    "type" : "DOMString"
+                                 }
+                              ]
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "type",
+                              "type" : "DOMString"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyDestination"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "lights-fog-front" : null,
+                              "lights-fog-rear" : null,
+                              "lights-head" : null,
+                              "lights-parking-hibeam" : null,
+                              "lights-signal-right" : null,
+                              "lights-signal-warn" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "active",
+                              "type" : "boolean"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyLights"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "parksensors-front" : null,
+                              "parksensors-rear" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "left",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "midLeft",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "midRigth",
+                              "type" : "short"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "position",
+                              "type" : "DOMString"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "rigth",
+                              "type" : "short"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyParkSensors"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "shift" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "gear",
+                              "type" : "short"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyShifts"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "tripcomputer" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "averageConsumption1",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "averageConsumption2",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "averageSpeed1",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "averageSpeed2",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "milage",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "range",
+                              "type" : "float"
+                           },
+                           {
+                              "logged" : true,
+                              "objectName" : "tripDistance",
+                              "type" : "float"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyTripComputer"
+         },
+         {
+            "methods" : [
+               {
+                  "Errors" : [
+                     {
+                        "logged" : false,
+                        "objectName" : "VehicleError",
+                        "type" : "short"
+                     }
+                  ],
+                  "inputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : "vehicleDataId",
+                        "type" : "DOMString",
+                        "values" : [
+                           {
+                              "wiper-automatic" : null,
+                              "wiper-front-level1" : null,
+                              "wiper-front-level2" : null,
+                              "wiper-front-once" : null,
+                              "wiper-front-wash" : null,
+                              "wiper-rear-once" : null,
+                              "wiper-rear-wash" : null
+                           }
+                        ]
+                     }
+                  ],
+                  "objectName" : "get",
+                  "outputs" : [
+                     {
+                        "logged" : true,
+                        "objectName" : " VehicleEvent",
+                        "type" : "object",
+                        "values" : [
+                           {
+                              "logged" : true,
+                              "objectName" : "active",
+                              "type" : "boolean"
+                           }
+                        ]
+                     }
+                  ]
+               }
+            ],
+            "objectName" : "MyWipers"
+         }
+      ],
+      "URI" : "http://webinos.org/api/vehicle",
+      "otherMethods" : []
+   },
+   {
+      "APIname" : "WebinosCoreAPI",
+      "URI" : "http://webinos.org/api/"
+   },
+   {
+      "APIname" : "WidgetexecutionAPI",
+      "URI" : "http://webinos.org/api/"
+   }
+]

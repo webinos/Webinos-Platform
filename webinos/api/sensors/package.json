@@ -1,0 +1,25 @@
+{ "name": "sensors"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Sensors API"
+, "keywords": [ "webinos", "sensors", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Andre Paul <andre.paul@fokus.fraunhofer.de>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/rpc_sensors.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

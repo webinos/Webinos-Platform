@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="attestation" id="::attestation">
+    <webidl>module attestation {&#13;
+&#13;
+        &#13;
+&#13;
+        interface X509 {                &#13;
+                readonly attribute <ref>TBSCertificate</ref> certificate;&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> signatureAlgorithm;&#13;
+                readonly attribute byte[] signature;&#13;
+        };&#13;
+&#13;
+&#13;
+        interface TBSCertificate { &#13;
+                readonly attribute DOMString version;&#13;
+                readonly attribute <ref>Integer</ref> serialNumber;&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> signature;&#13;
+                readonly attribute <ref>namePairArray</ref> issuer;&#13;
+                readonly attribute <ref>Validity</ref> validity;&#13;
+                readonly attribute <ref>namePairArray</ref> subject;&#13;
+                readonly attribute <ref>SubjectPublicKeyInfo</ref> subjectPublicKeyInfo;&#13;
+                readonly attribute <ref>Any</ref>? extensions;&#13;
+        };&#13;
+        &#13;
+&#13;
+        interface Validity { &#13;
+                readonly attribute <ref>Date</ref> notBefore; &#13;
+                readonly attribute <ref>Date</ref> notAfter;&#13;
+        };&#13;
+        &#13;
+&#13;
+        typedef <ref>namePair</ref>[] namePairArray;&#13;
+&#13;
+&#13;
+        interface namePair {&#13;
+                readonly attribute DOMString key;&#13;
+                readonly attribute DOMString value;&#13;
+        };&#13;
+        &#13;
+&#13;
+        interface AlgorithmIdentifier {&#13;
+            readonly attribute DOMString identifier;&#13;
+&#13;
+                readonly attribute DOMString? parameters;&#13;
+        };&#13;
+        &#13;
+&#13;
+        interface SubjectPublicKeyInfo {&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> algorithm;&#13;
+                readonly attribute byte[] publickKey;&#13;
+        };&#13;
+&#13;
+        &#13;
+&#13;
+        exception AttestationException  {&#13;
+&#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        &#13;
+&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+&#13;
+        const unsigned short IO_ERROR = 4;&#13;
+        &#13;
+&#13;
+        const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+        &#13;
+&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+&#13;
+        const unsigned short KEY_NOT_FOUND_ERROR = 21;&#13;
+&#13;
+        &#13;
+&#13;
+           &#13;
+        unsigned short code;&#13;
+&#13;
+        DOMString message;&#13;
+        &#13;
+        };&#13;
+  &#13;
+  &#13;
+        &#13;
+        &#13;
+        &#13;
+&#13;
+&#13;
+  interface attestationData  {&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute byte[][] trustChain;&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute byte[] validationData;&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute DOMString schema;&#13;
+   };&#13;
+    &#13;
+&#13;
+&#13;
+  [NoInterfaceObject]&#13;
+  interface WebinosAttestationInterface {&#13;
+&#13;
+&#13;
+&#13;
+     <ref>attestationData</ref> attestPlatform (in byte[] nonce, in <ref>SubjectPublicKeyInfo</ref> key )&#13;
+                        raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+     <ref>SubjectPublicKeyInfo</ref> getAttestationKey () raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+    &#13;
+     <ref>X509</ref> getKeyCredential (in <ref>SubjectPublicKeyInfo</ref> key) raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+  };&#13;
+  &#13;
+  &#13;
+&#13;
+        [NoInterfaceObject] interface WebinosAttestation {&#13;
+&#13;
+                readonly attribute <ref>WebinosAttestationInterface</ref> attestation;&#13;
+        };&#13;
+&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>WebinosAttestation</ref>;&#13;
+   &#13;
+  &#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Attestation: find the identity and integrity of running software 
+        </brief>
+       <description>
+        <p>
+The attestation API provides a secure method of querying the underlying device hardware to find out the identity and integrity of running software. <br/>This API should allow applications to communicate with hardware security systems, such as a Trusted Platform Module (defined in the Trusted Computing Group specifications). <br/>        </p>
+        <p>
+However, the usual trusted computing specifications are generally aimed at a lower layer of the operating system than webinos. <br/>The aim of the attestation API is to expose existing low-level functionality to web applications. <br/><br/> 
+Requirement/architectural reference: ID-DEV-POLITO-005, ID-DEV-POLITO-006, ID-DEV-POLITO-007, ID-DEV-POLITO-008 <br/>        </p>
+        <p>
+Example use of attestation, taken from the Security Architecture Documentation (D3.5):
+        </p>
+        <p>
+1.      User starts an application called &quot;MyBankApp&quot; <br/>2.      MyBankApp communicates with a remote webserver at http://bank.example.com<br/>3.      http://bank.example.com asks MyBankApp to attest to its current status<br/>4.      MyBankApp uses the Attestation API to request a public key and key credential for the local device, Peter's Smartphone. <br/>- App calls getAttestationKey() and getKeyCredential() to retrieve this information<br/>5.      The key credential is forwarded to http://bank.example.com<br/>6.      http://bank.example.com assesses the credential and checks to see whether the endpoint is a trusted device.<br/>- If not, attestation fails.<br/>7.      http://bank.example.com gives MyBankApp a fresh nonce, a 20 byte random value.<br/>8.      MyBankApp uses this nonce and the public key with the attestation API on Peter's Smartphone:<br/>- call attestPlatform( nonce, key )<br/>9.      Peter's Smartphone returns attestation data, which includes a log of the integrity of the platform (&quot;trustChain&quot;), 
+as well as validation data from the hardware trusted platform module (&quot;validation data&quot;) with schema &quot;TPM_Quote&quot;.<br/>10.     These values are passed on to http://bank.example.com<br/>11.     http://bank.example.com  assesses the validation data and the integrity log using standard TCG techniques 
+see http://www.trustedcomputinggroup.org/resources/tcg_architecture_overview_version_14 and related documents <br/>- If the platform integrity is not trusted, attestation fails<br/>- If the validation data is not trusted, attestation fails<br/>12.     http://bank.example.com passes MyBankApp a temporary token which gives it access to the http://bank.example.com 
+banking capabilities<br/>13.     User authentication is requested via the authentication API<br/>14.     The application is now able to perform transactions using remote http://bank.example.com APIs.<br/>        </p>
+       </description>
+        <author>
+ Andrew Martin; &#60;andrew.martin@cs.ox.ac.uk;&#62; <br/> John Lyle; &#60;john.lyle@cs.ox.ac.uk&#62;
+        </author>
+        <def-api-feature identifier="http://webinos.org/api/attestation">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <version>
+ 0.1
+        </version>
+    </descriptive>
+    <Interface name="X509" id="::attestation::X509">
+      <webidl>        interface X509 {                &#13;
+                readonly attribute <ref>TBSCertificate</ref> certificate;&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> signatureAlgorithm;&#13;
+                readonly attribute byte[] signature;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Definition of X509 certificate data structure taken from the ASN1 X509 Specifications and RFC 2459 http://www.ietf.org/rfc/rfc2459.txt <br/>We expect for TCG attestation that the SKAE extension to also be introduced, definition: <br/>http://www.trustedcomputinggroup.org/files/resource_files/876A7F79-1D09-3519-AD321B21144AE93C/IWG_SKAE_Extension_1-00.pdf <br/>however it is not defined here. <br/>          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="certificate" id="::attestation::X509::certificate">
+        <webidl>                readonly attribute <ref>TBSCertificate</ref> certificate;</webidl>
+        <Type name="TBSCertificate"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="signatureAlgorithm" id="::attestation::X509::signatureAlgorithm">
+        <webidl>                readonly attribute <ref>AlgorithmIdentifier</ref> signatureAlgorithm;</webidl>
+        <Type name="AlgorithmIdentifier"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="signature" id="::attestation::X509::signature">
+        <webidl>                readonly attribute byte[] signature;</webidl>
+        <Type type="array">
+          <Type type="byte"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="TBSCertificate" id="::attestation::TBSCertificate">
+      <webidl>        interface TBSCertificate { &#13;
+                readonly attribute DOMString version;&#13;
+                readonly attribute <ref>Integer</ref> serialNumber;&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> signature;&#13;
+                readonly attribute <ref>namePairArray</ref> issuer;&#13;
+                readonly attribute <ref>Validity</ref> validity;&#13;
+                readonly attribute <ref>namePairArray</ref> subject;&#13;
+                readonly attribute <ref>SubjectPublicKeyInfo</ref> subjectPublicKeyInfo;&#13;
+                readonly attribute <ref>Any</ref>? extensions;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ as defined in http://www.ietf.org/rfc/rfc2459.txt 
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="version" id="::attestation::TBSCertificate::version">
+        <webidl>                readonly attribute DOMString version;</webidl>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="serialNumber" id="::attestation::TBSCertificate::serialNumber">
+        <webidl>                readonly attribute <ref>Integer</ref> serialNumber;</webidl>
+        <Type name="Integer"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="signature" id="::attestation::TBSCertificate::signature">
+        <webidl>                readonly attribute <ref>AlgorithmIdentifier</ref> signature;</webidl>
+        <Type name="AlgorithmIdentifier"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="issuer" id="::attestation::TBSCertificate::issuer">
+        <webidl>                readonly attribute <ref>namePairArray</ref> issuer;</webidl>
+        <Type name="namePairArray"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="validity" id="::attestation::TBSCertificate::validity">
+        <webidl>                readonly attribute <ref>Validity</ref> validity;</webidl>
+        <Type name="Validity"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="subject" id="::attestation::TBSCertificate::subject">
+        <webidl>                readonly attribute <ref>namePairArray</ref> subject;</webidl>
+        <Type name="namePairArray"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="subjectPublicKeyInfo" id="::attestation::TBSCertificate::subjectPublicKeyInfo">
+        <webidl>                readonly attribute <ref>SubjectPublicKeyInfo</ref> subjectPublicKeyInfo;</webidl>
+        <Type name="SubjectPublicKeyInfo"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="extensions" id="::attestation::TBSCertificate::extensions">
+        <webidl>                readonly attribute <ref>Any</ref>? extensions;</webidl>
+        <Type name="Any" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="Validity" id="::attestation::Validity">
+      <webidl>        interface Validity { &#13;
+                readonly attribute <ref>Date</ref> notBefore; &#13;
+                readonly attribute <ref>Date</ref> notAfter;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ as defined in http://www.ietf.org/rfc/rfc2459.txt 
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="notBefore" id="::attestation::Validity::notBefore">
+        <webidl>                readonly attribute <ref>Date</ref> notBefore;</webidl>
+        <Type name="Date"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="notAfter" id="::attestation::Validity::notAfter">
+        <webidl>                readonly attribute <ref>Date</ref> notAfter;</webidl>
+        <Type name="Date"/>
+      </Attribute>
+    </Interface>
+    <Typedef name="namePairArray" id="::attestation::namePairArray">
+      <webidl>        typedef <ref>namePair</ref>[] namePairArray;</webidl>
+      <descriptive>
+          <brief>
+ as defined in http://www.ietf.org/rfc/rfc2459.txt 
+          </brief>
+      </descriptive>
+      <Type type="array">
+        <Type name="namePair"/>
+      </Type>
+    </Typedef>
+    <Interface name="namePair" id="::attestation::namePair">
+      <webidl>        interface namePair {&#13;
+                readonly attribute DOMString key;&#13;
+                readonly attribute DOMString value;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ A single pair of key and value. 
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="key" id="::attestation::namePair::key">
+        <webidl>                readonly attribute DOMString key;</webidl>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="value" id="::attestation::namePair::value">
+        <webidl>                readonly attribute DOMString value;</webidl>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="AlgorithmIdentifier" id="::attestation::AlgorithmIdentifier">
+      <webidl>        interface AlgorithmIdentifier {&#13;
+            readonly attribute DOMString identifier;&#13;
+&#13;
+                readonly attribute DOMString? parameters;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ as defined in http://www.ietf.org/rfc/rfc2459.txt 
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="identifier" id="::attestation::AlgorithmIdentifier::identifier">
+        <webidl>            readonly attribute DOMString identifier;</webidl>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="parameters" id="::attestation::AlgorithmIdentifier::parameters">
+        <webidl>                readonly attribute DOMString? parameters;</webidl>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="SubjectPublicKeyInfo" id="::attestation::SubjectPublicKeyInfo">
+      <webidl>        interface SubjectPublicKeyInfo {&#13;
+                readonly attribute <ref>AlgorithmIdentifier</ref> algorithm;&#13;
+                readonly attribute byte[] publickKey;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ as defined in http://www.ietf.org/rfc/rfc2459.txt 
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="algorithm" id="::attestation::SubjectPublicKeyInfo::algorithm">
+        <webidl>                readonly attribute <ref>AlgorithmIdentifier</ref> algorithm;</webidl>
+        <Type name="AlgorithmIdentifier"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="publickKey" id="::attestation::SubjectPublicKeyInfo::publickKey">
+        <webidl>                readonly attribute byte[] publickKey;</webidl>
+        <Type type="array">
+          <Type type="byte"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Exception name="AttestationException" id="::attestation::AttestationException">
+      <webidl>        exception AttestationException  {&#13;
+&#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        &#13;
+&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+&#13;
+        const unsigned short IO_ERROR = 4;&#13;
+        &#13;
+&#13;
+        const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+        &#13;
+&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+&#13;
+        const unsigned short KEY_NOT_FOUND_ERROR = 21;&#13;
+&#13;
+        &#13;
+&#13;
+           &#13;
+        unsigned short code;&#13;
+&#13;
+        DOMString message;&#13;
+        &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Exception handling for the attestation API 
+          </brief>
+      </descriptive>
+      <Const name="UNKNOWN_ERROR" value="0" id="::attestation::AttestationException::UNKNOWN_ERROR">
+        <webidl>        const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ An unknown error occurred. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::attestation::AttestationException::INVALID_ARGUMENT_ERROR">
+        <webidl>        const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested method was invoked. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="IO_ERROR" value="4" id="::attestation::AttestationException::IO_ERROR">
+        <webidl>        const unsigned short IO_ERROR = 4;</webidl>
+        <descriptive>
+            <brief>
+ An error occurred in communication with the underlying implementation that meant the requested method could not complete. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NOT_SUPPORTED_ERROR" value="5" id="::attestation::AttestationException::NOT_SUPPORTED_ERROR">
+        <webidl>        const unsigned short NOT_SUPPORTED_ERROR = 5;</webidl>
+        <descriptive>
+            <brief>
+ The requested method is not supported by the current implementation. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="20" id="::attestation::AttestationException::PERMISSION_DENIED_ERROR">
+        <webidl>        const unsigned short PERMISSION_DENIED_ERROR = 20;</webidl>
+        <descriptive>
+            <brief>
+ Access to the requested method was denied at the implementation or by the user.  
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="KEY_NOT_FOUND_ERROR" value="21" id="::attestation::AttestationException::KEY_NOT_FOUND_ERROR">
+        <webidl>        const unsigned short KEY_NOT_FOUND_ERROR = 21;</webidl>
+        <descriptive>
+            <brief>
+ The requested method is not supported by the current implementation. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <ExceptionField name="code" id="::attestation::AttestationException::code">
+        <webidl>        unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred 
+in attestation API processing.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::attestation::AttestationException::message">
+        <webidl>        DOMString message;</webidl>
+        <Type type="DOMString"/>
+      </ExceptionField>
+    </Exception>
+    <Interface name="attestationData" id="::attestation::attestationData">
+      <webidl>  interface attestationData  {&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute byte[][] trustChain;&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute byte[] validationData;&#13;
+&#13;
+&#13;
+&#13;
+     readonly attribute DOMString schema;&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ The data returned by an attestation request
+          </brief>
+      </descriptive>
+      <Attribute readonly="readonly" name="trustChain" id="::attestation::attestationData::trustChain">
+        <webidl>     readonly attribute byte[][] trustChain;</webidl>
+        <descriptive>
+            <brief>
+ List of binary data representing the identities of running <br/>software.  In the TCG scheme, this corresponds to the integrity <br/>measurement log.<br/>            </brief>
+           <description>
+            <p>
+For example, in a TCG scheme you would expect the following contents: <br/><br/>0x00 -> [ 0x45ac76fec..., 0x956836fbc42..., ] <br/>0x01 -> [ 0x23c3414f1..., 0xbb3f4d282cf..., ] <br/>0x02 -> [ 0x72bb76045..., 0x04ccc997056..., ] <br/>... <br/>0x0c -> [ 0x8a797441a..., 0xd642ac16d13..., ] <br/>            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="array">
+            <Type type="byte"/>
+          </Type>
+        </Type>
+      </Attribute>
+      <Attribute readonly="readonly" name="validationData" id="::attestation::attestationData::validationData">
+        <webidl>     readonly attribute byte[] validationData;</webidl>
+        <descriptive>
+            <brief>
+ single binary blob, containing validation data for the trustChain 
+            </brief>
+           <description>
+            <p>
+In the TCG scheme this would contain the following signed data, including: <br/>- The TPM Quote version (1.1.0.0) <br/>- A fixed byte[4] &quot;QUOT&quot; <br/>- The SHA1 digest of the composite hash of the trustChain <br/>- The 20 byte nonce <br/>            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="byte"/>
+        </Type>
+      </Attribute>
+      <Attribute readonly="readonly" name="schema" id="::attestation::attestationData::schema">
+        <webidl>     readonly attribute DOMString schema;</webidl>
+        <descriptive>
+            <brief>
+ text string identifying the attestation scheme being used
+for example, &quot;TPM_Quote&quot;
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="WebinosAttestationInterface" id="::attestation::WebinosAttestationInterface">
+      <webidl>  [NoInterfaceObject]&#13;
+  interface WebinosAttestationInterface {&#13;
+&#13;
+&#13;
+&#13;
+     <ref>attestationData</ref> attestPlatform (in byte[] nonce, in <ref>SubjectPublicKeyInfo</ref> key )&#13;
+                        raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+     <ref>SubjectPublicKeyInfo</ref> getAttestationKey () raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+    &#13;
+     <ref>X509</ref> getKeyCredential (in <ref>SubjectPublicKeyInfo</ref> key) raises(<ref>AttestationException</ref>);&#13;
+&#13;
+&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ interfaces for attesting the platform
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="attestPlatform" id="::attestation::WebinosAttestationInterface::attestPlatform">
+        <webidl>     <ref>attestationData</ref> attestPlatform (in byte[] nonce, in <ref>SubjectPublicKeyInfo</ref> key )&#13;
+                        raises(<ref>AttestationException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ requests platform to provide attestation data
+            </brief>
+           <description>
+            <p>
+inputs determine freshness and signing key to be used <br/>return values are loose, to support arbitrary schemes of attestation <br/>            </p>
+            <p>
+Note for implementation: there will need to be configuration of attestation modules to <br/>support any authentication at the hardware layer.
+            </p>
+            <p>
+Error conditions due to policy enforcement, as well as potentially from hardware failure. 
+            </p>
+           </description>
+        </descriptive>
+        <Type name="attestationData">
+          <descriptive>
+              <description><p>
+ data structure returned is described above.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="nonce">
+            <descriptive>
+                <description><p>
+ is a 20 byte value used to guarantee freshness of the result
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type type="byte"/>
+            </Type>
+          </Argument>
+          <Argument in="in" name="key">
+            <descriptive>
+                <description><p>
+ is the (identifier of the) key which should be used for attestation.  This will have been retrieved from getAttestationKey().
+                </p></description>
+            </descriptive>
+            <Type name="SubjectPublicKeyInfo"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="AttestationException"/>
+        </Raises>
+      </Operation>
+      <Operation name="getAttestationKey" id="::attestation::WebinosAttestationInterface::getAttestationKey">
+        <webidl>     <ref>SubjectPublicKeyInfo</ref> getAttestationKey () raises(<ref>AttestationException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ returns public key corresponding to device identity used to authenticate sessions
+            </brief>
+           <description>
+            <p>
+in TCG terminology this would be the Attestation Identity Key (AIK)
+            </p>
+            <p>
+Errors due to permission being denied or if the platform has not implemented attestation
+due to hardware or software issues.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="SubjectPublicKeyInfo">
+          <descriptive>
+              <description><p>
+ returns public key
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+        <Raises>
+          <RaiseException name="AttestationException"/>
+        </Raises>
+      </Operation>
+      <Operation name="getKeyCredential" id="::attestation::WebinosAttestationInterface::getKeyCredential">
+        <webidl>     <ref>X509</ref> getKeyCredential (in <ref>SubjectPublicKeyInfo</ref> key) raises(<ref>AttestationException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ return certificate for nominated key
+            </brief>
+           <description>
+            <p>
+If the key identifier is unknown, or the user policy does not allow access to it, an error &quot;not found&quot; is returned.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="X509">
+          <descriptive>
+              <description><p>
+ returns certificate data structure corresponding to key
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="key">
+            <descriptive>
+                <description><p>
+ is the RSA public key (or identifier) for which a certificate is to be returned
+                </p></description>
+            </descriptive>
+            <Type name="SubjectPublicKeyInfo"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="AttestationException"/>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosAttestation" id="::attestation::WebinosAttestation">
+      <webidl>        [NoInterfaceObject] interface WebinosAttestation {&#13;
+&#13;
+                readonly attribute <ref>WebinosAttestationInterface</ref> attestation;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosAttestation interface describes the part of the Attestation
+API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="attestation" id="::attestation::WebinosAttestation::attestation">
+        <webidl>                readonly attribute <ref>WebinosAttestationInterface</ref> attestation;</webidl>
+        <descriptive>
+            <brief>
+ webinos.attestation object.
+            </brief>
+        </descriptive>
+        <Type name="WebinosAttestationInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosAttestation">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>WebinosAttestation</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

@@ -1,0 +1,1326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="context" id="::context">
+    <webidl>module context {&#13;
+&#13;
+&#13;
+  [NoInterfaceObject] interface ContextManagerHook {&#13;
+    readonly attribute <ref>ContextManager</ref> context; &#13;
+  };&#13;
+  <ref>webinos</ref> implements <ref>ContextManager</ref>;&#13;
+&#13;
+&#13;
+  [NoInterfaceObject] interface ContextManager {&#13;
+&#13;
+&#13;
+    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  };&#13;
+&#13;
+&#13;
+   [Callback, NoInterfaceObject] interface Query {&#13;
+&#13;
+&#13;
+    attribute <ref>SPARQLquery</ref> xmlQuery;&#13;
+  };&#13;
+  &#13;
+&#13;
+  [NoInterfaceObject] interface ContextError {&#13;
+&#13;
+     const unsigned short SECURITY_ERR = 1;&#13;
+&#13;
+&#13;
+     const unsigned short INVALID_QUERY_ERR = 2;&#13;
+&#13;
+&#13;
+     const unsigned short TYPE_MISMATCH_ERR = 3;&#13;
+   };&#13;
+&#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface QuerySuccessCallback {        &#13;
+&#13;
+    void onsuccess (<ref>SPARQLquery</ref> queryResult);&#13;
+  };&#13;
+        &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface QueryErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeSuccessCallback {        &#13;
+&#13;
+    void onsuccess (unsigned long subscriptionIdentifier);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface OccuringEvent {        &#13;
+&#13;
+    void onContextEvent (DOMString eventContextData);&#13;
+  };&#13;
+        &#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The Context API 
+        </brief>
+       <description>
+        <p>
+The Context API defines the high-level interfaces required to obtain access to a user's context data. The API supports two basic ways of accessing context data:
+        </p>
+        <p>
+1. executing a query against the context data storage and retrieving context data through the query results.
+        </p>
+        <p>
+2. subscribing to receive real time context data updates as soon as a context related event happens.
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/context">
+          <descriptive>
+           <description>
+            <p>
+Acccess to all the module. This feature provides access to the whole API.
+Security and Privacy enforcement may depend on the query or subscription requested by the developer.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Heiko Desruelle &#60;heiko.desruelle@intec.ugent.be&#62;
+        </author>
+        <author>
+ Dieter Blomme &#60;dieter.blomme@intec.ugent.be&#62;
+        </author>
+        <author>
+ George Gionis &#60;gionis@epu.ntua.gr&#62;
+        </author>
+        <version>
+ 0.1 
+        </version>
+    </descriptive>
+    <Interface name="ContextManagerHook" id="::context::ContextManagerHook">
+      <webidl>  [NoInterfaceObject] interface ContextManagerHook {&#13;
+    readonly attribute <ref>ContextManager</ref> context; &#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Defines what is instantiated in initialization. 
+          </brief>
+         <description>
+          <p>
+There will be a webinos.context object that allows accessing the    * functionality of this module.
+          </p>
+         </description>
+          <def-instantiated>
+            <descriptive>
+             <description>
+ 
+             </description>
+              <api-feature identifier="http://webinos.org/api/context">
+              </api-feature>
+            </descriptive>
+          </def-instantiated>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="context" id="::context::ContextManagerHook::context">
+        <webidl>    readonly attribute <ref>ContextManager</ref> context;</webidl>
+        <Type name="ContextManager"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinos" name2="ContextManager">
+      <webidl>  <ref>webinos</ref> implements <ref>ContextManager</ref>;</webidl>
+    </Implements>
+    <Interface name="ContextManager" id="::context::ContextManager">
+      <webidl>  [NoInterfaceObject] interface ContextManager {&#13;
+&#13;
+&#13;
+    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ This is the entry point for the context API. The interface provides the two basic methods to access the User's context data, i.e. query or subscribe to updates. 
+          </brief>
+         <description>
+          <p>
+TODO: Long description
+          </p>
+         </description>
+          <Code> TODO
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="executeQuery" id="::context::ContextManager::executeQuery">
+        <webidl>    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Performs a context query against the context storage.
+            </brief>
+           <description>
+            <p>
+When this method is invoked it executes the provided query against the context storage. The context storage is a collection context objects, each one with specific attributes, which hold context data that have been acquired over time by identifying a number of context related events. The Query parameter that this method uses specifies what context data (i.e. from which context objects) should be retrieved. 
+            </p>
+            <p>
+Mediation by policy and security: this method, as it provides application with data (context) about the user, is expected to have privacy considerations. Therefore the system is able to ignore the request of an app to receive context data if the User Privacy Policy dictates so (i.e. the user has not authorized the app to access the context data it ask for in the Query parameter).
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous query operation completes successfully.
+                </p></description>
+            </descriptive>
+            <Type name="QuerySuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous query operation results in errors.
+                </p></description>
+            </descriptive>
+            <Type name="QueryErrorCallback" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" name="query">
+            <descriptive>
+                <description><p>
+ The Query object describing the query to be executed against the context storage.
+                </p></description>
+            </descriptive>
+            <Type name="Query"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="subscribeContextEvent" id="::context::ContextManager::subscribeContextEvent">
+        <webidl>    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notifies when a context related event occurs.
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation must register the (app) function that is passed in the eventHandler argument as the hander function that will be notified when the context related event, which in turn is identified in the eventIdentifier, happens. This function will be invoked every time the indicated event occurs until the unsubscribe method is invoked to cancel the subscription. 
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned in subscriptionSuccessCallback so that it is possible to cancel the subscription. If the subscription cannot be created, the subscriptionErrorCallback contains an error code that describes the reason for the error. 
+            </p>
+            <p>
+Mediation by policy and security: this method, as it can provide an application with real-time data (context) about the user, is expected to have privacy considerations. Therefore the system is able to ignore the request of an app to receive context data if the User Privacy Policy dictates so (i.e. the user has not authorized the app to access the context data of the dictated event).
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="subscribeSuccessCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous subscribe request completes successfully.
+                </p></description>
+            </descriptive>
+            <Type name="SubscribeSuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="subscribeErrorCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous subscribe request results in errors.
+                </p></description>
+            </descriptive>
+            <Type name="SubscribeErrorCallback" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" name="eventHandler">
+            <descriptive>
+                <description><p>
+ The function to be invoked when the dictated event occurs.
+                </p></description>
+            </descriptive>
+            <Type name="OccuringEvent"/>
+          </Argument>
+          <Argument in="in" name="eventIdentifier">
+            <descriptive>
+                <description><p>
+ The event identifier, for example &quot;UserProfileUpdate&quot;, &quot;ShoppingBasketCheckout&quot;.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="unsubscribe" id="::context::ContextManager::unsubscribe">
+        <webidl>    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Cancels a subscription to a context related event.
+            </brief>
+           <description>
+            <p>
+If the subscriptionIdentifier argument is valid and corresponds to a subscription already in place the subscription process MUST be effectivelly stoped. If the subscriptionHandler argument does not correspond to a valid subscription, the method should return without any further action.
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="subscriptionIdentifier">
+            <descriptive>
+                <description><p>
+ The identifier of the subscription, returned by subscribeContextEvent().
+                </p></description>
+            </descriptive>
+            <Type type="unsigned long"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="Query" id="::context::Query">
+      <webidl>   [Callback, NoInterfaceObject] interface Query {&#13;
+&#13;
+&#13;
+    attribute <ref>SPARQLquery</ref> xmlQuery;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Query interface,
+          </brief>
+         <description>
+          <p>
+TODO: Detail if this the right content for the query 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="xmlQuery" id="::context::Query::xmlQuery">
+        <webidl>    attribute <ref>SPARQLquery</ref> xmlQuery;</webidl>
+        <descriptive>
+            <brief>
+ query content in xml format
+            </brief>
+           <description>
+            <p>
+<a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL query language for RDF</a>            </p>
+           </description>
+        </descriptive>
+        <Type name="SPARQLquery"/>
+      </Attribute>
+    </Interface>
+    <Interface name="ContextError" id="::context::ContextError">
+      <webidl>  [NoInterfaceObject] interface ContextError {&#13;
+&#13;
+     const unsigned short SECURITY_ERR = 1;&#13;
+&#13;
+&#13;
+     const unsigned short INVALID_QUERY_ERR = 2;&#13;
+&#13;
+&#13;
+     const unsigned short TYPE_MISMATCH_ERR = 3;&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ Defines the  error codes for this module
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="SECURITY_ERR" value="1" id="::context::ContextError::SECURITY_ERR">
+        <webidl>     const unsigned short SECURITY_ERR = 1;</webidl>
+        <descriptive>
+            <brief>
+ Security Error 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_QUERY_ERR" value="2" id="::context::ContextError::INVALID_QUERY_ERR">
+        <webidl>     const unsigned short INVALID_QUERY_ERR = 2;</webidl>
+        <descriptive>
+            <brief>
+ invalid query 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TYPE_MISMATCH_ERR" value="3" id="::context::ContextError::TYPE_MISMATCH_ERR">
+        <webidl>     const unsigned short TYPE_MISMATCH_ERR = 3;</webidl>
+        <descriptive>
+            <brief>
+ invalid query 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Interface name="QuerySuccessCallback" id="::context::QuerySuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface QuerySuccessCallback {        &#13;
+&#13;
+    void onsuccess (<ref>SPARQLquery</ref> queryResult);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating success of executeQuery() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::context::QuerySuccessCallback::onsuccess">
+        <webidl>    void onsuccess (<ref>SPARQLquery</ref> queryResult);</webidl>
+        <descriptive>
+            <brief>
+ Callback on success of a executeQuery() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="queryResult">
+            <descriptive>
+                <description><p>
+ Result of the query operation serialized as a json string, see <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL query language for RDF</a>. 
+                </p></description>
+            </descriptive>
+            <Type name="SPARQLquery"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="QueryErrorCallback" id="::context::QueryErrorCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface QueryErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating error of executeQuery() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onerror" id="::context::QueryErrorCallback::onerror">
+        <webidl>    void onerror (<ref>ContextError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback on failure of a executeQuery() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ The ContextError object capturing the type of the error.
+                </p></description>
+            </descriptive>
+            <Type name="ContextError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="SubscribeSuccessCallback" id="::context::SubscribeSuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeSuccessCallback {        &#13;
+&#13;
+    void onsuccess (unsigned long subscriptionIdentifier);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating success of subscribeContextEvent() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::context::SubscribeSuccessCallback::onsuccess">
+        <webidl>    void onsuccess (unsigned long subscriptionIdentifier);</webidl>
+        <descriptive>
+            <brief>
+ Callback on success of a subscribeContextEvent() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="subscriptionIdentifier">
+            <descriptive>
+                <description><p>
+ A subscription handler that can be later used to cancel the subscription. 
+                </p></description>
+            </descriptive>
+            <Type type="unsigned long"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="SubscribeErrorCallback" id="::context::SubscribeErrorCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating error of subscribeContextEvent() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onerror" id="::context::SubscribeErrorCallback::onerror">
+        <webidl>    void onerror (<ref>ContextError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback on failure of a subscribeContextEvent() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ The ContextError object capturing the type of the error.
+                </p></description>
+            </descriptive>
+            <Type name="ContextError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="OccuringEvent" id="::context::OccuringEvent">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface OccuringEvent {        &#13;
+&#13;
+    void onContextEvent (DOMString eventContextData);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for specifying the method called when a new context related event occurs. 
+          </brief>
+         <description>
+          <p>
+This interface specifies a function that provides a serialized json string of the context data retrieved from the happening of a context related event.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onContextEvent" id="::context::OccuringEvent::onContextEvent">
+        <webidl>    void onContextEvent (DOMString eventContextData);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the context related event occurs.
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="eventContextData">
+            <descriptive>
+                <description><p>
+ The context data acquired by the event. 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+  <Module name="context" id="::context">
+    <webidl>module context {&#13;
+&#13;
+&#13;
+  [NoInterfaceObject] interface ContextManagerHook {&#13;
+    readonly attribute <ref>ContextManager</ref> context; &#13;
+  };&#13;
+  <ref>webinos</ref> implements <ref>ContextManager</ref>;&#13;
+&#13;
+&#13;
+  [NoInterfaceObject] interface ContextManager {&#13;
+&#13;
+&#13;
+    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  };&#13;
+&#13;
+&#13;
+   [Callback, NoInterfaceObject] interface Query {&#13;
+&#13;
+&#13;
+    attribute <ref>SPARQLquery</ref> xmlQuery;&#13;
+  };&#13;
+  &#13;
+&#13;
+  [NoInterfaceObject] interface ContextError {&#13;
+&#13;
+     const unsigned short SECURITY_ERR = 1;&#13;
+&#13;
+&#13;
+     const unsigned short INVALID_QUERY_ERR = 2;&#13;
+&#13;
+&#13;
+     const unsigned short TYPE_MISMATCH_ERR = 3;&#13;
+   };&#13;
+&#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface QuerySuccessCallback {        &#13;
+&#13;
+    void onsuccess (<ref>SPARQLquery</ref> queryResult);&#13;
+  };&#13;
+        &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface QueryErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeSuccessCallback {        &#13;
+&#13;
+    void onsuccess (unsigned long subscriptionIdentifier);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface OccuringEvent {        &#13;
+&#13;
+    void onContextEvent (DOMString eventContextData);&#13;
+  };&#13;
+        &#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The Context API 
+        </brief>
+       <description>
+        <p>
+The Context API defines the high-level interfaces required to obtain access to a user's context data. The API supports two basic ways of accessing context data:
+        </p>
+        <p>
+1. executing a query against the context data storage and retrieving context data through the query results.
+        </p>
+        <p>
+2. subscribing to receive real time context data updates as soon as a context related event happens.
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/context">
+          <descriptive>
+           <description>
+            <p>
+Acccess to all the module. This feature provides access to the whole API.
+Security and Privacy enforcement may depend on the query or subscription requested by the developer.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Heiko Desruelle &#60;heiko.desruelle@intec.ugent.be&#62;
+        </author>
+        <author>
+ Dieter Blomme &#60;dieter.blomme@intec.ugent.be&#62;
+        </author>
+        <author>
+ George Gionis &#60;gionis@epu.ntua.gr&#62;
+        </author>
+        <version>
+ 0.1 
+        </version>
+    </descriptive>
+    <Interface name="ContextManagerHook" id="::context::ContextManagerHook">
+      <webidl>  [NoInterfaceObject] interface ContextManagerHook {&#13;
+    readonly attribute <ref>ContextManager</ref> context; &#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Defines what is instantiated in initialization. 
+          </brief>
+         <description>
+          <p>
+There will be a webinos.context object that allows accessing the    * functionality of this module.
+          </p>
+         </description>
+          <def-instantiated>
+            <descriptive>
+             <description>
+ 
+             </description>
+              <api-feature identifier="http://webinos.org/api/context">
+              </api-feature>
+            </descriptive>
+          </def-instantiated>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="context" id="::context::ContextManagerHook::context">
+        <webidl>    readonly attribute <ref>ContextManager</ref> context;</webidl>
+        <Type name="ContextManager"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinos" name2="ContextManager">
+      <webidl>  <ref>webinos</ref> implements <ref>ContextManager</ref>;</webidl>
+    </Implements>
+    <Interface name="ContextManager" id="::context::ContextManager">
+      <webidl>  [NoInterfaceObject] interface ContextManager {&#13;
+&#13;
+&#13;
+    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  &#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ This is the entry point for the context API. The interface provides the two basic methods to access the User's context data, i.e. query or subscribe to updates. 
+          </brief>
+         <description>
+          <p>
+TODO: Long description
+          </p>
+         </description>
+          <Code> TODO
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="executeQuery" id="::context::ContextManager::executeQuery">
+        <webidl>    void executeQuery(in <ref>QuerySuccessCallback</ref> successCallback,&#13;
+                      in <ref>QueryErrorCallback</ref>? errorCallback,&#13;
+                      in <ref>Query</ref> query)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Performs a context query against the context storage.
+            </brief>
+           <description>
+            <p>
+When this method is invoked it executes the provided query against the context storage. The context storage is a collection context objects, each one with specific attributes, which hold context data that have been acquired over time by identifying a number of context related events. The Query parameter that this method uses specifies what context data (i.e. from which context objects) should be retrieved. 
+            </p>
+            <p>
+Mediation by policy and security: this method, as it provides application with data (context) about the user, is expected to have privacy considerations. Therefore the system is able to ignore the request of an app to receive context data if the User Privacy Policy dictates so (i.e. the user has not authorized the app to access the context data it ask for in the Query parameter).
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous query operation completes successfully.
+                </p></description>
+            </descriptive>
+            <Type name="QuerySuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous query operation results in errors.
+                </p></description>
+            </descriptive>
+            <Type name="QueryErrorCallback" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" name="query">
+            <descriptive>
+                <description><p>
+ The Query object describing the query to be executed against the context storage.
+                </p></description>
+            </descriptive>
+            <Type name="Query"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="subscribeContextEvent" id="::context::ContextManager::subscribeContextEvent">
+        <webidl>    void subscribeContextEvent(in <ref>SubscribeSuccessCallback</ref> subscribeSuccessCallback,&#13;
+                      in <ref>SubscribeErrorCallback</ref>? subscribeErrorCallback,&#13;
+                      in <ref>OccuringEvent</ref> eventHandler,&#13;
+                                          in DOMString eventIdentifier)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notifies when a context related event occurs.
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation must register the (app) function that is passed in the eventHandler argument as the hander function that will be notified when the context related event, which in turn is identified in the eventIdentifier, happens. This function will be invoked every time the indicated event occurs until the unsubscribe method is invoked to cancel the subscription. 
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned in subscriptionSuccessCallback so that it is possible to cancel the subscription. If the subscription cannot be created, the subscriptionErrorCallback contains an error code that describes the reason for the error. 
+            </p>
+            <p>
+Mediation by policy and security: this method, as it can provide an application with real-time data (context) about the user, is expected to have privacy considerations. Therefore the system is able to ignore the request of an app to receive context data if the User Privacy Policy dictates so (i.e. the user has not authorized the app to access the context data of the dictated event).
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="subscribeSuccessCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous subscribe request completes successfully.
+                </p></description>
+            </descriptive>
+            <Type name="SubscribeSuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="subscribeErrorCallback">
+            <descriptive>
+                <description><p>
+ Function to be invoked if the asynchronous subscribe request results in errors.
+                </p></description>
+            </descriptive>
+            <Type name="SubscribeErrorCallback" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" name="eventHandler">
+            <descriptive>
+                <description><p>
+ The function to be invoked when the dictated event occurs.
+                </p></description>
+            </descriptive>
+            <Type name="OccuringEvent"/>
+          </Argument>
+          <Argument in="in" name="eventIdentifier">
+            <descriptive>
+                <description><p>
+ The event identifier, for example &quot;UserProfileUpdate&quot;, &quot;ShoppingBasketCheckout&quot;.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="unsubscribe" id="::context::ContextManager::unsubscribe">
+        <webidl>    void unsubscribe(in unsigned long subscriptionIdentifier)&#13;
+         raises(<ref>ContextError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Cancels a subscription to a context related event.
+            </brief>
+           <description>
+            <p>
+If the subscriptionIdentifier argument is valid and corresponds to a subscription already in place the subscription process MUST be effectivelly stoped. If the subscriptionHandler argument does not correspond to a valid subscription, the method should return without any further action.
+            </p>
+           </description>
+            <Code> TODO
+ </Code>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void call
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="subscriptionIdentifier">
+            <descriptive>
+                <description><p>
+ The identifier of the subscription, returned by subscribeContextEvent().
+                </p></description>
+            </descriptive>
+            <Type type="unsigned long"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="ContextError">
+            <descriptive>
+                <description><p>
+ with error code TYPE_MISMATCH_ERR if 
+the input parameter is not compatible with the expected type for 
+that parameter.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="Query" id="::context::Query">
+      <webidl>   [Callback, NoInterfaceObject] interface Query {&#13;
+&#13;
+&#13;
+    attribute <ref>SPARQLquery</ref> xmlQuery;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Query interface,
+          </brief>
+         <description>
+          <p>
+TODO: Detail if this the right content for the query 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="xmlQuery" id="::context::Query::xmlQuery">
+        <webidl>    attribute <ref>SPARQLquery</ref> xmlQuery;</webidl>
+        <descriptive>
+            <brief>
+ query content in xml format
+            </brief>
+           <description>
+            <p>
+<a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL query language for RDF</a>            </p>
+           </description>
+        </descriptive>
+        <Type name="SPARQLquery"/>
+      </Attribute>
+    </Interface>
+    <Interface name="ContextError" id="::context::ContextError">
+      <webidl>  [NoInterfaceObject] interface ContextError {&#13;
+&#13;
+     const unsigned short SECURITY_ERR = 1;&#13;
+&#13;
+&#13;
+     const unsigned short INVALID_QUERY_ERR = 2;&#13;
+&#13;
+&#13;
+     const unsigned short TYPE_MISMATCH_ERR = 3;&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ Defines the  error codes for this module
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="SECURITY_ERR" value="1" id="::context::ContextError::SECURITY_ERR">
+        <webidl>     const unsigned short SECURITY_ERR = 1;</webidl>
+        <descriptive>
+            <brief>
+ Security Error 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_QUERY_ERR" value="2" id="::context::ContextError::INVALID_QUERY_ERR">
+        <webidl>     const unsigned short INVALID_QUERY_ERR = 2;</webidl>
+        <descriptive>
+            <brief>
+ invalid query 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TYPE_MISMATCH_ERR" value="3" id="::context::ContextError::TYPE_MISMATCH_ERR">
+        <webidl>     const unsigned short TYPE_MISMATCH_ERR = 3;</webidl>
+        <descriptive>
+            <brief>
+ invalid query 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Interface name="QuerySuccessCallback" id="::context::QuerySuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface QuerySuccessCallback {        &#13;
+&#13;
+    void onsuccess (<ref>SPARQLquery</ref> queryResult);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating success of executeQuery() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::context::QuerySuccessCallback::onsuccess">
+        <webidl>    void onsuccess (<ref>SPARQLquery</ref> queryResult);</webidl>
+        <descriptive>
+            <brief>
+ Callback on success of a executeQuery() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="queryResult">
+            <descriptive>
+                <description><p>
+ Result of the query operation serialized as a json string, see <a href="http://www.w3.org/TR/rdf-sparql-query/">SPARQL query language for RDF</a>. 
+                </p></description>
+            </descriptive>
+            <Type name="SPARQLquery"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="QueryErrorCallback" id="::context::QueryErrorCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface QueryErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating error of executeQuery() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onerror" id="::context::QueryErrorCallback::onerror">
+        <webidl>    void onerror (<ref>ContextError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback on failure of a executeQuery() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ The ContextError object capturing the type of the error.
+                </p></description>
+            </descriptive>
+            <Type name="ContextError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="SubscribeSuccessCallback" id="::context::SubscribeSuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeSuccessCallback {        &#13;
+&#13;
+    void onsuccess (unsigned long subscriptionIdentifier);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating success of subscribeContextEvent() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::context::SubscribeSuccessCallback::onsuccess">
+        <webidl>    void onsuccess (unsigned long subscriptionIdentifier);</webidl>
+        <descriptive>
+            <brief>
+ Callback on success of a subscribeContextEvent() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="subscriptionIdentifier">
+            <descriptive>
+                <description><p>
+ A subscription handler that can be later used to cancel the subscription. 
+                </p></description>
+            </descriptive>
+            <Type type="unsigned long"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="SubscribeErrorCallback" id="::context::SubscribeErrorCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface SubscribeErrorCallback  {        &#13;
+&#13;
+    void onerror (<ref>ContextError</ref> error);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for callbacks indicating error of subscribeContextEvent() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onerror" id="::context::SubscribeErrorCallback::onerror">
+        <webidl>    void onerror (<ref>ContextError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback on failure of a subscribeContextEvent() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ The ContextError object capturing the type of the error.
+                </p></description>
+            </descriptive>
+            <Type name="ContextError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="OccuringEvent" id="::context::OccuringEvent">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface OccuringEvent {        &#13;
+&#13;
+    void onContextEvent (DOMString eventContextData);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for specifying the method called when a new context related event occurs. 
+          </brief>
+         <description>
+          <p>
+This interface specifies a function that provides a serialized json string of the context data retrieved from the happening of a context related event.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onContextEvent" id="::context::OccuringEvent::onContextEvent">
+        <webidl>    void onContextEvent (DOMString eventContextData);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the context related event occurs.
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="eventContextData">
+            <descriptive>
+                <description><p>
+ The context data acquired by the event. 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

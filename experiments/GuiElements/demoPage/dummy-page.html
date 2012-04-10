@@ -1,0 +1,36 @@
+<html>
+<head>
+	<title>webinos | STYLEPACKAGE</title>
+	<link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
+	</head>
+<body>
+<div id="content">
+	<div id="header">
+		<h1><img src="testbed_logo.png"></h1>
+     </div>
+     <div id="functions">
+		<h2>Testfunctions:</h2>
+		<h3>Access vehicle data</h3>
+        <p>
+            <input type="button" id="init" value="initialize System" class="button"/><br />
+            <select id="vehicleDataId">
+            	<option value="0"></option>
+            	<option value="1">Option 1</option>
+            	<option value="2">Option 2</option>
+            	<option value="3">Option 3</option>
+            </select><br/>
+            <input type="button" id="getData" value="get Data" disabled class="button"/><br />
+            <input type="button" id="addListener" value="add EventListener" disabled class="button"/><br>
+
+		</p>
+    </div>
+
+<div id="info">INFO TEXT <br/>
+<img src="ajaxloader.gif">
+</div>
+
+<div id="status">STATUS: <span id="message">STATUS BAR...</span></div>
+</div>
+
+</body>
+</html>

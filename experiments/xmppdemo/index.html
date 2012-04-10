@@ -1,0 +1,78 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+    <title>Webinos Service Discovery Demo</title>
+
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/cupertino/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="css/xmppdemo.css">
+    <link rel="stylesheet" type="text/css" href="css/xml-logger.css">
+
+    <!-- external scripts and scripts by other parties -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.js"></script>
+    <script src="scripts/xml-logger.js"></script>
+    <script src="scripts/strophe.js"></script>
+    <script src="scripts/sha1.js"></script>
+
+    <!-- kept separate as these are the key -->
+    <script src="webinos-impl.js"></script> <!-- contains implementation of webinos API in JavaScript and XMPP -->
+    <script src="webinos.js"></script>      <!-- defines webinos API -->
+    <script src="xmppdemo.js"></script>     <!-- application logic, example of using webinos API -->
+</head>
+
+<body>
+    <div class="header">
+        <a href="http://www.webinos.org/" target="_"><img src="images/webinos-logo.png" alt="Webinos logo" /></a>
+        <img src="images/separator.png" />
+        <h1>Service Discovery Demo</h1>
+        <span id="status" class="status_disconnect">conn</span>
+    </div>
+
+    <div class="top-row" style="width: 100%; overflow: auto">
+        <fieldset id="actions_group" style="width:30%; float: left">
+            <legend>Actions</legend>
+            <input id="share-location" type="checkbox" name="share-location">Share location service</input><br>
+            <input id="share-remote-alert" type="checkbox" name="share-remote-alert" checked="checked">Share remote alerting service</input><br>
+            <input id="connect-button" type="button" class="button" value="Disconnect" disabled="disabled"><br>
+            <input id="toggle-logging" type="button" class="button" value="Show/hide Logging"><br>
+            <input id="toggle-raw-logging" type="button" class="button" value="Show/hide XMPP Logging">
+        </fieldset>
+        <fieldset id="your_services_group">
+            <legend>Your remote services (click to use):</legend>
+        </fieldset>
+    </div>
+    <div style="width: 100%">
+        <fieldset id="buddies_services_group">
+            <legend>Your buddies&#39; remote services (click to use):</legend>
+        </fieldset>
+        <div id="logging-console" style="clear:both; display:none"></div>
+        <div id="raw-logging-console" style="clear: both; display:none"></div>
+    </div>
+
+    <!-- this bit is for sending XMPP stanzas back, disabled during demo -->
+    <div style="display:none">
+        <input id="send_button" type="button" value="Send Data" disabled="disabled" class="button" style="float: right; position: relative;">
+        <textarea id="input" class="disabled" disabled="disabled" placeholder="Enter Strophe.js expr or raw XML here, press ctrl-Enter to send"></textarea>
+    </div>
+    
+    <!-- login dialog -->
+    <div id="login_dialog" class="hidden">
+        <table border="0">
+            <tr><td><label>JID:</label></td><td><input type="text" id="jid" value="@servicelab.org"></td></tr>
+            <tr><td><label>Resource:</label></td><td><input type="text" id="resource" value="in-car"></td></tr>
+            <tr><td><label>Password:</label></td><td><input type="password" id="password" autofocus="autofocus" value="webinos"></td></tr>
+        </table>
+    </div>
+
+    <!-- remote alerting dialog -->
+    <div id="alert-dialog" class="hidden" style="display: none">
+        <label>Your alert message:</label><br>
+        <input type="text" id="alert-message" value="" maxlength=40 placeholder="Type here" autofocus="autofocus">
+    </div>
+
+    <!-- remote alert show -->
+    <div id="alert-show-dialog" class="hidden" style="display: none">
+    </div>
+</body>
+</html>

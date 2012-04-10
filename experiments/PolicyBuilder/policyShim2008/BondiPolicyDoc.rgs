@@ -1,0 +1,26 @@
+HKCR
+{
+	policyShim2008.BondiPolicyDoc.1 = s 'BondiPolicyDoc Class'
+	{
+		CLSID = s '{02E24E4F-6605-4CF9-8FAD-99AEEEB1E876}'
+	}
+	policyShim2008.BondiPolicyDoc = s 'BondiPolicyDoc Class'
+	{
+		CLSID = s '{02E24E4F-6605-4CF9-8FAD-99AEEEB1E876}'
+		CurVer = s 'policyShim2008.BondiPolicyDoc.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {02E24E4F-6605-4CF9-8FAD-99AEEEB1E876} = s 'BondiPolicyDoc Class'
+		{
+			ProgID = s 'policyShim2008.BondiPolicyDoc.1'
+			VersionIndependentProgID = s 'policyShim2008.BondiPolicyDoc'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{A7F46B90-08C2-4815-8A62-EB5B32531EF2}'
+		}
+	}
+}

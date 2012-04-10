@@ -1,0 +1,31 @@
+{
+    "Version": 2,
+    "Map": [{
+    	"name": "pzh",
+        "type": "folder",
+        "contents": [{
+            "name": "contextDB.db",
+            "type": "sqlite",
+            "file": "contextDB.db"
+        }]        
+    }, {
+    	"name": "pzp",        
+        "type": "folder",
+        "contents": [{
+            "name": "contextDBbuffer.json",
+            "type": "json"
+        }, {
+            "name": "log.json",
+            "type": "json"
+        }, {
+            "name": "appContextVocabulary.json",
+            "type": "json"
+        }]
+    }, {
+        "name": "settings.json",
+        "type": "json",
+        "contents": {
+            "contextEnabled": false
+        }
+    }]
+}

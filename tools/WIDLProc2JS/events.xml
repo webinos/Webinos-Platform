@@ -1,0 +1,1590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="events" id="::events">
+    <webidl>module events {&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEventEntity {&#13;
+&#13;
+                attribute DOMString id;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEventAddressing {&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref> source;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] to;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] cc;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] bcc;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEvent {&#13;
+&#13;
+                readonly attribute DOMString type;&#13;
+&#13;
+                readonly attribute <ref>WebinosEventAddressing</ref> addressing;&#13;
+&#13;
+                readonly attribute DOMString id;&#13;
+&#13;
+                readonly attribute <ref>WebinosEvent</ref> inResponseTo;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? timeStamp;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? expiryTimeStamp;&#13;
+&#13;
+                readonly attribute boolean addressingSensitive;&#13;
+&#13;
+                readonly attribute <ref>WebinosEventAddressing</ref> forwarding;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? forwardingTimeStamp;&#13;
+&#13;
+                readonly attribute DOMString? payload;&#13;
+&#13;
+&#13;
+                void dispatchWebinosEvent(&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                void forwardWebinosEvent(&#13;
+                                in <ref>WebinosEventAddressing</ref> forwarding,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+        };&#13;
+&#13;
+&#13;
+        exception WebinosEventException {&#13;
+&#13;
+                unsigned short code;&#13;
+&#13;
+                DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERROR     = 1;&#13;
+&#13;
+                const unsigned short PERMISSION_DENIED_ERROR    = 2;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEventDeliveryError {&#13;
+&#13;
+                readonly attribute unsigned short code;&#13;
+&#13;
+                readonly attribute DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR                = 0;&#13;
+&#13;
+                const unsigned short INVALID                    = 1;&#13;
+&#13;
+                const unsigned short BAD_DESTINATION            = 2;&#13;
+&#13;
+                const unsigned short EXPIRED                    = 3;&#13;
+&#13;
+                const unsigned short REFUSED                    = 4;&#13;
+&#13;
+                const unsigned short NO_REFERENCE               = 5;&#13;
+        };&#13;
+&#13;
+&#13;
+        [Callback, NoInterfaceObject] interface WebinosEventCallbacks {&#13;
+&#13;
+                void onSending(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onCaching(in <ref>WebinosEvent</ref> event);&#13;
+&#13;
+                void onDelivery(in <ref>WebinosEvent</ref> event,&#13;
+                                in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onTimeout(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onError(in <ref>WebinosEvent</ref> event,&#13;
+                             in <ref>WebinosEventEntity</ref> recipient,&#13;
+                             in <ref>WebinosEventDeliveryError</ref> error);&#13;
+        };&#13;
+&#13;
+&#13;
+        [Callback=FunctionOnly] interface WebinosEventListener {&#13;
+&#13;
+                void handleEvent(in <ref>WebinosEvent</ref> event);&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEventsInterface {&#13;
+&#13;
+                <ref>WebinosEvent</ref> createWebinosEvent(&#13;
+                                in DOMString type,&#13;
+                                in <ref>WebinosEventAddressing</ref> addressing,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? payload,&#13;
+                                in optional <ref>WebinosEvent</ref>? inResponseTo,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? expiryTimeStamp,&#13;
+                                in optional boolean addressingSensitive)&#13;
+                             raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                DOMString addWebinosEventListener(&#13;
+                                in <ref>WebinosEventListener</ref> listener,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? type,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? source,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? destination)&#13;
+                          raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                void removeWebinosEventListener(in DOMString listenerId)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject] interface WebinosEvents {&#13;
+&#13;
+                readonly attribute <ref>WebinosEventsInterface</ref> events;&#13;
+        };&#13;
+&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>WebinosEvents</ref>;&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The Event Handling API
+        </brief>
+       <description>
+        <p>
+The Webinos Event Handling API provides means to exchange data in terms of
+events among addressable entities (e.g., applications, services), either
+locally or remotely.
+        </p>
+        <p>
+This is an advanced API that is mostly meant to be used by third-party
+developers to implement custom event-based protocols by taking advantage of
+the features offered by the Webinos event handling system, that in turn
+leverages off of the features offered by Webinos overlay networking model.
+        </p>
+        <p>
+It is, therefore, strongly recommended to carefully read the Messaging
+section in the Webinos system specifications before committing to the usage
+of this API.
+        </p>
+        <p>
+Despite its apparent complexity, this API revolves around three simple basic
+concepts: generating events, sending/forwarding events and
+registering/unregistering event listeners for incoming events.
+        </p>
+        <p>
+The following example demonstrates what the core functionality of a
+simplicistic textual chat application could look like if implemented using
+this API.
+        </p>
+       </description>
+        <Code>// Array of objects implementing the WebinosEventEntity interface that
+// represents the list of participants to the chat session, excluding the
+// current application.
+var participants = [...];
+
+// DOM element that keeps a log of the whole session.
+var logElem;
+
+// DOM Text object that allows the user to insert text messages.
+var inputElem;
+
+// Function that somehow returns a human-readable name associated to the input
+// entity.
+function getName(entity) {
+  ...
+}
+
+// Function that returns a copy of the input string with HTML control characters
+// ('&#60;', '&#62;', '&#38;') escaped ('&#38;lt;', '&#38;gt;', '&#38;amp;').
+function escapeHTML(str) {
+  str = str.replace(/&#38;/g, '&#38;amp;');
+  return str.replace(/&#60;/g, '&#38;lt;').replace(/&#62;/g, '&#38;gt;');
+}
+
+// Listener callback for incoming events.
+function onMsg(evt) {
+  // Appends event data to logElem.
+  // E.g.: [00:00:00] Stefano said: Hi all!
+  logElem.innerHTML += &quot;[&quot; + new Date(evt.timeStamp).toLocaleTimeString() + &quot;] &quot;
+                       + getName(evt.addressing.source) + &quot; said: &quot;
+                       + escapeHTML(evt.payload) + &quot;\n&quot;;
+}
+
+// Delivery error notification callback.
+function onMsgError(evt, recipient, error)
+{
+  // Pops up an alert dialog with error details.
+  // E.g.: Stefano did not receive your message saying: &quot;How are you?&quot;
+  //       Event refused (4)
+  alert(getName(recipient) + ' did not receive your message saying: &quot;'
+        + evt.payload + '&quot;\n' + error.message + '(' + error.code + ')');
+}
+
+// Listener to DOM &quot;click&quot; event for some &quot;Send Message&quot; button.
+function onSendButtonClicked() {
+  // Creates a new event of type &quot;chatMessage&quot; directed to all the chat
+  // participants with payload containing the text in inputElem and with
+  // timestamp.
+  var evt = webinos.events.createWebinosEvent(&quot;chatMessage&quot;, {to: participants},
+                                              inputElem.value, null, true, null,
+                                              true);
+
+  // Sends the event and specifies the onMsgError callback for handling error
+  // delivery notifications.
+  evt.dispatchWebinosEvent({onError: onMsgError});
+
+  // Appends the input message to logElem.
+  // E.g.: [00:01:00] you said: &quot;Let's try again... how are you?&quot;
+  logElem.innerHTML += &quot;[&quot; + new Date(evt.timeStamp).toLocaleTimeString()
+                       + &quot;] you said: &quot; + escapeHTML(evt.payload) + &quot;\n&quot;;
+}
+
+// Initialization stuff.
+document.onLoad = function() {
+  // Gets &quot;log&quot; element.
+  logElem = document.getElementById(&quot;log&quot;);
+
+  // Gets &quot;input&quot; element.
+  inputElem = document.getElementById(&quot;input&quot;);
+
+  // Adds the onMsg() callback as an event listener for incoming events with
+  // type &quot;chatMessage&quot;, from any source and to any destination (within the
+  // application).
+  webinos.events.addWebinosEventListener(onMsg, &quot;chatMessage&quot;);
+}
+ </Code>
+        <def-api-feature identifier="http://webinos.org/api/events">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Stefano D'Angelo &#60;dangelo@ismb.it&#62;
+        </author>
+        <version>
+ 0.9.13
+        </version>
+    </descriptive>
+    <Interface name="WebinosEventEntity" id="::events::WebinosEventEntity">
+      <webidl>        [NoInterfaceObject] interface WebinosEventEntity {&#13;
+&#13;
+                attribute DOMString id;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventEntity interface describes an addressable
+entity of any kind.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="id" id="::events::WebinosEventEntity::id">
+        <webidl>                attribute DOMString id;</webidl>
+        <descriptive>
+            <brief>
+ Globally unique identifier.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="WebinosEventAddressing" id="::events::WebinosEventAddressing">
+      <webidl>        [NoInterfaceObject] interface WebinosEventAddressing {&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref> source;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] to;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] cc;&#13;
+&#13;
+                attribute <ref>WebinosEventEntity</ref>[] bcc;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventAddressing interface contains references to
+the sender and recipients of an event.
+          </brief>
+         <description>
+          <p>
+This interfaces comes in two flavors: a strict normalized form for
+events generated and/or processed by the Webinos runtime, and a more
+lax non-normalized form to ease API usage.
+          </p>
+          <p>
+Please, keep in mind that the Webinos runtime always operates on
+normalized equivalents of user-supplied objects implementing this
+interface in non-normalized form, hence it creates those equivalents
+by applying the normalization process described in the documentation
+of the createWebinosEvent() function of the WebinosEventsInterface
+interface.
+          </p>
+          <p>
+Details on both forms are given in each attribute's description.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="source" id="::events::WebinosEventAddressing::source">
+        <webidl>                attribute <ref>WebinosEventEntity</ref> source;</webidl>
+        <descriptive>
+            <brief>
+ Event source.
+            </brief>
+           <description>
+            <p>
+In the normalized form it SHALL always be set.
+            </p>
+            <p>
+The non-normalized form allows to use null or undefined to
+indicate the current application.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="WebinosEventEntity"/>
+      </Attribute>
+      <Attribute name="to" id="::events::WebinosEventAddressing::to">
+        <webidl>                attribute <ref>WebinosEventEntity</ref>[] to;</webidl>
+        <descriptive>
+            <brief>
+ Array of primary recipients.
+            </brief>
+           <description>
+            <p>
+It MUST always contain at least one element.
+            </p>
+            <p>
+In the normalized form it SHALL be sorted in ascending order
+by Unicode code points and SHALL NOT contain duplicate
+entries.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type name="WebinosEventEntity"/>
+        </Type>
+      </Attribute>
+      <Attribute name="cc" id="::events::WebinosEventAddressing::cc">
+        <webidl>                attribute <ref>WebinosEventEntity</ref>[] cc;</webidl>
+        <descriptive>
+            <brief>
+ Array of secondary recipients.
+            </brief>
+           <description>
+            <p>
+It MAY be empty.
+            </p>
+            <p>
+In the normalized form it SHALL be sorted in ascending order
+by Unicode code points, SHALL NOT contain duplicate entries
+and SHALL NOT contain entries that are also found in the &quot;to&quot;
+array.
+            </p>
+            <p>
+The non-normalized form allows to use null or undefined to
+indicate no secondary recipients.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type name="WebinosEventEntity"/>
+        </Type>
+      </Attribute>
+      <Attribute name="bcc" id="::events::WebinosEventAddressing::bcc">
+        <webidl>                attribute <ref>WebinosEventEntity</ref>[] bcc;</webidl>
+        <descriptive>
+            <brief>
+ Array of blind-carbon-copy recipients.
+            </brief>
+           <description>
+            <p>
+It MAY be empty.
+            </p>
+            <p>
+In the normalized form it SHALL be sorted in ascending order
+by Unicode code points, SHALL NOT contain duplicate entries
+and SHALL NOT contain entries that are also found in the &quot;to&quot;
+or &quot;cc&quot; arrays.
+            </p>
+            <p>
+The non-normalized form allows to use null or undefined to
+indicate no blind-carbon-copy recipients.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type name="WebinosEventEntity"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="WebinosEvent" id="::events::WebinosEvent">
+      <webidl>        [NoInterfaceObject] interface WebinosEvent {&#13;
+&#13;
+                readonly attribute DOMString type;&#13;
+&#13;
+                readonly attribute <ref>WebinosEventAddressing</ref> addressing;&#13;
+&#13;
+                readonly attribute DOMString id;&#13;
+&#13;
+                readonly attribute <ref>WebinosEvent</ref> inResponseTo;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? timeStamp;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? expiryTimeStamp;&#13;
+&#13;
+                readonly attribute boolean addressingSensitive;&#13;
+&#13;
+                readonly attribute <ref>WebinosEventAddressing</ref> forwarding;&#13;
+&#13;
+                readonly attribute <ref>DOMTimeStamp</ref>? forwardingTimeStamp;&#13;
+&#13;
+                readonly attribute DOMString? payload;&#13;
+&#13;
+&#13;
+                void dispatchWebinosEvent(&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                void forwardWebinosEvent(&#13;
+                                in <ref>WebinosEventAddressing</ref> forwarding,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEvent interface describes an incoming or outgoing
+event.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="type" id="::events::WebinosEvent::type">
+        <webidl>                readonly attribute DOMString type;</webidl>
+        <descriptive>
+            <brief>
+ Event type identifier.
+            </brief>
+           <description>
+            <p>
+It MUST match the following regular expression:
+[_a-zA-Z][_a-zA-Z0-9]*
+            </p>
+            <p>
+Identifiers &quot;deliveryNotification&quot;, &quot;JSONRPC20Request&quot; and
+&quot;JSONRPC20Response&quot; are reserved, hence not allowed.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="addressing" id="::events::WebinosEvent::addressing">
+        <webidl>                readonly attribute <ref>WebinosEventAddressing</ref> addressing;</webidl>
+        <descriptive>
+            <brief>
+ References to the original sender and recipients in
+normalized form.
+            </brief>
+        </descriptive>
+        <Type name="WebinosEventAddressing"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="id" id="::events::WebinosEvent::id">
+        <webidl>                readonly attribute DOMString id;</webidl>
+        <descriptive>
+            <brief>
+ Event identifier.
+            </brief>
+           <description>
+            <p>
+It is calculated by hashing a partial serialization of the
+WebinosEvent object that involves: <br/>- the event type; <br/>- the original event source and primary recipients, in case
+the &quot;addressingSensitive&quot; attribute is true; <br/>- the identifier of the event that this event is a response
+to, if any; <br/>- the event timestamp, if present; <br/>- the event expiry timestamp, if present; <br/>- the payload, if present.
+            </p>
+            <p>
+Even though not strictly required, conforming implementations
+are recommended to implement some strategy to try to limit
+the likelihood that an application instance is delivered more
+than one event with a given id. Users of this API MUST assume
+that no more than one event with a given id is ever delivered
+to a given recipient.
+            </p>
+            <p>
+For more details, please refer to the Webinos system
+specifications.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="inResponseTo" id="::events::WebinosEvent::inResponseTo">
+        <webidl>                readonly attribute <ref>WebinosEvent</ref> inResponseTo;</webidl>
+        <descriptive>
+            <brief>
+ Event that this event is a response to.
+            </brief>
+           <description>
+            <p>
+If null, this event was not sent in response to another
+event.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="WebinosEvent"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="timeStamp" id="::events::WebinosEvent::timeStamp">
+        <webidl>                readonly attribute <ref>DOMTimeStamp</ref>? timeStamp;</webidl>
+        <descriptive>
+            <brief>
+ Moment in time in which the event is generated by the
+original event source.
+            </brief>
+           <description>
+            <p>
+It MAY be null.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="DOMTimeStamp" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="expiryTimeStamp" id="::events::WebinosEvent::expiryTimeStamp">
+        <webidl>                readonly attribute <ref>DOMTimeStamp</ref>? expiryTimeStamp;</webidl>
+        <descriptive>
+            <brief>
+ Moment in time past which the event is no more valid
+or meaningful.
+            </brief>
+           <description>
+            <p>
+It MAY be null.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="DOMTimeStamp" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="addressingSensitive" id="::events::WebinosEvent::addressingSensitive">
+        <webidl>                readonly attribute boolean addressingSensitive;</webidl>
+        <descriptive>
+            <brief>
+ Indicates whether the original addressing information
+is part of the informative content of the event.
+            </brief>
+           <description>
+            <p>
+In practice, when this is set to true, the identifiers of the
+orignal event source and primary recipients are used to
+compute the event id.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="forwarding" id="::events::WebinosEvent::forwarding">
+        <webidl>                readonly attribute <ref>WebinosEventAddressing</ref> forwarding;</webidl>
+        <descriptive>
+            <brief>
+ References to the entity that forwarded the event and
+the recipients of such forwarding.
+            </brief>
+           <description>
+            <p>
+It is null if the event was not subject to any forwarding,
+hence it comes straight from the original sending entity.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="WebinosEventAddressing"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="forwardingTimeStamp" id="::events::WebinosEvent::forwardingTimeStamp">
+        <webidl>                readonly attribute <ref>DOMTimeStamp</ref>? forwardingTimeStamp;</webidl>
+        <descriptive>
+            <brief>
+ Moment in time in which the event was forwarded by the
+forwarding source.
+            </brief>
+           <description>
+            <p>
+It SHALL be null if &quot;forwarding&quot; is null and MAY be null also
+if &quot;forwarding&quot; is not null.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="DOMTimeStamp" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="payload" id="::events::WebinosEvent::payload">
+        <webidl>                readonly attribute DOMString? payload;</webidl>
+        <descriptive>
+            <brief>
+ Event type-specific data.
+            </brief>
+           <description>
+            <p>
+It MAY be null.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Operation name="dispatchWebinosEvent" id="::events::WebinosEvent::dispatchWebinosEvent">
+        <webidl>                void dispatchWebinosEvent(&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Sends an event.
+            </brief>
+           <description>
+            <p>
+W.r.t. the &quot;Delivery notification wanted&quot; attribute described
+in the Webinos system specification, its value in the
+implementation is to be deferred from the callbacks parameter
+and allowed to change between dispatchWebinosEvent() and
+forwardWebinosEvent() calls. It SHALL be true when delivery
+and/or error callbacks are passed via the callbacks argument,
+false otherwise.
+            </p>
+            <p>
+<b>NOTE:</b> Please, keep in mind that all recipients SHALL get
+references to all entities specified in the &quot;to&quot; and &quot;cc&quot;
+attributes.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" optional="optional" name="callbacks">
+            <descriptive>
+                <description><p>
+ Set of callbacks to monitor sending status
+(null and undefined are considered as equivalent to a
+WebinosEventCallbacks object with all attributes set
+to null).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventCallbacks" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="referenceTimeout">
+            <descriptive>
+                <description><p>
+ Moment in time until which the
+Webinos runtime SHALL ensure that the WebinosEvent
+object being sent is not garbage collected for the
+purpose of receiving events in response to the event
+being sent (null, undefined and values up to the
+current date/time mean that no special action is taken
+by the runtime in this regard).
+                </p></description>
+            </descriptive>
+            <Type name="DOMTimeStamp" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="sync">
+            <descriptive>
+                <description><p>
+ If false or undefined, the function is
+non-blocking, otherwise if true it will block until
+one of the following conditions becomes true: <br/>- if referenceTimeout represents a moment in time in
+the future at call time, that moment is reached; <br/>- otherwise, if the &quot;expiryTimeStamp&quot; attribute is
+specified as a moment in time in the future at call
+time, that moment is reached; <br/>- in any case, the end result of the operation is
+completely determined for all recipients and all
+callbacks that were to be called have run.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="WebinosEventException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if any of
+the supplied arguments is not valid. <br/>PERMISSION_DENIED_ERROR if some local policy rule does
+not allow for the event to be sent.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="forwardWebinosEvent" id="::events::WebinosEvent::forwardWebinosEvent">
+        <webidl>                void forwardWebinosEvent(&#13;
+                                in <ref>WebinosEventAddressing</ref> forwarding,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>WebinosEventCallbacks</ref>? callbacks,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? referenceTimeout,&#13;
+                                in optional boolean sync)&#13;
+                     raises(<ref>WebinosEventException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Forwards an event.
+            </brief>
+           <description>
+            <p>
+W.r.t. the &quot;Delivery notification wanted&quot; attribute described
+in the Webinos system specification, its value in the
+implementation is to be deferred from the callbacks parameter
+and allowed to change between dispatchWebinosEvent() and
+forwardWebinosEvent() calls. It SHALL be true when delivery
+and/or error callbacks are passed via the callbacks argument,
+false otherwise.
+            </p>
+            <p>
+Conforming implementations SHALL NOT modify the &quot;Forwarding&quot;
+attribute of the local WebinosEvent object when this function
+is called.
+            </p>
+            <p>
+<b>NOTE:</b> Please, keep in mind that all recipients referenced
+by the forwarding argument SHALL get references to all
+entities specified in the &quot;to&quot;, &quot;cc&quot; and &quot;bcc&quot; arrays of the
+&quot;addressing&quot; attribute, as well as references to all entities
+specified in the &quot;to&quot; and &quot;cc&quot; arrays of the forwarding
+argument.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="forwarding">
+            <descriptive>
+                <description><p>
+ References to the entity on the behalf of
+which the application wants to forward the event and
+to the recipients of such forwarding. This argument
+SHALL be processed in the same way as the
+webinos.events.createWebinosEvent() function processes
+its &quot;addressing&quot; argument (i.e., make a normalized
+copy).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventAddressing"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="withTimeStamp">
+            <descriptive>
+                <description><p>
+ Whether to set the forwarding timestamp
+(undefined is considered as equivalent to false).
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="callbacks">
+            <descriptive>
+                <description><p>
+ Set of callbacks to monitor forwarding
+status (null and undefined are considered as
+equivalent to an WebinosEventCallbacks object with all
+attributes set to null).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventCallbacks" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="referenceTimeout">
+            <descriptive>
+                <description><p>
+ Moment in time until which the
+Webinos runtime SHALL ensure that the WebinosEvent
+object being forwarded is not garbage collected for
+the purpose of receiving events in response to the
+event being forwarded (null, undefined and values up
+to the current date/time mean that no special action
+is taken by the runtime in this regard).
+                </p></description>
+            </descriptive>
+            <Type name="DOMTimeStamp" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="sync">
+            <descriptive>
+                <description><p>
+ If false or undefined, the function is
+non-blocking, otherwise if true it will block until
+one of the following conditions becomes true: <br/>- if referenceTimeout represents a moment in time in
+the future at call time, that moment is reached; <br/>- otherwise, if the &quot;expiryTimeStamp&quot; attribute is
+specified as a moment in time in the future at call
+time, that moment is reached; <br/>- in any case, the end result of the operation is
+completely determined for all recipients and all
+callbacks that were to be called have run.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="WebinosEventException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if any of
+the supplied arguments is not valid. <br/>PERMISSION_DENIED_ERROR if some local policy rule does
+not allow for the event to be forwarded.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Exception name="WebinosEventException" id="::events::WebinosEventException">
+      <webidl>        exception WebinosEventException {&#13;
+&#13;
+                unsigned short code;&#13;
+&#13;
+                DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERROR     = 1;&#13;
+&#13;
+                const unsigned short PERMISSION_DENIED_ERROR    = 2;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Error codes for the events module.
+          </brief>
+      </descriptive>
+      <ExceptionField name="code" id="::events::WebinosEventException::code">
+        <webidl>                unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Error code.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::events::WebinosEventException::message">
+        <webidl>                DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Error description.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </ExceptionField>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::events::WebinosEventException::INVALID_ARGUMENT_ERROR">
+        <webidl>                const unsigned short INVALID_ARGUMENT_ERROR     = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested
+method was invoked.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="2" id="::events::WebinosEventException::PERMISSION_DENIED_ERROR">
+        <webidl>                const unsigned short PERMISSION_DENIED_ERROR    = 2;</webidl>
+        <descriptive>
+            <brief>
+ Access to the requested information was denied by the
+implementation or by the user.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Exception>
+    <Interface name="WebinosEventDeliveryError" id="::events::WebinosEventDeliveryError">
+      <webidl>        [NoInterfaceObject] interface WebinosEventDeliveryError {&#13;
+&#13;
+                readonly attribute unsigned short code;&#13;
+&#13;
+                readonly attribute DOMString message;&#13;
+&#13;
+&#13;
+                const unsigned short UNKNOWN_ERR                = 0;&#13;
+&#13;
+                const unsigned short INVALID                    = 1;&#13;
+&#13;
+                const unsigned short BAD_DESTINATION            = 2;&#13;
+&#13;
+                const unsigned short EXPIRED                    = 3;&#13;
+&#13;
+                const unsigned short REFUSED                    = 4;&#13;
+&#13;
+                const unsigned short NO_REFERENCE               = 5;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventDeliveryError interface describes event
+delivery errors reported using the delivery notification
+protocol.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="code" id="::events::WebinosEventDeliveryError::code">
+        <webidl>                readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Error code.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="message" id="::events::WebinosEventDeliveryError::message">
+        <webidl>                readonly attribute DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Error description.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Const name="UNKNOWN_ERR" value="0" id="::events::WebinosEventDeliveryError::UNKNOWN_ERR">
+        <webidl>                const unsigned short UNKNOWN_ERR                = 0;</webidl>
+        <descriptive>
+            <brief>
+ Unknown error.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID" value="1" id="::events::WebinosEventDeliveryError::INVALID">
+        <webidl>                const unsigned short INVALID                    = 1;</webidl>
+        <descriptive>
+            <brief>
+ The recipient got an invalid event (e.g., transmission
+error).
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="BAD_DESTINATION" value="2" id="::events::WebinosEventDeliveryError::BAD_DESTINATION">
+        <webidl>                const unsigned short BAD_DESTINATION            = 2;</webidl>
+        <descriptive>
+            <brief>
+ The intended recipient is unknown or unreachable.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="EXPIRED" value="3" id="::events::WebinosEventDeliveryError::EXPIRED">
+        <webidl>                const unsigned short EXPIRED                    = 3;</webidl>
+        <descriptive>
+            <brief>
+ The event expired before the actual delivery,
+according to its &quot;expiryTimestamp&quot; attribute.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="REFUSED" value="4" id="::events::WebinosEventDeliveryError::REFUSED">
+        <webidl>                const unsigned short REFUSED                    = 4;</webidl>
+        <descriptive>
+            <brief>
+ The event could not be received because of lack of
+authorization and/or policy settings.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NO_REFERENCE" value="5" id="::events::WebinosEventDeliveryError::NO_REFERENCE">
+        <webidl>                const unsigned short NO_REFERENCE               = 5;</webidl>
+        <descriptive>
+            <brief>
+ The recipient does not hold a local reference to the
+event specified by the &quot;inResponseTo&quot; attribute.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Interface name="WebinosEventCallbacks" id="::events::WebinosEventCallbacks">
+      <webidl>        [Callback, NoInterfaceObject] interface WebinosEventCallbacks {&#13;
+&#13;
+                void onSending(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onCaching(in <ref>WebinosEvent</ref> event);&#13;
+&#13;
+                void onDelivery(in <ref>WebinosEvent</ref> event,&#13;
+                                in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onTimeout(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);&#13;
+&#13;
+                void onError(in <ref>WebinosEvent</ref> event,&#13;
+                             in <ref>WebinosEventEntity</ref> recipient,&#13;
+                             in <ref>WebinosEventDeliveryError</ref> error);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventCallbacks interface allows to pass a set of
+status monitoring callbacks to event sending/forwarding
+methods.
+          </brief>
+         <description>
+          <p>
+TODO: does this definition allow to use null/undefined? Otherwise
+should define callback types and use nullable attributes.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSending" id="::events::WebinosEventCallbacks::onSending">
+        <webidl>                void onSending(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);</webidl>
+        <descriptive>
+            <brief>
+ Called right after the event has been successfully
+transmitted to the &quot;next hop&quot;.
+            </brief>
+           <description>
+            <p>
+This callback SHALL NOT be called more than once per
+recipient for each send/forward.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event being transmitted.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient to which the event is being
+transmitted.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onCaching" id="::events::WebinosEventCallbacks::onCaching">
+        <webidl>                void onCaching(in <ref>WebinosEvent</ref> event);</webidl>
+        <descriptive>
+            <brief>
+ Called right after the event has been put into the
+Local Event Cache for later transmission (e.g., when
+trying to send it to a remote entity but no
+connectivity is currently available).
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event being cached.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onDelivery" id="::events::WebinosEventCallbacks::onDelivery">
+        <webidl>                void onDelivery(in <ref>WebinosEvent</ref> event,&#13;
+                                in <ref>WebinosEventEntity</ref> recipient);</webidl>
+        <descriptive>
+            <brief>
+ Called as soon as successful event delivery has been
+reported by a given recipient or if the recipient
+notifies that it did already receive an event with the
+same ID.
+            </brief>
+           <description>
+            <p>
+This callback SHALL NOT be called more than once per
+recipient for each send/forward.
+            </p>
+            <p>
+Conforming implementations SHALL set the &quot;Delivery
+notification wanted&quot; attribute described in the Webinos
+system specifications as true whenever this callback is
+specified.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event that was successfully delivered.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient that notified delivery
+success.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onTimeout" id="::events::WebinosEventCallbacks::onTimeout">
+        <webidl>                void onTimeout(in <ref>WebinosEvent</ref> event,&#13;
+                               in <ref>WebinosEventEntity</ref> recipient);</webidl>
+        <descriptive>
+            <brief>
+ Called right after the moment in time specified by the
+&quot;referenceTimeout&quot; attribute is reached and the given
+primary recipient did not successfully sent back at
+least one event in response to the given event.
+            </brief>
+           <description>
+            <p>
+This callback SHALL only be called if the &quot;referenceTimeout&quot;
+attribute indicates a moment in time in the future at
+sending/forwarding time and SHALL NOT be called more than
+once per recipient for each send/forward.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient that did not successfully sent
+back at least one event in response to the given
+event.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onError" id="::events::WebinosEventCallbacks::onError">
+        <webidl>                void onError(in <ref>WebinosEvent</ref> event,&#13;
+                             in <ref>WebinosEventEntity</ref> recipient,&#13;
+                             in <ref>WebinosEventDeliveryError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Called as soon as unsuccessful event delivery has been
+reported w.r.t. a given recipient.
+            </brief>
+           <description>
+            <p>
+This callback SHALL be called when the recipient reports
+unsuccessful delivery or when it was not possible to send the
+message and the event expired.
+            </p>
+            <p>
+This callback SHALL NOT be called more than once per
+recipient for each send/forward.
+            </p>
+            <p>
+Conforming implementations SHALL set the &quot;Delivery
+notification wanted&quot; attribute described in the Webinos
+system specifications as true whenever this callback is
+specified.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event that was not successfully delivered.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient that notified delivery error.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity"/>
+          </Argument>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The reported error.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventDeliveryError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosEventListener" id="::events::WebinosEventListener">
+      <webidl>        [Callback=FunctionOnly] interface WebinosEventListener {&#13;
+&#13;
+                void handleEvent(in <ref>WebinosEvent</ref> event);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventListener interface describes an event listener
+callback.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+      </ExtendedAttributeList>
+      <Operation name="handleEvent" id="::events::WebinosEventListener::handleEvent">
+        <webidl>                void handleEvent(in <ref>WebinosEvent</ref> event);</webidl>
+        <descriptive>
+            <brief>
+ Called when a new event is received.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="event">
+            <descriptive>
+                <description><p>
+ The event.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosEventsInterface" id="::events::WebinosEventsInterface">
+      <webidl>        [NoInterfaceObject] interface WebinosEventsInterface {&#13;
+&#13;
+                <ref>WebinosEvent</ref> createWebinosEvent(&#13;
+                                in DOMString type,&#13;
+                                in <ref>WebinosEventAddressing</ref> addressing,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? payload,&#13;
+                                in optional <ref>WebinosEvent</ref>? inResponseTo,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? expiryTimeStamp,&#13;
+                                in optional boolean addressingSensitive)&#13;
+                             raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                DOMString addWebinosEventListener(&#13;
+                                in <ref>WebinosEventListener</ref> listener,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? type,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? source,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? destination)&#13;
+                          raises(<ref>WebinosEventException</ref>);&#13;
+&#13;
+                void removeWebinosEventListener(in DOMString listenerId)&#13;
+                     raises(<ref>WebinosEventException</ref>);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEventsInterface interface describes the part of the
+Event Handling API accessible through the webinos.events
+object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="createWebinosEvent" id="::events::WebinosEventsInterface::createWebinosEvent">
+        <webidl>                <ref>WebinosEvent</ref> createWebinosEvent(&#13;
+                                in DOMString type,&#13;
+                                in <ref>WebinosEventAddressing</ref> addressing,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? payload,&#13;
+                                in optional <ref>WebinosEvent</ref>? inResponseTo,&#13;
+                                in optional boolean withTimeStamp,&#13;
+                                in optional <ref>DOMTimeStamp</ref>? expiryTimeStamp,&#13;
+                                in optional boolean addressingSensitive)&#13;
+                             raises(<ref>WebinosEventException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Creates a new event.
+            </brief>
+           <description>
+            <p>
+The function SHALL accept the &quot;addressing&quot; argument both in
+normalized and non-normalized form and, in either case, the
+resulting &quot;addressing&quot; attribute in the newly created
+WebinosEvent object SHALL reference a newly created and
+normalized equivalent of such argument where: <br/>- entries that are found both in &quot;to&quot; and &quot;cc&quot; in the
+original argument are removed from the &quot;cc&quot; array of the
+resulting WebinosEventAddressing object; <br/>- entries that are found both in &quot;to&quot; and &quot;bcc&quot; in the
+original argument are removed from the &quot;bcc&quot; array of the
+resulting WebinosEventAddressing object; <br/>- entries that are found both in &quot;cc&quot; and &quot;bcc&quot; in the
+original argument are removed from the &quot;bcc&quot; array of the
+resulting WebinosEventAddressing object.
+            </p>
+            <p>
+Furthermore, the function SHALL also make sure that it is
+valid for the application to create the event on the behalf
+of the specified source, otherwise an WebinosEventException
+exception with error code INVALID_ARGUMENT_ERROR SHALL be
+thrown.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="WebinosEvent">
+          <descriptive>
+              <description><p>
+ Newly created WebinosEvent object or null if an error
+occurred.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ Event type identifier.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="addressing">
+            <descriptive>
+                <description><p>
+ References to the sending entity on the
+behalf of which the application wants to create the
+event and to the event recipients.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventAddressing"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="payload">
+            <descriptive>
+                <description><p>
+ Event type-specific data or null (undefined
+is considered as equivalent to null).
+                </p></description>
+            </descriptive>
+            <ExtendedAttributeList>
+              <ExtendedAttribute name="TreatUndefinedAs" value="Null"/>
+            </ExtendedAttributeList>
+            <Type type="DOMString" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="inResponseTo">
+            <descriptive>
+                <description><p>
+ Event that this event is a response to
+(undefined is considered as equivalent to null).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEvent" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="withTimeStamp">
+            <descriptive>
+                <description><p>
+ Whether to set the generation timestamp
+(undefined is considered as equivalent to false).
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="expiryTimeStamp">
+            <descriptive>
+                <description><p>
+ Moment in time past which the event is
+no more valid or meaningful (undefined is considered
+as equivalent to null).
+                </p></description>
+            </descriptive>
+            <Type name="DOMTimeStamp" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="addressingSensitive">
+            <descriptive>
+                <description><p>
+ Whether the addressing information
+is part of the informative content of the event
+(undefined is considered as equivalent to false).
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="WebinosEventException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if any of
+the supplied arguments is not valid.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="addWebinosEventListener" id="::events::WebinosEventsInterface::addWebinosEventListener">
+        <webidl>                DOMString addWebinosEventListener(&#13;
+                                in <ref>WebinosEventListener</ref> listener,&#13;
+                                [TreatUndefinedAs=Null]&#13;
+                                  in optional DOMString? type,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? source,&#13;
+                                in optional <ref>WebinosEventEntity</ref>? destination)&#13;
+                          raises(<ref>WebinosEventException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers an event listener.
+            </brief>
+           <description>
+            <p>
+The arguments to this function act as filters, in the sense
+that when a new event is received, the listener is called if
+the event's attributes match with all arguments passed to
+this function.
+            </p>
+            <p>
+When a new event is received, all listeners that were
+registered via this function with matching arguments SHALL be
+called, yet the order of such calls is unspecified.
+            </p>
+            <p>
+Registering a listener SHALL NOT have consequences on other
+listeners, hence it SHALL be possible to register multiple
+listeners to the same event type/source/destination
+combinations.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString">
+          <descriptive>
+              <description><p>
+ Listener identifier.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="listener">
+            <descriptive>
+                <description><p>
+ The event listener.
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventListener"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="type">
+            <descriptive>
+                <description><p>
+ Specific event type or null for any type
+(undefined is considered as null).
+                </p></description>
+            </descriptive>
+            <ExtendedAttributeList>
+              <ExtendedAttribute name="TreatUndefinedAs" value="Null"/>
+            </ExtendedAttributeList>
+            <Type type="DOMString" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="source">
+            <descriptive>
+                <description><p>
+ Specific event source or null for any source
+(undefined is considered as null).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity" nullable="nullable"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="destination">
+            <descriptive>
+                <description><p>
+ Specific event recipient (whether primary
+or not) or null for any destination (undefined is
+considered as null).
+                </p></description>
+            </descriptive>
+            <Type name="WebinosEventEntity" nullable="nullable"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="WebinosEventException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if any of
+the supplied arguments is not valid.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="removeWebinosEventListener" id="::events::WebinosEventsInterface::removeWebinosEventListener">
+        <webidl>                void removeWebinosEventListener(in DOMString listenerId)&#13;
+                     raises(<ref>WebinosEventException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Unregisters an event listener.
+            </brief>
+           <description>
+            <p>
+Unregistering a listener SHALL NOT have consequences on other
+listeners.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="listenerId">
+            <descriptive>
+                <description><p>
+ Listener identifier as returned by
+addWebinosEventListener().
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="WebinosEventException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if any of
+the supplied arguments is not valid.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosEvents" id="::events::WebinosEvents">
+      <webidl>        [NoInterfaceObject] interface WebinosEvents {&#13;
+&#13;
+                readonly attribute <ref>WebinosEventsInterface</ref> events;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosEvents interface describes the part of the Event
+Handling API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="events" id="::events::WebinosEvents::events">
+        <webidl>                readonly attribute <ref>WebinosEventsInterface</ref> events;</webidl>
+        <descriptive>
+            <brief>
+ webinos.events object.
+            </brief>
+        </descriptive>
+        <Type name="WebinosEventsInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosEvents">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>WebinosEvents</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

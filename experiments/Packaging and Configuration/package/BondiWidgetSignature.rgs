@@ -1,0 +1,27 @@
+HKCR
+{
+	Bondi.BondiWidgetSignature.1 = s 'BondiWidgetSignature Class'
+	{
+		CLSID = s '{4D282BAF-BBC8-4D16-87EE-93A857A50448}'
+	}
+	Bondi.BondiWidgetSignature = s 'BondiWidgetSignature Class'
+	{
+		CLSID = s '{4D282BAF-BBC8-4D16-87EE-93A857A50448}'
+		CurVer = s 'Bondi.BondiWidgetSignature.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {4D282BAF-BBC8-4D16-87EE-93A857A50448} = s 'BondiWidgetSignature Class'
+		{
+			ProgID = s 'Bondi.BondiWidgetSignature.1'
+			VersionIndependentProgID = s 'Bondi.BondiWidgetSignature'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{8F6D42DD-17A8-49C8-9625-63B136CA651A}'
+		}
+	}
+}

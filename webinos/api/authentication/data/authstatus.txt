@@ -1,0 +1,1 @@
+[{"username":"cesare","lastAuthTime":"2011-09-23T15:34-02:00","authMethod":"password","authMethodDetails":"console inserted password"},{"username":"andrea","lastAuthTime":"2011-09-23T15:42+02:00","authMethod":"password","authMethodDetails":"console inserted password"}]

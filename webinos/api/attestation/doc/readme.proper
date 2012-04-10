@@ -1,0 +1,84 @@
+                            
+                            
+                            Attestation API how-to guide.
+
+-------------------------------------------------------------------------------
+ REQUIREMENTS
+-------------------------------------------------------------------------------
+
+(1) A TPM or TPM Emulator
+(2) A valid TSS stack.  I've tested it against the TrouSerS stack.
+(3) OpenSSL
+(4) Linux compiled with the linux-ima option enabled, and your kernel running
+    with this option turned on.
+(5) Patience.  A lot of patience.
+
+-------------------------------------------------------------------------------
+ FILES
+-------------------------------------------------------------------------------
+
+src/main/attestation.js - the actual node.js javascript module for attestation.  Offers two functions: getAttestationKey and getAttestation()
+src/main/attestation.c - the C code that calls the TSS library to interface with the TPM. 
+src/main/attestation.h - the header for the above
+src/main/tssbridge.cpp - the C++ node.js module for talking to attestation.c.  mostly just marshalling arguments.
+src/main/x509Reader.js - a javascript module for reading X509 files.
+src/compile.sh    - a script for compiling the C/C++ modules.
+
+-------------------------------------------------------------------------------
+ COMPILATION
+-------------------------------------------------------------------------------
+Using node-waf.  Two steps:
+
+1) node-waf configure
+2) node-waf
+
+
+-------------------------------------------------------------------------------
+ KEYS
+-------------------------------------------------------------------------------
+
+This API doesn't create keys for you, it needs you to do it.
+
+(1) create a directory somewhere for keys (we'll call it AIKDIR here).  
+
+(2) Go to http://privacyca.com/code.html and follow instructions for the 
+Privacy CA client and (if possible) the EK Certificate Extractor.
+
+(3) Use the identity code to do the following, chosing any value for [label]:
+
+./identity [label] AIKDIR/[label]/key.blob AIKDIR/[label]/cert.pem
+
+(4) Change line 80 of attestation.js so that "aikdirectory" points to AIKDIR.
+
+
+-------------------------------------------------------------------------------
+ LOGS
+-------------------------------------------------------------------------------
+
+The attestation module relies on the IMA subsystem of Linux to record the 
+identity of software running on the OS.  These logfiles are read by the API.
+
+You need to change lines 86 and 89 of attestation.js to point to these:
+
+imalog: "/sys/kernel/security/ima/ascii_runtime_measurements"
+bootlog: "/sys/kernel/security/tpm0/ascii_bios_measurements"
+
+if you are *not* running IMA, you can point them to some dummy files in the test
+directory
+
+imalog: "[WEBINOS PATH]/API/Attestation/src/test/samplelogs/imalog.txt",
+bootlog: "[WEBINOS PATH]/API/Attestation/src/test/samplelogs/bootlog.txt"
+
+
+-------------------------------------------------------------------------------
+ TEST
+-------------------------------------------------------------------------------
+
+VERY limited test, and it probably wont work on your system.
+
+(1) go to src/test/
+(2) run "node ./testAttestation.js"
+
+if you don't get an error, then it is working correctly.
+
+

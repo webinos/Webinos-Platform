@@ -1,0 +1,211 @@
+<policy-set combine="first-matching-target" description="Mobile-operator-policy">
+	<policy combine="first-applicable" description="PZOwner-MobileCertificate">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+				<subject-match attr="distributor-key-root-fingerprint" match="111111"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/authentication"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
+				<resource-match attr="api-feature" match="http://wacapps.net/api/devicestatus"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/events"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.parksensors"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.controls"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.shift"/>
+			</condition>
+		</rule>
+		<rule effect="prompt-blanket">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+			</condition>
+		</rule>
+		<rule effect="deny"></rule>
+	</policy>
+	<policy combine="first-applicable" description="PZOwner-OtherCertificate">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+				<subject-match attr="distributor-key-root-fingerprint" match="222222"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/authentication"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
+				<resource-match attr="api-feature" match="http://wacapps.net/api/devicestatus"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/events"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.parksensors"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.controls"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.shift"/>
+			</condition>
+		</rule>
+		<rule effect="prompt-blanket">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+			</condition>
+		</rule>
+		<rule effect="deny">
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="PZOwner-OtherCertificate">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+				<subject-match attr="distributor-key-root-fingerprint" match="333333"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/authentication"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
+				<resource-match attr="api-feature" match="http://wacapps.net/api/devicestatus"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/events"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.parksensors"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.controls"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.shift"/>
+			</condition>
+		</rule>
+		<rule effect="prompt-blanket">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+			</condition>
+		</rule>
+		<rule effect="deny">
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="PZOwner-Untrusted">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/authentication"/>
+				<resource-match attr="api-feature" match="http://wacapps.net/api/devicestatus"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/events"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
+			</condition>
+		</rule>
+		<rule effect="prompt-blanket">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+			</condition>
+		</rule>
+		<rule effect="deny">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.parksensors"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.controls"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.shift"/>
+			</condition>
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="PZFriend-MobileCert">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user2"/>
+				<subject-match attr="distributor-key-root-fingerprint" match="111111"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+			</condition>
+		</rule>
+		<rule effect="prompt-oneshot">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
+				<resource-match attr="api-feature" match="http://wacapps.net/api/devicestatus"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/events"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+			</condition>
+		</rule>
+		<rule effect="deny">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/authentication"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.parksensors"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.controls"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.shift"/>
+			</condition>
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="PZFriend-MobileCert">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user2"/>
+			</subject>
+		</target>
+		<rule effect="deny">
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="untrusted">
+		<rule effect="deny"></rule>
+	</policy>
+</policy-set>

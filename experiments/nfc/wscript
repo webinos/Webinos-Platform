@@ -1,0 +1,27 @@
+def set_options(opt):
+  opt.tool_options("compiler_cxx")
+
+def configure(conf):
+  conf.check_tool("compiler_cxx")
+  conf.check_tool("node_addon")
+  #conf.check(lib="nfc",libpath=["/usr/lib","/usr/local/lib"])
+  #conf.check(lib="pcslite",libpath=["/usr/lib","/usr/local/lib"])
+  #conf.check(lib="usb",libpath=["/usr/lib","/usr/local/lib"])
+  #conf.check(lib="nfc",libpath=["/usr/lib","/usr/local/lib"], uselib_store='LIBNFC')
+  conf.check_cfg(package='libnfc', args='--cflags --libs', uselib_store='LIBNFC')
+  conf.check_cfg(package='libpcsclite', args='--cflags --libs', uselib_store='LIBPCSCLITE')
+  conf.check_cfg(package='libusb', args='--cflags --libs', uselib_store='LIBUSB')
+
+
+def build(bld):
+  obj = bld.new_task_gen("cxx", "shlib", "node_addon")
+  obj.cxxflags = ["-lnfc", "-lusb", "-lpcslite"]
+  obj.target = "nfc"
+  obj.source = ["nfc.cc", "nfc-print.cc"]
+  #obj.uselib = "NFC"
+  #obj.uselib = "PCSLITE"
+  #obj.uselib = "USB";
+  obj.uselib = "LIBPCSCLITE";
+  obj.uselib = "LIBUSB";
+  obj.uselib = "LIBNFC";
+

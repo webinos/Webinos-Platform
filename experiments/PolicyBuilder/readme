@@ -1,0 +1,8 @@
+Contains the components for building the PolicyBuilder web app, as found at http://79.125.111.55/
+
+Policy - a standard C++ implementation of the security policy
+PolicyShim2008 - a MS C++ COM wrapper for the Policy library
+PolicyBuilderWeb - a .NET MVC C# web application allowing policies to be created and tested
+PolicyDB - data tier for PolicyBuilderWeb, auto-generated using LLBLGen Pro ORM
+
+To build load the PolicyBuilder.sln solution file into MS Visual Studio 2008

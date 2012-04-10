@@ -1,0 +1,2240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="messaging" id="::messaging">
+    <webidl>module messaging {&#13;
+&#13;
+&#13;
+  typedef sequence&lt;<ref>Message</ref>> MessageArray;&#13;
+&#13;
+&#13;
+   typedef <ref>File</ref>[]  FileArray;&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+  [NoInterfaceObject] interface DeviceapisMessaging {&#13;
+    readonly attribute <ref>Messaging</ref> messaging;&#13;
+  };&#13;
+  <ref>Deviceapis</ref> implements <ref>DeviceapisMessaging</ref>;&#13;
+  &#13;
+&#13;
+   &#13;
+  [NoInterfaceObject] interface Messaging {&#13;
+&#13;
+    const short TYPE_SMS = 1;&#13;
+&#13;
+    const short TYPE_MMS = 2;&#13;
+&#13;
+    const short TYPE_EMAIL = 3;&#13;
+&#13;
+    const short TYPE_IM = 3;&#13;
+&#13;
+    const unsigned short FOLDER_INBOX = 1;&#13;
+&#13;
+    const unsigned short FOLDER_OUTBOX = 2;&#13;
+&#13;
+    const unsigned short FOLDER_DRAFTS = 3;&#13;
+&#13;
+    const unsigned short FOLDER_SENTBOX = 4;&#13;
+  &#13;
+&#13;
+    <ref>Message</ref> createMessage(in short type)&#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> sendMessage(in <ref>SuccessCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);&#13;
+ &#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> sendMessage(in <ref>MessageSendCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);&#13;
+                                 &#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> findMessages(in <ref>FindMessagesSuccessCallback</ref> successCallback, &#13;
+                                  in optional <ref>ErrorCallback</ref> errorCallback,&#13;
+                                  in optional <ref>MessageFilter</ref> filter)&#13;
+                                  raises(<ref>DeviceAPIError</ref>);                          &#13;
+  &#13;
+&#13;
+    unsigned long onSMS(in <ref>OnIncomingMessage</ref> messageHandler)&#13;
+                        raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    unsigned long onMMS(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                        raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    unsigned long onEmail(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+   &#13;
+&#13;
+    unsigned long onIM(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionHandler)&#13;
+                     raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+  };&#13;
+&#13;
+&#13;
+    [NoInterfaceObject] interface Message {&#13;
+&#13;
+&#13;
+    readonly attribute DOMString id;&#13;
+&#13;
+&#13;
+    attribute short type;&#13;
+    &#13;
+&#13;
+    attribute short folder;&#13;
+    &#13;
+&#13;
+    readonly attribute <ref>Date</ref> timestamp;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString from;&#13;
+&#13;
+&#13;
+    attribute <ref>StringArray</ref> to;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> cc;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> bcc;&#13;
+&#13;
+&#13;
+    attribute DOMString body;&#13;
+&#13;
+&#13;
+    attribute boolean isRead;&#13;
+&#13;
+&#13;
+    attribute boolean priority;&#13;
+&#13;
+&#13;
+    attribute DOMString subject;&#13;
+&#13;
+&#13;
+    attribute <ref>FileArray</ref> attachments;&#13;
+&#13;
+&#13;
+&#13;
+    &#13;
+    <ref>PendingOperation</ref> update(in <ref>UpdateMessageSuccessCallback</ref> successCallback, &#13;
+                            in optional <ref>ErrorCallback</ref> errorCallback)&#13;
+                            raises(<ref>DeviceAPIError</ref>);&#13;
+  };&#13;
+  <ref>Message</ref> implements <ref>Synchronisable</ref>;&#13;
+&#13;
+&#13;
+  [Callback, NoInterfaceObject] interface MessageFilter {&#13;
+&#13;
+    attribute DOMString id;&#13;
+&#13;
+&#13;
+    attribute <ref>ShortArray</ref> type;&#13;
+  &#13;
+&#13;
+    attribute <ref>ShortArray</ref> folder;&#13;
+&#13;
+&#13;
+    attribute <ref>Date</ref> startTimestamp;&#13;
+&#13;
+&#13;
+    attribute <ref>Date</ref> endTimestamp;&#13;
+    &#13;
+&#13;
+    attribute DOMString from;&#13;
+&#13;
+&#13;
+    attribute <ref>StringArray</ref> to;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> cc;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> bcc;&#13;
+&#13;
+&#13;
+    attribute DOMString body;&#13;
+&#13;
+&#13;
+    attribute boolean isRead;&#13;
+&#13;
+&#13;
+    attribute boolean messagePriority;&#13;
+&#13;
+&#13;
+    attribute DOMString subject;&#13;
+  };&#13;
+  &#13;
+&#13;
+  &#13;
+    interface MessageAttachment : <ref>File</ref> {&#13;
+&#13;
+    readonly attribute DOMString MIMEType; &#13;
+  };&#13;
+  &#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface FindMessagesSuccessCallback {&#13;
+&#13;
+    void onsuccess(in <ref>MessageArray</ref> messages);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface UpdateMessageSuccessCallback {&#13;
+&#13;
+    void onsuccess(in <ref>Message</ref> message);&#13;
+  };&#13;
+&#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject] interface OnIncomingMessage {&#13;
+&#13;
+     void onevent (in <ref>Message</ref> message);&#13;
+  };&#13;
+&#13;
+&#13;
+  [Callback, NoInterfaceObject] interface MessageSendCallback {&#13;
+&#13;
+     void onsuccess();&#13;
+&#13;
+&#13;
+     void onmessagesendsuccess(in DOMString recipient);&#13;
+&#13;
+&#13;
+     void onmessagesenderror(in <ref>DeviceAPIError</ref> error, in DOMString recipient);&#13;
+  };&#13;
+  &#13;
+&#13;
+     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ WAC based Messaging interface.
+        </brief>
+       <description>
+        <p>
+The messaging API provides access to the following capabilities:
+Sending messages through different technologies: SMS, MMS, Email and Instant Messages.
+Search for messages in the different folders.
+Subscribe for being notified upon incoming message events.
+        </p>
+        <p>
+This API is a read only API that does not allow message or folder management.
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/messaging">
+          <descriptive>
+           <description>
+            <p>
+Access to the full Messaging module except the methods Messaging.sendMessage and Messaging.find and the attribute Message.attachments 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/messaging.send">
+          <descriptive>
+           <description>
+            <p>
+Access to the Messaging.sendMessage() method 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/messaging.find">
+          <descriptive>
+           <description>
+            <p>
+Access to the Messaging.findMessages method 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/messaging.subscribe">
+          <descriptive>
+           <description>
+            <p>
+Access to the Messaging.onSMS, Messaging.onMMS, Messaging.onEmail, Messaging.onIM methods 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/messaging.attach">
+          <descriptive>
+           <description>
+            <p>
+Access to the Message.attachments attribute. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ WAC 2.0 Proposed Release Version (PRV) 28 January 2011
+        </author>
+        <author>
+ Extended with InstantMessaging functionality for webinos by Christian Fuhrhop &#60;christian.fuhrhop@fokus.fraunhofer.de&#62;
+        </author>
+        <version>
+ 1.0
+        </version>
+    </descriptive>
+    <Typedef name="MessageArray" id="::messaging::MessageArray">
+      <webidl>  typedef sequence&lt;<ref>Message</ref>> MessageArray;</webidl>
+      <descriptive>
+          <brief>
+ Sequence of Message objects
+          </brief>
+      </descriptive>
+      <Type type="sequence">
+        <Type name="Message"/>
+      </Type>
+    </Typedef>
+    <Typedef name="FileArray" id="::messaging::FileArray">
+      <webidl>   typedef <ref>File</ref>[]  FileArray;</webidl>
+      <descriptive>
+          <brief>
+     Array of files 
+          </brief>
+      </descriptive>
+      <Type type="array">
+        <Type name="File"/>
+      </Type>
+    </Typedef>
+    <Interface name="DeviceapisMessaging" id="::messaging::DeviceapisMessaging">
+      <webidl>  [NoInterfaceObject] interface DeviceapisMessaging {&#13;
+    readonly attribute <ref>Messaging</ref> messaging;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Defines what is instantiated in the deviceapis object 
+          </brief>
+         <description>
+          <p>
+When the messaging feature is instantiated, the messaging object is available in the deviceapis object. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="messaging" id="::messaging::DeviceapisMessaging::messaging">
+        <webidl>    readonly attribute <ref>Messaging</ref> messaging;</webidl>
+        <Type name="Messaging"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="Deviceapis" name2="DeviceapisMessaging">
+      <webidl>  <ref>Deviceapis</ref> implements <ref>DeviceapisMessaging</ref>;</webidl>
+    </Implements>
+    <Interface name="Messaging" id="::messaging::Messaging">
+      <webidl>  [NoInterfaceObject] interface Messaging {&#13;
+&#13;
+    const short TYPE_SMS = 1;&#13;
+&#13;
+    const short TYPE_MMS = 2;&#13;
+&#13;
+    const short TYPE_EMAIL = 3;&#13;
+&#13;
+    const short TYPE_IM = 3;&#13;
+&#13;
+    const unsigned short FOLDER_INBOX = 1;&#13;
+&#13;
+    const unsigned short FOLDER_OUTBOX = 2;&#13;
+&#13;
+    const unsigned short FOLDER_DRAFTS = 3;&#13;
+&#13;
+    const unsigned short FOLDER_SENTBOX = 4;&#13;
+  &#13;
+&#13;
+    <ref>Message</ref> createMessage(in short type)&#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> sendMessage(in <ref>SuccessCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);&#13;
+ &#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> sendMessage(in <ref>MessageSendCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);&#13;
+                                 &#13;
+&#13;
+&#13;
+    <ref>PendingOperation</ref> findMessages(in <ref>FindMessagesSuccessCallback</ref> successCallback, &#13;
+                                  in optional <ref>ErrorCallback</ref> errorCallback,&#13;
+                                  in optional <ref>MessageFilter</ref> filter)&#13;
+                                  raises(<ref>DeviceAPIError</ref>);                          &#13;
+  &#13;
+&#13;
+    unsigned long onSMS(in <ref>OnIncomingMessage</ref> messageHandler)&#13;
+                        raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    unsigned long onMMS(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                        raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    unsigned long onEmail(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+   &#13;
+&#13;
+    unsigned long onIM(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+&#13;
+    void unsubscribe(in unsigned long subscriptionHandler)&#13;
+                     raises(<ref>DeviceAPIError</ref>);&#13;
+&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Messaging creation, sending and reading capabilities 
+          </brief>
+         <description>
+          <p>
+This interface allows a web application to create a message through the createMessage() method that returns an instance of the Message interface. That message could be manipulated through the functionality offered by the Message interface and sent afterwards through the sendMessage() method.
+          </p>
+          <p>
+Messages created through this API are not persistent in device memory until the implementation tries to send them through the send operation. When that operation has been performed, the message will be available on the relevant folder depending on the result of the operation (e.g. sent, drafts...). The only way to access the messages that have been sent is through the use of the findMessages method. The findMessages method allows developers to retrieve the content of the messages available in 
+the device folders.
+          </p>
+          <p>
+This interface also offers mechanism to subscribe for being notified upon incoming message events.
+          </p>
+         </description>
+          <Code>  // Define the success callback
+ function messageSent() {
+   alert(&quot;The SMS has been sent&quot;);
+ }
+ 
+ // Define the error callback
+ function messageFailed(error) {
+   alert(&quot;The SMS could not be sent &quot; + error.message);
+ }
+ 
+ // SMS sending example
+ var msg = deviceapis.messaging.createMessage(deviceapis.messaging.TYPE_SMS);
+ msg.body = &quot;I will arrive in 10 minutes&quot;;
+ msg.to = [&quot;+34666666666&quot;];
+ 
+ // Send request
+ deviceapis.messaging.sendMessage(messageSent, messageFailed, msg);
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="TYPE_SMS" value="1" id="::messaging::Messaging::TYPE_SMS">
+        <webidl>    const short TYPE_SMS = 1;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for messages of type SMS. 
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="TYPE_MMS" value="2" id="::messaging::Messaging::TYPE_MMS">
+        <webidl>    const short TYPE_MMS = 2;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for messages of type MMS. 
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="TYPE_EMAIL" value="3" id="::messaging::Messaging::TYPE_EMAIL">
+        <webidl>    const short TYPE_EMAIL = 3;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for messages of type Email. 
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="TYPE_IM" value="3" id="::messaging::Messaging::TYPE_IM">
+        <webidl>    const short TYPE_IM = 3;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for messages of type IM. 
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="FOLDER_INBOX" value="1" id="::messaging::Messaging::FOLDER_INBOX">
+        <webidl>    const unsigned short FOLDER_INBOX = 1;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for the message inbox.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="FOLDER_OUTBOX" value="2" id="::messaging::Messaging::FOLDER_OUTBOX">
+        <webidl>    const unsigned short FOLDER_OUTBOX = 2;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for the message outbox. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="FOLDER_DRAFTS" value="3" id="::messaging::Messaging::FOLDER_DRAFTS">
+        <webidl>    const unsigned short FOLDER_DRAFTS = 3;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for the message draft folder. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="FOLDER_SENTBOX" value="4" id="::messaging::Messaging::FOLDER_SENTBOX">
+        <webidl>    const unsigned short FOLDER_SENTBOX = 4;</webidl>
+        <descriptive>
+            <brief>
+ Identifier for message sent-items folder. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Operation name="createMessage" id="::messaging::Messaging::createMessage">
+        <webidl>    <ref>Message</ref> createMessage(in short type)&#13;
+                          raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Create a message of a given type. 
+            </brief>
+            <Code> var msg = deviceapis.messaging.createMessage(deviceapis.messaging.TYPE_SMS);
+ msg.body = &quot;WAC first SMS message.&quot;;
+ </Code>
+        </descriptive>
+        <Type name="Message">
+          <descriptive>
+              <description><p>
+ A Message object of the given type or null if there is any problem during the message creation. 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ The type of message that is created. The possible values are: TYPE_SMS, TYPE_MMS, TYPE_EMAIL and TYPE_IM. 
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if the input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+                <description><p>
+ INVALID_VALUES_ERR if the input parameter contains an invalid value. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="sendMessage" id="::messaging::Messaging::sendMessage">
+        <webidl>    <ref>PendingOperation</ref> sendMessage(in <ref>SuccessCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Attempt to send the specified message. 
+            </brief>
+           <description>
+            <p>
+If the message type is set to email and the user has multiple email accounts set up, the runtime SHOULD use the default e-mail account. If no account has been set up, the runtime MAY either provide respective mechanisms to create a new one or throw the given ErrorCallback back to the requesting widget.
+            </p>
+            <p>
+Only the parameters supported by a specific technology and that can be set up by the developer (see Message interface attribute definition) are sent as specified in the following table (the rest are ignored):
+            </p>
+            <table>
+              <tr>
+                <td>
+Attribute                </td>
+                <td>
+SMS                </td>
+                <td>
+MMS                </td>
+                <td>
+Email                </td>
+                <td>
+IM                </td>
+              </tr>
+              <tr>
+                <td>
+to                              </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+body                           </td>
+                <td>
+ Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+subject                         </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+              <tr>
+                <td>
+attachments                     </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+              <tr>
+                <td>
+cc                              </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+bcc                             </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+priority                        </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+            </table>
+            <p>
+When a message has been successfully or unsuccessfully sent, it will be stored in the relevant folder (e.g. sent folder if successfully sent). Please not that some platforms may store multiple copies of the message if multiple recipients were included.
+            </p>
+            <p>
+When the operation is fully completed (i.e. the implementation knows the result of the send operation to all the recipients), the onsuccess method of the successCallback will be invoked if the message is successfully sent to all the recipients.
+            </p>
+            <p>
+If any of the input parameters is not compatible with the expected type for that parameter a DeviceAPIError with code TYPE_MISMATCH_ERR MUST be synchronously thrown.
+            </p>
+            <p>
+If the operation fails for any other reason, the errorCallback will be invoked with an appropriate error code amongst the following:
+            </p>
+            <p>
+INVALID_VALUES_ERR: If any of the input paramters contains an invalid value. E.g. successCallback or message is null, message contains invalid values in any of its attributes... Please note that in order to allow developer ignore errors errorCallback accepts null as a valid value.
+            </p>
+            <p>
+NOT_SUPPORTED_ERR: If the specified messaging technology is not supported.
+            </p>
+            <p>
+SECURITY_ERR: If the operation is not allowed.
+            </p>
+            <p>
+UNKNOWN_ERR: In any other error case.
+            </p>
+            <p>
+If the errorCallback does not contain a valid function (e.g. null), in case of any error that should be returned in the errorCallback (see above), the implementation MUST silently fail and no further action is required (i.e. the error is not notified to the developer).
+            </p>
+           </description>
+            <Code> // Define the success callback
+ function messageSent() {
+ alert(&quot;The SMS has been sent to all the recipients&quot;);
+ }
+ 
+ // Define the error callback
+ function messageFailed(error) {
+ alert(&quot;The SMS could not be sent &quot; + error.message);
+ }
+ 
+ // SMS sending example
+ var msg = deviceapis.messaging.createMessage(deviceapis.messaging.TYPE_SMS);
+ msg.body = &quot;I will arrive in 10 minutes&quot;;
+ msg.to = [&quot;+34666666666&quot;, &quot;+34888888888&quot;];
+ 
+ // Send request
+ deviceapis.messaging.sendMessage(messageSent, messageFailed, msg);
+ </Code>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ To be invoked if the message is successfully sent. 
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ To be invoked in case the sending request fails. 
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument in="in" name="message">
+            <descriptive>
+                <description><p>
+ The message to be sent. 
+                </p></description>
+            </descriptive>
+            <Type name="Message"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="sendMessage" id="::messaging::Messaging::sendMessage">
+        <webidl>    <ref>PendingOperation</ref> sendMessage(in <ref>MessageSendCallback</ref> successCallback, &#13;
+                                 in <ref>ErrorCallback</ref> errorCallback, &#13;
+                                 in <ref>Message</ref> message)&#13;
+                                 raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Attempt to send the specified message with per-recipient notification 
+            </brief>
+           <description>
+            <p>
+If the message type is set to email and the user has multiple email accounts set up, the runtime SHOULD use the default e-mail account. If no account has been set up, the runtime MAY either provide respective mechanisms to create a new one or throw the given ErrorCallback back to the requesting widget.
+            </p>
+            <p>
+Only the parameters supported by a specific technology and that can be set up by the developer (see Message interface attribute definition) are sent as specified in the following table (the rest are ignored):
+            </p>
+            <table>
+              <tr>
+                <td>
+Attribute                </td>
+                <td>
+SMS                </td>
+                <td>
+MMS                </td>
+                <td>
+Email                </td>
+                <td>
+IM                </td>
+              </tr>
+              <tr>
+                <td>
+to                              </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+body                            </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+subject                        </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+              <tr>
+                <td>
+attachments                     </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+              <tr>
+                <td>
+cc                              </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+bcc                             </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+Yes                </td>
+              </tr>
+              <tr>
+                <td>
+priority                        </td>
+                <td>
+No                      </td>
+                <td>
+No                      </td>
+                <td>
+Yes                     </td>
+                <td>
+No                </td>
+              </tr>
+            </table>
+            <p>
+When a message has been successfully or unsuccessfully sent, it will be stored in the relevant folder (e.g. sent folder if successfully sent). Please not that some platforms may store multiple copies of the message if multiple recipients were included.
+            </p>
+            <p>
+For every individual recipient in the destination list, when the message is successfully sent to it the method onmessagesendsuccess of the successCallback argument MUST be invoked. If the message cannot be sent to that recipient, the onmessagesenderror of the successCallback argument MUST be invoked with the recipient and the error code as input parameters. The following error codes may be passed depending on the the error conditions: 
+            </p>
+            <p>
+INVALID_VALUES_ERR: If any of the input paramters contains an invalid value. E.g. successCallback or message is null, message contains invalid values in any of its attributes... Please note that in order to allow developer ignore errors errorCallback accepts null as a valid value.
+            </p>
+            <p>
+NOT_SUPPORTED_ERR: If the specified messaging technology is not supported.
+            </p>
+            <p>
+SECURITY_ERR: If the operation is not allowed.
+            </p>
+            <p>
+UNKNOWN_ERR: In any other error case.
+            </p>
+            <p>
+When the operation is fully completed (i.e. the implementation knows the result of the send operation to all the recipients), the onsuccess method of the successCallback will be invoked if the message is successfully sent to all the recipients.  
+            </p>
+            <p>
+In case of any error different to a TYPE_MISMATCH_ERR, the errorCallback will be invoked with an appropriate error code amongst the following: 
+            </p>
+            <p>
+INVALID_VALUES_ERR: If any of the input paramters contains an invalid value. E.g. successCallback or message is null, message contains invalid values in any of its attributes... Please note that in order to allow developer ignore errors errorCallback accepts null as a valid value.
+            </p>
+            <p>
+NOT_SUPPORTED_ERR: If the specified messaging technology is not supported.
+            </p>
+            <p>
+SECURITY_ERR: If the operation is not allowed.
+            </p>
+            <p>
+UNKNOWN_ERR: In any other error case.
+            </p>
+            <p>
+If the errorCallback does not contain a valid function (e.g. null), in case of any error that should be returned in the errorCallback (see above), the implementation MUST silently fail and no further action is required (i.e. the error is not notified to the developer).
+            </p>
+           </description>
+            <Code>  // Define the send callback
+  var messageSendCallback = {
+        onsuccess: function() {
+          alert(&quot;The SMS has been sent to all the recipients&quot;);},
+        onmessagesendsuccess: function(recipient) {
+          alert(&quot;The SMS has been sent to &quot; + recipient);},
+        onmessagesenderror: function(error, recipient) {
+          alert(&quot;The SMS has not been sent to &quot; + recipient + 
+                &quot; error &quot; + error);}
+  };
+  
+  // Define the error callback
+  function messageFailed(error) {
+  alert(&quot;The SMS could not be sent &quot; + error.message);
+  }
+  
+  // SMS sending example
+  var msg = deviceapis.messaging.createMessage(deviceapis.messaging.TYPE_SMS);
+  msg.body = &quot;I will arrive in 10 minutes&quot;;
+  msg.to = [&quot;+34666666666&quot;, &quot;+34888888888&quot;];
+  
+  // Send request
+  deviceapis.messaging.sendMessage(messageSendCallback, messageFailed, msg);
+ </Code>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Contains the methods for individual notifications. 
+                </p></description>
+            </descriptive>
+            <Type name="MessageSendCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ To be invoked in case the sending request fails. 
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument in="in" name="message">
+            <descriptive>
+                <description><p>
+ The message to be sent. 
+                </p></description>
+            </descriptive>
+            <Type name="Message"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="findMessages" id="::messaging::Messaging::findMessages">
+        <webidl>    <ref>PendingOperation</ref> findMessages(in <ref>FindMessagesSuccessCallback</ref> successCallback, &#13;
+                                  in optional <ref>ErrorCallback</ref> errorCallback,&#13;
+                                  in optional <ref>MessageFilter</ref> filter)&#13;
+                                  raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Gets an array of messages from the message folders matching the selected filter. 
+            </brief>
+           <description>
+            <p>
+If any of the input parameters is not compatible with the expected type for that parameter a DeviceAPIError with code TYPE_MISMATCH_ERR MUST be synchronously thrown.
+            </p>
+            <p>
+If the this feature is not supported, a DeviceAPIError with code NOT_SUPPORTED_ERR MUST be returned in the errorCallback. If this functionality is not allowed the errorCallback MUST be invoked with a DeviceAPIError with code SECURITY_ERR.
+            </p>
+            <p>
+If the successCallback does not contain a Function (i.e. it is null), a DeviceAPIError with code INVALID_VALUES_ERR MUST be returned.
+            </p>
+            <p>
+If the filter is passed and contains valid values, only those values in the message lists that matches the filter criteria as specified in the MessageFilter interface will be returned in the successCallback. If no filter is passed, it is null or undefined, or contains any invalid value, the implementation MUST return the full list of messages in the successCallback. If no messages are available in the lists or no one matches the filter criteria, the successCallback will be invoked with an empty array.
+            </p>
+            <p>
+If any other error occurs, while trying to retrieve the messages, the errorCallback function that was passed in the invocation MUST be called including a DeviceAPIError object with code UNKNOWN_ERR.
+            </p>
+            <p>
+In any of the cases in which the errorCallback should be invoked, if the developer has not passed an ErrorCallback or it is null, no action is required (i.e. the error is not notified to the developer).
+            </p>
+           </description>
+            <Code>    var msg = { type:[deviceapis.messaging.TYPE_SMS], body:&quot;first messa%&quot; };
+
+ deviceapis.messaging.findMessages(
+    function (messages) {
+      alert(messages.length + &quot; message(s) found!&quot;);
+      for (var i=0; imessages.length; i++) {
+        alert(i + &quot;. message from &quot; + messages[i].from);
+      }
+    }, 
+   null, 
+   msg);
+ </Code>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ function called when the invocation ends successfully. 
+                </p></description>
+            </descriptive>
+            <Type name="FindMessagesSuccessCallback"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ function called when an error occurs 
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="filter">
+            <descriptive>
+                <description><p>
+ message data to be used when filtering 
+                </p></description>
+            </descriptive>
+            <Type name="MessageFilter"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="onSMS" id="::messaging::Messaging::onSMS">
+        <webidl>    unsigned long onSMS(in <ref>OnIncomingMessage</ref> messageHandler)&#13;
+                        raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notified on incoming new SMSs 
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation MUST register the function passed in the messageHandler argument as the handler for being notified whenever an incoming SMS arrives to the device. That function will be invoked every time an incoming SMS arrives, unless the unsubscribe method with the handler identifier is invoked in order to cancel the subscription.
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned so that it is possible to cancel the subscription. If the subscription cannot be created, a DeviceAPIError is synchronously thrown with an error code that describes the reason for the error.If any of the input parameters is not compatible with the expected type for that parameter a DeviceAPIError with code TYPE_MISMATCH_ERR MUST be synchronously thrown.
+            </p>
+           </description>
+            <Code>  // function to receive new SMS notifications
+  function incomingSMS(message)
+  {
+    alert(&quot;New incoming SMS from &quot; + message.from);
+ 
+    // The subscription is cancelled to prevent further notifications
+    if (mySMSListener != null)
+      deviceapis.messaging.unsubscribe(mySMSListener);
+  }
+ </Code>
+        </descriptive>
+        <Type type="unsigned long">
+          <descriptive>
+              <description><p>
+ Subscription identifier 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="messageHandler">
+            <descriptive>
+                <description><p>
+ The function to be invoked on incoming SMSs 
+                </p></description>
+            </descriptive>
+            <Type name="OnIncomingMessage"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+                <description><p>
+ INVALID_VALUES_ERR if the messageHandler is null or undefined. 
+                </p></description>
+                <description><p>
+ NOT_SUPPORTED_ERR if this feature is not supported. 
+                </p></description>
+                <description><p>
+ SECURITY_ERR if this operation is not allowed. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="onMMS" id="::messaging::Messaging::onMMS">
+        <webidl>    unsigned long onMMS(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                        raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notified on incoming new MMSs 
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation MUST register the function passed in the messageHandler argument as the handler for being notified whenever an incoming MMS arrives to the device. That function will be invoked every time an incoming MMS arrives, unless the unsubscribe method with the handler identifier is invoked in order to cancel the subscription.
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned so that it is possible to cancel the subscription. If the subscription cannot be created, a DeviceAPIError is synchronously thrown with an error code that describes the reason for the error.
+            </p>
+           </description>
+            <Code> // function to receive new MMS notifications
+ function incomingMMS(message)
+ {
+   alert(&quot;New incoming MMS from &quot; + message.from);
+
+   // The subscription is cancelled to prevent further notifications
+   if (myMMSListener != null)
+     deviceapis.messaging.unsubscribe(myMMSListener);
+ }
+ </Code>
+        </descriptive>
+        <Type type="unsigned long">
+          <descriptive>
+              <description><p>
+ Subscription identifier 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="messageHandler">
+            <descriptive>
+                <description><p>
+ The function to be invoked on incoming MMSs 
+                </p></description>
+            </descriptive>
+            <Type name="OnIncomingMessage"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+                <description><p>
+ INVALID_VALUES_ERR if the messageHandler is null or undefined. 
+                </p></description>
+                <description><p>
+ NOT_SUPPORTED_ERR if this feature is not supported. 
+                </p></description>
+                <description><p>
+ SECURITY_ERR if this operation is not allowed. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="onEmail" id="::messaging::Messaging::onEmail">
+        <webidl>    unsigned long onEmail(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notified on incoming new Email
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation MUST register the function passed in the messageHandler argument as the handler for being notified whenever an incoming Email arrives to the device. That function will be invoked every time an incoming Email arrives, unless the unsubscribe method with the handler identifier is invoked in order to cancel the subscription.
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned so that it is possible to cancel the subscription. If the subscription cannot be created, a DeviceAPIError is synchronously thrown with an error code that describes the reason for the error.
+            </p>
+           </description>
+            <Code> // function to receive new Email notifications
+  function incomingEmail(message)
+  {
+    alert(&quot;New incoming Email from &quot; + message.from);
+ 
+    // The subscription is cancelled to prevent further notifications
+    if (myEmailListener != null)
+      deviceapis.messaging.unsubscribe(myEmailListener);
+  }
+ 
+  // Register listener for new Email events
+  var myEmailListener = null;
+  myEmailListener = deviceapis.messaging.onEmail(incomingEmail);    
+ </Code>
+        </descriptive>
+        <Type type="unsigned long">
+          <descriptive>
+              <description><p>
+ Subscription identifier 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="messageHandler">
+            <descriptive>
+                <description><p>
+ he function to be invoked on incoming emails 
+                </p></description>
+            </descriptive>
+            <Type name="OnIncomingMessage"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+                <description><p>
+ INVALID_VALUES_ERR if the messageHandler is null or undefined. 
+                </p></description>
+                <description><p>
+ NOT_SUPPORTED_ERR if this feature is not supported. 
+                </p></description>
+                <description><p>
+ SECURITY_ERR if this operation is not allowed. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="onIM" id="::messaging::Messaging::onIM">
+        <webidl>    unsigned long onIM(in <ref>OnIncomingMessage</ref> messageHandler) &#13;
+                          raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Registers the function to be notified on incoming new Instant Message
+            </brief>
+           <description>
+            <p>
+When this method is invoked, the implementation MUST register the function passed in the messageHandler argument as the handler for being notified whenever an incoming instant message arrives to the device. That function will be invoked every time an incoming Instant Message arrives, unless the unsubscribe method with the handler identifier is invoked in order to cancel the subscription.
+            </p>
+            <p>
+If the subscription is successfully created, an identifier for the handler is created and returned so that it is possible to cancel the subscription. If the subscription cannot be created, a DeviceAPIError is synchronously thrown with an error code that describes the reason for the error.
+            </p>
+           </description>
+            <Code> // function to receive new Instant Messaging notifications
+  function incomingIM(message)
+  {
+    alert(&quot;New incoming Instant Message from &quot; + message.from);
+ 
+    // The subscription is cancelled to prevent further notifications
+    if (myIMListener != null)
+      deviceapis.messaging.unsubscribe(myIMistener);
+  }
+ 
+  // Register listener for new Instant Messaging events
+  var myIMistener = null;
+  myIMistener = deviceapis.messaging.onIM(incomingIM);    
+ </Code>
+        </descriptive>
+        <Type type="unsigned long">
+          <descriptive>
+              <description><p>
+ Subscription identifier 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="messageHandler">
+            <descriptive>
+                <description><p>
+ he function to be invoked on incoming instant message 
+                </p></description>
+            </descriptive>
+            <Type name="OnIncomingMessage"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+                <description><p>
+ INVALID_VALUES_ERR if the messageHandler is null or undefined. 
+                </p></description>
+                <description><p>
+ NOT_SUPPORTED_ERR if this feature is not supported. 
+                </p></description>
+                <description><p>
+ SECURITY_ERR if this operation is not allowed. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="unsubscribe" id="::messaging::Messaging::unsubscribe">
+        <webidl>    void unsubscribe(in unsigned long subscriptionHandler)&#13;
+                     raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Cancels a messaging subscription 
+            </brief>
+           <description>
+            <p>
+If the subscriptionHandler argument is valid and corresponds to a subscription already in place the subscription process MUST immediately stop and no further message notifications MUST be invoked. If the subscriptionHandler argument does not correspond to a valid subscription, the method should return without any further action. 
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="subscriptionHandler">
+            <descriptive>
+                <description><p>
+ identifier of the subscription returned by the onSMS(), onMMS(), onEmail() or onIM() methods. 
+                </p></description>
+            </descriptive>
+            <Type type="unsigned long"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="Message" id="::messaging::Message">
+      <webidl>    [NoInterfaceObject] interface Message {&#13;
+&#13;
+&#13;
+    readonly attribute DOMString id;&#13;
+&#13;
+&#13;
+    attribute short type;&#13;
+    &#13;
+&#13;
+    attribute short folder;&#13;
+    &#13;
+&#13;
+    readonly attribute <ref>Date</ref> timestamp;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString from;&#13;
+&#13;
+&#13;
+    attribute <ref>StringArray</ref> to;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> cc;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> bcc;&#13;
+&#13;
+&#13;
+    attribute DOMString body;&#13;
+&#13;
+&#13;
+    attribute boolean isRead;&#13;
+&#13;
+&#13;
+    attribute boolean priority;&#13;
+&#13;
+&#13;
+    attribute DOMString subject;&#13;
+&#13;
+&#13;
+    attribute <ref>FileArray</ref> attachments;&#13;
+&#13;
+&#13;
+&#13;
+    &#13;
+    <ref>PendingOperation</ref> update(in <ref>UpdateMessageSuccessCallback</ref> successCallback, &#13;
+                            in optional <ref>ErrorCallback</ref> errorCallback)&#13;
+                            raises(<ref>DeviceAPIError</ref>);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Defines the content and attributes of a message 
+          </brief>
+         <description>
+          <p>
+This interface allows a web application to define the set of properties linked to a message previously created through the createMessage() method in the Messaging Interface.
+          </p>
+          <p>
+Additionally, it also allows an application to retrieve the content of a message through the findMessages, onSMS, onMMS and onEmail methods. In those cases, the implementation MAY return in some situations only part of the body because of its size. In those situations the implementation MUST allow the developer to retrieve the remaining part of the message through the use of the sync method member of the Synchronisable interface implemented by Message.
+          </p>
+          <p>
+Additionally, for the same reason, the implementation MAY decide to provide only the attachment information but not the attachment content. This is achieved by returning in the attachments attribute not a sequence of Files but a sequence of MessageAttachments (that implement the Synchronisable interface).
+          </p>
+          <p>
+If the developer attempts to access an attribute not supported by the messaging technology (see attribute description or summary table in the sendMessage mehtod description), the implementation MUST ignore this attempt.
+          </p>
+         </description>
+          <Code> var msg = deviceapis.messaging.createMessage(deviceapis.messaging.TYPE_SMS);
+ msg.body = &quot;WAC first SMS message.&quot;;
+ msg.to = [&quot;+34666666666&quot;];
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="id" id="::messaging::Message::id">
+        <webidl>    readonly attribute DOMString id;</webidl>
+        <descriptive>
+            <brief>
+ Message unique identifier.
+            </brief>
+           <description>
+            <p>
+A unique indicator for identifying a message.
+            </p>
+            <p>
+This property is a locally unique and persistent id, assigned by the device or the web runtime environment. For new messages created using Messaging.createMessage(), the id is assigned on the first occasion that the message is processed by the underlying platform such as a call to send(). This property is unique across device power cycles.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="type" id="::messaging::Message::type">
+        <webidl>    attribute short type;</webidl>
+        <descriptive>
+            <brief>
+ The type of the given message. 
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Attribute>
+      <Attribute name="folder" id="::messaging::Message::folder">
+        <webidl>    attribute short folder;</webidl>
+        <descriptive>
+            <brief>
+  The folder for the given message.
+            </brief>
+           <description>
+            <p>
+For messages created through the createMessage method this property is undefined.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="timestamp" id="::messaging::Message::timestamp">
+        <webidl>    readonly attribute <ref>Date</ref> timestamp;</webidl>
+        <descriptive>
+            <brief>
+ The timestamp of a message.
+            </brief>
+           <description>
+            <p>
+This property is set up by the device or the web runtime environment.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="from" id="::messaging::Message::from">
+        <webidl>    readonly attribute DOMString from;</webidl>
+        <descriptive>
+            <brief>
+ The source address of a message.
+            </brief>
+           <description>
+            <p>
+This property is set up by the device or the web runtime environment. This property should only be taken into account for Email.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="to" id="::messaging::Message::to">
+        <webidl>    attribute <ref>StringArray</ref> to;</webidl>
+        <descriptive>
+            <brief>
+ The destination of a message. 
+            </brief>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="cc" id="::messaging::Message::cc">
+        <webidl>    attribute <ref>StringArray</ref> cc;</webidl>
+        <descriptive>
+            <brief>
+ The Cc address of a message. 
+            </brief>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="bcc" id="::messaging::Message::bcc">
+        <webidl>    attribute <ref>StringArray</ref> bcc;</webidl>
+        <descriptive>
+            <brief>
+ The Bcc address of a message. 
+            </brief>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="body" id="::messaging::Message::body">
+        <webidl>    attribute DOMString body;</webidl>
+        <descriptive>
+            <brief>
+ The body of a message. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="isRead" id="::messaging::Message::isRead">
+        <webidl>    attribute boolean isRead;</webidl>
+        <descriptive>
+            <brief>
+     The flag &quot;read&quot; for this Message.
+            </brief>
+           <description>
+            <p>
+True if the message has been read and false otherwise.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="priority" id="::messaging::Message::priority">
+        <webidl>    attribute boolean priority;</webidl>
+        <descriptive>
+            <brief>
+     The priority of a message.
+            </brief>
+           <description>
+            <p>
+True means high priority and false normal or low priority. This property should only be taken into account for Email.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="subject" id="::messaging::Message::subject">
+        <webidl>    attribute DOMString subject;</webidl>
+        <descriptive>
+            <brief>
+     The subject of a message.
+            </brief>
+           <description>
+            <p>
+This property should only be taken into account for MMS and Email.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="attachments" id="::messaging::Message::attachments">
+        <webidl>    attribute <ref>FileArray</ref> attachments;</webidl>
+        <descriptive>
+            <brief>
+     The list of message attachments.
+            </brief>
+           <description>
+            <p>
+This property should only be taken into account for Email and MMS. If the message has not been created by the developer but returned through the findMessage, onMMS or onEmail methods, the attachments will be stored in the &quot;attachments&quot; file system root location, that is only accessible through this API.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="FileArray"/>
+      </Attribute>
+      <Operation name="update" id="::messaging::Message::update">
+        <webidl>    <ref>PendingOperation</ref> update(in <ref>UpdateMessageSuccessCallback</ref> successCallback, &#13;
+                            in optional <ref>ErrorCallback</ref> errorCallback)&#13;
+                            raises(<ref>DeviceAPIError</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Updates a message retrieved with the findMessages method 
+            </brief>
+           <description>
+            <p>
+This method is meant to transfer all changes made to the given Message object before (i.e. changed attributes) to the underlying system (e.g. native messaging database and LDAP). If any changes cannot be transferred to the system, they can be ignored by the implementation.
+            </p>
+            <p>
+This method does not have effect on messages created through the createMessage method as they are not persistenly stored until the send action is invoked.
+            </p>
+            <p>
+For messages in the inbox (deviceapis.messaging.FOLDER_INBOX), outbox (deviceapis.messaging.FOLDER_OUTBOX) and sentbox (deviceapis.messaging.FOLDER_SENTBOX) the implementation MUST only change the isRead attribute of the Message object. For messages within the draft folder (deviceapis.messaging.FOLDER_DRAFTS) the implementation MAY update other attributes as well. However, this is up to the actual implementation and relies on the underlying system.
+            </p>
+            <p>
+The implementation has to make sure that an updated Message object is provided in the success callback, which represents the current status of the message. The developer is expected to use this updated message for comparison with the former object to check which fields have or have not been transferred by the implementation.
+            </p>
+            <p>
+If any of the input parameters is not compatible with the expected type for that parameter a DeviceAPIError with code TYPE_MISMATCH_ERR MUST be synchronously thrown.
+            </p>
+            <p>
+If this feature is not supported, a DeviceAPIError with code NOT_SUPPORTED_ERR MUST be returned in the errorCallback. If this functionality is not allowed the errorCallback MUST be invoked with a DeviceAPIError with code SECURITY_ERR.
+            </p>
+            <p>
+If the successCallback contains an invalid value (e.g. null or undefined), a DeviceAPIError with code INVALID_VALUES_ERR MUST be returned.
+            </p>
+            <p>
+If any other error occurs, while trying to update the messages, the errorCallback function that was passed in the invocation MUST be called including a DeviceAPIError object with code UNKNOWN_ERR.
+            </p>
+            <p>
+If the errorCallback does not contain a valid function (e.g. null), in case of any error that should be returned in the errorCallback (see above), the implementation MUST silently fail and no further action is required (i.e. the error is not notified to the developer).
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Function to call on successful update
+                </p></description>
+            </descriptive>
+            <Type name="UpdateMessageSuccessCallback"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Function to call on unsuccessful update
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="DeviceAPIError">
+            <descriptive>
+                <description><p>
+ TYPE_MISMATCH_ERR if any input parameter is not compatible with the expected type for that parameter. 
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Implements name1="Message" name2="Synchronisable">
+      <webidl>  <ref>Message</ref> implements <ref>Synchronisable</ref>;</webidl>
+    </Implements>
+    <Interface name="MessageFilter" id="::messaging::MessageFilter">
+      <webidl>  [Callback, NoInterfaceObject] interface MessageFilter {&#13;
+&#13;
+    attribute DOMString id;&#13;
+&#13;
+&#13;
+    attribute <ref>ShortArray</ref> type;&#13;
+  &#13;
+&#13;
+    attribute <ref>ShortArray</ref> folder;&#13;
+&#13;
+&#13;
+    attribute <ref>Date</ref> startTimestamp;&#13;
+&#13;
+&#13;
+    attribute <ref>Date</ref> endTimestamp;&#13;
+    &#13;
+&#13;
+    attribute DOMString from;&#13;
+&#13;
+&#13;
+    attribute <ref>StringArray</ref> to;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> cc;&#13;
+    &#13;
+&#13;
+    attribute <ref>StringArray</ref> bcc;&#13;
+&#13;
+&#13;
+    attribute DOMString body;&#13;
+&#13;
+&#13;
+    attribute boolean isRead;&#13;
+&#13;
+&#13;
+    attribute boolean messagePriority;&#13;
+&#13;
+&#13;
+    attribute DOMString subject;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Filter to restrict the items returned by the findMessages method 
+          </brief>
+         <description>
+          <p>
+When used this filter in the findMessages operation, the result-set of the search MUST only contain the Message entries that match the filter values.
+          </p>
+          <p>
+An entry matches the filter, if the attributes of the entry matches all the attributes of the filter with values different to undefined or null. I.e. the search is performed in a similar manner to a SQL &quot;AND&quot; operation.
+          </p>
+          <p>
+An attribute of the Message entry matches the filter value according to the following rules:
+          </p>
+          <p>
+For filter attributes of type DOMString an entry matches this value if its corresponding attribute is exactly the same than the filter one unless the filter contains U+0025 'PERCENT SIGN' wildcard character(s). If wildcards are used, the behavior is similar to the LIKE condition in SQL ('%' matches any string of any length - including zero length). In order to specify that a 'PERCENT SIGN' character is to be considered literally instead of interpreting it as a wildcard, developers may escape 
+it with the backslash character.
+          </p>
+          <p>
+For filter attributes of type StringArray the same rules as for filter attributes of type DOMString apply for each of the fields within the given Array separately. The search for all included fields is performed similar to a SQL &quot;AND&quot; operation in the end without taking into account the (possible) difference in ordering between Message fields as well as MessageFilter fields.
+          </p>
+          <p>
+For filter attributes of an array of WebIDL numeric type (type), an entry matches it only if the corresponding entry attribute has exactly the same value as any of the array elements.
+          </p>
+          <p>
+For filter attributes of any WebIDL boolean type (isRead, messagePriority) an entry matches it only if the corresponding entry attribute has exactly the same state (i.e. true or false).
+          </p>
+          <p>
+For message attributes of type Date (i.e. timestamp), a couple of filter attributes are included (initial and end), in order to allow looking for messages between two dates. If both initial and end dates are different to null, a message matches the filter if its corresponding attribute is between initial and end dates (including them). If only the initial date contains a value different to null, a message matches the filter if its corresponding attribute is later 
+than or equal to the initial one. If only the end date contains a value different to null, a message matches the filter if its corresponding attribute is earlier than or equal to the end date.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="id" id="::messaging::MessageFilter::id">
+        <webidl>    attribute DOMString id;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message id attribute.
+            </brief>
+           <description>
+            <p>
+Messages which id corresponds with this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="type" id="::messaging::MessageFilter::type">
+        <webidl>    attribute <ref>ShortArray</ref> type;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message type attribute.
+            </brief>
+           <description>
+            <p>
+Messages with type equals to one of the values in this array match the filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="ShortArray"/>
+      </Attribute>
+      <Attribute name="folder" id="::messaging::MessageFilter::folder">
+        <webidl>    attribute <ref>ShortArray</ref> folder;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message folder attribute.
+            </brief>
+           <description>
+            <p>
+Messages with folder equals to one of the values in this array match the filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="ShortArray"/>
+      </Attribute>
+      <Attribute name="startTimestamp" id="::messaging::MessageFilter::startTimestamp">
+        <webidl>    attribute <ref>Date</ref> startTimestamp;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message timestamp attribute.
+            </brief>
+           <description>
+            <p>
+Messages with date later than or equal to this attribute match the filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date"/>
+      </Attribute>
+      <Attribute name="endTimestamp" id="::messaging::MessageFilter::endTimestamp">
+        <webidl>    attribute <ref>Date</ref> endTimestamp;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message timestamp attribute.
+            </brief>
+           <description>
+            <p>
+Messages with date earlier than or equal to this attribute match the filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date"/>
+      </Attribute>
+      <Attribute name="from" id="::messaging::MessageFilter::from">
+        <webidl>    attribute DOMString from;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message from attribute.
+            </brief>
+           <description>
+            <p>
+Messages which from corresponds with this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="to" id="::messaging::MessageFilter::to">
+        <webidl>    attribute <ref>StringArray</ref> to;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message to attribute.
+            </brief>
+           <description>
+            <p>
+Messages which elements in the to array that correspond to all the elements of this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="cc" id="::messaging::MessageFilter::cc">
+        <webidl>    attribute <ref>StringArray</ref> cc;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message cc attribute.
+            </brief>
+           <description>
+            <p>
+Messages which elements in the cc array that correspond to all the elements of this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="bcc" id="::messaging::MessageFilter::bcc">
+        <webidl>    attribute <ref>StringArray</ref> bcc;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message bcc attribute.
+            </brief>
+           <description>
+            <p>
+Messages which elements in the bcc array that correspond to all the elements of this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="StringArray"/>
+      </Attribute>
+      <Attribute name="body" id="::messaging::MessageFilter::body">
+        <webidl>    attribute DOMString body;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message body attribute.
+            </brief>
+           <description>
+            <p>
+Messages which body corresponds with this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="isRead" id="::messaging::MessageFilter::isRead">
+        <webidl>    attribute boolean isRead;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message isRead attribute.
+            </brief>
+           <description>
+            <p>
+Messages which isRead corresponds exactly with this attribute match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="messagePriority" id="::messaging::MessageFilter::messagePriority">
+        <webidl>    attribute boolean messagePriority;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message messagePriority attribute.
+            </brief>
+           <description>
+            <p>
+Messages which messagePriority corresponds exactly with this attribute match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="subject" id="::messaging::MessageFilter::subject">
+        <webidl>    attribute DOMString subject;</webidl>
+        <descriptive>
+            <brief>
+     Used for filtering the Message subject attribute.
+            </brief>
+           <description>
+            <p>
+Messages which subject corresponds with this attribute (either exactly or with the specified wildcards) match this filtering criteria.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="MessageAttachment" id="::messaging::MessageAttachment">
+      <webidl>    interface MessageAttachment : <ref>File</ref> {&#13;
+&#13;
+    readonly attribute DOMString MIMEType; &#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Describes a message attachement 
+          </brief>
+         <description>
+          <p>
+This attribute extends the File interface (from W3C File reader (http://dev.w3.org/2006/webapi/FileAPI/#file)) by concurrently implementing the synchronizable interface. It allows attachments to be downloaded only if the user requests them by the use of the sync method specified in the Synchronizable interface. 
+          </p>
+         </description>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="File"/>
+      </InterfaceInheritance>
+      <Attribute readonly="readonly" name="MIMEType" id="::messaging::MessageAttachment::MIMEType">
+        <webidl>    readonly attribute DOMString MIMEType;</webidl>
+        <descriptive>
+            <brief>
+    Describes the mime type of the attachment, e.g. &quot;text/html&quot;. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="FindMessagesSuccessCallback" id="::messaging::FindMessagesSuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface FindMessagesSuccessCallback {&#13;
+&#13;
+    void onsuccess(in <ref>MessageArray</ref> messages);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ findMessages specific success callback. 
+          </brief>
+         <description>
+          <p>
+This callback interface specifies a success callback with a function taking a list of messages as input argument. It is used in the findMessages asynchronous operation. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::messaging::FindMessagesSuccessCallback::onsuccess">
+        <webidl>    void onsuccess(in <ref>MessageArray</ref> messages);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the asynchronous call completes successfully 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="messages">
+            <descriptive>
+                <description><p>
+ The list of messages that correspond to the find criteria 
+                </p></description>
+            </descriptive>
+            <Type name="MessageArray"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="UpdateMessageSuccessCallback" id="::messaging::UpdateMessageSuccessCallback">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface UpdateMessageSuccessCallback {&#13;
+&#13;
+    void onsuccess(in <ref>Message</ref> message);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ update specific success callback. 
+          </brief>
+         <description>
+          <p>
+This callback interface specifies a success callback with a function that will provide a message object that is meant to represent the actual status of a message after an update has been triggered. It is used in the update asynchronous operation on the Message interface. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::messaging::UpdateMessageSuccessCallback::onsuccess">
+        <webidl>    void onsuccess(in <ref>Message</ref> message);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the asynchronous call completes successfully 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="message">
+            <descriptive>
+                <description><p>
+ The new message representing the actual updated status 
+                </p></description>
+            </descriptive>
+            <Type name="Message"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="OnIncomingMessage" id="::messaging::OnIncomingMessage">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject] interface OnIncomingMessage {&#13;
+&#13;
+     void onevent (in <ref>Message</ref> message);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for specifying the method called on new incoming message events. 
+          </brief>
+         <description>
+          <p>
+This interface specifies a function that will provide a message object that represents the received message. It is used in the onSMS(), onMMS(), onEmail() method invocation. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onevent" id="::messaging::OnIncomingMessage::onevent">
+        <webidl>     void onevent (in <ref>Message</ref> message);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when an incoming message is received 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="message">
+            <descriptive>
+                <description><p>
+ The message received 
+                </p></description>
+            </descriptive>
+            <Type name="Message"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="MessageSendCallback" id="::messaging::MessageSendCallback">
+      <webidl>  [Callback, NoInterfaceObject] interface MessageSendCallback {&#13;
+&#13;
+     void onsuccess();&#13;
+&#13;
+&#13;
+     void onmessagesendsuccess(in DOMString recipient);&#13;
+&#13;
+&#13;
+     void onmessagesenderror(in <ref>DeviceAPIError</ref> error, in DOMString recipient);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Interface for specifying the methods to be called for message send results for each recipient. 
+          </brief>
+         <description>
+          <p>
+This interface specifies a set of functions that will be invoked every time the result of the send operation to a recipient is obtained or when the message is successfully sent to all the recipients. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::messaging::MessageSendCallback::onsuccess">
+        <webidl>     void onsuccess();</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the message is successfully sent to all the recipients 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="onmessagesendsuccess" id="::messaging::MessageSendCallback::onmessagesendsuccess">
+        <webidl>     void onmessagesendsuccess(in DOMString recipient);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the message is successfully sent to a recipient 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient which the message has been sent to 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onmessagesenderror" id="::messaging::MessageSendCallback::onmessagesenderror">
+        <webidl>     void onmessagesenderror(in <ref>DeviceAPIError</ref> error, in DOMString recipient);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the message is unsuccessfully sent to a recipient 
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The error code that identifies the reason of the failure 
+                </p></description>
+            </descriptive>
+            <Type name="DeviceAPIError"/>
+          </Argument>
+          <Argument in="in" name="recipient">
+            <descriptive>
+                <description><p>
+ The recipient which the message has been sent to 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="PendingOperation" id="::messaging::PendingOperation">
+      <webidl>     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };</webidl>
+      <descriptive>
+          <brief>
+ The PendingOperation interface
+          </brief>
+         <description>
+          <p>
+The PendingOperation interface describes operation of cancellable aynchronous methods.
+Cancellable asynchronous methods return PendingOperation objects exporting methods for
+cancelling the operation. 
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::messaging::PendingOperation::cancel">
+        <webidl>        void cancel ();</webidl>
+        <descriptive>
+            <brief>
+ Cancel method for cancelling asynchronous operation
+            </brief>
+           <description>
+            <p>
+Cancel ongoing asynchronous method call. Upon calling this method the runtime must immediately stop
+the pending operation and return.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

@@ -1,0 +1,1176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="sensors" id="::sensors">
+    <webidl>module sensors {&#13;
+&#13;
+&#13;
+&#13;
+   exception SensorException {&#13;
+&#13;
+&#13;
+       const unsigned short INVALID_INPUT_ARGUMENT = 0; &#13;
+&#13;
+&#13;
+       unsigned short code;&#13;
+&#13;
+&#13;
+&#13;
+       DOMString message;&#13;
+&#13;
+   };&#13;
+&#13;
+  &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+ &#13;
+    [NoInterfaceObject] interface Sensor : <ref>Service</ref> {&#13;
+ &#13;
+&#13;
+        readonly attribute float?          maximumRange;&#13;
+&#13;
+&#13;
+        readonly attribute unsigned long?   minDelay;&#13;
+&#13;
+&#13;
+        readonly attribute float?         power;&#13;
+&#13;
+&#13;
+        readonly attribute float?         resolution;&#13;
+&#13;
+&#13;
+        readonly attribute DOMString?      vendor;  &#13;
+&#13;
+&#13;
+        readonly attribute unsigned long?  version; &#13;
+&#13;
+&#13;
+&#13;
+        <ref>PendingOp</ref> configureSensor (in <ref>ConfigureSensorOptions</ref> options, in <ref>ConfigureSensorCB</ref> successCB, in optional <ref>SensorErrorCB</ref> errorCB)&#13;
+            raises (<ref>SensorException</ref>);&#13;
+&#13;
+&#13;
+     };&#13;
+&#13;
+&#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject] interface ConfigureSensorCB {&#13;
+&#13;
+&#13;
+       void onSuccess();          &#13;
+    };&#13;
+&#13;
+&#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject] interface SensorErrorCB {&#13;
+&#13;
+&#13;
+       void onErrror(in <ref>SensorCBError</ref> error); &#13;
+    };&#13;
+&#13;
+&#13;
+    [NoInterfaceObject] interface SensorCBError {&#13;
+&#13;
+&#13;
+       const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+&#13;
+       const unsigned short TIMEOUT_ERROR = 1;&#13;
+&#13;
+&#13;
+       const unsigned short ILLEGAL_SENSOR_TYPE_ERROR = 2;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_TYPE_NOT_SUPPORTED_ERROR = 3;&#13;
+&#13;
+&#13;
+       const unsigned short ILLEGAL_SENSOR_ID_ERROR = 4;&#13;
+&#13;
+&#13;
+       const unsigned short OTHER_ILLEGAL_INPUT_ARGUMENT_ERROR = 5;&#13;
+&#13;
+&#13;
+       const unsigned short REQUESTED_RATE_NOT_SUPPORTED_ERROR = 6;&#13;
+&#13;
+&#13;
+       const unsigned short REQUESTED_INTERRUPTMODE_NOT_SUPPORTED_ERROR = 7;&#13;
+&#13;
+&#13;
+       const unsigned short PERMISSION_DENIED_ERROR = 50;&#13;
+&#13;
+&#13;
+&#13;
+       readonly attribute unsigned short code;&#13;
+&#13;
+&#13;
+&#13;
+       readonly attribute DOMString message;&#13;
+&#13;
+    };    &#13;
+&#13;
+&#13;
+&#13;
+    [NoInterfaceObject] interface ConfigureSensorOptions {&#13;
+&#13;
+&#13;
+       const unsigned short INFINITE = 0;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_FASTEST = 0;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_GAME = 1;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_UI = 2;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_NORMAL = 3;&#13;
+&#13;
+&#13;
+       attribute unsigned short timeout;&#13;
+&#13;
+&#13;
+       attribute unsigned short rate;&#13;
+&#13;
+&#13;
+       attribute boolean interrupt;&#13;
+     };&#13;
+&#13;
+&#13;
+     [NoInterfaceObject] interface PendingOp {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+   interface SensorEvent : <ref>Event</ref> {&#13;
+&#13;
+ &#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_HIGH = 4;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_MEDIUM = 3;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_LOW = 2;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_UNRELIABLE = 1;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_UNAVAILABLE = 0;&#13;
+&#13;
+&#13;
+&#13;
+    readonly attribute DOMString sensorType;&#13;
+&#13;
+&#13;
+    readonly attribute DOMString sensorId;&#13;
+&#13;
+&#13;
+&#13;
+    readonly attribute unsigned short accuracy;&#13;
+&#13;
+ &#13;
+&#13;
+    readonly attribute unsigned short rate;&#13;
+&#13;
+&#13;
+    readonly attribute boolean interrupt;&#13;
+&#13;
+&#13;
+    readonly attribute float[] sensorValues;&#13;
+&#13;
+&#13;
+    void initSensorEvent(in DOMString type,&#13;
+                         in boolean bubbles,&#13;
+                         in boolean cancelable,&#13;
+                         in DOMString sensorType,&#13;
+                         in DOMString sensorId,&#13;
+                         in unsigned short accuracy,&#13;
+                         in unsigned short rate,&#13;
+                         in boolean interrupt, &#13;
+                         in float[] sensorValues); &#13;
+    };&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The Generic Sensor API 
+        </brief>
+       <description>
+        <p>
+The Webinos Generic Sensor API provides web applications with an API to access data from sensors in the device, connected to the device or in another device.
+        </p>
+        <p>
+The API is agnostic to underlying low level methods for sensor discovery and communication with sensors. However, the sensor API should be used
+in combination with the general Webinos service discovery methods findServices() and bind(). The sensors services can be located in the user's personal zone or be shared on the current network.
+        </p>
+        <p>
+The API consists of two interfaces: <br/>- A sensor interface that provides attributes for the sensors and a method to configure a selected sensor.<br/>- A DOM level 3 event that provides sensor data.<br/>        </p>
+        <p>
+Currently 5 different sensor types are defined but the API could easily be extended with additional sensor types.
+        </p>
+        <p>
+This is an experimental API and security and privacy issues are not specifically addressed in the specification. If access to security or privacy
+sensitive sensors are provided the user agent must either acquire access permission through a user interface or control access through a prearranged
+trust relationship with users. 
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/sensors">
+          <descriptive>
+           <description>
+            <p>
+Identifies all the sensor types. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/sensors.light">
+          <descriptive>
+           <description>
+            <p>
+Identifies the light sensor type. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/sensors.noise">
+          <descriptive>
+           <description>
+            <p>
+Identifies the noise sensor type. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/sensors.temperature">
+          <descriptive>
+           <description>
+            <p>
+Identifies the temperature sensor type. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/sensors.pressure">
+          <descriptive>
+           <description>
+            <p>
+Identifies the pressure sensor type. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Claes Nilsson &#60;claes1.nilsson@sonyericsson.com&#62;
+        </author>
+        <version>
+ 0.9 
+        </version>
+    </descriptive>
+    <Exception name="SensorException" id="::sensors::SensorException">
+      <webidl>   exception SensorException {&#13;
+&#13;
+&#13;
+       const unsigned short INVALID_INPUT_ARGUMENT = 0; &#13;
+&#13;
+&#13;
+       unsigned short code;&#13;
+&#13;
+&#13;
+&#13;
+       DOMString message;&#13;
+&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ Defines the  error codes for this module
+          </brief>
+      </descriptive>
+      <Const name="INVALID_INPUT_ARGUMENT" value="0" id="::sensors::SensorException::INVALID_INPUT_ARGUMENT">
+        <webidl>       const unsigned short INVALID_INPUT_ARGUMENT = 0;</webidl>
+        <descriptive>
+            <brief>
+ Illegal sensor id
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <ExceptionField name="code" id="::sensors::SensorException::code">
+        <webidl>       unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Exception code
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::sensors::SensorException::message">
+        <webidl>       DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Exception message
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </ExceptionField>
+    </Exception>
+    <Interface name="Sensor" id="::sensors::Sensor">
+      <webidl>    [NoInterfaceObject] interface Sensor : <ref>Service</ref> {&#13;
+ &#13;
+&#13;
+        readonly attribute float?          maximumRange;&#13;
+&#13;
+&#13;
+        readonly attribute unsigned long?   minDelay;&#13;
+&#13;
+&#13;
+        readonly attribute float?         power;&#13;
+&#13;
+&#13;
+        readonly attribute float?         resolution;&#13;
+&#13;
+&#13;
+        readonly attribute DOMString?      vendor;  &#13;
+&#13;
+&#13;
+        readonly attribute unsigned long?  version; &#13;
+&#13;
+&#13;
+&#13;
+        <ref>PendingOp</ref> configureSensor (in <ref>ConfigureSensorOptions</ref> options, in <ref>ConfigureSensorCB</ref> successCB, in optional <ref>SensorErrorCB</ref> errorCB)&#13;
+            raises (<ref>SensorException</ref>);&#13;
+&#13;
+&#13;
+     };</webidl>
+      <descriptive>
+          <Code>        // Handle that can be used to cancel the ongoing asynchronous discovery process.
+        var findHandle = 0;
+
+        // Handle from service.bind.
+        var sensorHandle = 0;
+
+        // Array of found temperature sensors object.
+        var availableTempSensors = {};
+                 
+        // Callback method that display a list of found sensors in a selection list
+        // The selection list is dynamically extended every time a new sensor is discovered.
+        function sensorFoundCB(sensor) {
+
+                var selectlist = document.getElementById('sensorlist');
+                var option = document.createElement('option');
+                option.value = sensor.id;
+                option.appendChild(document.createTextNode(sensor.displayName));
+                availableTempSensors [sensor.id] = sensor;
+                selectlist.appendChild(option);
+
+        }
+                      
+ 
+       // Callback when bind has been successfully executed on the service object. The Sensor is authorized and ready to use
+        function bindCB(mySensor) {
+
+                alert('Sensor ' + mySensor.displayName + ' with ID: ' + mySensor.id + ' selected');
+               
+
+                // Configure the sensor.
+                mySensor.configureSensor ( {timeout: 120, rate: SENSOR_DELAY_NORMAL, interrupt: False}, 
+                                           successHandler () {alert('Sensor ' + mySensor.displayName + ' with ID: ' + mySensor.id +
+                                                                    ' is configured') },
+                                           errorHandler (error) {alert('Sensor ' + mySensor.displayName + ' with ID: ' + mySensor.id +
+                                                                       ' configuration failed' + ' with error: ' + error.message)} );
+
+               
+                // Start listening to sensor events and log values. 
+                mySensor.addEventListener('sensor', function (event) {
+                          console.log(event.sensorValues[0]);
+
+                          var temp = document.getElementById('temp');
+                          temp.innerHTML = &quot;Current temperature is: &quot; + event.sensorValues[0];
+
+
+                }, true); 
+
+        }
+
+
+       // Callback method that is invoked when user selects an option in the sensor selection list 
+        function sensorSelected(sensor) {
+
+                // Stops the findServices operation
+                findHandle.cancel();
+
+                // Binds to the sensor API to initiate an authorized objects used to
+                // invoke services.  
+                sensorHandle = sensor.bind({onBind:bindCB});                               
+                
+        }
+        
+        // Get list of temperature sensors registered in the device through the Service Discovery findServices() method
+        findHandle  = window.webinos.discovery.findServices({api:'http://webinos.org/api/sensors.temperature'}, {onFound:sensorFoundCB});
+ 
+       // Handle user selection of sensor
+        var sensorlist = document.getElementById('sensorlist');
+        sensorlist.addEventListener(&quot;change&quot;, function (e) {
+                                var sensor = availableTempSensors[e.target.value];
+                                if (sensor) {
+                                    sensorSelected(sensor);
+                                }
+        }, false);
+
+
+ </Code>
+          <brief>
+ This interface defines sensor properties. It is a sensor specific extension to the interface Service in the ServiceDiscovery module.
+The added attributes correspond to Android sensor API attributes.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="Service"/>
+      </InterfaceInheritance>
+      <Attribute readonly="readonly" name="maximumRange" id="::sensors::Sensor::maximumRange">
+        <webidl>        readonly attribute float?          maximumRange;</webidl>
+        <descriptive>
+            <brief>
+ Max range of sensor in the sensors unit.
+            </brief>
+        </descriptive>
+        <Type type="float" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="minDelay" id="::sensors::Sensor::minDelay">
+        <webidl>        readonly attribute unsigned long?   minDelay;</webidl>
+        <descriptive>
+            <brief>
+ Min delay of sensor allowed between two events in microsecond or zero if this sensor only returns a value when the data it's measuring changes.
+            </brief>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="power" id="::sensors::Sensor::power">
+        <webidl>        readonly attribute float?         power;</webidl>
+        <descriptive>
+            <brief>
+ Power consumption of sensor in mA used by this sensor while in use. 
+            </brief>
+        </descriptive>
+        <Type type="float" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="resolution" id="::sensors::Sensor::resolution">
+        <webidl>        readonly attribute float?         resolution;</webidl>
+        <descriptive>
+            <brief>
+ Resolution of the sensor in the sensors unit.
+            </brief>
+        </descriptive>
+        <Type type="float" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="vendor" id="::sensors::Sensor::vendor">
+        <webidl>        readonly attribute DOMString?      vendor;</webidl>
+        <descriptive>
+            <brief>
+ Vendor string of this sensor.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="version" id="::sensors::Sensor::version">
+        <webidl>        readonly attribute unsigned long?  version;</webidl>
+        <descriptive>
+            <brief>
+ Version of the sensors module.
+            </brief>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Operation name="configureSensor" id="::sensors::Sensor::configureSensor">
+        <webidl>        <ref>PendingOp</ref> configureSensor (in <ref>ConfigureSensorOptions</ref> options, in <ref>ConfigureSensorCB</ref> successCB, in optional <ref>SensorErrorCB</ref> errorCB)&#13;
+            raises (<ref>SensorException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Configures a sensor.
+            </brief>
+           <description>
+            <p>
+Question: Do we need the ability to specify high and low thresholds? This is for example not supported by Android sensor API.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOp">
+          <descriptive>
+              <description><p>
+ A pending operation object making it possible to cancel the configureSensor operation     
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="options">
+            <descriptive>
+                <description><p>
+ Sensor configuration options. 
+                </p></description>
+            </descriptive>
+            <Type name="ConfigureSensorOptions"/>
+          </Argument>
+          <Argument in="in" name="successCB">
+            <descriptive>
+                <description><p>
+ Callback issued when sensor configuration succeeded.
+                </p></description>
+            </descriptive>
+            <Type name="ConfigureSensorCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCB">
+            <descriptive>
+                <description><p>
+ Callback issued if sensor configuration fails.  
+                </p></description>
+            </descriptive>
+            <Type name="SensorErrorCB"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="SensorException">
+            <descriptive>
+                <description><p>
+ with appropriate error code.
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="ConfigureSensorCB" id="::sensors::ConfigureSensorCB">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject] interface ConfigureSensorCB {&#13;
+&#13;
+&#13;
+       void onSuccess();          &#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ ConfigureSensorCB interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::sensors::ConfigureSensorCB::onSuccess">
+        <webidl>       void onSuccess();</webidl>
+        <descriptive>
+            <brief>
+ onSuccess The onSuccess method is called when configuration of a sensor succeeded.  
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="SensorErrorCB" id="::sensors::SensorErrorCB">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject] interface SensorErrorCB {&#13;
+&#13;
+&#13;
+       void onErrror(in <ref>SensorCBError</ref> error); &#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ SensorErrorCB interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onErrror" id="::sensors::SensorErrorCB::onErrror">
+        <webidl>       void onErrror(in <ref>SensorCBError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ onError The onError method is called if an error occurs during the configureSensor() process.  
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The error object of an unsuccessful configureSensor() asynchronous operation.
+                </p></description>
+            </descriptive>
+            <Type name="SensorCBError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="SensorCBError" id="::sensors::SensorCBError">
+      <webidl>    [NoInterfaceObject] interface SensorCBError {&#13;
+&#13;
+&#13;
+       const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+&#13;
+       const unsigned short TIMEOUT_ERROR = 1;&#13;
+&#13;
+&#13;
+       const unsigned short ILLEGAL_SENSOR_TYPE_ERROR = 2;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_TYPE_NOT_SUPPORTED_ERROR = 3;&#13;
+&#13;
+&#13;
+       const unsigned short ILLEGAL_SENSOR_ID_ERROR = 4;&#13;
+&#13;
+&#13;
+       const unsigned short OTHER_ILLEGAL_INPUT_ARGUMENT_ERROR = 5;&#13;
+&#13;
+&#13;
+       const unsigned short REQUESTED_RATE_NOT_SUPPORTED_ERROR = 6;&#13;
+&#13;
+&#13;
+       const unsigned short REQUESTED_INTERRUPTMODE_NOT_SUPPORTED_ERROR = 7;&#13;
+&#13;
+&#13;
+       const unsigned short PERMISSION_DENIED_ERROR = 50;&#13;
+&#13;
+&#13;
+&#13;
+       readonly attribute unsigned short code;&#13;
+&#13;
+&#13;
+&#13;
+       readonly attribute DOMString message;&#13;
+&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ SensorCBError interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="UNKNOWN_ERROR" value="0" id="::sensors::SensorCBError::UNKNOWN_ERROR">
+        <webidl>       const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ Uknown error
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TIMEOUT_ERROR" value="1" id="::sensors::SensorCBError::TIMEOUT_ERROR">
+        <webidl>       const unsigned short TIMEOUT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ No success callback within timeout period.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="ILLEGAL_SENSOR_TYPE_ERROR" value="2" id="::sensors::SensorCBError::ILLEGAL_SENSOR_TYPE_ERROR">
+        <webidl>       const unsigned short ILLEGAL_SENSOR_TYPE_ERROR = 2;</webidl>
+        <descriptive>
+            <brief>
+ Illegal sensor type
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_TYPE_NOT_SUPPORTED_ERROR" value="3" id="::sensors::SensorCBError::SENSOR_TYPE_NOT_SUPPORTED_ERROR">
+        <webidl>       const unsigned short SENSOR_TYPE_NOT_SUPPORTED_ERROR = 3;</webidl>
+        <descriptive>
+            <brief>
+ Illegal sensor type
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="ILLEGAL_SENSOR_ID_ERROR" value="4" id="::sensors::SensorCBError::ILLEGAL_SENSOR_ID_ERROR">
+        <webidl>       const unsigned short ILLEGAL_SENSOR_ID_ERROR = 4;</webidl>
+        <descriptive>
+            <brief>
+ Illegal sensor id
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="OTHER_ILLEGAL_INPUT_ARGUMENT_ERROR" value="5" id="::sensors::SensorCBError::OTHER_ILLEGAL_INPUT_ARGUMENT_ERROR">
+        <webidl>       const unsigned short OTHER_ILLEGAL_INPUT_ARGUMENT_ERROR = 5;</webidl>
+        <descriptive>
+            <brief>
+ Other illegal input arguments
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="REQUESTED_RATE_NOT_SUPPORTED_ERROR" value="6" id="::sensors::SensorCBError::REQUESTED_RATE_NOT_SUPPORTED_ERROR">
+        <webidl>       const unsigned short REQUESTED_RATE_NOT_SUPPORTED_ERROR = 6;</webidl>
+        <descriptive>
+            <brief>
+ Sensor rate requested through configureSensor() not supported
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="REQUESTED_INTERRUPTMODE_NOT_SUPPORTED_ERROR" value="7" id="::sensors::SensorCBError::REQUESTED_INTERRUPTMODE_NOT_SUPPORTED_ERROR">
+        <webidl>       const unsigned short REQUESTED_INTERRUPTMODE_NOT_SUPPORTED_ERROR = 7;</webidl>
+        <descriptive>
+            <brief>
+ Interrupt mode requested through configureSensor() not supported
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="50" id="::sensors::SensorCBError::PERMISSION_DENIED_ERROR">
+        <webidl>       const unsigned short PERMISSION_DENIED_ERROR = 50;</webidl>
+        <descriptive>
+            <brief>
+ Permission denied
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::sensors::SensorCBError::code">
+        <webidl>       readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Error code assigned when an error has occurred in configureSensor() processing.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="message" id="::sensors::SensorCBError::message">
+        <webidl>       readonly attribute DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ Human readable message assigned when an error has occurred in configureSensor() processing.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="ConfigureSensorOptions" id="::sensors::ConfigureSensorOptions">
+      <webidl>    [NoInterfaceObject] interface ConfigureSensorOptions {&#13;
+&#13;
+&#13;
+       const unsigned short INFINITE = 0;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_FASTEST = 0;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_GAME = 1;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_UI = 2;&#13;
+&#13;
+&#13;
+       const unsigned short SENSOR_DELAY_NORMAL = 3;&#13;
+&#13;
+&#13;
+       attribute unsigned short timeout;&#13;
+&#13;
+&#13;
+       attribute unsigned short rate;&#13;
+&#13;
+&#13;
+       attribute boolean interrupt;&#13;
+     };</webidl>
+      <descriptive>
+          <brief>
+ ConfigureSensorOptions interface definition
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="INFINITE" value="0" id="::sensors::ConfigureSensorOptions::INFINITE">
+        <webidl>       const unsigned short INFINITE = 0;</webidl>
+        <descriptive>
+            <brief>
+ INFINITE Timeout Value
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_DELAY_FASTEST" value="0" id="::sensors::ConfigureSensorOptions::SENSOR_DELAY_FASTEST">
+        <webidl>       const unsigned short SENSOR_DELAY_FASTEST = 0;</webidl>
+        <descriptive>
+            <brief>
+ The sensor is reporting data as fast as possible (rate attribute).
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_DELAY_GAME" value="1" id="::sensors::ConfigureSensorOptions::SENSOR_DELAY_GAME">
+        <webidl>       const unsigned short SENSOR_DELAY_GAME = 1;</webidl>
+        <descriptive>
+            <brief>
+ The sensor is reporting data with a rate suitable for games (rate attribute).
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_DELAY_UI" value="2" id="::sensors::ConfigureSensorOptions::SENSOR_DELAY_UI">
+        <webidl>       const unsigned short SENSOR_DELAY_UI = 2;</webidl>
+        <descriptive>
+            <brief>
+ The sensor is reporting data with a rate suitable for user interface (rate attribute).
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_DELAY_NORMAL" value="3" id="::sensors::ConfigureSensorOptions::SENSOR_DELAY_NORMAL">
+        <webidl>       const unsigned short SENSOR_DELAY_NORMAL = 3;</webidl>
+        <descriptive>
+            <brief>
+ The sensor is reporting data with a normal rate, e.g. suitable for screen orientation changes (rate attribute).
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute name="timeout" id="::sensors::ConfigureSensorOptions::timeout">
+        <webidl>       attribute unsigned short timeout;</webidl>
+        <descriptive>
+            <brief>
+ A timeout value for when configureSensor() is canceled in seconds between 0-65535. Default value is 120 seconds. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute name="rate" id="::sensors::ConfigureSensorOptions::rate">
+        <webidl>       attribute unsigned short rate;</webidl>
+        <descriptive>
+            <brief>
+ The requested rate of the sensor data.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute name="interrupt" id="::sensors::ConfigureSensorOptions::interrupt">
+        <webidl>       attribute boolean interrupt;</webidl>
+        <descriptive>
+            <brief>
+ The requested Interrupt mode of the sensor.<br/>False = INTERRUPT_DISABLED (events fired with a fixed time interval) <br/>True = INTERRUPT_ENABLED (events fired when value changes)
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+    </Interface>
+    <Interface name="PendingOp" id="::sensors::PendingOp">
+      <webidl>     [NoInterfaceObject] interface PendingOp {&#13;
+&#13;
+&#13;
+        void cancel ();&#13;
+     };</webidl>
+      <descriptive>
+          <brief>
+ The PendingOp interface
+          </brief>
+         <description>
+          <p>
+The PendingOp interface describes objects that are returned by asynchronous methods that are cancellable. It makes it possible to bring 
+these operations to a stop if they haven't produced a result within a desired time or before a given event, thereby possibly reclaiming resources.<br/>TBD: Elaborate on cancel of ongoing configureSensor() operation...
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::sensors::PendingOp::cancel">
+        <webidl>        void cancel ();</webidl>
+        <descriptive>
+            <brief>
+ Method Cancel
+            </brief>
+           <description>
+            <p>
+Cancel the pending asynchronous operation. When this method is called, the user agent must immediately bring the operation to a stop and return. No success or error callback for the pending operation will be invoked.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="SensorEvent" id="::sensors::SensorEvent">
+      <webidl>   interface SensorEvent : <ref>Event</ref> {&#13;
+&#13;
+ &#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_HIGH = 4;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_MEDIUM = 3;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_ACCURACY_LOW = 2;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_UNRELIABLE = 1;&#13;
+&#13;
+&#13;
+    const unsigned short SENSOR_STATUS_UNAVAILABLE = 0;&#13;
+&#13;
+&#13;
+&#13;
+    readonly attribute DOMString sensorType;&#13;
+&#13;
+&#13;
+    readonly attribute DOMString sensorId;&#13;
+&#13;
+&#13;
+&#13;
+    readonly attribute unsigned short accuracy;&#13;
+&#13;
+ &#13;
+&#13;
+    readonly attribute unsigned short rate;&#13;
+&#13;
+&#13;
+    readonly attribute boolean interrupt;&#13;
+&#13;
+&#13;
+    readonly attribute float[] sensorValues;&#13;
+&#13;
+&#13;
+    void initSensorEvent(in DOMString type,&#13;
+                         in boolean bubbles,&#13;
+                         in boolean cancelable,&#13;
+                         in DOMString sensorType,&#13;
+                         in DOMString sensorId,&#13;
+                         in unsigned short accuracy,&#13;
+                         in unsigned short rate,&#13;
+                         in boolean interrupt, &#13;
+                         in float[] sensorValues); &#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines the &quot;genericsensor&quot; event type.
+          </brief>
+         <description>
+          <p>
+Registration for generic sensor events is achieved by calling addEventListener instantiated on the selected sensor object with event type set to &quot;sensor&quot; (see code example in the beginning of this specification)
+          </p>
+         </description>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="Event"/>
+      </InterfaceInheritance>
+      <Const name="SENSOR_STATUS_ACCURACY_HIGH" value="4" id="::sensors::SensorEvent::SENSOR_STATUS_ACCURACY_HIGH">
+        <webidl>    const unsigned short SENSOR_STATUS_ACCURACY_HIGH = 4;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing that the sensor is reporting data with maximum accuracy.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_STATUS_ACCURACY_MEDIUM" value="3" id="::sensors::SensorEvent::SENSOR_STATUS_ACCURACY_MEDIUM">
+        <webidl>    const unsigned short SENSOR_STATUS_ACCURACY_MEDIUM = 3;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing that the sensor is reporting data with an average level of accuracy, calibrating with the environment may improve the
+reading.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_STATUS_ACCURACY_LOW" value="2" id="::sensors::SensorEvent::SENSOR_STATUS_ACCURACY_LOW">
+        <webidl>    const unsigned short SENSOR_STATUS_ACCURACY_LOW = 2;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing that the sensor is reporting with low accuracy, calibrating with the environment is needed.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_STATUS_UNRELIABLE" value="1" id="::sensors::SensorEvent::SENSOR_STATUS_UNRELIABLE">
+        <webidl>    const unsigned short SENSOR_STATUS_UNRELIABLE = 1;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing that the sensor data cannot be trusted, calibrating is needed or the environment does not allow reading.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SENSOR_STATUS_UNAVAILABLE" value="0" id="::sensors::SensorEvent::SENSOR_STATUS_UNAVAILABLE">
+        <webidl>    const unsigned short SENSOR_STATUS_UNAVAILABLE = 0;</webidl>
+        <descriptive>
+            <brief>
+ A constant describing that the sensor is not available and no sensor data can be provided. This accuracy attribute will for example take 
+this value when contact is lost with a sensor using Bluetooth communication.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="sensorType" id="::sensors::SensorEvent::sensorType">
+        <webidl>    readonly attribute DOMString sensorType;</webidl>
+        <descriptive>
+            <brief>
+ The type of sensor. This is a URI defining the sensor type according to the defined sensor &quot;feature&quot; URI strings. See section &quot;Features&quot;. <br/><br/>For the defined sensor types the sensorValues array contains the following data:<br/><br/>http://webinos.org/api/sensors.light:<br/>sensorValue[0] = the measured ambient light level around the device in SI lux units.<br/>sensorValue[1] = A normalized value between 0 and 1.<br/><br/>http://webinos.org/api/sensors.noise:<br/>sensorValue[0] = the measured ambient noise around the device, in DB(SPL).<br/>sensorValue[1] = A normalized value between 0 and 1.<br/><br/>http://webinos.org/api/sensors.temperature:<br/>sensorValue[0] = the measured ambient temperature around the device, in degrees Celsius.<br/>sensorValue[1] = A normalized value between 0 and 1.<br/><br/>http://webinos.org/api/sensors.pressure:<br/>sensorValue[0] = the measured atmospheric pressure around the device in hPa (millibar)<br/>sensorValue[1] = A normalized value between 0 and 1.<br/><br/>http://webinos.org/api/sensors.proximity:<br/>sensorValue[0] =  Proximity sensor distance measured in centimeters.<br/>sensorValue[1] = A normalized value between 0 and 1.Some sensor can only state &quot;near&quot; (0) and &quot;far&quot; (1) <br/>            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="sensorId" id="::sensors::SensorEvent::sensorId">
+        <webidl>    readonly attribute DOMString sensorId;</webidl>
+        <descriptive>
+            <brief>
+ The unique identity of the of the specific sensor
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="accuracy" id="::sensors::SensorEvent::accuracy">
+        <webidl>    readonly attribute unsigned short accuracy;</webidl>
+        <descriptive>
+            <brief>
+ The accuracy of the sensor
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="rate" id="::sensors::SensorEvent::rate">
+        <webidl>    readonly attribute unsigned short rate;</webidl>
+        <descriptive>
+            <brief>
+ The rate of the sensor data
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="interrupt" id="::sensors::SensorEvent::interrupt">
+        <webidl>    readonly attribute boolean interrupt;</webidl>
+        <descriptive>
+            <brief>
+ Interrupt mode of the sensor.
+The value is one of
+false = INTERRUPT_DISABLED (events fired with a fixed time interval)
+true = INTERRUPT_ENABLED (events fired when value changes)
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="sensorValues" id="::sensors::SensorEvent::sensorValues">
+        <webidl>    readonly attribute float[] sensorValues;</webidl>
+        <descriptive>
+            <brief>
+ Array of sensor values
+            </brief>
+        </descriptive>
+        <Type type="array">
+          <Type type="float"/>
+        </Type>
+      </Attribute>
+      <Operation name="initSensorEvent" id="::sensors::SensorEvent::initSensorEvent">
+        <webidl>    void initSensorEvent(in DOMString type,&#13;
+                         in boolean bubbles,&#13;
+                         in boolean cancelable,&#13;
+                         in DOMString sensorType,&#13;
+                         in DOMString sensorId,&#13;
+                         in unsigned short accuracy,&#13;
+                         in unsigned short rate,&#13;
+                         in boolean interrupt, &#13;
+                         in float[] sensorValues);</webidl>
+        <descriptive>
+            <brief>
+ Method to set initial values of sensor event.  
+            </brief>
+           <description>
+            <p>
+The initSensorEvent() method must initialize the event in a manner analogous to the initEvent() method in http://www.w3.org/TR/2010/WD-DOM-Level-3-Events-20100907/.
+The method can for example be used with document.createEvent() and EventTarget.dispatchEvent() to simulate a specific event.
+The sensorType, sensorId, accuracy, rate, interrupt and sensorvalues arguments must initialize the attributes with the same names.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="type">
+            <descriptive>
+                <description><p>
+ Event type i.e. 'sensor'
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" name="sensorType">
+            <descriptive>
+                <description><p>
+ Sensor type as a URI
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="sensorId">
+            <descriptive>
+                <description><p>
+ The unique identity of the specific sensor
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="accuracy">
+            <descriptive>
+                <description><p>
+ Accuracy of sensor data
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="rate">
+            <descriptive>
+                <description><p>
+ Rate
+                </p></description>
+            </descriptive>
+            <Type type="unsigned short"/>
+          </Argument>
+          <Argument in="in" name="interrupt">
+            <descriptive>
+                <description><p>
+ Interrupt mode
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument in="in" name="sensorValues">
+            <descriptive>
+                <description><p>
+ Array of sensor values
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type type="float"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

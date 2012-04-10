@@ -1,0 +1,36 @@
+{
+  "name": "contacts"
+, "publishConfig": { "tag": "alpha" }
+, "description": "contacts API"
+, "keywords": ["webinos", "contacts" , "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Vito Macchia <vito.macchia@ismb.it>, Paolo Vergori, <paolo.vergori@ismb.it>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "contrib": "./contrib"
+                 , "doc": "./doc"
+                 , "lib": "./lib"
+                 , "node_modules": "./node_modules"
+                 , "src": ".src"
+                 , "test": "./test"
+                 }
+, "main": "./lib/webinos.contacts.rpc"
+, "dependencies":
+  { "xml2js": "0.1.12"
+  , "seq": "0.3.5"
+  }
+, "bundleDependencies":
+  [ "events"
+  , "fs"
+  , "https"
+  , "path"
+  , "url"
+  ]
+}

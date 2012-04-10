@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="widget" id="::widget">
+    <webidl>module widget {&#13;
+&#13;
+&#13;
+   [NoInterfaceObject] interface NotifySuccessCallback {&#13;
+ &#13;
+&#13;
+    void onSuccess(in DOMString id);&#13;
+  };&#13;
+  &#13;
+&#13;
+   [NoInterfaceObject] interface NotifyErrorCallback {&#13;
+ &#13;
+&#13;
+    void onError(in DOMString id);&#13;
+  };&#13;
+  &#13;
+&#13;
+   [NoInterfaceObject] interface DeploymentSuccessCallback {&#13;
+&#13;
+&#13;
+     void onSuccess(in DOMString childID, in DOMString serviceID);&#13;
+   };&#13;
+   &#13;
+&#13;
+   [Callback=FunctionOnly, NoInterfaceObject] interface DeploymentErrorCallback {&#13;
+ &#13;
+&#13;
+      void onError (in <ref>DeploymentError</ref> error);&#13;
+    };&#13;
+  &#13;
+&#13;
+    interface DeploymentError {&#13;
+&#13;
+      const unsigned short INSTALLATION_CANCELED_BY_USER = 101;&#13;
+      &#13;
+&#13;
+      const unsigned short PERMISSION_DENIED_ERROR  = 102;&#13;
+                       &#13;
+&#13;
+      const unsigned short NOT_REACHABLE  = 103;&#13;
+      &#13;
+&#13;
+      const unsigned short UNKNOWN_APPLICATION_ID  = 104;&#13;
+         &#13;
+&#13;
+      const unsigned short ALREADY_INSTALLED = 105;&#13;
+                       &#13;
+&#13;
+      const unsigned short INSTALLATION_ERROR_OTHER = 106;&#13;
+&#13;
+&#13;
+      readonly attribute unsigned short code;&#13;
+      &#13;
+&#13;
+      readonly attribute DOMString applicationID;&#13;
+  };  &#13;
+  &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+  interface Widget {&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributor;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributorEmail;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributorHref;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     versionName;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long long validfor;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long long validuntil;&#13;
+&#13;
+   &#13;
+&#13;
+    readonly attribute DOMString     author;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     authorEmail;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     authorHref;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     description;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     id;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     name;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     shortName;&#13;
+    &#13;
+&#13;
+        readonly attribute <ref>Storage</ref>       preferences;&#13;
+        &#13;
+&#13;
+    readonly attribute DOMString     version;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long height;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long width;&#13;
+    &#13;
+&#13;
+    void exit();&#13;
+&#13;
+&#13;
+    void hide();&#13;
+&#13;
+&#13;
+    boolean isHidden();&#13;
+&#13;
+&#13;
+    void notify(in <ref>NotifySuccessCallback</ref> onSuccess, in <ref>NotifyErrorCallback</ref> onError, in DOMString title, in optional DOMString shortDescription, in optional DOMString id, in optional DOMString icon);&#13;
+&#13;
+&#13;
+    void cancelNotify(in DOMString id);&#13;
+&#13;
+&#13;
+    void onDestroy();&#13;
+&#13;
+&#13;
+    void onBackground();&#13;
+&#13;
+&#13;
+    void onForeground();&#13;
+&#13;
+&#13;
+    void onStop();&#13;
+&#13;
+&#13;
+    void onStart();&#13;
+    &#13;
+&#13;
+    void deployChild(in <ref>DeploymentSuccessCallback</ref> onSuccess, in <ref>DeploymentErrorCallback</ref> onError, in DOMString childApplicationID, in optional boolean local);&#13;
+  };&#13;
+  &#13;
+&#13;
+  [Supplemental, NoInterfaceObject]interface WindowWidget {&#13;
+     readonly attribute <ref>Widget</ref> widget;&#13;
+   };&#13;
+   &#13;
+  <ref>Window</ref> implements <ref>WindowWidget</ref>;&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Webinos widget interfaces 
+        </brief>
+       <description>
+        <p>
+This specification defines the common widget interface. The webinos application packaging
+is based on W3C Widget Specifications, thus, the interface definition is also based on
+W3C. Namely W3C Widget Interface (http://www.w3.org/TR/2011/WD-widgets-apis-20110607/).
+This specification recaptures the W3C specification while adding webinos specific extensions.
+        </p>
+       </description>
+        <author>
+ Andre Paul andre.paul@fokus.fraunhofer.de;
+        </author>
+        <version>
+ 0.1 
+        </version>
+    </descriptive>
+    <Interface name="NotifySuccessCallback" id="::widget::NotifySuccessCallback">
+      <webidl>   [NoInterfaceObject] interface NotifySuccessCallback {&#13;
+ &#13;
+&#13;
+    void onSuccess(in DOMString id);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Callback for successfull notifications
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::widget::NotifySuccessCallback::onSuccess">
+        <webidl>    void onSuccess(in DOMString id);</webidl>
+        <descriptive>
+            <brief>
+ Accepted Notification.
+            </brief>
+           <description>
+            <p>
+Called if an event was accepted by the user. If provided, the notification
+id is provided to link the success callback to a specific notification request.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="id">
+            <descriptive>
+                <description><p>
+ the optional id of the notification request or null if no id was provided.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="NotifyErrorCallback" id="::widget::NotifyErrorCallback">
+      <webidl>   [NoInterfaceObject] interface NotifyErrorCallback {&#13;
+ &#13;
+&#13;
+    void onError(in DOMString id);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Callback for failed notifications
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::widget::NotifyErrorCallback::onError">
+        <webidl>    void onError(in DOMString id);</webidl>
+        <descriptive>
+            <brief>
+ Discarded Notification.
+            </brief>
+           <description>
+            <p>
+Called if an event was not accepted by the user. If provided, the notification
+id is passed in to link the error to a specific notification request.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="id">
+            <descriptive>
+                <description><p>
+ the optional id of the notification request or null if no id was provided.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="DeploymentSuccessCallback" id="::widget::DeploymentSuccessCallback">
+      <webidl>   [NoInterfaceObject] interface DeploymentSuccessCallback {&#13;
+&#13;
+&#13;
+     void onSuccess(in DOMString childID, in DOMString serviceID);&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ Callback for successfull installations
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::widget::DeploymentSuccessCallback::onSuccess">
+        <webidl>     void onSuccess(in DOMString childID, in DOMString serviceID);</webidl>
+        <descriptive>
+            <brief>
+ Called when an application was successfully deployed.
+            </brief>
+           <description>
+            <p>
+Called when an application was successfully deployed on another device
+using deployChild.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="childID">
+            <descriptive>
+                <description><p>
+ is the application id which was used during deployChild and declared in the manifest
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="serviceID">
+            <descriptive>
+                <description><p>
+ is the unique application instance id that can be used to explicitly address
+the deployed service within webinos service discovery
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="DeploymentErrorCallback" id="::widget::DeploymentErrorCallback">
+      <webidl>   [Callback=FunctionOnly, NoInterfaceObject] interface DeploymentErrorCallback {&#13;
+ &#13;
+&#13;
+      void onError (in <ref>DeploymentError</ref> error);&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ Callback for failed installations
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::widget::DeploymentErrorCallback::onError">
+        <webidl>      void onError (in <ref>DeploymentError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Failled installions.
+            </brief>
+           <description>
+            <p>
+Called if an installation was not accepted by the user or any other error occurred.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The Widget API related error object of an unsuccessful application installation operation. 
+                </p></description>
+            </descriptive>
+            <Type name="DeploymentError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="DeploymentError" id="::widget::DeploymentError">
+      <webidl>    interface DeploymentError {&#13;
+&#13;
+      const unsigned short INSTALLATION_CANCELED_BY_USER = 101;&#13;
+      &#13;
+&#13;
+      const unsigned short PERMISSION_DENIED_ERROR  = 102;&#13;
+                       &#13;
+&#13;
+      const unsigned short NOT_REACHABLE  = 103;&#13;
+      &#13;
+&#13;
+      const unsigned short UNKNOWN_APPLICATION_ID  = 104;&#13;
+         &#13;
+&#13;
+      const unsigned short ALREADY_INSTALLED = 105;&#13;
+                       &#13;
+&#13;
+      const unsigned short INSTALLATION_ERROR_OTHER = 106;&#13;
+&#13;
+&#13;
+      readonly attribute unsigned short code;&#13;
+      &#13;
+&#13;
+      readonly attribute DOMString applicationID;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Application installation specific errors.
+          </brief>
+         <description>
+          <p>
+The DeploymentError interface encapsulates all errors related to installation of applications.
+on the same or on other devices using the deploy function. 
+          </p>
+         </description>
+      </descriptive>
+      <Const name="INSTALLATION_CANCELED_BY_USER" value="101" id="::widget::DeploymentError::INSTALLATION_CANCELED_BY_USER">
+        <webidl>      const unsigned short INSTALLATION_CANCELED_BY_USER = 101;</webidl>
+        <descriptive>
+            <brief>
+ Installation was cancelled by the user. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="102" id="::widget::DeploymentError::PERMISSION_DENIED_ERROR">
+        <webidl>      const unsigned short PERMISSION_DENIED_ERROR  = 102;</webidl>
+        <descriptive>
+            <brief>
+ Not Authorized to use the service. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NOT_REACHABLE" value="103" id="::widget::DeploymentError::NOT_REACHABLE">
+        <webidl>      const unsigned short NOT_REACHABLE  = 103;</webidl>
+        <descriptive>
+            <brief>
+ Device where the application should be installed on is not reachable. Consider retrying later. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="UNKNOWN_APPLICATION_ID" value="104" id="::widget::DeploymentError::UNKNOWN_APPLICATION_ID">
+        <webidl>      const unsigned short UNKNOWN_APPLICATION_ID  = 104;</webidl>
+        <descriptive>
+            <brief>
+ Device where the application should be installed on is not reachable. Consider retrying later. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="ALREADY_INSTALLED" value="105" id="::widget::DeploymentError::ALREADY_INSTALLED">
+        <webidl>      const unsigned short ALREADY_INSTALLED = 105;</webidl>
+        <descriptive>
+            <brief>
+ Already Installed. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INSTALLATION_ERROR_OTHER" value="106" id="::widget::DeploymentError::INSTALLATION_ERROR_OTHER">
+        <webidl>      const unsigned short INSTALLATION_ERROR_OTHER = 106;</webidl>
+        <descriptive>
+            <brief>
+ Any other error. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::widget::DeploymentError::code">
+        <webidl>      readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="applicationID" id="::widget::DeploymentError::applicationID">
+        <webidl>      readonly attribute DOMString applicationID;</webidl>
+        <descriptive>
+            <brief>
+ The application ID the error relates to.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="Widget" id="::widget::Widget">
+      <webidl>  interface Widget {&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributor;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributorEmail;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     distributorHref;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     versionName;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long long validfor;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long long validuntil;&#13;
+&#13;
+   &#13;
+&#13;
+    readonly attribute DOMString     author;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     authorEmail;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     authorHref;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     description;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     id;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     name;&#13;
+    &#13;
+&#13;
+    readonly attribute DOMString     shortName;&#13;
+    &#13;
+&#13;
+        readonly attribute <ref>Storage</ref>       preferences;&#13;
+        &#13;
+&#13;
+    readonly attribute DOMString     version;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long height;&#13;
+    &#13;
+&#13;
+    readonly attribute unsigned long width;&#13;
+    &#13;
+&#13;
+    void exit();&#13;
+&#13;
+&#13;
+    void hide();&#13;
+&#13;
+&#13;
+    boolean isHidden();&#13;
+&#13;
+&#13;
+    void notify(in <ref>NotifySuccessCallback</ref> onSuccess, in <ref>NotifyErrorCallback</ref> onError, in DOMString title, in optional DOMString shortDescription, in optional DOMString id, in optional DOMString icon);&#13;
+&#13;
+&#13;
+    void cancelNotify(in DOMString id);&#13;
+&#13;
+&#13;
+    void onDestroy();&#13;
+&#13;
+&#13;
+    void onBackground();&#13;
+&#13;
+&#13;
+    void onForeground();&#13;
+&#13;
+&#13;
+    void onStop();&#13;
+&#13;
+&#13;
+    void onStart();&#13;
+    &#13;
+&#13;
+    void deployChild(in <ref>DeploymentSuccessCallback</ref> onSuccess, in <ref>DeploymentErrorCallback</ref> onError, in DOMString childApplicationID, in optional boolean local);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Widget Interface
+          </brief>
+         <description>
+          <p>
+Defines that the webinos interface is part of the window global object.
+          </p>
+         </description>
+      </descriptive>
+      <Attribute readonly="readonly" name="distributor" id="::widget::Widget::distributor">
+        <webidl>    readonly attribute DOMString     distributor;</webidl>
+        <descriptive>
+            <brief>
+ An distributor attribute that represents people or an organization that distributed the widget.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="distributorEmail" id="::widget::Widget::distributorEmail">
+        <webidl>    readonly attribute DOMString     distributorEmail;</webidl>
+        <descriptive>
+            <brief>
+ A string attribute that represents an email address associated with the distributor.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="distributorHref" id="::widget::Widget::distributorHref">
+        <webidl>    readonly attribute DOMString     distributorHref;</webidl>
+        <descriptive>
+            <brief>
+ A string attribute that represents an email address associated with the distributor.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="versionName" id="::widget::Widget::versionName">
+        <webidl>    readonly attribute DOMString     versionName;</webidl>
+        <descriptive>
+            <brief>
+ A human readable version name.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="validfor" id="::widget::Widget::validfor">
+        <webidl>    readonly attribute unsigned long long validfor;</webidl>
+        <descriptive>
+            <brief>
+ The validfor attributed defines a time interval until when the application is valid and can be used.
+            </brief>
+           <description>
+            <p>
+The time frame is specified in elapsed milliseconds after the first application execution.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long long"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="validuntil" id="::widget::Widget::validuntil">
+        <webidl>    readonly attribute unsigned long long validuntil;</webidl>
+        <descriptive>
+            <brief>
+ The validuntil attributed defines a date and time until the application is valid and can be used.
+            </brief>
+           <description>
+            <p>
+The time frame is specified as in milliseconds whereas the date and time is encoded as milliseconds since midnight of January 1, 1970, according to universal time. 
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long long"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="author" id="::widget::Widget::author">
+        <webidl>    readonly attribute DOMString     author;</webidl>
+        <descriptive>
+            <brief>
+ An author attribute that represents people or an organization attributed with the creation of the widget.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="authorEmail" id="::widget::Widget::authorEmail">
+        <webidl>    readonly attribute DOMString     authorEmail;</webidl>
+        <descriptive>
+            <brief>
+ A string attribute that represents an email address associated with the author.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="authorHref" id="::widget::Widget::authorHref">
+        <webidl>    readonly attribute DOMString     authorHref;</webidl>
+        <descriptive>
+            <brief>
+ An IRI attribute whose value represents an IRI that the author associates with himself or herself (e.g., a homepage, a profile on a social network, etc.).
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="description" id="::widget::Widget::description">
+        <webidl>    readonly attribute DOMString     description;</webidl>
+        <descriptive>
+            <brief>
+ The description element represents a human-readable description of the widget.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="id" id="::widget::Widget::id">
+        <webidl>    readonly attribute DOMString     id;</webidl>
+        <descriptive>
+            <brief>
+ An IRI attribute that denotes an identifier for the widget.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="name" id="::widget::Widget::name">
+        <webidl>    readonly attribute DOMString     name;</webidl>
+        <descriptive>
+            <brief>
+ The name element represents the full human-readable name for a widget that is used, for example, in an application menu or in other contexts.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="shortName" id="::widget::Widget::shortName">
+        <webidl>    readonly attribute DOMString     shortName;</webidl>
+        <descriptive>
+            <brief>
+ A displayable-string attribute intended to represent a condensed name for a widget (e.g., a name that could be used in context were only limited space is available, such as underneath an icon).
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="preferences" id="::widget::Widget::preferences">
+        <webidl>        readonly attribute <ref>Storage</ref>       preferences;</webidl>
+        <descriptive>
+            <brief>
+ The preference element allows authors to access preferences declared in the manifest file. 
+            </brief>
+           <description>
+            <p>
+For a complete definition of the Storage attribute please read the W3C specification of
+the storage attribute in the Widget specification (http://www.w3.org/TR/2011/WD-widgets-apis-20110607/). 
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Storage"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="version" id="::widget::Widget::version">
+        <webidl>    readonly attribute DOMString     version;</webidl>
+        <descriptive>
+            <brief>
+ A version attribute that specifies the version of the widget.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="height" id="::widget::Widget::height">
+        <webidl>    readonly attribute unsigned long height;</webidl>
+        <descriptive>
+            <brief>
+ A numeric attribute greater than 0 that indicates the preferred viewport height of the instantiated custom start file in CSS pixels.
+            </brief>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="width" id="::widget::Widget::width">
+        <webidl>    readonly attribute unsigned long width;</webidl>
+        <descriptive>
+            <brief>
+ A numeric attribute greater than 0 that indicates the preferred viewport width of the instantiated custom start file in CSS pixels.
+            </brief>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Operation name="exit" id="::widget::Widget::exit">
+        <webidl>    void exit();</webidl>
+        <descriptive>
+            <brief>
+ Close the running application.
+            </brief>
+           <description>
+            <p>
+Allows an application to trigger calling destroy from the runtime which results in stopping the
+application execution and closing the application.
+            </p>
+           </description>
+            <Code> 
+ //terminate the widget by its own
+ window.widget.exit();
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="hide" id="::widget::Widget::hide">
+        <webidl>    void hide();</webidl>
+        <descriptive>
+            <brief>
+ Hide the running application.
+            </brief>
+           <description>
+            <p>
+Sends the application to background if possible so that it is not visible to the user anymore
+if possible by the platform the application execution goes on
+            </p>
+           </description>
+            <Code> 
+ //the widget is not visible anymore if possible
+ window.widget.hide();
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="isHidden" id="::widget::Widget::isHidden">
+        <webidl>    boolean isHidden();</webidl>
+        <descriptive>
+            <brief>
+ Checks visibility status.
+            </brief>
+           <description>
+            <p>
+Asks the WRT wheather the application is currently hidden (not visible to the user) or not
+if the application is hidden and want to come to foreground it may notify an event to
+the user.
+            </p>
+           </description>
+            <Code> 
+ if (window.widget.isHidden()){
+    //do things, e.g., create a notification
+ };
+
+ </Code>
+        </descriptive>
+        <Type type="boolean"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="notify" id="::widget::Widget::notify">
+        <webidl>    void notify(in <ref>NotifySuccessCallback</ref> onSuccess, in <ref>NotifyErrorCallback</ref> onError, in DOMString title, in optional DOMString shortDescription, in optional DOMString id, in optional DOMString icon);</webidl>
+        <descriptive>
+            <brief>
+ Issues a notification to the user.
+            </brief>
+           <description>
+            <p>
+Triggers the WRT to notify occurence of an event, as described using the parameters, to the user
+The user can click the event. If the application is in background the application must be brought to foreground.
+After that onSuccess is called.
+            </p>
+            <p>
+Triggers the WRT to notify occurrence of an event, as described using the parameters, to the user
+The user can click the event or reject it. If the application is in background and the user accepted
+the event, e.g., by clicking on it, the application must be brought back to foreground. The notify
+success callback is then called after onForeground was called.
+            </p>
+           </description>
+            <Code> function error(id){ 
+    if (id == &quot;1&quot;){
+        //e.g, clear new e-mail list
+   }
+ }
+
+ function success(id){
+   if (id == &quot;1&quot;){
+        //e.g, show new e-mails
+   }
+   else{
+      if (id == &quot;2&quot;){
+         //e.g, show new SMS messages
+      }
+   }
+ }
+ 
+ window.widget.notify(success, error, &quot;New Emails&quot;, &quot;You have 5 new E-Mails&quot;, 1);
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="onSuccess">
+            <descriptive>
+                <description><p>
+ NotifySuccessCallback issued when the user accepts the notification.
+                </p></description>
+            </descriptive>
+            <Type name="NotifySuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="onError">
+            <descriptive>
+                <description><p>
+ ErrorCallback issued when the notification is discarded.
+                </p></description>
+            </descriptive>
+            <Type name="NotifyErrorCallback"/>
+          </Argument>
+          <Argument in="in" name="title">
+            <descriptive>
+                <description><p>
+ A short title describing the notification.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="shortDescription">
+            <descriptive>
+                <description><p>
+ A short description about the notification.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="id">
+            <descriptive>
+                <description><p>
+ An local identifier that represents the event and can be used to cancel the event or to
+take actions within the callbacks. 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="icon">
+            <descriptive>
+                <description><p>
+ A relative path within the application package to an icon describing the notification. 
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="cancelNotify" id="::widget::Widget::cancelNotify">
+        <webidl>    void cancelNotify(in DOMString id);</webidl>
+        <descriptive>
+            <brief>
+ Cancels an ongoing notification.
+            </brief>
+           <description>
+            <p>
+To cancel a previous notify because it is updated or expired (if ongoing / not clicked by the user)
+            </p>
+           </description>
+            <Code> 
+ //cancel notifications with id 1
+ window.widget.cancelNotify(&quot;1&quot;);
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="id">
+            <descriptive>
+                <description><p>
+ The notification id to cancel.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="onDestroy" id="::widget::Widget::onDestroy">
+        <webidl>    void onDestroy();</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that the application will be terminated. 
+            </brief>
+           <description>
+            <p>
+Callback function which is called if the application will be shut down by the WRT.
+All application memory assigned to the application will be freed after returning
+out of this function.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="onBackground" id="::widget::Widget::onBackground">
+        <webidl>    void onBackground();</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that the application is gone to background. 
+            </brief>
+           <description>
+            <p>
+Callback function which is called after the application was put to background, e.g., another application
+goes to foreground and the application is not visible any more. After calling onBackground the application
+is still running but not visible anymore.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="onForeground" id="::widget::Widget::onForeground">
+        <webidl>    void onForeground();</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that the application is gone to foreground. 
+            </brief>
+           <description>
+            <p>
+Application goes to foreground after previously going to background.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="onStop" id="::widget::Widget::onStop">
+        <webidl>    void onStop();</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that application execution is going to be stopped. 
+            </brief>
+           <description>
+            <p>
+Application execution is stopped aftern returning out of this function.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="onStart" id="::widget::Widget::onStart">
+        <webidl>    void onStart();</webidl>
+        <descriptive>
+            <brief>
+ Asynchronous callback indicating that application execution is continued. 
+            </brief>
+           <description>
+            <p>
+Application execution is continued after previously stopped.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+      <Operation name="deployChild" id="::widget::Widget::deployChild">
+        <webidl>    void deployChild(in <ref>DeploymentSuccessCallback</ref> onSuccess, in <ref>DeploymentErrorCallback</ref> onError, in DOMString childApplicationID, in optional boolean local);</webidl>
+        <descriptive>
+            <brief>
+ Requests to install an application on another device.
+            </brief>
+           <description>
+            <p>
+Deploys a child application known to the WRT through the definition in the application s manifest
+file on another device. If local = false or not specified the WRT has to provide a list of available
+devices to the user where the application should be installed on, if local = true the WRT has to
+install the selected child on the same device as the API is bound to.
+            </p>
+           </description>
+            <Code> function error(){ 
+   //installation failed
+ }
+
+ function success(childID, serviceID){
+   //application was successfully deployed
+   //serviceID can be used for discovery to bind directly to this application
+   //if functions are exposed by the application
+ }
+
+ //installing child application with name child1.wgt on the same device 
+ window.widget.deployChild(success, error, &quot;child1.wgt&quot;, true);
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="onSuccess">
+            <descriptive>
+                <description><p>
+ SuccessCallback called after successfull installation.
+                </p></description>
+            </descriptive>
+            <Type name="DeploymentSuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="onError">
+            <descriptive>
+                <description><p>
+ ErrorCallback called if installation was not possible.
+                </p></description>
+            </descriptive>
+            <Type name="DeploymentErrorCallback"/>
+          </Argument>
+          <Argument in="in" name="childApplicationID">
+            <descriptive>
+                <description><p>
+ the application ID of the child package to be installed.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="local">
+            <descriptive>
+                <description><p>
+ Indicates if application should be installed on the same device as the requesting application or not.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="WindowWidget" id="::widget::WindowWidget">
+      <webidl>  [Supplemental, NoInterfaceObject]interface WindowWidget {&#13;
+     readonly attribute <ref>Widget</ref> widget;&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ The WindowWidget interface describes the part of the Widget API accessible through the window object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Supplemental"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="widget" id="::widget::WindowWidget::widget">
+        <webidl>     readonly attribute <ref>Widget</ref> widget;</webidl>
+        <Type name="Widget"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="Window" name2="WindowWidget">
+      <webidl>  <ref>Window</ref> implements <ref>WindowWidget</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

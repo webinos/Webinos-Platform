@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="authentication" id="::authentication">
+    <webidl>module authentication {&#13;
+&#13;
+&#13;
+  [NoInterfaceObject]&#13;
+  interface AuthStatus  {&#13;
+  &#13;
+&#13;
+         attribute DOMString? lastAuthTime;&#13;
+&#13;
+&#13;
+         attribute DOMString? authMethod;&#13;
+         &#13;
+&#13;
+         &#13;
+         attribute DOMString? authMethodDetails;&#13;
+  };&#13;
+  &#13;
+&#13;
+  [NoInterfaceObject]&#13;
+  interface AuthError  {&#13;
+&#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        &#13;
+&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+        &#13;
+&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+&#13;
+        const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+&#13;
+           &#13;
+        readonly attribute unsigned short code;&#13;
+        &#13;
+  };&#13;
+  &#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject]&#13;
+  interface AuthSuccessCB {&#13;
+        void onSuccess(<ref>AuthStatus</ref> status);&#13;
+  };&#13;
+&#13;
+&#13;
+  [Callback=FunctionOnly, NoInterfaceObject]&#13;
+  interface AuthErrorCB {&#13;
+        void onError(<ref>AuthError</ref> error);&#13;
+  };&#13;
+  &#13;
+&#13;
+  exception AuthenticationException{ &#13;
+        unsigned short code;&#13;
+        DOMString message;&#13;
+        &#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+        const unsigned short TIMEOUT_ERROR = 2;&#13;
+  };&#13;
+&#13;
+  &#13;
+&#13;
+   &#13;
+  [NoInterfaceObject]&#13;
+  interface WebinosAuthenticationInterface {&#13;
+&#13;
+&#13;
+&#13;
+     void authenticate ( in <ref>AuthSuccessCB</ref> successCB, in optional <ref>AuthErrorCB</ref> errorCB );&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+     boolean isAuthenticated ( ) raises(<ref>AuthenticationException</ref>);&#13;
+&#13;
+&#13;
+         &#13;
+&#13;
+&#13;
+&#13;
+     <ref>AuthStatus</ref> getAuthenticationStatus () raises(<ref>AuthenticationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+   };&#13;
+   &#13;
+&#13;
+        [NoInterfaceObject] interface WebinosAuthentication {&#13;
+&#13;
+                readonly attribute <ref>WebinosAuthenticationInterface</ref> authentication;&#13;
+        };&#13;
+&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>WebinosAuthentication</ref>;&#13;
+   &#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Provides information to applications about the current authentication status of users, as well as allowing applications to request re-authentication.
+        </brief>
+       <description>
+        <p>
+Authentication API for providing applications with information about whether the current user has authenticated, and requesting re-authentication at runtime.
+        </p>
+        <p>
+Requirement/architectural reference:  PS-USR-Oxford-121
+        </p>
+        <p>
+This API intentionally does not reveal identity information, but can give details about authentication method, which may reveal device information.
+        </p>
+       </description>
+        <author>
+ John Lyle; &#60;john.lyle@cs.ox.ac.uk&#62;
+        </author>
+        <def-api-feature identifier="http://webinos.org/api/authentication">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <version>
+ 0.1
+        </version>
+    </descriptive>
+    <Interface name="AuthStatus" id="::authentication::AuthStatus">
+      <webidl>  [NoInterfaceObject]&#13;
+  interface AuthStatus  {&#13;
+  &#13;
+&#13;
+         attribute DOMString? lastAuthTime;&#13;
+&#13;
+&#13;
+         attribute DOMString? authMethod;&#13;
+         &#13;
+&#13;
+         &#13;
+         attribute DOMString? authMethodDetails;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ The object returned when user authentication status is queried.  This contains information about when and how authentication occurred.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="lastAuthTime" id="::authentication::AuthStatus::lastAuthTime">
+        <webidl>         attribute DOMString? lastAuthTime;</webidl>
+        <descriptive>
+            <brief>
+ The time of last authentication, as a valid date or time string.
+            </brief>
+            <Code> {lastAuthTime: '2011-03-24T09:00-08:00'} // last authentication was on March 24, 2011 @ 5pm (UTC)
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="authMethod" id="::authentication::AuthStatus::authMethod">
+        <webidl>         attribute DOMString? authMethod;</webidl>
+        <descriptive>
+            <brief>
+ An identifier for the type of authentication performed by the user. <br/>Intended to be flexible for different devices.  Examples include &quot;PIN&quot;, <br/> 
+&quot;Password&quot;, &quot;Fingerprint&quot;.  This is a high-level method name, no details.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="authMethodDetails" id="::authentication::AuthStatus::authMethodDetails">
+        <webidl>         attribute DOMString? authMethodDetails;</webidl>
+        <descriptive>
+            <brief>
+ Further details as to the authentication method.  This might include <br/>the authentication device identifier, or the numberof digits in PINS, or
+any device-specific value.  Optional.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="AuthError" id="::authentication::AuthError">
+      <webidl>  [NoInterfaceObject]&#13;
+  interface AuthError  {&#13;
+&#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        &#13;
+&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+        &#13;
+&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+&#13;
+        const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+&#13;
+           &#13;
+        readonly attribute unsigned short code;&#13;
+        &#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Definition of error codes for authentication events
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="UNKNOWN_ERROR" value="0" id="::authentication::AuthError::UNKNOWN_ERROR">
+        <webidl>        const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ An unknown error occurred. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::authentication::AuthError::INVALID_ARGUMENT_ERROR">
+        <webidl>        const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested method was invoked. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="20" id="::authentication::AuthError::PERMISSION_DENIED_ERROR">
+        <webidl>        const unsigned short PERMISSION_DENIED_ERROR = 20;</webidl>
+        <descriptive>
+            <brief>
+ Access to the requested method was denied at the implementation or by the user.  
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TIMEOUT_ERROR" value="2" id="::authentication::AuthError::TIMEOUT_ERROR">
+        <webidl>        const unsigned short TIMEOUT_ERROR = 2;</webidl>
+        <descriptive>
+            <brief>
+ Authentication timed out
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::authentication::AuthError::code">
+        <webidl>        readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred 
+in authentication API processing.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+    </Interface>
+    <Interface name="AuthSuccessCB" id="::authentication::AuthSuccessCB">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject]&#13;
+  interface AuthSuccessCB {&#13;
+        void onSuccess(<ref>AuthStatus</ref> status);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Success callback for authentication events.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::authentication::AuthSuccessCB::onSuccess">
+        <webidl>        void onSuccess(<ref>AuthStatus</ref> status);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="status">
+            <Type name="AuthStatus"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="AuthErrorCB" id="::authentication::AuthErrorCB">
+      <webidl>  [Callback=FunctionOnly, NoInterfaceObject]&#13;
+  interface AuthErrorCB {&#13;
+        void onError(<ref>AuthError</ref> error);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Error callback for authentication events.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::authentication::AuthErrorCB::onError">
+        <webidl>        void onError(<ref>AuthError</ref> error);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="error">
+            <Type name="AuthError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Exception name="AuthenticationException" id="::authentication::AuthenticationException">
+      <webidl>  exception AuthenticationException{ &#13;
+        unsigned short code;&#13;
+        DOMString message;&#13;
+        &#13;
+        const unsigned short UNKNOWN_ERROR = 0;&#13;
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+        const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+        const unsigned short TIMEOUT_ERROR = 2;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Exception codes for authentication events
+          </brief>
+      </descriptive>
+      <ExceptionField name="code" id="::authentication::AuthenticationException::code">
+        <webidl>        unsigned short code;</webidl>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::authentication::AuthenticationException::message">
+        <webidl>        DOMString message;</webidl>
+        <Type type="DOMString"/>
+      </ExceptionField>
+      <Const name="UNKNOWN_ERROR" value="0" id="::authentication::AuthenticationException::UNKNOWN_ERROR">
+        <webidl>        const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::authentication::AuthenticationException::INVALID_ARGUMENT_ERROR">
+        <webidl>        const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="20" id="::authentication::AuthenticationException::PERMISSION_DENIED_ERROR">
+        <webidl>        const unsigned short PERMISSION_DENIED_ERROR = 20;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TIMEOUT_ERROR" value="2" id="::authentication::AuthenticationException::TIMEOUT_ERROR">
+        <webidl>        const unsigned short TIMEOUT_ERROR = 2;</webidl>
+        <Type type="unsigned short"/>
+      </Const>
+    </Exception>
+    <Interface name="WebinosAuthenticationInterface" id="::authentication::WebinosAuthenticationInterface">
+      <webidl>  [NoInterfaceObject]&#13;
+  interface WebinosAuthenticationInterface {&#13;
+&#13;
+&#13;
+&#13;
+     void authenticate ( in <ref>AuthSuccessCB</ref> successCB, in optional <ref>AuthErrorCB</ref> errorCB );&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+     boolean isAuthenticated ( ) raises(<ref>AuthenticationException</ref>);&#13;
+&#13;
+&#13;
+         &#13;
+&#13;
+&#13;
+&#13;
+     <ref>AuthStatus</ref> getAuthenticationStatus () raises(<ref>AuthenticationException</ref>);&#13;
+&#13;
+&#13;
+&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ The authentication interface provides three methods which allow applications to check the current user authentication status and prompt for re-authentication.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="authenticate" id="::authentication::WebinosAuthenticationInterface::authenticate">
+        <webidl>     void authenticate ( in <ref>AuthSuccessCB</ref> successCB, in optional <ref>AuthErrorCB</ref> errorCB );</webidl>
+        <descriptive>
+            <brief>
+ this method instructs the runtime to request that the user authenticate themselves. <br/>The method for authentication is not specified, it may be through any means provided by the platform.
+            </brief>
+           <description>
+            <p>
+Errors can occur due to: a policy restricting access to this API, or an unknown error in the
+device-specific authentication method.
+            </p>
+            <p>
+This is an asynchronous method, although it may well be used (in practice) synchronously.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCB">
+            <descriptive>
+                <description><p>
+ contains the status of the user with regards to authentication, including when <br/> 
+and how he or she was last authenticated.  It does not include user identity.
+                </p></description>
+            </descriptive>
+            <Type name="AuthSuccessCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCB">
+            <descriptive>
+                <description><p>
+ is a callback for when errors occur 
+                </p></description>
+            </descriptive>
+            <Type name="AuthErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="isAuthenticated" id="::authentication::WebinosAuthenticationInterface::isAuthenticated">
+        <webidl>     boolean isAuthenticated ( ) raises(<ref>AuthenticationException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Query the runtime to ask whether the user has recently been authenticated.  How the platform <br/> 
+determines this is not specified.  It may return true if the user entered their PIN in the last 10 <br/>minutes, for example.  It is expected that a platform preference based on current authentication <br/> 
+status would be defined.  These preferences are security-sensitive.
+            </brief>
+           <description>
+            <p>
+Errors can occur due to: a policy restricting access to this API, or if the platform does not have <br/>a definitive answer due to a misconfigured preference or lack of information.  
+            </p>
+            <p>
+This is a synchronous method.  Expected use would be to check at an important place whether the user
+is authenticated and, if not, call &quot;authenticate&quot; to do so.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean">
+          <descriptive>
+              <description><p>
+ True IFF the user has been authenticated to the satisfaction of the platform.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+        <Raises>
+          <RaiseException name="AuthenticationException"/>
+        </Raises>
+      </Operation>
+      <Operation name="getAuthenticationStatus" id="::authentication::WebinosAuthenticationInterface::getAuthenticationStatus">
+        <webidl>     <ref>AuthStatus</ref> getAuthenticationStatus () raises(<ref>AuthenticationException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Query the runtime for precise details about the current state of the user with regard to <br/>authentication.  <br/>            </brief>
+           <description>
+            <p>
+Errors can occur due to: a policy restricting access to this API.
+            </p>
+            <p>
+This is a synchronous method.  Expected use is for when an application is determining whether the 
+user ought to re-authenticate, or whether the user is suitably authenticated for a particular
+action.  Future versions of this API may be able to insist that the user authenticates in a certain
+way.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="AuthStatus">
+          <descriptive>
+              <description><p>
+ AuthStatus - returns the status of the user with regards to authentication, including when <br/> 
+and how he or she was last authenticated.  It does not include user identity.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+        <Raises>
+          <RaiseException name="AuthenticationException"/>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosAuthentication" id="::authentication::WebinosAuthentication">
+      <webidl>        [NoInterfaceObject] interface WebinosAuthentication {&#13;
+&#13;
+                readonly attribute <ref>WebinosAuthenticationInterface</ref> authentication;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosAuthentication interface describes the part of the Authentication
+API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="authentication" id="::authentication::WebinosAuthentication::authentication">
+        <webidl>                readonly attribute <ref>WebinosAuthenticationInterface</ref> authentication;</webidl>
+        <descriptive>
+            <brief>
+ webinos.authentication object.
+            </brief>
+        </descriptive>
+        <Type name="WebinosAuthenticationInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosAuthentication">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>WebinosAuthentication</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

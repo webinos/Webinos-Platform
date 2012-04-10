@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wrt</string>
+    <string name="wrt_receiver">WRT renderer intent receiver</string>
+    <string name="wrt_receiver_description">An intent receiver that controls intents relating to WRT renderer lifecycle</string>
+    <string name="renderer_activity_title">Widget</string>
+</resources>

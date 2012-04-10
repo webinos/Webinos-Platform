@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<title>PZH Testbed</title>
+		<script type="text/javascript">
+		var channel;
+		var setFlag = false;
+
+		try{
+			channel  = new WebSocket('wss://'+window.location.hostname+':8900');
+		} catch(e) {
+			channel  = new MozWebSocket('wss://'+window.location.hostname+':8900');
+//window.location.hostname
+		}
+
+		channel.onmessage = function(ev) {
+			console.log('WebSocket Client: Message Received : ' + JSON.stringify(ev.data));
+			var msg = ev.data;
+			if( typeof ev.data === 'string'){
+				msg = JSON.parse(ev.data);
+			}
+			console.log(msg);
+			switch(msg.cmd){
+				case 'auth-url':
+					window.location.href=msg.payload;
+					break;
+			}
+		};
+		channel.onopen = function(ev) {
+			setFlag = true;
+		};
+		function Google(){
+			send({cmd: "authenticate-google"});
+		}
+		function Yahoo(){
+			send({cmd: "authenticate-yahoo"});
+		}
+		function send(payload){
+			if (setFlag)
+				channel.send(JSON.stringify(payload));
+		}
+		</script>
+		<style type="text/css">
+			body{
+				font-family:Optima, Segoe, Candara, Calibri, Arial, sans-serif;
+				background-color:#257fd7;
+				color:#FFFFFF;
+				margin:0;
+				top: 0;
+				padding:0;
+			}
+			h2 {
+				font-family: 'Mate SC', serif;
+				color: #65b3ff;
+				padding: 5px;
+				font-size: 3em;
+				margin: 0
+			}
+			li {
+				font-family: 'Mate SC', serif;
+				color: #FFFFFF;
+				padding: 5px;
+				font-size: 1.5em;
+				margin: 0
+			}
+		</style>
+	</head>
+	<body>
+		
+		<h1 style="display:block;border:none;width:160px;height:150px;margin:5px auto 20px auto;padding:0">
+		<span> <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png"></img> </span>
+		</h1>			
+		<div style="width:30%;display:inline;background:#004C97;border:0.1px;padding:15px;float:left;clear:left;margin-left:20%;text-shadow:1em 1em 2em black;">
+			<h2> Welcome to Webinos PZH </h2>
+			<li> Login to your account</li>
+			<li> Connected devices List </li>
+			<li> Add devices(PZP) in your PZH </li>
+			<li> Connect other PZH's</li>
+			<li> Revoke PZP certificate </li>
+			<li> Crash Logs </li>
+			<li> Restart PZH </li> 
+		</div>
+
+		<div style="width:20%;display:inline;background:#004C97;border:0.1px;float:right;clear:right;margin-right:20%;text-shadow:1em 1em 2em black;">
+			<center> <h2> Sign in Using: </h2>
+			<input type="button" style="height:40;width:50%;align:center" value="Login via Google" onclick="Google()"/>
+			<p> <h2> or </h2> </p>
+			 <a href="Javascript:Yahoo()"> <img src="yahoo.png"/> </a> </center>
+		</div>
+	</body>
+</html>

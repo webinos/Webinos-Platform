@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'policyShim'
+		'policyShim.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

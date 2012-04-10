@@ -1,0 +1,880 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite for="http://dev.w3.org/2006/waf/widgets/Overview.html">
+
+<test id="aa" for="ta-ACCJfDGwDQ" src="test-cases/ta-ACCJfDGwDQ/000/aa.wgt" expected="invalid">
+Tests that the UA rejects configuration documents that don't have 
+correct widget element at the root. To pass, the UA must treat this as an 
+invalid widget (the root element is not widget).
+</test>
+
+<test id="ab" for="ta-ACCJfDGwDQ" src="test-cases/ta-ACCJfDGwDQ/001/ab.wgt" expected="invalid">
+Tests that the UA rejects configuration documents that don't have correct 
+widget element at the root. To pass, the UA must treat this as an 
+invalid widget (the namespace is wrong).
+</test>
+
+<test id="ac" for="ta-ACCJfDGwDQ" src="test-cases/ta-ACCJfDGwDQ/002/ac.wgt" expected="invalid">
+Tests that the UA rejects configuration documents that don't have correct widget 
+element at the root.To pass, the UA must treat this as an invalid widget (the namespace is missing).
+</test>
+
+<test id="af" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/000/af.wgt">
+Test that a user agent correctly processes a author element.
+To pass, the author name must be the string "PASS".
+</test>
+
+<test id="ag" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/001/ag.wgt">
+Test that a user agent correctly applies the Rule for Getting Text Content with Normalized White Space.
+To pass, the widget author must be the string "P A S S" (i.e., white space collapsed to single space).
+</test>
+
+<test id="ah" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/002/ah.wgt">
+Test that a user agent correctly applies the Rule for Getting Text Content with Normalized White Space.
+To pass, the author name must be the string "PASS" (i.e., all white space collapsed to single space, spaces at start/end trimmed).
+</test>
+
+<test id="ai" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/003/ai.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value.
+To pass, the author email must be the string "PASS".
+</test>
+
+<test id="aj" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/004/aj.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value and the Rule for Getting Text Content with Normalized White Space.
+To pass, the author name must be the string "PASS" and the author email must be "PASS" and the author href must be "PASS:PASS".
+</test>
+
+<test id="ak" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/005/ak.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value and the Rule for Getting Text Content with Normalized White Space.
+To pass, the author name must be the string "PASS" and the author email must be "PASS" and the author href must be "PASS:PASS".
+</test>
+
+<test id="al" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/006/al.wgt">
+Test the ability of the user agent to handle an empty author element.
+To pass, the author name must be an empty string.
+</test>
+
+<test id="am" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/007/am.wgt">
+Test the ability of the user agent to correctly process the author href attribute.
+To pass, the value of author href must be "PASS:PASS".
+</test>
+
+<test id="an" for="ta-argMozRiC" src="test-cases/ta-argMozRiC/008/an.wgt">
+Test the ability of the user agent to correctly process the author href attribute.
+To pass, the value of author href must be null.
+</test>
+
+<test id="ao" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/000/ao.wgt">
+Test that a user agent correctly processes a name element.
+To pass, the widget name must be the string "PASS".
+</test>
+
+<test id="ap" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/001/ap.wgt">
+Test that a user agent correctly applies the Rule for Getting Text Content with Normalized White Space.
+To pass, the widget name must be the string "P A S S" (i.e., white space collapsed to single space).
+</test>
+
+<test id="aq" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/002/aq.wgt">
+Test that a user agent correctly applies the Rule for Getting Text Content with Normalized White Space.
+To pass, the widget name must be the string "PASS" (i.e., all white space collapsed to single space, spaces at front/back trimmed).
+</test>
+
+<test id="ar" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/003/ar.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value.
+To pass, the widget short name must be the string "PASS".
+</test>
+
+<test id="as" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/004/as.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value and 
+the Rule for Getting Text Content with Normalized White Space.
+To pass, the widget short name must be the string "PASS" and the widget name must be "PASS".
+</test>
+
+<test id="at" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/005/at.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value and 
+the Rule for Getting Text Content with Normalized White Space.
+To pass, the widget short name must be the string "PASS" and the widget name must be "PASS".
+</test>
+
+<test id="au" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/006/au.wgt">
+Test that a user agent correctly processes the short attribue.
+To pass, the widget short name must be an empty string.
+</test>
+
+<test id="av" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/007/av.wgt">
+Test the ability of the user agent to handle an empty name element.
+To pass, the widget name must be an empty string.
+</test>
+
+<test id="oa" for="ta-AYLMhryBnD" src="test-cases/ta-AYLMhryBnD/008/oa.wgt">
+Test that a user agent correctly processes a name element with xml:lang attribute.
+To pass, the widget name must be the string "PASS".
+</test>
+
+<test id="aw" for="ta-BnWPqNvNVo" src="test-cases/ta-BnWPqNvNVo/000/aw.wgt">
+Test that the user agent does not attempt to load a default start file when a custom start file has been declared.
+To pass, the widget start file must point to "pass.html" and the icons list must contain a pointer to "icon.png" at the root of the widget.
+</test>
+
+<test id="ax" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/000/ax.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value "1234".
+</test>
+
+<test id="ay" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/001/ay.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value "0" (the value is composed of characters).
+</test>
+
+<test id="az" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/002/az.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value "100" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="a1" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/003/a1.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value "123" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="a2" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/004/a2.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value null (the value is an empty string, hence it would be ignored).
+</test>
+
+<test id="a3" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/005/a3.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value null (the value is a sequence of space characters, hence it would be ignored).
+</test>
+
+<test id="a4" for="ta-BxjoiWHaMr" src="test-cases/ta-BxjoiWHaMr/006/a4.wgt">
+Test the UA's ability process the height attribute.
+To pass, the widget height must be the value "0".
+</test>
+
+<test id="a5" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/000/a5.wgt">
+Test that the UA skips preference elements without a name attribute.
+To pass, widget preferences must remain an empty list (i.e., the preference is skipped).
+</test>
+
+<test id="a6" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/001/a6.wgt">
+Test that the UA skips preference element already defined.
+To pass, widget preference must contain one preference whose name is "PASS" and whose value is "PASS" and whose readonly attr value must be "false".
+</test>
+
+<test id="a7" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/002/a7.wgt">
+Test that the UA does a case sensitive comparison on the value of the readonly attribute.
+To pass, widget preference must contain one preference whose name is "PASS" and whose value is "PASS" and whose readonly attr value must be "false".
+</test>
+
+<test id="a8" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/003/a8.wgt">
+Test that the UA does a case sensitive comparison on the value of the readonly attribute.
+To pass, widget preference must contain one preference whose name is "PASS" and whose value is "PASS" and whose readonly attr value must be "true".
+</test>
+
+<test id="a9" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/004/a9.wgt">
+Test that the UA sets the readonly attribute to false by default.
+To pass, widget preference must contain one preference whose name is "PASS" and whose value is "PASS" and whose readonly attr value must be "false".
+</test>
+
+<test id="ba" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/005/ba.wgt">
+Test that the UA skips multiple preference element already defined.
+To pass, widget preference must contain one preference whose name is "a" and whose value is "a" and whose readonly attr value must be "false".
+</test>
+
+<test id="bb" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/006/bb.wgt">
+Test the UA's ability store preferences whose name vary only in case.
+To pass, widget preference must contain two preferences: 1 must have a name "a" and whose value is "a" and whose readonly attr value must be "false". 2 must have a name "A" and whose value is "b" and whose readonly attribute value must be "false".
+</test>
+
+<test id="bc" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/007/bc.wgt">
+Tests that the UA applies the rule for getting a single attribute value to name, value, and readonly attributes.
+To pass, widget preference must contain one preference whose name is "PASS" and whose value is "PASS" and whose readonly attr value must be "false".
+</test>
+
+<test id="bd" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/008/bd.wgt">
+Tests that a user agent does a case sensitive comparison of the preference element's readonly attribute.
+To pass, the value of the readonly attribute must equal false.
+</test>
+
+<test id="be" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/009/be.wgt">
+Tests that a user agent does a case sensitive comparison of the preference element's readonly attribute.
+To pass, the value of the readonly attribute must equal false.
+</test>
+
+<test id="bf" for="ta-DwhJBIJRQN" src="test-cases/ta-DwhJBIJRQN/010/bf.wgt">
+Tests that a user agent does a case sensitive comparison of the preference element's readonly attribute.
+To pass, the value of the readonly attribute must equal false.
+</test>
+
+<test id="bg" for="ta-dxzVDWpaWg" src="test-cases/ta-dxzVDWpaWg/000/bg.wgt" expected="invalid">
+Test to make sure that the UA only checks the root of the widget for config files, and not in an arbritrary folder.
+To pass, the user agent must treat this widget as an invalid widget (config file is not at the root).
+</test>
+
+<test id="bh" for="ta-dxzVDWpaWg" src="test-cases/ta-dxzVDWpaWg/001/bh.wgt" expected="invalid">
+Test to make sure that the UA only checks the root of the widget for config files, and not in a locale folder.
+To pass, the user agent must treat this widget as an invalid widget (config file is not at the root, but in locale folder).
+</test>
+
+<test id="bj" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/000/bj.wgt">
+Tests the UA's ability to locate an icon at the root of the widget. 
+To pass, after processing, the icons list must contain "icon.png", 
+which is at the root of the widget.
+</test>
+
+<test id="bk" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/001/bk.wgt">
+Tests the UA's ability to locate an icon in a locale folder. 
+To pass, after processing, the icons list must contain a pointer to "locales/en/icon.png".
+</test>
+
+<test id="bl" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/002/bl.wgt">
+Tests the UA's ability to locate an icon in a locale folder and at the root of the widget.
+To pass, after processing, the icons list must contain a pointer to "locales/en/icon.jpg", and "icon.png", which is at the root of the widget.
+The icons list needs to be in the correct order, where "locales/en/icon.jpg" must be first and "icon.png" must be second.
+</test>
+
+<test id="bm" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/003/bm.wgt">
+Tests the UA's ability to deal with custom icon declaration in the config document and matching default icons.
+To pass, the icons list must contain a pointer to "locales/en/icon.jpg" and "icon.png", which is at the root of the widget.
+The list needs to be in the correct order, where "locales/en/icon.jpg" must be first and "icon.png" must be second.
+</test>
+
+<test id="bn" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/004/bn.wgt">
+Tests the UA's ability to deal with custom icon declarations in the config document and matching default icons.
+To pass, the icons list must contain a pointer to "icons/pass.png", and "icon.png", which is at the root of the widget.
+The list needs to be in the correct order, where "icons/pass.png" must be first, followed by "icon.png".
+</test>
+
+<test id="bo" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/005/bo.wgt">
+Test the UA's ability to load default icons in the correct order.
+To pass, the icons list must contain "icon.png" followed by 'icon.jpg'.
+</test>
+
+<test id="bp" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/006/bp.wgt">
+Test the UA's ability to load default icons in the correct order.
+To pass, the icons list must contain a pointer "icon.png" followed by 
+a pointer to "en/locales/icon.jpg".
+</test>
+
+<test id="ad" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/007/ad.wgt">
+Tests if the UA treats file names in the default icons files table case-sensitively.
+To pass, the icons list must only contain a pointer to "icon.png" 
+at the root of the widget.
+</test>
+
+<test id="ae" for="ta-FAFYMEGELU" src="test-cases/ta-FAFYMEGELU/008/ae.wgt">
+Tests if the UA treats file names in the default icons files table case-sensitively.
+To pass, the icons list must only contain a pointer to "locales/en/icon.png".
+</test>
+
+
+<test id="bq" for="ta-hkWmGJgfve" src="test-cases/ta-hkWmGJgfve/000/bq.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the content element.
+To pass, the widget start file must be "pass.html".
+</test>
+
+<test id="br" for="ta-hkWmGJgfve" src="test-cases/ta-hkWmGJgfve/001/br.wgt" expected="invalid">
+Tests the UA's ability to ignore subsequent repetitions of the content element.
+To pass, the widget start file must treated by the user agent as an invalid widget.
+</test>
+
+<test id="bs" for="ta-hkWmGJgfve" src="test-cases/ta-hkWmGJgfve/002/bs.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the content element.
+To pass, the widget start file must be "pass.html".
+</test>
+
+<test id="bt" for="ta-klLDaEgJeU" src="test-cases/ta-klLDaEgJeU/000/bt.wgt" expected="invalid">
+Test to make sure the user agent rejects malformed XML.
+To pass, the widget must be treated as invalid by the user agent.
+</test>
+
+<test id="bu" for="ta-klLDaEgJeU" src="test-cases/ta-klLDaEgJeU/001/bu.wgt" expected="invalid">
+Test to make sure the user agent rejects malformed XML.
+To pass, the widget must be treated as invalid by the user agent.
+</test>
+
+<test id="bv" for="ta-klLDaEgJeU" src="test-cases/ta-klLDaEgJeU/002/bv.wgt">
+Tests support of XML, XMLNS, and UTF-8. 
+To pass, the user agent must load 'pass&amp;.html' as the start file.
+</test>
+
+<test id="bw" for="ta-klLDaEgJeU" src="test-cases/ta-klLDaEgJeU/003/bw.wgt">
+Tests support of XML, XMLNS, and UTF-8. To pass, the widget author must be the string 'PASS'.
+</test>
+
+<test id="bx" for="ta-LYLMhryBBT" src="test-cases/ta-LYLMhryBBT/000/bx.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the name element.
+To pass, the name of the widget must be "PASS".
+</test>
+
+<test id="by" for="ta-LYLMhryBBT" src="test-cases/ta-LYLMhryBBT/001/by.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the name element.
+To pass, the name of the widget must be an empty string.
+</test>
+
+<test id="bz" for="ta-LYLMhryBBT" src="test-cases/ta-LYLMhryBBT/002/bz.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the name element.
+To pass, the name of the widget must be "PASS".
+</test>
+
+<test id="b1" for="ta-RawAIWHoMs"  src="test-cases/ta-RawAIWHoMs/000/b1.wgt">
+Tests the ability for a UA to correctly process an widget element's id attribute.
+To pass, the widget id must be "pass:".
+</test>
+
+<test id="rd" for="ta-RawAIWHoMs"  src="test-cases/ta-RawAIWHoMs/001/rd.wgt">
+Tests the ability for a UA to correctly process an widget element's id attribute.
+To pass, the widget id must equal null (not a valid IRI).
+</test>
+
+<test id="b2" for="ta-RawAIWHoMs"  src="test-cases/ta-RawAIWHoMs/002/b2.wgt">
+Tests the ability for a UA to correctly process an widget element's id attribute.
+To pass, the widget id must equal "pass:" (applies rule for getting a single attribute value).
+</test>
+
+<test id="cc" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/008/cc.wgt">
+Tests the user agent's ability to select start files in the appropriate order.
+To pass, the user agent must select index.htm as the start file.
+</test>
+
+<test id="cv" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/009/cv.wgt">
+Tests the user agent's ability to select start files in the appropriate order.
+To pass, the user agent must select  index.html as the start file.
+</test>
+
+<test id="b3" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/000/b3.wgt">
+Tests to see if the user agents applies the algorithm to locate a default start file, when no custom start file is present.
+To pass, index.htm must be the widget start file and the start file content-type must be text/html.
+</test>
+
+<test id="b4" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/001/b4.wgt">
+Tests to see if the user agents applies the algorithm to locate a default start file, when no custom start file is present.
+To pass, index.html must be the widget start file and the start file content-type must be text/html.
+</test>
+
+<test id="b0" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/002/b0.wgt" expected="invalid">
+Tests the UA's ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must treat this widget as an invalid widget.
+</test>
+
+<test id="c1" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/003/c1.wgt" expected="invalid">
+Tests the UA's ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must treat this widget as an invalid widget.
+</test>
+
+<test id="c2" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/004/c2.wgt" expected="invalid">
+Tests the UAs ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must treat this widget as an invalid widget.
+</test>
+
+<test id="c3" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/005/c3.wgt" expected="invalid">
+Tests the UAs ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must treat this widget as an invalid widget.
+</test>
+
+<test id="c4" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/006/c4.wgt">
+Tests the UAs ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must ignore "INdeX.htm" at the root, but must use "index.html" as the default start file.
+</test>
+
+<test id="c5" for="ta-RGNHRBWNZV" src="test-cases/ta-RGNHRBWNZV/007/c5.wgt">
+Tests the UAs ability treat file names in the default start files table case-sensitively.
+To pass, the user agent must ignore "INdeX.htm" in the locales folder, but must use "index.html" as the default start file.
+</test>
+
+<test id="b5" for="ta-RRZxvvTFHx" src="test-cases/ta-RRZxvvTFHx/000/b5.wgt" expected="invalid">
+Tests that a UA does not go searching in an arbritrary folder ("abc123") for default start files.
+To pass, the user agent must treat this widget as an invalid widget.
+</test>
+
+<test id="b6" for="ta-RRZxvvTFHx" src="test-cases/ta-RRZxvvTFHx/001/b6.wgt">
+Tests that a UA does not go searching in an arbritrary folder ("foo/bar") for default start files.
+To pass, the user agent must use index.html at the root of the widget as 
+the start file</test>
+
+<test id="b7" for="ta-sdwhMozwIc" src="test-cases/ta-sdwhMozwIc/000/b7.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the author element.
+To pass, the author name must be  "PASS", href must be "PASS:" and email must be "PASS".
+</test>
+
+<test id="b8" for="ta-sdwhMozwIc" src="test-cases/ta-sdwhMozwIc/001/b8.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the author element.
+To pass, the author name must be an empty string.
+</test>
+
+<test id="b9" for="ta-sdwhMozwIc" src="test-cases/ta-sdwhMozwIc/002/b9.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the author element.
+To pass, the author name must be "PASS", href must be "PASS:" and email must be "PASS".
+</test>
+
+<test id="c6" for="ta-UEMbyHERkI" src="test-cases/ta-UEMbyHERkI/000/c6.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the description element.
+To pass, the widget description must be "PASS".
+</test>
+
+<test id="c7" for="ta-UEMbyHERkI" src="test-cases/ta-UEMbyHERkI/001/c7.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the description element.
+To pass, the widget description must be an empty string.
+</test>
+
+<test id="rb" for="ta-UEMbyHERkI" src="test-cases/ta-UEMbyHERkI/002/rb.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the description element.
+To pass, the widget description must be "PASS".
+</test>
+
+<test id="c8" for="ta-UEMbyHERkI" src="test-cases/ta-UEMbyHERkI/003/c8.wgt">
+Tests the UA's ability to correctly select the description element when the xml:lang attribute is present.
+To pass, the widget description must be "PASS".
+</test>
+
+<test id="c9" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/000/c9.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value "0" (the value is composed of characters).
+</test>
+
+<test id="cq" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/001/cq.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value "1234".
+</test>
+
+<test id="cw" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/002/cw.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value "100" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="ce" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/003/ce.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value "123" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="cr" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/004/cr.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value null (the value is an empty string, hence it would be ignored).
+</test>
+
+<test id="ct" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/005/ct.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value null (the value is a sequence of space characters, hence it would be ignored).
+</test>
+
+<test id="cy" for="ta-UScJfQHPPy" src="test-cases/ta-UScJfQHPPy/006/cy.wgt">
+Test the UA's ability process the width attribute.
+To pass, the widget width must be the value "0".
+</test>
+
+<test id="cu" for="ta-vcYJAPVEym" src="test-cases/ta-vcYJAPVEym/000/cu.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the license element.
+To pass, the widget license be the string "PASS" and license href must be the string "PASS:".
+</test>
+
+<test id="ci" for="ta-vcYJAPVEym" src="test-cases/ta-vcYJAPVEym/001/ci.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the license element.
+To pass, the widget license must be an empty string and widget license href must be the value null.
+</test>
+
+<test id="ra" for="ta-vcYJAPVEym" src="test-cases/ta-vcYJAPVEym/002/ra.wgt">
+Tests the UA's ability to ignore subsequent repetitions of the license element.
+To pass, widget license must be "PASS".
+</test>
+
+<test id="co" for="ta-vcYJAPVEym" src="test-cases/ta-vcYJAPVEym/003/co.wgt">
+Tests the UA's ability to correctly select a license element that makes use of xml:lang.
+To pass, widget license must be "PASS".
+</test>
+
+<test id="cp" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/000/cp.wgt">
+Test the ability of the user agent to correctly apply the rule for getting text content to a description element.
+To pass, the value of the widget description must be the string "PASS".
+</test>
+
+<test id="ca" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/001/ca.wgt">
+Test the ability of the user agent to correctly process the description element.
+To pass, the value of the widget description must be the string "PASS".
+</test>
+
+<test id="cs" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/002/cs.wgt">
+Test the ability of the user agent to correctly process the description element.
+To pass, the value of the widget description must be an empty string.
+</test>
+
+<test id="cd" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/003/cd.wgt">
+Test the ability of the user agent to correctly process the description element.
+To pass, the value of the widget description must be the following string:
+"
+	P
+	A
+	S
+	S
+"
+</test>
+
+<test id="x1" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/004/x1.wgt">
+Test the ability of the user agent to correctly process localized description elements by ignoring languages it does not know (i.e., selecting the unlocalized content).
+To pass, the value of the widget description must the string "PASS".
+</test>
+
+<test id="x2" for="ta-VdCEyDVSA" src="test-cases/ta-VdCEyDVSA/005/x2.wgt">
+Test the ability of the user agent to correctly process localized description elements.
+To pass, the value of the widget description must the string "PASS".
+</test>
+
+<test id="cf" for="ta-VerEfVGeTc"  src="test-cases/ta-VerEfVGeTc/000/cf.wgt">
+Test the UA's ability to process version a version attribute.
+To pass, the value of widget version must be the string "PASS".
+</test>
+
+<test id="cg" for="ta-VerEfVGeTc"  src="test-cases/ta-VerEfVGeTc/001/cg.wgt">
+Test the UA's ability to process version a version attribute.
+To pass, the value of version must be an empty string  (applies rule for getting a single attribute value).
+</test>
+
+<test id="ch" for="ta-VerEfVGeTc"  src="test-cases/ta-VerEfVGeTc/002/ch.wgt">
+Test the UA's ability to process version a version attribute.
+To pass, the value of widget version must be the string "PASS" (applies rule for getting a single attribute value).
+</test>
+
+<test id="cj" for="ta-YUMJAPVEgI" src="test-cases/ta-YUMJAPVEgI/000/cj.wgt">
+Test the ability of the user agent to correctly apply the rule for getting text content to a license element.
+To pass, the value of the widget license must be the string "PASS".
+</test>
+
+<test id="ck" for="ta-YUMJAPVEgI" src="test-cases/ta-YUMJAPVEgI/001/ck.wgt">
+Test the ability of the user agent to correctly process the text content of a license element.
+To pass, the value of the widget license must be the string "PASS".
+</test>
+
+<test id="cl" for="ta-YUMJAPVEgI" src="test-cases/ta-YUMJAPVEgI/002/cl.wgt">
+Test the ability of the user agent to correctly process the text content of the license element.
+To pass, the value of the widget license must be an empty string.
+</test>
+
+<test id="cz" for="ta-YUMJAPVEgI" src="test-cases/ta-YUMJAPVEgI/003/cz.wgt">
+Test the ability of the user agent to correctly process the text content license element.
+To pass, the value of the widget license must be the following string:
+"
+	P
+	A
+	S
+	S
+"
+</test>
+
+<test id="cx" for="ta-YUMJAPVEgI" src="test-cases/ta-YUMJAPVEgI/004/cx.wgt">
+Test the ability of the user agent to correctly process license element's href attribute when it is a file.
+To pass, the value of the widget license must be an empty string, but the license href attribute must point to the file at 'license/pass.html'.
+</test>
+
+<test id="d1" for="ta-iipTwNshRg" src="test-cases/ta-iipTwNshRg/000/d1.wgt">
+Tests the user agents ability to correctly process icon elements without a src attribute. 
+To pass, the icons list will only contain icon.png
+</test>
+
+<test id="ga" for="ta-iipTwNshRg" src="test-cases/ta-iipTwNshRg/001/ga.wgt">
+Tests the user agents ability to correctly process icon elements with an empty src attribute. 
+To pass, the icons list will only contain icon.png
+</test>
+
+<test id="d2" for="ta-roCaKRxZhS" src="test-cases/ta-roCaKRxZhS/000/d2.wgt">
+Tests the UA's ability to handle the situation where a path points to an icon which does not exist. 
+To pass, the icons list must contain icon.png.
+</test>
+
+<test id="d3" for="ta-MFcsScFEaC" src="test-cases/ta-MFcsScFEaC/000/d3.wgt">
+Test the UA's ability to progress to Step 8 when it has nothing to process inside the widget element.
+To pass, the widget start file must be "index.htm"
+</test>
+
+<test id="d4" for="ta-paWbGHyVrG" src="test-cases/ta-paWbGHyVrG/000/d4.wgt" expected="invalid">
+Tests the user agents ability to correctly process a feature element. 
+To pass, the user agent must treat this widget as an invalid widget. 
+</test>
+
+<test id="d5" for="ta-luyKMFABLX" src="test-cases/ta-luyKMFABLX/000/d5.wgt">
+Tests the user agents ability to correctly process a feature element. 
+To pass, the user agent must not contain any values in the feature list (i.e., the unknown feature is skipped). 
+</test>
+
+<test id="d6" for="ta-xlgUWUVzCY" src="test-cases/ta-xlgUWUVzCY/000/d6.wgt">
+Tests the user agent's ability to correctly process a param element. 
+To pass, feature 'feature:a9bb79c1' must not have any associated parameters.   
+</test>
+
+<test id="d7" for="ta-LTUJGJFCOU" src="test-cases/ta-LTUJGJFCOU/000/d7.wgt">
+Test that the user agent skips a content element with no src attribute and 
+loads default start file. 
+To pass, the start file must be index.htm at the root of the widget.
+</test>
+
+<test id="d8" for="ta-LTUJGJFCOU" src="test-cases/ta-LTUJGJFCOU/001/d8.wgt">
+Test that the user agent skips a content element with no src attribute and 
+loads default start file. 
+To pass, the start file must be index.htm at the root of the widget.
+</test>
+
+<test id="gb" for="ta-LTUJGJFCOU" src="test-cases/ta-LTUJGJFCOU/002/gb.wgt">
+Test that the user agent correctly handles a content element with an empty src attribute. 
+To pass, the start file must be index.htm at the root of the widget.
+</test>
+
+<test id="d9" for="ta-LQcjNKBLUZ" src="test-cases/ta-LQcjNKBLUZ/000/d9.wgt" expected="invalid">
+Test that the user agent skips a content element that points to a non-existing file and shoudln't read the following content element.
+To pass the user agent must treat the widget as invalid.
+</test>
+
+<test id="d0" for="ta-LQcjNKBLUZ" src="test-cases/ta-LQcjNKBLUZ/001/d0.wgt">
+Test that the user agent skips a content element that points to a non-existing file. 
+To pass, the start file must be index.htm
+</test>
+
+<test id="dq" for="ta-ZjcdAxFMSx" src="test-cases/ta-ZjcdAxFMSx/000/dq.wgt" expected="invalid">
+Test the UA's ability to correctly find config document. 
+To pass, the user agent must treat this as an invalid widget (config.exe is not a recognized config file name)
+</test>
+
+<test id="dw" for="ta-ZjcdAxFMSx" src="test-cases/ta-ZjcdAxFMSx/001/dw.wgt" expected="invalid">
+Test the UA's ability to correctly find config document. 
+To pass, the user agent must treat this as an invalid widget (CoNfIG.xml is not a recognized config file name)
+</test>
+
+<test id="ds" for="ta-xGYcVTMoAX" src="test-cases/ta-xGYcVTMoAX/000/ds.wgt">
+Tests that the user agent correctly sets the configuration defaults. 
+To pass, 
+author email must be null, 
+author href must be null,
+author name must be null,
+feature list must be empty (null),
+icons must be null,
+start file encoding must be UTF-8,
+start file content-type must be text/html,
+widget config doc must be 'config.xml' at the root of the widget package,
+widget description must be null,
+widget height must be null, 
+widget id must be null,
+widget license must be null,
+widget license file must be null,
+widget license href must be null,
+widget name must be null,
+widget preferences must be null,
+widget short name must be null,
+widget version must be null,
+widget width must be null,
+widget window modes must be an empty list,
+widget start file must be index.htm at the root of the widget,
+user agent locales must contain at least one item whose value is 'en'
+</test>
+
+<test id="dc" for="ta-paIabGIIMC" src="test-cases/ta-paIabGIIMC/000/dc.wgt">
+Test the UA's support for explicitly setting the mime type of a file using the type attribute of the content element.
+To pass, the widget start file must be index.php and start file content type must be "text/html" 
+</test>
+
+<test id="dv" for="ta-paIabGIIMC" src="test-cases/ta-paIabGIIMC/001/dv.wgt" expected="invalid">
+Test the UA's support for explicitly setting the mime type of a file using the type attribute of the content element.
+To pass, the user agent must treat this as an invalid widget.
+</test>
+
+<test id="df" for="ta-rZdcMBExBX" src="test-cases/ta-rZdcMBExBX/000/df.wgt">
+Test the UA's ability to handle a feature element without a name attribute. 
+To pass, the feature list must remain empty. 
+</test>
+
+<test id="dr" for="ta-rZdcMBExBX" src="test-cases/ta-rZdcMBExBX/001/dr.wgt">
+Test the UA's ability to handle a feature element without a name attribute. 
+To pass, the feature list must contain one feature named 'feature:a9bb79c1' whose required value is false.
+</test>
+
+<test id="dt" for="ta-EGkPfzCBOz" src="test-cases/ta-EGkPfzCBOz/000/dt.wgt">
+Tests the user agents to correctly handle a param element with missing name attribute. 
+To pass, the feature list must contain one feature named 'feature:a9bb79c1' with no associated parameters.
+</test>
+
+<test id="dg" for="ta-EGkPfzCBOz" src="test-cases/ta-EGkPfzCBOz/001/dg.wgt">
+Tests the user agents to correctly handle a param element with missing name attribute. 
+To pass, the feature list must contain one feature named 'feature:a9bb79c1' with one associated parameter whose name 
+is 'PASS' and whose value is 'PASS'.
+</test>
+
+<test id="db" for="ta-pIffQywZin" src="test-cases/ta-pIffQywZin/000/db.wgt">
+Test that the user agent skip a content element that uses an invalid path.
+To pass, the start file must be index.htm at the root of the widget package.
+</test>
+
+<test id="dn" for="ta-FDGQBROtzW" src="test-cases/ta-FDGQBROtzW/000/dn.test">
+Tests the user agent's ability to process files with a file extension other than .wgt.
+To pass, the user agent start file of the widget must be index.htm 
+</test>
+
+<test id="dm" for="ta-FDGQBROtzW" src="test-cases/ta-FDGQBROtzW/001/dm">
+Tests the user agent's ability to process files with no file extension. 
+To pass, the user agent start file of the widget must be index.htm 
+</test>
+
+<test id="dk" for="ta-qxLSCRCHlN" src="test-cases/ta-qxLSCRCHlN/000/dk.wgt" expected="invalid">
+Test the ability to deal with a widget with a wrong magic number.  
+To pass, the user agent must treat this as an invalid widget. 
+</test>
+
+<test id="dl" for="ta-uLHyIMvLwz" src="test-cases/ta-uLHyIMvLwz/000/dl.wgt" expected="invalid">
+Test the ability of the UA to verify a zip archive.   
+To pass, the user agent must treat this as an invalid widget (archive is encrypted - password is test). 
+</test>
+
+<test id="do" for="ta-uLHyIMvLwz" src="test-cases/ta-uLHyIMvLwz/001/split.wgt.001" expected="invalid">
+Test the ability of the UA to verify a zip archive.   
+To pass, the user agent must treat this as an invalid widget (archive is spanned). 
+</test>
+
+<test id="dp" for="ta-uLHyIMvLwz" src="test-cases/ta-uLHyIMvLwz/002/dp.wgt" expected="invalid">
+Test the ability of the UA to verify a zip archive.   
+To pass, the user agent must treat this as an invalid widget (archive is empty). 
+</test>
+
+<test id="e1" for="ta-KNiLPOKdgQ" src="test-cases/ta-KNiLPOKdgQ/000/e1.wgt">
+Tests the user agents ability to ignore orphan param elements.
+To pass, the feature feature:a9bb79c1 must not have any params associated with it. 
+</test>
+
+<test id="e2" for="ta-CEGwkNQcWo" src="test-cases/ta-CEGwkNQcWo/000/e2.wgt">
+Test that a user agent correctly ignores param elements with empty name attributes.
+To pass, the feature feature:a9bb79c1 must not have any associated params. 
+</test>
+
+<test id="e3" for="ta-CEGwkNQcWo" src="test-cases/ta-CEGwkNQcWo/001/e3.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value to a param element's name and value attributes.
+To pass, the feature feature:a9bb79c1 must not have any associated params. 
+</test>
+
+<test id="e4" for="ta-dPOgiLQKNK" src="test-cases/ta-dPOgiLQKNK/000/e4.wgt">
+Tests the user agent's ability to correctly process a content element's encoding attribute when it is empty.  
+To pass, the value of the start file encoding must be UTF-8.
+</test>
+
+<test id="e5" for="ta-dPOgiLQKNK" src="test-cases/ta-dPOgiLQKNK/001/e5.wgt">
+Tests the user agent's ability to correctly process a content element's encoding attribute when it contains the value "ISO-8859-1".  
+To pass, the value of the start file encoding must be ISO-8859-1.
+</test>
+
+<test id="e6" for="ta-dPOgiLQKNK" src="test-cases/ta-dPOgiLQKNK/002/e6.wgt">
+Test that a user agent correctly applies the rule for getting a single attribute value to the content element's encoding attribute.
+To pass, the value of the start file encoding must be ISO-8859-1.
+</test>
+
+
+<test id="e7" for="ta-dPOgiLQKNK" src="test-cases/ta-dPOgiLQKNK/003/e7.wgt">
+Tests the user agent's ability to correctly process a content element's encoding attribute when it encounters a bogus encoding name. 
+To pass, the value of the start file encoding must be UTF-8.
+</test>
+
+<test id="e8" for="ta-vOBaOcWfll" src="test-cases/ta-vOBaOcWfll/000/e8.wgt" expected="invalid">
+Tests the ability of the user agent to correctly handle required a feature when the feature is not supported by the UA.
+To pass, the UA must treat this as an invalid widget.
+</test>
+
+<test id="xx" for="ta-bbbbbbbbbb" src="test-cases/ta-bbbbbbbbbb/000/xx.wgt">
+Tests the ability of the user agent to correctly ignore unknown elements.
+To pass, the UA must use pass.html as the start file.
+</test>
+
+<test id="zz" for="ta-iuJHnskSHq" src="test-cases/ta-iuJHnskSHq/000/zz.wgt">
+Tests the ability of the user agent to correctly deal with an icon element that points to a file that is not present in the widget package.
+To pass, the icon list must contain "pass.png".
+</test>
+
+<test id="za" for="ta-iuJHnskSHq" src="test-cases/ta-iuJHnskSHq/001/za.wgt">
+Test the UAs ability to ignore unprocessable files as an icon format (fail contains garbage data).
+To pass, the user agent must contain "pass.png" as the only icon in the icons list.
+</test>
+
+<test id="zb" for="ta-iuJHnskSHq" src="test-cases/ta-iuJHnskSHq/002/zb.wgt">
+Test the UAs ability to ignore subsequent delclarations to use the same icon.
+To pass, the user agent must contain "locales/en/icon.png" as the only icon in the icons list and the icon must not have an associated width or height (unless it has been computed from the icon file). 
+</test>
+
+<test id="zc" for="ta-iuJHnskSHq" src="test-cases/ta-iuJHnskSHq/003/zc.wgt">
+Test the UAs ability to ignore subsequent delclarations to use the same icon.
+To pass, the user agent must contain "locales/en/custom.png" as the only icon in the icons list and the icon must not have an associated width or height (unless it has been computed from the file). 
+</test>
+
+
+<test id="ix" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/000/ix.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value "1234".
+</test>
+
+<test id="iy" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/001/iy.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value "0" (the value is composed of characters).
+</test>
+
+<test id="iz" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/002/iz.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value "100" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="i1" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/003/i1.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value "123" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="i2" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/004/i2.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value null (the value is an empty string, hence it would be ignored).
+</test>
+
+<test id="i3" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/005/i3.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value null (the value is a sequence of space characters, hence it would be ignored).
+</test>
+
+<test id="i4" for="ta-eHUaPbgfKg" src="test-cases/ta-eHUaPbgfKg/006/i4.wgt">
+Test the UA's ability process the height attribute of an icon.
+To pass, the icon's height must be the value "0".
+</test>
+
+
+<test id="iq" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/000/iq.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value "1234".
+</test>
+
+<test id="i9" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/001/i9.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value "0" (the value is composed of characters).
+</test>
+
+
+<test id="iw" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/002/iw.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value "100" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="ie" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/003/ie.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value "123" (resulting from rule for parsing a non-negative integer).
+</test>
+
+<test id="ir" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/004/ir.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value null (the value is an empty string, hence it would be ignored).
+</test>
+
+<test id="it" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/005/it.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value null (the value is a sequence of space characters, hence it would be ignored).
+</test>
+
+<test id="iy" for="ta-nYAcofihvj" src="test-cases/ta-nYAcofihvj/006/iy.wgt">
+Test the UA's ability process the width attribute of an icon element.
+To pass, the icon's width must be the value "0".
+</test>
+
+<test id="z1" for="ta-aaaaaaaaaa" src="test-cases/ta-nYAcofihvj/000/z1.wgt">
+Test that the user agent correctly handles a charset parameter when the type attribute is present.  
+To pass, the user agent must sets the start file encoding to 'ISO-8859-1' and ignore the charset parameter used in the type attribute. 
+</test>
+
+<test id="z2" for="ta-aaaaaaaaaa" src="test-cases/ta-nYAcofihvj/001/z2.wgt">
+Test that the user agent sets the user agent can derive the start file encoding from the charset parameter in the type attribute. 
+To pass, the start file encoding must be 'Windows-1252'.  
+</test>
+
+</testsuite>

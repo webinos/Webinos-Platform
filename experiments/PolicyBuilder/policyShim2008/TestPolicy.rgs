@@ -1,0 +1,26 @@
+HKCR
+{
+	policyShim.TestPolicy.1 = s 'TestPolicy Class'
+	{
+		CLSID = s '{E37E5169-2ED0-4CED-B5E3-9C70DA7467B5}'
+	}
+	policyShim.TestPolicy = s 'TestPolicy Class'
+	{
+		CLSID = s '{E37E5169-2ED0-4CED-B5E3-9C70DA7467B5}'
+		CurVer = s 'policyShim.TestPolicy.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {E37E5169-2ED0-4CED-B5E3-9C70DA7467B5} = s 'TestPolicy Class'
+		{
+			ProgID = s 'policyShim.TestPolicy.1'
+			VersionIndependentProgID = s 'policyShim.TestPolicy'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{A7F46B90-08C2-4815-8A62-EB5B32531EF2}'
+		}
+	}
+}

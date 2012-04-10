@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.webinos</groupId>
+    <artifactId>common</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>Manager</name>
+  <url>http://www.webinos.org</url>
+
+  <artifactId>manager</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <!-- One module tag per child module -->
+    <module>context_manager</module>
+    <module>keystore</module>
+    <module>messaging</module>
+    <module>policy_manager</module>
+    <module>storage</module>
+    <module>certificate_manager</module>
+  </modules>
+</project>

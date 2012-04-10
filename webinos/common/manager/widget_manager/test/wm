@@ -1,0 +1,104 @@
+#!/usr/bin/env node
+
+var widgetmanager = require('widgetmanager');
+var util = require('util');
+var wm = widgetmanager.widgetmanager;
+var path = require('path');
+
+var isInstalled = function(installId) {
+  var list = wm.getInstalledWidgets();
+  for(var i in list) {
+    if(installId == list[i])
+      return true;
+  }
+  return false;
+};
+
+var argv = process.argv; argv.shift(); argv.shift();
+
+if(argv.length == 0) {
+  console.log('wm: error: too few arguments');
+  process.exit(1);
+}
+
+if(argv[0] == 'list') {
+  var list = wm.getInstalledWidgets();
+  for(var i in list) {
+    var installId = list[i];
+    var widgetConfig = wm.getWidgetConfig(installId);
+    if(!widgetConfig) {
+      console.log('wm: error: unable to get widget config for ' + installId);
+      process.exit(1);
+    }
+    console.log(i + ': ' + list[i] + ': ' + util.inspect(widgetConfig));
+  }
+
+  process.exit(0);
+}
+
+if(argv[0] == 'install') {
+  if(argv.length == 1) {
+    console.log('wm: error: too few arguments');
+    process.exit(1);
+  }
+  var wgt = argv[1];
+  if(!path.existsSync(wgt)) {
+    console.log('wm: error: specified file does not exist: ' + wgt);
+    process.exit(1);
+  }
+
+  function handlePendingInstall(processingResult) {
+    if(processingResult.status) {
+      console.log('wm: error: install: ' + processingResult.status);
+      var installId = processingResult.getInstallId();
+      if(installId)
+        wm.abortInstall(installId);
+      return;
+    }
+
+    var result = wm.completeInstall(installId, true);
+    if(result)
+      console.log('wm: error: install: ' + result);
+  }
+
+  wm.prepareInstall(wgt, {}, handlePendingInstall);
+}
+
+if(argv[0] == 'uninstall') {
+  if(argv.length == 1) {
+    console.log('wm: error: too few arguments');
+    process.exit(1);
+  }
+  var installId = argv[1];
+  if(!isInstalled(installId)) {
+    console.log('wm: error: specified widget is not installed: ' + installId);
+    process.exit(1);
+  }
+  var result = wm.uninstall(installId);
+  if(result)
+    console.log('wm: error: uninstall: ' + result);
+}
+
+if(argv[0] == 'validate') {
+  if(argv.length == 1) {
+    console.log('wm: error: too few arguments');
+    process.exit(1);
+  }
+  var wgt = argv[1];
+  if(!path.existsSync(wgt)) {
+    console.log('wm: error: specified file does not exist: ' + wgt);
+    process.exit(1);
+  }
+  
+  var wgtResource = new widgetmanager.ZipWidgetResource(wgt);
+  var validator = new widgetmanager.WidgetValidator(wgtResource);
+  
+  var result = validator.validate();
+  console.log(util.inspect(validator));
+  console.log(result);
+  
+
+//  if(result)
+//    console.log('wm: error: install: ' + result);
+}
+

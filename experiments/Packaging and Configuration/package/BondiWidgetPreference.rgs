@@ -1,0 +1,27 @@
+HKCR
+{
+	Bondi.BondiWidgetPreference.1 = s 'BondiWidgetPreference Class'
+	{
+		CLSID = s '{CDF2B86E-50CD-443B-B5CD-8EDB833894DE}'
+	}
+	Bondi.BondiWidgetPreference = s 'BondiWidgetPreference Class'
+	{
+		CLSID = s '{CDF2B86E-50CD-443B-B5CD-8EDB833894DE}'
+		CurVer = s 'Bondi.BondiWidgetPreference.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {CDF2B86E-50CD-443B-B5CD-8EDB833894DE} = s 'BondiWidgetPreference Class'
+		{
+			ProgID = s 'Bondi.BondiWidgetPreference.1'
+			VersionIndependentProgID = s 'Bondi.BondiWidgetPreference'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Free'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{8F6D42DD-17A8-49C8-9625-63B136CA651A}'
+		}
+	}
+}

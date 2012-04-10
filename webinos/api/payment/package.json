@@ -1,0 +1,25 @@
+{ "name": "sensors"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Payment API"
+, "keywords": [ "webinos", "payment", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Christian Fuhrhop <christian.fuhrhop@fokus.fraunhofer.de>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/rpc_payment.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>BONDI widget packaging component</title>
+</head>
+<body>
+<h2>Introduction</h2>
+<p>The PnC library is an implementation of the W3C packaging and configuration specification (<a href="http://www.w3.org/TR/widgets/">http://www.w3.org/TR/widgets/</a>).</p>
+<p>It forms part of the BONDI reference implementation and is built using standard C++ in conjunction with the libxml2 xml parser.</p>
+<p>Functionality includes:</p>
+<ul>
+<li>Extracting a widget from an archive</li>
+<li>Parsing and processing the widget configuration document</li>
+<li>Support for multiple locales</li>
+<li>Project file currently supports win32 and WM 6 builds</li>
+</ul>
+<p>Coming soon - digital signature support.</p>
+<p>Although it is intended to be a cross-platform library, there are a couple of things remaining that need to be sorted out, namely:</p>
+<ul>
+<li>cross-platform support for converting to/from multi-byte character sets</li>
+<li>a cross-platform makefile</li>
+</ul>
+<h2>Building the library</h2>
+<p>Extract the ZIP file to your local disk, including the libxml2 folder.</p>
+<p>There is currently only a Visual Studio 2005 project file. Open the PnC.vcproj file in Visual Studio and build the library.</p>
+<h2>Using the library</h2>
+<p>After building the library you can use it in your project by making the PnC.h file available on your include paths and statically linking with the PnC.lib.</p>
+<p>Here is an example usage:</p>
+<pre>
+<code>
+
+	#include "PnC.h"
+
+	CPackageLocales locales(L"en-gb");
+
+	CPnC package = new CPnC(locales);
+	
+	if (package->LoadZip(L"C:\\MyWidgets\\coolWidget.wgt"))
+	{
+		// Widget loaded successfully - you can use the package.
+		std::wstring startFilePath;
+		if (package->GetStartFile(startFilePath))
+		{
+			
+		}
+	}
+	else
+	{
+		// Widget failed to load - find out why.
+		std::vector< std::wstring > faults;
+		package->GetFaults(faults);
+		
+		// Display or log the faults.
+	}
+
+</code>
+</pre>
+<h2>Latest source and contribute</h2>
+<p>This library is a work in progress - the latest code is available from <a href="http://svn.omtp.org:8080/svn/bondi/trunk/ri/widgetRuntime/PnC">the BONDI repository</a></p>
+<h2>More information</h2>
+<p>For more information about Bondi visit <a href="http://bondi.omtp.org">http://bondi.omtp.org</a></p>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:id="@+id/layout">
+  <TextView
+    android:id="@+id/console" 
+    android:text="Camera Demo"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:minLines="10"
+    android:maxLines="10"
+    android:focusable="false"
+    android:scrollbars="vertical"/>
+  <FrameLayout android:id="@+id/preview"
+    android:layout_weight="1" android:layout_width="fill_parent"
+    android:layout_height="fill_parent"/>
+</LinearLayout>
+<!--  android:maxLines="2000" -->
+

@@ -1,0 +1,39 @@
+<%@ Master Language="C#" Inherits="System.Web.Mvc.ViewMasterPage<PolicyBuilder.Models.baseData>" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>webinos Policy Builder - 
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server"></asp:ContentPlaceHolder>
+    </title>
+    <link href="/Content/Site.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/Scripts/jquery/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            setTimeout(function() { $(".feedback").fadeOut(); }, 2000);
+        });
+    </script>
+</head>
+
+<body>
+
+<%
+    if (TempData["message"] != null)
+    { %>
+    <div class="feedback"><span class="feedbackInner"><%= TempData["message"] %></span></div>
+<% } %>
+
+<div class="header">
+    <a href="/">webinos policy builder <%= Model != null && Model.Library != null ? "- " + Model.Library.Name : "" %></a>
+</div>
+
+<div class="topMenu">
+<% if (Model != null && Model.Library != null)
+   { %>
+        <%= Html.ActionLink("database", "Index", "Home")%> | <%= Html.ActionLink("policy documents", "Index", "policy", new { id = Model.Library.Id }, null) %> | <%= Html.ActionLink("policy library", "Library", "policy", new { id = Model.Library.Id }, null)%> | <%= Html.ActionLink("query library", "Index", "test", new { id = Model.Library.Id }, null)%> | <%= Html.ActionLink("test matrix", "Matrix", "test", new { id = Model.Library.Id }, null)%>
+<% } %>
+</div>
+
+<asp:ContentPlaceHolder ID="MainContent" runat="server" />
+
+</body>
+</html>

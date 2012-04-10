@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="CalendarWrapper" id="::CalendarWrapper">
+    <webidl>module CalendarWrapper {&#13;
+&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface ServiceCalendar {&#13;
+&#13;
+            readonly attribute <ref>Calendar</ref> calendar;&#13;
+        };&#13;
+                &#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface Calendar {       &#13;
+&#13;
+            caller void findEvents (in <ref>CalendarEventSuccessCB</ref> successCB, in optional <ref>CalendarErrorCB</ref> errorCB, in optional <ref>CalendarFindOptions</ref> options);&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface CalendarEvent {&#13;
+&#13;
+            readonly attribute DOMString          id;&#13;
+&#13;
+             attribute DOMString          description;&#13;
+&#13;
+             attribute DOMString?         location;&#13;
+&#13;
+             attribute DOMString?         summary;&#13;
+&#13;
+             attribute DOMString          start;&#13;
+&#13;
+             attribute DOMString?         end;&#13;
+&#13;
+             attribute DOMString?         status;&#13;
+&#13;
+             attribute DOMString?         transparency;&#13;
+&#13;
+             attribute <ref>CalendarRepeatRule</ref>? recurrence;&#13;
+&#13;
+             attribute DOMString?         reminder;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface CalendarRepeatRule {&#13;
+&#13;
+            attribute DOMString?      frequency;&#13;
+&#13;
+            attribute unsigned short? interval;&#13;
+&#13;
+            attribute DOMString?      expires;&#13;
+&#13;
+            attribute DOMString[]     exceptionDates;&#13;
+&#13;
+            attribute short[]         daysInWeek;&#13;
+&#13;
+            attribute short[]         daysInMonth;&#13;
+&#13;
+            attribute short[]         daysInYear;&#13;
+&#13;
+            attribute short[]         weeksInMonth;&#13;
+&#13;
+            attribute short[]         monthsInYear;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface CalendarFindOptions {&#13;
+&#13;
+            attribute <ref>CalendarEventFilter</ref>? filter;&#13;
+&#13;
+            attribute boolean?            multiple;&#13;
+        };&#13;
+&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface CalendarEventFilter : <ref>CalendarEvent</ref> {&#13;
+&#13;
+            attribute DOMString startBefore;&#13;
+&#13;
+            attribute DOMString startAfter;&#13;
+&#13;
+            attribute DOMString endBefore;&#13;
+&#13;
+            attribute DOMString endAfter;&#13;
+        };&#13;
+        &#13;
+        &#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface CalendarEventSuccessCB {        &#13;
+&#13;
+            void onSuccess (in sequence&lt;<ref>CalendarEvent</ref>> eventObjs);&#13;
+        };&#13;
+        &#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface CalendarErrorCB {&#13;
+&#13;
+            void onError (in <ref>CalendarError</ref> error);&#13;
+        };&#13;
+        &#13;
+&#13;
+      &#13;
+        [NoInterfaceObject]&#13;
+        interface CalendarError {&#13;
+&#13;
+            const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+            const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+            const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+            const unsigned short PENDING_OPERATION_ERROR = 3;&#13;
+&#13;
+            const unsigned short IO_ERROR = 4;&#13;
+&#13;
+            const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+&#13;
+            const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+            readonly attribute unsigned short code;&#13;
+        };&#13;
+            &#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ W3C based Calendar interface.
+        </brief>
+       <description>
+        <p>
+This specification provides a wrapper that mandates the use of the  
+<a href="http://www.w3.org/TR/2011/WD-calendar-api-20110419/">W3C Calendar API </a> (W3C Working draft 14th April).
+        </p>
+        <p>
+The Calendar API defines a high-level interface to access Calendar information such as events, reminders, alarms and other calendar information.
+        </p>
+        <p>
+The API itself is designed to be agnostic of any underlying calendaring service sources.
+        </p>
+        <p>
+Note that while the W3C version, on which this specification is based on, provides only the ServiceCalendar
+to retrieve calendars, in webinos calendars can also be retrieved using the findServices method of the
+Service Discovery API.
+        </p>
+       </description>
+        <def-api-feature identifier="http://www.w3.org/ns/api-perms/calendar.read">
+          <descriptive>
+           <description>
+            <p>
+Read access to the calendar book.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ W3C Working Draft 19 April 2011  
+        </author>
+        <author>
+ Normative: <a href="http://www.w3.org/TR/2011/WD-calendar-api-20110419/">W3C Calendar API </a>        </author>
+        <author>
+ WIDL version for webinos created by Christian Fuhrhop &#60;christian.fuhrhop@fokus.fraunhofer.de&#62;
+        </author>
+        <version>
+ 1.0
+        </version>
+    </descriptive>
+    <Interface name="ServiceCalendar" id="::CalendarWrapper::ServiceCalendar">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface ServiceCalendar {&#13;
+&#13;
+            readonly attribute <ref>Calendar</ref> calendar;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The ServiceCalendar interface is exposed on the Navigator interface [NAVIGATOR]. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="calendar" id="::CalendarWrapper::ServiceCalendar::calendar">
+        <webidl>            readonly attribute <ref>Calendar</ref> calendar;</webidl>
+        <descriptive>
+            <brief>
+ The root node from which the calendar functionality can be accessed. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Calendar"/>
+      </Attribute>
+    </Interface>
+    <Interface name="Calendar" id="::CalendarWrapper::Calendar">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface Calendar {       &#13;
+&#13;
+            caller void findEvents (in <ref>CalendarEventSuccessCB</ref> successCB, in optional <ref>CalendarErrorCB</ref> errorCB, in optional <ref>CalendarFindOptions</ref> options);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The The Calendar interface provides a method to retrieve calendaring information from a user's calendar. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation caller="caller" name="findEvents" id="::CalendarWrapper::Calendar::findEvents">
+        <webidl>            caller void findEvents (in <ref>CalendarEventSuccessCB</ref> successCB, in optional <ref>CalendarErrorCB</ref> errorCB, in optional <ref>CalendarFindOptions</ref> options);</webidl>
+        <descriptive>
+            <brief>
+ Find calendar event items in the calendar based on an CalendarEventFilter object.
+            </brief>
+           <description>
+            <p>
+This method takes between one and three arguments. When called, it immediately returns, and then asynchronously start a find calendar event items process defined as follows:
+            </p>
+            <p>
+If there are any tasks from the device task source in one of the task queues (i.e. an existing findEvents() operation is still pending a response), and the current method was invoked with a non-null errorCB argument, dispatch an error event with a PENDING_OPERATION_ERROR code value.
+            </p>
+            <p>
+Search for calendar event items in the calendar according to the calendar item search processing rules.
+            </p>
+            <p>
+If the attempt was successful, dispatch a success event. If the attempt fails, and the method was invoked with a non-null errorCB argument, this method must dispatch an error event with the code attribute set according to the type of failure that has occurred.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ caller void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCB">
+            <descriptive>
+                <description><p>
+ Function to call when the asynchronous operation completes successfully.
+                </p></description>
+            </descriptive>
+            <Type name="CalendarEventSuccessCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCB">
+            <descriptive>
+                <description><p>
+ Function to call when the asynchronous operation fails.
+                </p></description>
+            </descriptive>
+            <Type name="CalendarErrorCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="options">
+            <descriptive>
+                <description><p>
+ The options to apply to the output of this method.                                 
+                </p></description>
+            </descriptive>
+            <Type name="CalendarFindOptions"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="CalendarEvent" id="::CalendarWrapper::CalendarEvent">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface CalendarEvent {&#13;
+&#13;
+            readonly attribute DOMString          id;&#13;
+&#13;
+             attribute DOMString          description;&#13;
+&#13;
+             attribute DOMString?         location;&#13;
+&#13;
+             attribute DOMString?         summary;&#13;
+&#13;
+             attribute DOMString          start;&#13;
+&#13;
+             attribute DOMString?         end;&#13;
+&#13;
+             attribute DOMString?         status;&#13;
+&#13;
+             attribute DOMString?         transparency;&#13;
+&#13;
+             attribute <ref>CalendarRepeatRule</ref>? recurrence;&#13;
+&#13;
+             attribute DOMString?         reminder;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The CalendarEvent interface captures a calendar event object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="id" id="::CalendarWrapper::CalendarEvent::id">
+        <webidl>            readonly attribute DOMString          id;</webidl>
+        <descriptive>
+            <brief>
+ A globally unique identifier for the given CalendarEvent object. Each CalendarEvent referenced from Calendar must include a non-empty id value.
+            </brief>
+           <description>
+            <p>
+An implementation must maintain this globally unique resource identifier when a calendar event is added to, or present within, a Calendar.
+            </p>
+            <p>
+An implementation may use an IANA registered identifier format. The value can also be a non-standard format.
+            </p>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="description" id="::CalendarWrapper::CalendarEvent::description">
+        <webidl>             attribute DOMString          description;</webidl>
+        <descriptive>
+            <brief>
+ A description of the event. 
+            </brief>
+            <Code> {description: &quot;Meeting with Joe's team&quot;}
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="location" id="::CalendarWrapper::CalendarEvent::location">
+        <webidl>             attribute DOMString?         location;</webidl>
+        <descriptive>
+            <brief>
+ A plain text description of the location of the event. 
+            </brief>
+            <Code> {location: 'Conf call #+4402000000001'}
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="summary" id="::CalendarWrapper::CalendarEvent::summary">
+        <webidl>             attribute DOMString?         summary;</webidl>
+        <descriptive>
+            <brief>
+ A summary of the event. 
+            </brief>
+            <Code> {summary: &quot;Agenda: * Introductions* AoB&quot;}
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="start" id="::CalendarWrapper::CalendarEvent::start">
+        <webidl>             attribute DOMString          start;</webidl>
+        <descriptive>
+            <brief>
+ The start date and time of the event as a valid date or time string.
+            </brief>
+            <Code> {start: '2011-03-24T09:00-08:00'} // Event starts on March 24, 2011 @ 5pm (UTC)
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="end" id="::CalendarWrapper::CalendarEvent::end">
+        <webidl>             attribute DOMString?         end;</webidl>
+        <descriptive>
+            <brief>
+ The end date and time of the event as a valid date or time string.
+            </brief>
+            <Code> {end: '2011-03-24T10:00:00-08:00'} // Event ends on March 24, 2011 @ 6pm (UTC)
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="status" id="::CalendarWrapper::CalendarEvent::status">
+        <webidl>             attribute DOMString?         status;</webidl>
+        <descriptive>
+            <brief>
+ An indication of the user's status of the event.
+            </brief>
+           <description>
+            <p>
+This parameter may be set to one of the following constants:
+            </p>
+           </description>
+            <Code> {status: 'pending'} // Event is awaiting user action
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="transparency" id="::CalendarWrapper::CalendarEvent::transparency">
+        <webidl>             attribute DOMString?         transparency;</webidl>
+        <descriptive>
+            <brief>
+ An indication of the display status to set for the event.
+            </brief>
+           <description>
+            <p>
+This parameter may be set to one of the following constants:
+            </p>
+            <p>
+'transparent', 'opaque'.
+            </p>
+           </description>
+            <Code> {freebusy: 'transparent'} // Mark event as transparent in Calendar
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="recurrence" id="::CalendarWrapper::CalendarEvent::recurrence">
+        <webidl>             attribute <ref>CalendarRepeatRule</ref>? recurrence;</webidl>
+        <descriptive>
+            <brief>
+ The recurrence or repetition rule for this event 
+            </brief>
+            <Code> {recurrence: {frequency: 'daily'}}     // Event occurs every day and never expires
+ </Code>
+            <Code> {recurrence: {frequency: 'weekly',     // Event occurs weekly...
+  daysInWeek: [2, 4],      // ...every Tuesday and Thursday
+  expires: '2011-06-11T12:00:00-04:00'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+            <Code> {recurrence: {frequency: 'weekly',     // Event occurs weekly...on every Wednesday
+                           // (if we say the 'start' attribute is March 24, 2011 @ 2pm (Wednesday) as  
+                           // shown above and no daysInWeek attribute is provided)
+  expires: '2011-06-11T11:00:00-05:00'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+            <Code> {recurrence: {frequency: 'monthly',    // Event occurs monthly...
+  daysInMonth: [-5],       // ...5 days before the end of each month 
+ </Code>
+            <Code> {recurrence: {frequency: 'monthly',    // Event occurs monthly...on the 24th day of every month
+                          // (if we say the 'start' attribute is March 24, 2011 @ 2pm as  
+                           // shown above and no daysInMonth attribute is provided)
+  expires: '2011-06-11T20:00:00+04:00'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+            <Code> {recurrence: {frequency: 'yearly',     // Event occurs yearly...on the 24th day of every March
+                           // (if we say the 'start' attribute is March 24, 2011 @ 2pm as  
+                           // shown above and no daysInMonth attribute is provided)
+  expires: '2011-06-11T16:00:00+00:00'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+            <Code> {recurrence: {frequency: 'yearly',     // Event occurs yearly...
+   daysInMonth: [24],       // ...every 24th day... 
+  monthsInYear: [3, 6],    // ...in every March and June
+  expires: '2011-06-11T16:00:00Z'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+            <Code> {recurrence: {frequency: 'yearly',     // Event occurs yearly...
+  daysInYear: [168],       // ...every 168th day of each year 
+  expires: '2011-06-11T21:45:00+05:45'}} // Event expires on or before June 11, 2011 @ 4pm (UTC)
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="CalendarRepeatRule" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="reminder" id="::CalendarWrapper::CalendarEvent::reminder">
+        <webidl>             attribute DOMString?         reminder;</webidl>
+        <descriptive>
+            <brief>
+ A reminder for the event.
+            </brief>
+           <description>
+            <p>
+This attribute can be specified as a positive valid date or time string, denoting a one-time reminder or as a negative value in milliseconds denoting a relative relationship to the start time of the calendar event.
+            </p>
+            <p>
+A relative reminder is recommended for setting a reminder for recurrent events.
+            </p>
+           </description>
+            <Code> {reminder: '2011-03-24T13:00:00+00:00'}  // Remind ONCE on March 24, 2011 @ 1pm (UTC)
+ </Code>
+            <Code> {reminder: '-3600000'}       // Remind 1 hour before every occurrence of this event
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="CalendarRepeatRule" id="::CalendarWrapper::CalendarRepeatRule">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface CalendarRepeatRule {&#13;
+&#13;
+            attribute DOMString?      frequency;&#13;
+&#13;
+            attribute unsigned short? interval;&#13;
+&#13;
+            attribute DOMString?      expires;&#13;
+&#13;
+            attribute DOMString[]     exceptionDates;&#13;
+&#13;
+            attribute short[]         daysInWeek;&#13;
+&#13;
+            attribute short[]         daysInMonth;&#13;
+&#13;
+            attribute short[]         daysInYear;&#13;
+&#13;
+            attribute short[]         weeksInMonth;&#13;
+&#13;
+            attribute short[]         monthsInYear;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The CalendarRepeatRule interface captures the recurrence of a calendar event item. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="frequency" id="::CalendarWrapper::CalendarRepeatRule::frequency">
+        <webidl>            attribute DOMString?      frequency;</webidl>
+        <descriptive>
+            <brief>
+ The frequency of the CalendarRepeatRule.
+            </brief>
+           <description>
+            <p>
+This parameter must be set to one of the following constants: 'daily', 'weekly', 'monthly', 'yearly'.
+            </p>
+            <p>
+Additional values must be ignored for this attribute.
+            </p>
+           </description>
+            <Code> {frequency: 'monthly'}  // Event repeats on a monthly basis
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="interval" id="::CalendarWrapper::CalendarRepeatRule::interval">
+        <webidl>            attribute unsigned short? interval;</webidl>
+        <descriptive>
+            <brief>
+ A positive integer defining how often the recurrence rule must repeat.
+            </brief>
+           <description>
+            <p>
+For interval N, recurrence rule repeats every Nth frequency. Default interval value is 1, that is every day for a daily, every week for a weekly, every month for a monthly and every year for a yearly.
+            </p>
+            <p>
+If this parameter is set to null the event item does not have any fixed interval and the event interal should be derived from the other CalendarRepeatRule attributes.
+            </p>
+           </description>
+            <Code> {interval: 1}
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="expires" id="::CalendarWrapper::CalendarRepeatRule::expires">
+        <webidl>            attribute DOMString?      expires;</webidl>
+        <descriptive>
+            <brief>
+ The date and time to which the CalendarRepeatRule applies as a valid date or time string.
+            </brief>
+           <description>
+            <p>
+If this parameter is set to null the event item does not have any fixed expiry date and the event is scheduled to continue indefintely.
+            </p>
+           </description>
+            <Code> {expires: '2011-08-01T01:00:00+01:00'} // Event repeats until August 1, 2011 @ 12am (UTC)
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="exceptionDates" id="::CalendarWrapper::CalendarRepeatRule::exceptionDates">
+        <webidl>            attribute DOMString[]     exceptionDates;</webidl>
+        <descriptive>
+            <brief>
+ One or more dates and times to which the CalendarRepeatRule does not apply as valid date or time string strings.
+            </brief>
+           <description>
+            <p>
+If this parameter is set to null the event item does not have any exception dates and/or times.
+            </p>
+           </description>
+            <Code> {exceptionDates: ['2011-12-22', '2011-12-29']} // Event does not occur on December 22, 2011 and December 29, 2011
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="DOMString"/>
+        </Type>
+      </Attribute>
+      <Attribute name="daysInWeek" id="::CalendarWrapper::CalendarRepeatRule::daysInWeek">
+        <webidl>            attribute short[]         daysInWeek;</webidl>
+        <descriptive>
+            <brief>
+ The day or days of the week for which the CalendarRepeatRule applies. If this attribute is set to null then the day of the CalendarEvent.start value is used to derive the recurrent dates.
+            </brief>
+           <description>
+            <p>
+NOTE: This property only applies to weekly occurrences. If CalendarRepeatRule.frequency is not set to 'weekly' this property must be ignored.
+            </p>
+            <p>
+The possible values are:
+0 (Sunday)
+            </p>
+            <p>
+1 (Monday)
+            </p>
+            <p>
+2 (Tuesday)
+            </p>
+            <p>
+3 (Wednesday)
+            </p>
+            <p>
+4 (Thursday)
+            </p>
+            <p>
+5 (Friday)
+            </p>
+            <p>
+6 (Saturday)
+            </p>
+           </description>
+            <Code> {daysInWeek: [0, 6]} // A weekly event repeats every Sunday and Saturday
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="short"/>
+        </Type>
+      </Attribute>
+      <Attribute name="daysInMonth" id="::CalendarWrapper::CalendarRepeatRule::daysInMonth">
+        <webidl>            attribute short[]         daysInMonth;</webidl>
+        <descriptive>
+            <brief>
+ The day or days of the month for which the CalendarRepeatRule applies. If this attribute is set to null then the day of the month of the CalendarEvent.start value is used to derive the recurrent dates.
+            </brief>
+           <description>
+            <p>
+NOTE: This property only applies to monthly occurrences. If CalendarRepeatRule.frequency is not set to 'monthly' this property must be ignored.
+            </p>
+            <p>
+The possible values are:
+            </p>
+            <p>
+[1..31] (number of days from the first day of the month)
+[0..-30] (number of days before the last day of the month)
+            </p>
+           </description>
+            <Code> {daysInMonth: [4, -10]} // A monthly event repeats on the 4th and 10th to last day of each month.
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="short"/>
+        </Type>
+      </Attribute>
+      <Attribute name="daysInYear" id="::CalendarWrapper::CalendarRepeatRule::daysInYear">
+        <webidl>            attribute short[]         daysInYear;</webidl>
+        <descriptive>
+            <brief>
+ The day or days of the month for which the CalendarRepeatRule applies. If this attribute is set to null then the day of the year of the CalendarEvent.start value is used to derive the recurrent dates.
+            </brief>
+           <description>
+            <p>
+NOTE: This property only applies to yearly occurrences. If CalendarRepeatRule.frequency is not set to 'yearly' this property must be ignored.
+            </p>
+            <p>
+The possible values are:
+            </p>
+            <p>
+[1..365] (number of days from the first day of the year)
+[0..-364] (number of days before the last day of the year)
+            </p>
+           </description>
+            <Code> {daysInYear: [262, -102]} // A yearly event repeats on day 262 and 102 days before the last day of each year.
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="short"/>
+        </Type>
+      </Attribute>
+      <Attribute name="weeksInMonth" id="::CalendarWrapper::CalendarRepeatRule::weeksInMonth">
+        <webidl>            attribute short[]         weeksInMonth;</webidl>
+        <descriptive>
+            <brief>
+ The week or weeks of the month for which the CalendarRepeatRule applies. If this attribute is set to null then the week of the month of the CalendarEvent.start value is used to derive the recurrent dates.
+            </brief>
+           <description>
+            <p>
+NOTE: This property only applies to monthly occurrences. If CalendarRepeatRule.frequency is not set to 'monthly' this property must be ignored.
+The possible values are:
+            </p>
+            <p>
+[1..4] (number of weeks from the first week of the month)
+[0..-3] (number of weeks before the last week of the month)
+            </p>
+           </description>
+            <Code> {weeksInMonth: [1, -1]} // A monthly event repeats on the first and last week of each month.
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="short"/>
+        </Type>
+      </Attribute>
+      <Attribute name="monthsInYear" id="::CalendarWrapper::CalendarRepeatRule::monthsInYear">
+        <webidl>            attribute short[]         monthsInYear;</webidl>
+        <descriptive>
+            <brief>
+ The month or months of the year for which the CalendarRepeatRule applies. If this attribute is set to null then the month of the year of the CalendarEvent.start value is used to derive the recurrent dates.
+            </brief>
+           <description>
+            <p>
+NOTE: This property only applies to yearly occurrences. If CalendarRepeatRule.frequency is not set to 'yearly' this property must be ignored.
+            </p>
+            <p>
+The possible values are:
+            </p>
+            <p>
+1 (January)
+            </p>
+            <p>
+2 (February)
+            </p>
+            <p>
+3 (March)
+            </p>
+            <p>
+4 (April)
+            </p>
+            <p>
+5 (May)
+            </p>
+            <p>
+6 (June)
+            </p>
+            <p>
+7 (July)
+            </p>
+            <p>
+8 (August)
+            </p>
+            <p>
+9 (September)
+            </p>
+            <p>
+10 (October)
+            </p>
+            <p>
+11 (November)
+            </p>
+            <p>
+12 (December)
+            </p>
+           </description>
+            <Code> {monthsInYear: [4, 10]} // A yearly event repeats in April and October each year.
+ </Code>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="short"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="CalendarFindOptions" id="::CalendarWrapper::CalendarFindOptions">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface CalendarFindOptions {&#13;
+&#13;
+            attribute <ref>CalendarEventFilter</ref>? filter;&#13;
+&#13;
+            attribute boolean?            multiple;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The CalendarFindOptions interface describes the options that can be applied to calendar searching. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="filter" id="::CalendarWrapper::CalendarFindOptions::filter">
+        <webidl>            attribute <ref>CalendarEventFilter</ref>? filter;</webidl>
+        <descriptive>
+            <brief>
+ A search filter with which to search and initially filter the Calendar database. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="CalendarEventFilter" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="multiple" id="::CalendarWrapper::CalendarFindOptions::multiple">
+        <webidl>            attribute boolean?            multiple;</webidl>
+        <descriptive>
+            <brief>
+ A boolean value to indicate whether multiple Calendar objects are returnable as part of the associated Calendar findEvents() operation.
+            </brief>
+           <description>
+            <p>
+By default this option is set to true. 
+            </p>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="CalendarEventFilter" id="::CalendarWrapper::CalendarEventFilter">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface CalendarEventFilter : <ref>CalendarEvent</ref> {&#13;
+&#13;
+            attribute DOMString startBefore;&#13;
+&#13;
+            attribute DOMString startAfter;&#13;
+&#13;
+            attribute DOMString endBefore;&#13;
+&#13;
+            attribute DOMString endAfter;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The CalendarEventFilter interface captures the searchable parameters for finding calendar event items.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="CalendarEvent"/>
+      </InterfaceInheritance>
+      <Attribute name="startBefore" id="::CalendarWrapper::CalendarEventFilter::startBefore">
+        <webidl>            attribute DOMString startBefore;</webidl>
+        <descriptive>
+            <brief>
+ Search for Calendar Events that start before the time provided as a valid date or time string.. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="startAfter" id="::CalendarWrapper::CalendarEventFilter::startAfter">
+        <webidl>            attribute DOMString startAfter;</webidl>
+        <descriptive>
+            <brief>
+ Search for Calendar Events that start after the time provided as a valid date or time string.. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="endBefore" id="::CalendarWrapper::CalendarEventFilter::endBefore">
+        <webidl>            attribute DOMString endBefore;</webidl>
+        <descriptive>
+            <brief>
+ Search for Calendar Events that end before the time provided as a valid date or time string.. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="endAfter" id="::CalendarWrapper::CalendarEventFilter::endAfter">
+        <webidl>            attribute DOMString endAfter;</webidl>
+        <descriptive>
+            <brief>
+ Search for Calendar Events that end after the time provided as a valid date or time string.. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="CalendarEventSuccessCB" id="::CalendarWrapper::CalendarEventSuccessCB">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface CalendarEventSuccessCB {        &#13;
+&#13;
+            void onSuccess (in sequence&lt;<ref>CalendarEvent</ref>> eventObjs);&#13;
+        };</webidl>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::CalendarWrapper::CalendarEventSuccessCB::onSuccess">
+        <webidl>            void onSuccess (in sequence&lt;<ref>CalendarEvent</ref>> eventObjs);</webidl>
+        <descriptive>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="eventObjs">
+            <descriptive>
+                <description><p>
+ The resulting sequence of CalendarEvent objects resulting from a successful search operation. 
+                </p></description>
+            </descriptive>
+            <Type type="sequence">
+              <Type name="CalendarEvent"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="CalendarErrorCB" id="::CalendarWrapper::CalendarErrorCB">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface CalendarErrorCB {&#13;
+&#13;
+            void onError (in <ref>CalendarError</ref> error);&#13;
+        };</webidl>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::CalendarWrapper::CalendarErrorCB::onError">
+        <webidl>            void onError (in <ref>CalendarError</ref> error);</webidl>
+        <descriptive>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The Calendar API related error object of an unsuccessful asynchronous operation. 
+                </p></description>
+            </descriptive>
+            <Type name="CalendarError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="CalendarError" id="::CalendarWrapper::CalendarError">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface CalendarError {&#13;
+&#13;
+            const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+            const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+            const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+            const unsigned short PENDING_OPERATION_ERROR = 3;&#13;
+&#13;
+            const unsigned short IO_ERROR = 4;&#13;
+&#13;
+            const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+&#13;
+            const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+            readonly attribute unsigned short code;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ he CalendarError interface encapsulates all errors in the manipulation of CalendarEvent objects in the Calendar API. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="UNKNOWN_ERROR" value="0" id="::CalendarWrapper::CalendarError::UNKNOWN_ERROR">
+        <webidl>            const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ An unknown error occurred. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::CalendarWrapper::CalendarError::INVALID_ARGUMENT_ERROR">
+        <webidl>            const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested method was invoked. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TIMEOUT_ERROR" value="2" id="::CalendarWrapper::CalendarError::TIMEOUT_ERROR">
+        <webidl>            const unsigned short TIMEOUT_ERROR = 2;</webidl>
+        <descriptive>
+            <brief>
+ The requested method timed out before it could be completed. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PENDING_OPERATION_ERROR" value="3" id="::CalendarWrapper::CalendarError::PENDING_OPERATION_ERROR">
+        <webidl>            const unsigned short PENDING_OPERATION_ERROR = 3;</webidl>
+        <descriptive>
+            <brief>
+ If the user agent is currently waiting for a callback on a current findEvents() operation, as defined in this specification. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="IO_ERROR" value="4" id="::CalendarWrapper::CalendarError::IO_ERROR">
+        <webidl>            const unsigned short IO_ERROR = 4;</webidl>
+        <descriptive>
+            <brief>
+ An error occurred in communication with the underlying implementation that meant the requested method could not complete. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NOT_SUPPORTED_ERROR" value="5" id="::CalendarWrapper::CalendarError::NOT_SUPPORTED_ERROR">
+        <webidl>            const unsigned short NOT_SUPPORTED_ERROR = 5;</webidl>
+        <descriptive>
+            <brief>
+ The requested method is not supported by the current implementation. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="20" id="::CalendarWrapper::CalendarError::PERMISSION_DENIED_ERROR">
+        <webidl>            const unsigned short PERMISSION_DENIED_ERROR = 20;</webidl>
+        <descriptive>
+            <brief>
+ Access to the requested method was denied at the implementation or by the user. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::CalendarWrapper::CalendarError::code">
+        <webidl>            readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred in Calendar API processing.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+    </Interface>
+  </Module>
+</Definitions>

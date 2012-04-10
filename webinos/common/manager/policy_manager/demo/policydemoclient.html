@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<title>Webinos Policy demo</title>
+		<script type="text/javascript" src="jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="policydemoclient.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<link rel="stylesheet" type="text/css" href="theme/style.css" media="screen"/>
+	</head>
+
+	<body>
+
+<div id="content">
+	<div id="header">
+		<h1><img src="theme/testbed_logo.png"></h1>
+     </div>
+	 <br><br>
+
+	 <div style="background-color:#EEEEEE;padding: 15px;border-color:black;border-width:1px;">
+		Policy file:
+		<select id="policyFile" onChange="changePolicyFile(this.options[this.selectedIndex].value)">
+			<option value="policy-allow.xml">Permit all to everybody</option>
+			<option value="policy-allow2.xml">Permit owner, prompt friend</option>
+			<option value="policy-mobile.xml">Mobile operator policy</option>
+			<option value="policy-car.xml">Car manufacturer policy</option>
+			<option value="policy-custom.xml">Custom policy</option>
+		</select>
+
+		<br><br>
+
+		App certificate:
+		<select id="appCert" onChange="changeAppCert(this.options[this.selectedIndex].value)">
+			<option value="X">Untrusted</option>
+			<option value="111111">Mobile operator certificate</option>
+			<option value="222222">Car manufacturer certificate</option>
+			<option value="333333">Car manufacturer limited certificate</option>
+		</select>
+
+		<br><br>
+
+		<button type="button" id="appcfgTab" onclick="javascript:refreshTable();return false;">Refresh table</button>
+
+		<br><br>
+
+		<div id="policytable"></div>
+
+		<br><br>
+
+		<table id="description">
+			<tr><td class="PERMIT"></td><td>Permit</td></tr>
+			<tr><td class="DENY"></td><td>Deny</td></tr>
+			<tr><td class="PROMPT"></td><td>Prompt</td></tr>
+			<tr><td class="UNDETERMINED"></td><td>Undetermined</td></tr>
+		</table>
+		</div>
+		</div>
+	</body>
+</html>

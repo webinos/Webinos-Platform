@@ -1,0 +1,25 @@
+{ "name": "deviceorientation"
+, "publishConfig": { "tag": "alpha" }
+, "description": "deviceorientation API"
+, "keywords": ["webinos", "deviceorientation" , "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Simon Isenberg"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 , "node_modules": "./node_modules"
+                 }
+, "main": "./lib/webinos.deviceorientation.rpc.js"
+, "dependencies":
+  { "schema": "0.2.0"
+  }
+, "bundleDependencies":
+  []
+}

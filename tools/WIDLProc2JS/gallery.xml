@@ -1,0 +1,1496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="gallery" id="::gallery">
+    <webidl>module gallery {&#13;
+&#13;
+&#13;
+ &#13;
+&#13;
+&#13;
+ [NoInterfaceObject] interface Gallery {&#13;
+&#13;
+    const unsigned short AUDIO_TYPE = 0;&#13;
+&#13;
+    const unsigned short VIDEO_TYPE = 1;&#13;
+&#13;
+    const unsigned short IMAGE_TYPE = 2;&#13;
+&#13;
+    const unsigned short SORT_BY_FILENAME = 3;&#13;
+&#13;
+    const unsigned short SORT_BY_FILEDATE = 4;&#13;
+&#13;
+    const unsigned short SORT_BY_MEDIATYPE = 5;&#13;
+&#13;
+    const unsigned short SORT_BY_TITLE = 6;&#13;
+&#13;
+    const unsigned short SORT_BY_AUTHOR = 7;&#13;
+&#13;
+    const unsigned short SORT_BY_ALBUM = 8;&#13;
+&#13;
+    const unsigned short SORT_BY_DATE = 9;&#13;
+&#13;
+    const unsigned short SORT_BY_ASCENDING = 10;&#13;
+&#13;
+    const unsigned short SORT_BY_DESCENDING = 11;&#13;
+&#13;
+    readonly attribute unsigned long length;&#13;
+&#13;
+    caller <ref>PendingOp</ref> find (in DOMString[] fields, in <ref>GalleryFindCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB, in optional <ref>GalleryFindOptions</ref> options);&#13;
+&#13;
+   caller <ref>PendingOp</ref> getGalleries (in <ref>GalleryInfoCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB);&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject] interface MediaObject : <ref>File</ref> {&#13;
+&#13;
+    readonly attribute unsigned long   id;&#13;
+&#13;
+    readonly attribute <ref>GalleryInfo</ref>     gallery;&#13;
+&#13;
+    readonly attribute DOMString?       title;&#13;
+&#13;
+    readonly attribute DOMString?       language;&#13;
+&#13;
+    readonly attribute DOMString?       locator;&#13;
+&#13;
+    readonly attribute DOMString?       contributor;&#13;
+&#13;
+    readonly attribute DOMString?       Creator;&#13;
+&#13;
+    readonly attribute <ref>Date</ref>?            CreateDate;&#13;
+&#13;
+    readonly attribute DOMString?       location;&#13;
+&#13;
+    readonly attribute DOMString?       description;&#13;
+&#13;
+    readonly attribute DOMString?       keyword;&#13;
+&#13;
+    readonly attribute DOMString?       genre;&#13;
+&#13;
+    readonly attribute unsigned long?   rating;&#13;
+&#13;
+    readonly attribute DOMString?       relation;&#13;
+&#13;
+    readonly attribute DOMString?      collection;&#13;
+&#13;
+    readonly attribute DOMString?       copyright;&#13;
+&#13;
+    readonly attribute DOMString?       policy;&#13;
+&#13;
+    readonly attribute DOMString?       publisher;&#13;
+&#13;
+    readonly attribute DOMString?       targetAudience;&#13;
+&#13;
+    readonly attribute DOMString?       fragment;&#13;
+&#13;
+    readonly attribute DOMString?       namedFragment;&#13;
+&#13;
+    readonly attribute unsigned long?   frameSize;&#13;
+&#13;
+    readonly attribute DOMString?       compression;&#13;
+&#13;
+    readonly attribute unsigned long?   duration;&#13;
+&#13;
+    readonly attribute DOMString?       format;&#13;
+&#13;
+    readonly attribute unsigned long?   samplingRate;&#13;
+&#13;
+    readonly attribute unsigned long?   framerate;&#13;
+&#13;
+    readonly attribute unsigned long?   averageBitRate;&#13;
+&#13;
+    readonly attribute unsigned short?  numTracks;&#13;
+};&#13;
+&#13;
+&#13;
+&#13;
+[NoInterfaceObject] interface GalleryInfo {&#13;
+&#13;
+    readonly attribute DOMString   title;&#13;
+&#13;
+    readonly attribute <ref>Date</ref>        createdDate;&#13;
+&#13;
+    readonly attribute DOMString   location;&#13;
+&#13;
+    readonly attribute DOMString[] description;&#13;
+&#13;
+    readonly attribute DOMString[] supportedMediaObjectType;&#13;
+};&#13;
+&#13;
+[NoInterfaceObject] interface GalleryFindOptions {&#13;
+&#13;
+    attribute DOMString?      filter;&#13;
+&#13;
+    attribute short?          mediaType;&#13;
+&#13;
+    attribute <ref>GalleryInfo</ref>[]?  gallery;&#13;
+&#13;
+    attribute short?          order;&#13;
+&#13;
+    attribute short?          firstSortOption;&#13;
+&#13;
+    attribute short?          secondSortOption;&#13;
+&#13;
+    attribute <ref>Date</ref>?           startDate;&#13;
+&#13;
+    attribute <ref>Date</ref>?           endDate;&#13;
+};&#13;
+&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject] interface GalleryFindCB : <ref>PendingOp</ref> {&#13;
+&#13;
+       void onSuccess (in <ref>MediaObject</ref>[] mediaObjectObjs);&#13;
+};&#13;
+&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject] interface GalleryInfoCB : <ref>PendingOp</ref> {&#13;
+&#13;
+    void onSuccess (in <ref>GalleryInfo</ref>[] galleryInfoObjs);&#13;
+};&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject] interface GalleryErrorCB : <ref>PendingOp</ref> {&#13;
+&#13;
+    void onError (in <ref>GalleryError</ref> error);&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject] interface GalleryError {&#13;
+&#13;
+    const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+    const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+    const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+    const unsigned short PENDING_OPERATION_ERROR = 3;&#13;
+&#13;
+    const unsigned short IO_ERROR = 4;&#13;
+&#13;
+    const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+&#13;
+    const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+    readonly attribute unsigned short code;&#13;
+};&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ W3C based Gallery API interface.
+        </brief>
+       <description>
+        <p>
+This specification provides a wrapper that mandates the use of the
+<a href="http://dev.w3.org/2009/dap/gallery/">W3C Gallery API </a> (Editor's draft 4 November 2010) that  provides access to media gallery located on the device. 
+        </p>
+        <p>
+The Gallery API defines a high-level interface for accessing media gallery located on the device. A media gallery is a collection of media objects such as video, audio and image. 
+*
+        </p>
+       </description>
+        <author>
+ W3C Editor's Draft 04 November 2010
+        </author>
+        <author>
+ WIDL version for webinos created by Christian Fuhrhop &#60;christian.fuhrhop@fokus.fraunhofer.de&#62;
+        </author>
+        <version>
+ 1.0
+        </version>
+    </descriptive>
+    <Interface name="Gallery" id="::gallery::Gallery">
+      <webidl> [NoInterfaceObject] interface Gallery {&#13;
+&#13;
+    const unsigned short AUDIO_TYPE = 0;&#13;
+&#13;
+    const unsigned short VIDEO_TYPE = 1;&#13;
+&#13;
+    const unsigned short IMAGE_TYPE = 2;&#13;
+&#13;
+    const unsigned short SORT_BY_FILENAME = 3;&#13;
+&#13;
+    const unsigned short SORT_BY_FILEDATE = 4;&#13;
+&#13;
+    const unsigned short SORT_BY_MEDIATYPE = 5;&#13;
+&#13;
+    const unsigned short SORT_BY_TITLE = 6;&#13;
+&#13;
+    const unsigned short SORT_BY_AUTHOR = 7;&#13;
+&#13;
+    const unsigned short SORT_BY_ALBUM = 8;&#13;
+&#13;
+    const unsigned short SORT_BY_DATE = 9;&#13;
+&#13;
+    const unsigned short SORT_BY_ASCENDING = 10;&#13;
+&#13;
+    const unsigned short SORT_BY_DESCENDING = 11;&#13;
+&#13;
+    readonly attribute unsigned long length;&#13;
+&#13;
+    caller <ref>PendingOp</ref> find (in DOMString[] fields, in <ref>GalleryFindCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB, in optional <ref>GalleryFindOptions</ref> options);&#13;
+&#13;
+   caller <ref>PendingOp</ref> getGalleries (in <ref>GalleryInfoCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB);&#13;
+};</webidl>
+      <descriptive>
+          <Code>  // append images with a title matching 'foobar' from galleries 
+ // not older than 3 months to the document.body
+ 
+ var gallery = navigator.service.gallery;
+ 
+ function getGalleriesSuccess(galleryInfoObjs) {
+     var galleries = [];
+     for (var i in galleryInfoObjs) {
+         if ((new Date().getTime())-galleryInfoObjs[i].createDate  100*60*60*24*3) {
+             galleries.push(galleryInfoObjs[i]);
+         }
+     }
+     appendMedia(galleries);
+ }
+ 
+ function appendMedia(galleries) {
+     function findSuccess(mediaObjs) {
+         var container = document.createElement(&quot;div&quot;);
+         for (var i in mediaObjs) {
+             var img = document.createElement(&quot;img&quot;);
+             var title = document.createElement(&quot;div&quot;);
+             title.innerHTML = &quot;Title: &quot; + mediaObjs[i].title;
+             // create blob URI using window.createObjectURL():
+             // http://dev.w3.org/2006/webapi/FileAPI/#creating-revoking
+             img.src = createObjectURL(mediaObjs[i]);
+             container.appendChild(img);
+             container.appendChild(title);
+         }
+         document.body.appendChild(container);
+     }
+         
+     function findError() {
+         console.log('whoops, something went wrong!');
+     }
+         
+     gallery.find(['title', 'uri'], findSuccess, findError,
+             {filter: 'foobar', galleries: galleries, mediaType: gallery.IMAGE_TYPE });
+ }
+ 
+ gallery.getGalleries(getGalleriesSuccess);
+ </Code>
+          <brief>
+ The Gallery interface exposes an interface to access media gallery located on the device.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="AUDIO_TYPE" value="0" id="::gallery::Gallery::AUDIO_TYPE">
+        <webidl>    const unsigned short AUDIO_TYPE = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify audio type of media. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="VIDEO_TYPE" value="1" id="::gallery::Gallery::VIDEO_TYPE">
+        <webidl>    const unsigned short VIDEO_TYPE = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify video type of media. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="IMAGE_TYPE" value="2" id="::gallery::Gallery::IMAGE_TYPE">
+        <webidl>    const unsigned short IMAGE_TYPE = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify image type of media. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_FILENAME" value="3" id="::gallery::Gallery::SORT_BY_FILENAME">
+        <webidl>    const unsigned short SORT_BY_FILENAME = 3;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by filename. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_FILEDATE" value="4" id="::gallery::Gallery::SORT_BY_FILEDATE">
+        <webidl>    const unsigned short SORT_BY_FILEDATE = 4;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by file date. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_MEDIATYPE" value="5" id="::gallery::Gallery::SORT_BY_MEDIATYPE">
+        <webidl>    const unsigned short SORT_BY_MEDIATYPE = 5;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by media type. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_TITLE" value="6" id="::gallery::Gallery::SORT_BY_TITLE">
+        <webidl>    const unsigned short SORT_BY_TITLE = 6;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by title.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_AUTHOR" value="7" id="::gallery::Gallery::SORT_BY_AUTHOR">
+        <webidl>    const unsigned short SORT_BY_AUTHOR = 7;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by author.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_ALBUM" value="8" id="::gallery::Gallery::SORT_BY_ALBUM">
+        <webidl>    const unsigned short SORT_BY_ALBUM = 8;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by album. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_DATE" value="9" id="::gallery::Gallery::SORT_BY_DATE">
+        <webidl>    const unsigned short SORT_BY_DATE = 9;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify sort by date
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_ASCENDING" value="10" id="::gallery::Gallery::SORT_BY_ASCENDING">
+        <webidl>    const unsigned short SORT_BY_ASCENDING = 10;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify ascending sort order.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="SORT_BY_DESCENDING" value="11" id="::gallery::Gallery::SORT_BY_DESCENDING">
+        <webidl>    const unsigned short SORT_BY_DESCENDING = 11;</webidl>
+        <descriptive>
+            <brief>
+ Constant used to identify ascending sort order. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="length" id="::gallery::Gallery::length">
+        <webidl>    readonly attribute unsigned long length;</webidl>
+        <descriptive>
+            <brief>
+ the number of media objects in the gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Operation caller="caller" name="find" id="::gallery::Gallery::find">
+        <webidl>    caller <ref>PendingOp</ref> find (in DOMString[] fields, in <ref>GalleryFindCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB, in optional <ref>GalleryFindOptions</ref> options);</webidl>
+        <descriptive>
+            <brief>
+ Find media objects in the gallerys according to the find process detailed below. 
+            </brief>
+           <description>
+            <p>
+This method takes two, three or four arguments. When called, it immediately returns a PendingOp object, as defined in [CORE-DEVICE], and then asynchronously starts a find process defined as follows:
+            </p>
+            <p>
+1. If there are any tasks from the PendingOp task source in one of the task queues (i.e. an existing find() operation is still pending a response), and the current method was invoked with a non-null errorCB argument, dispatch an error event with a PENDING_OPERATION_ERROR code value.
+            </p>
+            <p>
+2. Search for media object in the galleries
+            </p>
+            <p>
+3. If the attempt was successful, dispatch a success event. If the attempt fails, and the method was invoked with a non-null errorCB argument, this method must dispatch an error event with the code attribute set according to the type of failure that has occurred.
+            </p>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOp">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="fields">
+            <descriptive>
+                <description><p>
+ The search qualifier. 
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type type="DOMString"/>
+            </Type>
+          </Argument>
+          <Argument in="in" name="successCB">
+            <descriptive>
+                <description><p>
+   Function to call when the asynchronous operation completes 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryFindCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCB">
+            <descriptive>
+                <description><p>
+ Function to call when the asynchronous operation fails. 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryErrorCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="options">
+            <descriptive>
+                <description><p>
+ The options to apply to the output of this method. 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryFindOptions"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation caller="caller" name="getGalleries" id="::gallery::Gallery::getGalleries">
+        <webidl>   caller <ref>PendingOp</ref> getGalleries (in <ref>GalleryInfoCB</ref> successCB, in optional <ref>GalleryErrorCB</ref> errorCB);</webidl>
+        <descriptive>
+            <brief>
+ Retrieve all galleries from available sources(e.g. device local memory, external memory and even Fliker, Facebook, etc.) according to the retrieve process detailed below.
+            </brief>
+           <description>
+            <p>
+This method takes one or two arguments. When called, it immediately returns a PendingOp object, as defined in [CORE-DEVICE], and then asynchronously starts a retrieve process defined as follows:
+            </p>
+            <p>
+1. If there are any tasks from the PendingOp task source in one of the task queues (i.e. an existing find() operation is still pending a response), and the current method was invoked with a non-null errorCB argument, dispatch an error event with a PENDING_OPERATION_ERROR code value.
+            </p>
+            <p>
+2. retrieve for all galleries
+            </p>
+            <p>
+3. If the attempt was successful, dispatch a success event. If the attempt fails, and the method was invoked with a non-null errorCB argument, this method must dispatch an error event with the code attribute set according to the type of failure that has occurred.Find media objects in the gallerys according to the find process detailed below. 
+            </p>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOp">
+          <descriptive>
+              <description><p>
+ PendingOperation to cancel the asynchronous call 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCB">
+            <descriptive>
+                <description><p>
+   Function to call when the asynchronous operation completes 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryInfoCB"/>
+          </Argument>
+          <Argument in="in" optional="optional" name="errorCB">
+            <descriptive>
+                <description><p>
+ Function to call when the asynchronous operation fails. 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="MediaObject" id="::gallery::MediaObject">
+      <webidl>[NoInterfaceObject] interface MediaObject : <ref>File</ref> {&#13;
+&#13;
+    readonly attribute unsigned long   id;&#13;
+&#13;
+    readonly attribute <ref>GalleryInfo</ref>     gallery;&#13;
+&#13;
+    readonly attribute DOMString?       title;&#13;
+&#13;
+    readonly attribute DOMString?       language;&#13;
+&#13;
+    readonly attribute DOMString?       locator;&#13;
+&#13;
+    readonly attribute DOMString?       contributor;&#13;
+&#13;
+    readonly attribute DOMString?       Creator;&#13;
+&#13;
+    readonly attribute <ref>Date</ref>?            CreateDate;&#13;
+&#13;
+    readonly attribute DOMString?       location;&#13;
+&#13;
+    readonly attribute DOMString?       description;&#13;
+&#13;
+    readonly attribute DOMString?       keyword;&#13;
+&#13;
+    readonly attribute DOMString?       genre;&#13;
+&#13;
+    readonly attribute unsigned long?   rating;&#13;
+&#13;
+    readonly attribute DOMString?       relation;&#13;
+&#13;
+    readonly attribute DOMString?      collection;&#13;
+&#13;
+    readonly attribute DOMString?       copyright;&#13;
+&#13;
+    readonly attribute DOMString?       policy;&#13;
+&#13;
+    readonly attribute DOMString?       publisher;&#13;
+&#13;
+    readonly attribute DOMString?       targetAudience;&#13;
+&#13;
+    readonly attribute DOMString?       fragment;&#13;
+&#13;
+    readonly attribute DOMString?       namedFragment;&#13;
+&#13;
+    readonly attribute unsigned long?   frameSize;&#13;
+&#13;
+    readonly attribute DOMString?       compression;&#13;
+&#13;
+    readonly attribute unsigned long?   duration;&#13;
+&#13;
+    readonly attribute DOMString?       format;&#13;
+&#13;
+    readonly attribute unsigned long?   samplingRate;&#13;
+&#13;
+    readonly attribute unsigned long?   framerate;&#13;
+&#13;
+    readonly attribute unsigned long?   averageBitRate;&#13;
+&#13;
+    readonly attribute unsigned short?  numTracks;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ The Gallery interface exposes an interface to access media gallery located on the device.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="File"/>
+      </InterfaceInheritance>
+      <Attribute readonly="readonly" name="id" id="::gallery::MediaObject::id">
+        <webidl>    readonly attribute unsigned long   id;</webidl>
+        <descriptive>
+            <brief>
+ Unique id of media object. This id is a unique numeric identifiers of the object. This id is persistent while the gallery is opened.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="gallery" id="::gallery::MediaObject::gallery">
+        <webidl>    readonly attribute <ref>GalleryInfo</ref>     gallery;</webidl>
+        <descriptive>
+            <brief>
+ gallery information associated to the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="GalleryInfo"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="title" id="::gallery::MediaObject::title">
+        <webidl>    readonly attribute DOMString?       title;</webidl>
+        <descriptive>
+            <brief>
+ The title of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="language" id="::gallery::MediaObject::language">
+        <webidl>    readonly attribute DOMString?       language;</webidl>
+        <descriptive>
+            <brief>
+ The language used in the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="locator" id="::gallery::MediaObject::locator">
+        <webidl>    readonly attribute DOMString?       locator;</webidl>
+        <descriptive>
+            <brief>
+ The logical address at which the media object can be accessed.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="contributor" id="::gallery::MediaObject::contributor">
+        <webidl>    readonly attribute DOMString?       contributor;</webidl>
+        <descriptive>
+            <brief>
+ The contributor related with the media object. e.g., actor, cameraman, director, singer, author, artist, etc.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="Creator" id="::gallery::MediaObject::Creator">
+        <webidl>    readonly attribute DOMString?       Creator;</webidl>
+        <descriptive>
+            <brief>
+ The author of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="CreateDate" id="::gallery::MediaObject::CreateDate">
+        <webidl>    readonly attribute <ref>Date</ref>?            CreateDate;</webidl>
+        <descriptive>
+            <brief>
+ The date and time the media object was originally created.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="location" id="::gallery::MediaObject::location">
+        <webidl>    readonly attribute DOMString?       location;</webidl>
+        <descriptive>
+            <brief>
+ The description where the media object has been created, developed, recorded, or otherwise authored.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="description" id="::gallery::MediaObject::description">
+        <webidl>    readonly attribute DOMString?       description;</webidl>
+        <descriptive>
+            <brief>
+ A free-form text describing the content of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="keyword" id="::gallery::MediaObject::keyword">
+        <webidl>    readonly attribute DOMString?       keyword;</webidl>
+        <descriptive>
+            <brief>
+ A concept, descriptive phrase or keyword that specifies the topic of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="genre" id="::gallery::MediaObject::genre">
+        <webidl>    readonly attribute DOMString?       genre;</webidl>
+        <descriptive>
+            <brief>
+ The category of the content of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="rating" id="::gallery::MediaObject::rating">
+        <webidl>    readonly attribute unsigned long?   rating;</webidl>
+        <descriptive>
+            <brief>
+ The rating value related with the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="relation" id="::gallery::MediaObject::relation">
+        <webidl>    readonly attribute DOMString?       relation;</webidl>
+        <descriptive>
+            <brief>
+ The description related with resource that the current media object is related with.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="collection" id="::gallery::MediaObject::collection">
+        <webidl>    readonly attribute DOMString?      collection;</webidl>
+        <descriptive>
+            <brief>
+ The name of the collection from which the media object originates or to which it belongs.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="copyright" id="::gallery::MediaObject::copyright">
+        <webidl>    readonly attribute DOMString?       copyright;</webidl>
+        <descriptive>
+            <brief>
+ The copyright statement. Identification of the copyrights holder.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="policy" id="::gallery::MediaObject::policy">
+        <webidl>    readonly attribute DOMString?       policy;</webidl>
+        <descriptive>
+            <brief>
+ A policy statement (typically human-readable) associated with the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="publisher" id="::gallery::MediaObject::publisher">
+        <webidl>    readonly attribute DOMString?       publisher;</webidl>
+        <descriptive>
+            <brief>
+ The publisher of a media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="targetAudience" id="::gallery::MediaObject::targetAudience">
+        <webidl>    readonly attribute DOMString?       targetAudience;</webidl>
+        <descriptive>
+            <brief>
+ The classification information related with media object including the issuer of the classification (e.g., a parental guidance issuing agency, or a targeted geographical region).
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="fragment" id="::gallery::MediaObject::fragment">
+        <webidl>    readonly attribute DOMString?       fragment;</webidl>
+        <descriptive>
+            <brief>
+ A fragment identifier. A fragment is a portion of the resource
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="namedFragment" id="::gallery::MediaObject::namedFragment">
+        <webidl>    readonly attribute DOMString?       namedFragment;</webidl>
+        <descriptive>
+            <brief>
+ A named fragment identifier.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="frameSize" id="::gallery::MediaObject::frameSize">
+        <webidl>    readonly attribute unsigned long?   frameSize;</webidl>
+        <descriptive>
+            <brief>
+ The frame size of the media object (e.g., width and height of 720 and 480 units, respectively).
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="compression" id="::gallery::MediaObject::compression">
+        <webidl>    readonly attribute DOMString?       compression;</webidl>
+        <descriptive>
+            <brief>
+ The compression type used.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="duration" id="::gallery::MediaObject::duration">
+        <webidl>    readonly attribute unsigned long?   duration;</webidl>
+        <descriptive>
+            <brief>
+ The actual duration of the media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="format" id="::gallery::MediaObject::format">
+        <webidl>    readonly attribute DOMString?       format;</webidl>
+        <descriptive>
+            <brief>
+ The MIME type of the media object (e.g., wrapper or bucket media types).
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="samplingRate" id="::gallery::MediaObject::samplingRate">
+        <webidl>    readonly attribute unsigned long?   samplingRate;</webidl>
+        <descriptive>
+            <brief>
+ The audio sampling rate.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="framerate" id="::gallery::MediaObject::framerate">
+        <webidl>    readonly attribute unsigned long?   framerate;</webidl>
+        <descriptive>
+            <brief>
+ The video frame rate.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="averageBitRate" id="::gallery::MediaObject::averageBitRate">
+        <webidl>    readonly attribute unsigned long?   averageBitRate;</webidl>
+        <descriptive>
+            <brief>
+ The average bit rate.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long" nullable="nullable"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="numTracks" id="::gallery::MediaObject::numTracks">
+        <webidl>    readonly attribute unsigned short?  numTracks;</webidl>
+        <descriptive>
+            <brief>
+ The number of tracks of a resource.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="GalleryInfo" id="::gallery::GalleryInfo">
+      <webidl>[NoInterfaceObject] interface GalleryInfo {&#13;
+&#13;
+    readonly attribute DOMString   title;&#13;
+&#13;
+    readonly attribute <ref>Date</ref>        createdDate;&#13;
+&#13;
+    readonly attribute DOMString   location;&#13;
+&#13;
+    readonly attribute DOMString[] description;&#13;
+&#13;
+    readonly attribute DOMString[] supportedMediaObjectType;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ The GalleryInfo exposes an interface to capture generic metadata information of a gallery.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="title" id="::gallery::GalleryInfo::title">
+        <webidl>    readonly attribute DOMString   title;</webidl>
+        <descriptive>
+            <brief>
+ The title of the gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="createdDate" id="::gallery::GalleryInfo::createdDate">
+        <webidl>    readonly attribute <ref>Date</ref>        createdDate;</webidl>
+        <descriptive>
+            <brief>
+ The date and time the gallery was originally created.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="location" id="::gallery::GalleryInfo::location">
+        <webidl>    readonly attribute DOMString   location;</webidl>
+        <descriptive>
+            <brief>
+ The location the gallery is located on.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="description" id="::gallery::GalleryInfo::description">
+        <webidl>    readonly attribute DOMString[] description;</webidl>
+        <descriptive>
+            <brief>
+ The description of the gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="DOMString"/>
+        </Type>
+      </Attribute>
+      <Attribute readonly="readonly" name="supportedMediaObjectType" id="::gallery::GalleryInfo::supportedMediaObjectType">
+        <webidl>    readonly attribute DOMString[] supportedMediaObjectType;</webidl>
+        <descriptive>
+            <brief>
+ A list of media object type supported by this gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type type="DOMString"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="GalleryFindOptions" id="::gallery::GalleryFindOptions">
+      <webidl>[NoInterfaceObject] interface GalleryFindOptions {&#13;
+&#13;
+    attribute DOMString?      filter;&#13;
+&#13;
+    attribute short?          mediaType;&#13;
+&#13;
+    attribute <ref>GalleryInfo</ref>[]?  gallery;&#13;
+&#13;
+    attribute short?          order;&#13;
+&#13;
+    attribute short?          firstSortOption;&#13;
+&#13;
+    attribute short?          secondSortOption;&#13;
+&#13;
+    attribute <ref>Date</ref>?           startDate;&#13;
+&#13;
+    attribute <ref>Date</ref>?           endDate;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ The GalleryFindOptions exposes an interface to describe the options that can be applied to media object searching and displaying.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="filter" id="::gallery::GalleryFindOptions::filter">
+        <webidl>    attribute DOMString?      filter;</webidl>
+        <descriptive>
+            <brief>
+ A DOMString-based search filter with which to search. It's working based on the metadata of media object.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="mediaType" id="::gallery::GalleryFindOptions::mediaType">
+        <webidl>    attribute short?          mediaType;</webidl>
+        <descriptive>
+            <brief>
+ Specify the scope of media type for finding the media object
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="short" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="gallery" id="::gallery::GalleryFindOptions::gallery">
+        <webidl>    attribute <ref>GalleryInfo</ref>[]?  gallery;</webidl>
+        <descriptive>
+            <brief>
+ Specify the scope of gallery for finding the media object
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array" nullable="nullable">
+          <Type name="GalleryInfo"/>
+        </Type>
+      </Attribute>
+      <Attribute name="order" id="::gallery::GalleryFindOptions::order">
+        <webidl>    attribute short?          order;</webidl>
+        <descriptive>
+            <brief>
+ Specify wheither media objects are ordered in ascending or descending order. Default is an ascending order. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="short" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="firstSortOption" id="::gallery::GalleryFindOptions::firstSortOption">
+        <webidl>    attribute short?          firstSortOption;</webidl>
+        <descriptive>
+            <brief>
+ Primary criteria to order the media object of the gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="short" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="secondSortOption" id="::gallery::GalleryFindOptions::secondSortOption">
+        <webidl>    attribute short?          secondSortOption;</webidl>
+        <descriptive>
+            <brief>
+ Second criteria to order the media object of the gallery.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="short" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="startDate" id="::gallery::GalleryFindOptions::startDate">
+        <webidl>    attribute <ref>Date</ref>?           startDate;</webidl>
+        <descriptive>
+            <brief>
+ Start date for performing the search. Media object with date previous to that date will not be returned.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="endDate" id="::gallery::GalleryFindOptions::endDate">
+        <webidl>    attribute <ref>Date</ref>?           endDate;</webidl>
+        <descriptive>
+            <brief>
+ End date for performing the search. Media object with date later to that date will not be returned.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Date" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="GalleryFindCB" id="::gallery::GalleryFindCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject] interface GalleryFindCB : <ref>PendingOp</ref> {&#13;
+&#13;
+       void onSuccess (in <ref>MediaObject</ref>[] mediaObjectObjs);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ find specific success callback. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="PendingOp"/>
+      </InterfaceInheritance>
+      <Operation name="onSuccess" id="::gallery::GalleryFindCB::onSuccess">
+        <webidl>       void onSuccess (in <ref>MediaObject</ref>[] mediaObjectObjs);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the asynchronous call completes successfully 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="mediaObjectObjs">
+            <descriptive>
+                <description><p>
+ The Media Object resulting from the given Gallery find() method.
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="MediaObject"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="GalleryInfoCB" id="::gallery::GalleryInfoCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject] interface GalleryInfoCB : <ref>PendingOp</ref> {&#13;
+&#13;
+    void onSuccess (in <ref>GalleryInfo</ref>[] galleryInfoObjs);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+  getGalleries specific success callback. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="PendingOp"/>
+      </InterfaceInheritance>
+      <Operation name="onSuccess" id="::gallery::GalleryInfoCB::onSuccess">
+        <webidl>    void onSuccess (in <ref>GalleryInfo</ref>[] galleryInfoObjs);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the asynchronous call completes successfully 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="galleryInfoObjs">
+            <descriptive>
+                <description><p>
+ The GalleryInfo Objects resulting from the given Gallery getGalleries() method.
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="GalleryInfo"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="GalleryErrorCB" id="::gallery::GalleryErrorCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject] interface GalleryErrorCB : <ref>PendingOp</ref> {&#13;
+&#13;
+    void onError (in <ref>GalleryError</ref> error);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+  Gallery API specific error callback.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="PendingOp"/>
+      </InterfaceInheritance>
+      <Operation name="onError" id="::gallery::GalleryErrorCB::onError">
+        <webidl>    void onError (in <ref>GalleryError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Method invoked when the asynchronous call completes unsuccessfully 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The Gallery API related error object. 
+                </p></description>
+            </descriptive>
+            <Type name="GalleryError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="GalleryError" id="::gallery::GalleryError">
+      <webidl>[NoInterfaceObject] interface GalleryError {&#13;
+&#13;
+    const unsigned short UNKNOWN_ERROR = 0;&#13;
+&#13;
+    const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+    const unsigned short TIMEOUT_ERROR = 2;&#13;
+&#13;
+    const unsigned short PENDING_OPERATION_ERROR = 3;&#13;
+&#13;
+    const unsigned short IO_ERROR = 4;&#13;
+&#13;
+    const unsigned short NOT_SUPPORTED_ERROR = 5;&#13;
+&#13;
+    const unsigned short PERMISSION_DENIED_ERROR = 20;&#13;
+&#13;
+    readonly attribute unsigned short code;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+  The GalleryError interface encapsulates all errors in the Gallery API.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="UNKNOWN_ERROR" value="0" id="::gallery::GalleryError::UNKNOWN_ERROR">
+        <webidl>    const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ An unknown error occurred. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::gallery::GalleryError::INVALID_ARGUMENT_ERROR">
+        <webidl>    const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ An invalid parameter was provided when the requested method was invoked. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TIMEOUT_ERROR" value="2" id="::gallery::GalleryError::TIMEOUT_ERROR">
+        <webidl>    const unsigned short TIMEOUT_ERROR = 2;</webidl>
+        <descriptive>
+            <brief>
+ The requested method timed out before it could be completed. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PENDING_OPERATION_ERROR" value="3" id="::gallery::GalleryError::PENDING_OPERATION_ERROR">
+        <webidl>    const unsigned short PENDING_OPERATION_ERROR = 3;</webidl>
+        <descriptive>
+            <brief>
+ If the user agent is currently waiting for a callback on a current find() operation, as defined in this specification. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="IO_ERROR" value="4" id="::gallery::GalleryError::IO_ERROR">
+        <webidl>    const unsigned short IO_ERROR = 4;</webidl>
+        <descriptive>
+            <brief>
+ An error occurred in communication with the underlying implementation that meant the requested method could not complete. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="NOT_SUPPORTED_ERROR" value="5" id="::gallery::GalleryError::NOT_SUPPORTED_ERROR">
+        <webidl>    const unsigned short NOT_SUPPORTED_ERROR = 5;</webidl>
+        <descriptive>
+            <brief>
+ The requested method is not supported by the current implementation. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PERMISSION_DENIED_ERROR" value="20" id="::gallery::GalleryError::PERMISSION_DENIED_ERROR">
+        <webidl>    const unsigned short PERMISSION_DENIED_ERROR = 20;</webidl>
+        <descriptive>
+            <brief>
+ 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::gallery::GalleryError::code">
+        <webidl>    readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred in Gallery API processing. 
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+    </Interface>
+  </Module>
+</Definitions>

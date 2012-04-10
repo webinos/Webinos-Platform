@@ -1,0 +1,432 @@
+Abstract
+
+Attestation: find the identity and integrity of running software
+
+Table of Contents
+
+1. Introduction
+2. Interfaces
+2.1. X509
+2.2. TBSCertificate
+2.3. Validity
+2.4. namePair
+2.5. AlgorithmIdentifier
+2.6. SubjectPublicKeyInfo
+2.7. attestationData
+2.8. WebinosAttestationInterface
+2.9. WebinosAttestation
+3. Type Definitions
+3.1. namePairArray
+4. Exceptions
+4.1. AttestationException
+5. Features
+6. Full WebIDL
+Summary of Methods
+
+Interface	Method
+X509	
+TBSCertificate	
+Validity	
+namePair	
+AlgorithmIdentifier	
+SubjectPublicKeyInfo	
+attestationData	
+WebinosAttestationInterface	attestationData attestPlatform(byte [] nonce, SubjectPublicKeyInfo key)
+SubjectPublicKeyInfo getAttestationKey()
+X509 getKeyCredential(SubjectPublicKeyInfo key)
+WebinosAttestation	
+1. Introduction
+
+The attestation API provides a secure method of querying the underlying device hardware to find out the identity and integrity of running software. 
+This API should allow applications to communicate with hardware security systems, such as a Trusted Platform Module (defined in the Trusted Computing Group specifications). 
+However, the usual trusted computing specifications are generally aimed at a lower layer of the operating system than webinos. 
+The aim of the attestation API is to expose existing low-level functionality to web applications. 
+
+Requirement/architectural reference: ID-DEV-POLITO-005, ID-DEV-POLITO-006, ID-DEV-POLITO-007, ID-DEV-POLITO-008 
+Example use of attestation, taken from the Security Architecture Documentation (D3.5):
+
+1. User starts an application called "MyBankApp" 
+2. MyBankApp communicates with a remote webserver at http://bank.example.com
+3. http://bank.example.com asks MyBankApp to attest to its current status
+4. MyBankApp uses the Attestation API to request a public key and key credential for the local device, Peter's Smartphone. 
+- App calls getAttestationKey() and getKeyCredential() to retrieve this information
+5. The key credential is forwarded to http://bank.example.com
+6. http://bank.example.com assesses the credential and checks to see whether the endpoint is a trusted device.
+- If not, attestation fails.
+7. http://bank.example.com gives MyBankApp a fresh nonce, a 20 byte random value.
+8. MyBankApp uses this nonce and the public key with the attestation API on Peter's Smartphone:
+- call attestPlatform( nonce, key )
+9. Peter's Smartphone returns attestation data, which includes a log of the integrity of the platform ("trustChain"), as well as validation data from the hardware trusted platform module ("validation data") with schema "TPM_Quote".
+10. These values are passed on to http://bank.example.com
+11. http://bank.example.com assesses the validation data and the integrity log using standard TCG techniques see http://www.trustedcomputinggroup.org/resources/tcg_architecture_overview_version_14 and related documents 
+- If the platform integrity is not trusted, attestation fails
+- If the validation data is not trusted, attestation fails
+12. http://bank.example.com passes MyBankApp a temporary token which gives it access to the http://bank.example.com banking capabilities
+13. User authentication is requested via the authentication API
+14. The application is now able to perform transactions using remote http://bank.example.com APIs.
+2. Interfaces
+
+2.1. X509
+
+Definition of X509 certificate data structure taken from the ASN1 X509 Specifications and RFC 2459 http://www.ietf.org/rfc/rfc2459.txt 
+We expect for TCG attestation that the SKAE extension to also be introduced, definition: 
+http://www.trustedcomputinggroup.org/files/resource_files/876A7F79-1D09-3519-AD321B21144AE93C/IWG_SKAE_Extension_1-00.pdf 
+however it is not defined here. 
+        interface X509 {                
+                readonly attribute TBSCertificate certificate;
+                readonly attribute AlgorithmIdentifier signatureAlgorithm;
+                readonly attribute byte[] signature;
+        };
+2.2. TBSCertificate
+
+as defined in http://www.ietf.org/rfc/rfc2459.txt
+
+        interface TBSCertificate { 
+                readonly attribute DOMString version;
+                readonly attribute Integer serialNumber;
+                readonly attribute AlgorithmIdentifier signature;
+                readonly attribute namePairArray issuer;
+                readonly attribute Validity validity;
+                readonly attribute namePairArray subject;
+                readonly attribute SubjectPublicKeyInfo subjectPublicKeyInfo;
+                readonly attribute Any? extensions;
+        };
+2.3. Validity
+
+as defined in http://www.ietf.org/rfc/rfc2459.txt
+
+        interface Validity { 
+                readonly attribute Date notBefore; 
+                readonly attribute Date notAfter;
+        };
+2.4. namePair
+
+A single pair of key and value.
+
+        interface namePair {
+                readonly attribute DOMString key;
+                readonly attribute DOMString value;
+        };
+2.5. AlgorithmIdentifier
+
+as defined in http://www.ietf.org/rfc/rfc2459.txt
+
+        interface AlgorithmIdentifier {
+            readonly attribute DOMString identifier;
+                readonly attribute DOMString? parameters;
+        };
+2.6. SubjectPublicKeyInfo
+
+as defined in http://www.ietf.org/rfc/rfc2459.txt
+
+        interface SubjectPublicKeyInfo {
+                readonly attribute AlgorithmIdentifier algorithm;
+                readonly attribute byte[] publickKey;
+        };
+2.7. attestationData
+
+The data returned by an attestation request
+
+  interface attestationData  {
+
+
+     readonly attribute byte[][] trustChain;
+
+
+     readonly attribute byte[] validationData;
+
+
+     readonly attribute DOMString schema;
+   };
+Attributes
+
+readonly byte [] [] trustChain
+List of binary data representing the identities of running 
+software. In the TCG scheme, this corresponds to the integrity 
+measurement log.
+For example, in a TCG scheme you would expect the following contents: 
+
+0x00 -> [ 0x45ac76fec..., 0x956836fbc42..., ] 
+0x01 -> [ 0x23c3414f1..., 0xbb3f4d282cf..., ] 
+0x02 -> [ 0x72bb76045..., 0x04ccc997056..., ] 
+... 
+0x0c -> [ 0x8a797441a..., 0xd642ac16d13..., ] 
+This attribute is readonly.
+readonly byte [] validationData
+single binary blob, containing validation data for the trustChain
+
+In the TCG scheme this would contain the following signed data, including: 
+- The TPM Quote version (1.1.0.0) 
+- A fixed byte[4] "QUOT" 
+- The SHA1 digest of the composite hash of the trustChain 
+- The 20 byte nonce 
+This attribute is readonly.
+readonly DOMString schema
+text string identifying the attestation scheme being used for example, "TPM_Quote"
+
+This attribute is readonly.
+2.8. WebinosAttestationInterface
+
+interfaces for attesting the platform
+
+  [NoInterfaceObject]
+  interface WebinosAttestationInterface {
+
+
+     attestationData attestPlatform (in byte[] nonce, in SubjectPublicKeyInfo key )
+                        raises(AttestationException);
+
+
+
+
+     SubjectPublicKeyInfo getAttestationKey () raises(AttestationException);
+
+
+    
+     X509 getKeyCredential (in SubjectPublicKeyInfo key) raises(AttestationException);
+
+
+  };
+Methods
+
+attestPlatform
+requests platform to provide attestation data
+
+Signature
+
+attestationData attestPlatform(in 
+              byte
+            [] nonce, in SubjectPublicKeyInfo key);
+inputs determine freshness and signing key to be used 
+return values are loose, to support arbitrary schemes of attestation 
+Note for implementation: there will need to be configuration of attestation modules to 
+support any authentication at the hardware layer.
+
+Error conditions due to policy enforcement, as well as potentially from hardware failure.
+
+Parameters
+
+nonce
+Optional: No.
+Nullable: No
+Type: array
+Description: is a 20 byte value used to guarantee freshness of the result
+key
+Optional: No.
+Nullable: No
+Type: SubjectPublicKeyInfo
+Description: is the (identifier of the) key which should be used for attestation. This will have been retrieved from getAttestationKey().
+Return value
+
+data structure returned is described above.
+Exceptions
+
+AttestationException:
+getAttestationKey
+returns public key corresponding to device identity used to authenticate sessions
+
+Signature
+
+SubjectPublicKeyInfo getAttestationKey();
+in TCG terminology this would be the Attestation Identity Key (AIK)
+
+Errors due to permission being denied or if the platform has not implemented attestation due to hardware or software issues.
+
+Return value
+
+returns public key
+Exceptions
+
+AttestationException:
+getKeyCredential
+return certificate for nominated key
+
+Signature
+
+X509 getKeyCredential(in SubjectPublicKeyInfo key);
+If the key identifier is unknown, or the user policy does not allow access to it, an error "not found" is returned.
+
+Parameters
+
+key
+Optional: No.
+Nullable: No
+Type: SubjectPublicKeyInfo
+Description: is the RSA public key (or identifier) for which a certificate is to be returned
+Return value
+
+returns certificate data structure corresponding to key
+Exceptions
+
+AttestationException:
+2.9. WebinosAttestation
+
+The WebinosAttestation interface describes the part of the Attestation API accessible through the webinos object.
+
+        [NoInterfaceObject] interface WebinosAttestation {
+                readonly attribute WebinosAttestationInterface attestation;
+        };
+        webinoscore::Webinos implements WebinosAttestation;
+Attributes
+
+readonly WebinosAttestationInterface attestation
+webinos.attestation object.
+
+This attribute is readonly.
+3. Type Definitions
+
+3.1. namePairArray
+
+as defined in http://www.ietf.org/rfc/rfc2459.txt
+
+        typedef namePair[] namePairArray;
+4. Exceptions
+
+4.1. AttestationException
+
+Exception handling for the attestation API
+
+        exception AttestationException  {
+        const unsigned short UNKNOWN_ERROR = 0;
+        
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;
+
+        const unsigned short IO_ERROR = 4;
+        
+        const unsigned short NOT_SUPPORTED_ERROR = 5;
+        
+        const unsigned short PERMISSION_DENIED_ERROR = 20;
+
+        const unsigned short KEY_NOT_FOUND_ERROR = 21;
+
+        
+           
+        unsigned short code;
+
+        DOMString message;
+        
+        };
+Field
+
+unsigned short code
+An error code assigned by an implementation when an error has occurred in attestation API processing.
+
+DOMString message
+5. Features
+
+This is the list of URIs used to declare this API's features, for use in the widget config.xml and as identifier for service type in service discovery functionality. For each URI, the list of functions covered is provided.
+
+http://webinos.org/api/attestation
+6. Full WebIDL
+
+module attestation {
+
+        
+        interface X509 {                
+                readonly attribute TBSCertificate certificate;
+                readonly attribute AlgorithmIdentifier signatureAlgorithm;
+                readonly attribute byte[] signature;
+        };
+
+        interface TBSCertificate { 
+                readonly attribute DOMString version;
+                readonly attribute Integer serialNumber;
+                readonly attribute AlgorithmIdentifier signature;
+                readonly attribute namePairArray issuer;
+                readonly attribute Validity validity;
+                readonly attribute namePairArray subject;
+                readonly attribute SubjectPublicKeyInfo subjectPublicKeyInfo;
+                readonly attribute Any? extensions;
+        };
+        
+        interface Validity { 
+                readonly attribute Date notBefore; 
+                readonly attribute Date notAfter;
+        };
+        
+        typedef namePair[] namePairArray;
+
+        interface namePair {
+                readonly attribute DOMString key;
+                readonly attribute DOMString value;
+        };
+        
+        interface AlgorithmIdentifier {
+            readonly attribute DOMString identifier;
+                readonly attribute DOMString? parameters;
+        };
+        
+        interface SubjectPublicKeyInfo {
+                readonly attribute AlgorithmIdentifier algorithm;
+                readonly attribute byte[] publickKey;
+        };
+
+        
+        exception AttestationException  {
+        const unsigned short UNKNOWN_ERROR = 0;
+        
+        const unsigned short INVALID_ARGUMENT_ERROR = 1;
+
+        const unsigned short IO_ERROR = 4;
+        
+        const unsigned short NOT_SUPPORTED_ERROR = 5;
+        
+        const unsigned short PERMISSION_DENIED_ERROR = 20;
+
+        const unsigned short KEY_NOT_FOUND_ERROR = 21;
+
+        
+           
+        unsigned short code;
+
+        DOMString message;
+        
+        };
+  
+  
+        
+        
+        
+
+  interface attestationData  {
+
+
+     readonly attribute byte[][] trustChain;
+
+
+     readonly attribute byte[] validationData;
+
+
+     readonly attribute DOMString schema;
+   };
+    
+
+  [NoInterfaceObject]
+  interface WebinosAttestationInterface {
+
+
+     attestationData attestPlatform (in byte[] nonce, in SubjectPublicKeyInfo key )
+                        raises(AttestationException);
+
+
+
+
+     SubjectPublicKeyInfo getAttestationKey () raises(AttestationException);
+
+
+    
+     X509 getKeyCredential (in SubjectPublicKeyInfo key) raises(AttestationException);
+
+
+  };
+  
+  
+        [NoInterfaceObject] interface WebinosAttestation {
+                readonly attribute WebinosAttestationInterface attestation;
+        };
+
+        webinoscore::Webinos implements WebinosAttestation;
+   
+  
+
+};

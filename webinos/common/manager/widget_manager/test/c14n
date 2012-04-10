@@ -1,0 +1,73 @@
+#!/usr/bin/env node
+
+var Parser = require('expat2').Parser;
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
+
+var argv = process.argv; argv.shift(); argv.shift();
+
+if(argv.length == 0) {
+  console.log('c14n: error: too few arguments');
+  process.exit(1);
+}
+
+var verbose = false;
+if(argv[0] == '-v') {
+  verbose = true;
+  argv.shift();
+}
+
+if(!path.existsSync(argv[0])) {
+  console.log('c14n: error: specified file does not exist (' + argv[0] + ')');
+  process.exit(1);
+}
+
+var dest;
+if(path.existsSync(argv[1]))
+  dest = argv[1];
+
+var buf;
+try {
+	buf = fs.readFileSync(argv[0]);
+	if(!buf) {
+	  console.log('c14n: error: unable to read file (' + argv[0] + ')');
+	  process.exit(1);
+	}
+} catch(e) {
+	  console.log('c14n: error: unable to read file (' + argv[0] + '), exception: ' + e);
+	  process.exit(1);
+}
+
+var opts = {isFinal: true, c14n: true};
+
+var parser = new Parser('UTF-8', opts);
+
+parser.on('startDocument', function(elt){
+//	console.log(util.inspect(elt));
+});
+
+parser.on('startElement', function(elt){
+//	console.log(util.inspect(elt));
+});
+
+if(verbose)
+  parser.on('endElement', function(elt){
+	console.log('elt: ' + elt.qName);
+	console.log('eltC14nText: ' + elt.eltC14nText);
+	console.log('localC14nText: ' + elt.localC14nText);
+	console.log('contextC14nText: ' + elt.contextC14nText);
+  });
+
+parser.on('endDocument', function(elt) {
+});
+
+parser.parse(buf, opts);
+
+if(dest) {
+  fs.writeFileSync(dest, parser.getC14NText());
+} else {
+  console.log('** CanonicalText start >>');
+  console.log(parser.getC14NText());
+  console.log('<< CanonicalText end **');
+}

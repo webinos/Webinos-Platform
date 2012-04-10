@@ -1,0 +1,8 @@
+{
+    "color": "auto",
+    "level": {
+        "*": "trace",
+        "webserver.js": "warn",
+		"xmpp.js": "trace"
+    }
+}

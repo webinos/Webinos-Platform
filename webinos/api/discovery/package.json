@@ -1,0 +1,25 @@
+{ "name": "discovery"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Discovery API"
+, "keywords": [ "webinos", "discovery", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Ziran Sun <ziran.sun@samsung.com>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/webinos.discovery.rpc.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

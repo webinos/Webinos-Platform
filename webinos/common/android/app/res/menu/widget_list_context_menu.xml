@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/menu_uninstall" android:title="@string/menu_uninstall"></item>
+    <item android:id="@+id/menu_check_for_updates" android:title="@string/menu_check_for_updates"></item>
+    <item android:id="@+id/menu_details" android:title="@string/menu_details"></item>
+    
+
+</menu>

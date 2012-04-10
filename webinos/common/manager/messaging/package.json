@@ -1,0 +1,12 @@
+{ "name": "messaging",
+  "version": "0.0.1",
+  "main": "./lib/messagehandler.js",
+  "repositories": [
+    { "type": "git",
+      "url": "http://dev.webinos.org/git/wp4.git"
+    }
+  ],
+  "directories": {
+    "lib": "./lib"
+  }
+}

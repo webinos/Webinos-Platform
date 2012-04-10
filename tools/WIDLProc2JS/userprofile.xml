@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="userprofile" id="::userprofile">
+    <webidl>module userprofile {&#13;
+        &#13;
+&#13;
+        interface UserProfileInterface {&#13;
+        &#13;
+&#13;
+                caller void find(DOMString[] fields, <ref>UserProfileFindCB</ref> successCB, optional <ref>UserProfileErrorCB</ref> errorCB, optional <ref>UserProfileFindOptions</ref> options);&#13;
+                        &#13;
+&#13;
+                void createUserProfile(in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+                &#13;
+&#13;
+                void replaceUserProfile(in DOMString id, in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+                &#13;
+&#13;
+                void deleteUserProfile(in DOMString id, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+        };&#13;
+        &#13;
+&#13;
+        interface UserProfile : <ref>Contact</ref> {&#13;
+        &#13;
+&#13;
+                attribute DOMString? preferredUsername;&#13;
+                &#13;
+&#13;
+                attribute <ref>SocialNetworkProfile</ref>[]? socialProfiles;&#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface SocialNetworkProfile {&#13;
+        &#13;
+&#13;
+                attribute boolean pref;&#13;
+                &#13;
+&#13;
+                attribute DOMString? socialNetworkProvider;&#13;
+                &#13;
+&#13;
+                attribute DOMString? userId;&#13;
+        };&#13;
+        &#13;
+&#13;
+    [NoInterfaceObject]&#13;
+    interface UserProfileFindOptions : <ref>ContactFindOptions</ref> {&#13;
+&#13;
+    };&#13;
+        &#13;
+&#13;
+    [NoInterfaceObject]&#13;
+        interface UserProfileError : <ref>ContactError</ref> {&#13;
+                &#13;
+&#13;
+        const unsigned short USERPROFILE_NOT_EXIST = 101;&#13;
+    };&#13;
+        &#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface UserProfileErrorCB  {  &#13;
+        &#13;
+&#13;
+        void onerror(<ref>UserProfileError</ref> error);&#13;
+    };&#13;
+        &#13;
+&#13;
+    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface UserProfileFindCB {        &#13;
+&#13;
+        void onsuccess (<ref>UserProfile</ref>[] userProfileObjs);&#13;
+    };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface WebinosUserProfile {&#13;
+&#13;
+                readonly attribute <ref>UserProfileInterface</ref> userprofile;&#13;
+        };&#13;
+&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>WebinosUserProfile</ref>;&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ The webinos userprofile API to access user information.
+        </brief>
+       <description>
+        <p>
+This API offers access to information of the user. UserProfile API is an extension of webinos Contact API to gather basic information about the user (e.g. name, nickname, gender, birthday, etc.) and extends it with social network attributes from Portablecontacts from August 5, 2008 (http://portablecontacts.net/draft-spec.html). These social network attributes are a simple pointer where the webinos user has non-webinos profiles. These information could be used by an application to query an external API for an additional information (e.g. query the Facebook Graph API for the buddylist).
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/userprofile">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ WIDL version for webinos created by Ronny Gr&#228;fe &#60;ronny.graefe@t-systems.com&#62;
+        </author>
+        <version>
+ 0.3 
+        </version>
+    </descriptive>
+    <Interface name="UserProfileInterface" id="::userprofile::UserProfileInterface">
+      <webidl>        interface UserProfileInterface {&#13;
+        &#13;
+&#13;
+                caller void find(DOMString[] fields, <ref>UserProfileFindCB</ref> successCB, optional <ref>UserProfileErrorCB</ref> errorCB, optional <ref>UserProfileFindOptions</ref> options);&#13;
+                        &#13;
+&#13;
+                void createUserProfile(in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+                &#13;
+&#13;
+                void replaceUserProfile(in DOMString id, in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+                &#13;
+&#13;
+                void deleteUserProfile(in DOMString id, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The UserProfileInterface interface provides methods to find, create, replace and delete a userprofile. There could be several userprofiles assigned to one sepcific webinos user.
+          </brief>
+      </descriptive>
+      <Operation caller="caller" name="find" id="::userprofile::UserProfileInterface::find">
+        <webidl>                caller void find(DOMString[] fields, <ref>UserProfileFindCB</ref> successCB, optional <ref>UserProfileErrorCB</ref> errorCB, optional <ref>UserProfileFindOptions</ref> options);</webidl>
+        <descriptive>
+            <brief>
+ find() method
+            </brief>
+           <description>
+            <p>
+Find a userprofile in the webinos system according to the find user process detailed below. 
+            </p>
+            <p>
+This method takes two, three or four arguments. When called, it starts the following find userprofile process: 
+            </p>
+            <p>
+1. Let successCallback be the callback indicated by the method's second argument. 
+            </p>
+            <p>
+2. Let errorCallback be the callback indicated by the method's third argument, if any, or null otherwise. 
+            </p>
+            <p>
+3. If successCallback is null, then throw a TypeError (as defined in the WEBIDL Sepcification - http://dev.w3.org/2006/webapi/WebIDL/).
+            </p>
+            <p>
+4. If there is a task from the device task source in one of the task queues (e.g. an existing find() operation is still pending a response), run these substeps: 
+            </p>
+            <p>
+4.1 If errorCallback is not null, let error be a UserProfileError object whose code attribute has the value PENDING_OPERATION_ERROR and queue a task to invoke errorCallback with error as its argument. 
+            </p>
+            <p>
+4.2 Abort this operation.
+            </p>
+            <p>
+5. Return, and run the remaining steps asynchronously. 
+            </p>
+            <p>
+6. Let results be the array of UserPofile objects obtained by searching userprofiles in the webinos system according to the rules defined in UserProfile Search Processing, or null if the search has failed.
+            </p>
+            <p>
+7. If results is null, run these substeps: 
+            </p>
+            <p>
+7.1 If errorCallback is not null, let error be a UserProfileError object whose code attribute has its value set according to the type of failure that occurred and queue a task to invoke errorCallback with error as its argument. 
+            </p>
+            <p>
+7.2 Abort this operation.
+            </p>
+            <p>
+8. Queue a task to invoke successCallback with results as its argument.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="fields">
+            <Type type="array">
+              <Type type="DOMString"/>
+            </Type>
+          </Argument>
+          <Argument name="successCB">
+            <Type name="UserProfileFindCB"/>
+          </Argument>
+          <Argument optional="optional" name="errorCB">
+            <Type name="UserProfileErrorCB"/>
+          </Argument>
+          <Argument optional="optional" name="options">
+            <Type name="UserProfileFindOptions"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="createUserProfile" id="::userprofile::UserProfileInterface::createUserProfile">
+        <webidl>                void createUserProfile(in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);</webidl>
+        <descriptive>
+            <brief>
+ createuserProfile() method - Creates a new user profile in the webinos system.
+            </brief>
+            <Code> //create a new userProfile
+ var userProfile = new Object();
+
+ //add attributes
+ userProfile.displayName = 'John Smith';
+ userProfile.nickname = 'johnny2011';
+ ...
+ userProfile.timezone = 'CET';
+ 
+ //creates a new userprofile in the webinos system
+ webinos.userprofile.createuserProfile(userProfile, successCB, errorCB);
+
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="userProfile">
+            <descriptive>
+                <description><p>
+ A new UserProfile object.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfile"/>
+          </Argument>
+          <Argument optional="optional" name="successCallBack">
+            <descriptive>
+                <description><p>
+ Callback issued when the creating of the user is correctly finished.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during the processing time.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfileErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="replaceUserProfile" id="::userprofile::UserProfileInterface::replaceUserProfile">
+        <webidl>                void replaceUserProfile(in DOMString id, in <ref>UserProfile</ref> userProfile, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);</webidl>
+        <descriptive>
+            <brief>
+ The replaceUserProfile() method - Replaces a userprofile. This method should be used to update a userprofile. 
+            </brief>
+           <description>
+            <p>
+Three steps are necessary to use this method.
+            </p>
+            <p>
+1. Get the existing user profile object
+            </p>
+            <p>
+2. Update attributes
+            </p>
+            <p>
+3. Use replaceUserProfile() method to update the existing user profile with new attributes by providing the entire user profile object to the method.
+            </p>
+           </description>
+            <Code> // Obtain a single existing UserProfile object resulting from webinos.userprofile.find()
+ var existingUserProfileObj = ...;
+
+ // Modify some parameters as required. e.g. add a new phone number
+ existingUserProfileObj.phoneNumbers.push({
+ type: 'home', 
+ value: '654321'
+ });
+
+ //update the userprofile
+ webinos.userprofile.replaceUserProfile(existingUserProfileObj, successCB, errorCB);
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="id">
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="userProfile">
+            <descriptive>
+                <description><p>
+ The UserProfile object which should be replaced in the webinos system.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfile"/>
+          </Argument>
+          <Argument optional="optional" name="successCallBack">
+            <descriptive>
+                <description><p>
+ Callback issued when the creating of the user is correctly finished.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during the opening. E.g. the userprofile id does not exist.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfileErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="deleteUserProfile" id="::userprofile::UserProfileInterface::deleteUserProfile">
+        <webidl>                void deleteUserProfile(in DOMString id, optional <ref>SuccessCB</ref> successCallBack, in <ref>UserProfileErrorCB</ref> errorCallback);</webidl>
+        <descriptive>
+            <brief>
+ The deleteUserProfile() method - Deletes an existing userprofile from the user in the webinos system.
+            </brief>
+            <Code> //delete the userprofile
+ webinos.userprofile.deleteUserProfile('xxx', successCB, errorCB);
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="id">
+            <descriptive>
+                <description><p>
+ The id of the existing object
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument optional="optional" name="successCallBack">
+            <descriptive>
+                <description><p>
+ Callback issued when the creating of the user is correctly finished.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during the opening. E.g. the userprofile id does not exist.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfileErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="UserProfile" id="::userprofile::UserProfile">
+      <webidl>        interface UserProfile : <ref>Contact</ref> {&#13;
+        &#13;
+&#13;
+                attribute DOMString? preferredUsername;&#13;
+                &#13;
+&#13;
+                attribute <ref>SocialNetworkProfile</ref>[]? socialProfiles;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The UserProfile interface. It is a userprofile specific extension to the interface Contact in the Contacts module.
+          </brief>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="Contact"/>
+      </InterfaceInheritance>
+      <Attribute name="preferredUsername" id="::userprofile::UserProfile::preferredUsername">
+        <webidl>                attribute DOMString? preferredUsername;</webidl>
+        <descriptive>
+            <brief>
+ preferredUsername of type DOMString
+            </brief>
+           <description>
+            <p>
+The preferred username of this user on sites that ask for a username (e.g. jsmarr or daveman692). This field may be useful for describing the owner (i.e. the value when /@me/@self is requested), e.g. Consumers MAY wish to use this value to pre-populate a username for this user when signing up for a new service. See [[PORT] section 7.2.1].
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="socialProfiles" id="::userprofile::UserProfile::socialProfiles">
+        <webidl>                attribute <ref>SocialNetworkProfile</ref>[]? socialProfiles;</webidl>
+        <descriptive>
+            <brief>
+ socialProfiles of type array of SocialNetworkProfile
+            </brief>
+           <description>
+            <p>
+The User profile on a social network provider.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array" nullable="nullable">
+          <Type name="SocialNetworkProfile"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="SocialNetworkProfile" id="::userprofile::SocialNetworkProfile">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface SocialNetworkProfile {&#13;
+        &#13;
+&#13;
+                attribute boolean pref;&#13;
+                &#13;
+&#13;
+                attribute DOMString? socialNetworkProvider;&#13;
+                &#13;
+&#13;
+                attribute DOMString? userId;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The SocialNetworkProfile interface
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="pref" id="::userprofile::SocialNetworkProfile::pref">
+        <webidl>                attribute boolean pref;</webidl>
+        <descriptive>
+            <brief>
+ pref of type boolean
+            </brief>
+           <description>
+            <p>
+This attribute indicates whether this instance of the SocialNetworkProfile is the preferred, or primary, value for the user. By default, the value is false. 
+            </p>
+           </description>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute name="socialNetworkProvider" id="::userprofile::SocialNetworkProfile::socialNetworkProvider">
+        <webidl>                attribute DOMString? socialNetworkProvider;</webidl>
+        <descriptive>
+            <brief>
+ socialNetworkProvider of type DOMString
+            </brief>
+           <description>
+            <p>
+The identifier of the social network provider, for the purposes of sorting and filtering.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="userId" id="::userprofile::SocialNetworkProfile::userId">
+        <webidl>                attribute DOMString? userId;</webidl>
+        <descriptive>
+            <brief>
+ userId of type DOMString
+            </brief>
+           <description>
+            <p>
+The user's IDs in the social network, that is one or more elements that can be used to uniquely identify the user (i.e. userName, social network ID number, email). Usually chosen automatically, and usually numeric but sometimes alphanumeric, e.g. &quot;12345&quot; or &quot;1Z425A&quot;. 
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+    </Interface>
+    <Interface name="UserProfileFindOptions" id="::userprofile::UserProfileFindOptions">
+      <webidl>    [NoInterfaceObject]&#13;
+    interface UserProfileFindOptions : <ref>ContactFindOptions</ref> {&#13;
+&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ The UserProfileFindOptions interface describes the options that can be applied to userprofile searching. It inherits directly from ContactFindOptions and could be used to declare an filter for userprofile attributes. When a UserProfileFindOptions parameter is provided to the UserProfile find() operation, it should be processed according to the provisions detailed in Options Processing. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="ContactFindOptions"/>
+      </InterfaceInheritance>
+    </Interface>
+    <Interface name="UserProfileError" id="::userprofile::UserProfileError">
+      <webidl>    [NoInterfaceObject]&#13;
+        interface UserProfileError : <ref>ContactError</ref> {&#13;
+                &#13;
+&#13;
+        const unsigned short USERPROFILE_NOT_EXIST = 101;&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ The UserProfileError interface. It is a userprofile specific extension to the interface ContactError in the Contacts module.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="ContactError"/>
+      </InterfaceInheritance>
+      <Const name="USERPROFILE_NOT_EXIST" value="101" id="::userprofile::UserProfileError::USERPROFILE_NOT_EXIST">
+        <webidl>        const unsigned short USERPROFILE_NOT_EXIST = 101;</webidl>
+        <descriptive>
+            <brief>
+ The userprofile does not exist in the webinos system.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+    </Interface>
+    <Interface name="UserProfileErrorCB" id="::userprofile::UserProfileErrorCB">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface UserProfileErrorCB  {  &#13;
+        &#13;
+&#13;
+        void onerror(<ref>UserProfileError</ref> error);&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ This is the wrapper interface for callbacks indicating failure of the createUserProfile(), updateUserProfile() and deleteUserProfile() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onerror" id="::userprofile::UserProfileErrorCB::onerror">
+        <webidl>        void onerror(<ref>UserProfileError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback on failure of a find() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ The UserProfileError object capturing the type of the error.
+                </p></description>
+            </descriptive>
+            <Type name="UserProfileError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="UserProfileFindCB" id="::userprofile::UserProfileFindCB">
+      <webidl>    [Callback=FunctionOnly, NoInterfaceObject]&#13;
+    interface UserProfileFindCB {        &#13;
+&#13;
+        void onsuccess (<ref>UserProfile</ref>[] userProfileObjs);&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ This is the wrapper interface for callbacks indicating success of the find() operation. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onsuccess" id="::userprofile::UserProfileFindCB::onsuccess">
+        <webidl>        void onsuccess (<ref>UserProfile</ref>[] userProfileObjs);</webidl>
+        <descriptive>
+            <brief>
+ Callback on success of a find() operation
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void                 
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="userProfileObjs">
+            <descriptive>
+                <description><p>
+ An array of UserProfile objects resulting from the given UserProfile find() operation. 
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="UserProfile"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="WebinosUserProfile" id="::userprofile::WebinosUserProfile">
+      <webidl>        [NoInterfaceObject] interface WebinosUserProfile {&#13;
+&#13;
+                readonly attribute <ref>UserProfileInterface</ref> userprofile;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosUserProfile interface describes the part of the user profile
+API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="userprofile" id="::userprofile::WebinosUserProfile::userprofile">
+        <webidl>                readonly attribute <ref>UserProfileInterface</ref> userprofile;</webidl>
+        <descriptive>
+            <brief>
+ webinos.userprofile object.
+            </brief>
+        </descriptive>
+        <Type name="UserProfileInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosUserProfile">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>WebinosUserProfile</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

@@ -1,0 +1,9 @@
+Policy manager implementation (c/c++) for use in an Android JNI project.
+
+To compile the code for an Android JNI project:
+- install the NDK by CrystaX (http://www.crystax.net/en/android/ndk/6#download)
+- add the file ./libcrypto.so in path_to_android_ndk/build/platforms/android-(version)/arch-(arm|x86)/usr/lib/
+- add path_to_android_ndk to the environment variable PATH
+- execute "ndk-build" in ./
+
+You can find the resulting libpolicymanager.so in a subfolder of ./libs/

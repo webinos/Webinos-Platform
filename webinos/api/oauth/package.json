@@ -1,0 +1,6 @@
+{ "name": "oauth"
+, "description": "oAuth API"
+, "homepage": "http://webinos.org/"
+, "author": "Andreas Botsikas <abot@epu.ntua.gr>"
+, "main": "./lib/oauth.api.js"
+}

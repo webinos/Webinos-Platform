@@ -1,0 +1,236 @@
+<html>
+	<head>
+		<title>PZH Testbed</title>
+		<script type="text/javascript">
+		var channel;
+
+		try{
+			channel  = new WebSocket('wss://'+window.location.hostname+':8900');
+		} catch(e) {
+			channel  = new MozWebSocket('wss://'+window.location.hostname+':8900');
+//window.location.hostname
+		}
+
+		channel.onmessage = function(ev) {
+			console.log('WebSocket Client: Message Received : ' + JSON.stringify(ev.data));
+			var msg = ev.data;
+			if( typeof ev.data === 'string'){
+				msg = JSON.parse(ev.data);
+			}
+			
+			switch(msg.cmd){
+				case 'listDevices':
+					displayPzhPzh(msg.payload);
+					break;
+				case 'userDetails':
+					displayUserDetails(msg.payload);
+					break;
+				case 'addPzpQR':
+					displayQRCode(msg.payload);
+					break;
+				case 'crashLog':
+					displayCrashLog(msg.payload);
+					break;
+				case 'pzhPzh':
+					displayPzhResult(msg.payload);
+					break;
+				case 'listPzp':
+					displayPzpResult(msg.payload);
+					break;
+				case 'revokePzp':
+					displayRevokeResult(msg.pzpid);
+					break;
+			}
+		};
+
+		channel.onopen = function () {
+			send({cmd:'listDevices'});
+		};
+
+		function send(payload){
+			"use strict";
+			if(channel !== null && typeof channel !== "undefined"){
+				payload.from = window.location.search.split("=")[2];
+				channel.send(JSON.stringify(payload));
+			}
+		};
+
+		function showConnectPzh() {
+			"use strict";
+			clearPage();
+			var text = "Connect PZH: <input type='text' id='connectPzhId' value='localhost/WGuo'/>";
+			text +=    "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
+			document.getElementById('pzhPzh').innerHTML=text;
+		};
+
+		function connectPzh(){
+			"use strict";
+			send({cmd:'pzhPzh', to:document.getElementById('connectPzhId').value});
+		};
+
+		function displayPzhResult(result) {
+			"use strict";
+			clearPage();
+			var text;
+			if(result) { text = 'Connected'}
+			else  { text = "Unable to connect";}
+			document.getElementById('pzhPzh').innerHTML = text;
+		};
+
+		function displayPzhPzh(payload) {
+			"use strict";
+			var text =  "<table padding=10px>";
+			var i;
+			text += "<tr> <td> <font color=\"#FFFFFF\"> <b> Connected PZP </b> </font> </td> </tr>";
+			for (i = 0 ; i < payload.pzps.length; i += 1){
+				var color = payload.pzps[i].isConnected?"#FFFFFF":"#333333";
+				text+= "<tr> <td> <font color= "+color +">"+payload.pzps[i].id + "</font> </td> </tr>";
+			}
+			text += "<tr> <td> <font color=\"#FFFFFF\"> <b> Connected PZH </b> </font> </td> </tr>";
+			for (i = 0 ; i < payload.pzhs.length; i += 1){
+				var color = payload.pzhs[i].isConnected?"#FFFFFF":"#333333";
+				text+= "<tr> <td> <font color= "+color +">"+payload.pzhs[i].id + "</font> </td> </tr>";
+			}
+			text+="</table>"
+			document.getElementById('listDevices').innerHTML=text;
+		};
+
+		function displayUserDetails(payload){
+			"use strict";
+			clearPage();
+			var text = "";
+			if (payload.image){
+				text += "<p><h3> <img src =  "+ payload.image+"> </img> </h3></p>";
+			}
+			text += "<p><h3> Name: "+ payload.name +"</h3></p>";
+			text += "<p><h3> Country  :  "+ payload.country +"</h3></p>";
+			text += "<p><h3> Email    :  "+ payload.email+"</h3></p>";
+			text += "<p> (Claimed Identifier: "+ payload.connid+")</p>";
+			document.getElementById('userDetails').innerHTML=text;
+		};
+
+		function displayCrashLog(payload){
+			"use strict";
+			clearPage();
+			document.getElementById('crashLog').innerHTML = payload;
+		};
+
+		function displayQRCode(payload){
+			"use strict";
+			var text = "<center>";
+			text += "<p> <img src=" + payload.img + "> </img> </p> ";
+			text += "<p> <h2>" +payload.code +"</p> </h2>";
+			clearPage();
+			document.getElementById('addPzp').innerHTML=text;
+
+		};
+
+		function sendRevoke(self) {
+			"use strict";
+			send({cmd: 'revokePzp', pzpid: self.id});
+		};
+
+		function displayPzpResult(payload){
+			"use strict";
+			clearPage();
+			var i, id;
+			var text = " <h3 align=center> Connected PZP's</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+			for (i = 0; i < payload.signedCert.length; i += 1 ) {
+				id = payload.signedCert[i].id;
+				text += "<tr>  <td> " + payload.signedCert[i].cname + "</td>  <td> <input id="+id+" type=button onclick=sendRevoke("+id+") value ="+id+" />  </td> </tr>" ;
+			}
+			text += '</table> </p>';
+			text += " <p> <h3 align=center> Revoked PZP's</h3> </p> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+			for (i = 0; i < payload.revokedCert.length; i += 1 ) {
+				id = payload.revokedCert[i].id;
+				text += "<tr>  <td> " + payload.revokedCert[i].cname + "</td> </td> </tr>" ;
+			}
+			text += '</table> </p>';
+			document.getElementById('revokePzp').innerHTML = text;
+		};
+
+		function displayRevokeResult(id) {
+			"use strict";
+			clearPage();
+			document.getElementById('revokePzp').innerHTML = id + " certificate revoked";
+		};
+
+		function clearPage(){
+			"use strict";
+			document.getElementById('addPzp').innerHTML="";
+			document.getElementById('userDetails').innerHTML="";
+			document.getElementById('crashLog').innerHTML="";
+			document.getElementById('pzhPzh').innerHTML="";
+			document.getElementById('revokePzp').innerHTML="";
+		};
+
+		function Logout() {
+			"use strict";
+			send({cmd:'logout'});
+			if (window.location.search && window.location.search.split("?") && window.location.search.split("?")[1].split('=')[1] === 'google') {
+				window.open('https://www.google.com/accounts/Logout');
+			} else {
+				window.open('https://login.yahoo.com/config/login?logout=1');
+			}
+			window.location.href='/index.html';
+		};
+
+		</script>
+		<style type="text/css">
+			body{
+				font-family:Optima, Segoe, Candara, Calibri, Arial, sans-serif;
+				background-color:#257fd7;
+				color:#FFFFFF;
+				margin:10px;
+				padding:10px;
+				margin-top:2cm;
+			}
+			ul{
+				position: absolute;
+				top: 0px;
+				list-style-type: none;
+				margin: 0 auto;
+				padding: 0;
+				padding-top: 0px;
+				padding-bottom: 20px;
+			}
+			li{
+				display:inline;
+			}
+			a:link,a:visited{
+				font-weight:bold;
+				text-align: center;
+				text-transform:uppercase;
+				padding:10px;
+				color:#FFFFFF;
+				background-color:#004C97;
+			}
+			a:hover{
+				background-color:#257fd7;
+			}
+			
+			
+		</style>
+	</head>
+	<body>
+		<div id = "Navigation" align="left">
+			<ul>
+				<li> <a href="/index.html" > Home </a> </li>
+				<li> <a href="#addPzp"      onclick="send({cmd:'addPzp'});">        Add New PZP </a> </li>
+				<li> <a href="#crashLog"    onclick="send({cmd:'crashLog'});">      Crash Log </a> </li>
+				<li> <a href="#revokeCert"  onclick="send({cmd:'listPzp'});">       Revoke Certificate </a> </li>
+				<li> <a href="#connectPzh"  onclick="showConnectPzh();">            Connect Other PZH </a> </li>
+				<li> <a href="#restartPzh"  onclick="send({cmd:'restartPzh'});">    Restart PZH </a> </li>
+				<li> <a href="#userDetails" onclick="send({cmd:'userDetails'});">   User Details </a> </li>
+				<li> <a href="#logout"      onclick="Logout();"> Logout </a> </li>
+
+			</ul>
+		</div>
+		<div id="listDevices" align="right" position="absolute" margin="0"> </div>
+		<div id="addPzp"      align="left" > </div>
+		<div id="userDetails" align="left" > </div>
+		<div id="crashLog"    align="left" > </div>
+		<div id="pzhPzh"      align="left" > </div>
+		<div id="revokePzp"   align="left" > </div>
+	</body>
+</html>

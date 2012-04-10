@@ -1,0 +1,183 @@
+﻿body
+{
+    background-color: white;
+    font-size: .75em;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    margin: 4px 4px 4px 4px;
+    padding: 0;
+    color: black;
+}
+
+form
+{
+    margin: 0;
+}
+
+h2
+{
+    margin: 10px 0px 5px 0px;
+    color: #067d99;
+    font-size: 1.3em;
+}
+
+a
+{
+    color: #034af3;
+    text-decoration: underline;
+}
+
+a:hover
+{
+    color: #1d60ff;
+    text-decoration: none;
+}
+
+.header
+{
+    background-color: #067d99;
+    color: White;
+    font-weight:bold;
+    font-size: 2em;
+    padding: 4px 4px 4px 4px;
+}
+
+.header a
+{
+    color: White;
+    text-decoration: none;
+}
+
+.panel
+{
+    border: 1px dotted black;
+    background-color: #eee;
+    padding: 4px;
+    margin-bottom: 10px;
+}
+
+.detailPanel
+{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.detailPanel td
+{
+    padding: 4px 4px 4px 4px;
+    border: 1px dotted black;
+}
+
+.detailPanel th
+{
+    background-color: #BBDDDD;
+    border: 1px solid #067d99;
+    padding: 4px 4px 4px 4px;
+    color: #067d99;
+    text-align: left;
+}
+
+.detailTitle
+{
+    color: Black;
+    font-weight:bold;
+    border-bottom: 1px dotted black;
+    margin-bottom: 4px;
+}
+
+.descInput
+{
+    width: 400px;
+}
+
+.breadcrumb
+{
+    padding: 4px 4px 4px 4px;
+}
+
+.topMenu
+{
+    background-color: #BBDDDD;
+    border: 1px solid #067d99;
+    padding: 4px 4px 4px 4px;
+    color: #067d99;
+    margin-bottom: 10px;
+}
+
+.footerActions
+{
+    border-top: 1px solid black;
+    margin-top: 20px;
+    padding-top: 4px;
+}
+
+.actionPanel
+{
+    text-align:right;
+    padding-top:4px;
+    padding-bottom:4px;
+}
+
+.decisionPanel
+{
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    padding: 40px 40px 40px 40px;
+    color: black;
+    margin-left:auto;
+    margin-right:auto;
+    border: 1px dotted black;
+}
+
+.permit
+{
+    background-color:Lime;
+}
+
+.deny
+{
+    background-color: Red;
+}
+
+.prompt-oneshot,
+.prompt-session,
+.prompt-blanket
+{
+    background-color: Orange;
+}
+
+.undetermined,
+.inapplicable
+{
+    background-color: White;
+}
+
+.explainer
+{
+    font-size: .8em;
+    font-weight: normal;
+}
+
+.pager
+{
+    text-align:center;
+    padding: 10px;
+}
+
+.feedback
+{
+    position:fixed;
+    top:2px;
+    left:0px;
+    right:0px;
+    text-align: center;
+}
+
+.feedbackInner
+{
+    background-color: Red;
+    color: White;
+    line-height: 2em;
+    font-weight: bold;
+    padding: 10px;
+}

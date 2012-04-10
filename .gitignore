@@ -1,0 +1,69 @@
+# context db
+Manager/Context/Storage/data/context.json
+webinos/common/manager/context_manager/data/log.json
+
+# generated webinos.js
+demo/client/webinos.js
+
+# eclipse project files
+.project
+.settings
+
+# vstudio prj files
+*.sln
+*.vcxproj*
+
+# generated certificates
+*.pem
+*.csr
+*.crl
+*.srl
+
+# backup files
+*~
+
+# waf lock files
+.lock-wscript
+
+# vi swap file
+*.swp
+
+# build stuff
+build
+out
+*.node
+linker.lock
+*.o
+
+# gyp generated
+webinos/common/manager/certificate_manager/src/Makefile
+webinos/common/manager/certificate_manager/src/*.mk
+
+# target folders
+target
+
+# reports folders
+reports
+
+# modules for vehicle connection
+webinos/api/vehicle/contrib/vb-con/
+webinos/api/vehicle/contrib/vb-con/vc.js
+webinos/api/vehicle/contrib/vb-con/jsonrpc.js 
+webinos/api/vehicle/lib/webinos.vehicle.most.js
+node_modules/dojo-node/
+node_modules/.bin/
+node_modules/prototype/
+node_modules/xmlhttprequest/
+RPC/node_modules/dojo-node/
+RPC/node_modules/prototype/
+RPC/node_modules/xmlhttprequest/
+
+#node_modules
+/.metadata/
+
+#pzh logs
+demo/crash.txt
+demo/info.txt
+WebinosPzh_crash.txt
+*_crash.txt
+

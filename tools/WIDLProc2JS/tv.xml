@@ -1,0 +1,741 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="tv" id="::tv">
+    <webidl>module tv {&#13;
+&#13;
+&#13;
+[NoInterfaceObject] &#13;
+interface WebinosTV {&#13;
+  readonly attribute <ref>TVManager</ref> tv;&#13;
+};&#13;
+&#13;
+<ref>webinoscore::Webinos</ref> implements <ref>WebinosTV</ref>;&#13;
+&#13;
+&#13;
+[NoInterfaceObject] &#13;
+interface TVManager {&#13;
+  readonly attribute <ref>TVDisplayManager</ref> display;&#13;
+  readonly attribute <ref>TVTunerManager</ref> tuner;&#13;
+}; &#13;
+&#13;
+&#13;
+[NoInterfaceObject]&#13;
+interface TVDisplayManager {&#13;
+&#13;
+  void setChannel(<ref>Channel</ref> channel, <ref>TVDisplaySuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);&#13;
+};&#13;
+&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject]&#13;
+interface TVDisplaySuccessCB {&#13;
+  void onSuccess(<ref>Channel</ref> channel);&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject] &#13;
+interface TVTunerManager {&#13;
+&#13;
+  void getTVSources(<ref>TVSuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);&#13;
+};&#13;
+&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject] &#13;
+interface TVSuccessCB {&#13;
+&#13;
+  void onSuccess(<ref>TVSource</ref>[] sources);&#13;
+};&#13;
+&#13;
+&#13;
+[Callback=FunctionOnly, NoInterfaceObject] &#13;
+interface TVErrorCB {&#13;
+&#13;
+  void onError(<ref>TVError</ref> error);&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject] &#13;
+interface TVError {&#13;
+&#13;
+  const unsigned short UNKNOWN_ERROR = 0;&#13;
+  &#13;
+&#13;
+  const unsigned short ILLEGAL_CHANNEL_ERROR = 1;&#13;
+  &#13;
+&#13;
+  readonly attribute unsigned short code;&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject] &#13;
+interface TVSource {&#13;
+&#13;
+  readonly attribute DOMString name;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>Channel</ref>[] channelList;&#13;
+};&#13;
+&#13;
+&#13;
+[NoInterfaceObject]&#13;
+interface Channel {&#13;
+&#13;
+  const unsigned short TYPE_TV = 0;&#13;
+  &#13;
+&#13;
+  const unsigned short TYPE_RADIO = 1;&#13;
+  &#13;
+&#13;
+  readonly attribute unsigned short channelType;&#13;
+  &#13;
+&#13;
+  readonly attribute DOMString name;&#13;
+  &#13;
+&#13;
+  readonly attribute DOMString longName;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>Stream</ref> stream;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>TVSource</ref> tvsource;&#13;
+};&#13;
+&#13;
+&#13;
+interface ChannelChangeEvent : <ref>Event</ref> {&#13;
+&#13;
+  readonly attribute <ref>Channel</ref> channel;&#13;
+&#13;
+&#13;
+  void initChannelChangeEvent(DOMString type, boolean bubbles, boolean cancelable, <ref>Channel</ref> channel);&#13;
+  &#13;
+};&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Interface for TV control and managment.
+        </brief>
+       <description>
+        <p>
+The interface provides means to acquire a list of tv sources, channels and
+their streams.
+        </p>
+        <p>
+The TV channel streams can be displayed in HTMLVideoElement object
+(http://dev.w3.org/html5/spec/video.html). Alternatively the API provides
+means to control channel management of the native hardware TV, by allowing
+to set a channel or watch for channel changes that are invoked otherwise.
+        </p>
+        <p>
+The tv object is made available under the webinos namespace, i.e.
+webinos.tv.
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/tv">
+          <descriptive>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Fraunhofer FOKUS, Alexander Fut&#225;sz &#60;alexander.futasz@fokus.fraunhofer.de&#62;
+        </author>
+        <author>
+ Dominique Hazael-Massieux
+        </author>
+    </descriptive>
+    <Interface name="WebinosTV" id="::tv::WebinosTV">
+      <webidl>[NoInterfaceObject] &#13;
+interface WebinosTV {&#13;
+  readonly attribute <ref>TVManager</ref> tv;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Creates tv object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="tv" id="::tv::WebinosTV::tv">
+        <webidl>  readonly attribute <ref>TVManager</ref> tv;</webidl>
+        <Type name="TVManager"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="WebinosTV">
+      <webidl><ref>webinoscore::Webinos</ref> implements <ref>WebinosTV</ref>;</webidl>
+    </Implements>
+    <Interface name="TVManager" id="::tv::TVManager">
+      <webidl>[NoInterfaceObject] &#13;
+interface TVManager {&#13;
+  readonly attribute <ref>TVDisplayManager</ref> display;&#13;
+  readonly attribute <ref>TVTunerManager</ref> tuner;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Access to tuner and display managers.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="display" id="::tv::TVManager::display">
+        <webidl>  readonly attribute <ref>TVDisplayManager</ref> display;</webidl>
+        <Type name="TVDisplayManager"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="tuner" id="::tv::TVManager::tuner">
+        <webidl>  readonly attribute <ref>TVTunerManager</ref> tuner;</webidl>
+        <Type name="TVTunerManager"/>
+      </Attribute>
+    </Interface>
+    <Interface name="TVDisplayManager" id="::tv::TVDisplayManager">
+      <webidl>[NoInterfaceObject]&#13;
+interface TVDisplayManager {&#13;
+&#13;
+  void setChannel(<ref>Channel</ref> channel, <ref>TVDisplaySuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Interface to manage what's currently displayed on TV screen.
+          </brief>
+         <description>
+          <p>
+This interface is useful when an app doesn't want to show the broadcast
+itself, but let the TV natively handle playback, i.e. not in a web context.
+Useful to build an control interface that allows channel switching.
+          </p>
+         </description>
+          <Code>  &lt;p>Currently shown on TV: &lt;span id='tv'>Undetermined&lt;/span>&lt;/p>
+  &lt;script>
+  var channel; // holding a previously obtained channel object.
+  webinos.tv.display.setChannel(channel, success);
+  var ontv = document.getElementById('tv');
+  function success(channel) {
+    ontv.normalize();
+    ontv.removeChild(ontv.childNodes[0]);
+    ontv.appendChild(document.createTextNode(channel.name + ' (source: ' + channel.tvsource.name + ')'));
+  }
+  &lt;/script>
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="setChannel" id="::tv::TVDisplayManager::setChannel">
+        <webidl>  void setChannel(<ref>Channel</ref> channel, <ref>TVDisplaySuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);</webidl>
+        <descriptive>
+            <brief>
+ Switches the channel natively on the TV (same as when a hardware remote control would be used).
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="channel">
+            <descriptive>
+                <description><p>
+ The TV channel to switch to.
+                </p></description>
+            </descriptive>
+            <Type name="Channel"/>
+          </Argument>
+          <Argument name="successCallback">
+            <descriptive>
+                <description><p>
+ The callback to notify the caller that the channel change succeeded.
+                </p></description>
+            </descriptive>
+            <Type name="TVDisplaySuccessCB"/>
+          </Argument>
+          <Argument optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ The callback called in case the channel could not be switched and an error occured.
+                </p></description>
+            </descriptive>
+            <Type name="TVErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TVDisplaySuccessCB" id="::tv::TVDisplaySuccessCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject]&#13;
+interface TVDisplaySuccessCB {&#13;
+  void onSuccess(<ref>Channel</ref> channel);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Callback function when current channel changed successfully.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::tv::TVDisplaySuccessCB::onSuccess">
+        <webidl>  void onSuccess(<ref>Channel</ref> channel);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="channel">
+            <Type name="Channel"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TVTunerManager" id="::tv::TVTunerManager">
+      <webidl>[NoInterfaceObject] &#13;
+interface TVTunerManager {&#13;
+&#13;
+  void getTVSources(<ref>TVSuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Get a list of all available TV tuners.
+          </brief>
+          <Code>  &lt;label>Pick a TV Source: &lt;select id='source'>
+  &lt;option>None&lt;/option>
+  &lt;/select>&lt;/label>
+  &lt;label>Pick a  channel: &lt;select id='channel'>
+  &lt;option>None&lt;/option>
+  &lt;/select>&lt;/label>
+  &lt;video id='display' width='640' height='400' poster='nochannel.png'>&lt;/video>
+  &lt;script>
+  webinos.tv.tuner.getTVSources(successCB);
+  var tvsourceselector = document.getElementById('source');
+  var channelselector = document.getElementById('channel');
+  var v = document.getElementById('display');
+  var currentTVSource;
+  var tvsources = [];
+  function successCB(sources) {
+    tvsources = sources;
+    for (var i in sources) {
+      var o = document.createElement('option');
+      o.value = i;
+      o.appendChild(document.createTextNode(sources[i].name);
+      tvsourceselector.appendChild(o);
+    }
+  }
+  tvsourceselector.addEventListener('change', function (e) {
+    currentTVSource = tvsources[e.target.value];
+    // start showing first channel
+    if (currentTVSource.channelList.length) {
+      v.src = currentTVSource.channelList[0].stream;
+      for (var i in currentTVSource.channelList) {
+          var channel = currentTVSource.channelList[i];
+          var o = document.createElement('option');
+          o.appendChild(document.createTextNode(channel.name);          
+          o.value = i;
+          channelselector.appendChild(o);
+    }
+  }, false);
+  channelselector.addEventListener('change', function (e) {
+     if (e.target.value) {
+       v.src = currentTVSource.channelList[e.target.value].stream;
+     }
+  }, false);
+  &lt;/script>
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="getTVSources" id="::tv::TVTunerManager::getTVSources">
+        <webidl>  void getTVSources(<ref>TVSuccessCB</ref> successCallback, optional <ref>TVErrorCB</ref> errorCallback);</webidl>
+        <descriptive>
+            <brief>
+ Get a list of all available TV tuners.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback that receives all available TV sources.
+                </p></description>
+            </descriptive>
+            <Type name="TVSuccessCB"/>
+          </Argument>
+          <Argument optional="optional" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback called in case something goes wrong.
+                </p></description>
+            </descriptive>
+            <Type name="TVErrorCB"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TVSuccessCB" id="::tv::TVSuccessCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject] &#13;
+interface TVSuccessCB {&#13;
+&#13;
+  void onSuccess(<ref>TVSource</ref>[] sources);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Callback for found TV tuners.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::tv::TVSuccessCB::onSuccess">
+        <webidl>  void onSuccess(<ref>TVSource</ref>[] sources);</webidl>
+        <descriptive>
+            <brief>
+ Callback that is called with the found TV sources.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="sources">
+            <descriptive>
+                <description><p>
+ An array of TVSource objects representing available tuners.
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="TVSource"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TVErrorCB" id="::tv::TVErrorCB">
+      <webidl>[Callback=FunctionOnly, NoInterfaceObject] &#13;
+interface TVErrorCB {&#13;
+&#13;
+  void onError(<ref>TVError</ref> error);&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Error callback for errors when trying to get TV tuners.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::tv::TVErrorCB::onError">
+        <webidl>  void onError(<ref>TVError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback that is called when an error occures while getting TV sources
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="error">
+            <descriptive>
+                <description><p>
+ Error object detailing what went wrong.
+                </p></description>
+            </descriptive>
+            <Type name="TVError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TVError" id="::tv::TVError">
+      <webidl>[NoInterfaceObject] &#13;
+interface TVError {&#13;
+&#13;
+  const unsigned short UNKNOWN_ERROR = 0;&#13;
+  &#13;
+&#13;
+  const unsigned short ILLEGAL_CHANNEL_ERROR = 1;&#13;
+  &#13;
+&#13;
+  readonly attribute unsigned short code;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Error codes.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="UNKNOWN_ERROR" value="0" id="::tv::TVError::UNKNOWN_ERROR">
+        <webidl>  const unsigned short UNKNOWN_ERROR = 0;</webidl>
+        <descriptive>
+            <brief>
+ An unknown error.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="ILLEGAL_CHANNEL_ERROR" value="1" id="::tv::TVError::ILLEGAL_CHANNEL_ERROR">
+        <webidl>  const unsigned short ILLEGAL_CHANNEL_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ Invalid input channel.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::tv::TVError::code">
+        <webidl>  readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ Code.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+    </Interface>
+    <Interface name="TVSource" id="::tv::TVSource">
+      <webidl>[NoInterfaceObject] &#13;
+interface TVSource {&#13;
+&#13;
+  readonly attribute DOMString name;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>Channel</ref>[] channelList;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ TV source: a list of channels with a name.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="name" id="::tv::TVSource::name">
+        <webidl>  readonly attribute DOMString name;</webidl>
+        <descriptive>
+            <brief>
+ The name of the source.
+            </brief>
+           <description>
+            <p>
+The name should describe the kind of tuner this source represents, e.g. DVB-T, DVB-C.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="channelList" id="::tv::TVSource::channelList">
+        <webidl>  readonly attribute <ref>Channel</ref>[] channelList;</webidl>
+        <descriptive>
+            <brief>
+ List of channels for this source.
+            </brief>
+        </descriptive>
+        <Type type="array">
+          <Type name="Channel"/>
+        </Type>
+      </Attribute>
+    </Interface>
+    <Interface name="Channel" id="::tv::Channel">
+      <webidl>[NoInterfaceObject]&#13;
+interface Channel {&#13;
+&#13;
+  const unsigned short TYPE_TV = 0;&#13;
+  &#13;
+&#13;
+  const unsigned short TYPE_RADIO = 1;&#13;
+  &#13;
+&#13;
+  readonly attribute unsigned short channelType;&#13;
+  &#13;
+&#13;
+  readonly attribute DOMString name;&#13;
+  &#13;
+&#13;
+  readonly attribute DOMString longName;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>Stream</ref> stream;&#13;
+  &#13;
+&#13;
+  readonly attribute <ref>TVSource</ref> tvsource;&#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ The Channel Interface
+          </brief>
+         <description>
+          <p>
+Channel objects provide access to the video stream.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Const name="TYPE_TV" value="0" id="::tv::Channel::TYPE_TV">
+        <webidl>  const unsigned short TYPE_TV = 0;</webidl>
+        <descriptive>
+            <brief>
+ Indicates a TV channel.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="TYPE_RADIO" value="1" id="::tv::Channel::TYPE_RADIO">
+        <webidl>  const unsigned short TYPE_RADIO = 1;</webidl>
+        <descriptive>
+            <brief>
+ Indicates a radio channel.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="channelType" id="::tv::Channel::channelType">
+        <webidl>  readonly attribute unsigned short channelType;</webidl>
+        <descriptive>
+            <brief>
+ The type of channel.
+            </brief>
+           <description>
+            <p>
+Type of channel is defined by one of the TYPE_* constants defined above.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="name" id="::tv::Channel::name">
+        <webidl>  readonly attribute DOMString name;</webidl>
+        <descriptive>
+            <brief>
+ The name of the channel.
+            </brief>
+           <description>
+            <p>
+The name of the channel will typically be the call sign of the station.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="longName" id="::tv::Channel::longName">
+        <webidl>  readonly attribute DOMString longName;</webidl>
+        <descriptive>
+            <brief>
+ The long name of the channel.
+            </brief>
+           <description>
+            <p>
+The long name of the channel if transmitted. Can be undefined if not available.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="stream" id="::tv::Channel::stream">
+        <webidl>  readonly attribute <ref>Stream</ref> stream;</webidl>
+        <descriptive>
+            <brief>
+ The video stream.
+            </brief>
+           <description>
+            <p>
+This stream is a represents a valid source for a HTMLVideoElement.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="Stream"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="tvsource" id="::tv::Channel::tvsource">
+        <webidl>  readonly attribute <ref>TVSource</ref> tvsource;</webidl>
+        <descriptive>
+            <brief>
+ The source this channels belongs too.
+            </brief>
+        </descriptive>
+        <Type name="TVSource"/>
+      </Attribute>
+    </Interface>
+    <Interface name="ChannelChangeEvent" id="::tv::ChannelChangeEvent">
+      <webidl>interface ChannelChangeEvent : <ref>Event</ref> {&#13;
+&#13;
+  readonly attribute <ref>Channel</ref> channel;&#13;
+&#13;
+&#13;
+  void initChannelChangeEvent(DOMString type, boolean bubbles, boolean cancelable, <ref>Channel</ref> channel);&#13;
+  &#13;
+};</webidl>
+      <descriptive>
+          <brief>
+ Event that fires when the channel is changed.
+          </brief>
+         <description>
+          <p>
+Changing channels could also be invoked by other parties, e.g. a hardware
+remote control. A ChannelChange event will be fire in these cases which
+provides the channel that was switched to.
+          </p>
+         </description>
+          <Code>  &lt;p>Currently shown on TV: &lt;span id='tv'>Undetermined&lt;/span>&lt;/p>
+  &lt;script>
+  window.addEventListener('channelchange', success);
+  var ontv = document.getElementById('tv');
+  function success(channel) {
+    ontv.normalize();
+    ontv.removeChild(ontv.childNodes[0]);
+    ontv.appendChild(document.createTextNode(channel.name + ' (source: ' + channel.tvsource.name + ')'));
+  }
+  &lt;/script>
+ </Code>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="Event"/>
+      </InterfaceInheritance>
+      <Attribute readonly="readonly" name="channel" id="::tv::ChannelChangeEvent::channel">
+        <webidl>  readonly attribute <ref>Channel</ref> channel;</webidl>
+        <descriptive>
+            <brief>
+ The new channel.
+            </brief>
+        </descriptive>
+        <Type name="Channel"/>
+      </Attribute>
+      <Operation name="initChannelChangeEvent" id="::tv::ChannelChangeEvent::initChannelChangeEvent">
+        <webidl>  void initChannelChangeEvent(DOMString type, boolean bubbles, boolean cancelable, <ref>Channel</ref> channel);</webidl>
+        <descriptive>
+            <brief>
+ Initializes a new channel change event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="type">
+            <descriptive>
+                <description><p>
+ The type of event. Pass 'channelchange'.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ Indicates whether the event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ Indicates whether the event is cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="channel">
+            <descriptive>
+                <description><p>
+ The channel that was changed to.
+                </p></description>
+            </descriptive>
+            <Type name="Channel"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

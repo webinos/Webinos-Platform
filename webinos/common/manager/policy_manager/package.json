@@ -1,0 +1,28 @@
+{ "name": "policy_manager"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Policy Manager"
+, "keywords": [ "webinos", "policy", "manager"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Stefano Vercelli <stefano.vercelli@telecomitalia.it>, Salvatore Monteleone <salvatore.monteleone@dieei.unict.it>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "contrib": "./contrib"
+                 , "demo"; "./demo"
+                 , "lib": "./lib"
+                 , "src": "./src"
+                 }
+, "main": "./lib/webinos.rpc.devicestatus.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

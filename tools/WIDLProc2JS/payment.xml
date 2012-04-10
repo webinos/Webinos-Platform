@@ -1,0 +1,1106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="payment" id="::payment">
+    <webidl>module payment {      &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+   [NoInterfaceObject] interface WebinosPayment {&#13;
+&#13;
+&#13;
+      readonly attribute <ref>Payment</ref> payment;&#13;
+   };&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+ &#13;
+[NoInterfaceObject] interface Payment { &#13;
+&#13;
+        <ref>PendingOperation</ref> createShoppingBasket(in <ref>SuccessShoppingBasketCallback</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback,&#13;
+        in DOMString serviceProviderID, in DOMString customerID, in DOMString shopID)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+  };&#13;
+  &#13;
+&#13;
+   &#13;
+[NoInterfaceObject] interface ShoppingBasket {   &#13;
+&#13;
+&#13;
+        readonly attribute <ref>ShoppingItem</ref>[] items; &#13;
+&#13;
+        readonly attribute <ref>ShoppingItem</ref>[] extras; &#13;
+&#13;
+        readonly attribute float totalBill; &#13;
+        &#13;
+&#13;
+        <ref>PendingOperation</ref> addItem(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback, in <ref>ShoppingItem</ref> item)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        <ref>PendingOperation</ref> update(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        <ref>PendingOperation</ref> checkout(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        void release();&#13;
+  };&#13;
+&#13;
+&#13;
+   [NoInterfaceObject] interface ShoppingItem {&#13;
+&#13;
+         attribute DOMString productID;&#13;
+&#13;
+         attribute DOMString description;&#13;
+&#13;
+         attribute DOMString currency;&#13;
+&#13;
+         attribute float itemPrice;&#13;
+&#13;
+         attribute unsigned long itemCount;&#13;
+&#13;
+         readonly attribute unsigned long itemsPrice;&#13;
+    };  &#13;
+&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface SuccessShoppingBasketCallback {&#13;
+&#13;
+            void onSuccess  (<ref>ShoppingBasket</ref> basket);&#13;
+        };&#13;
+        &#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface PaymentSuccessCB {&#13;
+&#13;
+            void onSuccess  ();&#13;
+        };&#13;
+                &#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface PaymentErrorCB {&#13;
+&#13;
+            void onError (in <ref>PaymentError</ref> error);&#13;
+        };&#13;
+&#13;
+&#13;
+     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+        void cancel ();&#13;
+     };&#13;
+&#13;
+&#13;
+        &#13;
+&#13;
+        interface PaymentError {&#13;
+&#13;
+&#13;
+                &#13;
+&#13;
+                const unsigned short PAYMENT_SHOPPING_BASKET_OPEN_ERROR = 1;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_SHOPPING_BASKET_NOT_OPEN_ERROR = 2;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_CHARGE_FAILED = 3;                &#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_REFUND_NOT_SUPPORTED = 4;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_REFUND_FAILED = 5;                &#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_CHARGEABLE_EXCEEDED = 6;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_AUTHENTICATION_FAILED = 7;&#13;
+&#13;
+&#13;
+        readonly attribute unsigned short code;&#13;
+&#13;
+             readonly attribute DOMString message;&#13;
+  };  &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+         exception PaymentException {&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+&#13;
+        unsigned short code;&#13;
+&#13;
+&#13;
+        DOMString message;&#13;
+&#13;
+    &#13;
+  };  &#13;
+&#13;
+&#13;
+     <ref>webinoscore::Webinos</ref> implements <ref>WebinosPayment</ref>;&#13;
+&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ Interface for Payment functions.
+        </brief>
+       <description>
+        <p>
+This API provides generic shopping basket functionality to provide in-app payment.
+        </p>
+        <p>
+It is not linked to a specific payment service provider and is designed to be 
+sufficiently generic to be mapable to various payment services like GSMA OneAPI,
+Andoid Payment API or PayPal. 
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/payment">
+          <descriptive>
+           <description>
+            <p>
+Identifies all payment interactions. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Christian Fuhrhop &#60;christian.fuhrhop@fokus.fraunhofer.de&#62;
+        </author>
+    </descriptive>
+    <Interface name="WebinosPayment" id="::payment::WebinosPayment">
+      <webidl>   [NoInterfaceObject] interface WebinosPayment {&#13;
+&#13;
+&#13;
+      readonly attribute <ref>Payment</ref> payment;&#13;
+   };</webidl>
+      <descriptive>
+          <brief>
+ The WebinosPayment interface describes the part of the payment API accessible through the webinos object.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="payment" id="::payment::WebinosPayment::payment">
+        <webidl>      readonly attribute <ref>Payment</ref> payment;</webidl>
+        <descriptive>
+            <brief>
+ webinos.payment object.
+            </brief>
+        </descriptive>
+        <Type name="Payment"/>
+      </Attribute>
+    </Interface>
+    <Interface name="Payment" id="::payment::Payment">
+      <webidl>[NoInterfaceObject] interface Payment { &#13;
+&#13;
+        <ref>PendingOperation</ref> createShoppingBasket(in <ref>SuccessShoppingBasketCallback</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback,&#13;
+        in DOMString serviceProviderID, in DOMString customerID, in DOMString shopID)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ The Payment interface
+          </brief>
+         <description>
+          <p>
+The Payment interface provides access to payment functionality.
+          </p>
+          <p>
+The API supports creation of a shopping basket, adding items to the shopping
+basket, proceeding to checkout and releasing the shopping basket.
+          </p>
+          <p>
+This essentially echoes the usual 'shopping basket' system used on many web sites.
+          </p>
+          <p>
+The code example below refunds the user for a returned CD and charges for
+the deluxe edition of that CD, demonstarting charging and refunding payments.
+          </p>
+         </description>
+          <Code>    
+        webinons.payment.createShoppingBasket(openBasketSuccess, paymentFailure, &quot;PayPal&quot;, &quot;mymail@provider.com&quot;, &quot;ShopName12345&quot;);
+        var myBasket = null;
+
+        // Define the openBasketSuccess success callback.
+        function openBasketSuccess(basket) {
+                alert(&quot;Shopping basket was opened successfully&quot;);
+                myBasket = basket;  
+                // refound for a CD
+                myBasket.addItem(CD2346278, paymentFailure,
+                    {  productID: 'DCD2346233', 
+                       description: 'Best of Ladytron 00-10 by Ladytron (Audio CD - 2011)', 
+                       currency: 'EUR',
+                       itemPrice: -14.99,
+                       itemCount: 1}
+        }
+
+        // Define the refundItemSuccess success callback.
+        function refundSuccess() {
+                alert(&quot;Adding of refunding item was handled successfully&quot;);
+                // charge for the deluxe CD
+                myBasket.addItem(addItemSuccess, paymentFailure,
+                    {  productID: 'DCD2346233', 
+                       description: 'Best of Ladytron 00-10 (Deluxe Edition) by Ladytron (Audio CD - 2011)', 
+                       currency: 'EUR',
+                       itemPrice: 17.98,
+                       itemCount: 1}
+        }
+
+        // Define the addItemSuccess success callback.
+        function addItemSuccess() {
+                alert(&quot;Adding of new item was handled successfully&quot;);
+                // now close the bill and perform the actual payment
+                myBasket.update(updateSuccess, paymentFailure);
+        }
+        
+        // Define the updateSuccess success callback.
+        function updateSuccess() {
+                alert(&quot;Total amount is: &quot;myBasket.totalAmount+&quot; Tax is &quot;+myBasket.tax);
+                // now close the bill and perform the actual payment
+                myBasket.checkout(checkoutSuccess, paymentFailure);
+        }
+        
+        // Define the checkoutSuccess success callback.
+        function checkoutSuccess() {
+                alert(&quot;Checkout handled successfully - payment was performed.&quot;);
+                 if (myBasket != null) myBasket.release();
+        }        
+
+        // Define the paymentFailure failure callback.
+        function paymentFailure(e) {   
+                alert(&quot;Failure occured during payment.&quot;);
+                 if (myBasket != null) myBasket.release();
+        }
+
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="createShoppingBasket" id="::payment::Payment::createShoppingBasket">
+        <webidl>        <ref>PendingOperation</ref> createShoppingBasket(in <ref>SuccessShoppingBasketCallback</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback,&#13;
+        in DOMString serviceProviderID, in DOMString customerID, in DOMString shopID)&#13;
+        raises(<ref>PaymentException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Creates a shopping basket
+            </brief>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation enabling the requester to cancel this request.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback issued when the shopping basket is created
+                </p></description>
+            </descriptive>
+            <Type name="SuccessShoppingBasketCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during the creation of the shopping basket
+                </p></description>
+            </descriptive>
+            <Type name="PaymentErrorCB"/>
+          </Argument>
+          <Argument in="in" name="serviceProviderID">
+            <descriptive>
+                <description><p>
+ is the name of the payment provider to be used
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="customerID">
+            <descriptive>
+                <description><p>
+ is identification of the person making the payment as known to the payment provider
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument in="in" name="shopID">
+            <descriptive>
+                <description><p>
+ is the identification of the shop the payment is made to
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="PaymentException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if an invalid argument is passed
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+    </Interface>
+    <Interface name="ShoppingBasket" id="::payment::ShoppingBasket">
+      <webidl>[NoInterfaceObject] interface ShoppingBasket {   &#13;
+&#13;
+&#13;
+        readonly attribute <ref>ShoppingItem</ref>[] items; &#13;
+&#13;
+        readonly attribute <ref>ShoppingItem</ref>[] extras; &#13;
+&#13;
+        readonly attribute float totalBill; &#13;
+        &#13;
+&#13;
+        <ref>PendingOperation</ref> addItem(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback, in <ref>ShoppingItem</ref> item)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        <ref>PendingOperation</ref> update(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        <ref>PendingOperation</ref> checkout(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);&#13;
+&#13;
+&#13;
+        void release();&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ The ShoppingBasket interface provides access to a shopping basket
+          </brief>
+         <description>
+          <p>
+The shopping basket represents a current payment action and allows to 
+add a number of items to the basket before proceeding to checkout.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="items" id="::payment::ShoppingBasket::items">
+        <webidl>        readonly attribute <ref>ShoppingItem</ref>[] items;</webidl>
+        <descriptive>
+            <brief>
+ List of items currently in the shopping basket. 
+            </brief>
+           <description>
+            <p>
+These are the items that have been added with addItem.
+            </p>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type name="ShoppingItem"/>
+        </Type>
+      </Attribute>
+      <Attribute readonly="readonly" name="extras" id="::payment::ShoppingBasket::extras">
+        <webidl>        readonly attribute <ref>ShoppingItem</ref>[] extras;</webidl>
+        <descriptive>
+            <brief>
+ Automatically generated extra items, typically rebates, taxes and shipping costs.
+            </brief>
+           <description>
+            <p>
+These items are automatically added to the shopping basket by update()
+(or after the addition of an item to the basket).
+            </p>
+            <p>
+These items can contain such 'virtual' items as payback schemes, rebates, taxes,
+shipping costs and other items that are calculated on the basis of the regular
+items added.
+            </p>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="array">
+          <Type name="ShoppingItem"/>
+        </Type>
+      </Attribute>
+      <Attribute readonly="readonly" name="totalBill" id="::payment::ShoppingBasket::totalBill">
+        <webidl>        readonly attribute float totalBill;</webidl>
+        <descriptive>
+            <brief>
+ The total amount that will be charged to the user on checkout.
+            </brief>
+           <description>
+            <p>
+Will be updated by update(), may be updated by addItem().
+            </p>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Operation name="addItem" id="::payment::ShoppingBasket::addItem">
+        <webidl>        <ref>PendingOperation</ref> addItem(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback, in <ref>ShoppingItem</ref> item)&#13;
+        raises(<ref>PaymentException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Adds an item to a shopping basket.
+            </brief>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation enabling the requester to cancel this request.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback issued when the adding of the item to the shopping basket is correctly finished.
+                </p></description>
+            </descriptive>
+            <Type name="PaymentSuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during adding the amount       
+                </p></description>
+            </descriptive>
+            <Type name="PaymentErrorCB"/>
+          </Argument>
+          <Argument in="in" name="item">
+            <descriptive>
+                <description><p>
+ the item to purchase
+                </p></description>
+            </descriptive>
+            <Type name="ShoppingItem"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="PaymentException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if an invalid argument is passed
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="update" id="::payment::ShoppingBasket::update">
+        <webidl>        <ref>PendingOperation</ref> update(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Updates the shopping basket
+            </brief>
+           <description>
+            <p>
+The update function updates the values in the shopping baskets, based on 
+the added items. Such updates may include taxes, calculating the total
+amount, shipping costs or rebate calculations. 
+            </p>
+            <p>
+While this, preferably, is internally updated after the adding of each item,
+such an update might require communication with the payment service provider
+and it might be undesireable in specific implementations to perform such
+a query after each individual item, so a specifc update function is provided
+to force such an update.
+            </p>
+            <p>
+The checkout function will always perform an update internally before
+payment.              
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation enabling the requester to cancel this request.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback issued when the update is performed
+                </p></description>
+            </descriptive>
+            <Type name="PaymentSuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during update 
+                </p></description>
+            </descriptive>
+            <Type name="PaymentErrorCB"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="PaymentException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if an invalid argument is passed
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="checkout" id="::payment::ShoppingBasket::checkout">
+        <webidl>        <ref>PendingOperation</ref> checkout(in <ref>PaymentSuccessCB</ref> successCallback, in <ref>PaymentErrorCB</ref> errorCallback)&#13;
+        raises(<ref>PaymentException</ref>);</webidl>
+        <descriptive>
+            <brief>
+ Performs the checkout of the shopping basket.
+            </brief>
+           <description>
+            <p>
+The items in the shopping basket will be charged to the shopper.
+            </p>
+            <p>
+Depending on the implementation of the actual payment service, this function
+might cause the checkout screen of the payment service provider to be displayed.
+            </p>
+           </description>
+        </descriptive>
+        <Type name="PendingOperation">
+          <descriptive>
+              <description><p>
+ PendingOperation enabling the requester to cancel this request.
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ Callback issued when the checkout is performed and payment is made
+                </p></description>
+            </descriptive>
+            <Type name="PaymentSuccessCB"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ Callback issued if an error occurs during adding the amount       
+                </p></description>
+            </descriptive>
+            <Type name="PaymentErrorCB"/>
+          </Argument>
+        </ArgumentList>
+        <Raises>
+          <RaiseException name="PaymentException">
+            <descriptive>
+                <description><p>
+ INVALID_ARGUMENT_ERROR if an invalid argument is passed
+                </p></description>
+            </descriptive>
+          </RaiseException>
+        </Raises>
+      </Operation>
+      <Operation name="release" id="::payment::ShoppingBasket::release">
+        <webidl>        void release();</webidl>
+        <descriptive>
+            <brief>
+ Releases a shopping basket.
+            </brief>
+           <description>
+            <p>
+The current shopping basket will be released.
+            </p>
+            <p>
+If no checkout has been performed, the initiated shopping transaction will be cancelled.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="ShoppingItem" id="::payment::ShoppingItem">
+      <webidl>   [NoInterfaceObject] interface ShoppingItem {&#13;
+&#13;
+         attribute DOMString productID;&#13;
+&#13;
+         attribute DOMString description;&#13;
+&#13;
+         attribute DOMString currency;&#13;
+&#13;
+         attribute float itemPrice;&#13;
+&#13;
+         attribute unsigned long itemCount;&#13;
+&#13;
+         readonly attribute unsigned long itemsPrice;&#13;
+    };</webidl>
+      <descriptive>
+          <brief>
+ The ShoppingItem captures the attributes of a single shopping product
+          </brief>
+         <description>
+          <p>
+The shopping basket represents a current payment action and allows to 
+add a number of items to the basket before proceeding to checkout.
+          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="productID" id="::payment::ShoppingItem::productID">
+        <webidl>         attribute DOMString productID;</webidl>
+        <descriptive>
+            <brief>
+ An id that allows the shop to identify the purchased item
+            </brief>
+           <description>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="description" id="::payment::ShoppingItem::description">
+        <webidl>         attribute DOMString description;</webidl>
+        <descriptive>
+            <brief>
+ A human-readable text to appear on the bill, so the user can easily see what they bought.
+            </brief>
+           <description>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="currency" id="::payment::ShoppingItem::currency">
+        <webidl>         attribute DOMString currency;</webidl>
+        <descriptive>
+            <brief>
+ The 3-figure code as per ISO 4217.
+            </brief>
+           <description>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="itemPrice" id="::payment::ShoppingItem::itemPrice">
+        <webidl>         attribute float itemPrice;</webidl>
+        <descriptive>
+            <brief>
+ The price per individual item in the currency given above, a negative number represents a refund.
+            </brief>
+           <description>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute name="itemCount" id="::payment::ShoppingItem::itemCount">
+        <webidl>         attribute unsigned long itemCount;</webidl>
+        <descriptive>
+            <brief>
+ The number of identical items purchased
+            </brief>
+           <description>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="itemsPrice" id="::payment::ShoppingItem::itemsPrice">
+        <webidl>         readonly attribute unsigned long itemsPrice;</webidl>
+        <descriptive>
+            <brief>
+ Price for all products in this shopping item.
+            </brief>
+           <description>
+            <p>
+Typically this is itemPrice*itemCount, but special '3 for 2' rebates might apply.
+            </p>
+            <p>
+Updated by the shopping basket update function.
+            </p>
+            <p>
+No exceptions
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned long"/>
+      </Attribute>
+    </Interface>
+    <Interface name="SuccessShoppingBasketCallback" id="::payment::SuccessShoppingBasketCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface SuccessShoppingBasketCallback {&#13;
+&#13;
+            void onSuccess  (<ref>ShoppingBasket</ref> basket);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback for successful creation of a shopping basket
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::payment::SuccessShoppingBasketCallback::onSuccess">
+        <webidl>            void onSuccess  (<ref>ShoppingBasket</ref> basket);</webidl>
+        <descriptive>
+            <brief>
+ Callback for successful creation of a shopping basket
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument name="basket">
+            <descriptive>
+                <description><p>
+ The shopping basket to which items can be added.
+                </p></description>
+            </descriptive>
+            <Type name="ShoppingBasket"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="PaymentSuccessCB" id="::payment::PaymentSuccessCB">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface PaymentSuccessCB {&#13;
+&#13;
+            void onSuccess  ();&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback for successful payment related functions
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::payment::PaymentSuccessCB::onSuccess">
+        <webidl>            void onSuccess  ();</webidl>
+        <descriptive>
+            <brief>
+ Callback for successful of payment related functions
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="PaymentErrorCB" id="::payment::PaymentErrorCB">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface PaymentErrorCB {&#13;
+&#13;
+            void onError (in <ref>PaymentError</ref> error);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ Callback for errors during payment related functions
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::payment::PaymentErrorCB::onError">
+        <webidl>            void onError (in <ref>PaymentError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Callback for errors during payment related functions
+            </brief>
+        </descriptive>
+        <Type type="void">
+          <descriptive>
+              <description><p>
+ void
+              </p></description>
+          </descriptive>
+        </Type>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ The Payment API related error object of an unsuccessful asynchronous operation. 
+                </p></description>
+            </descriptive>
+            <Type name="PaymentError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="PendingOperation" id="::payment::PendingOperation">
+      <webidl>     [NoInterfaceObject] interface PendingOperation {&#13;
+&#13;
+        void cancel ();&#13;
+     };</webidl>
+      <descriptive>
+          <brief>
+ The PendingOperation interface
+          </brief>
+         <description>
+          <p>
+The PendingOperation interface describes objects that are returned by asynchronous methods that are cancellable. It makes it possible to bring 
+these operations to a stop if they haven't produced a result within a desired time or before a given event, thereby possibly reclaiming resources.<br/>          </p>
+         </description>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="cancel" id="::payment::PendingOperation::cancel">
+        <webidl>        void cancel ();</webidl>
+        <descriptive>
+            <brief>
+ Method Cancel
+            </brief>
+           <description>
+            <p>
+Cancel the pending asynchronous operation. When this method is called, the user agent must immediately bring the operation to a stop and return. No success or error callback for the pending operation will be invoked.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="PaymentError" id="::payment::PaymentError">
+      <webidl>        interface PaymentError {&#13;
+&#13;
+&#13;
+                &#13;
+&#13;
+                const unsigned short PAYMENT_SHOPPING_BASKET_OPEN_ERROR = 1;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_SHOPPING_BASKET_NOT_OPEN_ERROR = 2;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_CHARGE_FAILED = 3;                &#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_REFUND_NOT_SUPPORTED = 4;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_REFUND_FAILED = 5;                &#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_CHARGEABLE_EXCEEDED = 6;&#13;
+&#13;
+&#13;
+                const unsigned short PAYMENT_AUTHENTICATION_FAILED = 7;&#13;
+&#13;
+&#13;
+        readonly attribute unsigned short code;&#13;
+&#13;
+             readonly attribute DOMString message;&#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Payment specific errors.
+          </brief>
+         <description>
+          <p>
+The PaymentError interface encapsulates all errors in the manipulation of payments objects in the Payment API. 
+          </p>
+         </description>
+      </descriptive>
+      <Const name="PAYMENT_SHOPPING_BASKET_OPEN_ERROR" value="1" id="::payment::PaymentError::PAYMENT_SHOPPING_BASKET_OPEN_ERROR">
+        <webidl>                const unsigned short PAYMENT_SHOPPING_BASKET_OPEN_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ Bill is already open
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_SHOPPING_BASKET_NOT_OPEN_ERROR" value="2" id="::payment::PaymentError::PAYMENT_SHOPPING_BASKET_NOT_OPEN_ERROR">
+        <webidl>                const unsigned short PAYMENT_SHOPPING_BASKET_NOT_OPEN_ERROR = 2;</webidl>
+        <descriptive>
+            <brief>
+ Bill is not open
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_CHARGE_FAILED" value="3" id="::payment::PaymentError::PAYMENT_CHARGE_FAILED">
+        <webidl>                const unsigned short PAYMENT_CHARGE_FAILED = 3;</webidl>
+        <descriptive>
+            <brief>
+ Charging operation failed, the charge was not applied
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_REFUND_NOT_SUPPORTED" value="4" id="::payment::PaymentError::PAYMENT_REFUND_NOT_SUPPORTED">
+        <webidl>                const unsigned short PAYMENT_REFUND_NOT_SUPPORTED = 4;</webidl>
+        <descriptive>
+            <brief>
+ Refunds not supported
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_REFUND_FAILED" value="5" id="::payment::PaymentError::PAYMENT_REFUND_FAILED">
+        <webidl>                const unsigned short PAYMENT_REFUND_FAILED = 5;</webidl>
+        <descriptive>
+            <brief>
+  Refund failed
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_CHARGEABLE_EXCEEDED" value="6" id="::payment::PaymentError::PAYMENT_CHARGEABLE_EXCEEDED">
+        <webidl>                const unsigned short PAYMENT_CHARGEABLE_EXCEEDED = 6;</webidl>
+        <descriptive>
+            <brief>
+ Chargeable amount exceeded
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Const name="PAYMENT_AUTHENTICATION_FAILED" value="7" id="::payment::PaymentError::PAYMENT_AUTHENTICATION_FAILED">
+        <webidl>                const unsigned short PAYMENT_AUTHENTICATION_FAILED = 7;</webidl>
+        <descriptive>
+            <brief>
+ Chargeable Authentication failed. Payment credentials are incorrect. 
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <Attribute readonly="readonly" name="code" id="::payment::PaymentError::code">
+        <webidl>        readonly attribute unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred in Payment processing.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="message" id="::payment::PaymentError::message">
+        <webidl>             readonly attribute DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ A text describing an error occuring in the Payment in human readable form.
+            </brief>
+           <description>
+            <p>
+No exceptions.
+            </p>
+           </description>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Exception name="PaymentException" id="::payment::PaymentException">
+      <webidl>         exception PaymentException {&#13;
+&#13;
+&#13;
+                const unsigned short INVALID_ARGUMENT_ERROR = 1;&#13;
+&#13;
+&#13;
+        unsigned short code;&#13;
+&#13;
+&#13;
+        DOMString message;&#13;
+&#13;
+    &#13;
+  };</webidl>
+      <descriptive>
+          <brief>
+ Payment API specific errors.
+          </brief>
+         <description>
+          <p>
+The PaymentException interface encapsulates all errors in calling of the Payment API. 
+          </p>
+         </description>
+      </descriptive>
+      <Const name="INVALID_ARGUMENT_ERROR" value="1" id="::payment::PaymentException::INVALID_ARGUMENT_ERROR">
+        <webidl>                const unsigned short INVALID_ARGUMENT_ERROR = 1;</webidl>
+        <descriptive>
+            <brief>
+ Invalid argument
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Const>
+      <ExceptionField name="code" id="::payment::PaymentException::code">
+        <webidl>        unsigned short code;</webidl>
+        <descriptive>
+            <brief>
+ An error code assigned by an implementation when an error has occurred in Payment API processing.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </ExceptionField>
+      <ExceptionField name="message" id="::payment::PaymentException::message">
+        <webidl>        DOMString message;</webidl>
+        <descriptive>
+            <brief>
+ A text describing an error occuring in the Payment API in human readable form.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </ExceptionField>
+    </Exception>
+    <Implements name1="webinoscoreWebinos" name2="WebinosPayment">
+      <webidl>     <ref>webinoscore::Webinos</ref> implements <ref>WebinosPayment</ref>;</webidl>
+    </Implements>
+  </Module>
+</Definitions>

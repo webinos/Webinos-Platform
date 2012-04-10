@@ -1,0 +1,26 @@
+{ "name": "pzh",
+  "version": "0.1.0",
+  "description": "Webinos server side functionality",
+  "main": "./lib/pzh_sessionHandling.js",
+  "author": "Habib Virji  <habib.virji@samsung.com>",
+  "repositories":{
+     "type": "git",
+     "url": "http://dev.webinos.org/git/wp4.git"
+   },
+  "bugs":{
+    "email": "webinos-wp4-ml@fokus.fraunhofer.de",
+    "url": ""
+  },
+  "directories": {
+    "lib": "./lib",
+    "test":"./test",
+    "web":"./web"
+  },
+"dependencies":{
+  "websocket":"1.0.2",
+  "schema": "0.2.0",
+  "vows":"0.6.2",
+  "openid":"0.3.2",
+  "qrcode":"0.1.1"
+ }
+}

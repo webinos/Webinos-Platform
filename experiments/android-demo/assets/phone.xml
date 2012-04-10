@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- this is faked for demo purposes -->
+<root xmlns="urn:schemas-upnp-org:device-1-0">
+ <specVersion>
+  <major>1</major>
+  <minor>0</minor>
+ </specVersion>
+ <device>
+  <deviceType>urn:schemas-upnp-org:device:Phone:1</deviceType>
+  <friendlyName>Samsung Nexus S</friendlyName>
+  <manufacturer>Samsung Electronics</manufacturer>
+  <manufacturerURL>http://www.samsung.com</manufacturerURL>
+  <modelDescription>Android phone with webinos PZP</modelDescription>
+  <modelName>Nexus S</modelName>
+  <modelNumber>1.0</modelNumber>
+  <modelURL>http://www.google.co.uk/nexus/</modelURL>
+  <serialNumber>1498BAZS300038T</serialNumber>
+  <UDN>uuid:e5b4f2aa-fe1e-11e0-a4a7-002170f348ec</UDN>
+  <serviceList>
+   <service>
+    <serviceType>urn:schemas-upnp-org:service:PhoneBasic:1</serviceType>
+    <serviceId>urn:upnp-org:serviceId:1</serviceId>
+    <SCPDURL>/PhoneBasic.xml</SCPDURL>
+    <controlURL>/upnp/control/phonercontrol</controlURL>
+    <eventSubURL>/phonecontrol</eventSubURL>
+   </service>
+  </serviceList>
+  <presentationURL>/</presentationURL>
+ </device>
+</root>

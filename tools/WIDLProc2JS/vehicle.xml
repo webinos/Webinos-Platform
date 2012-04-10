@@ -1,0 +1,2165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Definitions SYSTEM "widlprocxml.dtd">
+<Definitions>
+  <Module name="vehicle" id="::vehicle">
+    <webidl>module vehicle{&#13;
+&#13;
+        interface VehicleError : <ref>Error</ref>{&#13;
+&#13;
+                const short ACCESS_DENIED = 1;&#13;
+&#13;
+                const short NOT_AVAILABLE = 2;&#13;
+&#13;
+                const short UNKNOWN = 0;&#13;
+        };&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface Address{&#13;
+&#13;
+                attribute DOMString country;&#13;
+&#13;
+                attribute DOMString? region;&#13;
+&#13;
+                attribute DOMString? county;&#13;
+&#13;
+                attribute DOMString city;&#13;
+&#13;
+                attribute DOMString street;&#13;
+&#13;
+                attribute DOMString streetNumber;&#13;
+&#13;
+                attribute DOMString? premises;&#13;
+&#13;
+                attribute DOMString additionalInformation;&#13;
+&#13;
+                attribute DOMString postalCode;&#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface VehicleEvent : <ref>Event</ref>{&#13;
+        &#13;
+        };&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface LatLng{&#13;
+&#13;
+                attribute double latitude;&#13;
+&#13;
+                attribute double longitude;&#13;
+        };&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface POI{&#13;
+&#13;
+                attribute DOMString? name;&#13;
+&#13;
+                attribute <ref>LatLng</ref>? position;&#13;
+&#13;
+                attribute <ref>Address</ref> address;&#13;
+        };&#13;
+&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface SuccessCallback{&#13;
+&#13;
+                void onSuccess();&#13;
+        };&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface ErrorCallback{&#13;
+&#13;
+                void onError(in <ref>VehicleError</ref> error);&#13;
+        };&#13;
+        &#13;
+&#13;
+        interface VehicleDataHandler{&#13;
+                void handleVehicleData(in <ref>VehicleEvent</ref> data);&#13;
+        &#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface VehicleInterface : <ref>EventTarget</ref> {&#13;
+&#13;
+                const DOMString FUEL_UNLEADED = &quot;unleaded&quot;;&#13;
+&#13;
+                const DOMString FUEL_PREMIUM = &quot;premium&quot;;&#13;
+&#13;
+                const DOMString FUEL_DIESEL = &quot;diesel&quot;;&#13;
+&#13;
+                const DOMString TRANSMISSION_AUTOMATIC = &quot;automatic&quot;;&#13;
+&#13;
+                const DOMString TRANSMISSION_MANUAL = &quot;manual&quot;;         &#13;
+&#13;
+                readonly attribute DOMString brand;&#13;
+&#13;
+                readonly attribute DOMString model;&#13;
+&#13;
+                readonly attribute DOMString year;&#13;
+&#13;
+                readonly attribute DOMString fuel;&#13;
+&#13;
+                readonly attribute DOMString transmission;&#13;
+&#13;
+                void get(DOMString vehicleDataId, <ref>VehicleDataHandler</ref> handler, in <ref>ErrorCallback</ref> errorCB);&#13;
+&#13;
+                void requestGuidance(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref> errorCallback, <ref>POI</ref>[] destinations);&#13;
+&#13;
+                void findDestination(<ref>DestinationCallback</ref> destinationCallback, in <ref>ErrorCallback</ref> errorCallback, DOMString search);&#13;
+        };&#13;
+        &#13;
+&#13;
+        [NoInterfaceObject] interface Vehicle {&#13;
+                readonly attribute <ref>VehicleInterface</ref> vehicle;&#13;
+        };&#13;
+        <ref>webinoscore::Webinos</ref> implements <ref>Vehicle</ref>;&#13;
+&#13;
+        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface DestinationCallback {&#13;
+&#13;
+                 void handleResults(in <ref>POI</ref>[] pois);&#13;
+        };&#13;
+&#13;
+        [NoInterfaceObject]&#13;
+        interface ClimateControlEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString CLIMATE_ALL = &quot;climate-all&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_DRIVER = &quot;climate-driver&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_FRONT = &quot;climate-passenger-front&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_REAR_LEFT = &quot;climate-passenger-rear-left&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_REAR_RIGHT = &quot;climate-passenger-rear-right&quot;;&#13;
+&#13;
+                readonly attribute DOMString zone;&#13;
+&#13;
+                readonly attribute unsigned short desiredTemperature; &#13;
+&#13;
+                readonly attribute boolean acStatus;&#13;
+&#13;
+                readonly attribute unsigned short ventLevel;&#13;
+&#13;
+                readonly attribute boolean ventMode;&#13;
+&#13;
+                void initClimateControlEvent(boolean bubbles, boolean cancelable, DOMString zone, short desiredTemperature, boolean acStatus, short ventLevel, short ventMode);&#13;
+        };&#13;
+&#13;
+        interface ControlEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString LIGHTS_FOG_FRONT = &quot;lights-fog-front&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_FOG_REAR = &quot;lights-fog-rear&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_LEFT = &quot;lights-signal-left&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_RIGHT = &quot;lights-signal-right&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_WARN = &quot;lights-signal-warn&quot;;      &#13;
+&#13;
+                const DOMString LIGHTS_PARKING = &quot;lights-parking&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_HIBEAM = &quot;lights-hibeam&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_HEAD = &quot;lights-head&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_WASH = &quot;whiper-front-wash&quot;;&#13;
+&#13;
+                const DOMString WHIPER_REAR_WASH = &quot;whiper-rear-wash&quot;;&#13;
+&#13;
+                const DOMString WHIPER_AUTOMATIC = &quot;whiper-automatic&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_ONCE = &quot;whiper-front-once&quot;;&#13;
+&#13;
+                const DOMString WHIPER_REAR_ONCE = &quot;whiper-front-once&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_LEVEL1 = &quot;whiper-front-level1&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_LEVEL2 = &quot;whiper-front-level2&quot;;&#13;
+&#13;
+                readonly attribute DOMString conrolId;&#13;
+&#13;
+                readonly attribute boolean active;&#13;
+&#13;
+                void initControlEvent(boolean bubbles, boolean cancelable, DOMString controlId, boolean active);&#13;
+        };&#13;
+&#13;
+        interface NavigationEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString DESTINATION_REACHED = &quot;destination-reached&quot;;&#13;
+&#13;
+                const DOMString DESTINATION_CHANGED = &quot;destination-changed&quot;;&#13;
+&#13;
+                const DOMString DESTINATION_CANCELLED = &quot;destination-cancelled&quot;;        &#13;
+                &#13;
+&#13;
+                readonly attribute DOMString type;&#13;
+&#13;
+                readonly attribute <ref>Address</ref> address;&#13;
+&#13;
+&#13;
+                void initNavigationEvent(boolean bubbles, boolean cancelable, DOMString navigationEventId, <ref>Address</ref> destination);  &#13;
+        };&#13;
+&#13;
+        interface ParkSensorsEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString PARKSENSENSORS_FRONT = &quot;parksensors-front&quot;;&#13;
+&#13;
+                const DOMString PARKSENSENSORS_REAR = &quot;parksensors-rear&quot;;&#13;
+&#13;
+                readonly attribute DOMString position;&#13;
+&#13;
+                readonly attribute unsigned short left;&#13;
+&#13;
+                readonly attribute unsigned short midLeft;      &#13;
+&#13;
+                readonly attribute unsigned short midRigth;&#13;
+&#13;
+                readonly attribute unsigned short rigth;&#13;
+&#13;
+                void initParkSensorsEvent(boolean bubbles, boolean cancelable, DOMString position, short left, short midLeft, short midRight, short right);&#13;
+        };&#13;
+&#13;
+        interface ShiftEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString SHIFT = &quot;shift&quot;;&#13;
+&#13;
+                const short GEAR_ONE = 1;&#13;
+&#13;
+                const short GEAR_TWO = 2;&#13;
+&#13;
+                const short GEAR_THREE = 3;&#13;
+&#13;
+                const short GEAR_FOUR = 4;              &#13;
+&#13;
+                const short GEAR_FIFE = 5;&#13;
+&#13;
+                const short GEAR_SIX = 6;&#13;
+&#13;
+                const short GEAR_SEVEN = 7;&#13;
+&#13;
+                const short GEAR_EIGHT = 8;&#13;
+&#13;
+                const short GEAR_REVERSE = -1;&#13;
+&#13;
+                const short GEAR_NEUTRAL = 0;&#13;
+&#13;
+                const short GEAR_PARKING = -2;          &#13;
+&#13;
+                readonly attribute short gear;&#13;
+&#13;
+                void initShiftEvent(boolean bubbles, boolean cancelable, short gear);&#13;
+        };&#13;
+&#13;
+        interface TripComputerEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString TRIPCOMPUTER = &quot;tripcomputer&quot;;&#13;
+&#13;
+                readonly attribute float averageConsumption1;&#13;
+&#13;
+                readonly attribute float averageConsumption2;&#13;
+&#13;
+                readonly attribute float averageSpeed1;&#13;
+&#13;
+                readonly attribute float averageSpeed2;&#13;
+&#13;
+                readonly attribute float tripDistance;&#13;
+&#13;
+                readonly attribute float milage;&#13;
+&#13;
+                readonly attribute float range;&#13;
+&#13;
+                void initTripComputerEvent(boolean bubbles, boolean cancelable, float averageConsumption1, float averageConsumption2, float averageSpeed1, float averageSpeed2, float tripDistance, float mileage, float range);&#13;
+        };&#13;
+};</webidl>
+    <descriptive>
+        <brief>
+ webinos Vehicle interface.
+        </brief>
+       <description>
+        <p>
+The webinos vehicle API provides access to specific vehicle data. It is derived from W3C's DOM Level 3 Events model and defines event types for retrieving information about the vehicle including trip computer data, gears or park sensors. Furthermore it offers methods for interacting with the on-board navigation system. The geolocation, speed and acceleration can be retrieved using the <a href="geolocation.html">geolocation</a> and <a href="deviceorientation.html">device orientation</a> API. 
+        </p>
+        <p>
+The API gives access to vehicle data, which is available on the infotainment vehicle bus (e.g. <a href="http://en.wikipedia.org/wiki/MOST_Bus">MOST</a>). The infotainment bus is the only access point for the headunit to receveive vehicle data (<a href="http://dev.webinos.org/redmine/attachments/download/666/vehicle_bus_infrastructure.pdf" target="_blank">diagram on vehicle bus architecture</a>). Some data from other busses (high/low speed <a href="http://en.wikipedia.org/wiki/Controller_area_network" target="_blank">CAN</a>) are routed into the bus over the central gateway such as speed or gear (RPM is currently not provided on the MOST). 
+        </p>
+       </description>
+        <def-api-feature identifier="http://webinos.org/api/vehicle">
+          <descriptive>
+           <description>
+            <p>
+Identifies the light sensor type. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/vehicle.climate">
+          <descriptive>
+           <description>
+            <p>
+Identifies vehicle data related to climate controls. 
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/vehicle.navigation">
+          <descriptive>
+           <description>
+            <p>
+Identifies the navigation module of a vehicle.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/vehicle.parksensors">
+          <descriptive>
+           <description>
+            <p>
+Identifies park sensor modules of a vehicle.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/vehicle.tripcomputer">
+          <descriptive>
+           <description>
+            <p>
+Identifies the trip computer information of a vehicle.
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <def-api-feature identifier="http://webinos.org/api/vehicle.controls">
+          <descriptive>
+           <description>
+            <p>
+Identifies control data (e.g. whipers and lights) of a vehicle
+            </p>
+           </description>
+          </descriptive>
+        </def-api-feature>
+        <author>
+ Simon Isenberg (BMW Forschung &amp; Technik) &#60;Simon.Isenberg@bmw.de&#62;
+        </author>
+        <version>
+ 0.7
+        </version>
+    </descriptive>
+    <Interface name="VehicleError" id="::vehicle::VehicleError">
+      <webidl>        interface VehicleError : <ref>Error</ref>{&#13;
+&#13;
+                const short ACCESS_DENIED = 1;&#13;
+&#13;
+                const short NOT_AVAILABLE = 2;&#13;
+&#13;
+                const short UNKNOWN = 0;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the vehicle specific error
+          </brief>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="Error"/>
+      </InterfaceInheritance>
+      <Const name="ACCESS_DENIED" value="1" id="::vehicle::VehicleError::ACCESS_DENIED">
+        <webidl>                const short ACCESS_DENIED = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant describes that the access to the requested vehicle feature has been denied.
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="NOT_AVAILABLE" value="2" id="::vehicle::VehicleError::NOT_AVAILABLE">
+        <webidl>                const short NOT_AVAILABLE = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant describes that the requested vehicle feature is not available.
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="UNKNOWN" value="0" id="::vehicle::VehicleError::UNKNOWN">
+        <webidl>                const short UNKNOWN = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant describes that an unkown error occured while requestung a vehicle feature.
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+    </Interface>
+    <Interface name="Address" id="::vehicle::Address">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface Address{&#13;
+&#13;
+                attribute DOMString country;&#13;
+&#13;
+                attribute DOMString? region;&#13;
+&#13;
+                attribute DOMString? county;&#13;
+&#13;
+                attribute DOMString city;&#13;
+&#13;
+                attribute DOMString street;&#13;
+&#13;
+                attribute DOMString streetNumber;&#13;
+&#13;
+                attribute DOMString? premises;&#13;
+&#13;
+                attribute DOMString additionalInformation;&#13;
+&#13;
+                attribute DOMString postalCode;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines the address properties, which can be passed to the navigation system using the requestGuidance() function.   The <a href="http://dev.w3.org/geo/api/spec-source-v2.html#address_interface" target="_blank">Address interface</a> defined in the v2 of the W3C Geolocation API is used for this purpose.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="country" id="::vehicle::Address::country">
+        <webidl>                attribute DOMString country;</webidl>
+        <descriptive>
+            <brief>
+ Attribute is specified by using the two-letter [ISO 3166-1] code.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="region" id="::vehicle::Address::region">
+        <webidl>                attribute DOMString? region;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes the name of a country subdivision (e.g. the state name in the US).
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="county" id="::vehicle::Address::county">
+        <webidl>                attribute DOMString? county;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes the name of a land area within a larger region.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="city" id="::vehicle::Address::city">
+        <webidl>                attribute DOMString city;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the name of the city.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="street" id="::vehicle::Address::street">
+        <webidl>                attribute DOMString street;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the name of the street.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="streetNumber" id="::vehicle::Address::streetNumber">
+        <webidl>                attribute DOMString streetNumber;</webidl>
+        <descriptive>
+            <brief>
+ Attribute describes the location's street number.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="premises" id="::vehicle::Address::premises">
+        <webidl>                attribute DOMString? premises;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes the details of the premises, such as a building name, block of flats, etc.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="additionalInformation" id="::vehicle::Address::additionalInformation">
+        <webidl>                attribute DOMString additionalInformation;</webidl>
+        <descriptive>
+            <brief>
+ Attribute contains other address details that are not captured by the rest of the attributes in this interface. Examples include a floor number in a building, an apartment number, the name of an office occupant, etc..
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute name="postalCode" id="::vehicle::Address::postalCode">
+        <webidl>                attribute DOMString postalCode;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the postal code of the location (e.g. the zip code in the US).
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+    </Interface>
+    <Interface name="VehicleEvent" id="::vehicle::VehicleEvent">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface VehicleEvent : <ref>Event</ref>{&#13;
+        &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines a generic event for vehicle data specific events.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="Event"/>
+      </InterfaceInheritance>
+    </Interface>
+    <Interface name="LatLng" id="::vehicle::LatLng">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface LatLng{&#13;
+&#13;
+                attribute double latitude;&#13;
+&#13;
+                attribute double longitude;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines the LatLng properties, which can be passed to the navigation system using the requestGuidance() function. The format is WGS84. 
+<em>Note: The <a href="http://dev.w3.org/geo/api/spec-source-v2.html#coordinates">coordinate</a> interface from the Geolocation API v2 includes attributes, which are not feasible for beeing handled by the navigation system (accurancy, alitude accurency, heading, speed). In some special cases (destination is on a bridge, which crosses another street) it might make sense to add the altitude to LatLng interface at a later stage.</em> 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="latitude" id="::vehicle::LatLng::latitude">
+        <webidl>                attribute double latitude;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflect the latitude of a geolocation in WGS84.
+            </brief>
+        </descriptive>
+        <Type type="double"/>
+      </Attribute>
+      <Attribute name="longitude" id="::vehicle::LatLng::longitude">
+        <webidl>                attribute double longitude;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflect the Longitude of a geolocation in WGS84.
+            </brief>
+        </descriptive>
+        <Type type="double"/>
+      </Attribute>
+    </Interface>
+    <Interface name="POI" id="::vehicle::POI">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface POI{&#13;
+&#13;
+                attribute DOMString? name;&#13;
+&#13;
+                attribute <ref>LatLng</ref>? position;&#13;
+&#13;
+                attribute <ref>Address</ref> address;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines a Point of Interest (POI). 
+The interface contains the name of a POI and its address and/or geolocation as a LatLng object. <em> Note: The <a href="http://www.w3.org/2010/POI/" target="_blank">W3C POI WG</a> has published a <a href="http://www.w3.org/TR/2011/WD-poi-core-20110512/" target="_blank">first working draft</a> for the POI handling. The draft focuses on a XML representation of a POI and does not seem handy for beeing handled by a navigation system.</em>          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute name="name" id="::vehicle::POI::name">
+        <webidl>                attribute DOMString? name;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes the name of the POI.
+            </brief>
+        </descriptive>
+        <Type type="DOMString" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="position" id="::vehicle::POI::position">
+        <webidl>                attribute <ref>LatLng</ref>? position;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the geolocation of the POI as LatLng object.
+            </brief>
+        </descriptive>
+        <Type name="LatLng" nullable="nullable"/>
+      </Attribute>
+      <Attribute name="address" id="::vehicle::POI::address">
+        <webidl>                attribute <ref>Address</ref> address;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes the address of the POI.
+            </brief>
+        </descriptive>
+        <Type name="Address"/>
+      </Attribute>
+    </Interface>
+    <Interface name="SuccessCallback" id="::vehicle::SuccessCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface SuccessCallback{&#13;
+&#13;
+                void onSuccess();&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the callback for a asynchronous function call insided the vehicle module.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onSuccess" id="::vehicle::SuccessCallback::onSuccess">
+        <webidl>                void onSuccess();</webidl>
+        <descriptive>
+            <brief>
+ Method is triggered, if function has been succesfully called.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList/>
+      </Operation>
+    </Interface>
+    <Interface name="ErrorCallback" id="::vehicle::ErrorCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface ErrorCallback{&#13;
+&#13;
+                void onError(in <ref>VehicleError</ref> error);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the callback for a failed asynchronous function call inside the vehilce module.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="onError" id="::vehicle::ErrorCallback::onError">
+        <webidl>                void onError(in <ref>VehicleError</ref> error);</webidl>
+        <descriptive>
+            <brief>
+ Method is triggered, if asychronous function call fails.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="error">
+            <descriptive>
+                <description><p>
+ contains information about the error.
+                </p></description>
+            </descriptive>
+            <Type name="VehicleError"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="VehicleDataHandler" id="::vehicle::VehicleDataHandler">
+      <webidl>        interface VehicleDataHandler{&#13;
+                void handleVehicleData(in <ref>VehicleEvent</ref> data);&#13;
+        &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the callback method to receive vehicle data in a non-recurring and asynchronous way.
+          </brief>
+      </descriptive>
+      <Operation name="handleVehicleData" id="::vehicle::VehicleDataHandler::handleVehicleData">
+        <webidl>                void handleVehicleData(in <ref>VehicleEvent</ref> data);</webidl>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="data">
+            <Type name="VehicleEvent"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="VehicleInterface" id="::vehicle::VehicleInterface">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface VehicleInterface : <ref>EventTarget</ref> {&#13;
+&#13;
+                const DOMString FUEL_UNLEADED = &quot;unleaded&quot;;&#13;
+&#13;
+                const DOMString FUEL_PREMIUM = &quot;premium&quot;;&#13;
+&#13;
+                const DOMString FUEL_DIESEL = &quot;diesel&quot;;&#13;
+&#13;
+                const DOMString TRANSMISSION_AUTOMATIC = &quot;automatic&quot;;&#13;
+&#13;
+                const DOMString TRANSMISSION_MANUAL = &quot;manual&quot;;         &#13;
+&#13;
+                readonly attribute DOMString brand;&#13;
+&#13;
+                readonly attribute DOMString model;&#13;
+&#13;
+                readonly attribute DOMString year;&#13;
+&#13;
+                readonly attribute DOMString fuel;&#13;
+&#13;
+                readonly attribute DOMString transmission;&#13;
+&#13;
+                void get(DOMString vehicleDataId, <ref>VehicleDataHandler</ref> handler, in <ref>ErrorCallback</ref> errorCB);&#13;
+&#13;
+                void requestGuidance(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref> errorCallback, <ref>POI</ref>[] destinations);&#13;
+&#13;
+                void findDestination(<ref>DestinationCallback</ref> destinationCallback, in <ref>ErrorCallback</ref> errorCallback, DOMString search);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines general information about the vehicle and is the object, where the event listener for vehicle related data can be registered. The interface is accessible through the webinos.vehicle object. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="EventTarget"/>
+      </InterfaceInheritance>
+      <Const name="FUEL_UNLEADED" stringvalue="unleaded" id="::vehicle::VehicleInterface::FUEL_UNLEADED">
+        <webidl>                const DOMString FUEL_UNLEADED = &quot;unleaded&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the fuel type unleaded.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="FUEL_PREMIUM" stringvalue="premium" id="::vehicle::VehicleInterface::FUEL_PREMIUM">
+        <webidl>                const DOMString FUEL_PREMIUM = &quot;premium&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the fuel type premium.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="FUEL_DIESEL" stringvalue="diesel" id="::vehicle::VehicleInterface::FUEL_DIESEL">
+        <webidl>                const DOMString FUEL_DIESEL = &quot;diesel&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the fuel type diesel.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="TRANSMISSION_AUTOMATIC" stringvalue="automatic" id="::vehicle::VehicleInterface::TRANSMISSION_AUTOMATIC">
+        <webidl>                const DOMString TRANSMISSION_AUTOMATIC = &quot;automatic&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the transmission type automatic.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="TRANSMISSION_MANUAL" stringvalue="manual" id="::vehicle::VehicleInterface::TRANSMISSION_MANUAL">
+        <webidl>                const DOMString TRANSMISSION_MANUAL = &quot;manual&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the transmission type manual.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="brand" id="::vehicle::VehicleInterface::brand">
+        <webidl>                readonly attribute DOMString brand;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes brand name of the vehicle.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="model" id="::vehicle::VehicleInterface::model">
+        <webidl>                readonly attribute DOMString model;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects model name of the vehicle.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="year" id="::vehicle::VehicleInterface::year">
+        <webidl>                readonly attribute DOMString year;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes production year of the vehicle.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="fuel" id="::vehicle::VehicleInterface::fuel">
+        <webidl>                readonly attribute DOMString fuel;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects fuel type of the vehicle.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="transmission" id="::vehicle::VehicleInterface::transmission">
+        <webidl>                readonly attribute DOMString transmission;</webidl>
+        <descriptive>
+            <brief>
+ Attribute denotes transmission type of the vehicle.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Operation name="get" id="::vehicle::VehicleInterface::get">
+        <webidl>                void get(DOMString vehicleDataId, <ref>VehicleDataHandler</ref> handler, in <ref>ErrorCallback</ref> errorCB);</webidl>
+        <descriptive>
+            <brief>
+ Method allows to request vehicle data in a non-recurring way and is independant from value changes (cf. events). The same identifiers  are used for vehicle data as well as for the different vehicle events (ClimateControlEvent, ControlEvent, NavigationEvent, ParkSensorsEvent, ShiftEvent). 
+            </brief>
+            <Code> webinos.vehicle.get(webinos.vehicle.ClimateControlEvent.CLIMATE_ALL, dataHandler);
+ function dataHandler(data){
+        if(data.acStatus){
+                console.log(&quot;Airconditioning is on&quot;);
+                if(data.desiredTemperature &lt; 19){
+                        console.log(&quot;This is not so good for your health&quot;);
+                                }
+        }
+ }
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="vehicleDataId">
+            <descriptive>
+                <description><p>
+ Parameter specifies the type of data, which shall be retrieved. The identifiers for the different data types are defined in the different vehicle event interfaces (ClimateControlEvent, ControlEvent, NavigationEvent, ParkSensorsEvent, ShiftEvent). The identifiers for climate control data  are defined in constants CLIMATE_*, for control data in  constants LIGHTS_* and WHIPER_*,  for navigation data in  constants DESTINATION_*, for park sensors data in  constants PARKSENSORS_*, for shift data in constant SHIFT and for trip computer data in constant TRIPCOMPUTER.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="handler">
+            <descriptive>
+                <description><p>
+ Parameter specifies the function to handle the result.
+                </p></description>
+            </descriptive>
+            <Type name="VehicleDataHandler"/>
+          </Argument>
+          <Argument in="in" name="errorCB">
+            <descriptive>
+                <description><p>
+ Parameter specifies the callback function in case of an error.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="requestGuidance" id="::vehicle::VehicleInterface::requestGuidance">
+        <webidl>                void requestGuidance(in <ref>SuccessCallback</ref> successCallback, in <ref>ErrorCallback</ref> errorCallback, <ref>POI</ref>[] destinations);</webidl>
+        <descriptive>
+            <brief>
+ Parameter sets the given POIs as the next destinations for the build-in navigation system. The method handles intermediate stops. The last POI in the array is the final destination.
+            </brief>
+            <Code>        var destinations =new Array();
+        destination.push({name:&quot;BMW AG&quot;, address : {street:&quot;Petuelring&quot;, streetNumber: &quot;130&quot;, postalCode: &quot;80788&quot;, city: &quot;MÜNCHEN&quot;, country: &quot;DE&quot;}});
+      destination.push({name:&quot;BMW Forschung und Technik&quot;, address:{street: &quot;Hanauer Strasse&quot;, streetNumber: &quot;46&quot;, postalCode: &quot;80992&quot;, city: &quot;MÜNCHEN&quot;, country: &quot;DE&quot;}});
+      webinos.vehicle.requestGuidance(succesCB, null, destinations);
+        webinos.vehicle.addEventListener(webinos.vehicle.NavigationEvent.DESTINATION_REACHED, handleDestinations, false);
+      
+        function handleDestinations(event){
+          if (event.address.street == destination[0].address.street) {
+               console.log(&quot;Reached the HQ&quot;);
+          } else if (event.address.street == destination[1].address.street) {
+                console.log(&quot;Reached the research center&quot;);
+          }
+        }
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="successCallback">
+            <descriptive>
+                <description><p>
+ callback, if the POIs are succesully transferred.
+                </p></description>
+            </descriptive>
+            <Type name="SuccessCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ callback, if the address could not be transferred. 
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument name="destinations">
+            <descriptive>
+                <description><p>
+ in form of an POI array. The last POI in the array is the destination point. The other POIs are intermediate stops along the route.
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="POI"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+      <Operation name="findDestination" id="::vehicle::VehicleInterface::findDestination">
+        <webidl>                void findDestination(<ref>DestinationCallback</ref> destinationCallback, in <ref>ErrorCallback</ref> errorCallback, DOMString search);</webidl>
+        <descriptive>
+            <brief>
+ Queries the navigation system to retrieve POIs for a given search string.
+            </brief>
+            <Code>        var destinations =new Array();
+      webinos.vehicle.findDestination(destinationCB, errorCB,&quot;BMW&quot;);
+      function destinationCB(pois){
+        if(destinations.length > 0){
+        webinos.requestGuidance(successCB, errorCB, destinations);            
+        else{
+                console.log(&quot;No POI found&quot;);
+        }               
+}
+ 
+ </Code>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="destinationCallback">
+            <descriptive>
+                <description><p>
+ callback to handle the results to the search string.
+                </p></description>
+            </descriptive>
+            <Type name="DestinationCallback"/>
+          </Argument>
+          <Argument in="in" name="errorCallback">
+            <descriptive>
+                <description><p>
+ callback to handle errors.
+                </p></description>
+            </descriptive>
+            <Type name="ErrorCallback"/>
+          </Argument>
+          <Argument name="search">
+            <descriptive>
+                <description><p>
+ search string for resolving a address.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="Vehicle" id="::vehicle::Vehicle">
+      <webidl>        [NoInterfaceObject] interface Vehicle {&#13;
+                readonly attribute <ref>VehicleInterface</ref> vehicle;&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The Vehicle interface describes the part of the Vehicle API accessible through the webinos object. 
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Attribute readonly="readonly" name="vehicle" id="::vehicle::Vehicle::vehicle">
+        <webidl>                readonly attribute <ref>VehicleInterface</ref> vehicle;</webidl>
+        <Type name="VehicleInterface"/>
+      </Attribute>
+    </Interface>
+    <Implements name1="webinoscoreWebinos" name2="Vehicle">
+      <webidl>        <ref>webinoscore::Webinos</ref> implements <ref>Vehicle</ref>;</webidl>
+    </Implements>
+    <Interface name="DestinationCallback" id="::vehicle::DestinationCallback">
+      <webidl>        [Callback=FunctionOnly, NoInterfaceObject]&#13;
+        interface DestinationCallback {&#13;
+&#13;
+                 void handleResults(in <ref>POI</ref>[] pois);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the result callback for the asynchronous findDestination method.
+          </brief>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="Callback" value="FunctionOnly"/>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <Operation name="handleResults" id="::vehicle::DestinationCallback::handleResults">
+        <webidl>                 void handleResults(in <ref>POI</ref>[] pois);</webidl>
+        <descriptive>
+            <brief>
+ Function is called, when the results for a POI search are retrieved.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument in="in" name="pois">
+            <descriptive>
+                <description><p>
+ Parameter provides an array of POIs.
+                </p></description>
+            </descriptive>
+            <Type type="array">
+              <Type name="POI"/>
+            </Type>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="ClimateControlEvent" id="::vehicle::ClimateControlEvent">
+      <webidl>        [NoInterfaceObject]&#13;
+        interface ClimateControlEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString CLIMATE_ALL = &quot;climate-all&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_DRIVER = &quot;climate-driver&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_FRONT = &quot;climate-passenger-front&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_REAR_LEFT = &quot;climate-passenger-rear-left&quot;;&#13;
+&#13;
+                const DOMString CLIMATE_PASSENGER_REAR_RIGHT = &quot;climate-passenger-rear-right&quot;;&#13;
+&#13;
+                readonly attribute DOMString zone;&#13;
+&#13;
+                readonly attribute unsigned short desiredTemperature; &#13;
+&#13;
+                readonly attribute boolean acStatus;&#13;
+&#13;
+                readonly attribute unsigned short ventLevel;&#13;
+&#13;
+                readonly attribute boolean ventMode;&#13;
+&#13;
+                void initClimateControlEvent(boolean bubbles, boolean cancelable, DOMString zone, short desiredTemperature, boolean acStatus, short ventLevel, short ventMode);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines a climate control event. 
+The event provides information about changes to the climate control system inside the vehicle.
+          </brief>
+          <Code> webinos.vehicle.addEventListener(&quot;climate&quot;, climateHandler, null);
+ function climateHandler(data){
+                console.log(data.zone + &quot; desired temperature is &quot; + data.desiredTemperature + &quot;° C&quot;);                 
+        }                               
+ </Code>
+      </descriptive>
+      <ExtendedAttributeList>
+        <ExtendedAttribute name="NoInterfaceObject"/>
+      </ExtendedAttributeList>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="CLIMATE_ALL" stringvalue="climate-all" id="::vehicle::ClimateControlEvent::CLIMATE_ALL">
+        <webidl>                const DOMString CLIMATE_ALL = &quot;climate-all&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the single climate zone. This constant is used as an identifier for a ClimateControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the overall zone.       
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="CLIMATE_DRIVER" stringvalue="climate-driver" id="::vehicle::ClimateControlEvent::CLIMATE_DRIVER">
+        <webidl>                const DOMString CLIMATE_DRIVER = &quot;climate-driver&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant describes the climate zone of the driver. This constant is used as an identifier for a ClimateControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the driver zone.       
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="CLIMATE_PASSENGER_FRONT" stringvalue="climate-passenger-front" id="::vehicle::ClimateControlEvent::CLIMATE_PASSENGER_FRONT">
+        <webidl>                const DOMString CLIMATE_PASSENGER_FRONT = &quot;climate-passenger-front&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the climate zone of the passenger seat in the front. This constant is used as an identifier for a ClimateControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the passenger zone in the front.    
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="CLIMATE_PASSENGER_REAR_LEFT" stringvalue="climate-passenger-rear-left" id="::vehicle::ClimateControlEvent::CLIMATE_PASSENGER_REAR_LEFT">
+        <webidl>                const DOMString CLIMATE_PASSENGER_REAR_LEFT = &quot;climate-passenger-rear-left&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the climate zone of the rear set passenger seat on the left. This constant is used as an identifier for a ClimateControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the passenger zone in the rear on the left side.   
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="CLIMATE_PASSENGER_REAR_RIGHT" stringvalue="climate-passenger-rear-right" id="::vehicle::ClimateControlEvent::CLIMATE_PASSENGER_REAR_RIGHT">
+        <webidl>                const DOMString CLIMATE_PASSENGER_REAR_RIGHT = &quot;climate-passenger-rear-right&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the climate zone of the rear set passenger seat on the right. This constant is used as an identifier for a ClimateControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the passenger zone in the rear on the right side. 
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="zone" id="::vehicle::ClimateControlEvent::zone">
+        <webidl>                readonly attribute DOMString zone;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines the zone of the climate control event. The value of this attribute is defined in the constants CLIMATE_*.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="desiredTemperature" id="::vehicle::ClimateControlEvent::desiredTemperature">
+        <webidl>                readonly attribute unsigned short desiredTemperature;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines the desired temperature in degree celsius.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="acStatus" id="::vehicle::ClimateControlEvent::acStatus">
+        <webidl>                readonly attribute boolean acStatus;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines, if the AC switched on or not.       
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="ventLevel" id="::vehicle::ClimateControlEvent::ventLevel">
+        <webidl>                readonly attribute unsigned short ventLevel;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines the level of the vents. This value can be 1-9.       
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="ventMode" id="::vehicle::ClimateControlEvent::ventMode">
+        <webidl>                readonly attribute boolean ventMode;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines if the vent is used in automatic mode or not.        
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Operation name="initClimateControlEvent" id="::vehicle::ClimateControlEvent::initClimateControlEvent">
+        <webidl>                void initClimateControlEvent(boolean bubbles, boolean cancelable, DOMString zone, short desiredTemperature, boolean acStatus, short ventLevel, short ventMode);</webidl>
+        <descriptive>
+            <brief>
+ Method is used to set initial values of a climate control event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event is cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="zone">
+            <descriptive>
+                <description><p>
+ zone where event climate settings have been changed.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="desiredTemperature">
+            <descriptive>
+                <description><p>
+ desired temperature in degree celsius.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+          <Argument name="acStatus">
+            <descriptive>
+                <description><p>
+ true if the air conditioning is running.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="ventLevel">
+            <descriptive>
+                <description><p>
+ level of the vent.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+          <Argument name="ventMode">
+            <descriptive>
+                <description><p>
+ true, if the vent is in automatic mode.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="ControlEvent" id="::vehicle::ControlEvent">
+      <webidl>        interface ControlEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString LIGHTS_FOG_FRONT = &quot;lights-fog-front&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_FOG_REAR = &quot;lights-fog-rear&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_LEFT = &quot;lights-signal-left&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_RIGHT = &quot;lights-signal-right&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_SIGNAL_WARN = &quot;lights-signal-warn&quot;;      &#13;
+&#13;
+                const DOMString LIGHTS_PARKING = &quot;lights-parking&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_HIBEAM = &quot;lights-hibeam&quot;;&#13;
+&#13;
+                const DOMString LIGHTS_HEAD = &quot;lights-head&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_WASH = &quot;whiper-front-wash&quot;;&#13;
+&#13;
+                const DOMString WHIPER_REAR_WASH = &quot;whiper-rear-wash&quot;;&#13;
+&#13;
+                const DOMString WHIPER_AUTOMATIC = &quot;whiper-automatic&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_ONCE = &quot;whiper-front-once&quot;;&#13;
+&#13;
+                const DOMString WHIPER_REAR_ONCE = &quot;whiper-front-once&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_LEVEL1 = &quot;whiper-front-level1&quot;;&#13;
+&#13;
+                const DOMString WHIPER_FRONT_LEVEL2 = &quot;whiper-front-level2&quot;;&#13;
+&#13;
+                readonly attribute DOMString conrolId;&#13;
+&#13;
+                readonly attribute boolean active;&#13;
+&#13;
+                void initControlEvent(boolean bubbles, boolean cancelable, DOMString controlId, boolean active);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines a control event. 
+The event signals a change for a control unit inside the vehicle (e.g. lights, wiper, etc.). The identifiers for the different control events are defined in the constants LIGHTS_* and WHIPER_*
+          </brief>
+          <Code>        webinos.vehicle.addEventListener(&quot;lights-hibeam&quot;, lightHandler, false);
+      function lightHandler(cEvent){
+                if(cEvent.controlId == &quot;lights-hibeam&quot;){
+                        if(cEvent.active == true){
+                                console.log(&quot;Hibeam turned on&quot;);
+                        }else{
+                                console.log(&quot;Hibeam turned off&quot;);
+                        }
+                }
+        }
+ </Code>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="LIGHTS_FOG_FRONT" stringvalue="lights-fog-front" id="::vehicle::ControlEvent::LIGHTS_FOG_FRONT">
+        <webidl>                const DOMString LIGHTS_FOG_FRONT = &quot;lights-fog-front&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for the fog light in the front. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of fogs light in the front.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_FOG_REAR" stringvalue="lights-fog-rear" id="::vehicle::ControlEvent::LIGHTS_FOG_REAR">
+        <webidl>                const DOMString LIGHTS_FOG_REAR = &quot;lights-fog-rear&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for the fog light in the rear. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of fogs light in the rear.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_SIGNAL_LEFT" stringvalue="lights-signal-left" id="::vehicle::ControlEvent::LIGHTS_SIGNAL_LEFT">
+        <webidl>                const DOMString LIGHTS_SIGNAL_LEFT = &quot;lights-signal-left&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for left turn signal. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the left signal.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_SIGNAL_RIGHT" stringvalue="lights-signal-right" id="::vehicle::ControlEvent::LIGHTS_SIGNAL_RIGHT">
+        <webidl>                const DOMString LIGHTS_SIGNAL_RIGHT = &quot;lights-signal-right&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for right turn signal. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the right signal.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_SIGNAL_WARN" stringvalue="lights-signal-warn" id="::vehicle::ControlEvent::LIGHTS_SIGNAL_WARN">
+        <webidl>                const DOMString LIGHTS_SIGNAL_WARN = &quot;lights-signal-warn&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for warn signal. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the warn signal.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_PARKING" stringvalue="lights-parking" id="::vehicle::ControlEvent::LIGHTS_PARKING">
+        <webidl>                const DOMString LIGHTS_PARKING = &quot;lights-parking&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for the parking lights. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the parking light.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_HIBEAM" stringvalue="lights-hibeam" id="::vehicle::ControlEvent::LIGHTS_HIBEAM">
+        <webidl>                const DOMString LIGHTS_HIBEAM = &quot;lights-hibeam&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for the hibeam. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the lights hibeam.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="LIGHTS_HEAD" stringvalue="lights-head" id="::vehicle::ControlEvent::LIGHTS_HEAD">
+        <webidl>                const DOMString LIGHTS_HEAD = &quot;lights-head&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates a change for the headlight. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the head light.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_FRONT_WASH" stringvalue="whiper-front-wash" id="::vehicle::ControlEvent::WHIPER_FRONT_WASH">
+        <webidl>                const DOMString WHIPER_FRONT_WASH = &quot;whiper-front-wash&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates front window is beeing washed. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the whiper front wash.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_REAR_WASH" stringvalue="whiper-rear-wash" id="::vehicle::ControlEvent::WHIPER_REAR_WASH">
+        <webidl>                const DOMString WHIPER_REAR_WASH = &quot;whiper-rear-wash&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates rear window is beeing washed. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the  whiper rear wash.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_AUTOMATIC" stringvalue="whiper-automatic" id="::vehicle::ControlEvent::WHIPER_AUTOMATIC">
+        <webidl>                const DOMString WHIPER_AUTOMATIC = &quot;whiper-automatic&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates whiper is in automatic mode.  This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the  automatic whiper mode.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_FRONT_ONCE" stringvalue="whiper-front-once" id="::vehicle::ControlEvent::WHIPER_FRONT_ONCE">
+        <webidl>                const DOMString WHIPER_FRONT_ONCE = &quot;whiper-front-once&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates front whiper is beeing used once. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the whiper single mode in the front.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_REAR_ONCE" stringvalue="whiper-front-once" id="::vehicle::ControlEvent::WHIPER_REAR_ONCE">
+        <webidl>                const DOMString WHIPER_REAR_ONCE = &quot;whiper-front-once&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant indicates rear whiper is beeing used once. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the whiper single mode in the rear.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_FRONT_LEVEL1" stringvalue="whiper-front-level1" id="::vehicle::ControlEvent::WHIPER_FRONT_LEVEL1">
+        <webidl>                const DOMString WHIPER_FRONT_LEVEL1 = &quot;whiper-front-level1&quot;;</webidl>
+        <descriptive>
+            <brief>
+ constant indicates front whiper is on level 1. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the whiper on level 1 in the front.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="WHIPER_FRONT_LEVEL2" stringvalue="whiper-front-level2" id="::vehicle::ControlEvent::WHIPER_FRONT_LEVEL2">
+        <webidl>                const DOMString WHIPER_FRONT_LEVEL2 = &quot;whiper-front-level2&quot;;</webidl>
+        <descriptive>
+            <brief>
+ constant indicates front whiper is on level 2. This constant is used as an identifier for a ControlEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the whiper on level 2 in the front.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="conrolId" id="::vehicle::ControlEvent::conrolId">
+        <webidl>                readonly attribute DOMString conrolId;</webidl>
+        <descriptive>
+            <brief>
+ Attribute describes the source of the event. The value of the attribute is defined in the constants LIGHTS_* and WHIPER_*.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="active" id="::vehicle::ControlEvent::active">
+        <webidl>                readonly attribute boolean active;</webidl>
+        <descriptive>
+            <brief>
+ Attribute describes the status of the control unit.    
+            </brief>
+        </descriptive>
+        <Type type="boolean"/>
+      </Attribute>
+      <Operation name="initControlEvent" id="::vehicle::ControlEvent::initControlEvent">
+        <webidl>                void initControlEvent(boolean bubbles, boolean cancelable, DOMString controlId, boolean active);</webidl>
+        <descriptive>
+            <brief>
+ Method sets initial values of a control event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="controlId">
+            <descriptive>
+                <description><p>
+ specifies the control unit.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="active">
+            <descriptive>
+                <description><p>
+ specifies if the unit is activated or not.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="NavigationEvent" id="::vehicle::NavigationEvent">
+      <webidl>        interface NavigationEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString DESTINATION_REACHED = &quot;destination-reached&quot;;&#13;
+&#13;
+                const DOMString DESTINATION_CHANGED = &quot;destination-changed&quot;;&#13;
+&#13;
+                const DOMString DESTINATION_CANCELLED = &quot;destination-cancelled&quot;;        &#13;
+                &#13;
+&#13;
+                readonly attribute DOMString type;&#13;
+&#13;
+                readonly attribute <ref>Address</ref> address;&#13;
+&#13;
+&#13;
+                void initNavigationEvent(boolean bubbles, boolean cancelable, DOMString navigationEventId, <ref>Address</ref> destination);  &#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines the navigation event.
+The identifiers for the different navigation events are defined in the constants DESTINATTION_*.
+          </brief>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="DESTINATION_REACHED" stringvalue="destination-reached" id="::vehicle::NavigationEvent::DESTINATION_REACHED">
+        <webidl>                const DOMString DESTINATION_REACHED = &quot;destination-reached&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the event that the destination has been reached. This constant is used as an identifier for a NavigationEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for destination reached.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="DESTINATION_CHANGED" stringvalue="destination-changed" id="::vehicle::NavigationEvent::DESTINATION_CHANGED">
+        <webidl>                const DOMString DESTINATION_CHANGED = &quot;destination-changed&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the event that a new destination has been set. This constant is used as an identifier for a NavigationEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for destination changed.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="DESTINATION_CANCELLED" stringvalue="destination-cancelled" id="::vehicle::NavigationEvent::DESTINATION_CANCELLED">
+        <webidl>                const DOMString DESTINATION_CANCELLED = &quot;destination-cancelled&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the event that the navigation to a destination has been cancelled. This constant is used as an identifier for a NavigationEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for a cancelation of guidance to a destination.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="type" id="::vehicle::NavigationEvent::type">
+        <webidl>                readonly attribute DOMString type;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines the type of the navigation event. The type can either be  &quot;destination-reached&quot;, &quot;destination-changed&quot; or &quot;destination-cancelled&quot;.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="address" id="::vehicle::NavigationEvent::address">
+        <webidl>                readonly attribute <ref>Address</ref> address;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines for which address the event occured. 
+            </brief>
+        </descriptive>
+        <Type name="Address"/>
+      </Attribute>
+      <Operation name="initNavigationEvent" id="::vehicle::NavigationEvent::initNavigationEvent">
+        <webidl>                void initNavigationEvent(boolean bubbles, boolean cancelable, DOMString navigationEventId, <ref>Address</ref> destination);</webidl>
+        <descriptive>
+            <brief>
+ Method sets initial values of a navigation event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="navigationEventId">
+            <descriptive>
+                <description><p>
+ Sensor type.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="destination">
+            <descriptive>
+                <description><p>
+ destination for which the event occured.
+                </p></description>
+            </descriptive>
+            <Type name="Address"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="ParkSensorsEvent" id="::vehicle::ParkSensorsEvent">
+      <webidl>        interface ParkSensorsEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString PARKSENSENSORS_FRONT = &quot;parksensors-front&quot;;&#13;
+&#13;
+                const DOMString PARKSENSENSORS_REAR = &quot;parksensors-rear&quot;;&#13;
+&#13;
+                readonly attribute DOMString position;&#13;
+&#13;
+                readonly attribute unsigned short left;&#13;
+&#13;
+                readonly attribute unsigned short midLeft;      &#13;
+&#13;
+                readonly attribute unsigned short midRigth;&#13;
+&#13;
+                readonly attribute unsigned short rigth;&#13;
+&#13;
+                void initParkSensorsEvent(boolean bubbles, boolean cancelable, DOMString position, short left, short midLeft, short midRight, short right);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines an event related to the built-in park sensors. 
+The identifiers for the different events are defined in the constants PARKSENSENSORS_FRONT and PARKSENSENSORS_REAR.
+A listener can be registered by vehicle.addEventLister(&quot;parksensor-front&quot;,listener,false).
+          </brief>
+          <Code>        webinos.vehicle.addEventListener(&quot;parksensor-front&quot;, psHandler, false);
+        webinos.vehicle.addEventListener(&quot;parksensor-rear&quot;, psHandler, false);
+        function psHandler(psEvent){
+                if(psEvent.left == 20){
+                        console.log(&quot;obstacle on the left in&quot; + psEvent.position + &quot; is close&quot;);
+                }
+        }
+ </Code>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="PARKSENSENSORS_FRONT" stringvalue="parksensors-front" id="::vehicle::ParkSensorsEvent::PARKSENSENSORS_FRONT">
+        <webidl>                const DOMString PARKSENSENSORS_FRONT = &quot;parksensors-front&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines that the event was emitted by the park sensors in the front. This constant is used as an identifier for a ParkSensorEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the park sensors in the front.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="PARKSENSENSORS_REAR" stringvalue="parksensors-rear" id="::vehicle::ParkSensorsEvent::PARKSENSENSORS_REAR">
+        <webidl>                const DOMString PARKSENSENSORS_REAR = &quot;parksensors-rear&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines that the event was emitted by the park sensors in the rear. This constant is used as an identifier for a ParkSensorEvent and a non-recurring vehicle data request using the method webinos.vehicle.get() for the status of the park sensors in the rear.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="position" id="::vehicle::ParkSensorsEvent::position">
+        <webidl>                readonly attribute DOMString position;</webidl>
+        <descriptive>
+            <brief>
+ Attribute defines the position of the sensor. The value of the attribute is either PARKSENSENSORS_FRONT or PARKSENSENSORS_REAR.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="left" id="::vehicle::ParkSensorsEvent::left">
+        <webidl>                readonly attribute unsigned short left;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the destination to an object sensed by the sensor on the left side in centimeters. Minimum distance is 20 centimeters. Maximum distance is 250 centimeters. A value of -1 indiactes that no object has been sensed.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="midLeft" id="::vehicle::ParkSensorsEvent::midLeft">
+        <webidl>                readonly attribute unsigned short midLeft;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the destination to an object sensed by the sensor on the middle left side in centimeters. Minimum distance is 20 centimeters. Maximum distance is 250 centimeters. A value of -1 indiactes that no object has been sensed.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="midRigth" id="::vehicle::ParkSensorsEvent::midRigth">
+        <webidl>                readonly attribute unsigned short midRigth;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the destination to an object sensed by the sensor on the middle right side in centimeters. Minimum distance is 20 centimeters. Maximum distance is 250 centimeters. A value of -1 indiactes that no object has been sensed.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="rigth" id="::vehicle::ParkSensorsEvent::rigth">
+        <webidl>                readonly attribute unsigned short rigth;</webidl>
+        <descriptive>
+            <brief>
+ Attribute reflects the destination to an object sensed by the sensor on the rigth side in centimeters. Minimum distance is 20 centimeters. Maximum distance is 250 centimeters. A value of -1 indiactes that no object has been sensed.
+            </brief>
+        </descriptive>
+        <Type type="unsigned short"/>
+      </Attribute>
+      <Operation name="initParkSensorsEvent" id="::vehicle::ParkSensorsEvent::initParkSensorsEvent">
+        <webidl>                void initParkSensorsEvent(boolean bubbles, boolean cancelable, DOMString position, short left, short midLeft, short midRight, short right);</webidl>
+        <descriptive>
+            <brief>
+ Method sets initial values of a park sensors event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="position">
+            <descriptive>
+                <description><p>
+ position of the sensors: front or rear.
+                </p></description>
+            </descriptive>
+            <Type type="DOMString"/>
+          </Argument>
+          <Argument name="left">
+            <descriptive>
+                <description><p>
+ data from the left sensor.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+          <Argument name="midLeft">
+            <descriptive>
+                <description><p>
+ data from the middle left sensor.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+          <Argument name="midRight">
+            <descriptive>
+                <description><p>
+ data from the middle right sensor.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+          <Argument name="right">
+            <descriptive>
+                <description><p>
+ data from the right sensor.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="ShiftEvent" id="::vehicle::ShiftEvent">
+      <webidl>        interface ShiftEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString SHIFT = &quot;shift&quot;;&#13;
+&#13;
+                const short GEAR_ONE = 1;&#13;
+&#13;
+                const short GEAR_TWO = 2;&#13;
+&#13;
+                const short GEAR_THREE = 3;&#13;
+&#13;
+                const short GEAR_FOUR = 4;              &#13;
+&#13;
+                const short GEAR_FIFE = 5;&#13;
+&#13;
+                const short GEAR_SIX = 6;&#13;
+&#13;
+                const short GEAR_SEVEN = 7;&#13;
+&#13;
+                const short GEAR_EIGHT = 8;&#13;
+&#13;
+                const short GEAR_REVERSE = -1;&#13;
+&#13;
+                const short GEAR_NEUTRAL = 0;&#13;
+&#13;
+                const short GEAR_PARKING = -2;          &#13;
+&#13;
+                readonly attribute short gear;&#13;
+&#13;
+                void initShiftEvent(boolean bubbles, boolean cancelable, short gear);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ This interface defines a shift event. 
+A listener can be registered by vehicle.addEventLister(&quot;shift&quot;,listener,false).
+          </brief>
+          <Code> // registering an Event for a Shift
+ webinos.vehicle.addEventListener(&quot;shift&quot;, shiftHandler);
+ function shiftHandler(e){
+   document.getElementById(&quot;info&quot;).innerHTML = e.gear;
+  webinos.vehicle.removeEventListener(&quot;shift&quot;, shiftHandler);
+ }                              
+ </Code>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="SHIFT" stringvalue="shift" id="::vehicle::ShiftEvent::SHIFT">
+        <webidl>                const DOMString SHIFT = &quot;shift&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines shift event. This constant is used as an identifier for a shift event and a non-recurring vehicle data request using the method webinos.vehicle.get() for the gear.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Const name="GEAR_ONE" value="1" id="::vehicle::ShiftEvent::GEAR_ONE">
+        <webidl>                const short GEAR_ONE = 1;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the first gear.       
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_TWO" value="2" id="::vehicle::ShiftEvent::GEAR_TWO">
+        <webidl>                const short GEAR_TWO = 2;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the second gear.      
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_THREE" value="3" id="::vehicle::ShiftEvent::GEAR_THREE">
+        <webidl>                const short GEAR_THREE = 3;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the third gear.       
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_FOUR" value="4" id="::vehicle::ShiftEvent::GEAR_FOUR">
+        <webidl>                const short GEAR_FOUR = 4;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the fourth gear.
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_FIFE" value="5" id="::vehicle::ShiftEvent::GEAR_FIFE">
+        <webidl>                const short GEAR_FIFE = 5;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the fifth gear.       
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_SIX" value="6" id="::vehicle::ShiftEvent::GEAR_SIX">
+        <webidl>                const short GEAR_SIX = 6;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the sixth gear.       
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_SEVEN" value="7" id="::vehicle::ShiftEvent::GEAR_SEVEN">
+        <webidl>                const short GEAR_SEVEN = 7;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the seventh gear.
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_EIGHT" value="8" id="::vehicle::ShiftEvent::GEAR_EIGHT">
+        <webidl>                const short GEAR_EIGHT = 8;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the eighth gear.      
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_REVERSE" value="-1" id="::vehicle::ShiftEvent::GEAR_REVERSE">
+        <webidl>                const short GEAR_REVERSE = -1;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the reverse gear.     
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_NEUTRAL" value="0" id="::vehicle::ShiftEvent::GEAR_NEUTRAL">
+        <webidl>                const short GEAR_NEUTRAL = 0;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the neutral gear.     
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Const name="GEAR_PARKING" value="-2" id="::vehicle::ShiftEvent::GEAR_PARKING">
+        <webidl>                const short GEAR_PARKING = -2;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines the parking gear.     
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Const>
+      <Attribute readonly="readonly" name="gear" id="::vehicle::ShiftEvent::gear">
+        <webidl>                readonly attribute short gear;</webidl>
+        <descriptive>
+            <brief>
+ Attribute represents the current gear of the vehicle.  
+            </brief>
+        </descriptive>
+        <Type type="short"/>
+      </Attribute>
+      <Operation name="initShiftEvent" id="::vehicle::ShiftEvent::initShiftEvent">
+        <webidl>                void initShiftEvent(boolean bubbles, boolean cancelable, short gear);</webidl>
+        <descriptive>
+            <brief>
+ Method sets initial values a shift event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="gear">
+            <descriptive>
+                <description><p>
+ current gear of the engine.
+                </p></description>
+            </descriptive>
+            <Type type="short"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+    <Interface name="TripComputerEvent" id="::vehicle::TripComputerEvent">
+      <webidl>        interface TripComputerEvent : <ref>VehicleEvent</ref>{&#13;
+&#13;
+                const DOMString TRIPCOMPUTER = &quot;tripcomputer&quot;;&#13;
+&#13;
+                readonly attribute float averageConsumption1;&#13;
+&#13;
+                readonly attribute float averageConsumption2;&#13;
+&#13;
+                readonly attribute float averageSpeed1;&#13;
+&#13;
+                readonly attribute float averageSpeed2;&#13;
+&#13;
+                readonly attribute float tripDistance;&#13;
+&#13;
+                readonly attribute float milage;&#13;
+&#13;
+                readonly attribute float range;&#13;
+&#13;
+                void initTripComputerEvent(boolean bubbles, boolean cancelable, float averageConsumption1, float averageConsumption2, float averageSpeed1, float averageSpeed2, float tripDistance, float mileage, float range);&#13;
+        };</webidl>
+      <descriptive>
+          <brief>
+ The interface defines a trip computer event. 
+A listener can be registered by vehicle.addEventLister(&quot;tripcomputer&quot;,listener,false).
+          </brief>
+          <Code>var latestConsumption = 0;
+webinos.vehicle.addEventListener(&quot;tripcomputer&quot;, tripDataHandler, false);
+      
+function tripDataHandler(data){
+        //Calculating, if the fuel efficiency increased, since the last update
+        var gap = latestConsumption - data.averageConsumption1;
+        if(gap &lt; 0){
+            console.log(&quot;Thumbs down. You decreased your fuel efficiency&quot;);
+        } else if (gap > 0){
+            console.log(&quot;Thumbs up. You increased your fuel efficiency&quot;);
+        } else {
+            console.log(&quot;nothing changed&quot;);
+        }
+        latestConsumption = data.averageConsumption1;
+      
+        if (data.range &lt; 20){
+            console.log(&quot;You really need &quot; + webinos.vehicle.fuel + &quot;soon.&quot;);   
+        }
+}
+ </Code>
+      </descriptive>
+      <InterfaceInheritance>
+        <Name name="VehicleEvent"/>
+      </InterfaceInheritance>
+      <Const name="TRIPCOMPUTER" stringvalue="tripcomputer" id="::vehicle::TripComputerEvent::TRIPCOMPUTER">
+        <webidl>                const DOMString TRIPCOMPUTER = &quot;tripcomputer&quot;;</webidl>
+        <descriptive>
+            <brief>
+ Constant defines a trip computer event. This constant is used as an identifier for a trip computer event and a non-recurring trip  data request using the method webinos.vehicle.get() for trip computer data.
+            </brief>
+        </descriptive>
+        <Type type="DOMString"/>
+      </Const>
+      <Attribute readonly="readonly" name="averageConsumption1" id="::vehicle::TripComputerEvent::averageConsumption1">
+        <webidl>                readonly attribute float averageConsumption1;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects the average consumption 1 of the vehicle in l/100kilometers (resets automatically after a trip).
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="averageConsumption2" id="::vehicle::TripComputerEvent::averageConsumption2">
+        <webidl>                readonly attribute float averageConsumption2;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects the average consumption 2 of the vehicle in l/100kilometers (resets on driver's demand).
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="averageSpeed1" id="::vehicle::TripComputerEvent::averageSpeed1">
+        <webidl>                readonly attribute float averageSpeed1;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects the average speed of the vehicle in kilometers per hour (resets automatically after a trip).
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="averageSpeed2" id="::vehicle::TripComputerEvent::averageSpeed2">
+        <webidl>                readonly attribute float averageSpeed2;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects average speed of the vehicle in kilometers per hour (resets on driver's demand).
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="tripDistance" id="::vehicle::TripComputerEvent::tripDistance">
+        <webidl>                readonly attribute float tripDistance;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects trip distance in kilometers.
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="milage" id="::vehicle::TripComputerEvent::milage">
+        <webidl>                readonly attribute float milage;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects milage in kilometers.
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Attribute readonly="readonly" name="range" id="::vehicle::TripComputerEvent::range">
+        <webidl>                readonly attribute float range;</webidl>
+        <descriptive>
+            <brief>
+ Attrubute reflects the range of the vehicle in kilometers.
+            </brief>
+        </descriptive>
+        <Type type="float"/>
+      </Attribute>
+      <Operation name="initTripComputerEvent" id="::vehicle::TripComputerEvent::initTripComputerEvent">
+        <webidl>                void initTripComputerEvent(boolean bubbles, boolean cancelable, float averageConsumption1, float averageConsumption2, float averageSpeed1, float averageSpeed2, float tripDistance, float mileage, float range);</webidl>
+        <descriptive>
+            <brief>
+ Method sets the initial values of a trip computer event.
+            </brief>
+        </descriptive>
+        <Type type="void"/>
+        <ArgumentList>
+          <Argument name="bubbles">
+            <descriptive>
+                <description><p>
+ True if event bubbles.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="cancelable">
+            <descriptive>
+                <description><p>
+ True if event cancelable.
+                </p></description>
+            </descriptive>
+            <Type type="boolean"/>
+          </Argument>
+          <Argument name="averageConsumption1">
+            <descriptive>
+                <description><p>
+ average consumption 1 of the vehicle in l/100kilometers.
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="averageConsumption2">
+            <descriptive>
+                <description><p>
+ average consumption 2 of the vehicle in l/100kilometers.
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="averageSpeed1">
+            <descriptive>
+                <description><p>
+ average speed 1 of the vehicle in kilometers per hour. 
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="averageSpeed2">
+            <descriptive>
+                <description><p>
+ average speed 2 of the vehicle in kilometers per hour. 
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="tripDistance">
+            <descriptive>
+                <description><p>
+ distance of the current trip in kilometers.
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="mileage">
+            <descriptive>
+                <description><p>
+ overall driven distance in kilometers.
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+          <Argument name="range">
+            <descriptive>
+                <description><p>
+ range of the vehicle in kilometers. 
+                </p></description>
+            </descriptive>
+            <Type type="float"/>
+          </Argument>
+        </ArgumentList>
+      </Operation>
+    </Interface>
+  </Module>
+</Definitions>

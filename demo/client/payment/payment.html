@@ -1,0 +1,298 @@
+<html>
+<head>
+        <title>webinos rpc</title>
+        <script type="text/javascript" src="../webinos.js"></script>
+        <script type="text/javascript"
+                src="http://code.jquery.com/jquery-1.5.2.js"></script>
+        <script type="text/javascript">
+
+   /*******************************************************************************
+    *  Code contributed to the webinos project
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    *
+    * Copyright 2012 Christian Fuhrhop, Fraunhofer FOKUS
+    * 
+    ******************************************************************************/
+
+        function logObj(obj, name){
+                for (var myKey in obj){
+                        console.log(name + "["+myKey +"] = "+obj[myKey]);
+                        if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + "." + myKey);
+                }
+        }
+        
+            $(document).ready(function() {
+                function fillPZAddrs(data) {
+                    var pzpId = data.from;
+                    var pzhId, connectedPzp, connectedPzh;   
+                    if (pzpId !== "virgin_pzp") {
+                       pzhId = data.payload.message.pzhId;                    
+                       connectedPzp = data.payload.message.connectedPzp;
+                       connectedPzh = data.payload.message.connectedPzh;
+                    }
+                        
+                    if(document.getElementById('pzh_pzp_list'))
+                        document.getElementById('pzh_pzp_list').innerHTML="";
+            
+                    $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
+                    var i;
+                    if(typeof connectedPzp !== "undefined") {
+                                for(i =0; i < connectedPzp.length; i++) {
+                                    $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
+                                }
+                            }
+                            $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
+                    $("</optgroup>").appendTo("#pzh_pzp_list");
+                    $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
+                    if(typeof connectedPzh !== "undefined") {
+                                for(i =0; i < connectedPzh.length; i++) {
+                                    $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
+                                }
+                            }
+                   $("</optgroup>").appendTo("#pzh_pzp_list");
+                }
+                webinos.session.addListener('registeredBrowser', fillPZAddrs);
+                
+                function updatePZAddrs(data) {
+                    if(typeof data.payload.message.pzp !== "undefined") {
+                        $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
+                    } else {
+                        $("<option value=" + data.payload.message.pzh + " >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
+                    }
+                }
+                webinos.session.addListener('update', updatePZAddrs);
+                
+                function printInfo(data) {
+                    $('#message').append('<li>'+data.payload.message+'</li>');
+                }
+                webinos.session.addListener('info', printInfo);
+                
+                
+                        var myBasket = null;
+                        var paymentService = null;
+                        displayStatus("Initial");
+                        displayError("*none*");                        
+                        
+                    $('#findService').bind('click', function() {
+                            webinos.session.setServiceLocation($('#pzh_pzp_list').val());
+                            webinos.discovery.findServices(new ServiceType('http://webinos.org/api/payment'), {onFound: function (service) {
+                                paymentService = service;   displayStatus("Service found");
+                            }});                           
+                    });
+                                        
+
+                    $('#createShoppingBasket').bind('click', function() {
+
+                     providerList=document.getElementById('provider_list');
+   
+                     if (paymentService == null) { alert("Need to find service first");  }
+                     else {                    
+                         // set parameters appropriate for test case
+                         if(providerList.options[providerList.selectedIndex].value=="BlueVia")customer="kn12011684494805"; // consumer key
+                         else if(providerList.options[providerList.selectedIndex].value=="GSMA")customer="+16309700001"; // subscriber telephone
+                         else customer="TestCustomer";
+
+                         if(providerList.options[providerList.selectedIndex].value=="BlueVia")shop="cc9171216b9854493e488191b988c3f0"; // consumer secret
+                         else if(providerList.options[providerList.selectedIndex].value=="GSMA")shop="webinosTest"; // GSMA sandbox account
+                         else shop="TestShop";
+                         
+                          paymentService.createShoppingBasket(
+                           function (basket) {
+                                myBasket = basket;
+                                displayBasketContents(myBasket);
+                                displayStatus("Basket available");
+                               
+                            },
+                            function (error) {
+                                if(typeof(error)=='object')displayError(error.code+" : "+error.message);
+                                else displayError("Unknown error condition");
+                            },
+                            providerList.options[providerList.selectedIndex].value,
+                            customer,
+                            shop
+                            );      
+                       }
+                    }); 
+
+                    $('#addItem').bind('click', function() {
+
+                     if (myBasket == null) { alert("Need to create shopping basket"); }
+                                       else if(myBasket.items==null){ alert("Need to create shopping basket"); }
+                         
+                                              else if (document.getElementById("itemList").selectedIndex == 0) {  }
+                     else {
+                        var tobuy= "No item";
+                        if(document.getElementById("itemList").selectedIndex==1)
+                           tobuy="Old Kent Road";
+                        if(document.getElementById("itemList").selectedIndex==2)
+                           tobuy="Euston Road";
+                        if(document.getElementById("itemList").selectedIndex==3)
+                           tobuy="The Strand";
+                        if(document.getElementById("itemList").selectedIndex==4)
+                           tobuy="Regent Street";
+                        if(document.getElementById("itemList").selectedIndex==5)
+                           tobuy="Mayfair";
+                        if(document.getElementById("itemList").selectedIndex==6)
+                           tobuy="Mornington Crescent";
+                        var topay= 0;
+                        if(document.getElementById("itemList").selectedIndex==1)
+                           topay=0.06;
+                        if(document.getElementById("itemList").selectedIndex==2)
+                           topay=0.10;
+                        if(document.getElementById("itemList").selectedIndex==3)
+                           topay=0.22;
+                        if(document.getElementById("itemList").selectedIndex==4)
+                           topay=0.30;
+                        if(document.getElementById("itemList").selectedIndex==5)
+                           topay=0.40;
+                        if(document.getElementById("itemList").selectedIndex==6)
+                           topay=50.5;
+                      var myItem=new ShoppingItem();
+                      myItem.productID=""+document.getElementById("itemList").selectedIndex;
+                      myItem.description=tobuy;
+                      myItem.currency="EUR";
+                      myItem.itemPrice=topay;
+                      myItem.itemCount=1;
+                      myItem.itemsPrice=topay;
+                         myBasket.addItem(
+                           function () {
+                                displayBasketContents(myBasket);  
+                            },
+                            function (error) {
+                                if(typeof(error)=='object')displayError(error.code+" : "+error.message);
+                                else displayError("Unknown error condition");
+                            },
+                            myItem
+                            );      
+                         
+                     }
+                         
+                    }); 
+                    
+                    $('#update').bind('click', function() {
+
+                     if (myBasket == null) { alert("Need to create shopping basket"); }
+                                       else if(myBasket.items==null){ alert("Need to create shopping basket"); }
+                     else myBasket.update(
+                           function () {
+                                displayBasketContents(myBasket);  
+                            },
+                            function (error) {
+                                if(typeof(error)=='object')displayError(error.code+" : "+error.message);
+                                else displayError("Unknown error condition");
+                            }
+                            );                           
+                    }); 
+
+                    $('#checkout').bind('click', function() {
+
+                     if (myBasket == null) { alert("Need to create shopping basket"); }
+                                       else if(myBasket.items==null){ alert("Need to create shopping basket"); }
+                     else myBasket.checkout(
+                           function () {
+                                displayBasketContents(myBasket);  
+                                displayStatus("Checkout performed");
+                            },
+                            function (error) {
+                                if(typeof(error)=='object')displayError(error.code+" : "+error.message);
+                                else displayError("Unknown error condition");                          }
+                            );                           
+                    });       
+
+                    $('#release').bind('click', function() {
+
+                     if (myBasket == null) { alert("Need to create shopping basket"); }
+                     else if(myBasket.items==null){ alert("Need to create shopping basket"); }
+                     else {myBasket.release();  displayBasketContents(myBasket); displayStatus("Initial");   }                            
+                    });     
+                    
+              });      
+                
+                function displayStatus(statusText){
+                 document.getElementById("messages").innerHTML = "Status: "+statusText;
+                }
+                function displayError(errorText){
+                 if(errorText=="*none*")
+                 document.getElementById("errors").innerHTML = "Error: <FONT COLOR=\"#006600\">"+errorText+"</FONT>";
+                 else
+                 document.getElementById("errors").innerHTML = "Error: <FONT COLOR=\"#660000\">"+errorText+"</FONT>";
+                }
+                
+                function displayBasketContents(myBasket){
+                          if(myBasket==null){document.getElementById("shoppingBasket").value = "No basket";return;}
+                          if(myBasket.items==null){document.getElementById("shoppingBasket").value = "No basket";return;}
+                          var myText="Number of entries: "+myBasket.items.length;
+                          for(i=0; i<myBasket.items.length;i++){
+                                if(myBasket.items[i].itemCount==1)              
+                                  myText=myText+"\n"+myBasket.items[i].description+ "\t"+ formattedPrice(myBasket.items[i].itemsPrice);
+                            else 
+                                myText=myText+"\n"+myBasket.items[i].description+ " (" +myBasket.items[i].itemCount+" for "+myBasket.items[i].itemPrice+" each)\t"+ formattedPrice(myBasket.items[i].itemsPrice);
+                                }
+                          if(myBasket.extras.length>0){
+                                myText=myText+"\n-+-+"
+                          for(i=0; i<myBasket.extras.length;i++){                               
+                                myText=myText+"\n"+myBasket.extras[i].description+ "\t"+ formattedPrice(myBasket.extras[i].itemsPrice);
+                                }
+                                  };
+                          myText=myText+"\n-+-+-+\nTotal bill: "+formattedPrice(myBasket.totalBill);
+                          document.getElementById("shoppingBasket").value = myText;
+                        };
+              
+                        
+                         function formattedPrice(price){
+                                resVal=""+Math.floor(price);
+                                cents=Math.round((price-Math.floor(price))*100);
+                                if(cents>9)resVal=resVal+"."+cents;
+                                else resVal=resVal+".0"+cents;
+                                return resVal;
+                        }
+        </script>
+  
+</head>
+<body>
+   
+                        <p>
+                        <div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+                        <div> Payment Provider : <select id="provider_list"> <option>Local test</option> <option value="GSMA">GSMA Test</option> <option value="BlueVia">BlueVia Test (unfinished)</option> </select> <br> </div>
+                        <button id="findService">Find Service</button><br />
+                        <button id="createShoppingBasket">Create Shopping  Basket</button><br />
+                        <select id="itemList" name="itemList" size=1>
+                          <option value="">Select item to add to basket
+                          <option value="item1">Old Kent Road - &euro; 0.06
+                          <option value="item2">Euston Road - &euro; 0.10
+                          <option value="item3">The Strand - &euro; 0.22
+                          <option value="item4">Regent Street - &euro; 0.30
+                          <option value="item5">Mayfair - &euro; 0.40
+                          <option value="item6">Mornington Crescent - &euro; 0.05
+                        </select>
+                        <button id="addItem">Add Item</button><br />
+                        <button id="update">Update</button><br />
+                        <button id="checkout">Check-out</button><br />
+                        <button id="release">Release shopping basket</button><br />
+                
+                       
+                                <label for="shoppingBasket">Current Shopping Basket</label> 
+                                <br>
+                                <textarea rows='10' cols='70'
+                                        id="shoppingBasket">
+                                        </textarea>
+                        </p>
+                </div>
+                <div id="messages"></div>
+                <div id="errors"></div>
+        </div>
+</body>
+</html>
+
+

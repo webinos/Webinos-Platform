@@ -1,0 +1,29 @@
+An experimental Webinos demo project. Build it with ant
+
+   ant debug
+
+This experimental Android app supports:
+
+   -  multicast advertisements of the phone on SSDP every few seconds
+   -  very simple http server run as a background thread c/o AsyncTask
+   -  /phone.xml for the device/service description (faked)
+   -  /favicon.ico  (will try to get this to be the webinos one)
+   -  GET or POST /photo to grab frame from video preview of front camera
+   -  POST /vibrate to vibrate the phone
+   -  support for GET foo.html on files in sdcard/web/foo.html
+   -  CORS header to allow access by scripts from other "sites"
+
+This is part of a discovery demo on Linux notebook. The support 
+for SSDP is very rudimentary, and looking forward I expect to 
+expand this and to also support mDNS. The demo is for now limited 
+to Android 2.3.6. 
+
+The video preview appears when you launch the app. This raises the 
+question of the user interface on the phone for the services it 
+exposes.
+
+The installable APK file is bin/PZP-debug.apk
+
+You can copy it to your sdcard via USB and then install it e.g. with
+ES File Explorer.
+

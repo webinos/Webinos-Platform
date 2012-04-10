@@ -1,0 +1,29 @@
+/*******************************************************************************
+*  Code contributed to the webinos project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*******************************************************************************/
+
+PZP Storage
+
+Code
+----
+
+This is a VERY early example of what we could do for encrypted storage.
+
+Update: it now REQUIRES two node.js modules: Zipper and zipFile.  Please install with npm globally - "npm install -g zipper zipfile"
+
+To use it, call "open", then access files as normal in the directory you used as an argument.  When you are finished, call "close".
+
+Tests are run through maven.  All code should pass JSLint, too, although the tests wont.

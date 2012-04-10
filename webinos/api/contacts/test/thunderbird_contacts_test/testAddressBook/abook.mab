@@ -1,0 +1,84 @@
+// <!-- <mdb:mork:z v="1.4"/> -->
+< <(a=c)> // (f=iso-8859-1)
+  (B8=LastModifiedDate)(B9=RecordKey)(BA=AddrCharSet)(BB=LastRecordKey)
+  (BC=ns:addrbk:db:table:kind:pab)(BD=ListName)(BE=ListNickName)
+  (BF=ListDescription)(C0=ListTotalAddresses)(C1=LowercaseListName)
+  (C2=ns:addrbk:db:table:kind:deleted)(C3=PhotoType)(C4=PhotoName)
+  (C5=DbRowID)(C6=PhotoURI)(C7=PreferDisplayName)
+  (80=ns:addrbk:db:row:scope:card:all)
+  (81=ns:addrbk:db:row:scope:list:all)
+  (82=ns:addrbk:db:row:scope:data:all)(83=FirstName)(84=LastName)
+  (85=PhoneticFirstName)(86=PhoneticLastName)(87=DisplayName)
+  (88=NickName)(89=PrimaryEmail)(8A=LowercasePrimaryEmail)
+  (8B=SecondEmail)(8C=PreferMailFormat)(8D=PopularityIndex)
+  (8E=AllowRemoteContent)(8F=WorkPhone)(90=HomePhone)(91=FaxNumber)
+  (92=PagerNumber)(93=CellularNumber)(94=WorkPhoneType)(95=HomePhoneType)
+  (96=FaxNumberType)(97=PagerNumberType)(98=CellularNumberType)
+  (99=HomeAddress)(9A=HomeAddress2)(9B=HomeCity)(9C=HomeState)
+  (9D=HomeZipCode)(9E=HomeCountry)(9F=WorkAddress)(A0=WorkAddress2)
+  (A1=WorkCity)(A2=WorkState)(A3=WorkZipCode)(A4=WorkCountry)
+  (A5=JobTitle)(A6=Department)(A7=Company)(A8=_AimScreenName)
+  (A9=AnniversaryYear)(AA=AnniversaryMonth)(AB=AnniversaryDay)
+  (AC=SpouseName)(AD=FamilyName)(AE=WebPage1)(AF=WebPage2)(B0=BirthYear)
+  (B1=BirthMonth)(B2=BirthDay)(B3=Custom1)(B4=Custom2)(B5=Custom3)
+  (B6=Custom4)(B7=Notes)>
+
+<(DA=3)(81=1977)(82
+    =Luke Skywalker is a fictional character and the main protagonist of the o\
+riginal film trilogy of the Star Wars franchise, where he is portrayed by Mark\
+ Hamill. He is introduced in Star Wars Episode IV: A New Hope, in which he is \
+forced to leave home, and finds himself apprenticed to the Jedi master Obi-Wan\
+ Kenobi. He soon becomes an important figure in the Rebel Alliance, leading th\
+e struggle against the Galactic Empire. )(CB=1319614606)(84=05)(85
+    =http://en.wikipedia.org/wiki/Rebel_Alliance)(86=last of the jedis)
+  (87=Luke Skywalker)(88=99999)(80=0)(89=Skywalker)(8A=somewhere in space)
+  (8B=Tatooine)(8C=1334235)(8D=luke.skywalker@rebelalliance.com)(8E
+    =Coruscant)(8F=sandy street 1267)(98=1)(91=luke.skywalker@tatooine.org)
+  (92=12456)(C5=)(94=Space Republic)(95=file)(96=Tatooine city)(CC
+    =8752171459052024.jpg)(99=Luke)(9A
+    =file:///home/vito/Immagini/LukeSkywalkerROTJV2Wallpaper.jpg)(9B
+    =5567789)(9C=Jedi)(9D=Knight)(9E=luke.jedi)(9F=Rebel Alliance)(A0
+    =http://en.wikipedia.org/wiki/Luke_Skywalker)(A1=25)(A2=1959)(A3=Luigi)
+  (C8=1319614578)(A5=02)(A6=http://en.wikipedia.org/wiki/Topo_Gigio)
+  (A7=Topo Gigio)(A8=20064)(C6=gouda avenue 52)(AA=Italia)(AB=Cuneo)
+  (AC=13343455)(AD=topo.gigio@macosamidicimai.it)(C7=groviera street 23)
+  (AF=Gorgonzola)(BF=2)(B1=luigi.topo@cheese.com)(B2=12042)(B3=645562646)
+  (B4=web)(B5=Bra)(B6=256245656)(C9=1398990192946703.jpg)(B8=546665655)
+  (B9=Topo)(BA=http://vigilidelfuoco.usb.it/uploads/pics/topo_gigio_03.jpg)
+  (BB=Milano)(BC=52345366)(BD=Administration)(CA
+    =Topo Gigio was the lead character of a children's puppet show on Italian \
+and Spanish television in the early 1960s. The character, created by artist Ma\
+ria Perego, debuted on Italian television in 1959 and has been customarily voi\
+ced by actor Giuseppe (Peppino\) Mazzullo. The Italian nickname "Gigi" is a di\
+minutive of Luigi ("Louis"\), so Topo Gigio could be translated as Louie Mouse\
+.)(C0=CEO)(C1=topogigio)(C2=Topo Gigio International)(C3
+    =http://it.wikipedia.org/wiki/Topo_Gigio)(C4=11)(CD
+    =Professor Abraham van Helsing is a protagonist from Bram Stoker's 1897 no\
+vel, Dracula. Van Helsing is a Dutch doctor with a wide range of interests and\
+ accomplishments, partly attested by the string of letters that follows his na\
+me: "M.D., D.Ph., D.Litt., etc." The character is best known as a vampire hunt\
+er, and the arch-enemy of Count Dracula.)(DB=1319615056)(CE
+    =The vampire hunter)(CF=Van Helsing)(D0=vampire.killer)(D1=1342455678)
+  (D2=2136776799)(D3=a.vhelsing@killdracula.com)(D4
+    =http://guidatv.sky.it/app/guidatv/images/epgimages/38599b_Van%20Helsing_RC_visore.jpg)(D5=0007674532)(D6=5557899898)(DC=6073515020755292.jpg)
+  (D8=1452788000)(D9=Abraham)>
+{1:^80 {(k^BC:c)(s=9)} 
+  [1:^82(^BB=3)]
+  [1(^B0^81)(^B7^82)(^B8^CB)(^B1=05)(^AE^85)(^88^86)(^87^87)(^A3^88)
+    (^8D=0)(^84^89)(^9F^8A)(^9E^8B)(^9C^8B)(^8F^8C)(^89^8D)(^A1^8E)
+    (^8A^8D)(^99^8F)(^8E=0)(^B9=1)(^8B^91)(^9D^92)(^B3=)(^A4^94)(^C3^95)
+    (^9B^96)(^C4^CC)(^C5=1)(^8C=0)(^83^99)(^C6^9A)(^C7=1)(^A2^8E)(^90^9B)
+    (^A6^9C)(^A5^9D)(^A8^9E)(^A7^9F)(^AF^A0)(^B2=25)(^B6=)(^85=)(^A0=)
+    (^9A=)(^B5=)(^91=)(^92=)(^93=)(^B4=)(^86=)]
+  [2(^B0^A2)(^84^A3)(^B8^C8)(^B1=02)(^AE^A6)(^88^A7)(^87^A7)(^A3^A8)
+    (^8D=0)(^9F^C6)(^9E^AA)(^9C^AB)(^8F^AC)(^89^AD)(^99^C7)(^8A^AD)
+    (^A1^AF)(^8E=0)(^B9=2)(^8B^B1)(^9D^B2)(^91^B3)(^A4^AA)(^C3^B4)(^9B^B5)
+    (^92^B6)(^C4^C9)(^93^B8)(^8C=0)(^83^B9)(^C6^BA)(^C7=1)(^A2^BB)(^90^BC)
+    (^A6^BD)(^B7^CA)(^C5=2)(^A5^C0)(^A8^C1)(^A7^C2)(^AF^C3)(^B2=11)
+    (^B6=)(^85=)(^B3=)(^A0=)(^9A=)(^B5=)(^B4=)(^86=)]
+  [3(^B0=)(^B7^CD)(^B6=)(^B8^DB)(^88^CE)(^AE=)(^A6=)(^87^CF)(^B3=)(^A8^D0)
+    (^84^CF)(^9F=)(^9E=)(^9C=)(^90^D1)(^8F^D2)(^89^D3)(^85=)(^A1=)(^C6^D4)
+    (^99=)(^C3^B4)(^8E=0)(^8B=)(^8D=0)(^B5=)(^91^D5)(^B1=)(^A4=)(^9D=)
+    (^9B=)(^92^D6)(^C4^DC)(^93^D8)(^8C=0)(^83^D9)(^A2=)(^C7=1)(^B2=)
+    (^9A=)(^B4=)(^A3=)(^86=)(^A0=)(^C5=3)(^A5=)(^A7=)(^AF=)(^8A^D3)
+    (^B9=3)]}

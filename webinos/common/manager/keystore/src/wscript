@@ -1,0 +1,24 @@
+import sys
+srcdir = '.'
+
+def set_options(opt):
+  opt.tool_options("compiler_cxx")
+
+def configure(conf):
+  conf.check_tool("compiler_cxx")
+  conf.check_tool("node_addon")
+  if sys.platform == 'darwin':
+    conf.env.append_value('LDFLAGS',['-g','-framework','CoreFoundation','-framework','Security','-lssl','-lcrypto'])
+  else:
+    conf.check_cfg(package="gnome-keyring-1",args='--cflags --libs', uselib_store='LDFLAGS')
+
+def build(bld):
+  obj = bld.new_task_gen("cxx","shlib","node_addon")
+  obj.cxxflags = ["-g", "-D_FILE_OFFSET_BITS=64", "-D_LARGEFILE_SOURCE", "-Wall"]
+  obj.target = "keystore"
+  obj.source = ["ksImpl.cpp"]
+  if sys.platform == 'darwin':
+    obj.source.append("ksImpl_Darwin.cpp")
+  else:
+    obj.source.append("ksImpl_Linux.cpp")
+  obj.uselib = ['LDFLAGS']

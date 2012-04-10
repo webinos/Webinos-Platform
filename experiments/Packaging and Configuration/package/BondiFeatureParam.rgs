@@ -1,0 +1,27 @@
+HKCR
+{
+	Bondi.BondiFeatureParam.1 = s 'BondiFeatureParam Class'
+	{
+		CLSID = s '{0487B7C4-81F8-4AB8-A9B4-C7328C9B1AB5}'
+	}
+	Bondi.BondiFeatureParam = s 'BondiFeatureParam Class'
+	{
+		CLSID = s '{0487B7C4-81F8-4AB8-A9B4-C7328C9B1AB5}'
+		CurVer = s 'Bondi.BondiFeatureParam.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {0487B7C4-81F8-4AB8-A9B4-C7328C9B1AB5} = s 'BondiFeatureParam Class'
+		{
+			ProgID = s 'Bondi.BondiFeatureParam.1'
+			VersionIndependentProgID = s 'Bondi.BondiFeatureParam'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Free'
+			}
+			val AppID = s '%APPID%'
+			'TypeLib' = s '{}'
+		}
+	}
+}
