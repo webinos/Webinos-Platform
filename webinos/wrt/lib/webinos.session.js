@@ -121,13 +121,13 @@
 				pzhId = data.payload.message.pzhId;
 			}
 			
-			callListenerForMsg(data);
-			
 			webinos.messageHandler.setGetOwnId(sessionid);
 	
 			var msg = webinos.messageHandler.registerSender(sessionid, pzpId);
 			webinos.session.message_send(msg, pzpId);
 		
+			callListenerForMsg(data);
+			
 			break;
 			
 		case "update":
