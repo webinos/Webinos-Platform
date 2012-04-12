@@ -32,26 +32,39 @@
 		crypto = require('crypto'),
 		util = require('util');
 
-	var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-	var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 	var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// 	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// 	var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
 	if (typeof exports !== 'undefined') {
 		try {
 			/**
 			 * Webinos Modules loaded or used in PZH
 			 */
-			var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
-			var authcode     = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_authcode.js'));
-			var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-			var utils        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-			var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-			var pzhapis      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_internal_apis.js'));
-			var configuration = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-			var farm         = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_farm.js'));
-			var webInt       = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_webserver.js'));
+// 			var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
+// 			var authcode     = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_authcode.js'));
+// 			var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// 			var utils        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// 			var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+// 			var pzhapis      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_internal_apis.js'));
+// 			var configuration = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// 			var farm         = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_farm.js'));
+// 			var webInt       = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_webserver.js'));
+// 
+// 			var MessageHandler = require(path.join(webinosRoot, dependencies.manager.messaging.location, 'lib/messagehandler.js')).MessageHandler;
+// 			var RPCHandler     = rpc.RPCHandler;
 
-			var MessageHandler = require(path.join(webinosRoot, dependencies.manager.messaging.location, 'lib/messagehandler.js')).MessageHandler;
+			var rpc          = require('rpc');
+			var authcode     = require('pzh_authcode');
+			var cert         = require('session_certificate');
+			var utils        = require('session_common');
+			var log          = require('session_common').debugPzh;
+			var pzhapis      = require('pzh_internal_apis');
+			var configuration = require('session_configuration');
+			var farm         = require('pzh_farm');
+			var webInt       = require('pzh_webserver');
+
+			var MessageHandler = require('messagehandler').MessageHandler;
 			var RPCHandler     = rpc.RPCHandler;
 		} catch (err) {
 			console.log("[ERROR] Webinos modules missing, please check webinos installation" + err);

@@ -38,14 +38,21 @@ var http = require('http'),
 	WebSocketServer = require('websocket').server;
 	
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-	dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json')),
-	webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location),
-	webinosDemo  = path.resolve(__dirname, '../../../demo'),
-	log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug,
-	rpc          = require(path.join(webinosRoot, dependencies.rpc.location)),
-	validation   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_schema.js')), // ADDED BY POLITO
-	pzp_session  = require(path.join(webinosRoot, dependencies.pzp.location)),
-	configure    = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// 	dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json')),
+// 	webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location),
+// 	webinosDemo  = path.resolve(__dirname, '../../../demo'),
+// 	log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug,
+// 	rpc          = require(path.join(webinosRoot, dependencies.rpc.location)),
+// 	validation   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_schema.js')), // ADDED BY POLITO
+// 	pzp_session  = require(path.join(webinosRoot, dependencies.pzp.location)),
+// 	configure    = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+
+	var rpc          = require('rpc');
+	var validation   = require('session_schema');
+	var log          = require('session_common').debug;
+	var pzhapis      = require('pzh_internal_apis');
+	var configure    = require('session_configuration');
+	var pzp_session  = require('pzp_sessionHandling');
 	
 	var wrtServer;
 	if(process.platform == 'android') {

@@ -28,22 +28,32 @@
 	var tls  = require('tls');
 	var fs   = require('fs');
 	
-	var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-	var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-	var webinosDemo  = path.resolve(__dirname, '../../../demo');
+// 	var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// 	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// 	var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 	var webinosDemo  = path.resolve(__dirname, '../../../demo');
 		
 	if (typeof exports !== "undefined") {
-		var rpc            = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
-		var RPCHandler     = rpc.RPCHandler;
-		var MessageHandler = require(path.join(webinosRoot, dependencies.manager.messaging.location, 'lib/messagehandler.js')).MessageHandler;
-		var utils          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-		var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-		var configuration  = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-		var websocket      = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/pzp_websocket.js'));
-		var cert           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-		var pzp_server     = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/pzp_server.js'));
+// 		var rpc            = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
+// 		var RPCHandler     = rpc.RPCHandler;
+// 		var MessageHandler = require(path.join(webinosRoot, dependencies.manager.messaging.location, 'lib/messagehandler.js')).MessageHandler;
+// 		var utils          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// 		var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
+// 		var configuration  = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// 		var websocket      = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/pzp_websocket.js'));
+// 		var cert           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// 		var pzp_server     = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/pzp_server.js'));
 
+		var rpc          = require('rpc');
+		var RPCHandler   = rpc.RPCHandler;
+		var MessageHandler = require('messagehandler').MessageHandler;
+		var cert         = require('session_certificate');
+		var log          = require('session_common').debug;
+		var utils        = require('session_common');
+		var configuration = require('session_configuration');
+		var pzp_session  = require('pzp_sessionHandling');
+		var pzp_server   = require('pzp_server');
+		var websocket    = require('pzp_websocket');
 	}
 	
 	var instance, sessionPzp = [];

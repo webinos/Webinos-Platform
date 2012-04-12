@@ -28,7 +28,7 @@
 		var exports = module.exports = {};
 
 	if (typeof module !== 'undefined')
-		var utils = require('./webinos.utils.js');
+		var utils = require('webinos_utils');
 	else
 		var utils = webinos.utils || (webinos.utils = {});
 
