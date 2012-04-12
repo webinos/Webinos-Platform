@@ -18,11 +18,21 @@
 
 // Implementation of the tv module API for linux machines capable of receiving DVB streams ( http://linuxtv.org/ ) and having vlc 1.0.6 installed (comes with e.g. Ubuntu 10.04 LTS)
 
-//Screen dimensions of the tv set
-var SCREEN_WIDTH = 1360;
-var SCREEN_HEIGHT = 786;
-//Location of the channel configuration file
-var CHANNELS_CONF_FILE = "~/channels.conf";
+// Screen dimensions of the tv set, only used on overlay mode
+//var SCREEN_WIDTH = 1360;
+//var SCREEN_HEIGHT = 786;
+
+// Location of the channel configuration file
+var CHANNELS_CONF_FILE = '~/channels.conf';
+
+// url for dvb streams, specified in vlc commandline below as well
+var STREAM_URL = 'http://localhost:8080/tv.ogg';
+
+// command line to invoke vlc in transcoding and streaming mode
+var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb=1500,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:8080/tv.ogg}" --sout-keep';
+
+// command line to invoke vlc in overlay mode
+//var VLC_COMMANDLINE = 'cvlc '+CHANNELS_CONF_FILE+' --video-on-top --width='+(Math.round(SCREEN_WIDTH*0.50))+' --height='+(Math.round(SCREEN_HEIGHT*0.50))+' --qt-display-mode=2 --no-video-deco --video-x='+(Math.round(SCREEN_WIDTH/2 - SCREEN_WIDTH*0.25))+' --video-y='+(Math.round(SCREEN_HEIGHT/2 - SCREEN_HEIGHT*0.25))+' -I rc';
 
 (function() {
 
@@ -75,7 +85,7 @@ var util = require('util'),
 		client.on('error',function(e){
 		 console.log('error on connect');
 			
-		child = exec('cvlc '+CHANNELS_CONF_FILE+' --video-on-top --width='+(Math.round(SCREEN_WIDTH*0.50))+' --height='+(Math.round(SCREEN_HEIGHT*0.50))+' --qt-display-mode=2 --no-video-deco --video-x='+(Math.round(SCREEN_WIDTH/2 - SCREEN_WIDTH*0.25))+' --video-y='+(Math.round(SCREEN_HEIGHT/2 - SCREEN_HEIGHT*0.25))+' -I rc',
+		child = exec(VLC_COMMANDLINE,
 		  function (error, stdout, stderr) {
 		    console.log('stdout: ' + stdout);
 		    console.log('stderr: ' + stderr);
@@ -84,17 +94,24 @@ var util = require('util'),
 		    }
 		});
 		});
-	
-	
-		client.connect("/tmp/tvrc", function() {
-		    if(channel && channel.stream){
-		    var chkChan = channel.stream.split('://');
 
-		    if(chkChan.length==2 && chkChan[0]==='dvb'){
-				console.log('#TV: sending out: goto '+chkChan[1]+'\n');
-			client.write('goto '+chkChan[1]+'\n');
-		    }	
-		    }
+		client.connect("/tmp/tvrc", function() {
+			if(channel && channel.stream){
+				var chkChan = channel.stream.split('#');
+			
+				if(chkChan.length !== 2){
+					console.log('#TV: could not extract stream, setChannel fail: ', channel.stream);
+					return;
+				}
+				var streamUri = chkChan[1];
+				
+				var uriSplitted = streamUri.split('://');
+				
+				if(uriSplitted.length === 2 && uriSplitted[0] === 'dvb'){
+					console.log('#TV: sending out: goto '+uriSplitted[1]+'\n');
+					client.write('goto '+uriSplitted[1]+'\n');
+				}	
+			}
 			client.end();
 		});
 
@@ -157,7 +174,7 @@ var util = require('util'),
 		//TODO: do integrate vlc in renderer, instead using the standalone application 
 		exec('killall vlc');
 
-		child = exec('cvlc '+CHANNELS_CONF_FILE+' --video-on-top --width='+(Math.round(SCREEN_WIDTH*0.50))+' --height='+(Math.round(SCREEN_HEIGHT*0.50))+' --qt-display-mode=2 --no-video-deco --video-x='+(Math.round(SCREEN_WIDTH/2 - SCREEN_WIDTH*0.25))+' --video-y='+(Math.round(SCREEN_HEIGHT/2 - SCREEN_HEIGHT*0.25))+' -I rc',
+		child = exec(VLC_COMMANDLINE,
 		  function (error, stdout, stderr) {
 		    console.log('stdout: ' + stdout);
 		    console.log('stderr: ' + stderr);
@@ -184,7 +201,7 @@ var util = require('util'),
 									0,
 									onechan,
 									'Long name of '+onechan,
-									'dvb://'+(cix+1),
+									STREAM_URL + '#dvb://'+(cix+1),
 									new TVSource('DVB-T')));
 					}				
 				}			
@@ -378,7 +395,6 @@ var util = require('util'),
 	 * 
 	 */
 	ChannelChangeEvent = function() {
-
 		this.channel = new Channel();
 	};
 
