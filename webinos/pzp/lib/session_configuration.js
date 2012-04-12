@@ -21,13 +21,17 @@ var path          = require('path');
 var fs            = require('fs');
 var os            = require('os');
 
-var moduleRoot    = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var moduleRoot    = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 
+// var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
+// var common        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
 
-var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-var common        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+var cert          = require('session_certificate');
+var log           = require('session_common').debug;
+var common        = require('session_common');
 
 // Please change both ports 
 configure.pzhPort    = 8000; // used by PZP

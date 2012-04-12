@@ -31,14 +31,18 @@ var path    = require('path');
 var crypto  = require('crypto');
 var util    = require('util');
 
-var moduleRoot    = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var moduleRoot    = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var utils         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-var configuration = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+var cert         = require('session_certificate');
+var utils        = require('session_common');
+var log          = require('session_common').debugPzh;
+var configuration = require('session_configuration');
+// var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// var utils         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+// var configuration = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
 
 // Main interface: remove a PZP here.
 function revoke(pzh, pzpCert, callback) {

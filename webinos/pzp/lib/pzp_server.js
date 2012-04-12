@@ -24,13 +24,17 @@ var pzp_server = exports;
 var tls   = require('tls');
 var path  = require('path');
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));        
-var logs         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-var rpc          = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
-var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));        
+// var logs         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
+// var rpc          = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
+// var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+
+var rpc          = require('rpc');
+var log          = require('session_common').debug;
+var configuration = require('session_configuration');
 
 pzp_server.connectOtherPZP = function (pzp, msg) {
 	var self = pzp, client;

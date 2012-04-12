@@ -25,16 +25,24 @@ var path        = require('path');
 var util        = require('util');
 var fs          = require('fs');
 
-var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 
+// var cert            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// var utils           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// var log             = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
+// var configuration   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// var pzhWebInterface = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_webserver.js'));
+// var pzh             = require(path.join(webinosRoot, dependencies.pzh.location));
 
-var cert            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var utils           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var log             = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-var configuration   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-var pzhWebInterface = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_webserver.js'));
-var pzh             = require(path.join(webinosRoot, dependencies.pzh.location));
+
+var cert            = require('session_certificate');
+var utils           = require('session_common');
+var log             = require('session_common').debug;
+var configuration   = require('session_configuration');
+var pzhWebInterface = require('pzh_webserver');
+var pzh             = require('pzh_sessionHandling');
 
 var farm = exports;
 farm.pzhs =[];

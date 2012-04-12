@@ -19,12 +19,13 @@
 var certificate = exports;
 var path = require('path');	
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var uniqueID     = require(path.join(webinosRoot, dependencies.uniqueID.location, 'lib/uniqueID.js'));
-var log          =  require(path.resolve(webinosRoot,dependencies.pzp.location, 'lib/session_common.js')).debug;
+// var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 
+// var uniqueID     = require(path.join(webinosRoot, dependencies.uniqueID.location, 'lib/uniqueID.js'));
+//var log          =  require(path.resolve(webinosRoot,dependencies.pzp.location, 'lib/session_common.js')).debug;
+var log          =  require('session_common').debug;
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
@@ -41,7 +42,8 @@ certificate.selfSigned = function(config, type, callback) {
 
 	try {
 		if(process.platform !== 'android') {
-			certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+			//certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+			certman = process.binding('certificate_manager');
 		} else {
 			certman = require('certificate_manager');
 		}

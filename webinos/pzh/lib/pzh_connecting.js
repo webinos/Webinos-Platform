@@ -26,16 +26,24 @@ var path      = require('path');
 var http      = require('http');
 var tls       = require('tls');
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 
+// var utils        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// var certificate  = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
+// var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+// var config       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// 
+// var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
 
-var utils        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var certificate  = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-var config       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
 
-var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
+var rpc          = require('rpc');
+var certificate  = require('session_certificate');
+var utils        = require('session_common');
+var log          = require('session_common').debugPzh;
+var config       = require('session_configuration');
+
 
 // this is for connecting when PZH is in same farm
 pzhConnecting.connectOtherPZH = function(pzh, server, callback) {

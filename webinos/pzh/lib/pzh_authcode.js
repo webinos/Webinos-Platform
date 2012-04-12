@@ -30,12 +30,12 @@
 var tokenAuth = exports;
 
 var path            = require('path');
-var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-
+// var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// 
+// var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+var log             = require('session_common').debugPzh;
 
 /** @description: This creates an auth code object which can be used to set a new
  * code for a new PZP and then query about whether it is still valid.

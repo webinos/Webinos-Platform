@@ -31,18 +31,29 @@ var fs          = require('fs');
 var util        = require('util');
 var crypto      = require('crypto');
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var qrcode       = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_qrcode.js'));
-var revoker      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_revoke.js'));	
-var session      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_sessionHandling.js'));
-var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-var farm         = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_farm.js'));
-var pzhConnect   = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_connecting.js'));
-var common       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+// var qrcode       = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_qrcode.js'));
+// var revoker      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_revoke.js'));	
+// var session      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_sessionHandling.js'));
+// var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+// var farm         = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_farm.js'));
+// var pzhConnect   = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_connecting.js'));
+// var common       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
+// var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
+
+
+var log          = require('session_common').debugPzh;
+var common       = require('session_common');
+var configuration = require('session_configuration');
+var session      = require('pzh_sessionHandling');
+var pzhConnect   = require('pzh_connecting');
+var farm         = require('pzh_farm');
+var qrcode       = require('pzh_qrcode');
+var revoker      = require('pzh_revoke');
+
 
 // Synchronous method for getting information about a PZP with a certain ID.
 function getPzpInfoSync(pzh, pzpId) {
