@@ -39,7 +39,7 @@ uninstall:
 	out/Release/webinos tools/installer.js ./config.gypi uninstall
 
 clean:
-	-rm -rf out/Makefile webinos webinos_g out/$(BUILDTYPE)/webinos
+	-rm -rf out/Makefile ./webinos ./webinos_g out/$(BUILDTYPE)/webinos
 	-find out/ -name '*.o' -o -name '*.a' | xargs rm -rf
 
 distclean:

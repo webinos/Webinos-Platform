@@ -7,9 +7,10 @@ import subprocess
 import sys
 
 CC = os.environ.get('CC', 'cc')
+node_root = os.environ.get('NODE_ROOT')
 
 root_dir = os.path.dirname(__file__)
-sys.path.insert(0, os.path.join(root_dir, 'webinos', 'tools'))
+sys.path.insert(0, os.path.join(root_dir, 'webinos', 'tools', 'deps'))
 
 # parse our options
 parser = optparse.OptionParser()
@@ -121,6 +122,16 @@ parser.add_option("--dest-cpu",
     dest="dest_cpu",
     help="CPU architecture to build for. Valid values are: arm, ia32, x64")
 
+parser.add_option("--pzh",
+   action="store_true",
+   dest="pzh",
+   help="Enable this option to enable PZH build")
+
+parser.add_option("--pzp",
+   action="store_true",
+   dest="pzp",
+   help="Enable this option to enable PZP build")
+
 (options, args) = parser.parse_args()
 
 
@@ -208,6 +219,7 @@ def configure_node(o):
   o['variables']['host_arch'] = host_arch()
   o['variables']['target_arch'] = options.dest_cpu or target_arch()
   o['default_configuration'] = 'Debug' if options.debug else 'Release'
+  
 
   # turn off strict aliasing if gcc < 4.6.0 unless it's llvm-gcc
   # see http://gcc.gnu.org/bugzilla/show_bug.cgi?id=45883
@@ -219,6 +231,13 @@ def configure_node(o):
   if 'clang' not in CC and gcc_version() < [False, 4, 0, 0]:
     o['variables']['visibility'] = ''
 
+def configure_webinos(o):
+  o['variables']['node_root']= os.getenv("NODE_ROOT","/home/SERILOCAL/habib.virji/node/")
+  o['variables']['curr_dir'] = os.getcwd()
+  o['variables']['pzh'] = b(options.pzh)
+  o['variables']['pzp'] = b(not options.pzp)
+  for param in os.environ.keys():
+    print "%20s %s" % (param,os.environ[param])
 
 def configure_libz(o):
   o['variables']['node_shared_zlib'] = b(options.shared_zlib)
@@ -291,6 +310,7 @@ configure_node(output)
 configure_libz(output)
 configure_v8(output)
 configure_openssl(output)
+configure_webinos(output)
 
 # variables should be a root level element,
 # move everything else to target_defaults
