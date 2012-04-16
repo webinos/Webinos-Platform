@@ -29,7 +29,7 @@ config.gypi: configure
 out/Debug/webinos:
 	$(MAKE) -C out BUILDTYPE=Debug
 
-out/Makefile: common.gypi ../node/deps/uv/uv.gyp ../node/deps/http_parser/http_parser.gyp ../node/deps/zlib/zlib.gyp ../node/deps/v8/build/common.gypi ../node/deps/v8/tools/gyp/v8.gyp ../node/node.gyp webinos.gyp config.gypi
+out/Makefile: common.gypi deps/node/deps/uv/uv.gyp deps/node/deps/http_parser/http_parser.gyp deps/node/deps/zlib/zlib.gyp deps/node/deps/v8/build/common.gypi deps/node/deps/v8/tools/gyp/v8.gyp deps/node/node.gyp webinos.gyp config.gypi
 	tools/gyp_webinos -f make
 
 install: all
