@@ -1,7 +1,5 @@
 {
   'variables': {
-    'node_root': '/home/SERILOCAL/habib.virji/node',
-    'curr_dir': '/home/SERILOCAL/habib.virji/Webinos-Platform',
     'v8_use_snapshot%': 'true',
     # Turn off -Werror in V8
     # See http://codereview.chromium.org/8159015
@@ -12,42 +10,43 @@
     'node_use_openssl%': 'true',
     'node_use_system_openssl%': 'false',
     'library_files': [
-      '<@(node_root)/src/node.js',
-      '<@(node_root)/lib/_debugger.js',
-      '<@(node_root)/lib/_linklist.js',
-      '<@(node_root)/lib/assert.js',
-      '<@(node_root)/lib/buffer.js',
-      '<@(node_root)/lib/buffer_ieee754.js',
-      '<@(node_root)/lib/child_process.js',
-      '<@(node_root)/lib/console.js',
-      '<@(node_root)/lib/constants.js',
-      '<@(node_root)/lib/crypto.js',
-      '<@(node_root)/lib/cluster.js',
-      '<@(node_root)/lib/dgram.js',
-      '<@(node_root)/lib/dns.js',
-      '<@(node_root)/lib/events.js',
-      '<@(node_root)/lib/freelist.js',
-      '<@(node_root)/lib/fs.js',
-      '<@(node_root)/lib/http.js',
-      '<@(node_root)/lib/https.js',
-      '<@(node_root)/lib/module.js',
-      '<@(node_root)/lib/net.js',
-      '<@(node_root)/lib/os.js',
-      '<@(node_root)/lib/path.js',
-      '<@(node_root)/lib/punycode.js',
-      '<@(node_root)/lib/querystring.js',
-      '<@(node_root)/lib/readline.js',
-      '<@(node_root)/lib/repl.js',
-      '<@(node_root)/lib/stream.js',
-      '<@(node_root)/lib/string_decoder.js',
-      '<@(node_root)/lib/sys.js',
-      '<@(node_root)/lib/timers.js',
-      '<@(node_root)/lib/tls.js',
-      '<@(node_root)/lib/tty.js',
-      '<@(node_root)/lib/url.js',
-      '<@(node_root)/lib/util.js',
-      '<@(node_root)/lib/vm.js',
-      '<@(node_root)/lib/zlib.js',
+      '<(curr_dir)/deps/node/src/node.js',
+      '<(curr_dir)/deps/node/lib/_debugger.js',
+      '<(curr_dir)/deps/node/lib/_linklist.js',
+      '<(curr_dir)/deps/node/lib/assert.js',
+      '<(curr_dir)/deps/node/lib/buffer.js',
+      '<(curr_dir)/deps/node/lib/buffer_ieee754.js',
+      '<(curr_dir)/deps/node/lib/child_process.js',
+      '<(curr_dir)/deps/node/lib/console.js',
+      '<(curr_dir)/deps/node/lib/constants.js',
+      '<(curr_dir)/deps/node/lib/crypto.js',
+      '<(curr_dir)/deps/node/lib/cluster.js',
+      '<(curr_dir)/deps/node/lib/dgram.js',
+      '<(curr_dir)/deps/node/lib/dns.js',
+      '<(curr_dir)/deps/node/lib/events.js',
+      '<(curr_dir)/deps/node/lib/freelist.js',
+      '<(curr_dir)/deps/node/lib/fs.js',
+      '<(curr_dir)/deps/node/lib/http.js',
+      '<(curr_dir)/deps/node/lib/https.js',
+      '<(curr_dir)/deps/node/lib/module.js',
+      '<(curr_dir)/deps/node/lib/net.js',
+      '<(curr_dir)/deps/node/lib/os.js',
+      '<(curr_dir)/deps/node/lib/path.js',
+      '<(curr_dir)/deps/node/lib/punycode.js',
+      '<(curr_dir)/deps/node/lib/querystring.js',
+      '<(curr_dir)/deps/node/lib/readline.js',
+      '<(curr_dir)/deps/node/lib/repl.js',
+      '<(curr_dir)/deps/node/lib/stream.js',
+      '<(curr_dir)/deps/node/lib/string_decoder.js',
+      '<(curr_dir)/deps/node/lib/sys.js',
+      '<(curr_dir)/deps/node/lib/timers.js',
+      '<(curr_dir)/deps/node/lib/tls.js',
+      '<(curr_dir)/deps/node/lib/tty.js',
+      '<(curr_dir)/deps/node/lib/url.js',
+      '<(curr_dir)/deps/node/lib/util.js',
+      '<(curr_dir)/deps/node/lib/vm.js',
+      '<(curr_dir)/deps/node/lib/zlib.js',
+
       '<@(curr_dir)/webinos/pzh/lib/pzh_authcode.js',
       '<@(curr_dir)/webinos/pzh/lib/pzh_connecting.js',
       '<@(curr_dir)/webinos/pzh/lib/pzh_farm.js',
@@ -56,6 +55,7 @@
       '<@(curr_dir)/webinos/pzh/lib/pzh_revoke.js',
       '<@(curr_dir)/webinos/pzh/lib/pzh_sessionHandling.js',
       '<@(curr_dir)/webinos/pzh/web/pzh_webserver.js',
+
       '<@(curr_dir)/webinos/pzp/lib/pzp_server.js',
       '<@(curr_dir)/webinos/pzp/lib/pzp_sessionHandling.js',
       '<@(curr_dir)/webinos/pzp/lib/pzp_websocket.js',
@@ -63,58 +63,13 @@
       '<@(curr_dir)/webinos/pzp/lib/session_common.js',
       '<@(curr_dir)/webinos/pzp/lib/session_configuration.js',
       '<@(curr_dir)/webinos/pzp/lib/session_schema.js',
+
       '<@(curr_dir)/webinos/common/rpc/lib/webinos_utils.js',
       '<@(curr_dir)/webinos/common/rpc/lib/rpc.js',
+
       '<@(curr_dir)/webinos/common/manager/messaging/lib/messagehandler.js',
-      #'<@(curr_dir)/demo/_third_party_main.js',
+
     ],
-    'input': [
-        '../node/src/fs_event_wrap.cc',
-        '../node/src/cares_wrap.cc',
-        '../node/src/handle_wrap.cc',
-        '../node/src/node.cc',
-        '../node/src/node_buffer.cc',
-        '../node/src/node_constants.cc',
-        '../node/src/node_extensions.cc',
-        '../node/src/node_file.cc',
-        '../node/src/node_http_parser.cc',
-        '../node/src/node_javascript.cc',
-        '../node/src/node_main.cc',
-        '../node/src/node_os.cc',
-        '../node/src/node_script.cc',
-        '../node/src/node_string.cc',
-        '../node/src/node_zlib.cc',
-        '../node/src/pipe_wrap.cc',
-        '../node/src/stream_wrap.cc',
-        '../node/src/tcp_wrap.cc',
-        '../node/src/timer_wrap.cc',
-        '../node/src/tty_wrap.cc',
-        '../node/src/process_wrap.cc',
-        '../node/src/v8_typed_array.cc',
-        '../node/src/udp_wrap.cc',
-        # headers to make for a more pleasant IDE experience
-        '../node/src/handle_wrap.h',
-        '../node/src/node.h',
-        '../node/src/node_buffer.h',
-        '../node/src/node_constants.h',
-        '../node/src/node_crypto.h',
-        '../node/src/node_extensions.h',
-        '../node/src/node_file.h',
-        '../node/src/node_http_parser.h',
-        '../node/src/node_javascript.h',
-        '../node/src/node_os.h',
-        '../node/src/node_root_certs.h',
-        '../node/src/node_script.h',
-        '../node/src/node_string.h',
-        '../node/src/node_version.h',
-        '../node/src/pipe_wrap.h',
-        '../node/src/req_wrap.h',
-        '../node/src/stream_wrap.h',
-        '../node/src/v8_typed_array.h',
-        '<@(node_root)/deps/http_parser/http_parser.h',
-        # javascript files to make for an even more pleasant IDE experience
-        '<@(library_files)',
-      ],
   },
 
   'targets': [
@@ -123,23 +78,87 @@
       'type': 'executable',
 
       'dependencies': [
-        '<@(node_root)/deps/http_parser/http_parser.gyp:http_parser',
-        '<@(node_root)/deps/uv/uv.gyp:uv',
+        'deps/node/deps/http_parser/http_parser.gyp:http_parser',
+        'deps/node/deps/uv/uv.gyp:uv',
         'node_js2c#host',
       ],
 
       'include_dirs': [
-        '../node/src',
-        '../node/deps/uv/src/ares',
+        'deps/node/src',
+        'deps/node/deps/uv/src/ares',
+        #'webinos/api/contacts/contrib',
         '<(SHARED_INTERMEDIATE_DIR)' # for node_natives.h
       ],
 
       'sources':[
         "common/manager/certificate_manager/src/certificate_manager.cpp",
         "common/manager/certificate_manager/src/openssl_wrapper.cpp",
-        "<@(input)",
-        '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',
-        # node.gyp is added to the project by default.
+        #"common/manager/policy_manager/src/pm.cc",
+        #"common/manager/policy_manager/src/core/policymanager/PolicyManager.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Condition.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Globals.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/IPolicyBase.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Policy.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/PolicySet.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Request.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Rule.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Subject.cpp",
+        #"common/manager/policy_manager/src/core/common.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxml.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/slre.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinystr.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxmlparser.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxmlerror.cpp",
+        #"api/contacts/src/thunderbird_AB_parser/MorkAddressBook.cpp",
+        #"api/contacts/contrib/MorkParser.cpp",
+        #"api/contacts/src/thunderbird_AB_parser/node_contacts_mork.cpp",
+        #"api/discovery/src/bluetooth.cc",
+        'deps/node/src/fs_event_wrap.cc',
+        'deps/node/src/cares_wrap.cc',
+        'deps/node/src/handle_wrap.cc',
+        'deps/node/src/node.cc',
+        'deps/node/src/node_buffer.cc',
+        'deps/node/src/node_constants.cc',
+        'deps/node/src/node_extensions.cc',
+        'deps/node/src/node_file.cc',
+        'deps/node/src/node_http_parser.cc',
+        'deps/node/src/node_javascript.cc',
+        'deps/node/src/node_main.cc',
+        'deps/node/src/node_os.cc',
+        'deps/node/src/node_script.cc',
+        'deps/node/src/node_string.cc',
+        'deps/node/src/node_zlib.cc',
+        'deps/node/src/pipe_wrap.cc',
+        'deps/node/src/stream_wrap.cc',
+        'deps/node/src/tcp_wrap.cc',
+        'deps/node/src/timer_wrap.cc',
+        'deps/node/src/tty_wrap.cc',
+        'deps/node/src/process_wrap.cc',
+        'deps/node/src/v8_typed_array.cc',
+        'deps/node/src/udp_wrap.cc',
+        # headers to make for a more pleasant IDE experience
+        'deps/node/src/handle_wrap.h',
+        'deps/node/src/node.h',
+        'deps/node/src/node_buffer.h',
+        'deps/node/src/node_constants.h',
+        'deps/node/src/node_crypto.h',
+        'deps/node/src/node_extensions.h',
+        'deps/node/src/node_file.h',
+        'deps/node/src/node_http_parser.h',
+        'deps/node/src/node_javascript.h',
+        'deps/node/src/node_os.h',
+        'deps/node/src/node_root_certs.h',
+        'deps/node/src/node_script.h',
+        'deps/node/src/node_string.h',
+        'deps/node/src/node_version.h',
+        'deps/node/src/pipe_wrap.h',
+        'deps/node/src/req_wrap.h',
+        'deps/node/src/stream_wrap.h',
+        'deps/node/src/v8_typed_array.h',
+        'deps/node/deps/http_parser/http_parser.h',
+        # javascript files to make for an even more pleasant IDE experience
+        '<@(library_files)',
+        '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',        
         'common.gypi',
        ],
 
@@ -152,10 +171,10 @@
       'conditions': [
         [ 'node_use_openssl=="true"', {
           'defines': [ 'HAVE_OPENSSL=1' ],
-          'sources': [ '../node/src/node_crypto.cc' ],
+          'sources': [ 'deps/node/src/node_crypto.cc' ],
           'conditions': [
             [ 'node_use_system_openssl=="false"', {
-              'dependencies': [ '<@(node_root)/deps/openssl/openssl.gyp:openssl' ],
+              'dependencies': [ 'deps/node/deps/openssl/openssl.gyp:openssl' ],
             }]]
         }, {
           'defines': [ 'HAVE_OPENSSL=0' ]
@@ -163,11 +182,11 @@
 
         [ 'node_use_dtrace=="true"', {
           'sources': [
-            '../node/src/node_dtrace.cc',
-            '../node/src/node_dtrace.h',
+            'deps/node/node/src/node_dtrace.cc',
+            'deps/node/node/src/node_dtrace.h',
             # why does node_provider.h get generated into src and not
             # SHARED_INTERMEDIATE_DIR?
-            '../node/src/node_provider.h',
+            'deps/node/node/src/node_provider.h',
           ],
         }],
 
@@ -178,19 +197,19 @@
           ],
         }, {
           'sources': [
-            '<@(node_root)/deps/v8/include/v8.h',
-            '<@(node_root)/deps/v8/include/v8-debug.h',
+            'deps/node/deps/v8/include/v8.h',
+            'deps/node/deps/v8/include/v8-debug.h',
           ],
-          'dependencies': [ '<@(node_root)/deps/v8/tools/gyp/v8.gyp:v8' ],
+          'dependencies': [ 'deps/node/deps/v8/tools/gyp/v8.gyp:v8' ],
         }],
 
         [ 'node_shared_zlib=="false"', {
-          'dependencies': [ '<@(node_root)/deps/zlib/zlib.gyp:zlib' ],
+          'dependencies': [ 'deps/node/deps/zlib/zlib.gyp:zlib' ],
         }],
 
         [ 'OS=="win"', {
           'sources': [
-            'tools/msvs/res/node.rc',
+            'deps/node/tools/msvs/res/node.rc',
           ],
           'defines': [
             'FD_SETSIZE=1024',
@@ -202,9 +221,9 @@
         },{ # POSIX
           'defines': [ '__POSIX__' ],
           'sources': [
-            '../node/src/node_signal_watcher.cc',
-            '../node/src/node_stat_watcher.cc',
-            '../node/src/node_io_watcher.cc',
+            'deps/node/src/node_signal_watcher.cc',
+            'deps/node/src/node_stat_watcher.cc',
+            'deps/node/src/node_io_watcher.cc',
           ]
         }],
         [ 'OS=="mac"', {
@@ -245,7 +264,7 @@
           'action_name': 'node_js2c',
 
           'inputs': [
-            '<@(node_root)/tools/js2c.py',
+            '<@(curr_dir)/deps/node/tools/js2c.py',
             '<@(library_files)',
           ],
 
@@ -261,17 +280,17 @@
             [ 'node_use_dtrace=="true"', {
               'action': [
                 'python',
-                '<@(node_root)/tools/js2c.py',
+                '<@(curr_dir)/deps/node/tools/js2c.py',
                 '<@(_outputs)',
                 '<@(library_files)'
               ],
             }, { # No Dtrace
               'action': [
                 'python',
-                '<@(node_root)/tools/js2c.py',
+                '<@(curr_dir)/deps/node/tools/js2c.py',
                 '<@(_outputs)',
                 '<@(library_files)',
-                '<@(node_root)/src/macros.py'
+                '<@(curr_dir)/deps/node/src/macros.py'
               ],
             }]
           ],
