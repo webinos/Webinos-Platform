@@ -68,7 +68,11 @@
       '<@(curr_dir)/webinos/common/rpc/lib/rpc.js',
 
       '<@(curr_dir)/webinos/common/manager/messaging/lib/messagehandler.js',
-
+      '<@(curr_dir)/deps/openid/openid.js',
+      '<@(curr_dir)/deps/openid/lib/base64.js',
+      '<@(curr_dir)/deps/openid/lib/bigint.js',
+      '<@(curr_dir)/deps/openid/lib/convert.js',
+      '<@(curr_dir)/deps/openid/lib/xrds.js',
     ],
   },
 
