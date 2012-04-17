@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="webinos" default="debug">
+    
+    <!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
+
+    <target name="debug" >
+
+	<zip destfile="app/assets/modules/webinos.zip">
+	    <zipfileset
+		dir="../../.."
+		prefix="wp4"
+
+		includes="
+		    demo/policy.xml,
+		    demo/startPzp.js,
+		    node_modules/,
+		    webinos/"
+
+		excludes="
+		    webinos/common/android/,
+		    webinos/pzh/,
+		    webinos/wrt/,
+			    
+		    **/test/,
+		    **/build/,
+		    **/deps/,
+		    **/.gitignore"/>
+	</zip>
+
+	<ant dir="wrt" target="debug"/>
+
+	<ant dir="app" target="debug"/>
+
+    </target>
+</project>
