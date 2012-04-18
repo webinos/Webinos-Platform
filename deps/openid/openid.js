@@ -26,14 +26,14 @@
  * vim: set sw=2 ts=2 et tw=80 : 
  */
 
-var bigint = require('./lib/bigint'),
-    convert = require('./lib/convert'),
+var bigint = require('bigint'),
+    convert = require('convert'),
     crypto = require('crypto'),
     http = require('http'),
     https = require('https'),
     querystring = require('querystring'),
     url = require('url'),
-    xrds = require('./lib/xrds');
+    xrds = require('xrds');
 
 var _associations = {};
 var _discoveries = {};

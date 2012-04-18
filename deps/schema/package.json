@@ -1,0 +1,35 @@
+{
+  "name": "schema",
+  "version": "0.2.0",
+  "description": "Sophisticated JSON schema data validation and adaptation",
+  "keywords": [
+    "json schema",
+    "schema",
+    "data",
+    "validation",
+    "tolerant",
+    "adaptation",
+    "agile"
+  ],
+  "homepage": "http://github.com/akidee/schema.js",
+  "author": {
+    "name": "Andreas Kalsch",
+    "url": "http://akidee.de/"
+  },
+  "main": "./",
+  "dependencies": {},
+  "devDependencies": {},
+  "_id": "schema@0.2.0",
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "_engineSupported": true,
+  "_npmVersion": "1.1.12",
+  "_nodeVersion": "v0.6.14",
+  "_defaultsLoaded": true,
+  "dist": {
+    "shasum": "14f59e77920d524ed6617e0c0c8b923706cf23bd"
+  },
+  "_from": "schema@0.2.0"
+}

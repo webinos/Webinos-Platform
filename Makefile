@@ -17,11 +17,11 @@ endif
 
 webinos: config.gypi
 	$(MAKE) -C out BUILDTYPE=Release
-	ln -fs out/Release/webinos webinos
+	ln -fs out/Release/webinos ./webinos_pzp
 
 webinos_g: config.gypi
 	$(MAKE) -C out BUILDTYPE=Debug
-	ln -fs out/Debug/webinos webinos_g
+	ln -fs out/Debug/webinos ./webinos_g_pzp
 
 config.gypi: configure
 	./configure
@@ -32,14 +32,8 @@ out/Debug/webinos:
 out/Makefile: common.gypi deps/node/deps/uv/uv.gyp deps/node/deps/http_parser/http_parser.gyp deps/node/deps/zlib/zlib.gyp deps/node/deps/v8/build/common.gypi deps/node/deps/v8/tools/gyp/v8.gyp deps/node/node.gyp webinos.gyp config.gypi
 	tools/gyp_webinos -f make
 
-install: all
-	out/Release/webinos tools/installer.js ./config.gypi install
-
-uninstall:
-	out/Release/webinos tools/installer.js ./config.gypi uninstall
-
 clean:
-	-rm -rf out/Makefile ./webinos ./webinos_g out/$(BUILDTYPE)/webinos
+	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos
 	-find out/ -name '*.o' -o -name '*.a' | xargs rm -rf
 
 distclean:

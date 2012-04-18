@@ -30,7 +30,8 @@ Condition::Condition(TiXmlElement* condition){
 	for(TiXmlNode * node = (TiXmlNode*)condition->FirstChild(); node;
 			node = (TiXmlNode*)node->NextSibling() ) {
 		
-		TiXmlElement * child = dynamic_cast<TiXmlElement*>(node);
+		//TiXmlElement * child = dynamic_cast<TiXmlElement*>(node);
+		TiXmlElement * child = (TiXmlElement*)(node);
 		if(child == NULL)
 			continue;
 		if(child->ValueStr() == "condition"){

@@ -10,70 +10,75 @@
     'node_use_openssl%': 'true',
     'node_use_system_openssl%': 'false',
     'library_files': [
-      '<(curr_dir)/deps/node/src/node.js',
-      '<(curr_dir)/deps/node/lib/_debugger.js',
-      '<(curr_dir)/deps/node/lib/_linklist.js',
-      '<(curr_dir)/deps/node/lib/assert.js',
-      '<(curr_dir)/deps/node/lib/buffer.js',
-      '<(curr_dir)/deps/node/lib/buffer_ieee754.js',
-      '<(curr_dir)/deps/node/lib/child_process.js',
-      '<(curr_dir)/deps/node/lib/console.js',
-      '<(curr_dir)/deps/node/lib/constants.js',
-      '<(curr_dir)/deps/node/lib/crypto.js',
-      '<(curr_dir)/deps/node/lib/cluster.js',
-      '<(curr_dir)/deps/node/lib/dgram.js',
-      '<(curr_dir)/deps/node/lib/dns.js',
-      '<(curr_dir)/deps/node/lib/events.js',
-      '<(curr_dir)/deps/node/lib/freelist.js',
-      '<(curr_dir)/deps/node/lib/fs.js',
-      '<(curr_dir)/deps/node/lib/http.js',
-      '<(curr_dir)/deps/node/lib/https.js',
-      '<(curr_dir)/deps/node/lib/module.js',
-      '<(curr_dir)/deps/node/lib/net.js',
-      '<(curr_dir)/deps/node/lib/os.js',
-      '<(curr_dir)/deps/node/lib/path.js',
-      '<(curr_dir)/deps/node/lib/punycode.js',
-      '<(curr_dir)/deps/node/lib/querystring.js',
-      '<(curr_dir)/deps/node/lib/readline.js',
-      '<(curr_dir)/deps/node/lib/repl.js',
-      '<(curr_dir)/deps/node/lib/stream.js',
-      '<(curr_dir)/deps/node/lib/string_decoder.js',
-      '<(curr_dir)/deps/node/lib/sys.js',
-      '<(curr_dir)/deps/node/lib/timers.js',
-      '<(curr_dir)/deps/node/lib/tls.js',
-      '<(curr_dir)/deps/node/lib/tty.js',
-      '<(curr_dir)/deps/node/lib/url.js',
-      '<(curr_dir)/deps/node/lib/util.js',
-      '<(curr_dir)/deps/node/lib/vm.js',
-      '<(curr_dir)/deps/node/lib/zlib.js',
+      '<@(curr_dir)/deps/node/src/node.js',
+      '<@(node_jsfiles)',
+      '<@(session_jsfiles)',
+      '<@(pzh_jsfiles)',
+      '<@(curr_dir)/webinos/pzh/web/webinos_pzh_webserver.js',
+      '<@(pzp_jsfiles)',
+      #'<@(context_jsfiles)',
+      '<@(curr_dir)/webinos/common/manager/policy_manager/lib/webinos_policymanager.js',
+      '<@(dep_openid_jsfiles)',
+      '<@(dep_websocket_jsfiles)',
+      '<@(dep_schema_jsfiles)',
 
-      '<@(curr_dir)/webinos/pzh/lib/pzh_authcode.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_connecting.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_farm.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_internal_apis.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_qrcode.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_revoke.js',
-      '<@(curr_dir)/webinos/pzh/lib/pzh_sessionHandling.js',
-      '<@(curr_dir)/webinos/pzh/web/pzh_webserver.js',
-
-      '<@(curr_dir)/webinos/pzp/lib/pzp_server.js',
-      '<@(curr_dir)/webinos/pzp/lib/pzp_sessionHandling.js',
-      '<@(curr_dir)/webinos/pzp/lib/pzp_websocket.js',
-      '<@(curr_dir)/webinos/pzp/lib/session_certificate.js',
-      '<@(curr_dir)/webinos/pzp/lib/session_common.js',
-      '<@(curr_dir)/webinos/pzp/lib/session_configuration.js',
-      '<@(curr_dir)/webinos/pzp/lib/session_schema.js',
-
+      # RPC
       '<@(curr_dir)/webinos/common/rpc/lib/webinos_utils.js',
-      '<@(curr_dir)/webinos/common/rpc/lib/rpc.js',
+      '<@(curr_dir)/webinos/common/rpc/lib/webinos_rpc.js',
 
-      '<@(curr_dir)/webinos/common/manager/messaging/lib/messagehandler.js',
-      '<@(curr_dir)/deps/openid/openid.js',
-      '<@(curr_dir)/deps/openid/lib/base64.js',
-      '<@(curr_dir)/deps/openid/lib/bigint.js',
-      '<@(curr_dir)/deps/openid/lib/convert.js',
-      '<@(curr_dir)/deps/openid/lib/xrds.js',
-    ],
+      # Message Handler
+      '<@(curr_dir)/webinos/common/manager/messaging/lib/webinos_messagehandler.js',
+
+#Webinos APIs
+      #get42
+     '<@(curr_dir)/webinos/api/get42/lib/webinos_get42.js',
+
+     #service discovery
+     '<@(curr_dir)/webinos/api/servicedisco/lib/webinos_service_discovery.js',
+
+     #applauncher
+     '<@(curr_dir)/webinos/api/applauncher/lib/webinos_applauncher.js',
+
+     #authentication
+     '<@(curr_dir)/webinos/api/authentication/lib/webinos_authentication.js',
+
+     #context
+     '<@(curr_dir)/webinos/api/context/lib/webinos_context.js',
+
+     #contacts
+     '<@(contacts_jsfiles)',
+
+     #geolocation
+     '<@(geolocation_jsfiles)',
+
+     #file
+     '<@(file_jsfiles)',
+
+     #events
+     '<@(curr_dir)/webinos/api/events/lib/webinos_events.js',
+
+     #sensors
+     '<@(curr_dir)/webinos/api/sensors/lib/webinos_sensors.js',
+
+     #tv
+     '<@(tv_jsfiles)',
+
+     #payment
+     '<@(payment_jsfiles)',
+
+    #device orientation
+    '<@(deviceorientation_jsfiles)',
+
+    #discovery
+    '<@(discovery_jsfiles)',
+
+    #device status
+    '<@(curr_dir)/webinos/api/devicestatus/lib/webinos_devicestatus.js',
+    '<@(curr_dir)/webinos/api/devicestatus/lib/webinos_devicestatus_impl.js',
+
+    #vehicle
+    '<@(vehicle_jsfiles)',
+   ],
   },
 
   'targets': [
@@ -90,33 +95,13 @@
       'include_dirs': [
         'deps/node/src',
         'deps/node/deps/uv/src/ares',
-        #'webinos/api/contacts/contrib',
+        'webinos/api/contacts/contrib',
+        'webinos/common/manager/policy_manager/src/core',
+        'webinos/common/manager/policy_manager/src/core/policymanager',
         '<(SHARED_INTERMEDIATE_DIR)' # for node_natives.h
       ],
 
       'sources':[
-        "common/manager/certificate_manager/src/certificate_manager.cpp",
-        "common/manager/certificate_manager/src/openssl_wrapper.cpp",
-        #"common/manager/policy_manager/src/pm.cc",
-        #"common/manager/policy_manager/src/core/policymanager/PolicyManager.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Condition.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Globals.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/IPolicyBase.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Policy.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/PolicySet.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Request.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Rule.cpp",
-        #"common/manager/policy_manager/src/core/policymanager/Subject.cpp",
-        #"common/manager/policy_manager/src/core/common.cpp",
-        #"common/manager/policy_manager/contrib/xmltools/tinyxml.cpp",
-        #"common/manager/policy_manager/contrib/xmltools/slre.cpp",
-        #"common/manager/policy_manager/contrib/xmltools/tinystr.cpp",
-        #"common/manager/policy_manager/contrib/xmltools/tinyxmlparser.cpp",
-        #"common/manager/policy_manager/contrib/xmltools/tinyxmlerror.cpp",
-        #"api/contacts/src/thunderbird_AB_parser/MorkAddressBook.cpp",
-        #"api/contacts/contrib/MorkParser.cpp",
-        #"api/contacts/src/thunderbird_AB_parser/node_contacts_mork.cpp",
-        #"api/discovery/src/bluetooth.cc",
         'deps/node/src/fs_event_wrap.cc',
         'deps/node/src/cares_wrap.cc',
         'deps/node/src/handle_wrap.cc',
@@ -140,28 +125,41 @@
         'deps/node/src/process_wrap.cc',
         'deps/node/src/v8_typed_array.cc',
         'deps/node/src/udp_wrap.cc',
-        # headers to make for a more pleasant IDE experience
-        'deps/node/src/handle_wrap.h',
-        'deps/node/src/node.h',
-        'deps/node/src/node_buffer.h',
-        'deps/node/src/node_constants.h',
-        'deps/node/src/node_crypto.h',
-        'deps/node/src/node_extensions.h',
-        'deps/node/src/node_file.h',
-        'deps/node/src/node_http_parser.h',
-        'deps/node/src/node_javascript.h',
-        'deps/node/src/node_os.h',
-        'deps/node/src/node_root_certs.h',
-        'deps/node/src/node_script.h',
-        'deps/node/src/node_string.h',
-        'deps/node/src/node_version.h',
-        'deps/node/src/pipe_wrap.h',
-        'deps/node/src/req_wrap.h',
-        'deps/node/src/stream_wrap.h',
-        'deps/node/src/v8_typed_array.h',
-        'deps/node/deps/http_parser/http_parser.h',
-        # javascript files to make for an even more pleasant IDE experience
-        '<@(library_files)',
+
+        #Certificate manager
+        "common/manager/certificate_manager/src/certificate_manager.cpp",
+        "common/manager/certificate_manager/src/openssl_wrapper.cpp",
+
+        #Discovery
+        "api/discovery/src/bluetooth.cc",
+
+        #Contacts
+        "api/contacts/src/thunderbird_AB_parser/MorkAddressBook.cpp",
+        "api/contacts/contrib/MorkParser.cpp",
+        "api/contacts/src/thunderbird_AB_parser/node_contacts_mork.cpp",
+
+        #Device status
+        "api/devicestatus/src/nativedevicestatus.cc",
+        "api/devicestatus/src/battery.cc",
+
+        # Policy Manager
+        #"common/manager/policy_manager/src/pm.cc",
+        #"common/manager/policy_manager/src/core/policymanager/PolicyManager.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Condition.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Globals.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/IPolicyBase.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Policy.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/PolicySet.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Request.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Rule.cpp",
+        #"common/manager/policy_manager/src/core/policymanager/Subject.cpp",
+        #"common/manager/policy_manager/src/core/common.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxml.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/slre.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinystr.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxmlparser.cpp",
+        #"common/manager/policy_manager/contrib/xmltools/tinyxmlerror.cpp",
+
         '<(SHARED_INTERMEDIATE_DIR)/node_natives.h',        
         'common.gypi',
        ],
@@ -268,7 +266,7 @@
           'action_name': 'node_js2c',
 
           'inputs': [
-            '<@(curr_dir)/deps/node/tools/js2c.py',
+            './deps/node/tools/js2c.py',
             '<@(library_files)',
           ],
 

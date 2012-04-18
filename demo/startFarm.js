@@ -16,7 +16,8 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 var fs = require('fs'),
-	PzhFarm             = require('pzh_farm');
+	//PzhFarm             = require('pzh_farm');
+PzhFarm = require('webinos_pzh').farm;
 
 var host = null, name = null;
 
@@ -56,8 +57,8 @@ if ( name === null) {
 	name = '';
 }
 
-//PzhFarm.startFarm(host, name, function(result) {
-//	console.log('******* PZH FARM STARTED *******');	
-//});
+PzhFarm.startFarm(host, name, function(result) {
+	console.log('******* PZH FARM STARTED *******');
+});
 
 

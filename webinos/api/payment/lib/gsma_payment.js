@@ -21,7 +21,7 @@
      * The Payment connector to GSMA Payment API
      *
      */
-    require('./gsma_provison_payment.js');
+    require('gsma_provison_payment');
 
     /* path definitions for GSMA (currently sandbox) */
     GSMA_Payment_Server="oneapi.aepona.com";

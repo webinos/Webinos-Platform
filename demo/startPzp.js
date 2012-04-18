@@ -16,8 +16,8 @@
 *******************************************************************************/
 
 
-var pzp = require('../webinos/pzp/lib/pzp_sessionHandling.js'),
-	websocket = require('../webinos/pzp/lib/pzp_websocket.js'),
+var pzp = require('webinos_pzp').session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
+	websocket = require('webinos_pzp').websocket,//require('../webinos/pzp/lib/pzp_websocket.js'),
 	fs = require('fs'),
 	path = require('path');
 
@@ -70,11 +70,11 @@ var pzpModules = [
     {name: "sensors", params: {}},
     {name: "payment", params: {}},
     {name: "tv", params: {}},
-    {name: "oauth", params: {}},
+    //{name: "oauth", params: {}},
     {name: "deviceorientation", params: {connector : 'simulator'}},
     {name: "vehicle", params: {connector : 'simulator'}},
-    {name: "context", params: {}},
-    {name: "authentication", params: {}},
+    //{name: "context", params: {}},
+    //{name: "authentication", params: {}},
     {name: "contacts", params: {}},
     {name: "devicestatus", params: {}},
     {name: "discovery", params: {}}
