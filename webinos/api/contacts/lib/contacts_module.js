@@ -19,22 +19,24 @@
 //var webinosRoot=process.env.WEBINOS_PATH; //TODO a try/catch block?
 //var moduleRoot=webinosRoot+'/api/contacts/lib';
 
-var path = require('path');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var path = require('path');
+// var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
 var local_contacts = '';
 if(process.platform!=='android')
 {
-  local_contacts = require(path.resolve(__dirname,'local_contacts.js'));
+  //local_contacts = require(path.resolve(__dirname,'local_contacts.js'));
+  local_contacts = require('local_contacts');
 }
 else //on android
 {
   local_contacts = require('bridge').load('org.webinos.impl.ContactManagerImpl', this);
 }
 
-var c_def_path = path.resolve(__dirname,'contacts_def.js');
+//var c_def_path = path.resolve(__dirname,'contacts_def.js');
+var c_def_path = require('contacts_def');
 var Contact = require(c_def_path).Contact;
 var ContactField = require(c_def_path).ContactField;
 var ContactName = require(c_def_path).ContactName;
@@ -44,7 +46,9 @@ var ContactOrganization = require(c_def_path).ContactOrganization;
 /**
  * Instances of remote contacts and local contacts
  */
-RemoteContacts = require(path.resolve(__dirname,'google_contacts.js'));//new remote_contacts.contacts();
+//RemoteContacts = require(path.resolve(__dirname,'google_contacts.js'));//new remote_contacts.contacts();
+RemoteContacts = require('google_contacts');//new remote_contacts.contacts();
+
 if(process.platform!=='android') //TODO else JAVA_BRIDGE
 {
   LocalContacts = new local_contacts.contacts();
@@ -62,8 +66,8 @@ var askPolicyManager = function(module,params,callback)
 {
   console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 // TODO CHANGE
-  var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
-
+  //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+  var pmlib = require('webinos_policymanager'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   policyManager = new pmlib.policyManager();
 
   var res, request = {}, subjectInfo = {}, resourceInfo = {};
@@ -147,7 +151,7 @@ var askPolicyManager = function(module,params,callback)
 //      
       console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 //      // TODO CHANGE
-      var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager; // this line should be moved in the policy manager
+      var pmlib = require('webinos_policymanager'), policyManager; // this line should be moved in the policy manager
 
       policyManager = new pmlib.policyManager();
 

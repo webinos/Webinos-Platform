@@ -5,6 +5,7 @@ import pprint
 import re
 import subprocess
 import sys
+import glob
 
 CC = os.environ.get('CC', 'cc')
 node_root = os.environ.get('NODE_ROOT')
@@ -122,16 +123,20 @@ parser.add_option("--dest-cpu",
     dest="dest_cpu",
     help="CPU architecture to build for. Valid values are: arm, ia32, x64")
 
-parser.add_option("--pzh",
+parser.add_option("--webinos-pzh",
    action="store_true",
-   dest="pzh",
+   dest="webinos_pzh",
    help="Enable this option to enable PZH build")
 
-parser.add_option("--pzp",
+parser.add_option("--webinos-pzp",
    action="store_true",
-   dest="pzp",
+   dest="webinos_pzp",
    help="Enable this option to enable PZP build")
 
+parser.add_option("--webinos-discovery",
+   action="store_true",
+   dest="webinos_discovery",
+   help="Enable this option to enable webinos discovery module")
 (options, args) = parser.parse_args()
 
 
@@ -232,12 +237,33 @@ def configure_node(o):
     o['variables']['visibility'] = ''
 
 def configure_webinos(o):
-  o['variables']['node_root']= os.getenv("NODE_ROOT","/home/SERILOCAL/habib.virji/node/")
-  o['variables']['curr_dir'] = os.getcwd()
-  o['variables']['pzh'] = b(options.pzh)
-  o['variables']['pzp'] = b(not options.pzp)
-  for param in os.environ.keys():
-    print "%20s %s" % (param,os.environ[param])
+  o['variables']['curr_dir'] = os.getcwd();
+  o['variables']['webinos_pzh'] = b(options.webinos_pzh);
+  o['variables']['webinos_pzp'] = b(not options.webinos_pzp);
+  o['variables']['node_jsfiles'] = glob.glob(os.getcwd()+'/deps/node/lib/*.js');
+  o['variables']['pzh_jsfiles'] = glob.glob(os.getcwd()+'/webinos/pzh/lib/*.js');
+  o['variables']['pzp_jsfiles'] = glob.glob(os.getcwd()+'/webinos/pzp/lib/webinos_pzp*.js');
+  o['variables']['session_jsfiles'] = glob.glob(os.getcwd()+'/webinos/pzp/lib/webinos_session*.js');
+  o['variables']['context_jsfiles'] = glob.glob(os.getcwd()+'/webinos/common/manager/context_manager/lib/webinos_context*.js');
+#Webinos API  
+  o['variables']['geolocation_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/geolocation/lib/*.js');
+  o['variables']['tv_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/tv/lib/*.js');
+  o['variables']['contacts_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/contacts/lib/*.js');
+  o['variables']['file_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/file/lib/*.js');
+  o['variables']['vehicle_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/vehicle/lib/*.js');
+  o['variables']['vehicle_jsfiles'] += glob.glob(os.getcwd()+'/webinos/api/vehicle/contrib/vb-sim/*.js');
+  o['variables']['payment_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/payment/lib/*.js');
+  o['variables']['deviceorientation_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/deviceorientation/lib/*.js');
+  o['variables']['discovery_jsfiles'] = glob.glob(os.getcwd()+'/webinos/api/discovery/lib/*.js');
+#Dependency modules
+  o['variables']['dep_websocket_jsfiles'] = glob.glob(os.getcwd()+'/deps/websocket/lib/*.js');
+  o['variables']['dep_websocket_jsfiles'] += glob.glob(os.getcwd()+'/deps/websocket/vendor/node_ctype/*.js');
+  o['variables']['dep_websocket_jsfiles'] += glob.glob(os.getcwd()+'/deps/websocket/vendor/*.js');
+  o['variables']['dep_openid_jsfiles'] = glob.glob(os.getcwd()+'/deps/openid/openid.js');
+  o['variables']['dep_openid_jsfiles'] += glob.glob(os.getcwd()+'/deps/openid/lib/*.js');
+  o['variables']['dep_schema_jsfiles'] = glob.glob(os.getcwd()+'/deps/schema/lib/*.js');
+  o['variables']['dep_schema_jsfiles'] += glob.glob(os.getcwd()+'/deps/schema/lib/draft-02/*.js');
+  o['libraries'] += ['-lopenobex', '-lobexftp', '-lbluetooth' ];
 
 def configure_libz(o):
   o['variables']['node_shared_zlib'] = b(options.shared_zlib)
