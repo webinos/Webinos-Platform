@@ -19,7 +19,10 @@
 // Implementation of the tv module API for linux machines capable of receiving DVB streams ( http://linuxtv.org/ ) and having vlc 2.0 installed
 
 // Location of the channel configuration file
-var CHANNELS_CONF_FILE = 'channels.conf';
+// this can be configured by passing the absolute path to a channels.conf file
+// into the params object configuring the tv module added to the pzp, e.g.:
+//   {name: "tv", params: {impl:"vlcdvb", path:"/path/to/channels.conf"}}
+var CHANNELS_CONF_FILE = __dirname + '/../tools/berlin-dvbt-channels.conf';
 
 // port for dvb streams
 var VLC_STREAM_PORT = 8888;
@@ -44,7 +47,14 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 	var util = require('util'),
 		exec = require('child_process').exec,
 		child;
-
+	
+	/**
+	 * Set the absolute path to the channels.conf to use, if not the default.
+	 */
+	exports.setChannelsConfPath = function(path) {
+		CHANNELS_CONF_FILE = path;
+		VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb=400,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:' + VLC_STREAM_PORT + '/tv.ogg}" --sout-keep -I http --http-port ' + VLC_HTTP_PORT;
+	};
 
 	var WebinosTV, TVManager, TVDisplayManager, TVDisplaySuccessCB, TVTunerManager, TVSuccessCB, TVErrorCB, TVError, TVSource, Channel, ChannelChangeEvent;
 
@@ -97,7 +107,7 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 
 			if (uriSplitted.length === 2 && uriSplitted[0] === 'dvb') {
 				var playlistId = parseInt(uriSplitted[1]) + VLC_PLAYLIST_OFFSET;
-				console.log('#TV: sending out: goto ' + playlistId + '\n');
+				console.log('#TV: sending out: goto ' + playlistId);
 				requestChannel(playlistId);
 			}
 		}
@@ -110,16 +120,14 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 			};
 
 			http.get(options, function(res) {
-				setTimeout(function() {
-					console.log('channel change successfully requested.');
+				console.log('channel change successfully requested.');
 
-					successCallback(channel);
+				successCallback(channel);
 
-					// send the channel change information to all registered handlers
-					for (var i = 0; channelChangeHandlers.length > i; i++) {
-						channelChangeHandlers[i](channel);
-					}
-				}, 3500);
+				// send the channel change information to all registered handlers
+				for (var i = 0; channelChangeHandlers.length > i; i++) {
+					channelChangeHandlers[i](channel);
+				}
 
 			}).on('error', function(err) {
 				if (err.code === 'ECONNREFUSED' && tries > 0) {

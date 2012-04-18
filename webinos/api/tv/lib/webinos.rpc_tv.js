@@ -21,17 +21,17 @@
 (function() {
 	"use strict";
 	
-	var _TV_MODULE_IMPLEMENTATION_ = 'mock'; //coolstream, ce4100
+	var _TV_MODULE_IMPLEMENTATION_ = 'mock'; // mock, vlcdvb, coolstream, ce4100
 
-	//get the reference to a certain tv module implementation
-	var tvmodule = require('./webinos.service_tv.'+_TV_MODULE_IMPLEMENTATION_+'.js').tv;
+	// reference to a certain tv module implementation
+	var tvmodule;
 	
 	/**
 	 * Webinos TV service constructor (server side).
 	 * @constructor
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.
 	 */
-	var RemoteTVManager = function(rpcHandler) {
+	var RemoteTVManager = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -39,6 +39,16 @@
 			displayName:'TV ('+_TV_MODULE_IMPLEMENTATION_+' service)',
 			description:'TV control and managment.'
 		});
+		
+		if (typeof params.impl !== 'undefined') {
+			tvmodule = require('./webinos.service_tv.' + params.impl + '.js').tv;
+			
+			if (typeof params.path !== 'undefined') {
+				tvmodule.setChannelsConfPath(params.path);
+			}
+		} else {
+			tvmodule = require('./webinos.service_tv.' + _TV_MODULE_IMPLEMENTATION_ + '.js').tv;
+		}
 		
 		/**
 		 * Add event listener.
