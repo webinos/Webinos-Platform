@@ -339,11 +339,11 @@ Pzp.prototype.connect = function (conn_key, conn_csr, callback) {
 
 			for ( webApp in self.connectedWebApp ) {
 				if (self.connectedWebApp.hasOwnProperty(webApp)) {
-					var addr = self.sessionId + '/' + websocket.webId;
-					websocket.webId += 1;
-					websocket.connectedApp[addr] = self.connectedWebApp[webApp];
-					var payload = {type:"prop", from:self.sessionId, to: addr, payload:{status:"registeredBrowser"}};
-					websocket.connectedApp[addr].sendUTF(JSON.stringify(payload));
+					var addr = self.sessionId + '/' + self.sessionWebApp;
+					self.sessionWebApp += 1;
+					self.connectedApp[addr] = self.connectedApp[webApp];
+					var payload = {'pzhId':self.pzhId,'connectedPzp': self.connectedPzpIds,'connectedPzh': self.connectedPzhIds};
+					self.prepMsg(self.sessionId, addr, 'registeredBrowser', payload);
 				}
 			}
 		}

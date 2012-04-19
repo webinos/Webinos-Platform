@@ -13,14 +13,16 @@
       '<@(curr_dir)/deps/node/src/node.js',
       '<@(node_jsfiles)',
       '<@(session_jsfiles)',
-
+      '<@(pzh_jsfiles)', 
       '<@(pzp_jsfiles)',
       #'<@(context_jsfiles)',
       '<@(curr_dir)/webinos/common/manager/policy_manager/lib/webinos_policymanager.js',
-      '<@(dep_openid_jsfiles)',
+#Dependencies file
       '<@(dep_websocket_jsfiles)',
       '<@(dep_schema_jsfiles)',
-
+      '<@(curr_dir)/deps/xml2js/lib/xml2js.js',
+      '<@(curr_dir)/deps/sax/lib/sax.js',
+      '<@(dep_oauth_jsfiles)',
       # RPC
       '<@(curr_dir)/webinos/common/rpc/lib/webinos_utils.js',
       '<@(curr_dir)/webinos/common/rpc/lib/webinos_rpc.js',
@@ -65,6 +67,9 @@
      #payment
      '<@(payment_jsfiles)',
 
+     #oauth
+    '<@(curr_dir)/webinos/api/oauth/lib/webinos_oauth.js',
+
     #device orientation
     '<@(deviceorientation_jsfiles)',
 
@@ -82,12 +87,13 @@
 
   'targets': [
     {
-      'target_name': <@(webinos_target),
+      'target_name':'webinos',
       'type': 'executable',
 
       'dependencies': [
         'deps/node/deps/http_parser/http_parser.gyp:http_parser',
         'deps/node/deps/uv/uv.gyp:uv',
+        'node_modules/unixlib/module.gyp:unixlib',
         'node_js2c#host',
       ],
 

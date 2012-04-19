@@ -1,7 +1,7 @@
 module.exports = {
 	validation_error: {
 	  de: function() {
-		return "Diese Instanz ist nicht gültig";
+		return "Diese Instanz ist nicht gultig";
 	  },
 	  en: function() {
 		return "This instance is not valid";
@@ -9,7 +9,7 @@ module.exports = {
 	},
 	validation_error_type: {
 	  de: function(v) {
-		return "Ungültiger Typ";
+		return "Ungultiger Typ";
 	  },
 	  en: function(v) {
 		return "Invalid type";

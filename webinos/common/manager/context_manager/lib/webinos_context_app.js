@@ -25,7 +25,7 @@ if (typeof webinos.context.app === 'undefined')
   webinos.context.app = {};
 
 var path = require('path');
-var moduleRoot = path.resolve(__dirname, '../') + '/';
+//var moduleRoot = path.resolve(__dirname, '../') + '/';
 
 require('webinos_context_ascii_art');
 
@@ -38,15 +38,16 @@ if (commonPaths.storage === null){
 }
 else
 {
-
 if (commonPaths.storage === null) {
    console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
 }
 
-require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+//require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+
+require('webinos_context_storage_check')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 var databasehelper = require('JSORMDB');
-var appVocDBpath = path.resolve(commonPaths.storage + '/pzp/appContextVocabulary.json');
+//var appVocDBpath = path.resolve(commonPaths.storage + '/pzp/appContextVocabulary.json');
 
 webinos.context.app.appVocDB = new databasehelper.JSONDatabase({path : appVocDBpath,transactional : false});
 console.log("Log DB Initialized");

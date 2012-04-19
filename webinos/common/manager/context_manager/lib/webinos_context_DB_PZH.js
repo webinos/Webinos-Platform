@@ -39,13 +39,14 @@
   }
   //require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
-  require('webinos_context_storage_check.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+  require('webinos_context_storage_check')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 //  var moduleDependencies = require(moduleRoot + '/dependencies.json');
 //  var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
 //  var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
 
-  var ServiceDiscovery = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.servicedisco.js')).ServiceDiscovery;
+  //var ServiceDiscovery = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.servicedisco.js')).ServiceDiscovery;
+  var ServiceDiscovery = require('webinos_service_discovery').ServiceDiscovery;
   var webinosServiceDiscovery = null;
 
   var sqlite3 = require('sqlite3').verbose();
