@@ -239,7 +239,12 @@ def configure_node(o):
 def configure_webinos(o):
   o['variables']['curr_dir'] = os.getcwd();
   o['variables']['webinos_pzh'] = b(options.webinos_pzh);
-  o['variables']['webinos_pzp'] = b(not options.webinos_pzp);
+  if (options.webinos_pzh)
+    o['variables']['webinos_pzp'] = b(options.webinos_pzp);
+    o['variables']['webinos_target'] = "webinos_pzh"
+  else 
+    o['variables']['webinos_pzp'] = b(not options.webinos_pzp);
+    o['variables']['webinos_target'] = "webinos_pzp"
   o['variables']['node_jsfiles'] = glob.glob(os.getcwd()+'/deps/node/lib/*.js');
   o['variables']['pzh_jsfiles'] = glob.glob(os.getcwd()+'/webinos/pzh/lib/*.js');
   o['variables']['pzp_jsfiles'] = glob.glob(os.getcwd()+'/webinos/pzp/lib/webinos_pzp*.js');

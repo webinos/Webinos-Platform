@@ -40,7 +40,7 @@ var fs          = require('fs');
 var session         = require('webinos_session');
 var log             = require('webinos_session').common.debug;
 var pzh             = require('webinos_pzh_sessionHandling');
-var pzh             = require('webinos_pzh_webserver');
+var pzhWI           = require('webinos_pzh_webserver');
 
 //var pzhWebInterface = require('pzh_webserver');
 //var pzh             = require('pzh_sessionHandling');
@@ -140,7 +140,7 @@ pzh_farm.startFarm = function (url, name, callback) {
 				// Load PZH's that we already have registered ...
 				loadPzhs(pzh_farm.config);
 				// Start web interface, this webinterface will adapt depending on user who logins
-				pzhWebInterface.start(url, function (status) {
+				pzhWI.start(pzh_farm, url, function (status) {
 					if (status) {
 						callback(true, pzh_farm.config);
 					}

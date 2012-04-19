@@ -35,7 +35,7 @@ var session      = require('webinos_session');
 var qrcode       = require('webinos_pzh_qrcode');
 var revoke       = require('webinos_pzh_revoke');
 var connect      = require('webinos_pzh_connecting');
-var farm         = require('webinos_pzh_farm');
+//var farm         = require('webinos_pzh_farm');
 
 var pzh_internal_apis = exports;
 

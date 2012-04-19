@@ -13,8 +13,7 @@
       '<@(curr_dir)/deps/node/src/node.js',
       '<@(node_jsfiles)',
       '<@(session_jsfiles)',
-      '<@(pzh_jsfiles)',
-      '<@(curr_dir)/webinos/pzh/web/webinos_pzh_webserver.js',
+
       '<@(pzp_jsfiles)',
       #'<@(context_jsfiles)',
       '<@(curr_dir)/webinos/common/manager/policy_manager/lib/webinos_policymanager.js',
@@ -83,7 +82,7 @@
 
   'targets': [
     {
-      'target_name': 'webinos',
+      'target_name': <@(webinos_target),
       'type': 'executable',
 
       'dependencies': [
