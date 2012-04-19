@@ -20,7 +20,7 @@
 
 (function () {
 	var fs = require('fs');
-	var sc = require('schema')('authEnvironment', { fallbacks: 'STRICT_FALLBACKS' });
+	var sc = require('schema_environment')('authEnvironment', { fallbacks: 'STRICT_FALLBACKS' });
 	var tty = require('tty'); // required starting from node.js 0.6
 	var os = require('os');
 	var path = require('path');

@@ -209,5 +209,5 @@ module.exports = function () {
 		}
 	})
 
-	require('./'+this.v+'/validation').call(this)
+	require('validation').call(this)
 }

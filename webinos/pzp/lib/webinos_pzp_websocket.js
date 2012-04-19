@@ -78,7 +78,7 @@ exports.startPzpWebSocketServer = function(pzpInstance, config, callback) {
 
 	var cs = http.createServer(function(request, response) {
 		var uri = url.parse(request.url).pathname;
-		var filename = path.join(webinosDemo, uri);
+		var filename = path.join(__dirname, uri);
 		fs.stat(filename, function(err, stats) {
 			if(err) {
 				response.writeHead(404, {"Content-Type": "text/plain"});

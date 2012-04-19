@@ -24,7 +24,12 @@
 // 	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 	
 //	var contacts_module = require(path.resolve(__dirname,'contacts_module.js'));
-	var contacts_module = require('contacts_module');
+	var contacts_module;
+	try {
+		contacts_module = require('contacts_module');
+	} catch (err){
+		console.log(err.stack);
+	}
 	/**
 	 * Webinos Service constructor.
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  

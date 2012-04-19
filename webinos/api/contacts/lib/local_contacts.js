@@ -23,7 +23,14 @@
 // var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 // var binaryRoot = path.resolve(__dirname, '../src/build/Release');
 //var localcontacts = require(path.resolve(binaryRoot,'localcontacts'));
-var localcontacts =  process.binding('localcontacts');
+var localcontacts;
+try {
+	localcontacts =  process.binding('localcontacts');
+	console.log(localcontacts)
+} catch (Err) {
+	console.log("local contacts")
+	console.log(Err);
+}
 //Pass methods to the above levels using this
 //TODO here we can remap names, if desired
 

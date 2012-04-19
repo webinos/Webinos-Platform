@@ -244,7 +244,7 @@ function authenticate(hostname, url) {
 				log('INFO','[WEB SERVER] Error '+ error);
 			} else if (!authUrl) {
 				log('INFO','[WEB SERVER] Authentication failed as url to redirect after authentication is missing');
-			} else {                                                                                      
+			} else {
 				result({cmd:'auth-url', payload: authUrl});
 			}
 		});

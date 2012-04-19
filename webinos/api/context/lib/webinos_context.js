@@ -23,7 +23,7 @@
 // 			+ '/dependencies.json');
 // 	var webinosRoot = '../' + moduleRoot.root.location;
 
-	 var appContext = require('webinos_context_appContext');//webinosRoot + dependencies.manager.context_manager.location + 'lib/appContext.js'
+	 var appContext = require('webinos_context_app');//webinosRoot + dependencies.manager.context_manager.location + 'lib/appContext.js'
 
 	/**
 	 * Webinos Service constructor.
@@ -70,9 +70,10 @@
 					break;
 				}
 
-				var contextDB = require(webinosRoot
-		      			+ dependencies.manager.context_manager.location
-		      			+ 'lib/contextDBManagerPZH.js');
+// 				var contextDB = require(webinosRoot
+// 		      			+ dependencies.manager.context_manager.location
+// 		      			+ 'lib/contextDBManagerPZH.js');
+				var contextDB = require('webinos_context_DB_PZH');
 				if(_query.type == "getrawview")
 				{
 					contextDB.getrawview(function(results) {
@@ -107,9 +108,10 @@
 						}
 						else
 						{
-							var contextDB = require(webinosRoot
-			      					+ dependencies.manager.context_manager.location
-			      					+ 'lib/contextDBManagerPZH.js');
+// 							var contextDB = require(webinosRoot
+// 			      					+ dependencies.manager.context_manager.location
+// 			      					+ 'lib/contextDBManagerPZH.js');
+							var contextDB = require('webinos_context_DB_PZH');
 							if(_query.type == "getrawview")
 							{
 								contextDB.getrawview(function(results) {
@@ -138,9 +140,10 @@
 	RemoteContextManager.prototype.executeQuery = function(query, successCallback, errorCallback) {
 		switch (query.type) {
 		case "DB-insert"://PZH
-		  var contextDB = require(webinosRoot
-		      + dependencies.manager.context_manager.location
-		      + 'lib/contextDBManagerPZH.js');
+// 		  var contextDB = require(webinosRoot
+// 		      + dependencies.manager.context_manager.location
+// 		      + 'lib/contextDBManagerPZH.js');
+		  var contextDB = require('webinos_context_DB_PZH');
 			contextDB.insert(query.data); //TODO: Add success callback
 			break;
 		case "getrawview"://PZH

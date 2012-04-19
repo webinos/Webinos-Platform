@@ -46,24 +46,24 @@ var Environment = function (id, options) {
 
 	// option: i18n
 	
-// 	var _i18n = options.i18n || [ '../i18n/default' ]
-// 	if (!(_i18n instanceof Array))
-// 		_i18n = [ _i18n ]
-// 
-// 	var i18n = this.i18n = function (id) {
-// 		return i18n[id] || { en: function () { return '' } }
-// 	},
-// 		part
-// 	for (var i = 0, ii = _i18n.length; i < ii; i++) {
-// 
-// 		part = _i18n[i]
-// 		if (typeof part === 'object')
-// 			extend(i18n, part)
-// 		else
-// 			extend(i18n, require(part))
-// 	}
-// 
-// 	delete options.i18n
+ 	var _i18n = options.i18n || ['default']//[ '../i18n/default' ]
+ 	if (!(_i18n instanceof Array))
+ 		_i18n = [ _i18n ]
+ 
+ 	var i18n = this.i18n = function (id) {
+ 		return i18n[id] || { en: function () { return '' } }
+ 	}
+ 		
+ 	for (var i = 0, ii = _i18n.length; i < ii; i++) {
+ 
+ 		part = _i18n[i]
+ 		if (typeof part === 'object')
+ 			extend(i18n, part)
+ 		else
+ 			extend(i18n, require(part))
+ 	}
+ 
+ 	delete options.i18n
 
 
 	// option: locale

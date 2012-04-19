@@ -54,7 +54,7 @@ function getUserFolder(){
 commonPaths = function (){
 	var userFolder = getUserFolder(); 
 	this.storage = (userFolder!==null) ? (path.resolve(userFolder + '/' + modulePackageName) + '/') : null;
-	this.local = moduleRoot;
-	this.global = webinosRoot;
+// 	this.local = moduleRoot;
+// 	this.global = webinosRoot;
 }
 module.exports = new commonPaths();
