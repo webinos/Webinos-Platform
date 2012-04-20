@@ -24,7 +24,7 @@
 	var _TV_MODULE_IMPLEMENTATION_ = 'mock'; //coolstream, ce4100
 
 	//get the reference to a certain tv module implementation
-	var tvmodule = require('webinos_service_tv_'+_TV_MODULE_IMPLEMENTATION_).tv;
+	var tvmodule = require('webinos.service_tv.'+_TV_MODULE_IMPLEMENTATION_).tv;
 	
 	/**
 	 * Webinos TV service constructor (server side).

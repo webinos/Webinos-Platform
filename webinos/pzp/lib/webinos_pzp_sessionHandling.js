@@ -41,12 +41,12 @@ var fs   = require('fs');
 // 		var cert           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
 // 		var pzp_server     = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/pzp_server.js'));
 
-var rpc          = require('webinos_rpc');
+var rpc          = require('webinos').rpc;
 var RPCHandler   = rpc.RPCHandler;
-var MessageHandler = require('webinos_messagehandler').MessageHandler;
+var MessageHandler = require('webinos').messaging.MessageHandler;
 
-var log          = require('webinos_session').common.debug;
-var session      = require('webinos_session');
+var log          = require('webinos').session.common.debug;
+var session      = require('webinos').session;
 
 var pzp_server   = require('webinos_pzp_server'); // Needed as we start PZP server from here
 var websocket    = require('webinos_pzp_websocket'); // Needed as we start PZP webserver after PZP is started

@@ -1,0 +1,20 @@
+module.exports = {
+    "applauncher"       : require('./applauncher/lib/applauncher'),
+    "authentication"    : require('./authentication/lib/authentication'),
+    "contacts"          : require('./contacts/lib/webinos.contacts.rpc'),
+    "context"           : require('./context/lib/webinos.rpc.context'),
+    "deviceorientation" : require('./deviceorientation/lib/webinos.deviceorientation.rpc'),
+    "devicestatus   "   : require('./devicestatus/lib/webinos.rpc.devicestatus'),
+    "discovery"         : require('./discovery/lib/webinos.discovery.rpc'),
+    "events"            : require('./events/lib/events'),
+    "file"              : require('./file/lib/webinos.file.rpc'),
+    "geolocation"       : require('./geolocation/lib/webinos.geolocation.rpc'),
+    "get42"             : require('./get42/lib/rpc_test'),
+    "oauth"             : require('./oauth/lib/oauth.api'),
+    "payment"           : require('./payment/lib/rpc_payment'),
+    "sensors"           : require('./sensors/lib/rpc_sensors'),
+    "servicedisco"      : require('./sensors/lib/rpc_servicedisco'),
+    "tv"                : require('./tv/lib/webinos.rpc_tv'),
+    "vehicle"           : require('./vehicle/lib/webinos.vehicle.rpc.js'),
+};
+

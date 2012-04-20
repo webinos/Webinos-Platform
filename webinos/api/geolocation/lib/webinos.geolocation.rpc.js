@@ -14,11 +14,29 @@
 * limitations under the License.
 *
 * Copyright 2012 BMW AG
+* Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
+
 (function() {
 
-function DeviceOrientationModule(rpcHandler) {
-    var car, implFile = 'fake';
+/**
+ * Webinos Geolocation service constructor  (server side).
+ * @constructor
+ * @param rpcHandler A handler for functions that use RPC to deliver their result.
+ */
+function GeolocationModule(rpcHandler, params) {
+    var implFile;
+    var car = null;
+    var conncector = null;
+    
+    if(typeof params.connector === 'undefined' ){
+        connector = 'simulator';
+    }else{
+        connector = params.connector;
+    }
+        
+
+    
     if(connector == 'most'){
         try{
             var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
@@ -30,42 +48,54 @@ function DeviceOrientationModule(rpcHandler) {
         }
     }else if(connector == 'simulator'){
         try{
-            car = require('vs');
+            car = require('../../vehicle/contrib/vb-sim/vs.js');
             implFile = 'sim';
             console.log('connecting to simulator');
             console.log('simulator available at http://localhost:9898/simulator/vehicle.html');
         }catch(e){
             console.log(e);
         }
-    }else if(connector == 'fake'){
-        implFile = 'fake';    
+    }else if(connector == 'geoip'){
+        implFile = 'geoip';    
         console.log('connecting to fake data generator');
      }
+    
 
-	var implModule = require('webinos_deviceorientation_' + implFile);
+    
+	var implModule = require('webinos.geolocation.' + implFile );
 
-
+    
 	implModule.setRPCHandler(rpcHandler);
 	implModule.setRequired(car);
 	
 	// inherit from RPCWebinosService
 	this.base = RPCWebinosService;
 	this.base(implModule.serviceDesc);
-
-
-
-
 	
-	this.addEventListener = function(params, successCB, errorCB, objectRef) {
-		implModule.addEventListener(params, successCB, errorCB, objectRef);
+	/**
+	 * Get the current position.
+	 */
+	this.getCurrentPosition = function(params, successCB, errorCB, objectRef) {
+		implModule.getCurrentPosition(params, successCB, errorCB, objectRef);
 	};
 	
-	this.removeEventListener = function(args, successCB, errorCB, objectRef) {
-		implModule.removeEventListener(args, successCB, errorCB, objectRef);
+	/**
+	 * Continuously call a listener with the current position. 
+	 */
+	this.watchPosition = function(args, successCB, errorCB, objectRef) {
+		implModule.watchPosition(args, successCB, errorCB, objectRef);
 	};
-	}
-    
-    DeviceOrientationModule.prototype = new RPCWebinosService;
-    exports.Service = DeviceOrientationModule;
+	
+	/**
+	 * Stop calling a listener.
+	 */
+	this.clearWatch = function(params, successCB, errorCB, objectRef) {
+		implModule.clearWatch(params, successCB, errorCB, objectRef);
+	};
+	
+}
+
+GeolocationModule.prototype = new RPCWebinosService;
+exports.Service = GeolocationModule;
 
 })();

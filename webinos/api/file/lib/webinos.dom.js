@@ -28,7 +28,7 @@
 //	var webinos = require("webinos")(__dirname);
 //		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
 
-	var utils = require('webinos_utils');
+	var utils = require('webinos').utils;
 	exports.DOMException = function (type, message) {
 		this.name = type;
 		this.message = message;

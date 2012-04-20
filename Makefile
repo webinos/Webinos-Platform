@@ -29,11 +29,11 @@ config.gypi: configure
 out/Debug/webinos:
 	$(MAKE) -C out BUILDTYPE=Debug
 
-out/Makefile: common.gypi deps/node/deps/uv/uv.gyp deps/node/deps/http_parser/http_parser.gyp deps/node/deps/zlib/zlib.gyp deps/node/deps/v8/build/common.gypi deps/node/deps/v8/tools/gyp/v8.gyp deps/node/node.gyp webinos.gyp config.gypi
+out/Makefile: common.gypi deps/node/node.gyp webinos.gyp config.gypi
 	tools/gyp_webinos -f make
 
 clean:
-	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos
+	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos_
 	-find out/ -name '*.o' -o -name '*.a' | xargs rm -rf
 
 distclean:
@@ -41,5 +41,7 @@ distclean:
 	-rm -f config.gypi
 	-rm -f config.mk
 
+staticlib: config.gypi
+        $(MAKE) -C out BUILDTYPE=staticlib
 
 .PHONY: clean distclean check uninstall install install-includes install-bin all program staticlib dynamiclib
