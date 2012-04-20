@@ -24,6 +24,10 @@
 (function (exports) {
 	"use strict";
 
+	// <HACK>
+	require("./webinos.file.hack.js");
+	// </HACK>
+
 	var nUtil = require("util");
 
 	var webinos = require("webinos")(__dirname);
