@@ -51,10 +51,10 @@
 	// </HACK>
 
 	//var webinos = require("webinos")(__dirname);
-	var dom = require("webinos_dom"),
-		path = require("webinos_path"),
+	var dom = require("webinos.dom"),
+		path = require("webinos.path"),
 		//utils = webinos.global.require(webinos.global.rpc.location, "lib/utils.js");
-		utils = require('webinos_utils');
+		utils = require('webinos').utils;
 	var mUtils = {};
 
 	/**

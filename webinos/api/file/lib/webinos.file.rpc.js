@@ -27,10 +27,10 @@
 	var nUtil = require("util");
 
 	//var webinos = require("webinos")(__dirname);
-	var dom_rpc = require("webinos_dom_rpc") ,
-		file = require("webinos_file_impl"),
+	var dom_rpc = require("webinos.dom.rpc") ,
+		file = require("webinos.file"),
 		//utils = webinos.global.require(webinos.global.rpc.location, "lib/utils.js");
-		utils = require('webinos_utils');
+		utils = require('webinos').utils;
 
 	exports.Blob = {};
 	exports.Blob.serialize = function (blob) {

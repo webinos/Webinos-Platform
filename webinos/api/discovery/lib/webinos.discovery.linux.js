@@ -41,7 +41,7 @@ if (!webinos.discovery) { webinos.discovery = {}; }
 	  // TODO CHANGE
 	 // var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'); 
 
-	  var pmlib = require('webinos_policymanager'); 
+	  var pmlib = require('webinos').policy;
 	  exec = require('child_process').exec; 
 	  var policyManager = new pmlib.policyManager();
 	

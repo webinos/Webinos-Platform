@@ -39,7 +39,7 @@ function VehicleModule(rpcHandler, params) {
         }
     }else if(connector == 'simulator'){
         try{
-            car = require('vs');
+            car = require('../../vehicle/contrib/vb-sim/vs.js');
             implFile = 'sim';
             console.log('connecting to simulator');
             console.log('simulator available at http://localhost:9898/simulator/vehicle.html');
@@ -52,7 +52,7 @@ function VehicleModule(rpcHandler, params) {
      }
     
    
-	var implModule = require('webinos_vehicle_' + implFile);
+	var implModule = require('webinosi.vehicle.' + implFile);
 
 	implModule.setRPCHandler(rpcHandler);
 	implModule.setRequired(car);

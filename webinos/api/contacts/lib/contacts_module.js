@@ -84,7 +84,7 @@ var askPolicyManager = function(module,params,callback)
 // TODO CHANGE
   //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   try {
-  var pmlib = require('webinos_policymanager'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+  var pmlib = require('webinos').policy, policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   policyManager = new pmlib.policyManager();
 } catch (err) {
 	console.log("err4" + err)
@@ -170,7 +170,7 @@ var askPolicyManager = function(module,params,callback)
 //      
       console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 //      // TODO CHANGE
-      var pmlib = require('webinos_policymanager'), policyManager; // this line should be moved in the policy manager
+      var pmlib = require('webinos').policy, policyManager; // this line should be moved in the policy manager
 
       policyManager = new pmlib.policyManager();
 
