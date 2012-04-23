@@ -16,17 +16,16 @@
     {
       'target_name':'webinos',
       'type': 'executable',
-
+      'variables': {'node_staticlib':'true'},
       'dependencies': [
         '<@(node_root)/node.gyp:node',
-        '<@(node_root)/deps/uv/uv.gyp:uv',
-        '<@(node_root)/deps/v8/tools/gyp/v8.gyp:v8',
         'webinos_wrt#host',
       ],
 
       'include_dirs': [
         '<@(node_root)/src',
-
+        '<@(node_root)/deps/uv/include',
+        '<@(node_root)/deps/v8/include',
         'webinos/api/contacts/contrib',
         'webinos/common/manager/policy_manager/src/core',
         'webinos/common/manager/policy_manager/src/core/policymanager',

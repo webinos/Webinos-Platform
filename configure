@@ -232,7 +232,7 @@ def configure_webinos(o):
   o['variables']['curr_dir'] = os.getcwd();
   o['variables']['webinos_pzh'] = b(options.webinos_pzh);
   o['variables']['node_root'] = os.getenv('NODE_ROOT', "/home/SERILOCAL/habib.virji/node");
-  o['libraries'] += ['-lopenobex', '-lobexftp', '-lbluetooth' ];
+  o['libraries'] += ['-lopenobex', '-lobexftp', '-lbluetooth', '-ldl', '-lrt' ];
 
   o['variables']['host_arch'] = host_arch()
   o['variables']['target_arch'] = options.dest_cpu or target_arch()
