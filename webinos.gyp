@@ -3,11 +3,12 @@
     'v8_use_snapshot%': 'true',
     # Turn off -Werror in V8
     # See http://codereview.chromium.org/8159015
-    'werror': '',
-    'node_use_dtrace': 'false',
+    'werror%': '',
+    'node_use_dtrace%': 'false',
     'node_shared_v8%': 'false',
     'node_shared_zlib%': 'false',
     'node_use_openssl%': 'true',
+    'node_staticlib%': 'true',
     'node_use_system_openssl%': 'false',
   },
 
@@ -17,10 +18,15 @@
       'type': 'executable',
 
       'dependencies': [
-        '<@(node_root)/node.gyp:node'
+        '<@(node_root)/node.gyp:node',
+        '<@(node_root)/deps/uv/uv.gyp:uv',
+        '<@(node_root)/deps/v8/tools/gyp/v8.gyp:v8',
+        'webinos_wrt#host',
       ],
 
       'include_dirs': [
+        '<@(node_root)/src',
+
         'webinos/api/contacts/contrib',
         'webinos/common/manager/policy_manager/src/core',
         'webinos/common/manager/policy_manager/src/core/policymanager',
@@ -28,6 +34,7 @@
 
       'sources':[
         #Certificate manager
+        "webinos_main.cc",
         "common/manager/certificate_manager/src/certificate_manager.cpp",
         "common/manager/certificate_manager/src/openssl_wrapper.cpp",
 
@@ -69,7 +76,61 @@
         'ARCH="<(target_arch)"',
         'PLATFORM="<(OS)"',         
       ],
-   }
-  ] # end targets
+   },
+   {
+      'target_name': 'webinos_wrt',
+      'type': 'none',
+      'toolsets': ['host'],
+      'actions': [
+        {
+          'action_name': 'webinos_wrt',
+
+          'inputs': [
+            '<@(curr_dir)/tools/closure-compiler/compiler.jar',
+          ],
+
+          'outputs': [
+            'test/webinos.js',
+          ],
+
+          # FIXME can the following conditions be shorted by just setting
+          # macros.py into some variable which then gets included in the
+          # action?
+          'action': [
+                'java',
+                '-jar',
+                '../tools/closure-compiler/compiler.jar',
+                '--compilation_level',
+                'WHITESPACE_ONLY',
+                '--warning_level',
+                'VERBOSE',
+                "--js", "../webinos/common/rpc/lib/webinos_rpc.js",
+                "--js", "../webinos/common/manager/messaging/lib/webinos_messagehandler.js",
+                "--js", "../webinos/wrt/lib/webinos.session.js",
+                "--js", "../webinos/wrt/lib/webinos.servicedisco.js",
+                "--js", "../webinos/wrt/lib/webinos.js",
+                "--js", "../webinos/common/rpc/lib/webinos_utils.js",
+                "--js", "../webinos/api/file/lib/webinos.path.js",
+                "--js", "../webinos/wrt/lib/webinos.file.js",
+                "--js", "../webinos/wrt/lib/webinos.tv.js",
+                "--js", "../webinos/wrt/lib/webinos.oauth.js",
+                "--js", "../webinos/wrt/lib/webinos.get42.js",
+                "--js", "../webinos/wrt/lib/webinos.geolocation.js",
+                "--js", "../webinos/wrt/lib/webinos.sensors.js",
+                "--js", "../webinos/wrt/lib/webinos.events.js",
+		"--js", "../webinos/wrt/lib/webinos.applauncher.js",
+		"--js", "../webinos/wrt/lib/webinos.vehicle.js",
+		"--js", "../webinos/wrt/lib/webinos.deviceorientation.js",
+                "--js", "../webinos/wrt/lib/webinos.devicestatus.js",
+                "--js", "../webinos/wrt/lib/webinos.context.js",
+                "--js", "../webinos/wrt/lib/webinos.contacts.js",
+                "--js", "../webinos/wrt/lib/webinos.discovery.js",
+                "--js", "../webinos/wrt/lib/webinos.authentication.js",
+		"--js_output_file","<@(_outputs)""--js", 
+
+              ],
+         }],     
+    }, # end webinos_wrt
+   ], 
 }
 

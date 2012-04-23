@@ -23,22 +23,23 @@ if (typeof webinos.context === 'undefined')
   webinos.context = {};
 
 //console.log("CONTEXT MANAGER LOADED");
+var webinos_ = require('webinos')(__dirname);
 
 var path = require('path');
 var moduleRoot = path.resolve(__dirname, '../') + '/';
 
 //require(moduleRoot +'/lib/AsciiArt.js')
-require('webinos_context_ascii_art');
+require('./webinos_context_ascii_art');
 
 //var commonPaths = require(moduleRoot + '/lib/commonPaths.js');
-var commonPaths = require('webinos_context_common_paths');
+var commonPaths = require('./webinos_context_common_paths');
 if (commonPaths.storage === null){
   console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
 }
 else
 {
   //require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
-  require('webinos_context_storage_check')(commonPaths, require(moduleRoot + '/data/storage.json'));
+  require('./webinos_context_storage_check')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
   if (!require(commonPaths.storage + '/settings.json').contextEnabled){
     console.log("CONTEXT MANAGER DISABLED");
@@ -51,7 +52,8 @@ else
 //     var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
 //     var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
 //     var sessionPzp = require( webinosRoot + '/pzp/lib/pzp_sessionHandling.js');
-    var sessionPzp = require('webinos_pzp').session;
+    var  sessionPzp =  webinos_.global.require(webinos.global.pzp.location, 'lib/webinos_pzp').session;
+
 //  This class represents the context objects that will be logged
     webinos.context.ContextData = function(method, params, results) {
       this.timestamp = new Date();
@@ -121,7 +123,7 @@ else
 //  Initialize helper classes
     var dbpath = path.resolve(commonPaths.storage + '/pzp/log.json');
     //require(moduleRoot + '/lib/contextExtraction.js');
-    require('webinos_context_extraction');
+    require('./webinos_context_extraction');
 
     var registeredListeners = [];
 
@@ -134,7 +136,7 @@ else
     function saveContextData(_dataInLog, _dataIn)
     {
       //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec;
-      var pmlib = require('webinos_policymanager'), policyManager, exec = require('child_process').exec;
+      var pmlib = webinos_.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager'), policyManager, exec = require('child_process').exec;
       policyManager = new pmlib.policyManager();
 
       var res, request = {}, subjectInfo = {}, resourceInfo = {};

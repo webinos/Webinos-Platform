@@ -35,8 +35,9 @@ var tls       = require('tls');
 // 
 // var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
 
-var log          = require('webinos_session').common.debugPzh;
-var session      = require('webinos_session');
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debugPzh;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
 
 // this is for connecting when PZH is in same farm
 exports.connectOtherPZH = function(pzh, server, callback) {

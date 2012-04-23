@@ -21,7 +21,6 @@
 // 8-byte string, plus (in theory) the URL of the PZH.
 
 var crypto  = require('crypto');
-//var path    = require('path');
 
 var pzh_qrcode = exports;
 

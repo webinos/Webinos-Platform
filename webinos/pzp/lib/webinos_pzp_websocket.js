@@ -37,9 +37,11 @@ var http = require('http'),
 // 	pzp_session  = require(path.join(webinosRoot, dependencies.pzp.location)),
 // 	session.configuration    = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
 
-var rpc     = require('webinos').rpc;
-var session = require('webinos').session;
-var log     = require('webinos').session.common.debug;
+var webinos        = require('webinos')(__dirname);
+var log            = require('./webinos_session').common.debug;
+var session        = require('./webinos_session');
+var rpc            = webinos.global.require(webinos.global.rpc.location, 'lib/webinos_rpc');
+
 var wrtServer;
 
 if(process.platform == 'android') {

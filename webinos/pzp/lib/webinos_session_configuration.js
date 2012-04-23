@@ -27,9 +27,9 @@ var os            = require('os');
 // var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
 // var common        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
 
-var certificate = require('webinos_session_certificate');
-var common      = require('webinos_session_common');
-var log         = require('webinos_session_common').debug;
+var certificate = require('./webinos_session_certificate');
+var common      = require('./webinos_session_common');
+var log         = require('./webinos_session_common').debug;
 
 var session_configuration = exports;
 

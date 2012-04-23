@@ -12,17 +12,17 @@
             <sources dir="${basedir}/../webinos/">
                 <file name="common/rpc/lib/rpc.js"/>
             	<file name="common/manager/messaging/lib/messagehandler.js"/>
-   				<file name="wrt/lib/webinos.session.js"/>
-    			<file name="wrt/lib/webinos.servicedisco.js"/>
-    			<file name="wrt/lib/webinos.js"/>
+   		<file name="wrt/lib/webinos.session.js"/>
+    		<file name="wrt/lib/webinos.servicedisco.js"/>
+    		<file name="wrt/lib/webinos.js"/>
             	<file name="common/rpc/lib/webinos.utils.js"/>
-				<file name="api/file/lib/webinos.path.js"/>
-				<file name="wrt/lib/webinos.file.js"/>
+		<file name="api/file/lib/webinos.path.js"/>
+		<file name="wrt/lib/webinos.file.js"/>
             	<file name="wrt/lib/webinos.tv.js"/>
             	<file name="wrt/lib/webinos.oauth.js"/>
-				<file name="wrt/lib/webinos.get42.js"/>
+		<file name="wrt/lib/webinos.get42.js"/>
                 <file name="wrt/lib/webinos.geolocation.js"/>
-				<file name="wrt/lib/webinos.sensors.js"/>
+		<file name="wrt/lib/webinos.sensors.js"/>
             	<file name="wrt/lib/webinos.events.js"/>
             	<file name="wrt/lib/webinos.applauncher.js"/>
                 <file name="wrt/lib/webinos.vehicle.js"/>
@@ -31,7 +31,7 @@
             	<file name="wrt/lib/webinos.authentication.js"/>
             	<file name="wrt/lib/webinos.contacts.js"/>
             	<file name="wrt/lib/webinos.devicestatus.js"/>
-				<file name="wrt/lib/webinos.discovery.js"/>
+		<file name="wrt/lib/webinos.discovery.js"/>
             </sources>
         </jscompiler>
     </target>	
