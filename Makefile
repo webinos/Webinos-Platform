@@ -18,10 +18,12 @@ endif
 webinos: config.gypi
 	$(MAKE) -C out BUILDTYPE=Release
 	ln -fs out/Release/webinos ./webinos_
-	
+# npm install
+
 webinos_g: config.gypi
 	$(MAKE) -C out BUILDTYPE=Debug
 	ln -fs out/Debug/webinos ./webinos_
+#npm install
 
 config.gypi: configure
 	./configure
@@ -29,8 +31,9 @@ config.gypi: configure
 out/Debug/webinos:
 	$(MAKE) -C out BUILDTYPE=Debug
 
-out/Makefile: common.gypi deps/node/node.gyp webinos.gyp config.gypi
+out/Makefile: common.gypi webinos.gyp config.gypi
 	tools/gyp_webinos -f make
+# npm install
 
 clean:
 	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos_
@@ -42,6 +45,6 @@ distclean:
 	-rm -f config.mk
 
 staticlib: config.gypi
-        $(MAKE) -C out BUILDTYPE=staticlib
+        $(MAKE) -C out BUILDTYPE=staticlib	
 
 .PHONY: clean distclean check uninstall install install-includes install-bin all program staticlib dynamiclib

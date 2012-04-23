@@ -51,13 +51,14 @@ if (typeof exports !== 'undefined') {
 //
 // 			var MessageHandler = require(path.join(webinosRoot, dependencies.manager.messaging.location, 'lib/messagehandler.js')).MessageHandler;
 // 			var RPCHandler     = rpc.RPCHandler;
-
-		var rpc            = require('webinos_rpc');
-		var MessageHandler = require('webinos_messagehandler').MessageHandler;
-		var RPCHandler     = rpc.RPCHandler;
-		var authcode       = require('webinos_pzh_authcode');
-		var session        = require('webinos_session');
-
+	var webinos        = require('webinos')(__dirname);
+	var log            = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debugPzh;
+	var session        = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
+	var rpc            = webinos.global.require(webinos.global.rpc.location, 'lib/webinos_rpc');
+	var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, 'lib/webinos_messagehandler').MessageHandler;
+	var RPCHandler     = rpc.RPCHandler;
+	var authcode       = require('./webinos_pzh_authcode');
+	var farm           = require('./webinos_pzh_farm');
 // 			var authcode     = require('pzh_authcode');
 // 			var cert         = require('session_certificate');
 // 			var utils        = require('session_common');
@@ -97,7 +98,7 @@ var Pzh = function (modules) {
 	this.rpcHandler.loadModules(modules);
 	/* This is used for authenticating new PZPs */
 	var self = this;
-	pzh.authcode.createAuthCounter(function (res) {
+	authcode.createAuthCounter(function (res) {
 		self.expecting = res;
 	});
 };
@@ -461,3 +462,4 @@ exports.addPzh = function ( uri, modules, callback) {
 		}
 	}
 }
+

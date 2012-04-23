@@ -36,28 +36,24 @@ var fs          = require('fs');
 // var pzhWebInterface = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_webserver.js'));
 // var pzh             = require(path.join(webinosRoot, dependencies.pzh.location));
 
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debug;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
+var pzh     = require("./webinos_pzh_sessionHandling.js");
+var pzhWI   = webinos.global.require(webinos.global.pzh.location, 'web/webinos_pzh_webserver');
 
-var session         = require('webinos_session');
-var log             = require('webinos_session').common.debug;
-var pzh             = require('webinos_pzh_sessionHandling');
-var pzhWI           = require('webinos_pzh_webserver');
+var farm = exports;
 
-//var pzhWebInterface = require('pzh_webserver');
-//var pzh             = require('pzh_sessionHandling');
-
-function pzh_farm (){
-	this.pzhs = [];
-	this.config = {};
-	this.server;
-}
+farm.pzhs = [];
+farm.config = {};
+farm.server;
 
 function loadPzhs(config) {
 	"use strict";
-	var self = this;
 	var myKey;
 	for ( myKey in config.pzhs) {
 		if(typeof config.pzhs[myKey] !== "undefined") {
-			pzh.addPzh(self, myKey, config.pzhs[myKey], function(res, instance) {
+			pzh.addPzh(myKey, config.pzhs[myKey], function(res, instance) {
 				log('INFO','[PZHFARM] Started PZH ... ' + instance.config.details.name);
 			});
 		}
@@ -69,9 +65,8 @@ function loadPzhs(config) {
  * @param {string} url: pzh pzh_farm url for e.g. pzh.webinos.org
  * @param {function} callback: true in case successful or else false in case unsuccessful
  */
-pzh_farm.prototype.startFarm = function (url, name, callback) {
+farm.startFarm = function (url, name, callback) {
 	"use strict";
-	var self = this;
 	// The directory structure which pzh_farms needs for putting in files
 	session.configuration.createDirectoryStructure();
 	// Configuration setting for pzh, returns set values and connection key
@@ -82,22 +77,22 @@ pzh_farm.prototype.startFarm = function (url, name, callback) {
 		} 
 		// Connection parameters for PZH pzh_farm TLS server.
 		// Note this is the main server, pzh started are stored as SNIContext to this server
-		self.config = config;
+		farm.config = config;
 		var options = {
 			key  : conn_key,
-			cert : self.config.conn.cert,
-			ca   : self.config.master.cert,
+			cert : farm.config.conn.cert,
+			ca   : farm.config.master.cert,
 			requestCert       : true,
 			rejectUnauthorised: false
 		};
 		session.common.resolveIP(url, function(resolvedAddress) {
 			// Main pzh_farm TLS server
-			self.server = tls.createServer (options, function (conn) {
+			farm.server = tls.createServer (options, function (conn) {
 				console.log(conn)
 				// if servername existes in conn and pzh_farm.pzhs has details about pzh instance, message will be routed to respective PZH authorization function
-				if (conn.servername && self.pzhs[conn.servername]) {
+				if (conn.servername && farm.pzhs[conn.servername]) {
 					log('INFO', '[PZHFARM] sending message to ' + conn.servername);
-					self.pzhs[conn.servername].handleConnectionAuthorization(self.pzhs[conn.servername], conn);
+					farm.pzhs[conn.servername].handleConnectionAuthorization(farm.pzhs[conn.servername], conn);
 				} else {
 					log('ERROR', '[PZHFARM] Server Is Not Registered in Farm '+conn.servername);
 					conn.socket.end();
@@ -107,8 +102,8 @@ pzh_farm.prototype.startFarm = function (url, name, callback) {
 				conn.on('data', function(data){
 					log('INFO', '[PZHFARM] msg received at pzh_farm');
 					// forward message to respective PZH handleData function
-					if(conn.servername && self.pzhs[conn.servername]) {
-						self.pzhs[conn.servername].handleData(conn, data);
+					if(conn.servername && farm.pzhs[conn.servername]) {
+						farm.pzhs[conn.servername].handleData(conn, data);
 					}
 				});
 				// In case of error
@@ -120,8 +115,8 @@ pzh_farm.prototype.startFarm = function (url, name, callback) {
 				conn.on('close', function() {
 					try {
 						log('INFO', '[PZHFARM] ('+conn.servername+') Pzh/Pzp  closed');
-						if(conn.servername && self.pzhs[conn.servername]) {
-							var cl = self.pzhs[conn.servername];
+						if(conn.servername && farm.pzhs[conn.servername]) {
+							var cl = farm.pzhs[conn.servername];
 							var removed = session.common.removeClient(cl, conn);
 							if (removed !== null && typeof removed !== "undefined"){
 								cl.messageHandler.removeRoute(removed, conn.servername);
@@ -139,19 +134,19 @@ pzh_farm.prototype.startFarm = function (url, name, callback) {
 				});
 			});
 
-			self.server.on('listening', function(){
+			farm.server.on('listening', function(){
 				log('INFO', '[PZHFARM] Initialized at ' + resolvedAddress);
 				// Load PZH's that we already have registered ...
-				loadPzhs(self.config);
+				loadPzhs(farm.config);
 				// Start web interface, this webinterface will adapt depending on user who logins
-				pzhWI.start(self, url, function (status) {
+				pzhWI.start(url, function (status) {
 					if (status) {
-						callback(true, self.config);
+						callback(true, farm.config);
 					}
 				});
 			});
 
-			self.server.listen(session.configuration.farmPort, resolvedAddress);
+			farm.server.listen(session.configuration.farmPort, resolvedAddress);
 		});
 	});
 };
@@ -161,9 +156,8 @@ pzh_farm.prototype.startFarm = function (url, name, callback) {
  * @param {string} url: pzh url
  * @param {object} user: details fetched from openid about user
  */
-pzh_farm.prototype.getOrCreatePzhInstance = function (host, user, callback) {
+farm.getOrCreatePzhInstance = function (host, user, callback) {
 	"use strict";
-	var self = this;
 	var name;
 	
 	if (typeof user.username === 'undefined' || user.username === null ) {
@@ -174,33 +168,32 @@ pzh_farm.prototype.getOrCreatePzhInstance = function (host, user, callback) {
 	// Check for if user already existed and is stored	
 	var myKey = host+'/'+name;
 
-	if ( self.pzhs[myKey] && self.pzhs[myKey].config.details.username === user.username ) {
+	if ( farm.pzhs[myKey] && farm.pzhs[myKey].config.details.username === user.username ) {
 		log('INFO', '[PZHFARM] User already registered');
-		callback(myKey, self.pzhs[myKey]);
-	} else if(self.pzhs[myKey]) { // Cannot think of this case, but still might be useful
+		callback(myKey, farm.pzhs[myKey]);
+	} else if(farm.pzhs[myKey]) { // Cannot think of this case, but still might be useful
 		log('INFO', '[PZHFARM] User first time login');
-		self.pzhs[myKey].config.details.email    = user.email;
-		self.pzhs[myKey].config.details.username = user.username;
-		self.pzhs[myKey].config.details.country  = user.country;
-		self.pzhs[myKey].config.details.connid   = user.id;
-		self.pzhs[myKey].config.details.image    = user.image;
-		configuration.storeConfig(self.pzhs[myKey].config, function() {
-			callback(myKey, self.pzhs[myKey]);
+		farm.pzhs[myKey].config.details.email    = user.email;
+		farm.pzhs[myKey].config.details.username = user.username;
+		farm.pzhs[myKey].config.details.country  = user.country;
+		farm.pzhs[myKey].config.details.connid   = user.id;
+		farm.pzhs[myKey].config.details.image    = user.image;
+		session.configuration.storeConfig(farm.pzhs[myKey].config, function() {
+			callback(myKey, farm.pzhs[myKey]);
 		});
 	} else {
 		log('INFO', '[PZHFARM] Adding new PZH - ' + myKey);
-		var pzhModules = configuration.pzhDefaultServices;;
+		var pzhModules = session.configuration.pzhDefaultServices;;
 		pzh.addPzh(myKey, pzhModules, function(){
-			self.pzhs[myKey].config.details.email    = user.email;
-			self.pzhs[myKey].config.details.username = user.username;
-			self.pzhs[myKey].config.details.country  = user.country;
-			self.pzhs[myKey].config.details.connid   = user.id;
-			self.pzhs[myKey].config.details.image    = user.image;
-			configuration.storeConfig(self.pzhs[myKey].config, function() {
-				callback(myKey, self.pzhs[myKey]);
+			farm.pzhs[myKey].config.details.email    = user.email;
+			farm.pzhs[myKey].config.details.username = user.username;
+			farm.pzhs[myKey].config.details.country  = user.country;
+			farm.pzhs[myKey].config.details.connid   = user.id;
+			farm.pzhs[myKey].config.details.image    = user.image;
+			session.configuration.storeConfig(farm.pzhs[myKey].config, function() {
+				callback(myKey, farm.pzhs[myKey]);
 			});
 		});
 	}
 };
 
-module.exports = pzh_farm;

@@ -33,8 +33,10 @@ var util    = require('util');
 // var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 // var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var session      = require('webinos_session');
-var log          = require('webinos_session').common.debugPzh;
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debug;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
+
 
 // var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
 // var utils         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));

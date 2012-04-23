@@ -29,13 +29,13 @@ var fs          = require('fs');
 var util        = require('util');
 var crypto      = require('crypto');
 
-var log          = require('webinos_session').common.debugPzh;
-var session      = require('webinos_session');
-
-var qrcode       = require('webinos_pzh_qrcode');
-var revoke       = require('webinos_pzh_revoke');
-var connect      = require('webinos_pzh_connecting');
-//var farm         = require('webinos_pzh_farm');
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debug;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
+var qrcode  = require('./webinos_pzh_qrcode.js');
+var revoke  = require('./webinos_pzh_revoke.js');
+var connect = require('./webinos_pzh_connecting.js');
+var farm    = require('./webinos_pzh_farm.js');
 
 var pzh_internal_apis = exports;
 

@@ -28,16 +28,16 @@ var path = require('path');
 var fs = require('fs');
 var os = require('os');
 
-function session_common(){
-	this.writeError = [];
-	this.message = '';
-}
+var writeError = [];
+var message = '';
+
+var session_common = exports;
 
 // var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
 // var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 // var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
 // var validation   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_schema.js')); // ADDED BY POLITO
-var validation   = require('webinos_session_schema');
+var validation   = require('./webinos_session_schema');
 
 // Done to make server run all the time
 // process.on('uncaughtException', function(err){
@@ -62,18 +62,18 @@ session_common.debug = function(num, msg) {
 session_common.debugPzh = function(id, type, msg) {
 	var info = true; // Change this if you want no prints from session manager
 
-	if (id !== null && typeof id !== "undefined" && typeof session_common.writeError[id] === "undefined"){
+	if (id !== null && typeof id !== "undefined" && typeof writeError[id] === "undefined"){
 		var filepath = session_common.webinosConfigPath();
 		var filename = path.join(filepath+'/logs/', id+'.json');
 		try{
-			path.exists(filename, function(status){
+			fs.exists(filename, function(status){
 				// If file does not exist, we create it , create write stream does not create file directly :) ..
 				if (!status) {
 					fs.writeFile(filename, function(){
-						session_common.writeError[id] = fs.createWriteStream(filename, { flags: 'a', encoding:'utf8'});
+						writeError[id] = fs.createWriteStream(filename, { flags: 'a', encoding:'utf8'});
 					});
 				} else {
-					session_common.writeError[id] = fs.createWriteStream(filename, { flags: 'a', encoding:'utf8'});
+					writeError[id] = fs.createWriteStream(filename, { flags: 'a', encoding:'utf8'});
 				}
 			});
 
@@ -82,8 +82,8 @@ session_common.debugPzh = function(id, type, msg) {
 		}
 	}
 
-	if (typeof session_common.writeError[id] !== "undefined" && type === 'ERROR') {
-		session_common.writeError[id].write(msg);
+	if (typeof writeError[id] !== "undefined" && type === 'ERROR') {
+		writeError[id].write(msg);
 	}
 
 	if(type === 'ERROR' || type === 1) {
@@ -157,20 +157,20 @@ session_common.processedMsg = function(self, data, callback) {
 	// This part of the code is executed when message comes in chunks 
 	// First part of the message coming in
 	if (msg[0] === '#' && msg[msg.length-dataLen] !== '#') {
-		session_common.message = msg;
+		message = msg;
 		return;
 	}
 	// This is the middle of the message
 	if (msg[0] !== '#' && msg[msg.length-dataLen] !== '#') {
-		session_common.message += msg;
+		message += msg;
 		return;
 	}
 	// This is the last part of the message
 	if (msg[0] !== '#' && msg[msg.length-dataLen] === '#') {
-		session_common.message += msg;
-		msg = session_common.message;
+		message += msg;
+		msg = message;
 
-		session_common.message = '';
+		message = '';
 	}
 	
 	if(msg[0] ==='#' && msg[msg.length-dataLen] === '#') {
@@ -223,4 +223,3 @@ session_common.resolveIP = function(serverName, callback) {
 	}
 };
 
-module.exports = session_common;

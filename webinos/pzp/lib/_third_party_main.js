@@ -16,8 +16,8 @@
 *******************************************************************************/
 
 
-var pzp = require('webinos_pzp').session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
-	websocket = require('webinos_pzp').websocket,//require('../webinos/pzp/lib/pzp_websocket.js'),
+var pzp = require('./webinos_pzp').session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
+	websocket = require('./webinos_pzp').websocket,//require('../webinos/pzp/lib/pzp_websocket.js'),
 	fs = require('fs'),
 	path = require('path');
 

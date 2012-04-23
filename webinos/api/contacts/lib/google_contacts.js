@@ -37,7 +37,7 @@ var path = require('path');
 
 //Webinos contact definition
 //var c_def_path = path.resolve(__dirname,'contacts_def.js');
-var c_def_path = require('contacts_def');
+var c_def_path = require('./contacts_def');
 var Contact = c_def_path.Contact;
 var ContactField = c_def_path.ContactField;
 var ContactName = c_def_path.ContactName;
@@ -46,7 +46,7 @@ var ContactOrganization = c_def_path.ContactOrganization;
 
 //Authentication module
 //var auth = require(path.resolve(__dirname,'authentication_module.js'));
-var auth = require('authentication_module');
+var auth = require('./authentication_module');
 
 //GLOBAL VAR //TODO an object?
 var TOKEN = "";

@@ -24,6 +24,7 @@
 // var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 // var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
+var webinos = require('webinos')(__dirname);
 
 var local_contacts;
 try {
@@ -44,7 +45,7 @@ else //on android
 var c_def_path;
 try{
 	
-c_def_path = require('contacts_def');
+c_def_path = require('./contacts_def');
 } catch (err) {
 	console.log("err2" + err)
 }
@@ -60,7 +61,7 @@ var ContactOrganization = c_def_path.ContactOrganization;
 //RemoteContacts = require(path.resolve(__dirname,'google_contacts.js'));//new remote_contacts.contacts();
 var RemoteContacts, LocalContacts;
 try{
-RemoteContacts = require('google_contacts');//new remote_contacts.contacts();
+RemoteContacts = require('./google_contacts');//new remote_contacts.contacts();
 } catch (err) {
 	console.log("err3" + err)
 }
@@ -84,7 +85,7 @@ var askPolicyManager = function(module,params,callback)
 // TODO CHANGE
   //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   try {
-  var pmlib = require('webinos').policy, policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+  var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   policyManager = new pmlib.policyManager();
 } catch (err) {
 	console.log("err4" + err)
@@ -170,8 +171,7 @@ var askPolicyManager = function(module,params,callback)
 //      
       console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 //      // TODO CHANGE
-      var pmlib = require('webinos').policy, policyManager; // this line should be moved in the policy manager
-
+      var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager; // this line should be moved in the policy manager
       policyManager = new pmlib.policyManager();
 
       var res, request = {}, subjectInfo = {}, resourceInfo = {};

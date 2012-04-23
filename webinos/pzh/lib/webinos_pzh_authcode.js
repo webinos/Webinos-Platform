@@ -24,8 +24,8 @@
  * interface, logs in, and is shown a QR Code, which contains an authCode, 
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
-
-var log = require('webinos_session').common.debugPzh;
+var webinos = require('webinos')(__dirname);
+var log = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debugPzh;
 
 var pzh_authcode = exports;
 

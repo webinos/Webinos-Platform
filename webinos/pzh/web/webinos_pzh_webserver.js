@@ -30,9 +30,12 @@ var webSocket= require('websocket').server;
 // var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 // var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var log = require('webinos_session').common.debug;
-var session = require('webinos_session');
-var pzhapis = require('webinos_pzh_internal_apis');
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debugPzh;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
+
+var pzhapis = require('../lib/webinos_pzh_internal_apis');
+var farm    = require('../lib/webinos_pzh_farm');
 
 var authorized   = false;
 var rely ;
@@ -40,14 +43,14 @@ var connection;
 var pzh = [];
 
 // Create HTTPS Server
-pzhWebInterface.start = function(farm, hostname, callback) {
+pzhWebInterface.start = function(hostname, callback) {
 	createWebInterfaceCertificate(farm.config, function(webServer){
 		var server = https.createServer(webServer, function(req, res){
 			var parsed = url.parse(req.url);
 			var query = querystr.parse(parsed.query);
 			
 			if (query.id === 'verify'){
-				fetchOpenIdDetails(farm, req, res, function(provider, userid) {// Important step as we assign pzh instance
+				fetchOpenIdDetails(req, res, function(provider, userid) {// Important step as we assign pzh instance
 					res.writeHead(302, {Location: '/main.html?provider='+provider+'?id='+userid}); // redirection to same page but without details fetched from google.
 					res.end();
 				});
@@ -251,7 +254,7 @@ function authenticate(hostname, url) {
 	
 }
 
-function fetchOpenIdDetails(farm, req, res, callback){
+function fetchOpenIdDetails(req, res, callback){
 	rely.verifyAssertion(req, function(err, userDetails){
 		if (err){
 			console.log("[ERROR] UNABLE TO LOGIN " + err.message);

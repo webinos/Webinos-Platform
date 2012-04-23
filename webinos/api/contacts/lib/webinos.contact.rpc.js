@@ -26,7 +26,7 @@
 //	var contacts_module = require(path.resolve(__dirname,'contacts_module.js'));
 	var contacts_module;
 	try {
-		contacts_module = require('contacts_module');
+		contacts_module = require('./contacts_module');
 	} catch (err){
 		console.log(err.stack);
 	}

@@ -30,7 +30,7 @@ function DeviceOrientationModule(rpcHandler) {
         }
     }else if(connector == 'simulator'){
         try{
-            car = require('vs');
+            car = require('../../vehicle/contrib/vb-sim/vs.js');
             implFile = 'sim';
             console.log('connecting to simulator');
             console.log('simulator available at http://localhost:9898/simulator/vehicle.html');
@@ -42,7 +42,7 @@ function DeviceOrientationModule(rpcHandler) {
         console.log('connecting to fake data generator');
      }
 
-	var implModule = require('webinos.deviceorientation.' + implFile);
+	var implModule = require('./webinos.deviceorientation.' + implFile);
 
 
 	implModule.setRPCHandler(rpcHandler);
