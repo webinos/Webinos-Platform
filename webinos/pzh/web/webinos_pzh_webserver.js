@@ -70,7 +70,6 @@ pzhWebInterface.start = function(hostname, callback) {
 // 					
 // 				}
 				filename = path.join(__dirname, parsed.pathname);
-				console.log(filename)
 				fs.stat(filename, function(err, stats) {
 					if(err) {
 						res.writeHeader(404, {"Content-Type": "text/plain"});

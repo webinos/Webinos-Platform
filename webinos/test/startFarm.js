@@ -15,10 +15,10 @@
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-var fs = require('fs'),
+var fs = require('fs');
 	//PzhFarm             = require('pzh_farm');
-PzhFarm = require('webinos_pzh').farm;
-
+var webinos = require('webinos')(__dirname);
+var PzhFarm = webinos.local.require(webinos.local.pzh.location, 'lib/webinos_pzh').farm;
 var host = null, name = null;
 
 function help() {

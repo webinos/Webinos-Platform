@@ -45,7 +45,7 @@ var webinos        = require('webinos')(__dirname);
 var log            = require('./webinos_session').common.debug;
 var session        = require('./webinos_session');
 var rpc            = webinos.global.require(webinos.global.rpc.location, 'lib/webinos_rpc');
-var MessageHandler = webinos.global.require(webinos.global.messaing.location, 'lib/webinos_messaging').MessageHandler;
+var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, 'lib/webinos_messagehandler').MessageHandler;
 var RPCHandler     = rpc.RPCHandler;
 
 var pzp_server   = require('./webinos_pzp_server'); // Needed as we start PZP server from here
@@ -294,7 +294,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, callback) {
 					self.pzhId = text.split(':')[1];//parseMsg.from;
 					self.connectedPzh[self.pzhId] = {socket: pzpInstance};
 					self.prepMsg(self.sessionId, self.pzhId,
-						'pzpInstanceCert', { csr: conn_csr,
+						'clientCert', { csr: conn_csr,
 						name: self.config.details.name,
 						code: self.code //"DEBUG"
 					});
@@ -394,7 +394,7 @@ Pzp.prototype.processMsg = function(data, callback) {
 			var parseMsg = JSON.parse(message[j]);
 			if(parseMsg.type === 'prop' && parseMsg.payload.status === 'signedCert') {
 				log('INFO', '[PZP -'+self.sessionId+'] PZP Writing certificates data ');
-				self.config.conn.cert   = parseMsg.payload.message.pzpInstanceCert;
+				self.config.conn.cert   = parseMsg.payload.message.clientCert;
 				self.config.master.cert = parseMsg.payload.message.masterCert;
 
 				session.configuration.storeConfig(self.config, function() {

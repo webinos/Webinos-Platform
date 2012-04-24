@@ -15,11 +15,10 @@
 *
 *******************************************************************************/
 
-
-var pzp = require('webinos_pzp').session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
-	websocket = require('webinos_pzp').websocket,//require('../webinos/pzp/lib/pzp_websocket.js'),
-	fs = require('fs'),
-	path = require('path');
+var webinos = require('webinos')(__dirname);
+var pzp = webinos.local.require(webinos.local.pzp.location, 'lib/webinos_pzp.js').session; //.session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
+var fs = require('fs');
+var path = require('path');
 
 var options = {};
 

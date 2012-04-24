@@ -32,7 +32,7 @@ var path  = require('path');
 // var rpc          = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
 // var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
 var webinos = require('webinos')(__dirname);
-var log     = require('./webinos_session').common.debug;
+var logs    = require('./webinos_session').common.debug;
 var session = require('./webinos_session');
 var rpc     = webinos.global.require(webinos.global.rpc.location, 'lib/webinos_rpc');
 

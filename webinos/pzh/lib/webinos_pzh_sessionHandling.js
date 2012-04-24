@@ -273,7 +273,8 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
 			msg = self.messageHandler.registerSender(self.sessionId, sessionId);
 			self.sendMessage(msg, sessionId);
 		}
-		pzh.webserver.updateList(self);
+		console.log(self)
+		farm.pzhWI.updateList(self);
 	}
 };
 
@@ -431,7 +432,7 @@ exports.addPzh = function ( uri, modules, callback) {
 				// pzh servername
 				instance.config.details.servername = uri;
 				// store pzh instance in farm, this will allow farm to know about PZH instance.
-				farm.pzhs[uri] = pzh;
+				farm.pzhs[uri] = instance;
 				// Information for reloading PZH if PZH Farm restarts later
 				farm.config.pzhs[uri] = modules;
 				// Certificate parameters that will be added in SNI context of farm
@@ -446,16 +447,16 @@ exports.addPzh = function ( uri, modules, callback) {
 				instance.options = options;
 				instance.setMessageHandler();
 				// RPC instance getting PZH session id
-				instance.rpcHandler.setSessionId(pzh.sessionId);
+				instance.rpcHandler.setSessionId(instance.sessionId);
 
-				if (typeof pzh.farm.server === "undefined" || pzh.farm.server === null) {
+				if (typeof farm.server === "undefined" || farm.server === null) {
 					log(instance.sessionId, 'ERROR', '[PZH -'+ instance.sessionId+'] Farm is not running, please startFarm');
 				} else {
 					// This adds SNI context to existing running PZH server
-					pzh.farm.server.addContext(uri, options);
+					farm.server.addContext(uri, options);
 				}
 
-				session.configuration.storeConfig(pzh.farm.config, function() {
+				session.configuration.storeConfig(farm.config, function() {
 					callback(true, instance);
 				});
 			});
