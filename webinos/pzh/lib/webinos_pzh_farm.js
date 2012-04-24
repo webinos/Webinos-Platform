@@ -40,13 +40,13 @@ var webinos = require('webinos')(__dirname);
 var log     = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session').common.debug;
 var session = webinos.global.require(webinos.global.pzp.location, 'lib/webinos_session');
 var pzh     = require("./webinos_pzh_sessionHandling.js");
-var pzhWI   = webinos.global.require(webinos.global.pzh.location, 'web/webinos_pzh_webserver');
 
 var farm = exports;
 
 farm.pzhs = [];
 farm.config = {};
 farm.server;
+farm.pzhWI  = webinos.global.require(webinos.global.pzh.location, 'web/webinos_pzh_webserver');
 
 function loadPzhs(config) {
 	"use strict";
@@ -88,7 +88,6 @@ farm.startFarm = function (url, name, callback) {
 		session.common.resolveIP(url, function(resolvedAddress) {
 			// Main pzh_farm TLS server
 			farm.server = tls.createServer (options, function (conn) {
-				console.log(conn)
 				// if servername existes in conn and pzh_farm.pzhs has details about pzh instance, message will be routed to respective PZH authorization function
 				if (conn.servername && farm.pzhs[conn.servername]) {
 					log('INFO', '[PZHFARM] sending message to ' + conn.servername);
@@ -139,7 +138,7 @@ farm.startFarm = function (url, name, callback) {
 				// Load PZH's that we already have registered ...
 				loadPzhs(farm.config);
 				// Start web interface, this webinterface will adapt depending on user who logins
-				pzhWI.start(url, function (status) {
+				farm.pzhWI.start(url, function (status) {
 					if (status) {
 						callback(true, farm.config);
 					}

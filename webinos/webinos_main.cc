@@ -1,29 +1,50 @@
 #include <node.h>
-
-// #undef NODE_EXT_LIST_START
-// #undef NODE_EXT_LIST_ITEM
-// #undef NODE_EXT_LIST_END
-// 
-// #define NODE_EXT_LIST_START
-// #define NODE_EXT_LIST_ITEM NODE_MODULE_DECL
-// #define NODE_EXT_LIST_END
-// 
-// #include <node_extensions.h>
-// 
-// #undef NODE_EXT_LIST_START
-// #undef NODE_EXT_LIST_ITEM
-// #undef NODE_EXT_LIST_END
-// 
-// #define NODE_EXT_STRING(x) &x ## _module,
-// #define NODE_EXT_LIST_START node::node_module_struct *node_module_list[] = {
-// #define NODE_EXT_LIST_ITEM NODE_EXT_STRING
-// #define NODE_EXT_LIST_END NULL};
-// 
-// #include <node_extensions.h>
-// 
 #include <iostream>
+#include <string.h>
+#include <v8.h>
+
+using namespace node;
+using namespace v8;
 
 int main(int argc, char *argv[]) {
-  node::Start(argc, argv);
-  node::get_builtin_module("certificate_manager");
+//   Persistent<Object> binding_cache;
+//   if (binding_cache.IsEmpty()) {
+//     binding_cache = Persistent<Object>::New(Object::New());
+//   }
+//   Local<String> module = "certificate_manager"//args[0]->ToString();
+
+//   for (int i = 0; node::node_module_list[i] != NULL; i++) {
+//     std::cerr<< "buf" << node::node_module_list[i]->modname << std::endl;
+// 
+//   }
+//   String::Utf8Value module_v(module);
+  Start(argc, argv);
+//   Local<Object> exports = Object::New();
+//   
+//   modp->register_func(exports);
+  
 }
+
+// node_module_struct *get_module(const char* name) {
+// 	
+// }
+// 
+// 
+// 
+// node_module_struct* get_builtin_module(const char *name)
+// {
+//   char buf[128];
+//   node_module_struct *cur = NULL;
+//   snprintf(buf, sizeof(buf), "node_%s", name);
+//   /* TODO: you could look these up in a hash, but there are only
+//    * a few, and once loaded they are cached. */
+//   for (int i = 0; node_module_list[i] != NULL; i++) {
+//     cur = node_module_list[i];
+//     std::cerr<< "buf" << cur->modname << std::endl;
+//     if (strcmp(cur->modname, buf) == 0) {
+//       return cur;
+//     }
+//   }
+// 
+//   return NULL;
+// }

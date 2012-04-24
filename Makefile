@@ -18,12 +18,10 @@ endif
 webinos: config.gypi
 	$(MAKE) -C out BUILDTYPE=Release
 	ln -fs out/Release/webinos ./webinos_
-# npm install
 
 webinos_g: config.gypi
 	$(MAKE) -C out BUILDTYPE=Debug
 	ln -fs out/Debug/webinos ./webinos_
-#npm install
 
 config.gypi: configure
 	./configure
@@ -33,7 +31,6 @@ out/Debug/webinos:
 
 out/Makefile: common.gypi webinos.gyp config.gypi
 	tools/gyp_webinos -f make
-# npm install
 
 clean:
 	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos_
