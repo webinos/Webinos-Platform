@@ -15,8 +15,6 @@
 , "directories": { "lib": "./lib"
                  }
 , "main": "./lib/xmpp.js"
-, "dependencies":
-  }
 , "bundleDependencies":
   [ "fs"
   , "path"
