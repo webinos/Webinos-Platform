@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="app" default="help">
 
+    <property environment="env"/>
+
     <!-- The local.properties file is created and updated by the 'android' tool.
          It contains the path to the SDK. It should *NOT* be checked into
          Version Control Systems. -->
     <property file="local.properties" />
-
 
     <!-- The ant.properties file can be created by you. It is only edited by the
          'android' tool to add properties to it.
@@ -27,9 +28,6 @@
          application and should be checked into Version Control Systems.
 
          -->
-	 
-    <property environment="env"/>
-
     <property file="ant.properties" />
 
     <!-- The project.properties file is created and updated by the 'android'
