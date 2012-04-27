@@ -25,7 +25,7 @@
     var channelChangeHandlers = [];
     
     //STB specific hook
-    var STB = require('webinos.service_tvi.coolstream_rest').coolstream;
+    var STB = require('./webinos.service_tv.coolstream_rest.js').coolstream;
 
     
     

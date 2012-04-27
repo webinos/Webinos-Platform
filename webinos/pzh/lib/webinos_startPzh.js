@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -16,7 +17,9 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 var fs = require('fs'),
-	PzhFarm             = require('../webinos/pzh/lib/pzh_farm.js');
+webinos = require('webinos')(__dirname);
+
+PzhFarm = webinos.global.require(webinos.global.pzh.location, 'lib/webinos_pzh').farm;
 
 var host = null, name = null;
 
@@ -57,7 +60,7 @@ if ( name === null) {
 }
 
 PzhFarm.startFarm(host, name, function(result) {
-	console.log('******* PZH FARM STARTED *******');	
+	console.log('******* PZH FARM STARTED *******');
 });
 
 

@@ -15,5 +15,8 @@
     "type": "git",
     "url": "http://dev.webinos.org/git/wp4.git",
     "path": "webinos/api/file"
-  } ]
+  } ],
+  "dependencies": {
+    "connect": "*"
+  }
 }

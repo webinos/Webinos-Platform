@@ -41,7 +41,6 @@ var webinos        = require('webinos')(__dirname);
 var log            = require('./webinos_session').common.debug;
 var session        = require('./webinos_session');
 var rpc            = webinos.global.require(webinos.global.rpc.location, 'lib/webinos_rpc');
-
 var wrtServer;
 
 if(process.platform == 'android') {
@@ -80,7 +79,8 @@ exports.startPzpWebSocketServer = function(pzpInstance, config, callback) {
 
 	var cs = http.createServer(function(request, response) {
 		var uri = url.parse(request.url).pathname;
-		var filename = path.join(__dirname, uri);
+		var filename = path.join(__dirname, '../../test/', uri);
+		console.log(filename)
 		fs.stat(filename, function(err, stats) {
 			if(err) {
 				response.writeHead(404, {"Content-Type": "text/plain"});

@@ -18,18 +18,13 @@
 
 (function() {
 	"use strict";
-// 	var path = require('path');
-// 	var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-// 	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-// 	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+	var path = require('path');
+	var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 	
-//	var contacts_module = require(path.resolve(__dirname,'contacts_module.js'));
-	var contacts_module;
-	try {
-		contacts_module = require('./contacts_module');
-	} catch (err){
-		console.log(err.stack);
-	}
+	var contacts_module = require(path.resolve(__dirname,'contacts_module.js'));
+	
 	/**
 	 * Webinos Service constructor.
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  

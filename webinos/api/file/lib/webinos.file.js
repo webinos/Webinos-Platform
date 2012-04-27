@@ -42,19 +42,11 @@
 		nStream = require("stream"),
 		nUtil = require("util");
 
-	// <HACK>
-	// var nConnect = require("connect");
+	var webinos = require("webinos")(__dirname);
+		webinos.dom = require("./webinos.dom.js"),
+		webinos.path = require("./webinos.path.js"),
+		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
 
-	// nConnect(
-	// 	nConnect.static(nPath.join(process.cwd(), "default"))
-	// ).listen(2409);
-	// </HACK>
-
-	//var webinos = require("webinos")(__dirname);
-	var dom = require("webinos.dom"),
-		path = require("webinos.path"),
-		//utils = webinos.global.require(webinos.global.rpc.location, "lib/utils.js");
-		utils = require('webinos').utils;
 	var mUtils = {};
 
 	/**
@@ -91,7 +83,7 @@
 		return function () {
 			var argsArray = arguments;
 
-			process.nextTick(utils.bind(function () {
+			process.nextTick(webinos.utils.bind(function () {
 				var result;
 
 				try {
@@ -102,12 +94,12 @@
 					if (exception instanceof exports.FileException)
 						code = exception.code;
 
-					utils.callback(errorCallback, this)(new exports.FileError(code));
+					webinos.utils.callback(errorCallback, this)(new exports.FileError(code));
 
 					return;
 				}
 
-				utils.callback(successCallback, this)(result);
+				webinos.utils.callback(successCallback, this)(result);
 			}, this));
 		};
 	};
@@ -389,30 +381,30 @@
 	 * @constructor
 	 */
 	exports.FileReader = function () {
-		dom.EventTarget.call(this);
+		webinos.dom.EventTarget.call(this);
 
 		this.addEventListener("loadstart", function (event) {
-			utils.callback(this.onloadstart, this)(event);
+			webinos.utils.callback(this.onloadstart, this)(event);
 		});
 
 		this.addEventListener("progress", function (event) {
-			utils.callback(this.onprogress, this)(event);
+			webinos.utils.callback(this.onprogress, this)(event);
 		});
 
 		this.addEventListener("error", function (event) {
-			utils.callback(this.onerror, this)(event);
+			webinos.utils.callback(this.onerror, this)(event);
 		});
 
 		this.addEventListener("abort", function (event) {
-			utils.callback(this.onabort, this)(event);
+			webinos.utils.callback(this.onabort, this)(event);
 		});
 
 		this.addEventListener("load", function (event) {
-			utils.callback(this.onload, this)(event);
+			webinos.utils.callback(this.onload, this)(event);
 		});
 
 		this.addEventListener("loadend", function (event) {
-			utils.callback(this.onloadend, this)(event);
+			webinos.utils.callback(this.onloadend, this)(event);
 		});
 	};
 
@@ -428,7 +420,7 @@
 
 	exports.FileReader.BUFFER_SIZE = 1024;
 
-	nUtil.inherits(exports.FileReader, dom.EventTarget);
+	nUtil.inherits(exports.FileReader, webinos.dom.EventTarget);
 
 	exports.FileReader.prototype.readyState = exports.FileReader.EMPTY;
 	exports.FileReader.prototype.result = null;
@@ -443,7 +435,7 @@
 	 */
 	exports.FileReader.prototype._read = function (blob, format, encoding) {
 		if (this.readyState == exports.FileReader.LOADING)
-			throw new dom.DOMException("InvalidStateError", "read in progress");
+			throw new webinos.dom.DOMException("InvalidStateError", "read in progress");
 
 		var isFile = blob instanceof exports.File,
 			isBuffer = blob instanceof exports.Buffer;
@@ -499,7 +491,7 @@
 		var loaded = 0,
 			total = blob.size;
 
-		var createEventInitDict = utils.bind(function (withProgress) {
+		var createEventInitDict = webinos.utils.bind(function (withProgress) {
 			var eventInitDict = {
 				bubbles: false,
 				cancelable: false
@@ -514,9 +506,9 @@
 			return eventInitDict;
 		}, this);
 
-		this.dispatchEvent(new dom.ProgressEvent("loadstart", createEventInitDict(true)));
+		this.dispatchEvent(new webinos.dom.ProgressEvent("loadstart", createEventInitDict(true)));
 
-		utils.bind(mUtils.schedule(function () {
+		webinos.utils.bind(mUtils.schedule(function () {
 			if (toBuffer || toDataURL)
 				var targetBuffer = new Buffer(blob.size),
 					targetStart = 0;
@@ -532,7 +524,7 @@
 			else if (isBuffer)
 				stream = new nStream.Stream();
 
-			stream.on("data", utils.bind(function (data) {
+			stream.on("data", webinos.utils.bind(function (data) {
 				if (toBuffer || toDataURL) {
 					data.copy(targetBuffer, targetStart);
 
@@ -547,26 +539,26 @@
 				loaded += data.length;
 
 				if (toBuffer || toText)
-					this.dispatchEvent(new dom.ProgressEvent("progress", createEventInitDict(true)));
+					this.dispatchEvent(new webinos.dom.ProgressEvent("progress", createEventInitDict(true)));
 			}, this));
 
-			stream.on("error", utils.bind(function (error) {
+			stream.on("error", webinos.utils.bind(function (error) {
 				this.readyState = exports.FileReader.DONE;
 				this.result = null;
 
-				this.error = new dom.DOMError("SecurityError");
+				this.error = new webinos.dom.DOMError("SecurityError");
 
 				var eventInitDict = createEventInitDict(false);
 
-				this.dispatchEvent(new dom.ProgressEvent("error", eventInitDict));
-				this.dispatchEvent(new dom.ProgressEvent("loadend", eventInitDict));
+				this.dispatchEvent(new webinos.dom.ProgressEvent("error", eventInitDict));
+				this.dispatchEvent(new webinos.dom.ProgressEvent("loadend", eventInitDict));
 			}, this));
 
-			stream.on("end", utils.bind(function () {
+			stream.on("end", webinos.utils.bind(function () {
 				var eventInitDict = createEventInitDict(true);
 
 				if (((toBuffer || toText) && loaded == 0) || toDataURL)
-					this.dispatchEvent(new dom.ProgressEvent("progress", eventInitDict));
+					this.dispatchEvent(new webinos.dom.ProgressEvent("progress", eventInitDict));
 
 				if (toDataURL) {
 					this.result = "data:" + relativeMediaType;
@@ -579,8 +571,8 @@
 
 				this.readyState = exports.FileReader.DONE;
 
-				this.dispatchEvent(new dom.ProgressEvent("load", eventInitDict));
-				this.dispatchEvent(new dom.ProgressEvent("loadend", eventInitDict));
+				this.dispatchEvent(new webinos.dom.ProgressEvent("load", eventInitDict));
+				this.dispatchEvent(new webinos.dom.ProgressEvent("loadend", eventInitDict));
 			}, this));
 
 			if (isBuffer) {
@@ -607,7 +599,7 @@
 
 	// Aborting is currently not supported.
 	exports.FileReader.prototype.abort = function () {
-		throw new dom.DOMException("NotSupportedError", "aborting is not supported");
+		throw new webinos.dom.DOMException("NotSupportedError", "aborting is not supported");
 	};
 
 	/**
@@ -742,7 +734,7 @@
 	 * @param {exports.FileEntry} entry The FileEntry object.
 	 */
 	exports.FileWriter = function (entry) {
-		dom.EventTarget.call(this);
+		webinos.dom.EventTarget.call(this);
 
 		var stats = mUtils.wrap(nFs.statSync)(entry.realize());
 
@@ -751,27 +743,27 @@
 		this._entry = entry;
 
 		this.addEventListener("writestart", function (event) {
-			utils.callback(this.onwritestart, this)(event);
+			webinos.utils.callback(this.onwritestart, this)(event);
 		});
 
 		this.addEventListener("progress", function (event) {
-			utils.callback(this.onprogress, this)(event);
+			webinos.utils.callback(this.onprogress, this)(event);
 		});
 
 		this.addEventListener("error", function (event) {
-			utils.callback(this.onerror, this)(event);
+			webinos.utils.callback(this.onerror, this)(event);
 		});
 
 		this.addEventListener("abort", function (event) {
-			utils.callback(this.onabort, this)(event);
+			webinos.utils.callback(this.onabort, this)(event);
 		});
 
 		this.addEventListener("write", function (event) {
-			utils.callback(this.onwrite, this)(event);
+			webinos.utils.callback(this.onwrite, this)(event);
 		});
 
 		this.addEventListener("writeend", function (event) {
-			utils.callback(this.onwriteend, this)(event);
+			webinos.utils.callback(this.onwriteend, this)(event);
 		});
 	};
 
@@ -781,7 +773,7 @@
 
 	exports.FileWriter.BUFFER_SIZE = 1024;
 
-	nUtil.inherits(exports.FileWriter, dom.EventTarget);
+	nUtil.inherits(exports.FileWriter, webinos.dom.EventTarget);
 
 	/** The FileWriter object's current state.  */
 	exports.FileWriter.prototype.readyState = exports.FileWriter.INIT;
@@ -820,9 +812,9 @@
 			total: 0
 		};
 
-		this.dispatchEvent(new dom.ProgressEvent("writestart", eventInitDict));
+		this.dispatchEvent(new webinos.dom.ProgressEvent("writestart", eventInitDict));
 
-		utils.bind(mUtils.schedule(function () {
+		webinos.utils.bind(mUtils.schedule(function () {
 			// TODO Reuse FileReader stream creation?!
 			var source,
 				sourcedEnded = false;
@@ -841,17 +833,17 @@
 				start: this.position
 			});
 
-			source.on("data", utils.bind(function (data) {
+			source.on("data", webinos.utils.bind(function (data) {
 				if (destination.write(data) === false && isFile)
 					source.pause();
 
 				this.position += data.length;
 				this.length = Math.max(this.position, this.length);
 
-				this.dispatchEvent(new dom.ProgressEvent("progress", eventInitDict));
+				this.dispatchEvent(new webinos.dom.ProgressEvent("progress", eventInitDict));
 			}, this));
 
-			source.on("end", utils.bind(function () {
+			source.on("end", webinos.utils.bind(function () {
 				if (sourcedEnded)
 					return;
 
@@ -860,7 +852,7 @@
 				destination.end();
 			}, this));
 
-			source.on("close", utils.bind(function () {
+			source.on("close", webinos.utils.bind(function () {
 				if (sourcedEnded)
 					return;
 
@@ -869,7 +861,7 @@
 				destination.destroy();
 			}, this));
 
-			destination.on("drain", utils.bind(function () {
+			destination.on("drain", webinos.utils.bind(function () {
 				if (isFile)
 					source.resume();
 			}, this));
@@ -881,15 +873,15 @@
 		}, function () {
 			this.readyState = exports.FileWriter.DONE;
 
-			this.dispatchEvent(new dom.ProgressEvent("write", eventInitDict));
-			this.dispatchEvent(new dom.ProgressEvent("writeend", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("write", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("writeend", eventInitDict));
 		}, function (error) {
 			this.error = new exports.FileError(exports.FileError.SECURITY_ERR);
 
 			this.readyState = exports.FileWriter.DONE;
 
-			this.dispatchEvent(new dom.ProgressEvent("error", eventInitDict));
-			this.dispatchEvent(new dom.ProgressEvent("writeend", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("error", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("writeend", eventInitDict));
 		}), this)();
 	};
 
@@ -927,9 +919,9 @@
 			total: 0
 		};
 
-		this.dispatchEvent(new dom.ProgressEvent("writestart", eventInitDict));
+		this.dispatchEvent(new webinos.dom.ProgressEvent("writestart", eventInitDict));
 
-		utils.bind(mUtils.schedule(function () {
+		webinos.utils.bind(mUtils.schedule(function () {
 			var fd = mUtils.wrap(nFs.openSync)(this._entry.realize(), "r+");
 
 			mUtils.wrap(nFs.truncateSync)(fd, size);
@@ -940,15 +932,15 @@
 		}, function () {
 			this.readyState = exports.FileWriter.DONE;
 
-			this.dispatchEvent(new dom.ProgressEvent("write", eventInitDict));
-			this.dispatchEvent(new dom.ProgressEvent("writeend", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("write", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("writeend", eventInitDict));
 		}, function (error) {
 			this.error = new exports.FileError(exports.FileError.SECURITY_ERR);
 
 			this.readyState = exports.FileWriter.DONE;
 
-			this.dispatchEvent(new dom.ProgressEvent("error", eventInitDict));
-			this.dispatchEvent(new dom.ProgressEvent("writeend", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("error", eventInitDict));
+			this.dispatchEvent(new webinos.dom.ProgressEvent("writeend", eventInitDict));
 		}), this)();
 	};
 
@@ -1205,9 +1197,7 @@
 
 	// TODO Choose filesystem url scheme, e.g., <webinos:http://example.domain/persistent-or-temporary/path/to/exports.html>.
 	exports.EntrySync.prototype.toURL = function () {
-		// <HACK>
-		// return "webinos:http://localhost:2409" + this.fullPath;
-		// </HACK>
+		return "webinos:" + this.fullPath;
 	};
 
 	/**
@@ -1406,14 +1396,14 @@
 	exports.LocalFileSystem.PERSISTENT = 1;
 
 	exports.LocalFileSystem.prototype.requestFileSystem = function (type, size, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.LocalFileSystemSync.prototype.requestFileSystemSync, mUtils.sync(this)), function (filesystem) {
-			utils.callback(successCallback, this)(mUtils.async(filesystem));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.LocalFileSystemSync.prototype.requestFileSystemSync, mUtils.sync(this)), function (filesystem) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(filesystem));
 		}, errorCallback), this)(type, size);
 	};
 
 	exports.LocalFileSystem.prototype.resolveLocalFileSystemURL = function (url, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.LocalFileSystemSync.prototype.resolveLocalFileSystemSyncURL, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.LocalFileSystemSync.prototype.resolveLocalFileSystemSyncURL, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)(url);
 	};
 
@@ -1457,29 +1447,29 @@
 	};
 
 	exports.Entry.prototype.copyTo = function (parent, newName, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.EntrySync.prototype.copyTo, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.EntrySync.prototype.copyTo, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)(mUtils.sync(parent), newName);
 	};
 
 	exports.Entry.prototype.getMetadata = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.EntrySync.prototype.getMetadata, mUtils.sync(this)), successCallback, errorCallback), this)();
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.EntrySync.prototype.getMetadata, mUtils.sync(this)), successCallback, errorCallback), this)();
 	};
 
 	exports.Entry.prototype.getParent = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.EntrySync.prototype.getParent, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.EntrySync.prototype.getParent, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)();
 	};
 
 	exports.Entry.prototype.moveTo = function (parent, newName, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.EntrySync.prototype.moveTo, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.EntrySync.prototype.moveTo, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)(mUtils.sync(parent), newName);
 	};
 
 	exports.Entry.prototype.remove = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.EntrySync.prototype.remove, mUtils.sync(this)), successCallback, errorCallback), this)();
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.EntrySync.prototype.remove, mUtils.sync(this)), successCallback, errorCallback), this)();
 	};
 
 	exports.Entry.prototype.toURL = function () {
@@ -1503,19 +1493,19 @@
 	};
 
 	exports.DirectoryEntry.prototype.getDirectory = function (path, options, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.DirectoryEntrySync.prototype.getDirectory, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.DirectoryEntrySync.prototype.getDirectory, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)(path, options);
 	};
 
 	exports.DirectoryEntry.prototype.getFile = function (path, options, successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.DirectoryEntrySync.prototype.getFile, mUtils.sync(this)), function (entry) {
-			utils.callback(successCallback, this)(mUtils.async(entry));
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.DirectoryEntrySync.prototype.getFile, mUtils.sync(this)), function (entry) {
+			webinos.utils.callback(successCallback, this)(mUtils.async(entry));
 		}, errorCallback), this)(path, options);
 	};
 
 	exports.DirectoryEntry.prototype.removeRecursively = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(utils.bind(exports.DirectoryEntrySync.prototype.removeRecursively, mUtils.sync(this)), successCallback, errorCallback), this)();
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.DirectoryEntrySync.prototype.removeRecursively, mUtils.sync(this)), successCallback, errorCallback), this)();
 	};
 
 	exports.DirectoryReader = function (entry, start) {
@@ -1526,10 +1516,10 @@
 	exports.DirectoryReader.prototype.readEntries = function (successCallback, errorCallback) {
 		var sync = mUtils.sync(this);
 
-		utils.bind(mUtils.schedule(utils.bind(exports.DirectoryReaderSync.prototype.readEntries, sync), function (entries) {
+		webinos.utils.bind(mUtils.schedule(webinos.utils.bind(exports.DirectoryReaderSync.prototype.readEntries, sync), function (entries) {
 			this._start = sync._start;
 
-			utils.callback(successCallback, this)(entries.map(mUtils.async));
+			webinos.utils.callback(successCallback, this)(entries.map(mUtils.async));
 		}, errorCallback), this)();
 	};
 
@@ -1542,13 +1532,13 @@
 	exports.FileEntry.prototype.isFile = true;
 
 	exports.FileEntry.prototype.createWriter = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(function () {
+		webinos.utils.bind(mUtils.schedule(function () {
 			return new exports.FileWriter(this);
 		}, successCallback, errorCallback), this)();
 	};
 
 	exports.FileEntry.prototype.file = function (successCallback, errorCallback) {
-		utils.bind(mUtils.schedule(function () {
+		webinos.utils.bind(mUtils.schedule(function () {
 			return new exports.File(this);
 		}, successCallback, errorCallback), this)();
 	};

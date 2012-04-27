@@ -20,15 +20,15 @@
 
 (function () {
 	var fs = require('fs');
-	var sc = require('schema_environment')('authEnvironment', { fallbacks: 'STRICT_FALLBACKS' });
+	var sc = require('schema')('authEnvironment', { fallbacks: 'STRICT_FALLBACKS' });
 	var tty = require('tty'); // required starting from node.js 0.6
 	var os = require('os');
 	var path = require('path');
 	var exec = require('child_process').exec;
 
-// 	var localDependencies = require("../dependencies.json");
-// 	var root = "../" + localDependencies.root.location;
-// 	var dependencies = require(root + "/dependencies.json");
+	var localDependencies = require("../dependencies.json");
+	var root = "../" + localDependencies.root.location;
+	var dependencies = require(root + "/dependencies.json");
 
 	if (typeof webinos === "undefined") {
 		var webinos = {};
@@ -41,7 +41,6 @@
 	 * @param data JSON parsed data to validate
 	 * @param callback Callback
 	 */
-	
 	var passfile_validation = sc.f(
 		{
 			'type': 'array', // function arguments are treated as array

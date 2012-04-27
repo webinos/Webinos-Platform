@@ -14,7 +14,7 @@
 * limitations under the License.
 *
 * Copyright 2012 BMW AG
-* Copyright 2012 TU Munchen
+* Copyright 2012 TU München
 ******************************************************************************/
 
 (function() {

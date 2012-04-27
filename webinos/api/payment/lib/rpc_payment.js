@@ -19,7 +19,7 @@
     
     (function() {
 
-var wPayment = require('impl_payment');
+var wPayment = require('./impl_payment.js');
         
 var basket = null;
 

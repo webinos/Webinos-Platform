@@ -62,7 +62,7 @@ function GeolocationModule(rpcHandler, params) {
     
 
     
-	var implModule = require('webinos.geolocation.' + implFile );
+	var implModule = require('./webinos.geolocation.' + implFile + '.js');
 
     
 	implModule.setRPCHandler(rpcHandler);

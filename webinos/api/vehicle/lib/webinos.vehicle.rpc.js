@@ -22,13 +22,15 @@ function VehicleModule(rpcHandler, params) {
     var implFile = 'fake';
     var car = null;
     var conncector = null;
-  
+    
     if(typeof params.connector === 'undefined' ){
         connector = 'simulator';
     }else{
         connector = params.connector;
     }
+        
 
+    
     if(connector == 'most'){
         try{
             var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
@@ -52,7 +54,7 @@ function VehicleModule(rpcHandler, params) {
      }
     
    
-	var implModule = require('webinosi.vehicle.' + implFile);
+	var implModule = require('./webinos.vehicle.' + implFile + '.js');
 
 	implModule.setRPCHandler(rpcHandler);
 	implModule.setRequired(car);

@@ -36,7 +36,11 @@
 		}
 		else {
 			//this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
-			this.pmNativeLib = require('pm');
+			try {
+				this.pmNativeLib = process.binding('pm');
+			} catch (err) {
+				console.log(err);
+			}
 
 			if (os.platform()==='win32'){				
 				//this.promptMan = require('../src/promptMan/build/Release/promptMan.node');

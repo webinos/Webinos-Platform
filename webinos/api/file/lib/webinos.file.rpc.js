@@ -24,13 +24,16 @@
 (function (exports) {
 	"use strict";
 
+	// <HACK>
+	require("./webinos.file.hack.js");
+	// </HACK>
+
 	var nUtil = require("util");
 
-	//var webinos = require("webinos")(__dirname);
-	var dom_rpc = require("webinos.dom.rpc") ,
-		file = require("webinos.file"),
-		//utils = webinos.global.require(webinos.global.rpc.location, "lib/utils.js");
-		utils = require('webinos').utils;
+	var webinos = require("webinos")(__dirname);
+		webinos.dom = { rpc: require("./webinos.dom.rpc.js") },
+		webinos.file = require("./webinos.file.js"),
+		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
 
 	exports.Blob = {};
 	exports.Blob.serialize = function (blob) {
@@ -39,10 +42,10 @@
 			type: blob.type
 		};
 
-		if (blob instanceof file.Buffer) {
+		if (blob instanceof webinos.file.Buffer) {
 			object._type = "buffer";
 			object._buffer = blob._buffer.toString("hex");
-		} else if (blob instanceof file.File) {
+		} else if (blob instanceof webinos.file.File) {
 			object._type = "file";
 			object.name = blob.name;
 			object.lastModifiedDate = blob.lastModifiedDate;
@@ -58,9 +61,9 @@
 	exports.Blob.deserialize = function (object) {
 		switch (object._type) {
 			case "buffer":
-				return new file.Buffer(new Buffer(object._buffer, "hex"), object.type);
+				return new webinos.file.Buffer(new Buffer(object._buffer, "hex"), object.type);
 			case "file":
-				return new file.File(exports.Entry.deserialize(object._entry), object._start, object._end, object.type);
+				return new webinos.file.File(exports.Entry.deserialize(object._entry), object._start, object._end, object.type);
 		}
 	};
 
@@ -69,25 +72,25 @@
 		return {
 			readyState: reader.readyState,
 			result: hex ? reader.result.toString("hex") : reader.result,
-			error: reader.error ? dom_rpc.DOMError.serialize(reader.error) : null
+			error: reader.error ? webinos.dom.rpc.DOMError.serialize(reader.error) : null
 		};
 	};
 
 	exports.FileReader.readAsBuffer = function (params, successCallback, errorCallback, objectRef) {
-		var reader = new file.FileReader(); // TODO Deserialize remote FileReader?
+		var reader = new webinos.file.FileReader(); // TODO Deserialize remote FileReader?
 
 		var eventCallback = function (attribute) {
 			return function (event) {
-				this.rpc.notify(objectRef, attribute)(exports.FileReader.serialize(reader, true), dom_rpc.ProgressEvent.serialize(event));
+				this.rpc.notify(objectRef, attribute)(exports.FileReader.serialize(reader, true), webinos.dom.rpc.ProgressEvent.serialize(event));
 			};
 		};
 
-		reader.onloadstart = utils.bind(eventCallback("onloadstart"), this);
-		reader.onprogress = utils.bind(eventCallback("onprogress"), this);
-		reader.onerror = utils.bind(eventCallback("onerror"), this);
-		reader.onabort = utils.bind(eventCallback("onabort"), this);
-		reader.onload = utils.bind(eventCallback("onload"), this);
-		reader.onloadend = utils.bind(eventCallback("onloadend"), this);
+		reader.onloadstart = webinos.utils.bind(eventCallback("onloadstart"), this);
+		reader.onprogress = webinos.utils.bind(eventCallback("onprogress"), this);
+		reader.onerror = webinos.utils.bind(eventCallback("onerror"), this);
+		reader.onabort = webinos.utils.bind(eventCallback("onabort"), this);
+		reader.onload = webinos.utils.bind(eventCallback("onload"), this);
+		reader.onloadend = webinos.utils.bind(eventCallback("onloadend"), this);
 
 		try {
 			reader.readAsBuffer(exports.Blob.deserialize(params[0]));
@@ -97,20 +100,20 @@
 	};
 
 	exports.FileReader.readAsText = function (params, successCallback, errorCallback, objectRef) {
-		var reader = new file.FileReader(); // TODO Deserialize remote FileReader?
+		var reader = new webinos.file.FileReader(); // TODO Deserialize remote FileReader?
 
 		var eventCallback = function (attribute) {
 			return function (event) {
-				this.rpc.notify(objectRef, attribute)(exports.FileReader.serialize(reader), dom_rpc.ProgressEvent.serialize(event));
+				this.rpc.notify(objectRef, attribute)(exports.FileReader.serialize(reader), webinos.dom.rpc.ProgressEvent.serialize(event));
 			};
 		};
 
-		reader.onloadstart = utils.bind(eventCallback("onloadstart"), this);
-		reader.onprogress = utils.bind(eventCallback("onprogress"), this);
-		reader.onerror = utils.bind(eventCallback("onerror"), this);
-		reader.onabort = utils.bind(eventCallback("onabort"), this);
-		reader.onload = utils.bind(eventCallback("onload"), this);
-		reader.onloadend = utils.bind(eventCallback("onloadend"), this);
+		reader.onloadstart = webinos.utils.bind(eventCallback("onloadstart"), this);
+		reader.onprogress = webinos.utils.bind(eventCallback("onprogress"), this);
+		reader.onerror = webinos.utils.bind(eventCallback("onerror"), this);
+		reader.onabort = webinos.utils.bind(eventCallback("onabort"), this);
+		reader.onload = webinos.utils.bind(eventCallback("onload"), this);
+		reader.onloadend = webinos.utils.bind(eventCallback("onloadend"), this);
 
 		try {
 			reader.readAsText(exports.Blob.deserialize(params[0]), params[1]);
@@ -135,7 +138,7 @@
 	};
 
 	exports.FileWriter.deserialize = function (object) {
-		var writer = new file.FileWriter(exports.Entry.deserialize(object._entry));
+		var writer = new webinos.file.FileWriter(exports.Entry.deserialize(object._entry));
 
 		// writer.readyState = object.readyState;
 		writer.error = object.error;
@@ -150,16 +153,16 @@
 
 		var eventCallback = function (attribute) {
 			return function (event) {
-				this.rpc.notify(objectRef, attribute)(exports.FileWriter.serialize(writer), dom_rpc.ProgressEvent.serialize(event));
+				this.rpc.notify(objectRef, attribute)(exports.FileWriter.serialize(writer), webinos.dom.rpc.ProgressEvent.serialize(event));
 			};
 		};
 
-		writer.onwritestart = utils.bind(eventCallback("onwritestart"), this);
-		writer.onprogress = utils.bind(eventCallback("onprogress"), this);
-		writer.onerror = utils.bind(eventCallback("onerror"), this);
-		writer.onabort = utils.bind(eventCallback("onabort"), this);
-		writer.onwrite = utils.bind(eventCallback("onwrite"), this);
-		writer.onwriteend = utils.bind(eventCallback("onwriteend"), this);
+		writer.onwritestart = webinos.utils.bind(eventCallback("onwritestart"), this);
+		writer.onprogress = webinos.utils.bind(eventCallback("onprogress"), this);
+		writer.onerror = webinos.utils.bind(eventCallback("onerror"), this);
+		writer.onabort = webinos.utils.bind(eventCallback("onabort"), this);
+		writer.onwrite = webinos.utils.bind(eventCallback("onwrite"), this);
+		writer.onwriteend = webinos.utils.bind(eventCallback("onwriteend"), this);
 
 		try {
 			writer.write(exports.Blob.deserialize(params[1]));
@@ -173,16 +176,16 @@
 
 		var eventCallback = function (attribute) {
 			return function (event) {
-				this.rpc.notify(objectRef, attribute)(exports.FileWriter.serialize(writer), dom_rpc.ProgressEvent.serialize(event));
+				this.rpc.notify(objectRef, attribute)(exports.FileWriter.serialize(writer), webinos.dom.rpc.ProgressEvent.serialize(event));
 			};
 		};
 
-		writer.onwritestart = utils.bind(eventCallback("onwritestart"), this);
-		writer.onprogress = utils.bind(eventCallback("onprogress"), this);
-		writer.onerror = utils.bind(eventCallback("onerror"), this);
-		writer.onabort = utils.bind(eventCallback("onabort"), this);
-		writer.onwrite = utils.bind(eventCallback("onwrite"), this);
-		writer.onwriteend = utils.bind(eventCallback("onwriteend"), this);
+		writer.onwritestart = webinos.utils.bind(eventCallback("onwritestart"), this);
+		writer.onprogress = webinos.utils.bind(eventCallback("onprogress"), this);
+		writer.onerror = webinos.utils.bind(eventCallback("onerror"), this);
+		writer.onabort = webinos.utils.bind(eventCallback("onabort"), this);
+		writer.onwrite = webinos.utils.bind(eventCallback("onwrite"), this);
+		writer.onwriteend = webinos.utils.bind(eventCallback("onwriteend"), this);
 
 		try {
 			writer.truncate(params[1]);
@@ -192,7 +195,7 @@
 	};
 
 	exports.LocalFileSystem = {};
-	exports.LocalFileSystem.object = new file.LocalFileSystem();
+	exports.LocalFileSystem.object = new webinos.file.LocalFileSystem();
 	exports.LocalFileSystem.requestFileSystem = function (params, successCallback, errorCallback) {
 		exports.LocalFileSystem.object.requestFileSystem(params[0], params[1], function (filesystem) {
 			successCallback(exports.FileSystem.serialize(filesystem));
@@ -219,7 +222,7 @@
 	};
 
 	exports.FileSystem.deserialize = function (object) {
-		return new file.FileSystem(object.name, object._realPath);
+		return new webinos.file.FileSystem(object.name, object._realPath);
 	};
 
 	exports.Entry = {};
@@ -237,9 +240,9 @@
 
 	exports.Entry.deserialize = function (object) {
 		if (object.isDirectory)
-			return new file.DirectoryEntry(exports.FileSystem.deserialize(object.filesystem), object.fullPath);
+			return new webinos.file.DirectoryEntry(exports.FileSystem.deserialize(object.filesystem), object.fullPath);
 		else if (object.isFile)
-			return new file.FileEntry(exports.FileSystem.deserialize(object.filesystem), object.fullPath);
+			return new webinos.file.FileEntry(exports.FileSystem.deserialize(object.filesystem), object.fullPath);
 	};
 
 	exports.Entry.copyTo = function (params, successCallback, errorCallback) {
