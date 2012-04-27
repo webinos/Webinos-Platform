@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="webinos" default="debug" basedir="../../..">
+
+    <!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
+
+    <target name="debug" >
+
+	<!-- Creates app/assets/webinos.zip -->
+	<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
+	    <zipfileset
+		dir="${basedir}"
+		prefix="wp4"
+
+		includes="
+		    demo/policy.xml,
+		    demo/startPzp.js,
+		    node_modules/,
+		    webinos/"
+
+		excludes="
+		    webinos/common/android/,
+		    webinos/pzh/,
+		    webinos/wrt/,
+
+		    **/test/,
+		    **/build/,
+		    **/deps/,
+		    **/.gitignore"/>
+	</zip>
+
+	<!-- Creates demo/client/webinos.js -->
+	<ant dir="${basedir}/demo" target="gen-webinos-js"/>
+
+	<!-- Copies demo/client/webinos.js to wrt/assets folder -->
+	<copy file="${basedir}/demo/client/webinos.js" todir="${basedir}/webinos/common/android/wrt/assets/js"/>
+
+	<!-- Builds app/bin/app-debug.apk
+	    Can be installed with the command: adb install app/bin/app-debug.apk -->
+	<ant dir="${basedir}/webinos/common/android/wrt" target="debug"/>
+
+	<!-- Builds wrt/bin/wrt-debug.apk
+	    Can be installed with the command: adb install wrt/bin/wrt-debug.apk -->
+	<ant dir="${basedir}/webinos/common/android/app" target="debug"/>
+
+    </target>
+</project>
