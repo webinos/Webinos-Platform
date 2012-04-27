@@ -32,8 +32,8 @@
     if (typeof webinos === "undefined") { webinos = {}; }
     if (!webinos.payment) { webinos.payment = {}; }
     
-     require('bluevia_payment');
-     require('gsma_payment');
+     require('./bluevia_payment.js'); 
+     require('./gsma_payment.js'); 
 
     var WebinosPayment, Payment, ShoppingBasket, ShoppingItem, SuccessShoppingBasketCallback, PaymentSuccessCB, PaymentErrorCB, PendingOperation, PaymentError;
 

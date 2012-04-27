@@ -1,3 +1,4 @@
+#!/usr/local/bin/node
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -16,8 +17,8 @@
 *******************************************************************************/
 
 
-var pzp = require('../webinos/pzp/lib/pzp_sessionHandling.js'),
-	websocket = require('../webinos/pzp/lib/pzp_websocket.js'),
+var pzp = require('./webinos_pzp').session,//require('../webinos/pzp/lib/pzp_sessionHandling.js'),
+	websocket = require('./webinos_pzp').websocket,//require('../webinos/pzp/lib/pzp_websocket.js'),
 	fs = require('fs'),
 	path = require('path');
 
@@ -27,11 +28,8 @@ function help() {
     console.log('Usage: node startPzp.js [options]');
     console.log('Options:');
     console.log('--pzh-host=[host]        host of the pzh (default localhost)');
-    console.log('--pzh-port=[port]        port to host the pzh (default 8000)');
     console.log('--pzp-name=[name]        name of the pzp (default WebinosPzp)');
     console.log('--pzp-host=[name]        host of the pzp (default localhost)');
-    console.log('--pzp-http-port=[port]   port to pzp web server (default 8080)');
-    console.log('--pzp-ws-port=[port]     port to pzp websocket server (default 8081)');
     console.log('--context-code=[code]    context debug flag (default DEBUG)');
     process.exit();
 }
@@ -45,23 +43,14 @@ process.argv.forEach(function (arg) {
 	      case '--pzh-host':
 	        options.pzhHost = parts[1];
 	        break;
-	      case '--pzh-port':
-	    	  options.pzhPort = parseInt(parts[1], 10);
-	    	  break;
 	      case '--pzp-name':
 	    	  options.pzpName = parts[1];
 	    	  break;
 	      case '--pzp-host':
 	    	  options.pzpHost = parts[1];
 	    	  break;
-	      case '--pzp-http-port':
-	    	  options.pzpHttpPort = parseInt(parts[1], 10);
-	    	  break;
-	      case '--pzp-ws-port':
-	    	  options.pzpWebsocketPort = parseInt(parts[1], 10);
-	    	  break;
 	      case '--context-code':
-	    	  options.code = parts[1];
+	    	  options.code = parts[1]+'='; // added as last letter in qrcode is = but above 'split' removes this info
 	    	  break;
 	      default:
 	        console.log('unknown option: ' + parts[0]);
@@ -75,21 +64,21 @@ process.argv.forEach(function (arg) {
 });
 
 var pzpModules = [
-//    {name: "get42", param: {}},
-//   {name: "file", param: {}},
-    {name: "geolocation", param: {}},
-//    {name: "applauncher", param: {}},
-//    {name: "events", param: {}},
-//    {name: "sensors", param: {}},
-//    {name: "payment", param: {}},
-//    {name: "tv", param: {}},
-    {name: "deviceorientation", param: {}},
-    {name: "vehicle", param: {}} //,
-//    {name: "context", param: {}},
-//    {name: "authentication", param: {}},
-//    {name: "contacts", param: {}},
-//    {name: "devicestatus", param: {}},
-//    {name: "discovery", param: {}}
+    {name: "get42", params: {num: '21'}},
+    {name: "file", params: {}},
+    {name: "geolocation", params: {connector : 'geoip'}},
+    {name: "applauncher", params: {}},
+    {name: "sensors", params: {}},
+    {name: "payment", params: {}},
+    {name: "tv", params: {}},
+    {name: "oauth", params: {}},
+    {name: "deviceorientation", params: {connector : 'simulator'}},
+    {name: "vehicle", params: {connector : 'simulator'}},
+    {name: "context", params: {}},
+    {name: "authentication", params: {}},
+    {name: "contacts", params: {}},
+    {name: "devicestatus", params: {}},
+    {name: "discovery", params: {}}
 ];
 
 if (options.pzhHost === '' || options.pzhPort <= 0) {
@@ -106,37 +95,19 @@ if (options.pzhHost === '' || options.pzhPort <= 0) {
 		}
 		
 		if (!config.pzhHost) {
-			config.pzhHost = 'localhost';
-		}
-		if (!config.pzhPort) {
-			config.pzhPort = 8000;
+			config.pzhHost = 'localhost/OpenIDUserName';
 		}
 		if (!config.pzpHost) {
 			config.pzpHost='localhost';
 		}
-		if (!config.pzpHttpPort) {
-			config.pzpHttpPort = 8080;
-		}
-		if (!config.pzpWebsocketPort) {
-			config.pzpWebsocketPort = 8081;
-		}
 		if (!config.pzpName) {
-			config.pzpName = 'WebinosPzp';
+			config.pzpName = '';
 		}
 		if (!config.code) {
 			config.code = 'DEBUG';
 		}
 		if (options.pzhHost) {
 			config.pzhHost = options.pzhHost;
-		}
-		if (options.pzhPort) {
-			config.pzhPort = options.pzhPort;
-		}
-		if (options.pzpHttpPort) {
-			config.pzpHttpPort = options.pzpHttpPort;
-		}
-		if (options.pzpWebsocketPort) {
-			config.pzpWebsocketPort = options.pzpWebsocketPort;
 		}
 		if (options.pzpHost) {
 			config.pzpHost = options.pzpHost;
@@ -147,12 +118,13 @@ if (options.pzhHost === '' || options.pzhPort <= 0) {
 		if (options.code) {
 			config.code = options.code;
 		}
-
-		var contents ="pzh_name=localhost\ncountry=UK\nstate=MX\ncity=ST\norganization=Webinos\norganizationUnit=WP4\ncommon="+config.pzpName+"\nemail=internal@webinos.org\ndays=180\n"
-		websocket.startPzpWebSocketServer(config.pzpHost, config.pzpWebsocketPort, config.pzpHttpPort, function() {
-			pzp.startPzp(contents, config.pzhHost, config.pzhPort, config.code, pzpModules, function() {
-				console.log("=== PZP started ===");
-			});
+		
+		pzp.startPzp(config, pzpModules, function(result, pzp) {
+			if (result === 'startedPzp') {
+				console.log("***** PZP "+pzp.sessionId+" started *****");
+			}
 		});
 	});
 }
+
+

@@ -89,7 +89,7 @@
           ],
 
           'outputs': [
-            'test/webinos.js',
+            '<@(curr_dir)/webinos/test/client/webinos.js',
           ],
 
           # FIXME can the following conditions be shorted by just setting
@@ -125,7 +125,7 @@
                 "--js", "../webinos/wrt/lib/webinos.contacts.js",
                 "--js", "../webinos/wrt/lib/webinos.discovery.js",
                 "--js", "../webinos/wrt/lib/webinos.authentication.js",
-		"--js_output_file","<@(_outputs)""--js", 
+		"--js_output_file","<@(_outputs)", 
 
               ],
          }],     

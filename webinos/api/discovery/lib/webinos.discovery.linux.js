@@ -40,9 +40,9 @@ if (!webinos.discovery) { webinos.discovery = {}; }
 	  
 	  // TODO CHANGE
 	 // var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'); 
-
-	  var pmlib = require('webinos').policy;
-	  exec = require('child_process').exec; 
+	  var webinos = require('webinos')(__dirname);
+	  var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager.js');
+	  exec = require('child_process').exec;
 	  var policyManager = new pmlib.policyManager();
 	
 	  var res, request = {}, subjectInfo = {}, resourceInfo = {};

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 Andre Paul, Fraunhofer FOKUS
+* Copyright 2012 André Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 

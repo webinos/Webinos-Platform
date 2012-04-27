@@ -6,7 +6,7 @@ PYTHON ?= python
 # BUILDTYPE=Debug builds both release and debug builds. If you want to compile
 # just the debug build, run `make -C out BUILDTYPE=Debug` instead.
 ifeq ($(BUILDTYPE),Release)
-all: out/Makefile webinos 
+all: out/Makefile webinos
 else
 all: out/Makefile webinos webinos_g
 endif
@@ -32,9 +32,11 @@ out/Debug/webinos:
 out/Makefile: common.gypi webinos.gyp config.gypi
 	tools/gyp_webinos -f make
 
+install:
+	./out/Release/webinos installer.js
+
 clean:
-	-rm -rf out/Makefile out/$(BUILDTYPE)/webinos_
-	-find out/ -name '*.o' -o -name '*.a' | xargs rm -rf
+	-rm -rf out
 
 distclean:
 	-rm -rf out
@@ -42,6 +44,6 @@ distclean:
 	-rm -f config.mk
 
 staticlib: config.gypi
-        $(MAKE) -C out BUILDTYPE=staticlib	
+        $(MAKE) -C out BUILDTYPE=staticlib
 
 .PHONY: clean distclean check uninstall install install-includes install-bin all program staticlib dynamiclib

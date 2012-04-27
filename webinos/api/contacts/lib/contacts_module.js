@@ -31,7 +31,7 @@ try {
 if(process.platform!=='android')
 {
   //local_contacts = require(path.resolve(__dirname,'local_contacts.js'));
-  local_contacts = process.binding('localcontacts');
+  local_contacts = require('./local_contacts');;
 }
 else //on android
 {
@@ -85,7 +85,7 @@ var askPolicyManager = function(module,params,callback)
 // TODO CHANGE
   //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   try {
-  var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+  var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
   policyManager = new pmlib.policyManager();
 } catch (err) {
 	console.log("err4" + err)

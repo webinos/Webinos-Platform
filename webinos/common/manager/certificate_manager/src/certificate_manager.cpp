@@ -19,12 +19,12 @@
 
 #include <v8.h>
 #include <node.h>
-#include <node.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "openssl_wrapper.h"
 #include <string.h>
 
+using namespace node;
 using namespace v8;
 
 	

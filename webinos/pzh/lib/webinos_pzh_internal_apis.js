@@ -116,8 +116,8 @@ pzh_internal_apis.listPzp = function(instance, callback) {
 		}
 	}
 	
-	for (var i in instance.config.conn.revokedCert) {
-		if (typeof instance.config.conn.revokedCert[i] !== "undefined") {
+	for (var i in instance.conn.revokedCert) {
+		if (typeof instance.conn.revokedCert[i] !== "undefined") {
 			result.revokedCert.push(getPzpInfoSync(instance, i));
 		}
 	}

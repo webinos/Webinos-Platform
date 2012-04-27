@@ -42,7 +42,7 @@ function DeviceOrientationModule(rpcHandler) {
         console.log('connecting to fake data generator');
      }
 
-	var implModule = require('./webinos.deviceorientation.' + implFile);
+	var implModule = require('./webinos.deviceorientation.' + implFile + '.js');
 
 
 	implModule.setRPCHandler(rpcHandler);

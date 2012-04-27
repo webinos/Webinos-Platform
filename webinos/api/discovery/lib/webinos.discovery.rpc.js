@@ -26,12 +26,12 @@
 
 	if(process.platform!=='android')
 	{
-		 discoverymodule = require('webinos_discovery_linux');
+		 discoverymodule = require('./webinos.discovery.linux.js');
 	}
 	else  
 	{
-		discoverymodule = require('webinos_discovery_general');
-		var hrmmodule = require('webinos_discovery_hrm');
+		discoverymodule = require('./webinos.discovery.general.js');
+		var hrmmodule = require('./webinos.discovery.hrm.js');
 	} 
 	
 	/**

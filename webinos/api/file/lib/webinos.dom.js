@@ -25,10 +25,9 @@
 	var nEvents = require("events"),
 		nUtil = require("util");
 
-//	var webinos = require("webinos")(__dirname);
-//		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
+	var webinos = require("webinos")(__dirname);
+		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
 
-	var utils = require('webinos').utils;
 	exports.DOMException = function (type, message) {
 		this.name = type;
 		this.message = message;
@@ -101,14 +100,14 @@
 		if (listener === null)
 			return;
 
-		this._eventEmitter.addListener(type, utils.bind(listener, this) /* bind to event's currentTarget */);
+		this._eventEmitter.addListener(type, webinos.utils.bind(listener, this) /* bind to event's currentTarget */);
 	};
 
 	exports.EventTarget.prototype.removeEventListener = function (type, listener, capture /* ignored */) {
 		if (listener === null)
 			return;
 
-		this._eventEmitter.removeListener(type, utils.bind(listener, this) /* bind to event's currentTarget */);
+		this._eventEmitter.removeListener(type, webinos.utils.bind(listener, this) /* bind to event's currentTarget */);
 	};
 
 	exports.EventTarget.prototype.dispatchEvent = function (event) {

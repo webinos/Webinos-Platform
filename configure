@@ -124,7 +124,10 @@ def injectModulesinNode():
       if value == "NODE_EXT_LIST_ITEM(node_zlib)\n" :
         changed.append("NODE_EXT_LIST_ITEM(node_certificate_manager)\n")
         changed.append("NODE_EXT_LIST_ITEM(node_bluetooth)\n")
-  else:
+        changed.append("NODE_EXT_LIST_ITEM(node_nativedevicestatus)\n")
+        changed.append("NODE_EXT_LIST_ITEM(node_localcontacts)\n")
+        changed.append("NODE_EXT_LIST_ITEM(node_pm)\n")
+  else:	  
      changed = str_list
   
   w = open(node_root+"/src/node_extensions.h", "w")
