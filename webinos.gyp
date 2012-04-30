@@ -16,7 +16,6 @@
     {
       'target_name':'webinos',
       'type': 'executable',
-      'variables': {'node_staticlib':'true'},
       'dependencies': [
         '<@(node_root)/node.gyp:node',
         'webinos_wrt#host',
@@ -26,14 +25,14 @@
         '<@(node_root)/src',
         '<@(node_root)/deps/uv/include',
         '<@(node_root)/deps/v8/include',
-        'webinos/api/contacts/contrib',
-        'webinos/common/manager/policy_manager/src/core',
-        'webinos/common/manager/policy_manager/src/core/policymanager',
+        "webinos/common/manager/policy_manager/src/core/policymanager",
+        "webinos/common/manager/policy_manager/src/core",
+        "webinos/api/contacts/contrib/"
       ],
 
       'sources':[
-        #Certificate manager
         "webinos_main.cc",
+        "common.gypi",
         "common/manager/certificate_manager/src/certificate_manager.cpp",
         "common/manager/certificate_manager/src/openssl_wrapper.cpp",
 
@@ -66,14 +65,12 @@
         "common/manager/policy_manager/contrib/xmltools/tinystr.cpp",
         "common/manager/policy_manager/contrib/xmltools/tinyxmlparser.cpp",
         "common/manager/policy_manager/contrib/xmltools/tinyxmlerror.cpp",
-
-        'common.gypi',
        ],
-
+       
       'defines': [
         'NODE_WANT_INTERNALS=1',
         'ARCH="<(target_arch)"',
-        'PLATFORM="<(OS)"',         
+        'PLATFORM="<(OS)"',
       ],
    },
    {
@@ -117,19 +114,18 @@
                 "--js", "../webinos/wrt/lib/webinos.geolocation.js",
                 "--js", "../webinos/wrt/lib/webinos.sensors.js",
                 "--js", "../webinos/wrt/lib/webinos.events.js",
-		"--js", "../webinos/wrt/lib/webinos.applauncher.js",
-		"--js", "../webinos/wrt/lib/webinos.vehicle.js",
-		"--js", "../webinos/wrt/lib/webinos.deviceorientation.js",
+	            "--js", "../webinos/wrt/lib/webinos.applauncher.js",
+                "--js", "../webinos/wrt/lib/webinos.vehicle.js",
+                "--js", "../webinos/wrt/lib/webinos.deviceorientation.js",
                 "--js", "../webinos/wrt/lib/webinos.devicestatus.js",
                 "--js", "../webinos/wrt/lib/webinos.context.js",
                 "--js", "../webinos/wrt/lib/webinos.contacts.js",
                 "--js", "../webinos/wrt/lib/webinos.discovery.js",
                 "--js", "../webinos/wrt/lib/webinos.authentication.js",
-		"--js_output_file","<@(_outputs)", 
+                "--js_output_file","<@(_outputs)", 
 
               ],
          }],     
     }, # end webinos_wrt
    ], 
 }
-

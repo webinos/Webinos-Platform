@@ -454,45 +454,46 @@ sessionPzp.startPzp = function(config, modules, callback) {
 		}
 
 		if (config && config.pzhHost !== 'undefined' && config.pzpName!== 'undefined' && config.pzpHost !== 'undefined') {
-			session.configuration.createDirectoryStructure();
-			session.configuration.setConfiguration(config.pzpName, 'Pzp', config.pzhHost, function (configure, conn_key, conn_csr) {
-				var addr;
-				if (configure === "undefined") {
-					log('ERROR', 'Error in initializing PZP configuration')
-					return;
-				}
-
-				pzpInstance.config                    = configure;
-				pzpInstance.sessionId                 = configure.details.name;
-
-				if (config.pzhHost && config.pzhHost.split('/')) {
-					addr = config.pzhHost.split('/')[0];
-				} else {
-					addr = config.pzhHost;
-				}
-				session.common.resolveIP(addr, function(resolvedAddress) {
-					log('INFO', '[PZP -'+ pzpInstance.sessionId+'] Connecting Address: ' + resolvedAddress);
-					pzpInstance.address = resolvedAddress;
-					try {
-						pzpInstance.connect(conn_key, conn_csr, function(result) {
-							if(result === 'startedPZP') {
-								websocket.startPzpWebSocketServer(pzpInstance, config, function() {
-									pzpInstance.update(callback);
-								});
-							} else if(result === 'startPZPAgain'){
-								pzpInstance.connect(conn_key, null, function(result){
-									if (result === 'startedPZP') {
-										websocket.startPzpWebSocketServer(pzpInstance, config, function() {
-												pzpInstance.update(callback);
-										});
-									}
-								});
-							}
-						});
-					} catch (err) {
-						callback.call(pzpInstance, 'failedStarting', pzpInstance);
+			session.configuration.createDirectoryStructure( function() {
+				session.configuration.setConfiguration(config.pzpName, 'Pzp', config.pzhHost, function (configure, conn_key, conn_csr) {
+					var addr;
+					if (configure === "undefined") {
+						log('ERROR', 'Error in initializing PZP configuration')
 						return;
 					}
+
+					pzpInstance.config                    = configure;
+					pzpInstance.sessionId                 = configure.details.name;
+
+					if (config.pzhHost && config.pzhHost.split('/')) {
+						addr = config.pzhHost.split('/')[0];
+					} else {
+						addr = config.pzhHost;
+					}
+					session.common.resolveIP(addr, function(resolvedAddress) {
+						log('INFO', '[PZP -'+ pzpInstance.sessionId+'] Connecting Address: ' + resolvedAddress);
+						pzpInstance.address = resolvedAddress;
+						try {
+							pzpInstance.connect(conn_key, conn_csr, function(result) {
+								if(result === 'startedPZP') {
+									websocket.startPzpWebSocketServer(pzpInstance, config, function() {
+										pzpInstance.update(callback);
+									});
+								} else if(result === 'startPZPAgain'){
+									pzpInstance.connect(conn_key, null, function(result){
+										if (result === 'startedPZP') {
+											websocket.startPzpWebSocketServer(pzpInstance, config, function() {
+													pzpInstance.update(callback);
+											});
+										}
+									});
+								}
+							});
+						} catch (err) {
+							callback.call(pzpInstance, 'failedStarting', pzpInstance);
+							return;
+						}
+					});
 				});
 			});
 		}

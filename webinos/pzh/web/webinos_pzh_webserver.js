@@ -185,7 +185,7 @@ pzhWebInterface.start = function(hostname, callback) {
 }
 
 pzhWebInterface.updateList = function (self) {
-	pzhapis.listZoneDevices(self, result);
+ 	pzhapis.listZoneDevices(self, result);
 }
 
 function getContentType(uri) {

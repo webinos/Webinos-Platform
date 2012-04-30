@@ -11,7 +11,7 @@
     "sqlite3":"2.1.1",
     "zipfile":"0.3.0",
     "ejs":"0.6.1",
-    "openid":"0.3.2",
+    "openid":"0.4.2",
     "qrcode":"0.1.1",
     "websocket":"1.0.2",
     "jsorm-i18n": "2.0.4",

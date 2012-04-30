@@ -110,14 +110,14 @@ pzh_internal_apis.addPzpQR = function (instance, callback) {
 pzh_internal_apis.listPzp = function(instance, callback) {
 	"use strict";
 	var result = {signedCert: [], revokedCert: []};
-	for (var i in instance.config.conn.signedCert){
-		if (typeof instance.config.conn.signedCert[i] !== "undefined") {
+	for (var i in instance.config.signedCert){
+		if (typeof instance.config.signedCert[i] !== "undefined") {
 			result.signedCert.push(getPzpInfoSync(instance, i));
 		}
 	}
 	
-	for (var i in instance.conn.revokedCert) {
-		if (typeof instance.conn.revokedCert[i] !== "undefined") {
+	for (var i in instance.config.revokedCert) {
+		if (typeof instance.config.revokedCert[i] !== "undefined") {
 			result.revokedCert.push(getPzpInfoSync(instance, i));
 		}
 	}
@@ -130,15 +130,15 @@ pzh_internal_apis.listPzp = function(instance, callback) {
 pzh_internal_apis.listZoneDevices = function(instance, callback) {
 	"use strict";
 	var result = {pzps: [], pzhs: []};
-	
-	for (var i in instance.config.conn.signedCert){
-		if (typeof instance.config.conn.signedCert[i] !== "undefined") {
-			result.pzps.push(getPzpInfoSync(instance));
+
+	for (var i in instance.config.signedCert){
+		if (typeof instance.config.signedCert[i] !== "undefined") {
+			result.pzps.push(getPzpInfoSync(instance, i));
 		}
 	}
 
-	for (var i in instance.config.conn.otherCert) {
-		if (typeof instance.config.conn.otherCert[i] !== "undefined" && instance.config.conn.otherCert[i].cert !== '') {
+	for (var i in instance.config.otherCert) {
+		if (typeof instance.config.otherCert[i] !== "undefined" && instance.config.otherCert[i].cert !== '') {
 			result.pzhs.push(getPzhInfoSync(instance, i));
 		}
 	}

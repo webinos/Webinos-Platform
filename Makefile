@@ -17,11 +17,9 @@ endif
 
 webinos: config.gypi
 	$(MAKE) -C out BUILDTYPE=Release
-	ln -fs out/Release/webinos ./webinos_
 
 webinos_g: config.gypi
 	$(MAKE) -C out BUILDTYPE=Debug
-	ln -fs out/Debug/webinos ./webinos_
 
 config.gypi: configure
 	./configure

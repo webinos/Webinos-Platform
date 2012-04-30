@@ -26,7 +26,6 @@
 var localcontacts;
 try {
 	localcontacts =  process.binding('localcontacts');
-	console.log(localcontacts)
 } catch (Err) {
 	console.log("local contacts")
 	console.log(Err);
