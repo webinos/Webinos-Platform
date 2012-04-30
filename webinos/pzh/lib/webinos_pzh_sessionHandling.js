@@ -273,7 +273,6 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
 			msg = self.messageHandler.registerSender(self.sessionId, sessionId);
 			self.sendMessage(msg, sessionId);
 		}
-		console.log(self)
 		farm.pzhWI.updateList(self);
 	}
 };

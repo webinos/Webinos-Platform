@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/usr/local/bin/webinos
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -118,7 +118,7 @@ if (options.pzhHost === '' || options.pzhPort <= 0) {
 		if (options.code) {
 			config.code = options.code;
 		}
-		
+		console.log(config);
 		pzp.startPzp(config, pzpModules, function(result, pzp) {
 			if (result === 'startedPzp') {
 				console.log("***** PZP "+pzp.sessionId+" started *****");

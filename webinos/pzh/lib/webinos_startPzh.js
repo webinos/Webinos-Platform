@@ -1,4 +1,4 @@
-#!/usr/local/bin/node
+#!/usr/local/bin/webinos
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -18,10 +18,9 @@
 *******************************************************************************/
 var fs = require('fs'),
 webinos = require('webinos')(__dirname);
-
-PzhFarm = webinos.global.require(webinos.global.pzh.location, 'lib/webinos_pzh').farm;
-
+var PzhFarm = webinos.global.require(webinos.global.pzh.location, 'lib/webinos_pzh').farm;
 var host = null, name = null;
+
 
 function help() {
     console.log('Usage: node startPzh.js [options]');

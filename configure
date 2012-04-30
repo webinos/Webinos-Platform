@@ -127,7 +127,7 @@ def injectModulesinNode():
         changed.append("NODE_EXT_LIST_ITEM(node_nativedevicestatus)\n")
         changed.append("NODE_EXT_LIST_ITEM(node_localcontacts)\n")
         changed.append("NODE_EXT_LIST_ITEM(node_pm)\n")
-  else:	  
+  else:
      changed = str_list
   
   w = open(node_root+"/src/node_extensions.h", "w")
@@ -148,8 +148,8 @@ def configure_webinos(o):
   #  shutil.copyfile('webinos/test/startPzp.js' , node_root+'/lib/_third_party_main.js')
 
   o['variables']['node_root'] = node_root;
-  o['libraries'] += ['-lopenobex', '-lobexftp', '-lbluetooth', '-ldl', '-lrt' ];
-
+  o['libraries'] += ['-lopenobex', '-lobexftp', '-lbluetooth', '-ldl', '-lrt'];
+  
   o['variables']['host_arch'] = host_arch()
   o['variables']['target_arch'] = options.dest_cpu or target_arch()
   o['default_configuration'] = 'Debug' if options.debug else 'Release'

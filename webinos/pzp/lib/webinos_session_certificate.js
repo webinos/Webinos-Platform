@@ -23,7 +23,7 @@
 // 
 // var uniqueID     = require(path.join(webinosRoot, dependencies.uniqueID.location, 'lib/uniqueID.js'));
 //var log          =  require(path.resolve(webinosRoot,dependencies.pzp.location, 'lib/session_common.js')).debug;
-
+var log         = require('./webinos_session_common').debug;
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
