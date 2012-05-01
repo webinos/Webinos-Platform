@@ -1,0 +1,62 @@
+<!DOCTYPE html> 
+<html>
+	<head>
+	<title>webinosFS</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="/client/webinosFS/jquery.mobile-1.0.1.min.css" />
+	<script type="text/javascript" src="/client/webinosFS/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="/client/webinosFS/js/jquery.ba-bbq.min.js"></script>
+	<script type="text/javascript" src="/client/webinosFS/js/async.min.js"></script>
+	<script type="text/javascript" src="/client/webinos.js"></script>
+	<script type="text/javascript" src="/client/webinosFS/webinosFS.js"></script>
+	<script type="text/javascript" src="/client/webinosFS/jquery.mobile-1.0.1.min.js"></script>
+	<script type="text/javascript" src="/client/webinosFS/js/jqm.page.params.js"></script>
+</head>
+<body>
+<div id="browse" data-role="page">
+	<div data-role="header">
+		<a id="parent.browse" data-icon="back" data-iconpos="notext" style="display: none;"></a>
+		<h1 id="current.browse">webinosFS</h1>
+		<a id="refresh.browse" data-icon="refresh" data-iconpos="notext"></a>
+	</div>
+	<div data-role="content">
+		<ul id="sentries.browse" data-role="listview">
+		</ul>
+	</div>
+	<div data-role="footer">
+		<h1 id="playing.browse">&nbsp;</h1>
+	</div>
+</div>
+<div id="select" data-role="page">
+	<div data-role="header">
+		<a id="parent.select" data-icon="back" data-iconpos="notext"></a>
+		<h1 id="name.select"></h1>
+	</div>
+	<div data-role="content"> 
+		<ul id="shards.select" data-role="listview">
+		</ul>
+	</div>	
+</div>
+<div id="view" data-role="page">
+	<div data-role="header">
+		<a id="parent.view" data-icon="back" data-iconpos="notext"></a>
+		<h1 id="name.view"></h1>
+	</div>
+	<div data-role="content">
+	</div>
+	<div data-role="footer">
+		<a id="remote.view" style="margin: 0.4em; float: right;" data-icon="arrow-r" data-iconpos="right">Remote</a>
+	</div>
+</div>
+<div id="remote" data-role="page">
+	<div data-role="header">
+		<a id="view.remote" data-icon="back" data-iconpos="notext"></a>
+		<h1 id="name.remote"></h1>
+	</div>
+	<div data-role="content">
+		<ul id="players.remote" data-role="listview">
+		</ul>
+	</div>
+</div>
+</body>
+</html>

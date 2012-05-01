@@ -143,6 +143,7 @@ class BTDiscovery: ObjectWrap
     uuid_t svc_uuid;
     int err;
     bdaddr_t target;
+    bdaddr_t source;
     sdp_list_t *response_list = NULL, *search_list, *attrid_list;
     sdp_session_t *session = 0;
     uint32_t serv_class = 0;
@@ -179,6 +180,7 @@ class BTDiscovery: ObjectWrap
     for (i = 0; i < num_rsp; i++)
     {
       target = (ii+i)->bdaddr;
+      str2ba("0:0:0:0:0:0", &source);
 
       if (!strncasecmp(*v8str, "0x", 2))
       {
@@ -206,9 +208,9 @@ class BTDiscovery: ObjectWrap
         printf("service class is not correct\n");
         return args.This();
       }
-    // connect to the SDP server running on the remote machine
 
-      session = sdp_connect( BDADDR_ANY, &target, SDP_RETRY_IF_BUSY );
+      // connect to the SDP server running on the remote machine
+      session = sdp_connect( &source, &target, SDP_RETRY_IF_BUSY );
       if (session == (sdp_session_t *)NULL)
       {
         printf("session for device to connect is not available, go to next device\n");
@@ -446,5 +448,5 @@ extern "C" {
 	  BTDiscovery::Init(target);
   }
 
-  NODE_MODULE(bluetooth, init);
+  NODE_MODULE(node_bluetooth, init);
 }

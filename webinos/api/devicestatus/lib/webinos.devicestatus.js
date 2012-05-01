@@ -1,9 +1,12 @@
 (function () {
 	"use strict";
+	var webinos = require('webinos')(__dirname);
 
 	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation,
-	nativeDeviceStatus = (process.versions.node < "0.6.0" ) ? require('../src/build/default/nativedevicestatus') : require('../src/build/Release/nativedevicestatus'),
-	pmlib = require("../../../common/manager/policy_manager/lib/policymanager.js"),
+	//nativeDeviceStatus = (process.versions.node < "0.6.0" ) ? require('../src/build/default/nativedevicestatus') : require('../src/build/Release/nativedevicestatus'),
+	//pmlib = require("../../../common/manager/policy_manager/lib/policymanager.js"),
+	nativeDeviceStatus = process.binding('nativedevicestatus'),
+	pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager'),
 	policyManager;
 
 //Regular policyManger lib loading.. the library currently is loaded inside the getPropertyValue method

@@ -19,7 +19,7 @@
 (function() {
 
 function VehicleModule(rpcHandler, params) {
-	var implFile;
+    var implFile = 'fake';
     var car = null;
     var conncector = null;
     

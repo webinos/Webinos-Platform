@@ -20,15 +20,15 @@
 if (typeof webinos === "undefined") { webinos = {}; }
 if (!webinos.discovery) { webinos.discovery = {}; }
 
-	var localdisc = (process.versions.node < "0.6.0" ) ? require('../src/build/default/bluetooth.node') : require('../src/build/Release/bluetooth.node');
-
+	//var localdisc = (process.versions.node < "0.6.0" ) ? require('../src/build/default/bluetooth.node') : require('../src/build/Release/bluetooth.node');
+	var localdisc = process.binding('bluetooth');
 	//check path
-	var path = require('path');
-	var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+	//var path = require('path');
+	//var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+	//var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+	//var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 	
-	console.log("webinosRoot=" + webinosRoot); 
+	//console.log("webinosRoot=" + webinosRoot); 
 	
 	//Enforce Policy in
 	/**
@@ -39,8 +39,10 @@ if (!webinos.discovery) { webinos.discovery = {}; }
 	  console.log("discovery Linux - check Policy");
 	  
 	  // TODO CHANGE
-	  var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'); 
-	  exec = require('child_process').exec; 
+	 // var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'); 
+	  var webinos = require('webinos')(__dirname);
+	  var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager.js');
+	  exec = require('child_process').exec;
 	  var policyManager = new pmlib.policyManager();
 	
 	  var res, request = {}, subjectInfo = {}, resourceInfo = {};

@@ -17,13 +17,19 @@
 ******************************************************************************/
 
 
-var path = require('path');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-var binaryRoot = path.resolve(__dirname, '../src/build/Release');
-var localcontacts = require(path.resolve(binaryRoot,'localcontacts'));
-
+// var path = require('path');
+// var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+// var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+// var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+// var binaryRoot = path.resolve(__dirname, '../src/build/Release');
+//var localcontacts = require(path.resolve(binaryRoot,'localcontacts'));
+var localcontacts;
+try {
+	localcontacts =  process.binding('localcontacts');
+} catch (Err) {
+	console.log("local contacts")
+	console.log(Err);
+}
 //Pass methods to the above levels using this
 //TODO here we can remap names, if desired
 

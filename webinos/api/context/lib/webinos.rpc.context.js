@@ -18,16 +18,12 @@
 
 (function() {
 	//	console.log("CONTEXT SERVICE LOADED");
-	var moduleRoot = require('../dependencies.json');
-	var dependencies = require('../' + moduleRoot.root.location
-			+ '/dependencies.json');
-	var webinosRoot = '../' + moduleRoot.root.location;
-
-
-	 var appContext = require(webinosRoot
-	      + dependencies.manager.context_manager.location
-	      + 'lib/appContext.js');
-	 
+// 	var moduleRoot = require('../dependencies.json');
+// 	var dependencies = require('../' + moduleRoot.root.location
+// 			+ '/dependencies.json');
+// 	var webinosRoot = '../' + moduleRoot.root.location;
+	var webinos = require('webinos')(__dirname);
+	var appContext = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/webinos_context_app');//webinosRoot + dependencies.manager.context_manager.location + 'lib/appContext.js'
 
 	/**
 	 * Webinos Service constructor.
@@ -45,15 +41,14 @@
 
 	RemoteContextManager.prototype = new RPCWebinosService;
 
-
-
 	RemoteContextManager.prototype.registerAppContextObject = function(APPName, ContextObjectName, ContextFields, callback) {
 	  appContext.registerContextObject(APPName, ContextObjectName, ContextFields, function(response){callback(response);})
 	}
 	
 	function enforceContextDataAccess(_mode, _query, _successCallback)
 	{
-		var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec;
+		//var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec;
+		var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/webinos_policymanager'), policyManager, exec = require('child_process').exec;
 		policyManager = new pmlib.policyManager();
 
 		var res, request = {}, subjectInfo = {}, resourceInfo = {};
@@ -73,9 +68,10 @@
 					break;
 				}
 
-				var contextDB = require(webinosRoot
-		      			+ dependencies.manager.context_manager.location
-		      			+ 'lib/contextDBManagerPZH.js');
+// 				var contextDB = require(webinosRoot
+// 		      			+ dependencies.manager.context_manager.location
+// 		      			+ 'lib/contextDBManagerPZH.js');
+				var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/webinos_context_DB_PZH');
 				if(_query.type == "getrawview")
 				{
 					contextDB.getrawview(function(results) {
@@ -110,9 +106,10 @@
 						}
 						else
 						{
-							var contextDB = require(webinosRoot
-			      					+ dependencies.manager.context_manager.location
-			      					+ 'lib/contextDBManagerPZH.js');
+// 							var contextDB = require(webinosRoot
+// 			      					+ dependencies.manager.context_manager.location
+// 			      					+ 'lib/contextDBManagerPZH.js');
+							var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/webinos_context_DB_PZH');
 							if(_query.type == "getrawview")
 							{
 								contextDB.getrawview(function(results) {
@@ -141,9 +138,10 @@
 	RemoteContextManager.prototype.executeQuery = function(query, successCallback, errorCallback) {
 		switch (query.type) {
 		case "DB-insert"://PZH
-		  var contextDB = require(webinosRoot
-		      + dependencies.manager.context_manager.location
-		      + 'lib/contextDBManagerPZH.js');
+// 		  var contextDB = require(webinosRoot
+// 		      + dependencies.manager.context_manager.location
+// 		      + 'lib/contextDBManagerPZH.js');
+		  var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/contextDBManagerPZH');
 			contextDB.insert(query.data); //TODO: Add success callback
 			break;
 		case "getrawview"://PZH

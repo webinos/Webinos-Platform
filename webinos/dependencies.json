@@ -118,5 +118,9 @@
   "wrt": {
     "name": "wrt",
     "location": "wrt/"
+  },
+  "test": {
+    "name": "test",
+    "location": "test/"
   }
 }

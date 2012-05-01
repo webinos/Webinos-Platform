@@ -45,3 +45,5 @@ void init( Handle<Object> target )
 	target->Set( String::NewSymbol( "getPropertyValue" ), ft3->GetFunction() );
 	target->Set( String::NewSymbol( "watchPropertyChange" ), ft4->GetFunction() );
 }
+
+NODE_MODULE(node_nativedevicestatus, init);

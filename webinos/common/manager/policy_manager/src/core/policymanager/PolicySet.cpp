@@ -36,7 +36,7 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 	for(TiXmlNode * node = (TiXmlNode*)set->FirstChild(); node;
 			node = (TiXmlNode*)node->NextSibling() ) {
 		
-		TiXmlElement * child = dynamic_cast<TiXmlElement*>(node);
+		TiXmlElement * child = (TiXmlElement*)(node);//dynamic_cast<TiXmlElement*>(node);
 		if(child == NULL)
 			continue;
 	
