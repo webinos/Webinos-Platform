@@ -1,23 +1,15 @@
 {
-  "name": "webinos",
+  "name": "Webinos-Platform",
   "description": "Web runtime platform based on Webinos specification",
   "version": "0.0.1",
-  "dependencies": {
-    "schema": "0.2.0",
-    "sax": "0.3.4", 
-    "seq": "0.3.5", 
-    "xml2js": "0.1.12",
-    "crypt": "0.0.1",
-    "sqlite3":"2.1.1",
-    "zipfile":"0.3.0",
-    "ejs":"0.6.1",
-    "openid":"0.4.2",
-    "qrcode":"0.1.1",
-    "websocket":"1.0.2",
-    "jsorm-i18n": "2.0.4",
-    "vows":"0.6.2"
+  "keywords": ["webinos platform", "api"],
+  "repository": {
+    "type":"git",
+    "url":"git://github.com/webinos/Webinos-Platform.git"
   },
-  "keywords": ["webinos", "api"],
-  "repository": "git://github.com/webinos",
-  "engines": { "node":">= 0.5.0 < 0.7.0" }
+  "main": "webinos/pzp/lib/webinos_startPzp.js",
+  "directories": {
+    "lib": "./webinos"
+  },
+  "engines": { "node":">= 0.6.0" }
 }

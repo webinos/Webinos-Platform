@@ -35,12 +35,13 @@ fs.readFile('config.gypi', function(err, buffer) {
 	list.push("cp -rf out/Release/webinos /usr/local/bin/webinos")
 	list.push("cp -rf webinos/* /usr/local/lib/node_modules/webinos_platform/ ")
 	list.push("cp -rf "+node_path.variables.node_root+"/deps/npm /usr/local/lib/node_modules/" );
-	list.push("cp -rf "+node_path.variables.node_root+"/tools/wafadmin /usr/local/lib/node_modules/" )
-	list.push("cp -rf "+node_path.variables.node_root+"/tools/node-waf /usr/local/bin" )
+	list.push("cp -rf "+node_path.variables.node_root+"/tools/wafadmin /usr/local/lib/node/" )
+	list.push("cp -rf "+node_path.variables.node_root+"/tools/node-waf /usr/local/bin/node_waf" )
 	list.push("ln -sf /usr/local/lib/node_modules/webinos_platform/pzh/lib/webinos_startPzh.js /usr/local/bin/webinos_pzh")
 	list.push("ln -sf /usr/local/lib/node_modules/webinos_platform/pzp/lib/webinos_startPzp.js /usr/local/bin/webinos_pzp")
 	list.push("ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm")
-	
+	list.push("cp -rf node_modules/* /usr/local/lib/node_modules/");
+	//list.push("cp -rf package.json /usr/local/lib/node_modules/webinos_platform/");
 	exec(list);
 	fs.readFile('/usr/local/lib/node_modules/npm/bin/npm-cli.js', function(err, buffer) {
 		if (err) {
@@ -51,9 +52,9 @@ fs.readFile('config.gypi', function(err, buffer) {
 		var newcontents = '#!/usr/local/bin/webinos\n'+old;
 		fs.writeFileSync('/usr/local/lib/node_modules/npm/bin/npm-cli.js', newcontents );
 		list = [];	
-		list.push("npm install")
-		list.push("cp -rf node_modules/* /usr/local/lib/node_modules/")
-		exec(list);
+		//list.push("sudo npm install -unsafe-perm");// /usr/local/lib/node_modules/webinos_platform/package.json")
+		
+		//exec(list);
 	});
 	
 });

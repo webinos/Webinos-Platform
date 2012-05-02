@@ -106,37 +106,39 @@ def gcc_version():
   return ['LLVM' in version] + map(int, match.groups())
 
 def injectModulesinNode():
-  r = open(node_root+"/src/node_extensions.h", "r")
-  str_list = []
-  changed = []
-  insert = 'true'
-  
-  for line in r:
+  if node_root != "":
+    r = open(node_root+"/src/node_extensions.h", "r")
+    str_list = []
+    changed = []
+    insert = 'true'
+    for line in r:
      str_list.append(line)
      if line == "NODE_EXT_LIST_ITEM(node_certificate_manager)\n":
        insert = 'false'
-
-  r.close()
-  
-  if insert == 'true':
-    for value in str_list:
-      changed.append(value)
-      if value == "NODE_EXT_LIST_ITEM(node_zlib)\n" :
-        changed.append("NODE_EXT_LIST_ITEM(node_certificate_manager)\n")
-        changed.append("NODE_EXT_LIST_ITEM(node_bluetooth)\n")
-        changed.append("NODE_EXT_LIST_ITEM(node_nativedevicestatus)\n")
-        changed.append("NODE_EXT_LIST_ITEM(node_localcontacts)\n")
-        changed.append("NODE_EXT_LIST_ITEM(node_pm)\n")
-  else:
+       
+    r.close()
+    
+    if insert == 'true':
+      for value in str_list:
+        changed.append(value)
+        if value == "NODE_EXT_LIST_ITEM(node_zlib)\n" :
+          changed.append("NODE_EXT_LIST_ITEM(node_certificate_manager)\n")
+          changed.append("NODE_EXT_LIST_ITEM(node_bluetooth)\n")
+          changed.append("NODE_EXT_LIST_ITEM(node_nativedevicestatus)\n")
+          changed.append("NODE_EXT_LIST_ITEM(node_localcontacts)\n")
+          changed.append("NODE_EXT_LIST_ITEM(node_pm)\n")
+    else:
      changed = str_list
-  
-  w = open(node_root+"/src/node_extensions.h", "w")
-  
-  for value in changed:
-    w.write(value)
+     
+    w = open(node_root+"/src/node_extensions.h", "w")
+    for value in changed:
+      w.write(value)
+    w.close()
+  else:
+    sys.exit("failed as NODE_ROOT is not set, run export NODE_ROOT=/path/to/node_folder")
+    
+    
 
-  w.close()
-  
 def configure_webinos(o):
   injectModulesinNode()
   o['variables']['curr_dir'] = os.getcwd();
