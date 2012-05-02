@@ -17,33 +17,53 @@
 *
 ******************************************************************************/
 
-(function(exports) {
-	
-	var CONNECTING = 0;
-	var OPEN       = 1;
-	var CLOSING    = 2;
-	var CLOSED     = 3;
+(function(exports) {	
+	var INITIALISED = -1;
+	var CONNECTING  =  0;
+	var OPEN        =  1;
+	var CLOSING     =  2;
+	var CLOSED      =  3;
 
 	var sockets = [];
-	
-	var WebinosSocket = function(){
-		this.id = sockets.length;
-		sockets.push(this);
-		
-		this.readyState = CONNECTING;
-		exports.__webinos.openSocket(this.id);
+
+	var tryConnect = function(ws) {
+		if(exports.__webinos) {
+			try {
+				console.log('WebinosSocket connecting .....');
+				exports.__webinos.openSocket(ws.id);
+				ws.readyState = CONNECTING;
+				return true;
+			} catch(e) {
+				console.log('... failed; exception = ' + e);
+			}
+		}
+		return false;
 	};
 
-	WebinosSocket.CONNECTING = CONNECTING;
-	WebinosSocket.OPEN       = OPEN;
-	WebinosSocket.CLOSING    = CLOSING;
-	WebinosSocket.CLOSED     = CLOSED;
+	var WebinosSocket = function() {
+		var id = this.id = sockets.length;
+		sockets.push(this);
+		this.readyState = INITIALISED;
+		
+		tryConnect(this)
+		this.queuedMessages = [];
+	};
+
+	WebinosSocket.INITIALISED = INITIALISED;
+	WebinosSocket.CONNECTING  = CONNECTING;
+	WebinosSocket.OPEN        = OPEN;
+	WebinosSocket.CLOSING     = CLOSING;
+	WebinosSocket.CLOSED      = CLOSED;
 
 	WebinosSocket.handleConnect = function(id) {
 		var ws = sockets[id];
 		if(ws) {
 			if(ws.readyState == CONNECTING) {
+				console.log('... connected');
 				ws.readyState = OPEN;
+				for(var i in ws.queuedMessages)
+					exports.__webinos.send(ws.id, ws.queuedMessages[i]);
+				delete ws.queuedMessages;
 				if(ws.onopen)
 					ws.onopen();
 			}
@@ -70,10 +90,20 @@
 	};
 
 	WebinosSocket.prototype.send = function(data) {
-		if(this.readyState != OPEN)
+		switch(this.readyState) {
+		case -1: /* INITIALISED */
+			tryConnect(this);
+		case 0: /* CONNECTING */
+			this.queuedMessages.push(data);
+			break;
+		case 1: /* OPEN */
+			exports.__webinos.send(this.id, data);
+			break;
+		case 2: /* CLOSING */
+		case 3: /* CLOSED */
+		default:
 			throw new Error('IllegalStateError');
-		
-		exports.__webinos.send(this.id, data);
+		}
 	};
 	
 	WebinosSocket.prototype.close = function(data) {
