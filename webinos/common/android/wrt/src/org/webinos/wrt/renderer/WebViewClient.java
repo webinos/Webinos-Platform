@@ -30,23 +30,27 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 public class WebViewClient extends android.webkit.WebViewClient {
-	
-	@SuppressWarnings("unused")
+
 	private RendererActivity activity;
 
 	private static final String TAG = "org.webinos.wrt.renderer.WebViewClient";
-	
+
 	public WebViewClient(RendererActivity activity) {
 		this.activity = activity;
 	}
 
 	@Override
-	public void onPageStarted(android.webkit.WebView webView, String url, Bitmap favicon) {
-		WebView wgtView = (WebView)webView;
+	public void onPageStarted(android.webkit.WebView webView, String url,
+			Bitmap favicon) {
+		WebView wgtView = (WebView) webView;
+		webView.addJavascriptInterface(activity.getClientSocket(), "__webinos");
 		try {
-			wgtView.injectScript(AssetUtils.getAssetAsString(WrtManager.getInstance(), ClientSocket.SOCKETJS_ASSET));
-			wgtView.injectScript(AssetUtils.getAssetAsString(WrtManager.getInstance(), ClientSocket.WEBINOSJS_ASSET));
-		} catch(IOException ioe) {
+			wgtView.injectScripts(new String[] {
+					AssetUtils.getAssetAsString(WrtManager.getInstance(),
+							ClientSocket.SOCKETJS_ASSET),
+					AssetUtils.getAssetAsString(WrtManager.getInstance(),
+							ClientSocket.WEBINOSJS_ASSET) });
+		} catch (IOException ioe) {
 			Log.v(TAG, "Unable to inject scripts; exception: ", ioe);
 		}
 	}
