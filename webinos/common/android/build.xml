@@ -1,46 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="webinos" default="debug" basedir="../../..">
 
-    <!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
+	<!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
 
-    <target name="debug" >
+	<target name="gen-webinos">
 
-	<!-- Creates app/assets/webinos.zip -->
-	<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
-	    <zipfileset
-		dir="${basedir}"
-		prefix="wp4"
+		<!-- Creates app/assets/webinos.zip -->
+		<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
+			<zipfileset dir="${basedir}" prefix="wp4" includes="
+			demo/policy.xml,
+			demo/startPzp.js,
+			node_modules/,
+			webinos/" excludes="
+			webinos/common/android/,
+			webinos/pzh/,
+			webinos/wrt/,
 
-		includes="
-		    demo/policy.xml,
-		    demo/startPzp.js,
-		    node_modules/,
-		    webinos/"
+			**/test/,
+			**/build/,
+			**/deps/,
+			**/.gitignore" />
+		</zip>
 
-		excludes="
-		    webinos/common/android/,
-		    webinos/pzh/,
-		    webinos/wrt/,
+		<!-- Creates demo/client/webinos.js -->
+		<ant dir="${basedir}/demo" target="gen-webinos-js" />
 
-		    **/test/,
-		    **/build/,
-		    **/deps/,
-		    **/.gitignore"/>
-	</zip>
+		<!-- Copies demo/client/webinos.js to wrt/assets folder -->
+		<copy file="${basedir}/demo/client/webinos.js" todir="${basedir}/webinos/common/android/wrt/assets/js" />
+	</target>
 
-	<!-- Creates demo/client/webinos.js -->
-	<ant dir="${basedir}/demo" target="gen-webinos-js"/>
+	<target name="gen-webinos-clean">
 
-	<!-- Copies demo/client/webinos.js to wrt/assets folder -->
-	<copy file="${basedir}/demo/client/webinos.js" todir="${basedir}/webinos/common/android/wrt/assets/js"/>
+		<!-- Removes app/assets/webinos.zip -->
+		<delete file="${basedir}/webinos/common/android/app/assets/modules/webinos.zip" />
 
-	<!-- Builds app/bin/app-debug.apk
-	    Can be installed with the command: adb install app/bin/app-debug.apk -->
-	<ant dir="${basedir}/webinos/common/android/wrt" target="debug"/>
+		<!-- Removes wrt/assets/js/webinos.js -->
+		<delete file="${basedir}/webinos/common/android/wrt/assets/js/webinos.js" />
+	</target>
 
-	<!-- Builds wrt/bin/wrt-debug.apk
-	    Can be installed with the command: adb install wrt/bin/wrt-debug.apk -->
-	<ant dir="${basedir}/webinos/common/android/app" target="debug"/>
+	<target name="debug" depends="gen-webinos">
 
-    </target>
+		<!-- Builds app/bin/app-debug.apk
+		Can be installed with the command: adb install app/bin/app-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/wrt" target="debug" />
+
+		<!-- Builds wrt/bin/wrt-debug.apk
+		Can be installed with the command: adb install wrt/bin/wrt-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/app" target="debug" />
+
+	</target>
+
+	<target name="release" depends="gen-webinos">
+
+		<!-- Builds app/bin/app-debug.apk
+		Can be installed with the command: adb install app/bin/app-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/wrt" target="release" />
+
+		<!-- Builds wrt/bin/wrt-debug.apk
+		Can be installed with the command: adb install wrt/bin/wrt-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/app" target="release" />
+
+	</target>
+
+	<target name="clean" depends="gen-webinos-clean">
+
+		<!-- Builds app/bin/app-debug.apk
+		Can be installed with the command: adb install app/bin/app-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/wrt" target="clean" />
+
+		<!-- Builds wrt/bin/wrt-debug.apk
+		Can be installed with the command: adb install wrt/bin/wrt-debug.apk -->
+		<ant dir="${basedir}/webinos/common/android/app" target="clean" />
+
+	</target>
 </project>
