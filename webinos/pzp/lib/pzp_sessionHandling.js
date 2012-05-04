@@ -328,6 +328,7 @@
 				self.pzhId     = '';
 				self.sessionId = self.config.details.name;
 				self.rpcHandler.setSessionId(self.sessionId);
+				setupMessageHandler(self);
 
 				websocket.updateInstance(instance);
 
