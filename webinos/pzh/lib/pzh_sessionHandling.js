@@ -231,29 +231,8 @@
 				} 				
 				// Used for communication purpose. Address is used as PZP might have different IP addresses
 				self.connectedPzp[sessionId] = {'socket': conn,  'address': conn.socket.remoteAddress};
-				// Fetch details about connected pzp's
-				// Information to be sent includes address, id and indication which is a newPZP joining
-				var otherPzp = [], status;
-				for(var i in  self.connectedPzp) {
-					if (self.connectedPzp.hasOwnProperty(i)) {
-						// Special case for new pzp
-						if (i === sessionId) {
-							status = true;
-						} else {
-							status = false;
-						}
-						otherPzp.push({name: i, address:self.connectedPzp[i].address, newPzp: status});
-					}
-				}
-				// Send message to all connected pzp's about new pzp that has joined in
-				for(var i in self.connectedPzp) {
-					if (self.connectedPzp.hasOwnProperty(i)) {
-						msg = self.prepMsg(self.sessionId, i, 'pzpUpdate', otherPzp);
-						self.sendMessage(msg, i);
-					}
-				}
 
-				// Register PZP with message handler
+				// Register PZP with message handler	
 				msg = self.messageHandler.registerSender(self.sessionId, sessionId);
 				self.sendMessage(msg, sessionId);
 				
@@ -277,7 +256,33 @@
 			log(this.sessionId, 'ERROR ', '[PZH] Exception in processing recieved message ' + err);
 		}
 	}
-
+	
+	Pzh.prototype.sendPzpUpdate = function (sessionId, conn, port) {
+		// Fetch details about connected pzp's
+		// Information to be sent includes address, id and indication which is a newPZP joining
+		var self = this;
+		// Fetch details about connected pzp's
+		// Information to be sent includes address, id and indication which is a newPZP joining
+		var otherPzp = [], status;
+		for(var i in  self.connectedPzp) {
+			if (self.connectedPzp.hasOwnProperty(i)) {
+				// Special case for new pzp
+				if (i === sessionId) {
+					status = true;
+				} else {
+					status = false;
+				}
+				otherPzp.push({name: i, address:self.connectedPzp[i].address, port: port, newPzp: status});
+			}
+		}
+		// Send message to all connected pzp's about new pzp that has joined in
+		for(var i in self.connectedPzp) {
+			if (self.connectedPzp.hasOwnProperty(i)) {				
+				var msg = self.prepMsg(self.sessionId, i, 'pzpUpdate', otherPzp);
+				self.sendMessage(msg, i);
+			}
+		}	
+	}
 	/**
 	 * @description: Sets PZH URL id for storing information about QRCode
 	 * @param {function} cb: Callback to return result
@@ -350,7 +355,10 @@
 							self.sendMessage(msg, parse.from,conn);
 						}
 					});
-				}
+				} else if (parse.type === "prop" && parse.payload.status === "pzpDetails") {
+					log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Receiving details from PZP...');
+					self.sendPzpUpdate(parse.from, conn, parse.payload.message);				
+				} // information sent by connecting PZP about services it supports. These details are then used by findServices
 				// information sent by connecting PZP about services it supports. These details are then used by findServices 
 				else if(parse.type === "prop" && parse.payload.status === 'registerServices') {
 					log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Receiving Webinos Services from PZP...');

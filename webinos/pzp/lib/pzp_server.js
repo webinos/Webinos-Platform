@@ -29,59 +29,68 @@ var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.locat
 var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
 var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));        
 var logs         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
+var common       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
 var rpc          = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
 var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
 
 pzp_server.connectOtherPZP = function (pzp, msg) {
-	var self = pzp, client;
-	configuration.fetchKey(self.config.conn.key_id, function(key) {
+	var parent = pzp, client;
+	configuration.fetchKey(parent.config.conn.key_id, function(key) {
 		var options = {
 				key:  key,
-				cert: self.config.conn.cert,
-				crl:  self.config.master.crl,
-				ca:   self.config.master.cert
+				cert: parent.config.conn.cert,
+				crl:  parent.config.master.crl,
+				ca:   parent.config.master.cert
 				};
 
 		client = tls.connect(msg.port, msg.address, options, function () {
 			if (client.authorized) {
-				logs('INFO', "[PZP - " + self.sessionId + "] Client: Authorized & Connected to PZP: " + msg.address );
-				self.connectedPzp[msg.name] = {socket: client};
-				
-				var msg1 = self.messageHandler.registerSender(self.sessionId, msg.name);
-				self.sendMessage(msg1, msg.name); 
+				parent.status = 'peer_mode';
+				logs('INFO', "[PZP - " + parent.sessionId + "] Client: Authorized & Connected to PZP: " + msg.address + " name = " + msg.name);
+				parent.connectedPeer[msg.name] = {socket: client};
+				var msg1 = parent.messageHandler.registerSender(parent.sessionId, msg.name);
+				parent.sendMessage(msg1, msg.name);
 			} else {
-				logs('INFO', "[PZP - " + self.sessionId + "]  Client: Connection failed, first connect with PZH to download certificated");
+				logs('INFO', "[PZP - " + parent.sessionId + "]  Client: Connection failed, first connect with PZH to download certificated");
 			}
 		});
 
 		client.on('data', function (data) {
 			try {
 				client.pause();
-				for(var i = 1; i < data1.length-1; i += 1) {
-					if (data1[i] === '') {
-						continue
+				
+				common.processedMsg(parent, data, function(data2) {
+					for (var j = 1 ; j < (data2.length-1); j += 1 ) {
+						if (data2[j] === '') {
+							continue;
+						}
+						var parse = JSON.parse(data2[j]);
+						if(parse.type === 'prop' && parse.payload.status === 'foundServices') {
+							logs('INFO', '[PZP -'+parent.sessionId+'] Received message about available remote services.');
+							parent.serviceListener && parent.serviceListener(parse.payload);
+						} else {
+							parent.messageHandler.onMessageReceived(parse, parse.to);
+						}
 					}
-					var parse = JSON.parse(data1[i]);
-					self.messageHandler.onMessageReceived(parse, parse.to);
-					client.resume();
-					
-				}
+				});
+				
+				client.resume();
 			} catch (err) {
-				logs('ERROR', "[PZP - " + self.sessionId + "]  Client: Exception" + err);
+				logs('ERROR', "[PZP - " + parent.sessionId + "]  Client: Exception" + err);
 			}
 		});
 
 		client.on('end', function () {
-			logs('INFO', "[PZP - " + self.sessionId + "]  Client: Connection terminated");
+			logs('INFO', "[PZP - " + parent.sessionId + "]  Client: Connection terminated");
 		});
 
 
 		client.on('error', function (err) {
-			logs('ERROR', "[PZP - " + self.sessionId + "]  Client:  " + err);			
+			logs('ERROR', "[PZP - " + parent.sessionId + "]  Client:  " + err);			
 		});
 
 		client.on('close', function () {
-			logs('INFO', "[PZP - " + self.sessionId + "] Client:  Connection closed by PZP Server");
+			logs('INFO', "[PZP - " + parent.sessionId + "] Client:  Connection closed by PZP Server");
 		});
 	});
 };
@@ -100,7 +109,7 @@ pzp_server.startServer = function (self, callback) {
 		};
 
 		server = tls.createServer(config, function (conn) {
-			var cn, sessionId;
+			var cn, clientSessionId;
 			/* If connection is authorized:
 			* SessionId is generated for PZP. Currently it is PZH's name and 
 			* PZP's CommonName and is stored in form of PZH::PZP.
@@ -109,15 +118,15 @@ pzp_server.startServer = function (self, callback) {
 			* of form {status:'Auth', message:self.connected_client} and type as prop.
 			*/
 			if (conn.authorized) {
-				cn = conn.getPeerCertificate().subject.CN;			
-				sessionId = self.pzhId + '/' +cn.split(':')[1];
-				utils.debug(2, "PZP (" + self.sessionId +") Server: Client Authenticated " + sessionId) ;
-			
-				if(self.connectedPzp[sessionId]) {
-					self.connectedPzp[sessionId]= {socket: conn};
-				} else {
-					self.connectedPzp[sessionId]= {socket: conn, address: conn.socket.peerAddress.address, port: ''};
-				}
+				self.status = 'peer_mode';
+				var text = decodeURIComponent(conn.getPeerCertificate().subject.CN);
+				var cn = text.split(':')[1];
+				clientSessionId = self.pzhId + '/'+ cn; //self.pzhId + '/' +cn;
+				self.connectedPeer[clientSessionId]= {socket: conn};
+				logs(2, "PZP (" + self.sessionId +") Server: Client Authenticated " + clientSessionId) ;
+				var msg = self.messageHandler.registerSender(self.sessionId, clientSessionId);
+				self.sendMessage(msg, clientSessionId);				
+				
 			} 
 			
 			conn.on('connection', function () {
@@ -126,25 +135,38 @@ pzp_server.startServer = function (self, callback) {
 	
 			conn.on('data', function (data) {
 				try{
-					utils.processedMsg(self, data, 1, function(data2) {
-						for(var i = 1; i < data2.length-1; i += 1) {
-							if (data2[i] === '') {
-								continue
+					common.processedMsg(self, data, function(data2) {
+						for (var j = 1 ; j < (data2.length-1); j += 1 ) {
+							if (data2[j] === '') {
+								continue;
 							}
-							var parse = JSON.parse(data2[i]);
-							if (parse.type === 'prop' && parse.payload.status === 'pzpDetails') {
-								if(self.connectedPzp[parse.from]) {
-									self.connectedPzp[parse.from].port = parse.payload.message;
+							var parse = JSON.parse(data2[j]);
+// 							if(parse.type === "prop" && parse.payload.status === 'registerServices') {
+// 								log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Receiving Webinos Services from PZP...');
+// 								self.rpcHandler.addRemoteServiceObjects(parse.payload.message);
+// 							}
+							// Send findServices information to connected PZP..
+							if(parse.type === "prop" && parse.payload.status === 'findServices') {
+								logs(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Trying to send Webinos Services from this RPC handler to ' + parse.from + '...');
+								var services = self.rpcHandler.getAllServices(parse.from);
+								var msg = {'type':'prop', 'from':self.sessionId, 'to':parse.from, 'payload':{'status':'foundServices', 'message':services}};
+								msg.payload.id = parse.payload.message.id;
+								self.sendMessage(msg, parse.from);
+								logs(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Sent ' + (services && services.length) || 0 + ' Webinos Services from this RPC handler.');
+							}	
+							else if (parse.type === 'prop' && parse.payload.status === 'pzpDetails') {
+								if(self.connectedPeer[parse.from]) {
+									self.connectedPeer[parse.from].port = parse.payload.message;
 								} else {
-									utils.debug(2, "PZP (" + self.sessionId +") Server: Received PZP"+
+									logs(2, "PZP (" + self.sessionId +") Server: Received PZP"+
 									"details from entity which is not registered : " + parse.from);
 								}
 							} else {
-								rpc.setSessionId(self.sessionId);
-								utils.sendMessageMessaging(self, self.messageHandler, parse);
+								self.messageHandler.onMessageReceived( parse, parse.to);
 							}
 						}
-					});
+					});					
+					
 				} catch(err) {
 					utils.debug(1, 'PZP (' + self.sessionId + ' Server: Exception' + err);
 
@@ -155,7 +177,7 @@ pzp_server.startServer = function (self, callback) {
 				logs('INFO', "[PZP Server - " + self.sessionId + "] connection end");
 			});
 
-			// It calls removeClient to remove PZP from connected_client and connectedPzp.
+			// It calls removeClient to remove PZP from connected_client and connectedPeer.
 			conn.on('close', function() {
 				logs('ERROR', "[PZP Server - " + self.sessionId + "] socket closed");
 			});

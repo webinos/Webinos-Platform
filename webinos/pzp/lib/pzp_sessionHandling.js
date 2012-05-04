@@ -86,7 +86,8 @@
 		
 		// load specified modules
 		this.rpcHandler.loadModules(modules);
-		this.tried = true;
+		this.connectedPeer = [];
+		this.status = 'virgin_mode'; // default mode
 	};
 	
 	Pzp.prototype.prepMsg = function(from, to, status, message) {
@@ -121,10 +122,10 @@
 				self.connectedWebApp[address].socket.pause();
 				self.connectedWebApp[address].sendUTF(JSON.stringify(message));
 				self.connectedWebApp[address].socket.resume();
-			} else if (self.connectedPzp[address]) {
-				self.connectedPzp[address].socket.pause();
-				self.connectedPzp[address].socket.write(buf);
-				self.connectedPzp[address].socket.resume();
+			} else if(self.connectedPeer[address]){
+				self.connectedPeer[address].socket.pause();
+				self.connectedPeer[address].socket.write(buf);
+				self.connectedPeer[address].socket.resume();
 			} else if(self.connectedPzh[address]){
 				self.connectedPzh[address].socket.pause();
 				self.connectedPzh[address].socket.write(buf);
@@ -218,7 +219,7 @@
 		if(!self.connectedPzp.hasOwnProperty(self.sessionId)) {
 			log('INFO','[PZP -'+ self.sessionId+'] Connected to PZH & Authenticated');
 			self.pzhId = cn;
-			
+			self.state = 'connected'; 
 			self.sessionId = self.pzhId + "/" + self.config.details.name;
 			self.rpcHandler.setSessionId(self.sessionId);
 			self.connectedPzh[self.pzhId] = {socket: client};
@@ -325,20 +326,18 @@
 				delete self.connectedPzh[self.pzhId];
 				delete self.connectedPzp[self.sessionId];
 	
-				self.pzhId     = '';
-				self.sessionId = self.config.details.name;
-				self.rpcHandler.setSessionId(self.sessionId);
-
-				websocket.updateInstance(instance);
-
-				for ( webApp in self.connectedWebApp ) {
-					if (self.connectedWebApp.hasOwnProperty(webApp)) {
-						var addr = self.sessionId + '/' + websocket.webId;
-						websocket.webId += 1;
-						websocket.connectedApp[addr] = self.connectedWebApp[webApp];
-						var payload = {type:"prop", from:self.sessionId, to: addr, payload:{status:"registeredBrowser"}};
-						websocket.connectedApp[addr].sendUTF(JSON.stringify(payload));
-					}
+				if (self.status === 'peer_mode') {
+					// Let see what to do?
+					log('INFO', '[PZP -'+self.sessionId+']PZP in HUBLESS PEER MODE');					
+					
+				} else if (self.status === 'connected') {
+					self.pzhId     = '';
+					self.sessionId = self.config.details.name;
+					log('INFO', '[PZP -'+self.sessionId+']PZP in ONLY HUBLESS MODE');					
+					self.connectedApp();
+					self.rpcHandler.setSessionId(self.sessionId);
+					self.setupMessageHandler(self);
+					self.state = 'hubless';				
 				}
 			}			
 			// TODO: Try reconnecting back to server but when.
@@ -354,6 +353,7 @@
 				self.sessionId = self.config.details.name;
 				self.rpcHandler.setSessionId(self.sessionId);
 				setupMessageHandler(self);
+				self.connectedApp();
 				log('INFO', '[PZP -'+self.sessionId+'] virgin PZP mode');
 				callback('startedPZP');
 			}
@@ -364,7 +364,31 @@
 		});
 		
 	};
-	
+
+	Pzp.prototype.connectedApp = function(connection) {
+		var self = this;
+		if(typeof self !== "undefined" && typeof self.sessionId !== "undefined") {
+			var id, connectedPzp=[];
+			if (connection !== "undefined") {
+				self.sessionWebAppId  = self.sessionId+ '/'+ self.sessionWebApp;
+				self.sessionWebApp  += 1;
+				self.connectedWebApp[self.sessionWebAppId] = connection;
+				var payload = {'pzhId':self.pzhId,'connectedPzp': self.connectedPzpIds,'connectedPzh': self.connectedPzhIds};
+				self.prepMsg(self.sessionId, self.sessionWebAppId, 'registeredBrowser', payload);
+			} else {
+				for (var key in connectedWebApp) {
+					conn = connectedWebApp[key];
+					key = self.sessionId+ '/' + key.split('/')[1];
+					connectedWebApp[key] = conn;
+					var payload = {'pzhId':self.pzhId,'connectedPzp': self.connectedPzpIds,'connectedPzh': self.connectedPzhIds};
+					self.prepMsg(self.sessionId, key, 'registeredBrowser', payload);
+				}
+				
+			}
+			
+		}
+	};
+
 	Pzp.prototype.processMsg = function(data, callback) {
 		var self = this;
 		var  msg, i ;
@@ -398,8 +422,10 @@
 								if(msg[i].newPzp) {
 									pzp_server.connectOtherPZP(self, msg[i]);
 								}
-								self.wsServerMsg("Pzp Joined " + msg[i].name);
-								self.prepMsg(self.sessionId, self.sessionWebAppId, 'update', {pzp: msg[i].name });
+								if (self.sessionWebAppId !== "undefined") {
+									self.wsServerMsg("Pzp Joined " + msg[i].name);
+									self.prepMsg(self.sessionId, self.sessionWebAppId, 'update', {pzp: msg[i].name });
+								}
 							}
 							
 						}
@@ -457,15 +483,16 @@
 						log('INFO', '[PZP -'+ client.sessionId+'] Connecting Address: ' + resolvedAddress);
 						client.address = resolvedAddress;
 						try {
+							client.status = 'connecting';
 							client.connect(conn_key, conn_csr, function(result) {
 								if(result === 'startedPZP') {
-									websocket.startPzpWebSocketServer(config, function() {
+									websocket.startPzpWebSocketServer(client, config, function() {
 										client.update(callback);
 									});
 								} else if(result === 'startPZPAgain'){
 									client.connect(conn_key, null, function(result){
 										if (result === 'startedPZP') {
-											websocket.startPzpWebSocketServer(config, function() {
+											websocket.startPzpWebSocketServer(client, config, function() {
 													client.update(callback);
 											});
 										}

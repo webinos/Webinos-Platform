@@ -603,7 +603,8 @@
 			}
 			
 			// no connection to a PZH it seems, don't ask for remote services
-			if (!this.parent || !this.parent.pzhId) {
+			if (this.parent.connectedPeer != []) {
+			} else if (!this.parent ||  !this.parent.pzhId ) { 
 				deliverResults(results);
 				return;
 			}
@@ -623,7 +624,18 @@
 			})(results);
 			
 			// ask for remote service objects
-			this.parent.prepMsg(this.parent.sessionId, this.parent.pzhId, 'findServices', {id: callbackId});
+			if (this.parent.pzhId) {
+				this.parent.prepMsg(this.parent.sessionId, this.parent.pzhId, 'findServices', {id: callbackId});
+			} 
+			
+			if (this.parent.connectedPeer != []) {
+				for( var key in this.parent.connectedPeer) {
+					if (this.parent.connectedPeer.hasOwnProperty(key) && key !== this.parent.sessionId) {
+						this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
+						
+					}
+				}
+			}	
 		}
 	};
 	

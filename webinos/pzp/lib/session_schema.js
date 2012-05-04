@@ -193,6 +193,7 @@ checkTypeSchema = function(message) {
 		assert.strictEqual(validation.isError(), false);
 		return validation.isError();
 	} catch (err2) {
+		console.log('schema');
 		console.log(validation.getError());
 		console.log(validation.getError().errors);
 		return true;
