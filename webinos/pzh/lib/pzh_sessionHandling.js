@@ -138,7 +138,7 @@
 				log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Client ' + address + ' is not connected');
 			} 
 		} catch(err) {
-			log(self.sessionId, 'ERROR ','[PZH -'+ self.sessionId+'] Exception in sending packet ' + err);
+			log(self.sessionId, 'ERROR','[PZH -'+ self.sessionId+'] Exception in sending packet ' + err);
 			
 		}
 	};
@@ -181,7 +181,7 @@
 				var text = decodeURIComponent(cn);
 				data = text.split(':');
 			} catch(err) {
-				log(self.sessionId, 'ERROR ','[PZH  -'+self.sessionId+'] Exception in reading common name of peer PZH certificate ' + err);
+				log(self.sessionId, 'ERROR','[PZH  -'+self.sessionId+'] Exception in reading common name of peer PZH certificate ' + err);
 				return;
 			}
 			/**
@@ -192,7 +192,7 @@
 				try {
 					pzhId = data[1];
 				} catch (err1) {
-					log(self.sessionId, 'ERROR ','[PZH -'+self.sessionId+'] Pzh information in certificate is in unrecognized format ' + err1);
+					log(self.sessionId, 'ERROR','[PZH -'+self.sessionId+'] Pzh information in certificate is in unrecognized format ' + err1);
 					return;
 				}
 
@@ -220,7 +220,7 @@
 				try {
 					sessionId = self.sessionId+'/'+data[1];
 				} catch(err1) {
-					log(self.sessionId, 'ERROR ','[PZH  -' + self.sessionId + '] Exception in reading common name of PZP certificate ' + err1);
+					log(self.sessionId, 'ERROR','[PZH  -' + self.sessionId + '] Exception in reading common name of PZP certificate ' + err1);
 					return;
 				}
 				
@@ -272,9 +272,10 @@
 		try {
 			conn.pause();
 			this.processMsg(conn, data);
-			conn.resume();
 		} catch (err) {
-			log(this.sessionId, 'ERROR ', '[PZH] Exception in processing recieved message ' + err);
+			log(this.sessionId, 'ERROR', '[PZH] Exception in processing recieved message ' + err);
+		} finally {
+			conn.resume();
 		}
 	}
 
@@ -318,7 +319,7 @@
 			});
 			
 		} catch (err) {
-			log(self.sessionId, 'ERROR ', '[PZH -'+self.sessionId+'] Error Signing Client Certificate' + err);
+			log(self.sessionId, 'ERROR', '[PZH -'+self.sessionId+'] Error Signing Client Certificate' + err);
 			cb.call(self, "Could not create client certificate");
 		}
 	}
