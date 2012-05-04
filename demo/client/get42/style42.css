@@ -1,0 +1,105 @@
+@charset "UTF-8";
+/* CSS Document */
+
+			html, body{
+			padding: 0;
+			margin: 0;
+			font-family: Helvetica, Arial, sans-serif;
+			font-size: 12px;
+			font-stretch:condensed;
+			
+			}
+			html{
+				background:-moz-linear-gradient(top, #055084, #0071BC); /* Firefox */
+				background:-webkit-gradient(linear, left top, left bottom, from(#055084), to(#0071BC)); /* Safari, Chrome */
+				background:-webkit-linear-gradient(top, #055084, #0071BC); /* Safari, Chrome - neue Syntax! */
+				background:-o-linear-gradient(top, #055084, #0071BC); /* Opera */
+				background:-ms-linear-gradient(top, #055084, #0071BC); /* IE */
+				background:linear-gradient(top, #055084, #0071BC); /* W3C Standard */
+				background-color:#0879a9;
+				margin: 0 0 0 0;
+				padding: 0 0 0 0;
+			}
+				
+			body{
+				margin: 0 0 0 0;
+				padding: 0 0 0 0;
+				background-repeat: repeat-x; background-position:top;
+				
+				}
+			p{margin: 0; padding:0; line-height: 140%} 
+			
+			#status{
+				background-color: #fff;
+				opacity: 0.8;
+				/*width: 650px;*/
+				padding: 5px;
+				color: #626262;
+				position: fixed;/*absolute;*/ 
+				bottom: 10px;
+				font-size: 10px;
+				text-transform:capitalize;
+				text-transform:uppercase;
+				margin: 0 auto 0 auto 0;;
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				font-weight:bold;
+	
+			}
+			
+			select{
+				-moz-border-radius:4px; /* Firefox */
+				-webkit-border-radius:4px; /* Safari, Chrome */
+				-khtml-border-radius:4px; /* Konqueror */
+				border-radius:4px; /* CSS3 */
+				border: 1px solid #a0a0a0;
+				
+				background: -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				 background:  -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)); /* Safari, Chrome*/
+				 background: -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+				
+				
+				background:  linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
+				
+				color: #000;
+				font-family: Helvetica, Arial, sans-serif;
+				font-stretch:condensed;
+				font-weight:bold;
+				font-size:12px;
+				width: 250px;
+				box-shadow: #000000 0px 0px 5px;
+				text-transform:uppercase;
+			}
+			
+			
+			select[disabled],input[disabled]{
+				opacity: 0.5;
+				}
+			h2{
+				font-size: 14px;
+				color: #ffff00;
+				text-shadow: #000000 1px 1px 2px;
+				text-transform:uppercase;
+				
+				}
+			#message{
+					font-weight:normal;
+			}
+			
+			
+			h3{
+				text-transform:uppercase;
+				font-weight: normal;
+				color: #ffff00;
+				font-size: 11px;
+				border-bottom: 1px #fff dotted;
+				text-shadow: #000000 1px 1px 2px;
+				width: 250px;
+				
+				}
+				#info p{font-size: 14px; margin: 0; padding 0;}
+			

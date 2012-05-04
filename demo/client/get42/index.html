@@ -1,17 +1,15 @@
 <html>
 <head>
-<title>PZP Testbed</title>
+<title>get42 example</title>
         <link rel="icon" href="vehicle/webinos.ico" type="image/x-icon">
-        <script type="text/javascript" src="./webinos.js"></script>
-<!--        <script type="text/javascript" src="./jsrender.js"></script>  --> 
-        <link rel="stylesheet" type="text/css" href="./jquery-ui-1.8.16.custom.css"/>
-        <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-        <script type="text/javascript" src="./jquery-1.7.2.min.js"></script>
-        <script type="text/javascript" src="./jquery-ui.js"></script>
+        <script type="text/javascript" src="../webinos.js"></script>
+        <link rel="stylesheet" type="text/css" href="../jquery-ui-1.8.16.custom.css"/>
+        <link rel="stylesheet" type="text/css" href="style42.css" media="screen"/>
+        <script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="../jquery-ui.js"></script>
         <script type="text/javascript">
                 $(document).ready(function() {
-                                $("#tabs").tabs();
-                                $('#get42_example button').button();
+                                $('.button').button();
                                 
                                 function logMessage(msg) {
                                 	if (msg) {
@@ -19,18 +17,10 @@
                                 	}
                                 }
 
-                                function fillPZAddrs(data) {
-                                    var pzpId = data.from;
-                                    var pzhId, connectedPzh , connectedPzp;
-                                    if (pzpId !== "virgin_pzp") {
-                                      pzhId = data.payload.message.pzhId;                                     
-                                      connectedPzp = data.payload.message.connectedPzp; // all connected pzp
-                                      connectedPzh = data.payload.message.connectedPzh; // all connected pzh
-                                      
-                                      logMessage('registeredBrowser msg from ' + pzpId);
-                                    }
+                                function registeredListener(data) {
+                                    logMessage('registeredBrowser msg from ' + data.from);
                                 }
-                                webinos.session.addListener('registeredBrowser', fillPZAddrs);
+                                webinos.session.addListener('registeredBrowser', registeredListener);
                                 
                                 function updatePZAddrs(data) {
                                     if(typeof data.payload.message.pzp !== "undefined") {
@@ -46,30 +36,6 @@
                                 }
                                 webinos.session.addListener('info', printInfo);
                                 
-                $('#startPZP').bind('click', function() {
-                                var config ='country='+ document.getElementById('pzpcountry').value + '\n' +
-                                        'state='+ document.getElementById('pzpstate').value + '\n' +
-                                        'city='+ document.getElementById('pzpcity').value + '\n' +
-                                        'organization='+ document.getElementById('pzporg').value + '\n' +
-                                        'organizationUnit='+ document.getElementById('pzporgunit').value + '\n' +
-                                        'common='+ document.getElementById('pzpcommon').value + '\n' +
-                                        'email='+ document.getElementById('pzpemail').value + '\n' +
-                                        'days='+ document.getElementById('pzpdays').value + '\n';
-
-                        var payload = {status: 'startPzp', 
-                                servername: document.getElementById('pzpservername').value,
-                                serverport: document.getElementById('pzpserverport').value,
-                                code:  document.getElementById('pzpcode').value,
-                                modules: [{name:'get42', params: [23]},
-				      {name:'contacts', params:[0]},
-				      {name:'context', params:[0]},
-				      {name:'geolocation', params:[0]}
-				], // FIXME just for testing, need gui to configure modules
-                                value: config}; 
-                        
-                        var options = {type: 'prop', payload: payload};
-                        webinos.session.message_send(options);
-                });
                 
                 $('#disconnectPZP').bind('click', function() {
                         var options = {type: 'prop', payload: {status:'disconnectPzp'}};
@@ -127,8 +93,7 @@
         </script>
 </head>
 <body>
-<center><div id="header"> <h1><img src="testbed_logo.png"></h1> </div></center>
-        <div id = "get42_example" style="background-color:#0879a9">
+        <div id="get42_example" style="background-color:#0879a9">
 				<table
 					style="background-color: lightgray; border: 3px solid #0879a9">
 					<tr>
@@ -168,5 +133,14 @@
 					</tr>
 				</table>
 			</div>
+
+<div id="status">STATUS: <span id="message"></span></div>
+<script type="text/javascript">
+$('#status').mouseenter(function(){
+	var that = $(this);
+	var right = that.css("right");
+	that.css("right",(right==="0px")?"":"0px");
+});
+</script>
 </body>
 </html>
