@@ -43,14 +43,16 @@ var bootstrap = io.connect('/bootstrap');
 
 /* taken and changed from the orginal RPC client: webinos.js */
 
-function write(text, responseto, msgid) {
-	channel.send(JSON.stringify(text));
+var messageHandler = {
+    write: function(text, responseto, msgid) {
+    	channel.send(JSON.stringify(text));
+    }
 }
 
 if (typeof webinos === 'undefined') webinos = {};
 
 webinos.rpc = new RPCHandler;
-webinos.rpc.setWriter(write);
+webinos.rpc.setMessageHandler(messageHandler);
 
 channel.on('message', function (message) {
 	webinos.rpc.handleMessage(JSON.parse(message));
