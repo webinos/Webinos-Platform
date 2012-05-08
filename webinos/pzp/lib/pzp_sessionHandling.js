@@ -236,14 +236,14 @@
 			
 			var msg = self.messageHandler.registerSender(self.sessionId, self.pzhId);
 			self.sendMessage(msg, self.pzhId);
-			
+
+			var localServices = self.rpcHandler.getRegisteredServices();
+			self.prepMsg(self.sessionId, self.pzhId, 'registerServices', localServices);
+			log('INFO', '[PZP -'+ self.sessionId+'] Sent msg to register local services with pzh');
+
 			pzp_server.startServer(self, function() {
 				// The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP's
-				self.prepMsg(self.sessionId, self.pzhId, 'pzpDetails', self.pzpServerPort);				
-				var localServices = self.rpcHandler.getRegisteredServices();
-				self.prepMsg(self.sessionId, self.pzhId, 'registerServices', localServices);
-				log('INFO', '[PZP -'+ self.sessionId+'] Sent msg to register local services with pzh');
-			
+				self.prepMsg(self.sessionId, self.pzhId, 'pzpDetails', self.pzpServerPort);
 			});
 			callback.call(self, 'startedPZP');
 		}
@@ -328,16 +328,16 @@
 
 				if (self.status === 'peer_mode') {
 					// Let see what to do?
-					log('INFO', '[PZP -'+self.sessionId+'] PZP in HUBLESS PEER MODE');					
+					log('INFO', '[PZP -'+self.sessionId+'] PZP in HUBLESS PEER MODE');
 					
 				} else if (self.status === 'connected') {
 					self.pzhId     = '';
 					self.sessionId = self.config.details.name;
-					log('INFO', '[PZP -'+self.sessionId+'] PZP in ONLY HUBLESS MODE');					
+					log('INFO', '[PZP -'+self.sessionId+'] PZP in ONLY HUBLESS MODE');
 					self.connectedApp();
 					self.rpcHandler.setSessionId(self.sessionId);
 					setupMessageHandler(self);
-					self.status = 'hubless';				
+					self.status = 'hubless';
 				}
 			}			
 			// TODO: Try reconnecting back to server but when.
@@ -354,8 +354,9 @@
 				self.rpcHandler.setSessionId(self.sessionId);
 				setupMessageHandler(self);
 				self.connectedApp();
-				log('INFO', '[PZP -'+self.sessionId+'] virgin PZP mode');
+				log('INFO', '[PZP -'+self.sessionId+'] PZP in only HUBLESS mode');
 				callback('startedPZP');
+				self.status = 'hubless';
 			}
 		});
 
