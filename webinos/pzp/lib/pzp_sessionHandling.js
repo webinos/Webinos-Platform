@@ -219,7 +219,7 @@
 		if(!self.connectedPzp.hasOwnProperty(self.sessionId)) {
 			log('INFO','[PZP -'+ self.sessionId+'] Connected to PZH & Authenticated');
 			self.pzhId = cn;
-			self.state = 'connected'; 
+			self.status = 'connected'; 
 			self.sessionId = self.pzhId + "/" + self.config.details.name;
 			self.rpcHandler.setSessionId(self.sessionId);
 			self.connectedPzh[self.pzhId] = {socket: client};
@@ -325,19 +325,19 @@
 			
 				delete self.connectedPzh[self.pzhId];
 				delete self.connectedPzp[self.sessionId];
-	
+
 				if (self.status === 'peer_mode') {
 					// Let see what to do?
-					log('INFO', '[PZP -'+self.sessionId+']PZP in HUBLESS PEER MODE');					
+					log('INFO', '[PZP -'+self.sessionId+'] PZP in HUBLESS PEER MODE');					
 					
 				} else if (self.status === 'connected') {
 					self.pzhId     = '';
 					self.sessionId = self.config.details.name;
-					log('INFO', '[PZP -'+self.sessionId+']PZP in ONLY HUBLESS MODE');					
+					log('INFO', '[PZP -'+self.sessionId+'] PZP in ONLY HUBLESS MODE');					
 					self.connectedApp();
 					self.rpcHandler.setSessionId(self.sessionId);
-					self.setupMessageHandler(self);
-					self.state = 'hubless';				
+					setupMessageHandler(self);
+					self.status = 'hubless';				
 				}
 			}			
 			// TODO: Try reconnecting back to server but when.

@@ -602,9 +602,8 @@
 				results[i].serviceAddress = sessionId; // This is source addres, it is used by messaging for returning back
 			}
 			
-			// no connection to a PZH it seems, don't ask for remote services
-			if (this.parent.connectedPeer != []) {
-			} else if (!this.parent ||  !this.parent.pzhId ) { 
+			// no connection to a PZH & other connected Peers it seems, don't ask for remote services
+			if (!this.parent ||  !this.parent.pzhId || this.parent.connectedPeer.length !== 0 ) { 
 				deliverResults(results);
 				return;
 			}
