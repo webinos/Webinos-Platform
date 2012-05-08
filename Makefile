@@ -42,6 +42,6 @@ distclean:
 	-rm -f config.mk
 
 staticlib: config.gypi
-        $(MAKE) -C out BUILDTYPE=staticlib
+	$(MAKE) -C out BUILDTYPE=staticlib
 
 .PHONY: clean distclean check uninstall install install-includes install-bin all program staticlib dynamiclib
