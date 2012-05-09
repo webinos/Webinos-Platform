@@ -19,7 +19,7 @@
 # Copyright 2011 EPU - National Technical University of Athens
 #*******************************************************************************
 
-""" webinos-buildall is a utility that builds all module.gyp files found on the directory it runs from (and its children)."""
+""" webinos-buildall is a utility that builds all module.gyp or binding.gyp files found on the directory it runs from (and its children)."""
 
 import os
 import os.path
@@ -40,8 +40,8 @@ def build_projects(argv):
     print "Located webinos-gyp in %s" % webinosgyp
     for root, dirs, files in os.walk(os.getcwd()): # Walk directory tree
       for f in files:
-        if f.lower() == 'module.gyp':
-          print "Found a module.gyp file in %s" % root
+        if f.lower() == 'module.gyp' or f.lower() == 'binding.gyp':
+          print "Found a %s file in %s" % (f, root)
           os.chdir(root)
           subprocess.call(["%s" % webinosgyp,"make"])		  
   return True
