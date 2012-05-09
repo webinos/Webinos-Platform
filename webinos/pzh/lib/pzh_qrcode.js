@@ -23,7 +23,7 @@
 var crypto  = require('crypto');
 var path    = require('path');
 
-var webinosqr = exports;
+var pzh_qrcode = exports;
 
 function create(url, code, cb) {
     "use strict";
@@ -44,7 +44,7 @@ function generateRandomCode() {
 }
 
 // Generate me a random code.  I do hope this is secure...
-webinosqr.createQR = function(url, code, cb) {
+pzh_qrcode.createQR = function(url, code, cb) {
     "use strict";
     create(url,code,cb);
 };
@@ -52,7 +52,7 @@ webinosqr.createQR = function(url, code, cb) {
 // (1) returns a QR code 
 // (2) generates a new secret code, to be held by the PZH
 // (3) tells the PZH to be ready for a new PZP to be added
-webinosqr.addPzpQR = function(pzh, connection) {
+pzh_qrcode.addPzpQR = function(pzh, connection) {
     "use strict";
     var code = generateRandomCode();
 
@@ -87,7 +87,7 @@ webinosqr.addPzpQR = function(pzh, connection) {
 
 // The same function as the above, but without the messaging nonsense.
 // Due a refactor.
-webinosqr.addPzpQRAgain = function(pzh, next) {
+pzh_qrcode.addPzpQRAgain = function(pzh, next) {
     "use strict";
     
     var code = generateRandomCode();

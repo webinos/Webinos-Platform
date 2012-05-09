@@ -27,20 +27,16 @@ var path = require('path');
 var fs = require('fs');
 var os = require('os');
 
-var common = exports;
+var writeError = [];
+var message = '';
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+var session_common = exports;
 
-var validation   = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_schema.js')); // ADDED BY POLITO
+var validation   = require('./session_schema');
 
-// Done to make server run all the time
-process.on('uncaughtException', function(err){
-	console.log('Uncaught Exception ' + err);
-});
 
-common.debug = function(num, msg) {
+
+session_common.debug = function(num, msg) {
 	"use strict";
 	var info = true; // Change this if you want no prints from session manager
 	var debug = true;
@@ -55,14 +51,15 @@ common.debug = function(num, msg) {
 };
 var writeError = [];
 
-common.debugPzh = function(id, type, msg) {
+
+session_common.debugPzh = function(id, type, msg) {
 	var info = true; // Change this if you want no prints from session manager
 
 	if (id !== null && typeof id !== "undefined" && typeof writeError[id] === "undefined"){
-		var filepath = common.webinosConfigPath();
+		var filepath = session_common.webinosConfigPath();
 		var filename = path.join(filepath+'/logs/', id+'.json');
 		try{
-			path.exists(filename, function(status){
+			fs.exists(filename, function(status){
 				// If file does not exist, we create it , create write stream does not create file directly :) ..
 				if (!status) {
 					fs.writeFile(filename, function(){
@@ -93,7 +90,7 @@ common.debugPzh = function(id, type, msg) {
 /**
  * @description: returns root path of .webinos folder. In this folder all information is stored.
  */
-common.webinosConfigPath = function() {
+session_common.webinosConfigPath = function() {
 	"use strict";
 	var webinosDemo;
 	switch(os.type().toLowerCase()){
@@ -128,7 +125,7 @@ common.webinosConfigPath = function() {
 
 /** @desription It removes the connected PZP/Pzh details.
  */
-common.removeClient = function(self, conn) {
+session_common.removeClient = function(self, conn) {
 	"use strict";
 	var i, delId, delPzhId;
 
@@ -146,8 +143,7 @@ common.removeClient = function(self, conn) {
  * It removes appended # in the message. This is appended at both end to identify start and end of message.
  * Also message verify is done based on schema. 
  */
-var message = '';
-common.processedMsg = function(self, data, callback) {
+session_common.processedMsg = function(self, data, callback) {
 	"use strict";
 	var msg = data.toString('utf8');
 	var dataLen = 1;
@@ -199,7 +195,7 @@ common.processedMsg = function(self, data, callback) {
 /**
  * @description: It uses both resolve and lookup to fetch IP address. Used before connecting to pzh
  */
-common.resolveIP = function(serverName, callback) {
+session_common.resolveIP = function(serverName, callback) {
 	if(net.isIP(serverName) !== 0) {		
 		callback(serverName);
 	} else {

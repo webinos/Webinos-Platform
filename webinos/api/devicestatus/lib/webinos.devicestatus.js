@@ -1,13 +1,9 @@
 (function () {
 	"use strict";
-	var path = require('path');
-	var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-	
-	var pmlib = require(path.join(webinosRoot,dependencies.manager.policy_manager.location, 'lib/policymanager.js'));
-	var nativeDeviceStatus = require(path.join(__dirname, '..', 'src/build/Release/nativedevicestatus.node'));
-	
+	var webinos = require('webinos')(__dirname);
+	var nativeDeviceStatus = process.binding('nativedevicestatus'),
+	pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'),
+	policyManager;
 	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation,
 	policyManager;
 
