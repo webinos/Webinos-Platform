@@ -28,21 +28,17 @@
   var path = require('path');
   var moduleRoot = path.resolve(__dirname, '../') + '/';
 
-  require(moduleRoot +'/lib/AsciiArt.js')
+  require('./AsciiArt')
 
-  var commonPaths = require(moduleRoot + '/lib/commonPaths.js');
+  var commonPaths = require('./commonPaths');
   if (commonPaths.storage === null){
     console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
     return;
   }
-  require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+  require('./storageCheck')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 
-  var moduleDependencies = require(moduleRoot + '/dependencies.json');
-  var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-  var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
-
-  var ServiceDiscovery = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.servicedisco.js')).ServiceDiscovery;
+  var ServiceDiscovery = webinos_.global.require(webinos.global.api['service_discovery']).ServiceDiscovery;
   var webinosServiceDiscovery = null;
 
 
@@ -51,7 +47,8 @@
   var databasehelper = require('JSORMDB');
   bufferDB = new databasehelper.JSONDatabase({path : bufferpath, transactional : false});
 
-  sessionPzp = require(webinosRoot + '/pzp/lib/pzp_sessionHandling.js');
+  sessionPzp =   webinos_.global.require(webinos.global.pzp.location, 'lib/webinos_pzp').session;
+
   var sessionInstance =null;
 
 

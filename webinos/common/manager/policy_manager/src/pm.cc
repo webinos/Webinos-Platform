@@ -233,6 +233,6 @@ extern "C" {
 	static void init (Handle<Object> target)  {
 		PolicyManagerInt::Init(target);  
 	}
-	NODE_MODULE(pm, init);
+	NODE_MODULE(node_pm, init);
 } 
 

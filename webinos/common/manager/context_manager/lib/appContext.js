@@ -27,9 +27,9 @@ if (typeof webinos.context.app === 'undefined')
 var path = require('path');
 var moduleRoot = path.resolve(__dirname, '../') + '/';
 
-require(moduleRoot +'/lib/AsciiArt.js')
+require('./AsciiArt');
 
-var commonPaths = require(moduleRoot + '/lib/commonPaths.js');
+var commonPaths = require('./commonPaths');
 if (commonPaths.storage === null){
   console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
 }
@@ -40,7 +40,7 @@ if (commonPaths.storage === null) {
    console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
 }
 
-require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+require('./storageCheck')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 var databasehelper = require('JSORMDB');
 var appVocDBpath = path.resolve(commonPaths.storage + '/pzp/appContextVocabulary.json');

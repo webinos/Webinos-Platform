@@ -761,18 +761,7 @@
 	_RPCHandler.prototype.loadModules = function(modules) {
 		if (typeof module === 'undefined') return;
 		
-		var path = require('path');
-		var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-		var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-		//We need to add the trailing / or add it later on
-		var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location)+'/';
-		//sessionPzp = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_pzp.js'));
-//		if (contextEnabled) {
-//		if (require(webinosRoot + dependencies.manager.context_manager.location + 'data/contextSettings.json').contextEnabled){
-		  require(webinosRoot + dependencies.manager.context_manager.location); 
-			//modules.push(webinosRoot + dependencies.manager.context_manager.location);
-//		}
-		
+		var webinos = require('webinos')(__dirname);	
 		var _modules;
 		if (!modules){
 			_modules = [];
@@ -785,7 +774,7 @@
 
 		for (var i = 0; i < _modules.length; i++){
 			try{
-				var Service = require(webinosRoot + dependencies.api[_modules[i].name].location).Service;
+				var Service = webinos.global.require(webinos.global.api[_modules[i].name].location).Service;
 				this.registerObject(new Service(this, _modules[i].params));
 			}
 			catch (error){

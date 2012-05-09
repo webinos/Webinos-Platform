@@ -35,7 +35,12 @@
 			this.promptMan = this.bridge.load('org.webinos.impl.PromptImpl', this);
 		}
 		else {
-			this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
+			//this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
+			try {
+				this.pmNativeLib = process.binding('pm');
+			} catch (err) {
+				console.log("policy manager could not be loaded");
+			}
 			if (os.platform()==='win32'){
 				this.promptMan = require('../src/promptMan/build/Release/promptMan.node');
 			}

@@ -142,5 +142,5 @@ extern "C"
 		target->Set( String::NewSymbol( "watchPropertyChange" ), ft4->GetFunction() );
 	}
 
-	NODE_MODULE(nativedevicestatus, init);
+	NODE_MODULE(node_nativedevicestatus, init);
 }

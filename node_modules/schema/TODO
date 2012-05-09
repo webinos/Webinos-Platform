@@ -1,0 +1,117 @@
+-- schema.toJSON()
+	- acts as method to get the original raw schema as well, including functions, but without the schema specific changes
+	- recursive
+
+-- Shorten README, add separate doc page
+
+-- Implement JSON schema based on draft 3 (fork) - change topics:
+
+- 4.1 Review /schemas
+
+- If it will not include my idea, fork the draft and add a property _"inherits"_ that solves these problems: http://groups.google.com/group/json-schema/browse_thread/thread/a863dd593c50d338
+
+- 5.1 Union Types - it must be _clarified_ how to use (Does a combination of simple type, schema and URI make sense?) and to validate (Do I need to copy instances?) them.
+
+- What about using URIs instead of schemas? It is better to only use referencing with $ref
+_Discussion_: http://groups.google.com/group/json-schema/browse_thread/thread/95fb4006f1f92a40
+
+- 5.3 "patternProperties"
+
+- 5.4 "additionalProperties" now defaults to false.*
+
+- 5.6 "additionalItems" now defaults to what? If false *
+
+- 5.7 Replace "optional" by "required", that defaults to false.*
+
+- 5.8 Replace "requires" by "dependencies".
+
+- 5.11 Replace "maximumCanEqual" by "exclusiveMaximum"
+
+- 5.12 Replace "minimumCanEqual" by "exclusiveMinimum"
+
+- 5.15 "uniqueItems" and probably add support for complex types
+
+- 5.24 "disallow" - Should always be validated strictly, if it is a schema.
+
+- 6 Not planned to be implemented
+
+- 6.2.1/2 together with "$ref" must be part of the core schema.
+
+- 6.5 "default" must be part of the core schema
+
+*) Criticism: Just to make flawed "extends" definition work ...
+
+-- Enable use of both version 0.2 and 0.3
+
+-- Better documentation of the basic concepts and the whole API, especially own properties like adapters and fallbacks
+
+type, if tolerant cast does not work
+	set default...
+	add Error
+optional, if !optional && value not defined
+	set default...
+	add Error
+enum, if enum does not contain value
+	set default...
+	add Error
+maxDecimal, if too many decimals
+	round
+	set default...
+	add Error
+minimum/maximum, if our of range
+	set default/minimum/maximum...
+	add Error
+minLength, if too short
+	set default...
+	add Error
+maxLength, if too long
+	shorten
+	set default...
+	add Error
+pattern, if value does not match
+	set default...
+	add Error
+requires, if is string and property is missing
+	set default... for property
+	add Error
+additionalProperties, if false and found
+	remove
+	add Error
+minItems, if <
+	add Error
+maxItems, if >
+	remove
+	add Error
+
+Only add necessary fallbacks to reduce size!
+
+-- Be able to represent a validation report both as array (to get a simple list) and object tree that corresponds to the schema.
+
+XX Avoid duplicate reports
+
+-- schema.js needs to support async adapters and plugins. Use: Constraint checking against a persistence layer ...
+
+-- Optimization: Check if property exists _before_ calling the checker to reduce calls
+
+-- Include (packed) client version
+
+-- Make schema.js instantiable to allow running separate instances with different global options.
+Useful options are: default fallbacks, include/omit/choose i18n, version, recursion, 
+
+-- Rename _ mixins validateCall to callValidly, add applyValidly, constructValidly and - with good documentation - f
+
+XX Try to cast objects to arrays (if all own keys are integeric)
+
+-- Type check as in _.js?
+
+XX Remove underscore(x) dependency
+
+XX Can disable recursive support for not setting __id (enumerable: true) in older browsers
+
+-- new Schema(schema, forAll)
+
+-- Exactly rethink the API. env.Schema.f or env.f ?
+
+-- Make it compatible with client (test!)
+
+-- Better validation.error.id()

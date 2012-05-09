@@ -22,21 +22,15 @@ if (typeof webinos === 'undefined') {
 if (typeof webinos.context === 'undefined')
   webinos.context = {};
 
-var path = require('path');
-var moduleRoot = path.resolve(__dirname, '../') + '/';
-var moduleDependencies = require(moduleRoot + '/dependencies.json');
-var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
 var databasehelper = require('JSORMDB');
 
 //Initialize helper classes
 
 var Fs = require('fs');
 var vocdbpath = path.resolve(moduleRoot +'/data/contextVocabulary.json');
+webinos.context.DB = require('./contextDBManagerPZP')
 
-webinos.context.DB = require(moduleRoot +'lib/contextDBManagerPZP.js')
-var sessionPzp = require( webinosRoot + '/pzp/lib/pzp_sessionHandling.js');
-
+var sessionPzp =   webinos_.global.require(webinos.global.pzp.location, 'lib/pzp').session;
 webinos.context.saveContext = function(dataIn, success, fail) {
 
   var contextVocJSON = JSON.parse(Fs.readFileSync(vocdbpath, 'utf-8'));

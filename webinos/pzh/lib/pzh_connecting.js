@@ -26,16 +26,9 @@ var path      = require('path');
 var http      = require('http');
 var tls       = require('tls');
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var utils        = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var certificate  = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-var config       = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-
-var rpc          = require(path.join(webinosRoot, dependencies.rpc.location));
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/session').common.debugPzh;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
 
 // this is for connecting when PZH is in same farm
 pzhConnecting.connectOtherPZH = function(pzh, server, callback) {
@@ -50,7 +43,7 @@ pzhConnecting.connectOtherPZH = function(pzh, server, callback) {
 	
 	log(pzh.sessionId, 'INFO', '[PZH -'+self.sessionId+'] Connect Other PZH - '+serverName);
 	
-	config.fetchKey(self.config.conn.key_id, function(key_id) {
+	session.configuration.fetchKey(self.config.conn.key_id, function(key_id) {
 		try {
 			var caList = [], crlList = [];
 			caList.push(self.config.master.cert);

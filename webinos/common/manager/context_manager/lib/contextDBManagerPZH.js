@@ -16,6 +16,7 @@
 * Copyright 2012 EPU-National Technical University of Athens
 ******************************************************************************/
 (function() {
+  var webinos_ = require('webinos')(__dirname);
   if (typeof webinos === 'undefined') {
     webinos = {};
     console.log("webinos not found");
@@ -28,21 +29,18 @@
   var path = require('path');
   var moduleRoot = path.resolve(__dirname, '../') + '/';
 
-  require(moduleRoot +'/lib/AsciiArt.js')
+  require('./AsciiArt')
 
-  var commonPaths = require(moduleRoot + '/lib/commonPaths.js');
+  var commonPaths = require('./commonPaths');
   if (commonPaths.storage === null){
     console.log('[ERROR] User Storage Path not found.\nContext Manager disabled.', 'yellow+black_bg');
     return;
   }
-  require(moduleRoot + '/lib/storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
+  require('./storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 
-  var moduleDependencies = require(moduleRoot + '/dependencies.json');
-  var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-  var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
+  var ServiceDiscovery = webinos_.global.require(webinos.global.api['service_discovery']).ServiceDiscovery;
 
-  var ServiceDiscovery = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.servicedisco.js')).ServiceDiscovery;
   var webinosServiceDiscovery = null;
 
   var sqlite3 = require('sqlite3').verbose();
@@ -119,6 +117,6 @@
     );
   }
   exports.query = function(data, callback){
-    require(moduleRoot + '/lib/contextQueryDB.js')(db, data, callback);
+    require('./contextQueryDB')(db, data, callback);
   }
 })();
