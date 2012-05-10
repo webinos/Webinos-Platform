@@ -24,17 +24,11 @@
  * interface, logs in, and is shown a QR Code, which contains an authCode, 
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
-
+var webinos = require('webinos')(__dirname);
+var log = webinos.global.require(webinos.global.pzp.location, 'lib/session').common.debugPzh;
 
 
 var tokenAuth = exports;
-
-var path            = require('path');
-var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
 
 
 /** @description: This creates an auth code object which can be used to set a new

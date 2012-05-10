@@ -24,17 +24,14 @@ var pzp_server = exports;
 var tls   = require('tls');
 var path  = require('path');
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));        
-var logs         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-var rpc          = require(path.join(webinosRoot, dependencies.rpc.location, 'lib/rpc.js'));
-var configuration= require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+var webinos = require('webinos')(__dirname);
+var logs    = require('./session').common.debug;
+var session = require('./session');
+var rpc     = webinos.global.require(webinos.global.rpc.location, 'lib/rpc');
 
 pzp_server.connectOtherPZP = function (pzp, msg) {
 	var self = pzp, client;
-	configuration.fetchKey(self.config.conn.key_id, function(key) {
+	session.configuration.fetchKey(self.config.conn.key_id, function(key) {
 		var options = {
 				key:  key,
 				cert: self.config.conn.cert,
@@ -88,7 +85,7 @@ pzp_server.connectOtherPZP = function (pzp, msg) {
 
 pzp_server.startServer = function (self, callback) {
 	var server;
-	configuration.fetchKey(self.config.conn.key_id, function(key) {
+	session.configuration.fetchKey(self.config.conn.key_id, function(key) {
 		// Read server configuration for creating TLS connection
 		var config = {	
 				key: key,

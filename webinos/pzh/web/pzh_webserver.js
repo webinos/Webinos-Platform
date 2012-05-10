@@ -26,21 +26,18 @@ var path     = require('path');
 var fs       = require('fs');
 var webSocket= require('websocket').server;
 
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
+var webinos = require('webinos')(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, 'lib/session').common.debugPzh;
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
 
-var pzhapis      = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_internal_apis.js'));
-var farm         = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_farm.js'));
-var log          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debug;
-var configure    = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
-var cert         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var connecting   = require(path.join(webinosRoot, dependencies.pzh.location, 'lib/pzh_connecting.js'))
+var pzhapis = require('../lib/pzh_internal_apis');
+var farm    = require('../lib/pzh_farm');
 
 var authorized   = false;
 var rely ;
 var connection;
 var pzh = [];
+
 // Create HTTPS Server
 pzhWebInterface.start = function(hostname, callback) {
 	createWebInterfaceCertificate(farm.config, function(webServer){
@@ -95,8 +92,8 @@ pzhWebInterface.start = function(hostname, callback) {
 			}
 		});
 
-		server.listen(configure.webServerPort, hostname, function() {
-			log('INFO','[WEB SERVER] STARTED on '+ configure.webServerPort);
+		server.listen(session.configuration.webServerPort, hostname, function() {
+			log('INFO','[WEB SERVER] STARTED on '+ session.configuration.webServerPort);
 		});
 
 		server.on('error', function(err) {
@@ -108,8 +105,8 @@ pzhWebInterface.start = function(hostname, callback) {
 			response.end();
 		});
 
-		httpsServer.listen(configure.httpServerPort, hostname, function(){
-			log('INFO','[WEB SERVER] Http Server listening on '+ configure.httpServerPort);
+		httpsServer.listen(session.configuration.httpServerPort, hostname, function(){
+			log('INFO','[WEB SERVER] Http Server listening on '+ session.configuration.httpServerPort);
 			callback(true);
 		});
 
@@ -245,7 +242,7 @@ function authenticate(hostname, url) {
 				log('INFO','[WEB SERVER] Error '+ error);
 			} else if (!authUrl) {
 				log('INFO','[WEB SERVER] Authentication failed as url to redirect after authentication is missing');
-			} else {                                                                                      
+			} else {
 				result({cmd:'auth-url', payload: authUrl});
 			}
 		});
@@ -260,7 +257,6 @@ function fetchOpenIdDetails(req, res, callback){
 			res.end();
 		}
 		else if (userDetails.authenticated) {
-			console.log(userDetails);
 			var host;
 			var details = {country: '', username: '', email: '', image: ''};
 			if(req.headers.host.split(':')){
@@ -315,14 +311,14 @@ function fetchOpenIdDetails(req, res, callback){
  * */
 function createWebInterfaceCertificate (config, callback) {
 	if (config.webServer.cert === "") {
-		cert.selfSigned(config, 'PzhWebServer', function(status, selfSignErr, ws_key, ws_cert, csr ) {
+		session.certificate.selfSigned(config, 'PzhWebServer', function(status, selfSignErr, ws_key, ws_cert, csr ) {
 			if(status === 'certGenerated') {
-				configure.fetchKey(config.master.key_id, function(master_key) {
-					cert.signRequest(csr, master_key,  config.master.cert, 1, config.details.servername, function(result, signed_cert) {
+				session.configuration.fetchKey(config.master.key_id, function(master_key) {
+					session.certificate.signRequest(csr, master_key,  config.master.cert, 1, config.details.servername, function(result, signed_cert) {
 						if(result === 'certSigned') {
 							config.webServer.cert = signed_cert;
-							configure.storeKey(config.webServer.key_id, ws_key);
-							configure.storeConfig(config, function() {
+							session.configuration.storeKey(config.webServer.key_id, ws_key);
+							session.configuration.storeConfig(config, function() {
 								var wss = {
 									key : ws_key,
 									cert: config.webServer.cert,
@@ -344,7 +340,7 @@ function createWebInterfaceCertificate (config, callback) {
 				cert: config.webServer.cert,
 				ca  : config.master.cert
 				};
-			configure.fetchKey(config.webServer.key_id, function(ws_key){
+			session.configuration.fetchKey(config.webServer.key_id, function(ws_key){
 				wss.key = ws_key;
 				callback(wss);
 			});
