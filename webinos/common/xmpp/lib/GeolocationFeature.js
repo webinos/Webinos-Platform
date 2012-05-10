@@ -46,10 +46,15 @@ var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.lo
 
 var NS = "urn:services-webinos-org:geolocation";
 
-function GeolocationFeature(rpcHandler) {
+function GeolocationFeature(rpcHandler, connector) {
 	GenericFeature.GenericFeature.call(this, rpcHandler);
 
-	this.geo = new geolocation.Service(rpcHandler)
+    if (connector === undefined) {
+        this.geo = new geolocation.Service(rpcHandler, { 'connector': 'geoip'});
+    } else {
+	    this.geo = new geolocation.Service(rpcHandler, { 'connector': connector} );
+    }
+    
 	this.api = NS;
 	this.displayName = "GeolocationFeature" + this.id;
 	this.description = 'Geolocation Feature.';
