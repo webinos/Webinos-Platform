@@ -36,7 +36,7 @@ var client;
 function initialize(pzhConnection, jid, rpcHandler) {
 	connection = pzhConnection;
 	
-	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler);
+	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler, 'geoip');
 	geoLocationFeature.local = true;
 	geoLocationFeature.shared = false;
 	geoLocationFeature.device = jid;
