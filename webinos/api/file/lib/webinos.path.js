@@ -247,8 +247,29 @@ if (typeof module === "undefined") {
 	 * TODO Check if paths are absolute (resolve if not? fallback prefix?).
 	 */
 	exports.relative = function (from, to) {
-		var fromParts = exports.normalize(from).split("/"),
-			toParts = exports.normalize(to).split("/");
+		function trim (array) {
+			var start;
+			for (start = 0; start < array.length; start++) {
+				if (array[start] !== "") {
+					break;
+				}
+			}
+
+			var end;
+			for (end = array.length - 1; end >= 0; end--) {
+				if (array[end] !== "") {
+					break;
+				}
+			}
+
+			if (start > end)
+				return [];
+
+			return array.slice(start, end - start + 1);
+		}
+
+		var fromParts = trim(exports.normalize(from).substr(1).split("/")),
+			toParts = trim(exports.normalize(to).substr(1).split("/"));
 
 		var length = Math.min(fromParts.length, toParts.length),
 			samePartsLength = length;
