@@ -24,17 +24,11 @@
  * interface, logs in, and is shown a QR Code, which contains an authCode, 
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
-
+var webinos = require("webinos")(__dirname);
+var log = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debugPzh;
 
 
 var tokenAuth = exports;
-
-var path            = require('path');
-var moduleRoot      = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies    = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot     = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var log            = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
 
 
 /** @description: This creates an auth code object which can be used to set a new
@@ -54,7 +48,7 @@ tokenAuth.createAuthCounter = function(callback) {
     */
 	authCounter.setExpectedCode = function(code, cb) {
 		var self = this;
-		log(self.sessionId, 'INFO', "[PZH] New PZP expected, code: " + code);
+		log(self.sessionId, "INFO", "[PZH] New PZP expected, code: " + code);
 		self.status = true;
 		self.code = code;
 		var d = new Date();
@@ -69,7 +63,7 @@ tokenAuth.createAuthCounter = function(callback) {
      */
 	authCounter.unsetExpected = function(cb) {
 		var self = this;
-		log(self.sessionId, 'INFO', "[PZH] No longer expecting PZP with code " + self.code);
+		log(self.sessionId, "INFO", "[PZH] No longer expecting PZP with code " + self.code);
 		self.status = false;
 		self.code = null;
 		self.timeout = null;
@@ -82,12 +76,12 @@ tokenAuth.createAuthCounter = function(callback) {
 		var self = this;
 
 		if (!self.status) {
-			log(self.sessionId, 'INFO', "[PZH] Not expecting a new PZP");
+			log(self.sessionId, "INFO", "[PZH] Not expecting a new PZP");
 			cb(false);
 			return;
 		}
 		if (self.timeout < new Date()) {
-			log(self.sessionId, 'INFO', "[PZH] Was expecting a new PZP, timed out.");
+			log(self.sessionId, "INFO", "[PZH] Was expecting a new PZP, timed out.");
 			self.unsetExpected( function() {
 				cb(false);
 			});
@@ -104,19 +98,19 @@ tokenAuth.createAuthCounter = function(callback) {
 	authCounter.isExpectedCode = function(newcode, cb) {
 		var self = this;
 
-		log(self.sessionId, 'INFO', "[PZH] Trying to add a PZP, code: " + newcode);
+		log(self.sessionId, "INFO", "[PZH] Trying to add a PZP, code: " + newcode);
 
 		if (!self.status) {
-			log(self.sessionId, 'INFO', "[PZH] Not expecting a new PZP");
+			log(self.sessionId, "INFO", "[PZH] Not expecting a new PZP");
 			cb(false);
 			return;
 		}
 		if (self.code !== newcode) {
-			log(self.sessionId, 'INFO', "[PZH] Was expecting a new PZP, but code wrong");
+			log(self.sessionId, "INFO", "[PZH] Was expecting a new PZP, but code wrong");
 			self.guesses = self.guesses - 1;
 			if (self.guesses <= 0) {
 				//no more guesses
-				log(self.sessionId, 'INFO', "[PZH] Too many guesses, deleting code");
+				log(self.sessionId, "INFO", "[PZH] Too many guesses, deleting code");
 				self.unsetExpected( function() {
 					cb(false);
 				});
@@ -126,7 +120,7 @@ tokenAuth.createAuthCounter = function(callback) {
 		}
 
 		if (self.timeout < new Date()) {
-			log(self.sessionId, 'INFO', "[PZH] Was expecting a new PZP, code is right, but timed out.");
+			log(self.sessionId, "INFO", "[PZH] Was expecting a new PZP, code is right, but timed out.");
 			self.unsetExpected( function() {
 				cb(false);
 			});

@@ -78,7 +78,6 @@ public class RendererActivity extends Activity implements WrtManager.LaunchListe
 		webView.setWebViewClient(new WebViewClient(this));
 		webView.setWebChromeClient(new WebChromeClient(this));
 		socket = new ClientSocket(webView, widgetConfig, instanceId);
-        webView.addJavascriptInterface(socket, "__webinos");
 		webView.loadUrl(widgetConfig.getStartUrl());		
 
 		WrtManager.getInstance().put(instanceId, this);

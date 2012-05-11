@@ -1,9 +1,10 @@
 (function () {
 	"use strict";
-
+	var webinos = require('webinos')(__dirname);
+	var nativeDeviceStatus = process.binding('nativedevicestatus'),
+	pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'),
+	policyManager;
 	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation,
-	nativeDeviceStatus = (process.versions.node < "0.6.0" ) ? require('../src/build/default/nativedevicestatus') : require('../src/build/Release/nativedevicestatus'),
-	pmlib = require("../../../common/manager/policy_manager/lib/policymanager.js"),
 	policyManager;
 
 //Regular policyManger lib loading.. the library currently is loaded inside the getPropertyValue method
@@ -56,7 +57,7 @@
 		resourceInfo.apiFeature = "http://wacapps.net/api/devicestatus";
 		request.resourceInfo = resourceInfo;
 
-		policyManager.enforceRequest(request, errorCallback, successCallback, nativeDeviceStatus.getPropertyValue(prop));
+		policyManager.enforceRequest(request, errorCallback, successCallback, nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component));
 	};
 
 	DeviceStatusManager.prototype.watchPropertyChange = function (successCallback, errorCallback, prop, options) {

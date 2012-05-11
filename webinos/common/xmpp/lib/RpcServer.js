@@ -48,13 +48,15 @@ function configure(server, rpcHandler) {
 	  	});
 
 		//RPC writer for this connection
-		function writer(result, respto, msgid)	{
-			logger.trace('result(' + result + ')');
-			socket.send(JSON.stringify(result));
-			logger.trace('end result();')
+		var messageHandler = {
+    		write: function(result, respto, msgid)	{
+    			logger.trace('result(' + result + ')');
+    			socket.send(JSON.stringify(result));
+    			logger.trace('end result();')
+    		}
 		}
 		
-		rpcHandler.setWriter(writer);
+		rpcHandler.setMessageHandler(messageHandler);
 	});
 }
 

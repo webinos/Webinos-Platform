@@ -327,5 +327,5 @@ static void init(v8::Handle<v8::Object> target)
     CLocalContacts::Init(target);
 }
 // @see http://github.com/ry/node/blob/v0.2.0/src/node.h#L101
-NODE_MODULE(localcontacts, init);
+NODE_MODULE(node_localcontacts, init);
 }

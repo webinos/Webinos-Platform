@@ -20,48 +20,43 @@
 // which should no longer be part of the personal zone. It does not handle
 // revocation of a PZH.
 //
-// The main user of this module is the PZH's web interface.
+// The main user of this module is the PZH"s web interface.
 //
 
 
 var revoker = exports;
 
-var fs      = require('fs');
-var path    = require('path');
-var crypto  = require('crypto');
-var util    = require('util');
+var fs      = require("fs");
+var path    = require("path");
+var crypto  = require("crypto");
+var util    = require("util");
 
-var moduleRoot    = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies  = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot   = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var cert          = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_certificate.js'));
-var utils         = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js'));
-var log           = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_common.js')).debugPzh;
-var configuration = require(path.join(webinosRoot, dependencies.pzp.location, 'lib/session_configuration.js'));
+var webinos = require("webinos")(__dirname);
+var log     = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debug;
+var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 
 // Main interface: remove a PZP here.
-function revoke(pzh, pzpCert, callback) {
+function revoke(instance, pzpCert, callback) {
 	"use strict";
-	configuration.fetchKey(pzh.config.master.key_id, function(master_key) { 
-		cert.revokeClientCert(master_key, pzh.config.master.crl, pzpCert, function(result, crl) {
+	session.configuration.fetchKey(instance.config.master.key_id, function(master_key) {
+		session.certificate.revokeClientCert(master_key, instance.config.master.crl, pzpCert, function(result, crl) {
 			if (result === "certRevoked") {
 				/* This should work, if this works then we do not have to restart PZH
 				try {
-					pzh.conn.pair.credentials.context.addCRL(crl);
+					instance.conn.pair.credentials.context.addCRL(crl);
 				} catch (err) {
 					console.log(err);
 				}
 				*/
-				pzh.config.master.crl = crl;
-				configuration.storeConfig(pzh.config, function() {
+				instance.config.master.crl = crl;
+				session.configuration.storeConfig(instance.config, function() {
 					//TODO : trigger the PZH to reconnect all clients
 					//TODO : trigger a synchronisation with PZPs.
 					callback(true);
 				});
 
 			} else {
-				log(pzh.sessionId, "ERROR", "[PZH - "+pzh.sessionId+"] Failed to revoke client certificate [" + pzpCert + "]");
+				log(instance.sessionId, "ERROR", "[PZH - "+instance.sessionId+"] Failed to revoke client certificate [" + pzpCert + "]");
 				callback(false);
 			}
 		});
@@ -69,16 +64,16 @@ function revoke(pzh, pzpCert, callback) {
 }
 
 // internal wrapper for revocation.  Collects key and revokes the certificate.
-function removeRevokedCert(pzh, pzpid, config, callback) {
+function removeRevokedCert(instance, pzpid, config, callback) {
 	"use strict";
 	try {
 		config.revokedCert[pzpid] = config.signedCert[pzpid];
 		delete config.signedCert[pzpid] ;
-		configuration.storeConfig(config, function() {
+		session.configuration.storeConfig(config, function() {
 			callback(true);
 		});
 	} catch (err) {
-		log(pzh.sessionId, "INFO", "[PZH - "+ pzh.sessionId+"] Unable to rename certificate " + err);
+		log(instance.sessionId, "INFO", "[PZH - "+ instance.sessionId+"] Unable to rename certificate " + err);
 		callback(false);
 	}
 }
@@ -95,7 +90,7 @@ revoker.revokePzp = function (pzpid, pzh, callback ) {
 					if (!status2) {
 						log(pzh.sessionId, "INFO", "[PZH - "+ pzh.sessionId+"] Could not rename certificate");
 					}
-					callback({cmd:'revokePzp', pzpid: pzpid});
+					callback({cmd:"revokePzp", pzpid: pzpid});
 					return;
 				});
 			} else {

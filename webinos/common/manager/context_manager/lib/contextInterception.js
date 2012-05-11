@@ -23,6 +23,7 @@ if (typeof webinos.context === 'undefined')
   webinos.context = {};
 
 //console.log("CONTEXT MANAGER LOADED");
+var webinos_ = require('webinos')(__dirname);
 
 var path = require('path');
 var moduleRoot = path.resolve(__dirname, '../') + '/';
@@ -44,10 +45,7 @@ else
     console.log("CONTEXT MANAGER ENABLED");
 //  }
 
-    var moduleDependencies = require(moduleRoot + '/dependencies.json');
-    var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-    var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
-    var sessionPzp = require( webinosRoot + '/pzp/lib/pzp_sessionHandling.js');
+    var  sessionPzp =  webinos_.global.require(webinos.global.pzp.location, 'lib/pzp').session;
 
 //  This class represents the context objects that will be logged
     webinos.context.ContextData = function(method, params, results) {
@@ -129,7 +127,8 @@ else
 
     function saveContextData(_dataInLog, _dataIn)
     {
-      var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec;
+      
+      var pmlib = webinos_.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec;
       policyManager = new pmlib.policyManager();
 
       var res, request = {}, subjectInfo = {}, resourceInfo = {};

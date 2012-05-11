@@ -1,38 +1,60 @@
 /*******************************************************************************
-*  Code contributed to the webinos project
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*  
-*     http://www.apache.org/licenses/LICENSE-2.0
-*  
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-* 
-* Copyright 2012 Martin Lasak, Fraunhofer FOKUS
-******************************************************************************/
+ *  Code contributed to the webinos project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *  
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Copyright 2012 Martin Lasak, Fraunhofer FOKUS
+ ******************************************************************************/
 
-// Implementation of the tv module API for linux machines capable of receiving DVB streams ( http://linuxtv.org/ ) and having vlc 1.0.6 installed (comes with e.g. Ubuntu 10.04 LTS)
+// Implementation of the tv module API for linux machines capable of receiving DVB streams ( http://linuxtv.org/ ) and having vlc 2.0 installed
 
-//Screen dimensions of the tv set
-var SCREEN_WIDTH = 1360;
-var SCREEN_HEIGHT = 786;
-//Location of the channel configuration file
-var CHANNELS_CONF_FILE = "~/channels.conf";
+// Location of the channel configuration file
+// this can be configured by passing the absolute path to a channels.conf file
+// into the params object configuring the tv module added to the pzp, e.g.:
+//   {name: "tv", params: {impl:"vlcdvb", path:"/path/to/channels.conf"}}
+var CHANNELS_CONF_FILE = __dirname + '/../tools/berlin-dvbt-channels.conf';
+
+// port for dvb streams
+var VLC_STREAM_PORT = 8888;
+
+// playback url for transcoded dvb stream
+var VLC_STREAM_URL = 'http://localhost:' + VLC_STREAM_PORT + '/tv.ogg';
+
+// vlc http interface port
+var VLC_HTTP_PORT = 8020;
+
+// vlc http interface playlist offset, playlist items start at 5
+var VLC_PLAYLIST_OFFSET = 4;
+
+// command line to invoke vlc in transcoding and streaming mode
+var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb=400,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:' + VLC_STREAM_PORT + '/tv.ogg}" --sout-keep -I http --http-port ' + VLC_HTTP_PORT;
 
 (function() {
 
-var fs = require('fs');
-var net = require('net');
-var client;
-var util = require('util'),
-    exec = require('child_process').exec,
-    child;
-
+	var fs = require('fs');
+	var http = require('http');
+	var client;
+	var util = require('util'),
+		exec = require('child_process').exec,
+		child;
+	
+	/**
+	 * Set the absolute path to the channels.conf to use, if not the default.
+	 */
+	exports.setChannelsConfPath = function(path) {
+		CHANNELS_CONF_FILE = path;
+		VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb=400,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:' + VLC_STREAM_PORT + '/tv.ogg}" --sout-keep -I http --http-port ' + VLC_HTTP_PORT;
+	};
 
 	var WebinosTV, TVManager, TVDisplayManager, TVDisplaySuccessCB, TVTunerManager, TVSuccessCB, TVErrorCB, TVError, TVSource, Channel, ChannelChangeEvent;
 
@@ -68,46 +90,59 @@ var util = require('util'),
 	 */
 	TVDisplayManager.prototype.setChannel = function(channel, successCallback,
 			errorCallback) {
-		var i;
+		
+		var requestChannel,
+			tries = 5;
 
+		if (channel && channel.stream) {
+			var chkChan = channel.stream.split('#');
 
-		client=new net.Socket();
-		client.on('error',function(e){
-		 console.log('error on connect');
-			
-		child = exec('cvlc '+CHANNELS_CONF_FILE+' --video-on-top --width='+(Math.round(SCREEN_WIDTH*0.50))+' --height='+(Math.round(SCREEN_HEIGHT*0.50))+' --qt-display-mode=2 --no-video-deco --video-x='+(Math.round(SCREEN_WIDTH/2 - SCREEN_WIDTH*0.25))+' --video-y='+(Math.round(SCREEN_HEIGHT/2 - SCREEN_HEIGHT*0.25))+' -I rc',
-		  function (error, stdout, stderr) {
-		    console.log('stdout: ' + stdout);
-		    console.log('stderr: ' + stderr);
-		    if (error !== null) {
-		      console.log('exec error: ' + error);
-		    }
-		});
-		});
-	
-	
-		client.connect("/tmp/tvrc", function() {
-		    if(channel && channel.stream){
-		    var chkChan = channel.stream.split('://');
+			if (chkChan.length !== 2) {
+				console.log('#TV: could not extract stream, setChannel fail: ', channel.stream);
+				return;
+			}
 
-		    if(chkChan.length==2 && chkChan[0]==='dvb'){
-				console.log('#TV: sending out: goto '+chkChan[1]+'\n');
-			client.write('goto '+chkChan[1]+'\n');
-		    }	
-		    }
-			client.end();
-		});
+			var streamUri = chkChan[1];
+			var uriSplitted = streamUri.split('://');
 
-		client.on('end', function(){
-		 console.log('unix sock closed.');
-		});
+			if (uriSplitted.length === 2 && uriSplitted[0] === 'dvb') {
+				var playlistId = parseInt(uriSplitted[1]) + VLC_PLAYLIST_OFFSET;
+				console.log('#TV: sending out: goto ' + playlistId);
+				requestChannel(playlistId);
+			}
+		}
+		
+		function requestChannel(playlistId) {
+			var options = {
+					host: 'localhost',
+					port: VLC_HTTP_PORT,
+					path: '/requests/status.json?command=pl_play&id=' + playlistId
+			};
 
+			http.get(options, function(res) {
+				console.log('channel change successfully requested.');
 
-		// return the set channel immediatelly
-		successCallback(channel);
-		// send the channel change information to all registered handlers
-		for (i = 0; channelChangeHandlers.length > i; i++) {
-			channelChangeHandlers[i](channel);
+				successCallback(channel);
+
+				// send the channel change information to all registered handlers
+				for (var i = 0; channelChangeHandlers.length > i; i++) {
+					channelChangeHandlers[i](channel);
+				}
+
+			}).on('error', function(err) {
+				if (err.code === 'ECONNREFUSED' && tries > 0) {
+					console.log('got error, requesting channel change again.');
+					tries -= 1;
+					setTimeout(function() {
+						requestChannel(playlistId);
+					}, 1400);
+					return;
+				}
+				if (typeof errorCallback === 'function') {
+					errorCallback(err);
+				}
+				console.log('got error, channel change failed.');
+			});
 		}
 	};
 
@@ -153,50 +188,45 @@ var util = require('util'),
 	TVTunerManager.prototype.getTVSources = function(successCallback,
 			errorCallback) {
 
-
-		//TODO: do integrate vlc in renderer, instead using the standalone application 
 		exec('killall vlc');
 
-		child = exec('cvlc '+CHANNELS_CONF_FILE+' --video-on-top --width='+(Math.round(SCREEN_WIDTH*0.50))+' --height='+(Math.round(SCREEN_HEIGHT*0.50))+' --qt-display-mode=2 --no-video-deco --video-x='+(Math.round(SCREEN_WIDTH/2 - SCREEN_WIDTH*0.25))+' --video-y='+(Math.round(SCREEN_HEIGHT/2 - SCREEN_HEIGHT*0.25))+' -I rc',
-		  function (error, stdout, stderr) {
-		    console.log('stdout: ' + stdout);
-		    console.log('stderr: ' + stderr);
-		    if (error !== null) {
-		      console.log('exec error: ' + error);
-		    }
+		child = exec(VLC_COMMANDLINE,
+				function (error, stdout, stderr) {
+			console.log('stdout: ' + stdout);
+			console.log('stderr: ' + stderr);
+			if (error !== null) {
+				console.log('exec error: ' + error);
+			}
 		});
 
 		fs.readFile(CHANNELS_CONF_FILE, 'utf8', function(err,data){
-		   	if(err){
+			if (err) {
 				if (typeof errorCallback === 'function') {
-				errorCallback();
+					errorCallback();
 				}				
+				return;
 			}
-		var dvbtTuners = [{
-					name : "DVB-T",
-					channelList : [ ] }];
+
+			var dvbtTuners = [{
+				name : "DVB-T",
+				channelList : [ ] }];
 			var chans = data.split('\n');
-			for(var cix=0; cix<chans.length; cix++){
-				if(chans[cix]){
+			for (var cix=0; cix<chans.length; cix++) {
+				if (chans[cix]) {
 					var onechan = chans[cix].split(':')[0];
-					if(onechan){
+					if (onechan) {
 						dvbtTuners[0].channelList.push(new Channel(
-									0,
-									onechan,
-									'Long name of '+onechan,
-									'dvb://'+(cix+1),
-									new TVSource('DVB-T')));
+								0,
+								onechan,
+								'Long name of '+onechan,
+								VLC_STREAM_URL + '#dvb://'+(cix+1),
+								new TVSource('DVB-T')));
 					}				
 				}			
 			}
-			if (typeof successCallback === 'function') {
-				successCallback(dvbtTuners);
-				return;
-			}		
-		});
-		return;
 
-		
+			successCallback(dvbtTuners);
+		});
 	};
 
 	/**
@@ -378,7 +408,6 @@ var util = require('util'),
 	 * 
 	 */
 	ChannelChangeEvent = function() {
-
 		this.channel = new Channel();
 	};
 
@@ -406,7 +435,7 @@ var util = require('util'),
 	TVDisplayManager.prototype.addEventListener = function(eventname,
 			channelchangeeventhandler, useCapture) {
 		if (eventname === 'channelchange'
-				&& typeof channelchangeeventhandler === 'function') {
+			&& typeof channelchangeeventhandler === 'function') {
 			channelChangeHandlers.push(channelchangeeventhandler);
 		}
 		return;

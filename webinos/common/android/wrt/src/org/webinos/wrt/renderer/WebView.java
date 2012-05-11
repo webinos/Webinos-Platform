@@ -30,19 +30,50 @@ public class WebView extends android.webkit.WebView {
 		getSettings().setJavaScriptEnabled(true);
 	}
 
-    public void injectScript(String script) {
-    	try {
-    		loadUrl("javascript:(function(){var s=document.createElement('script');s.text=" + script + ";var target = document.head || document; target.appendChild(s);})()");
-    	} catch(Throwable t) {
-    		Log.v("org.webinos.wrt.renderer.WebView", "Error in injecting script", t);
-    	}
-    }
-    
-    public void callScript(final String script) {
-    	try {
-    		getHandler().post(new Runnable() {public void run() {loadUrl("javascript:(function(){" + script + "})()");}});
-    	} catch(Throwable t) {
-    		Log.v("org.webinos.wrt.renderer.WebView", "Error in JavaScript callback", t);
-    	}
-    }
+	public void injectScript(String script) {
+		try {
+			String functionBody = "var s=document.createElement('script');"
+					+ "s.text=" + script + ";"
+					+ "var target = document.head || document;"
+					+ "target.appendChild(s);"
+					+ "console.log('injected script');";
+			loadUrl("javascript:(function(){" + functionBody + "})()");
+		} catch (Throwable t) {
+			Log.v("org.webinos.wrt.renderer.WebView",
+					"Error in injecting script", t);
+		}
+	}
+
+	public void injectScripts(String[] scripts) {
+		try {
+			String functionBody = "var target = document.getElementsByTagName('head')[0] || document.firstChild || document;"
+					+ "var child = target.firstChild;"
+					+ "console.log('target = ' + target + ', document = ' + document + ', head = ' + document.head + ', child = ' + child);"
+					+ "var insert = child ? function(x){target.insertBefore(x, child);} : function(x){target.appendChild(x);};";
+			for (String script : scripts) {
+				functionBody += "var s=document.createElement('script');"
+						+ "s.text=" + script + ";"
+						+ "console.log('injecting script...');" + "insert(s);"
+						+ "console.log('injected script');" + "";
+			}
+			loadUrl("javascript:(function(){" + functionBody + "})()");
+		} catch (Throwable t) {
+			Log.v("org.webinos.wrt.renderer.WebView",
+					"Error in injecting script", t);
+		}
+	}
+
+	public void callScript(final String script) {
+		Log.v("org.webinos.wrt.renderer.WebView.callScript()", script);
+		try {
+			getHandler().post(new Runnable() {
+				public void run() {
+					loadUrl("javascript:(function(){" + script + "})()");
+				}
+			});
+		} catch (Throwable t) {
+			Log.v("org.webinos.wrt.renderer.WebView",
+					"Error in JavaScript callback", t);
+		}
+	}
 }

@@ -16,15 +16,7 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 
-var certificate = exports;
-var path = require('path');	
-
-var moduleRoot   = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot  = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-var uniqueID     = require(path.join(webinosRoot, dependencies.uniqueID.location, 'lib/uniqueID.js'));
-var log          =  require(path.resolve(webinosRoot,dependencies.pzp.location, 'lib/session_common.js')).debug;
+var log         = require("./session_common").debug;
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
@@ -32,18 +24,19 @@ var log          =  require(path.resolve(webinosRoot,dependencies.pzp.location, 
  * @param {Object} obj holds key, certificate and crl certificate values and names
  * @returns {Function} callback returns failed or certGenerated. Added to get synchronous behaviour
  */
-certificate.selfSigned = function(config, type, callback) {
+exports.selfSigned = function(config, type, callback) {
 	"use strict";
 	var certman;
 	var certType;
 	var key , csr ;
-	var obj = {cert: '', crl:''};	
+	var obj = {cert: "", crl:""};	
 
 	try {
-		if(process.platform !== 'android') {
-			certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+		if(process.platform !== "android") {
+			//certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+			certman = process.binding("certificate_manager");
 		} else {
-			certman = require('certificate_manager');
+			certman = require("certificate_manager");
 		}
 	} catch (err) {
 		callback("failed", err);
@@ -57,15 +50,15 @@ certificate.selfSigned = function(config, type, callback) {
 		return;
 	}
 
-	var cn = encodeURIComponent(type+':'+config.details.name);
+	var cn = encodeURIComponent(type+":"+config.details.name);
 	if (cn.length > 40) {
 		
 		cn = cn.substring(0, 40);
 	}
 	
-	if (type === 'PzhFarmCA' ||  type === 'PzhCA') {
+	if (type === "PzhFarmCA" ||  type === "PzhCA") {
 		certType = 0;
-	} else if (type === 'Pzh' || type === 'PzhFarm' || type === 'PzhWebServer' || type === 'PzhWebSocketServer') {
+	} else if (type === "Pzh" || type === "PzhFarm" || type === "PzhWebServer" || type === "PzhWebSocketServer") {
 		certType = 1;
 	} else {
 		certType = 2;
@@ -75,10 +68,10 @@ certificate.selfSigned = function(config, type, callback) {
 		// state, city, orgname, orgunit are left empty as we do not posses this information
 		csr = certman.createCertificateRequest(key,
 			config.details.country,
-			'', // state
-			'', //city
-			'', //orgname
-			'', //orgunit
+			"", // state
+			"", //city
+			"", //orgname
+			"", //orgunit
 			cn,
 			config.details.email);
 	} catch (e) {
@@ -105,12 +98,13 @@ certificate.selfSigned = function(config, type, callback) {
 /**
  * @description Crypto sensitive 
 */
-certificate.signRequest = function(csr, master_key, master_cert, certType, uri, callback) {
+exports.signRequest = function(csr, master_key, master_cert, certType, uri, callback) {
 	"use strict";
 	var certman;
 	
 	try {
-		certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+		//certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+		certman = process.binding("certificate_manager");
 	} catch (err) {
 		callback( "failed");
 		return;
@@ -120,18 +114,19 @@ certificate.signRequest = function(csr, master_key, master_cert, certType, uri, 
 		var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, uri);
 		callback("certSigned", clientCert);
 	} catch(err1) {
-		log('ERROR', "Failed to sign certificate: " + err1.code + ", " + err1.stack);
+		log("ERROR", "Failed to sign certificate: " + err1.code + ", " + err1.stack);
 		callback("failed");
 		return;
 	}	
 };
 
-certificate.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
+exports.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
 	"use strict";
 	var certman;
 	
 	try {
-		certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));		
+		//certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+		certman = process.binding("certificate_manager");
 	} catch (err) {
 		log("ERROR", "Failed to find the certificate manager");
 		callback("failed", err);

@@ -20,16 +20,16 @@
 // A wrapper for the QRCODE module which generates a QR code for a short,
 // 8-byte string, plus (in theory) the URL of the PZH.
 
-var crypto  = require('crypto');
-var path    = require('path');
+var crypto  = require("crypto");
+var path    = require("path");
 
-var webinosqr = exports;
+var pzh_qrcode = exports;
 
 function create(url, code, cb) {
     "use strict";
     try { 
-        var QRCode = require('qrcode');
-        var urlCode = "" + url + ' ' + code;
+        var QRCode = require("qrcode");
+        var urlCode = "" + url + " " + code;
         QRCode.toDataURL(urlCode, function(err,url) {
             cb(err, url);
         });
@@ -44,7 +44,7 @@ function generateRandomCode() {
 }
 
 // Generate me a random code.  I do hope this is secure...
-webinosqr.createQR = function(url, code, cb) {
+pzh_qrcode.createQR = function(url, code, cb) {
     "use strict";
     create(url,code,cb);
 };
@@ -52,7 +52,7 @@ webinosqr.createQR = function(url, code, cb) {
 // (1) returns a QR code 
 // (2) generates a new secret code, to be held by the PZH
 // (3) tells the PZH to be ready for a new PZP to be added
-webinosqr.addPzpQR = function(pzh, connection) {
+pzh_qrcode.addPzpQR = function(pzh, connection) {
     "use strict";
     var code = generateRandomCode();
 
@@ -65,8 +65,8 @@ webinosqr.addPzpQR = function(pzh, connection) {
                         img: qrimg,
                         result: "success"
                         };
-                    var payload = {status : 'addPzpQR', message : message};
-                    var msg = {type: 'prop', payload: payload};	                    
+                    var payload = {status : "addPzpQR", message : message};
+                    var msg = {type: "prop", payload: payload};	                    
                     connection.sendUTF(JSON.stringify(msg));
                 } else {
                     pzh.expecting.unsetExpected( function() {
@@ -75,8 +75,8 @@ webinosqr.addPzpQR = function(pzh, connection) {
                             img: qrimg,
                             result: "failure: not suppported"
                             };			            
-                        var payload = {status : 'addPzpQR', message : message};
-                        var msg = {type: 'prop', payload: payload};
+                        var payload = {status : "addPzpQR", message : message};
+                        var msg = {type: "prop", payload: payload};
                         connection.sendUTF(JSON.stringify(msg));
                     });
                 }
@@ -87,7 +87,7 @@ webinosqr.addPzpQR = function(pzh, connection) {
 
 // The same function as the above, but without the messaging nonsense.
 // Due a refactor.
-webinosqr.addPzpQRAgain = function(pzh, next) {
+pzh_qrcode.addPzpQRAgain = function(pzh, next) {
     "use strict";
     
     var code = generateRandomCode();
@@ -95,7 +95,7 @@ webinosqr.addPzpQRAgain = function(pzh, next) {
     pzh.expecting.setExpectedCode(code,function() {
         pzh.getMyUrl(function(url) {
             create(url, code, function(err, qrimg) {
-                next({cmd: 'addPzpQR', payload:{err: err, img: qrimg, code: code}});
+                next({cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
 
             });
         });	    

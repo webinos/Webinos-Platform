@@ -252,5 +252,5 @@ extern "C" {
     NODE_SET_METHOD(target,"createEmptyCRL",_createEmptyCRL);
     NODE_SET_METHOD(target,"addToCRL",_addToCRL);
   }
-  NODE_MODULE(certificate_manager,init);
+  NODE_MODULE(node_certificate_manager,init);
 }

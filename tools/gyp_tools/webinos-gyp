@@ -31,7 +31,7 @@ import subprocess
 def generate_project(argv):
   """ Generate node module project. Takes two optional arguments:
     make  : A command to request project building after its generation.
-    filename: The gyp file to use. If not defined, it tries to locate module.gyp file."""
+    filename: The gyp file to use. If not defined, it tries to locate module.gyp or binding.gyp file."""
   
   # Currently the script assumes that it runs in the 
   # node source dir inside folder tools.
@@ -126,7 +126,7 @@ def windows_locate_node_lib(nodeRoot):
   
 def locate_gyp_file(argv):
   """ Examines the arguments to see if the user has asked for a specific gyp file.
-    If not or the file does not exist, tries to locate a module.gyp file in 
+    If not or the file does not exist, tries to locate a module.gyp or a binding.gyp file in 
     the path of invocation. Returns the full path to the gyp file or None if
     not found."""
     
@@ -138,10 +138,12 @@ def locate_gyp_file(argv):
     elif len(argv) == 2 and argv[1]!= "make" and check_for_file(os.getcwd(),argv[1]):
       gyp_definition_file= os.path.join(os.getcwd(), argv[1])
   
-  # if the file is not specified in the arguments, check for default file
+  # if the file is not specified in the arguments, check for default files
   if gyp_definition_file is None:
     if check_for_file(os.getcwd(), "module.gyp"):
       gyp_definition_file = os.path.join(os.getcwd(), "module.gyp")
+    elif check_for_file(os.getcwd(), "binding.gyp"):
+      gyp_definition_file = os.path.join(os.getcwd(), "binding.gyp")
   return gyp_definition_file
 
 def load_gyp(nodeRoot):

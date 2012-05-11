@@ -18,16 +18,9 @@
 
 (function() {
 	//	console.log("CONTEXT SERVICE LOADED");
-	var moduleRoot = require('../dependencies.json');
-	var dependencies = require('../' + moduleRoot.root.location
-			+ '/dependencies.json');
-	var webinosRoot = '../' + moduleRoot.root.location;
-
-
-	 var appContext = require(webinosRoot
-	      + dependencies.manager.context_manager.location
-	      + 'lib/appContext.js');
-	 
+	var webinos = require('webinos')(__dirname);
+	var appContext = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/appContext.js');
+ 
 
 	/**
 	 * Webinos Service constructor.
@@ -53,7 +46,8 @@
 	
 	function enforceContextDataAccess(_mode, _query, _successCallback)
 	{
-		var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec;
+
+		var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec;
 		policyManager = new pmlib.policyManager();
 
 		var res, request = {}, subjectInfo = {}, resourceInfo = {};
@@ -73,9 +67,7 @@
 					break;
 				}
 
-				var contextDB = require(webinosRoot
-		      			+ dependencies.manager.context_manager.location
-		      			+ 'lib/contextDBManagerPZH.js');
+				var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/contextDBManagerPZH.js');
 				if(_query.type == "getrawview")
 				{
 					contextDB.getrawview(function(results) {
@@ -141,9 +133,7 @@
 	RemoteContextManager.prototype.executeQuery = function(query, successCallback, errorCallback) {
 		switch (query.type) {
 		case "DB-insert"://PZH
-		  var contextDB = require(webinosRoot
-		      + dependencies.manager.context_manager.location
-		      + 'lib/contextDBManagerPZH.js');
+		  var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/contextDBManagerPZH.js');
 			contextDB.insert(query.data); //TODO: Add success callback
 			break;
 		case "getrawview"://PZH

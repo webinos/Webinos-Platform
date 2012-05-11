@@ -14,7 +14,7 @@
   , "url": ""
   }
 , "directories": { "contrib": "./contrib"
-                 , "demo"; "./demo"
+                 , "demo": "./demo"
                  , "lib": "./lib"
                  , "src": "./src"
                  }

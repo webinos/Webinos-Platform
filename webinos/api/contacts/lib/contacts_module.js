@@ -19,33 +19,46 @@
 //var webinosRoot=process.env.WEBINOS_PATH; //TODO a try/catch block?
 //var moduleRoot=webinosRoot+'/api/contacts/lib';
 
-var path = require('path');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+var webinos = require('webinos')(__dirname);
 
 var local_contacts = '';
-if(process.platform!=='android')
-{
-  local_contacts = require(path.resolve(__dirname,'local_contacts.js'));
-}
-else //on android
-{
-  local_contacts = require('bridge').load('org.webinos.impl.ContactManagerImpl', this);
+try {
+	if(process.platform!=='android')
+	{
+	  local_contacts = require('./local_contacts');;
+	}
+	else //on android
+	{
+	  local_contacts = require('bridge').load('org.webinos.impl.ContactManagerImpl', this);
+	}
+} catch (err) {
+	console.log("err1" + err)
 }
 
-var c_def_path = path.resolve(__dirname,'contacts_def.js');
-var Contact = require(c_def_path).Contact;
-var ContactField = require(c_def_path).ContactField;
-var ContactName = require(c_def_path).ContactName;
-var ContactAddress = require(c_def_path).ContactAddress;
-var ContactOrganization = require(c_def_path).ContactOrganization;
+var c_def_path;
+try{
+	c_def_path = require('./contacts_def');
+} catch (err) {
+	console.log("Could not load contacts_def");
+}
+var Contact = c_def_path.Contact;
+var ContactField = c_def_path.ContactField;
+var ContactName = c_def_path.ContactName;
+var ContactAddress = c_def_path.ContactAddress;
+var ContactOrganization = c_def_path.ContactOrganization;
 
 /**
  * Instances of remote contacts and local contacts
  */
-RemoteContacts = require(path.resolve(__dirname,'google_contacts.js'));//new remote_contacts.contacts();
-if(process.platform!=='android') //TODO else JAVA_BRIDGE
+
+var RemoteContacts;
+try{
+	RemoteContacts = require('./google_contacts');//new remote_contacts.contacts();
+} catch (err) {
+	console.log("Could not load remote contacts");
+}
+
+if(local_contacts && process.platform!=='android') //TODO else JAVA_BRIDGE
 {
   LocalContacts = new local_contacts.contacts();
 }
@@ -62,10 +75,13 @@ var askPolicyManager = function(module,params,callback)
 {
   console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 // TODO CHANGE
-  var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
-
-  policyManager = new pmlib.policyManager();
-
+  //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+  try {
+  	var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+     policyManager = new pmlib.policyManager();
+  } catch (err) {
+	console.log("Error loading policy manager in contacts")
+  }
   var res, request = {}, subjectInfo = {}, resourceInfo = {};
 
   subjectInfo.userId = "user1";
@@ -147,8 +163,7 @@ var askPolicyManager = function(module,params,callback)
 //      
       console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 //      // TODO CHANGE
-      var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager; // this line should be moved in the policy manager
-
+      var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager; // this line should be moved in the policy manager
       policyManager = new pmlib.policyManager();
 
       var res, request = {}, subjectInfo = {}, resourceInfo = {};

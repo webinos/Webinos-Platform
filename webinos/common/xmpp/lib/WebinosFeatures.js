@@ -32,7 +32,7 @@ var NS = {
 }
 
 var factory = {
-	'urn:services-webinos-org:geolocation': function (rpcHandler) { return new GeolocationFeature.GeolocationFeature(rpcHandler) },
+	'urn:services-webinos-org:geolocation': function (rpcHandler, connector) { return new GeolocationFeature.GeolocationFeature(rpcHandler, connector) },
 	'urn:services-webinos-org:get42': function (rpcHandler) { return new Get42Feature.Get42Feature(rpcHandler) }
 }
 

@@ -42,14 +42,6 @@
 		nStream = require("stream"),
 		nUtil = require("util");
 
-	// <HACK>
-	// var nConnect = require("connect");
-
-	// nConnect(
-	// 	nConnect.static(nPath.join(process.cwd(), "default"))
-	// ).listen(2409);
-	// </HACK>
-
 	var webinos = require("webinos")(__dirname);
 		webinos.dom = require("./webinos.dom.js"),
 		webinos.path = require("./webinos.path.js"),
@@ -1205,9 +1197,7 @@
 
 	// TODO Choose filesystem url scheme, e.g., <webinos:http://example.domain/persistent-or-temporary/path/to/exports.html>.
 	exports.EntrySync.prototype.toURL = function () {
-		// <HACK>
-		// return "webinos:http://localhost:2409" + this.fullPath;
-		// </HACK>
+		return "webinos:" + this.fullPath;
 	};
 
 	/**
