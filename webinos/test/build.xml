@@ -3,13 +3,13 @@
 	
     <!-- Task for the Google Closure Compiler for JavaScript minification -->
     <taskdef name="jscompiler" classname="com.google.javascript.jscomp.ant.CompileTask"
-        classpath="../tools/closure-compiler/compiler.jar"/>
+        classpath="../../tools/closure-compiler/compiler.jar"/>
 	
     <!-- Use closure compiler to minify all JavaScript files -->
     <target name="gen-webinos-js">
     	<!-- Available compilation levels: advanced, simple, whitespace -->
         <jscompiler compilationlevel="whitespace" prettyPrint="true" output="${basedir}/client/webinos.js">
-            <sources dir="${basedir}/../webinos/">
+            <sources dir="${basedir}/../">
                 <file name="common/rpc/lib/rpc.js"/>
             	<file name="common/manager/messaging/lib/messagehandler.js"/>
    		<file name="wrt/lib/webinos.session.js"/>
