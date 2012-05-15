@@ -99,8 +99,7 @@
 					return;
 				}
 				
-				delete that.remoteServicesFoundCallbacks[payload.id];
-				callback(payload.message);
+				callback(payload.message, payload.id);
 			});
 		}
 		
@@ -572,8 +571,21 @@
 
 		}
 		else {
-			
-			function deliverResults(r) {
+           function deliverResults(r) {
+				function isDuplicate(sv, pos) {
+					var cnt = 0;
+					for (var i=0; i<r.length; i++) {
+						if (sv.id === r[i].id & sv.serviceAddress === r[i].serviceAddress) {
+							if (i === pos && cnt === 0) {
+								return true;
+							}
+							cnt += 1;
+						}
+					}
+					return false;
+				}
+				r = r.filter(isDuplicate);
+				
 				// filter results for zoneId
 				if (filter && typeof filter.zoneId === 'object') {
 					function hasZoneId(sv) {
@@ -602,39 +614,48 @@
 				results[i].serviceAddress = sessionId; // This is source addres, it is used by messaging for returning back
 			}
 			
-			// no connection to a PZH & other connected Peers it seems, don't ask for remote services
-			if (!this.parent ||  !this.parent.pzhId || this.parent.connectedPeer.length === 0 ) { 
+			// reference counter of all entities we expect services back from
+			var entityRefCount = this.parent.config.pzhId ? 1 : 0;
+			entityRefCount += this.parent.connectedPzp ? Object.keys(this.parent.connectedPzp).length : 0;
+			
+			// no connection to a PZH & other connected Peers, don't ask for remote services
+			if (!this.parent || entityRefCount === 0) { 
 				deliverResults(results);
 				return;
 			}
 			
 			// store callback in map for lookup on returned remote results
 			var callbackId = getNextID();
-			this.remoteServicesFoundCallbacks[callbackId] = (function(res) {
-				return function(remoteServices) {
+			var that = this;
+			this.remoteServicesFoundCallbacks[callbackId] = (function(res, refCnt) {
+				return function(remoteServices, cId) {
 					
 					function isServiceType(el) {
 						return el.api === serviceType.api ? true : false;
 					}
 					res = res.concat(remoteServices.filter(isServiceType));
+					refCnt -= 1;
 					
-					deliverResults(res);
-				}
-			})(results);
-			
-			// ask for remote service objects
-			if (this.parent.pzhId) {
-				this.parent.prepMsg(this.parent.sessionId, this.parent.pzhId, 'findServices', {id: callbackId});
-			} 
-			
-			if (this.parent.connectedPeer.length !== 0 ) {
-				for( var key in this.parent.connectedPeer) {
-					if (this.parent.connectedPeer.hasOwnProperty(key) && key !== this.parent.sessionId) {
-						this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
-						
+					if (refCnt < 1) {
+						// entity reference counter is zero, got all answers, so continue
+						deliverResults(res);
+						delete that.remoteServicesFoundCallbacks[cId];
 					}
 				}
-			}	
+			})(results, entityRefCount);
+			
+			// ask for remote service objects
+			if (this.parent.config.pzhId) {
+				this.parent.prepMsg(this.parent.sessionId, this.parent.config.pzhId, 'findServices', {id: callbackId});
+			} 
+			
+			if (this.parent.connectedPzp && Object.keys(this.parent.connectedPzp).length > 0) {
+				for (var key in this.parent.connectedPzp) {
+					if (this.parent.connectedPzp.hasOwnProperty(key) && key !== this.parent.sessionId) {
+						this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
+					}
+				}
+			}
 		}
 	};
 	

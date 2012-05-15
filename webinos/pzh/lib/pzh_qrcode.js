@@ -74,7 +74,7 @@ pzh_qrcode.addPzpQR = function(pzh, connection) {
                             name: pzh.sessionId, 
                             img: qrimg,
                             result: "failure: not suppported"
-                            };			            
+                            };
                         var payload = {status : "addPzpQR", message : message};
                         var msg = {type: "prop", payload: payload};
                         connection.sendUTF(JSON.stringify(msg));

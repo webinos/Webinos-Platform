@@ -27,9 +27,7 @@
 var webinos = require("webinos")(__dirname);
 var log = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debugPzh;
 
-
 var tokenAuth = exports;
-
 
 /** @description: This creates an auth code object which can be used to set a new
  * code for a new PZP and then query about whether it is still valid.

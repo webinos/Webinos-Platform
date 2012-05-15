@@ -18,49 +18,54 @@
 
 
 var pzp = require("./pzp").session,//require("../webinos/pzp/lib/pzp_sessionHandling.js"),
-	websocket = require("./pzp").websocket,//require("../webinos/pzp/lib/pzp_websocket.js"),
-	fs = require("fs"),
-	path = require("path");
+        websocket = require("./pzp").websocket,//require("../webinos/pzp/lib/pzp_websocket.js"),
+        fs = require("fs"),
+        path = require("path");
 
 var options = {};
-
+var pzpInstance;
 function help() {
-    console.log("Usage: node startPzp.js [options]");
+    console.log("Usage: webinos_pzp [options]");
     console.log("Options:");
-    console.log("--pzh-host=[host]        host of the pzh (default localhost)");
+    console.log("--pzh-host=[host]        host of the pzh (default localhost/OpenID)");
     console.log("--pzp-name=[name]        name of the pzp (default WebinosPzp)");
     console.log("--pzp-host=[name]        host of the pzp (default localhost)");
-    console.log("--context-code=[code]    context debug flag (default DEBUG)");
+    console.log("--auth-code=[code]       context debug flag (default DEBUG)");
+    console.log("--preference=[option]    preference option (default hub, other option peer)");
     process.exit();
 }
 
 process.argv.forEach(function (arg) {
-	  var parts;
-	  if (arg.indexOf("--") > -1) {
-	    parts = arg.split("=");
-	    if (parts.length > 1) {
-	      switch (parts[0]) {
-	      case "--pzh-host":
-	        options.pzhHost = parts[1];
-	        break;
-	      case "--pzp-name":
-	    	  options.pzpName = parts[1];
-	    	  break;
-	      case "--pzp-host":
-	    	  options.pzpHost = parts[1];
-	    	  break;
-	      case "--context-code":
-	    	  options.code = parts[1]+"="; // added as last letter in qrcode is = but above "split" removes this info
-	    	  break;
-	      default:
-	        console.log("unknown option: " + parts[0]);
-	        break;
-	      }
-	    }
-	    else if (parts[0] === "--help") {
-	    	help();
-	    }
-	  }
+    var parts;
+    if (arg.indexOf("--") > -1) {
+        parts = arg.split("=");
+        if (parts.length > 1) {
+          switch (parts[0]) {
+          case "--pzh-host":
+            options.pzhHost = parts[1];
+            break;
+          case "--pzp-name":
+              options.pzpName = parts[1];
+              break;
+          case "--pzp-host":
+              options.pzpHost = parts[1];
+              break;
+          case "--preference":
+              options.preference = parts[1];
+              break;
+          case "--auth-code":
+              options.code = parts[1]+"="; // added as last letter in qrcode is = but above "split" removes this info
+              break;
+
+          default:
+            console.log("unknown option: " + parts[0]);
+            break;
+          }
+        }
+        else if (parts[0] === "--help") {
+            help();
+        }
+    }
 });
 
 var pzpModules = [
@@ -82,49 +87,74 @@ var pzpModules = [
 ];
 
 if (options.pzhHost === "" || options.pzhPort <= 0) {
-	help();
+    help();
 } else {
-	fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
-		var config;
-		
-		if (err) {
-			config = {};
-		}
-		else {
-			config = JSON.parse(data);
-		}
-		
-		if (!config.pzhHost) {
-			config.pzhHost = "localhost/OpenIDUserName";
-		}
-		if (!config.pzpHost) {
-			config.pzpHost="localhost";
-		}
-		if (!config.pzpName) {
-			config.pzpName = "";
-		}
-		if (!config.code) {
-			config.code = "DEBUG";
-		}
-		if (options.pzhHost) {
-			config.pzhHost = options.pzhHost;
-		}
-		if (options.pzpHost) {
-			config.pzpHost = options.pzpHost;
-		}
-		if (options.pzpName) {
-			config.pzpName = options.pzpName;
-		}
-		if (options.code) {
-			config.code = options.code;
-		}
-		console.log(config);
-		pzp.startPzp(config, pzpModules, function(result, pzp) {
-			if (result === "startedPzp") {
-				console.log("***** PZP "+pzp.sessionId+" started *****");
-			}
-		});
-	});
+    fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
+        var config;
+
+        if (err) {
+                config = {};
+        }
+        else {
+                config = JSON.parse(data);
+        }
+
+        if (!config.pzhHost) {
+                config.pzhHost = "localhost/OpenIDUserName";
+        }
+        if (!config.pzpHost) {
+                config.pzpHost="localhost";
+        }
+        if (!config.pzpName) {
+                config.pzpName = "";
+        }
+        if (!config.code) {
+                config.code = "DEBUG";
+        }
+        if (!config.preference) {
+                config.prefence = "hub";
+        }
+        if (options.pzhHost) {
+                config.pzhHost = options.pzhHost;
+        }
+        if (options.pzpHost) {
+            config.pzpHost = options.pzpHost;
+        }
+        if (options.pzpName) {
+            config.pzpName = options.pzpName;
+        }
+        if (options.code) {
+            config.code = options.code;
+        }
+        if (options.preference) {
+            config.preference = options.preference;
+        }
+        initializePzp(config, pzpModules);
+    });
+};
+
+function initializePzp(config, pzpModules) {
+    pzpInstance = new pzp(config, pzpModules);
 }
 
+//Added in order to be able to get the rpc handler from the current pzp
+function getPzp() {
+    if (typeof instance !== "undefined") {
+        return instance;
+    } else {
+        return null;
+    }
+}
+
+function getPzpId() {
+    if (typeof instance !== "undefined") {
+        return instance.sessionId;
+    }
+}
+
+function getPzhId() {
+    if (typeof instance !== "undefined") {
+        return instance.pzhId;
+    }
+}
 
