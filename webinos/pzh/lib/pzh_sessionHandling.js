@@ -128,7 +128,7 @@ Pzh.prototype.sendMessage = function (message, address, conn) {
 			log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Client ' + address + ' is not connected');
 		}
 	} catch(err) {
-		log(self.sessionId, 'ERROR ','[PZH -'+ self.sessionId+'] Exception in sending packet ' + err);
+		log(self.sessionId, 'ERROR', '[PZH -'+ self.sessionId+'] Exception in sending packet ' + err);
 	}
 };
 
@@ -170,7 +170,7 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
 			var text = decodeURIComponent(cn);
 			data = text.split(':');
 		} catch(err) {
-			log(self.sessionId, 'ERROR ','[PZH  -'+self.sessionId+'] Exception in reading common name of peer PZH certificate ' + err);
+			log(self.sessionId, 'ERROR', '[PZH  -'+self.sessionId+'] Exception in reading common name of peer PZH certificate ' + err);
 			return;
 		}
 		/**
@@ -181,7 +181,7 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
 			try {
 				pzhId = data[1];
 			} catch (err1) {
-				log(self.sessionId, 'ERROR ','[PZH -'+self.sessionId+'] Pzh information in certificate is in unrecognized format ' + err1);
+				log(self.sessionId, 'ERROR', '[PZH -'+self.sessionId+'] Pzh information in certificate is in unrecognized format ' + err1);
 				return;
 			}
 
@@ -209,7 +209,7 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
 			try {
 				sessionId = self.sessionId+'/'+data[1];
 			} catch(err1) {
-				log(self.sessionId, 'ERROR ','[PZH  -' + self.sessionId + '] Exception in reading common name of PZP certificate ' + err1);
+				log(self.sessionId, 'ERROR', '[PZH  -' + self.sessionId + '] Exception in reading common name of PZP certificate ' + err1);
 				return;
 			}
 
@@ -265,7 +265,7 @@ Pzh.prototype.handleData = function(conn, buffer) {
 			self.processMsg(conn, obj);
 		});
 	} catch (err) {
-		log(this.sessionId, 'ERROR ', '[PZH] Exception in processing recieved message ' + err);
+		log(this.sessionId, 'ERROR', '[PZH] Exception in processing recieved message ' + err);
 	} finally {
 		conn.resume();
 	}
@@ -311,7 +311,7 @@ Pzh.prototype.addNewPZPCert = function (parse, cb) {
 		});
 
 	} catch (err) {
-		log(self.sessionId, 'ERROR ', '[PZH -'+self.sessionId+'] Error Signing Client Certificate' + err);
+		log(self.sessionId, 'ERROR', '[PZH -'+self.sessionId+'] Error Signing Client Certificate' + err);
 		cb.call(self, "Could not create client certificate");
 	}
 }
@@ -386,7 +386,7 @@ exports.addPzh = function ( uri, modules, callback) {
 		callback(false);
 	} else {
 		if (typeof uri === "undefined" || uri === 'null' || typeof modules === "undefined" || modules === 'null' ){
-			log(null, 'ERROR','PZH could not be started as one of the details are missing ');
+			log(null, 'ERROR', 'PZH could not be started as one of the details are missing ');
 			callback(false);
 		} else {
 			var name = uri.split('/')[1];
