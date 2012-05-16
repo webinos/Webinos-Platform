@@ -615,7 +615,7 @@
 			}
 			
 			// reference counter of all entities we expect services back from
-			var entityRefCount = this.parent.config.pzhId ? 1 : 0;
+			var entityRefCount = this.parent.connectedPzh[this.parent.config.pzhId] ? 1 : 0;
 			entityRefCount += this.parent.connectedPzp ? Object.keys(this.parent.connectedPzp).length : 0;
 			
 			// no connection to a PZH & other connected Peers, don't ask for remote services
@@ -645,7 +645,7 @@
 			})(results, entityRefCount);
 			
 			// ask for remote service objects
-			if (this.parent.config.pzhId) {
+			if (this.parent.connectedPzh[this.parent.config.pzhId]) {
 				this.parent.prepMsg(this.parent.sessionId, this.parent.config.pzhId, 'findServices', {id: callbackId});
 			} 
 			
