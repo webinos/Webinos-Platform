@@ -36,16 +36,14 @@
 		this.base = RPCWebinosService;
 		this.base({
 			api:'http://webinos.org/api/tv',
-			displayName:'TV ('+_TV_MODULE_IMPLEMENTATION_+' service)',
+			displayName:'TV ('+(params.impl?params.impl:_TV_MODULE_IMPLEMENTATION_)+' service)',
 			description:'TV control and managment.'
 		});
 		
 		if (typeof params.impl !== 'undefined') {
-			tvmodule = require('./webinos.service_tv.' + params.impl + '.js').tv;
-			
-			if (typeof params.path !== 'undefined') {
-				tvmodule.setChannelsConfPath(params.path);
-			}
+			tvmodule = require('./webinos.service_tv.' + params.impl + '.js');
+			if(tvmodule.tv_setConf)tvmodule.tv_setConf(params);
+			tvmodule=tvmodule.tv;
 		} else {
 			tvmodule = require('./webinos.service_tv.' + _TV_MODULE_IMPLEMENTATION_ + '.js').tv;
 		}
