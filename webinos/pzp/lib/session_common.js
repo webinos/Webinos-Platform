@@ -115,14 +115,6 @@ session_common.webinosConfigPath = function() {
 	return webinosDemo;
 };
 
-// global exception handler, which catches all unhandled exceptions,
-// prints a trace and exits. the trace is better than the default.
-/*process.addListener("uncaughtException", function (err) {
-    console.log("Uncaught exception: " + err);
-    console.trace();
-    process.exit();
-});*/
-
 /** @desription It removes the connected PZP/Pzh details.
  */
 session_common.removeClient = function(self, conn) {
@@ -139,57 +131,74 @@ session_common.removeClient = function(self, conn) {
 };
 
 /**
+ * Read in JSON objects from buffer and call objectHandler for each parsed
+ * object.
+ * @param buffer Buffer instance containing JSON serialized objects.
+ * @param objectHandler Callback for parsed object.s
+ */
+var instanceMap = {};
+session_common.readJson = function(instance, buffer, objectHandler) {
+	var jsonStr;
+	var len;
+	var offset = 0;
+	
+	for (;;) {
+		if (instanceMap[instance]) {
+			// we already read from a previous buffer, read the rest
+			len = instanceMap[instance].restLen;
+			jsonStr = instanceMap[instance].part;
+			jsonStr += buffer.toString('utf8', offset, offset + len);
+			offset += len;
+			instanceMap[instance] = undefined;
+			
+		} else {
+			len = buffer.readUInt32LE(offset);
+			jsonStr = buffer.toString('utf8', offset + 4, offset + len + 4);
+			offset += len + 4;
+		}
+		
+		if (jsonStr.length < len) {
+			instanceMap[instance] = {
+					restLen: len - jsonStr.length,
+					part: jsonStr
+			}
+			return;
+		}
+		
+		// call handler with parsed message object
+		objectHandler(JSON.parse(jsonStr));
+		
+		if (offset >= buffer.length) {
+			// finished reading buffer
+			return;
+		}
+	}
+};
+
+/**
  * This function is call most as each data received first calls this function.
  * It removes appended # in the message. This is appended at both end to identify start and end of message.
  * Also message verify is done based on schema. 
  */
-session_common.processedMsg = function(self, data, callback) {
+session_common.processedMsg = function(self, msgObj, callback) {
 	"use strict";
-	var msg = data.toString('utf8');
-	var dataLen = 1;
-	// This part of the code is executed when message comes in chunks 
-	// First part of the message coming in
-	if (msg[0] === '#' && msg[msg.length-dataLen] !== '#') {
-		message = msg;
-		return;
-	}
-	// This is the middle of the message
-	if (msg[0] !== '#' && msg[msg.length-dataLen] !== '#') {
-		message += msg;
-		return;
-	}
-	// This is the last part of the message
-	if (msg[0] !== '#' && msg[msg.length-dataLen] === '#') {
-		message += msg;
-		msg = message;
-
-		message = '';
-	}
 	
-	if(msg[0] ==='#' && msg[msg.length-dataLen] === '#') {
-		msg = msg.split('#');
-		
-		var parse = JSON.parse(msg[1]);
-		// BEGIN OF POLITO MODIFICATIONS
-		for (var i = 1 ; i < parse.length-1; i += 1) {
-			var valError = validation.checkSchema(parse[i]);
-			if(valError === false) { // validation error is false, so validation is ok
-				common.debug('DEBUG','[VALIDATION] Received recognized packet ' + JSON.stringify(parse[i]));
-			} else if (valError === true) {
-				// for debug purposes, we only print a message about unrecognized packet
-				// in the final version we should throw an error
-				// Currently there is no a formal list of allowed packages and throw errors
-				// would prevent the PZH from working
-				common.debug('INFO','[VALIDATION] Received unrecognized packet ' + JSON.stringify(parse[i]));
-			} else if (valError === 'failed') {
-				common.debug('ERROR','[VALIDATION] failed');
-			} else {
-				common.debug('ERROR','[VALIDATION] Invalid response ' + valError);
-			}
-		}
-		callback.call(self, msg);
+	// BEGIN OF POLITO MODIFICATIONS
+	var valError = validation.checkSchema(msgObj);
+	if(valError === false) { // validation error is false, so validation is ok
+		session_common.debug('DEBUG','[VALIDATION] Received recognized packet ' + JSON.stringify(msgObj));
+	} else if (valError === true) {
+		// for debug purposes, we only print a message about unrecognized packet
+		// in the final version we should throw an error
+		// Currently there is no a formal list of allowed packages and throw errors
+		// would prevent the PZH from working
+		session_common.debug('INFO','[VALIDATION] Received unrecognized packet ' + JSON.stringify(msgObj));
+	} else if (valError === 'failed') {
+		session_common.debug('ERROR','[VALIDATION] failed');
+	} else {
+		session_common.debug('ERROR','[VALIDATION] Invalid response ' + valError);
 	}
-
+	callback.call(self, msgObj);
 };
 
 /**
