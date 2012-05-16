@@ -17,12 +17,23 @@
 ******************************************************************************/
 
 // Implementation of the tv module API that works without any specific STB hardware
+
+var MOCK_CHANNELS_FILE = __dirname + '/../tools/mock-channels.json';
  
 (function() {
 
 	var WebinosTV, TVManager, TVDisplayManager, TVDisplaySuccessCB, TVTunerManager, TVSuccessCB, TVErrorCB, TVError, TVSource, Channel, ChannelChangeEvent;
 
 	var channelChangeHandlers = [];
+
+	/**
+	 * Set the configuration parameters for the mock service.
+	 */
+	exports.tv_setConf = function(params) {
+		if(params && params.path){
+			MOCK_CHANNELS_FILE = params.path;
+		}
+	}
 
 	/**
 	 * Creates tv object.
@@ -105,47 +116,35 @@
 	TVTunerManager.prototype.getTVSources = function(successCallback,
 			errorCallback) {
 
-		// TODO: The following implementation needs to be modified to fit the
-		// focused device, e.g. STB, DVB-Stick
+		var readChannels, tvTuners=[], channelList= [];
 
-		// Sample videos taken from:
-		// http://people.opera.com/patrickl/experiments/webm/fancy-swap/
-		var staticExampleTuners = [
-				{
-					name : "DVB-S",
-					channelList : [
-							new Channel(
+		try{
+			readChannels = require(MOCK_CHANNELS_FILE);
+		}catch(e){		
+console.log(MOCK_CHANNELS_FILE+' '+readChannels);process.exit();
+			if (typeof errorCallback === 'function') {
+				errorCallback();
+			}
+			return;
+		}
+
+
+		if(readChannels && readChannels.sourceName && readChannels.channelList){
+			for(var i=0; i<readChannels.channelList.length; i++){
+				channelList.push(new Channel(
 									0,
-									'CH01',
-									'Long name of channel 1.',
-									'http://people.opera.com/patrickl/experiments/webm/videos/fridge.webm',
-									new TVSource('DVB-S')),
-							new Channel(
-									0,
-									'CH02',
-									'Long name of channel 2.',
-									'http://people.opera.com/patrickl/experiments/webm/videos/garden1.webm',
-									new TVSource('DVB-S')) ]
-				},
-				{
-					name : "DVB-T",
-					channelList : [
-							new Channel(
-									0,
-									'CH100',
-									'Long name of channel 1.',
-									'http://people.opera.com/patrickl/experiments/webm/videos/garden2.webm',
-									new TVSource('DVB-T')),
-							new Channel(
-									0,
-									'CH101',
-									'Long name of channel 101.',
-									'http://people.opera.com/patrickl/experiments/webm/videos/windowsill.webm',
-									new TVSource('DVB-T')) ]
-				} ];
+									readChannels.channelList[i].channelName,
+									'Long name of '+readChannels.channelList[i].channelName,
+									readChannels.channelList[i].channelURL,
+									new TVSource(readChannels.sourceName)));
+			}
+			if(channelList.length){
+				tvTuners.push({name:readChannels.sourceName,channelList:channelList});
+			}
+		}
 
 		if (typeof successCallback === 'function') {
-			successCallback(staticExampleTuners);
+			successCallback(tvTuners);
 			return;
 		}
 
