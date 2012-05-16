@@ -1,0 +1,21 @@
+{
+	"sourceName":"Test Source",
+	"channelList":[
+		{
+			"channelName":"CH01",
+			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/fridge.webm"
+		},
+		{
+			"channelName":"CH02",
+			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/garden1.webm"
+		},
+		{
+			"channelName":"CH03",
+			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/garden2.webm"
+		},
+		{
+			"channelName":"CH04",
+			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/windowsill.webm"
+		} 
+	]
+}
