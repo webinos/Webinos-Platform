@@ -64,25 +64,19 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       }
     });
 
-    client.on("data", function (data) {
+    client.on("data", function (buffer) {
       try {
         client.pause();
-
-        session.common.processedMsg(parent, data, function(data2) {
-          for (var j = 1 ; j < (data2.length-1); j += 1 ) {
-            if (data2[j] === "") {
-              continue;
-            }
-            var parse = JSON.parse(data2[j]);
-            if(parse.type === "prop" && parse.payload.status === "foundServices") {
+        session.common.readJson(self, buffer, function(obj) {
+          session.common.processedMsg(self, obj, function(validMsgObj) {
+            if(validMsgObj.type === "prop" && validMsgObj.payload.status === "foundServices") {
               logs("INFO", "[PZP Client-"+self.sessionId+"]: Received message about available remote services.");
-              parent.serviceListener && parent.serviceListener(parse.payload);
+              parent.serviceListener && parent.serviceListener(validMsgObj.payload);
             } else {
-              parent.messageHandler.onMessageReceived(parse, parse.to);
+              parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
             }
-          }
+          });
         });
-
         client.resume();
       } catch (err) {
         logs("ERROR", "[PZP Client-" + self.sessionId + "]: Exception" + err);
@@ -92,11 +86,11 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
     client.on("end", function () {
       logs("INFO", "[PZP Client-" + self.sessionId + "]: Connection terminated");
       parent.connectedPzp[self.peerSessionId].state = global.states[3];
-      if (self.mode === global.modes[2]) {
-        self.state = global.states[0];
+      if (parent.mode === global.modes[2]) {
+        parent.state = global.states[0];
       }
         
-      if (self.mode === global.modes[3]) {
+      if (parent.mode === global.modes[3]) {
         var status = true;
         for (var key in self.connectedPzp) {
           if(parent.connectedPzp[key].state === global.states[2]) {
@@ -105,22 +99,24 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
           }
         }
         if (status) {
-          self.mode = global.modes[1];
+          parent.mode = global.modes[1];
         }
       } else {
-        self.mode = global.modes[1]; // Go back in hub mode
+        parent.mode = global.modes[1]; // Go back in hub mode
       }
       parent.connectedPzp[self.peerSessionId].state = global.states[0];
+      logs('INFO','[PZP Client-'+ self.sessionId+'] Mode '+ parent.mode + ' State '+parent.state);
+
     });
 
     client.on("error", function (err) {
       logs("ERROR", "[PZP Client-" + self.sessionId + "]:  " + err);
       parent.connectedPzp[self.peerSessionId].state = global.states[3];
-      if (self.mode === global.modes[2]) {
-        self.state = global.states[0];
+      if (parent.mode === global.modes[2]) {
+        parent.state = global.states[0];
       }
         
-      if (self.mode === global.modes[3]) {
+      if (parent.mode === global.modes[3]) {
         var status = true;
         for (var key in self.connectedPzp) {
           if(parent.connectedPzp[key].state === global.states[2]) {
@@ -129,12 +125,13 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
           }
         }
         if (status) {
-          self.mode = global.modes[1];
+          parent.mode = global.modes[1];
         }
       } else {
-        self.mode = global.modes[1]; // Go back in hub mode
+        parent.mode = global.modes[1]; // Go back in hub mode
       }
       parent.connectedPzp[self.peerSessionId].state = global.states[0];
+      logs('INFO','[PZP Client-'+ self.sessionId+'] Mode '+ self.mode + ' State '+self.state);
     });
 
     client.on("close", function () {

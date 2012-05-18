@@ -29,13 +29,14 @@ var PzpServer = function() {
 }
 
 PzpServer.prototype.startServer = function (parent, callback) {
+  var self = this;
   session.configuration.fetchKey(parent.config.own.key_id, function(key) {
     // Read server configuration for creating TLS connection
     var certConfig = {
-      key: key,
+      key:  key,
       cert: parent.config.own.cert,
-      ca: parent.config.master.cert,
-      crl: parent.config.master.crl,
+      ca:   parent.config.master.cert,
+      crl:  parent.config.master.crl,
       requestCert: true,
       rejectUnauthorized: true
     };
@@ -72,34 +73,29 @@ PzpServer.prototype.startServer = function (parent, callback) {
 
       } 
 
-      conn.on("data", function (data) {
+      conn.on("data", function (buffer) {
         try{
-            session.common.processedMsg(parent, data, function(data2) {
-              for (var j = 1 ; j < (data2.length-1); j += 1 ) {
-                if (data2[j] === "") {
-                  continue;
-                }
-                var parse = JSON.parse(data2[j]);
-
-                if(parse.type === "prop" && parse.payload.status === "findServices") {
-                  logs(parent.sessionId, "INFO", "[PZP Server-"+ parent.sessionId+"] Trying to send Webinos Services from this RPC handler to " + parse.from + "...");
-                  var services = parent.rpcHandler.getAllServices(parse.from);
-                  var msg = {"type":"prop", "from":parent.sessionId, "to":parse.from, "payload":{"status":"foundServices", "message":services}};
-                  msg.payload.id = parse.payload.message.id;
-                  parent.sendMessage(msg, parse.from);
-                  logs("INFO", "[PZP Server-"+ parent.sessionId+"] Sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
-                }
-                else if (parse.type === "prop" && parse.payload.status === "pzpDetails") {
-                  if(parent.connectedPzp[parse.from]) {
-                    parent.connectedPzp[parse.from].port = parse.payload.message;
-                  } else {
-                    logs(2, "[PZP Server-"+ parent.sessionId+"] Server: Received PZP"+
-                      "details from entity which is not registered : " + parse.from);
-                  }
-                } else {
-                  parent.messageHandler.onMessageReceived( parse, parse.to);
-                }
+          session.common.readJson(self, buffer, function(obj) {
+            session.common.processedMsg(self, obj, function(validMsgObj) {
+              if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
+                logs(parent.sessionId, "INFO", "[PZP Server-"+ parent.sessionId+"] Trying to send Webinos Services from this RPC handler to " + validMsgObj.from + "...");
+                var services = parent.rpcHandler.getAllServices(validMsgObj.from);
+                var msg = {"type":"prop", "from":parent.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
+                msg.payload.id = validMsgObj.payload.message.id;
+                parent.sendMessage(msg, validMsgObj.from);
+                logs("INFO", "[PZP Server-"+ parent.sessionId+"] Sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
               }
+              else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
+                if(parent.connectedPzp[validMsgObj.from]) {
+                  parent.connectedPzp[validMsgObj.from].port = validMsgObj.payload.message;
+                } else {
+                  logs(2, "[PZP Server-"+ parent.sessionId+"] Server: Received PZP"+
+                    "details from entity which is not registered : " + validMsgObj.from);
+                }
+              } else {
+                parent.messageHandler.onMessageReceived( validMsgObj, validMsgObj.to);
+              }
+            });
           });
         } catch(err) {
           logs(1, "[PZP Server-"+ parent.sessionId+"]Server: Exception" + err);
@@ -128,7 +124,8 @@ PzpServer.prototype.startServer = function (parent, callback) {
           if (parent.connectedPzp[key].socket === conn){
             parent.connectedPzp[key].state = global.states[0];
           }
-        }  
+        }
+        logs('INFO','[PZP Server-'+ parent.sessionId+'] Mode '+ parent.mode + ' State '+parent.state);
       });
 
       // It calls removeClient to remove PZP from connected_client and connectedPzp.
@@ -160,8 +157,7 @@ PzpServer.prototype.startServer = function (parent, callback) {
             parent.connectedPzp[key].state = global.states[0];
           }
         }
-
-        logs("ERROR", "[PZP Server-" + parent.sessionId + "] " + err);
+        logs('INFO','[PZP Server-'+ parent.sessionId+'] Mode '+ parent.mode + ' State '+parent.state);
       });
     });
 

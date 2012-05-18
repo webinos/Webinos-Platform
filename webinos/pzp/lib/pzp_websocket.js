@@ -146,7 +146,7 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
       }
       else {
         // schema check is false, so validation is ok
-        log("DEBUG",  "[PZP WSServer]: msg schema is valid " + JSON.stringify(msg));
+        //log("DEBUG",  "[PZP WSServer]: msg schema is valid " + JSON.stringify(msg));
       }
 
 

@@ -8,13 +8,12 @@
 		<!-- Creates app/assets/webinos.zip -->
 		<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
 			<zipfileset dir="${basedir}" prefix="wp4" includes="
-			demo/policy.xml,
-			demo/startPzp.js,
 			node_modules/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
 			webinos/wrt/,
+                        webinos/test/,
 
 			**/test/,
 			**/build/,
@@ -22,11 +21,11 @@
 			**/.gitignore" />
 		</zip>
 
-		<!-- Creates demo/client/webinos.js -->
-		<ant dir="${basedir}/demo" target="gen-webinos-js" />
+                <!-- Creates webinos/test/client/webinos.js -->
+                <ant dir="${basedir}/webinos/test" target="gen-webinos-js" />
 
-		<!-- Copies demo/client/webinos.js to wrt/assets folder -->
-		<copy file="${basedir}/demo/client/webinos.js" todir="${basedir}/webinos/common/android/wrt/assets/js" />
+                <!-- Copies webinos/test/client/webinos.js to wrt/assets folder -->
+                <copy file="${basedir}/webinos/test/client/webinos.js" todir="${basedir}/webinos/common/android/wrt/assets/js" />
 	</target>
 
 	<target name="gen-webinos-clean">

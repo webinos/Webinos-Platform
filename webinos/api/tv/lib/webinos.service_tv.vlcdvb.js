@@ -30,6 +30,9 @@ var VLC_STREAM_PORT = 8888;
 // playback url for transcoded dvb stream
 var VLC_STREAM_URL = 'http://localhost:' + VLC_STREAM_PORT + '/tv.ogg';
 
+// bitrate for transcoding
+var VLC_TRANSCODE_BITRATE = '400'; //kbps
+
 // vlc http interface port
 var VLC_HTTP_PORT = 8020;
 
@@ -49,11 +52,17 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 		child;
 	
 	/**
-	 * Set the absolute path to the channels.conf to use, if not the default.
+	 * Set the configuration parameters for the transcoder.
 	 */
-	exports.setChannelsConfPath = function(path) {
-		CHANNELS_CONF_FILE = path;
-		VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb=400,scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:' + VLC_STREAM_PORT + '/tv.ogg}" --sout-keep -I http --http-port ' + VLC_HTTP_PORT;
+	exports.tv_setConf = function(params) {
+		if(params.streamPort){
+			VLC_STREAM_URL = 'http://localhost:' + params.streamPort + '/tv.ogg';
+		}
+		if(params.path){
+			CHANNELS_CONF_FILE = params.path;
+		}
+		VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec=theo,vb='+(params.bitrate?params.bitrate:VLC_TRANSCODE_BITRATE)+',scale=1,acodec=vorb,ab=128,channels=2,samplerate=44100}:http{dst=:' + (params.streamPort?params.streamPort:VLC_STREAM_PORT) + '/tv.ogg}" --sout-keep -I http --http-port ' + (params.rcHttpPort?params.rcHttpPort:VLC_HTTP_PORT);
+
 	};
 
 	var WebinosTV, TVManager, TVDisplayManager, TVDisplaySuccessCB, TVTunerManager, TVSuccessCB, TVErrorCB, TVError, TVSource, Channel, ChannelChangeEvent;
@@ -122,12 +131,15 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 			http.get(options, function(res) {
 				console.log('channel change successfully requested.');
 
+				// fix, wait until dvb hardware is ready for stream out
+				setTimeout(function(){
 				successCallback(channel);
 
 				// send the channel change information to all registered handlers
 				for (var i = 0; channelChangeHandlers.length > i; i++) {
 					channelChangeHandlers[i](channel);
 				}
+				},3500);
 
 			}).on('error', function(err) {
 				if (err.code === 'ECONNREFUSED' && tries > 0) {
@@ -449,6 +461,7 @@ var VLC_COMMANDLINE = 'cvlc ' + CHANNELS_CONF_FILE + ' --sout "#transcode{vcodec
 
 		this.display = new TVDisplayManager();
 		this.tuner = new TVTunerManager();
+
 	};
 
 	exports.tv = new WebinosTV();

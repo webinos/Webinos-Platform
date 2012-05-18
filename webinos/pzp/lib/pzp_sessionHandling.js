@@ -41,15 +41,17 @@ var pzpClient     = require("./pzp_peerTLSClient"); // Needed as we start PZP se
 
 var Pzp = function (config, modules) {
   "use strict";
-  this.connectedPzh   = {}; // Stores PZH server details
-  this.connectedPzp   = {}; // Stores connected PZP information
+  this.connectedPzh    = {}; // Stores PZH server details
+  this.connectedPzp    = {}; // Stores connected PZP information
   this.connectedWebApp = {}; // List of connected apps i.e session with browser
   this.sessionWebApp   = 0;
-  this.config         = {}//Configuration details of Pzp (certificates, file names)
+  this.webServerState  = global.states[0];
+  this.config          = {}//Configuration details of Pzp (certificates, file names)
   this.tlsId           = ""; // Used for session reuse
   this.serviceListener;   // For a single callback to be registered via addRemoteServiceListener.
-  this.state          = global.states[0]; // State is applicable for hub mode but for peer mode, we need to check individually
-  this.mode          = global.modes[0]; //  4 modes a pzp can be, for peer mode, each PZP needs to be checked if it is connected
+  this.state           = global.states[0]; // State is applicable for hub mode but for peer mode, we need to check individually
+  this.mode            = global.modes[0]; //  4 modes a pzp can be, for peer mode, each PZP needs to be checked if it is connected
+  this.inputConfig     = {};
   this.initializePzp(config, modules);
 };
 
@@ -62,9 +64,7 @@ Pzp.prototype.checkMode = function(config) {
   } else {
     this.state = global.states[0];
     this.mode = global.modes[1]; // hub mode
-  }
-  
-  log("INFO", "PZP is in mode " + this.mode);
+  }  
 }
 
 Pzp.prototype.prepMsg = function(from, to, status, message) {
@@ -93,14 +93,20 @@ Pzp.prototype.wsServerMsg = function(message) {
 * @param address to forward message
 */
 Pzp.prototype.sendMessage = function (message, address) {
-  var self = this, buf;
-  buf = new Buffer('#'+JSON.stringify(message)+'#', 'utf8');
-  log('INFO','[PZP -'+ self.sessionId+'] Mode '+ self.mode + ' State '+self.state);
-  log('INFO','[PZP -'+ self.sessionId+'] Send to '+ address + ' Message '+JSON.stringify(message));
+  var self = this;
+  
+  var jsonString = JSON.stringify(message);
+  var buf = new Buffer(4 + jsonString.length, 'utf8');
+  buf.writeUInt32LE(jsonString.length, 0);
+  buf.write(jsonString, 4);
+  
+  log('INFO','[PZP-'+ self.sessionId+'] Send to '+ address + ' Message ' + jsonString);
+  log('INFO','[PZP-'+ self.sessionId+'] Mode '+ self.mode + ' State '+self.state);
+
   try {
     if (self.connectedWebApp[address]) { // it should be for the one of the apps connected.
       self.connectedWebApp[address].socket.pause();
-      self.connectedWebApp[address].sendUTF(JSON.stringify(message));
+      self.connectedWebApp[address].sendUTF(jsonString);
       self.connectedWebApp[address].socket.resume();
     } else if (self.connectedPzp[address] && self.connectedPzp[address].state === global.states[2] &&
       (self.mode === global.modes[2] || self.mode === global.modes[3])) {
@@ -114,7 +120,7 @@ Pzp.prototype.sendMessage = function (message, address) {
       self.connectedPzh[address].resume();
     }
   } catch (err) {
-    log("ERROR", "[PZP-"+ self.sessionId+"]Error in sending send message" + err);
+    log('ERROR', '[PZP-'+ self.sessionId+']Error in sending send message' + err);  
   }
 };
 
@@ -182,8 +188,11 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
 Pzp.prototype.unauthenticated = function(conn, sessionId, pzhId, conn_csr, code) {
   try{
     var msg = {"type" : "prop", "from" : sessionId, "to": pzhId,
-      "payload": {"status": "clientCert", "message": {csr: conn_csr, code: code}}};       
-    var buf = new Buffer('#'+JSON.stringify(msg)+'#', 'utf8');
+      "payload": {"status": "clientCert", "message": {csr: conn_csr, code: code}}};
+    var jsonString = JSON.stringify(msg);
+    var buf = new Buffer(4 + jsonString.length, 'utf8');
+    buf.writeUInt32LE(jsonString.length, 0);
+    buf.write(jsonString, 4);
     conn.write(buf);
   } catch(err) {
     log("INFO","[PZP-"+ self.sessionId+"]Failed sending client certificate to the PZH" );
@@ -215,7 +224,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
           servername: self.config.serverName
       };
     }
-
+  
     pzpInstance = tls.connect(global.pzhPort, self.address, config, function(conn) {
       log("INFO","[PZP-"+ self.sessionId+"] Connection to PZH status: " + pzpInstance.authorized );
       log("INFO","[PZP-"+ self.sessionId+"] Reusing session : " + pzpInstance.isSessionReused());
@@ -239,14 +248,16 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
     /* It fetches data and forward it to processMsg
     * @param data is the received data
     */
-    pzpInstance.on("data", function(data) {
+    pzpInstance.on("data", function(buffer) {
       try {
         pzpInstance.pause(); // This pauses socket, cannot receive messages
-        self.processMsg(data, callback);
-        pzpInstance.resume();// unlocks socket.
+        session.common.readJson(self, buffer, function(obj) {
+          self.processMsg(obj, callback);
+        });
       } catch (err) {
-        log("ERROR", "[PZP] Exception " + err);
-
+        log('ERROR', '[PZP] Exception ' + err);
+      } finally {
+        pzpInstance.resume();// unlocks socket.
       }
     });
 
@@ -274,11 +285,21 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
         } else if (self.mode === global.modes[1] ) { //hub mode
           self.state = global.states[0]; // not connected
         }        
-        log("INFO", "[PZP-"+self.sessionId+"] PZP mode " + self.mode + " and state is " + self.state);       
       } else {
         self.mode = global.modes[1];
         self.state = global.states[0];
       }
+      // Special case if started in virgin pzp mode
+      if (self.webServerState !== global.states[2]) {
+        pzpWebSocket.startPzpWebSocketServer(self, self.inputConfig, function() {
+          self.rpcHandler.setSessionId(self.sessionId);
+          setupMessageHandler(self);
+          self.connectedApp();
+          log("INFO", "[PZP-"+ self.sessionId+"] Started PZP");
+          self.webServerState = global.states[2];
+        });
+      }
+      log("INFO", "[PZP-"+self.sessionId+"] PZP mode " + self.mode + " and state is " + self.state);
     });
 
     pzpInstance.on("close", function () {
@@ -291,13 +312,11 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
       }
       log("INFO", "[PZP-"+self.sessionId+"] PZP mode " + self.mode + " and state is " + self.state);
     });
-
   } catch (err) {
     log("ERROR", "[PZP-"+ self.sessionId+"] General Error : " + err);
     throw err;
   }
 };
-
 
 Pzp.prototype.connectedApp = function(connection) {
   var self = this;
@@ -332,59 +351,53 @@ Pzp.prototype.connectedApp = function(connection) {
   }
 };
 
-Pzp.prototype.processMsg = function(data, callback) {
+Pzp.prototype.processMsg = function(msgObj, callback) {
   var self = this;
-  var msg, i ;
-  session.common.processedMsg(self, data, function(message) { // 1 is for #
-    for (var j = 1 ; j < (message.length-1); j += 1 ) {
-      if (message[j] === '') {
-        continue;
-      }
+  var msg;
+  session.common.processedMsg(self, msgObj, function(validMsgObj) {
+    if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'signedCert') {
+      self.status = global.states[3]; // Disconnecting
 
-      var parseMsg = JSON.parse(message[j]);
-      
-      if(parseMsg.type === "prop" && parseMsg.payload.status === "signedCert") {
-        self.status = global.states[3]; // Disconnecting
-        log("INFO", "[PZP-"+self.sessionId+"] PZP Writing certificates data ");
-        self.config.own.cert    = parseMsg.payload.message.clientCert;
-        self.config.master.cert = parseMsg.payload.message.masterCert;
+      log('INFO', '[PZP-'+self.sessionId+'] PZP Writing certificates data ');
+      self.config.own.cert   = validMsgObj.payload.message.clientCert;
+      self.config.master.cert = validMsgObj.payload.message.masterCert;
 
-        global.storeConfig(self.config, function() {
-          self.mode  = global.modes[1]; // Moved from Virgin mode to hub mode
-          self.state = global.states[0];
-          callback.call(self, "startPZPAgain");
-        });
+      global.storeConfig(self.config, function() {
+        self.mode  = global.modes[1]; // Moved from Virgin mode to hub mode
+        self.sessionId = validMsgObj.from + '/' + self.config.name;
+        self.state = global.states[0];
+        callback.call(self, 'startPZPAgain');
+      });
 
-      } // This is update message about other connected PZP
-      else if(parseMsg.type === "prop" && parseMsg.payload.status === "pzpUpdate") {
-        log("INFO", "[PZP-"+self.sessionId+"] Update PZPs details") ;
-        msg = parseMsg.payload.message;
-        for ( var i in msg) {
-          if (msg.hasOwnProperty(i) && self.sessionId !== msg[i].name) {
-            self.connectedPzp[msg[i].name] = {};
-            self.connectedPzp[msg[i].name].address = msg[i].address;
-            self.connectedPzp[msg[i].name].port   = msg[i].port;
-            self.connectedPzp[msg[i].name].state   = global.states[0];
-            if(msg[i].newPzp) {
-              console.log(msg[i]);
-              self.mode  = global.modes[3];
-              self.state  = global.states[1];
-              var client = new pzpClient(); 
-              client.connectOtherPZP(self, msg[i]);
-            }
+    } // This is update message about other connected PZP
+    else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'pzpUpdate') {
+      log('INFO', '[PZP-'+self.sessionId+'] Update PZPs details') ;
+      msg = validMsgObj.payload.message;
+      for (var i in msg) {
+        if (msg.hasOwnProperty(i) && self.sessionId !== msg[i].name) {
+          self.connectedPzp[msg[i].name] = {};
+          self.connectedPzp[msg[i].name].address = msg[i].address;
+          self.connectedPzp[msg[i].name].port    = msg[i].port;
+          self.connectedPzp[msg[i].name].state   = global.states[0];
+          if(msg[i].newPzp) {
+            self.mode  = global.modes[3];
+            self.state = global.states[1];
+            var client = new pzpClient(); 
+            client.connectOtherPZP(self, msg[i]);
           }
         }
-      } else if(parseMsg.type === "prop" && parseMsg.payload.status === "failedCert") {
-        log("ERROR", "[PZP-"+ self.sessionId+"] Failed to get certificate from PZH");
-        callback.call(self, "ERROR");
-      } else if(parseMsg.type === "prop" && parseMsg.payload.status === "foundServices") {
-        log("INFO", "[PZP-"+self.sessionId+"] Received message about available remote services.");
-        this.serviceListener && this.serviceListener(parseMsg.payload);
       }
-      // Forward message to message handler
-      else {
-        self.messageHandler.onMessageReceived( parseMsg, parseMsg.to);
-      }
+    } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'failedCert') {
+      log('ERROR', '[PZP-'+ self.sessionId+'] Failed to get certificate from PZH');
+      callback.call(self, "ERROR");
+
+    } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'foundServices') {
+      log('INFO', '[PZP-'+self.sessionId+'] Received message about available remote services.');
+      this.serviceListener && this.serviceListener(validMsgObj.payload);
+    }
+    // Forward message to message handler
+    else {
+      self.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
     }
   });
 };
@@ -396,7 +409,7 @@ Pzp.prototype.initializePzp = function(config, modules) {
   self.messageHandler = new MessageHandler(this.rpcHandler); // handler for all things message
   self.modules         = modules;
   self.rpcHandler.loadModules(modules);// load specified modules
-  
+  self.inputConfig = config;
   if (config && config.pzhHost !== "undefined" && config.pzpName!== "undefined" && config.pzpHost !== "undefined") {
     global.createDirectoryStructure( function() {
       global.setConfiguration(config.pzpName, "Pzp", config.pzhHost, function (configure, conn_key, conn_csr) {
@@ -428,20 +441,22 @@ Pzp.prototype.initializePzp = function(config, modules) {
             addr = config.pzhHost;
           }
           session.common.resolveIP(addr, function(resolvedAddress) {
-            log("INFO", "[PZP -"+ self.sessionId+"] Connecting Address: " + resolvedAddress);
+            log("INFO", "[PZP-"+ self.sessionId+"] Connecting Address: " + resolvedAddress);
             self.address = resolvedAddress;
             self.connect(conn_key, conn_csr, config.code, function(result) {
               if(result === "startedPZP") {
                 pzpWebSocket.startPzpWebSocketServer(self, config, function() {
                   self.connectedApp();
-                  log("INFO", "[PZP -"+ self.sessionId+"] Started PZP");
+                  log("INFO", "[PZP-"+ self.sessionId+"] Started PZP");
+                  self.webServerState = global.states[2];
                 });
               } else if(result === "startPZPAgain") {
                 self.connect(conn_key, null, null, function(result){
                   if (result === "startedPZP") {
                     pzpWebSocket.startPzpWebSocketServer(self, config, function() {
                       self.connectedApp();
-                      log("INFO", "[PZP -"+ self.sessionId+"] Started PZP");
+                      log("INFO", "[PZP-"+ self.sessionId+"] Started PZP");
+                      self.webServerState = global.states[2];
                     });
                   }
                 });
