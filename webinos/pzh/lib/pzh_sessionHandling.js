@@ -376,52 +376,52 @@ Pzh.prototype.setMessageHandler = function() {
 * @param {function} callback: returns instance of PZH
 */
 exports.addPzh = function ( uri, modules, callback) {
-    if (typeof farm.server === "undefined" || farm.server === null) {
-        log(null, "ERROR", "[PZH] Farm is not running, please startFarm");
-        callback(false);
+  if (typeof farm.server === "undefined" || farm.server === null) {
+    log(null, "ERROR", "[PZH] Farm is not running, please startFarm");
+    callback(false);
+  } else {
+    if (typeof uri === "undefined" || uri === "null" || typeof modules === "undefined" || modules === "null" ){
+      log(null, "ERROR","PZH could not be started as one of the details are missing ");
+      callback(false);
     } else {
-        if (typeof uri === "undefined" || uri === "null" || typeof modules === "undefined" || modules === "null" ){
-                log(null, "ERROR","PZH could not be started as one of the details are missing ");
-                callback(false);
+      var name = uri.split("/")[1];
+      var instance  = new Pzh(modules);
+
+      authcode.createAuthCounter(function (res) {
+        instance.expecting = res;
+      });
+      session.configuration.setConfiguration(name, "Pzh", uri, function(config, conn_key) {
+        instance.config    = config;
+        instance.sessionId = name ; 
+        instance.modules   = modules;     // modules loaded in pzh
+        instance.config.serverName = uri; // pzh servername
+        farm.pzhs[uri] = instance;
+        farm.config.pzhs[uri] = modules;
+        // Certificate parameters that will be added in SNI context of farm
+        var options = {
+          key  : conn_key,
+          cert : config.own.cert,
+          ca   : [config.master.cert],
+          crl  : [config.master.crl],
+          requestCert: true,
+          rejectUnauthorized: false
+        };
+        instance.setMessageHandler();
+        // RPC instance getting PZH session id
+        instance.rpcHandler.setSessionId(instance.sessionId);
+
+        if (typeof farm.server === "undefined" || farm.server === null) {
+          log(instance.sessionId, "ERROR", "[PZH -"+ instance.sessionId+"] Farm is not running, please startFarm");
         } else {
-            var name = uri.split("/")[1];
-            var instance  = new Pzh(modules);
-    
-            authcode.createAuthCounter(function (res) {
-                instance.expecting = res;
-            });
-            session.configuration.setConfiguration(name, "Pzh", uri, function(config, conn_key) {
-                instance.config    = config;
-                instance.sessionId = name ; 
-                instance.modules   = modules;     // modules loaded in pzh
-                instance.config.serverName = uri; // pzh servername
-                farm.pzhs[uri] = instance;
-                farm.config.pzhs[uri] = modules;
-                // Certificate parameters that will be added in SNI context of farm
-                var options = {
-                    key  : conn_key,
-                    cert : config.own.cert,
-                    ca   : [config.master.cert],
-                    crl  : [config.master.crl],
-                    requestCert: true,
-                    rejectUnauthorized: false
-                };
-                instance.setMessageHandler();
-                // RPC instance getting PZH session id
-                instance.rpcHandler.setSessionId(instance.sessionId);
-
-                if (typeof farm.server === "undefined" || farm.server === null) {
-                    log(instance.sessionId, "ERROR", "[PZH -"+ instance.sessionId+"] Farm is not running, please startFarm");
-                } else {
-                    // This adds SNI context to existing running PZH server
-                    farm.server.addContext(uri, options);
-                }
-
-                session.configuration.storeConfig(farm.config, function() {
-                    callback(true, instance);
-                });
-            });
+          // This adds SNI context to existing running PZH server
+          farm.server.addContext(uri, options);
         }
+
+        session.configuration.storeConfig(farm.config, function() {
+          callback(true, instance);
+        });
+      });
     }
+  }
 }
 

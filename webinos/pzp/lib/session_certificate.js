@@ -25,133 +25,133 @@ var log  = require("./session_common").debug;
  * @returns {Function} callback returns failed or certGenerated. Added to get synchronous behaviour
  */
 exports.selfSigned = function(config, type, callback) {
-    "use strict";
-    var certman, cn, certType, key , csr ;
-    var obj = {cert: "", crl:""};
+  "use strict";
+  var certman, cn, certType, key , csr ;
+  var obj = {cert: "", crl:""};
 
-    try {
-        if(process.platform !== "android") {
-                //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-                certman = process.binding("certificate_manager");
-        } else {
-                certman = require("certificate_manager");
-        }
-    } catch (err) {
-        callback("failed", err);
-        return;
-    }
+  try {
+      if(process.platform !== "android") {
+        //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+        certman = process.binding("certificate_manager");
+      } else {
+        certman = require("certificate_manager");
+      }
+  } catch (err) {
+    callback("failed", err);
+    return;
+  }
 
-    try {
-        key = certman.genRsaKey(1024);
-    } catch(err1) {
-        console.log("Failed Generating Key");
-        callback("failed", err1);
-        return;
-    }
+  try {
+    key = certman.genRsaKey(1024);
+  } catch(err1) {
+    console.log("Failed Generating Key");
+    callback("failed", err1);
+    return;
+  }
 
-    cn = encodeURIComponent(type+":"+ config.name);
+  cn = encodeURIComponent(type+":"+ config.name);
 
-    if (cn.length > 40) {
-        cn = cn.substring(0, 40);
-    }
-    if (type === "PzhFarmCA" ||  type === "PzhCA") {
-        certType = 0;
-    } else if (type === "Pzh" || type === "PzhFarm" || 
-        type === "PzhWebServer" || type === "PzhWebSocketServer") {
-        certType = 1;
+  if (cn.length > 40) {
+    cn = cn.substring(0, 40);
+  }
+  if (type === "PzhFarmCA" ||  type === "PzhCA") {
+    certType = 0;
+  } else if (type === "Pzh" || type === "PzhFarm" || 
+    type === "PzhWebServer" || type === "PzhWebSocketServer") {
+    certType = 1;
+  } else {
+    certType = 2;
+  }
+
+  try {
+      // state, city, orgname, orgunit are left empty as we do not posses this information
+    if (type === "Pzh") {
+      csr = certman.createCertificateRequest(key,
+          config.country,
+          "", // state
+          "", //city
+          "", //orgname
+          "", //orgunit
+          cn,
+          config.email);
     } else {
-        certType = 2;
+      csr = certman.createCertificateRequest(key,
+          "", // country
+          "", // state
+          "", //city
+          "", //orgname
+          "", //orgunit
+          cn,
+         ""); //email
     }
+  } catch (e) {
+    console.log("Failed Generating CSR");
+    callback("failed", e);
+    return;
+  }
 
-    try {
-        // state, city, orgname, orgunit are left empty as we do not posses this information
-        if (type === "Pzh") {
-            csr = certman.createCertificateRequest(key,
-                config.country,
-                "", // state
-                "", //city
-                "", //orgname
-                "", //orgunit
-                cn,
-                config.email);
-        } else {
-            csr = certman.createCertificateRequest(key,
-                "", // country
-                "", // state
-                "", //city
-                "", //orgname
-                "", //orgunit
-                cn,
-               ""); //email
-        }
-    } catch (e) {
-        console.log("Failed Generating CSR");
-        callback("failed", e);
-        return;
-    }
+  try {
+    obj.cert = certman.selfSignRequest(csr, 3600, key, certType, config.serverName);
+  } catch (e1) {
+    console.log("Failed Generating Self Signed Certifcate");
+    callback("failed", e1);
+    return;
+  }
 
-    try {
-        obj.cert = certman.selfSignRequest(csr, 3600, key, certType, config.serverName);
-    } catch (e1) {
-        console.log("Failed Generating Self Signed Certifcate");
-        callback("failed", e1);
-        return;
-    }
-
-    try {
-            obj.crl = certman.createEmptyCRL(key, obj.cert, 3600, 0);
-    } catch (e2) {
-            callback("failed", e2);
-            return;
-    }
-    callback("certGenerated", null, key, obj, csr);
+  try {
+    obj.crl = certman.createEmptyCRL(key, obj.cert, 3600, 0);
+  } catch (e2) {
+    callback("failed", e2);
+    return;
+  }
+  callback("certGenerated", null, key, obj, csr);
 };
 
 /**
  * @description Crypto sensitive
 */
 exports.signRequest = function(csr, master_key, master_cert, certType, uri, callback) {
-        "use strict";
-        var certman;
+  "use strict";
+  var certman;
 
-        try {
-            //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-            certman = process.binding("certificate_manager");
-        } catch (err) {
-            callback( "failed");
-            return;
-        }
+  try {
+    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+    certman = process.binding("certificate_manager");
+  } catch (err) {
+    callback( "failed");
+    return;
+  }
 
-        try {
-            var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, uri);
-            callback("certSigned", clientCert);
-        } catch(err1) {
-            log("ERROR", "Failed to sign certificate: " + err1.code + ", " + err1.stack);
-            callback("failed");
-            return;
-        }
+  try {
+    var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, uri);
+    callback("certSigned", clientCert);
+  } catch(err1) {
+    log("ERROR", "Failed to sign certificate: " + err1.code + ", " + err1.stack);
+    callback("failed");
+    return;
+  }
 };
 
 exports.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
-        "use strict";
-        var certman;
+  "use strict";
+  var certman;
 
-        try {
-                //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-            certman = process.binding("certificate_manager");
-        } catch (err) {
-            log("ERROR", "Failed to find the certificate manager");
-            callback("failed", err);
-            return;
-        }
-        try {
-            log("INFO", "Calling certman.addToCRL\n");
-            var crl = certman.addToCRL("" + master_key, "" + master_crl, "" + pzpCert);
-            // master.key.value, master.cert.value
-            callback("certRevoked",  crl);
-        } catch(err1) {
-            log("ERROR", "Error: " + err1);
-            callback("failed", err1);
-            return;
-        }
+  try {
+    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
+    certman = process.binding("certificate_manager");
+  } catch (err) {
+    log("ERROR", "Failed to find the certificate manager");
+    callback("failed", err);
+    return;
+  }
+  try {
+    log("INFO", "Calling certman.addToCRL\n");
+    var crl = certman.addToCRL("" + master_key, "" + master_crl, "" + pzpCert);
+    // master.key.value, master.cert.value
+    callback("certRevoked",  crl);
+  } catch(err1) {
+    log("ERROR", "Error: " + err1);
+    callback("failed", err1);
+    return;
+  }
 }
