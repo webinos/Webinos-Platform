@@ -172,9 +172,10 @@ session_common.readJson = function(instance, buffer, objectHandler) {
 };
 
 /**
- * This function is call most as each data received first calls this function.
- * It removes appended # in the message. This is appended at both end to identify start and end of message.
- * Also message verify is done based on schema. 
+ * Read in JSON objects from buffer and call objectHandler for each parsed
+ * object.
+ * @param buffer Buffer instance containing JSON serialized objects.
+ * @param objectHandler Callback for parsed object.s
  */
 session_common.processedMsg = function(self, msgObj, callback) {
   "use strict";
