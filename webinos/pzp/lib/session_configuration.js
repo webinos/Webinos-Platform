@@ -21,7 +21,7 @@ var os            = require("os");
 
 var certificate = require("./session_certificate");
 var common      = require("./session_common");
-var log         = require("./session_common").debug;
+var log         = new common.debug("config");
 
 var session_configuration = exports;
 
@@ -62,13 +62,13 @@ session_configuration.setConfiguration = function (name, type, url, callback) {
   var webinosDemo = common.webinosConfigPath();
 
   if (typeof callback !== "function") {
-    log("ERROR", "[CONFIG] Callback function is not defined");
+    log.error("callback function is not defined");
     callback("undefined");
     return;
   }
 
   if (type !== "PzhFarm" && type !== "Pzh" && type !== "Pzp") {
-    log("ERROR", "[CONFIG] Wrong type is used");
+    log.error("wrong type is used");
     callback("undefined");
     return;
   }
@@ -88,7 +88,7 @@ session_configuration.setConfiguration = function (name, type, url, callback) {
         certificate.selfSigned(config, type, function(status, selfSignErr, conn_key, conn_cert, csr ) {
           if(status === "certGenerated") {
             session_configuration.storeKey(config.own.key_id, conn_key);
-            log("INFO", "[CONFIG] Generated CONN Certificates");
+            log.info("generated CONN Certificates");
             if (type !== "Pzp") {
               // This self signed certificate is  master certificate / CA
               selfSignedMasterCert(config, function(config_master){
@@ -106,24 +106,24 @@ session_configuration.setConfiguration = function (name, type, url, callback) {
                   callback(config, conn_key, csr);
                 });
               } catch (err) {
-                log("ERROR", "[CONFIG] Error storing key in key store "+ err);
+                log.error("storing key in key store "+ err);
                 return;
               }
             }
           } else {
-            log("ERROR", "[CONFIG] Error Generating Self Signed Cert: ");
+            log.error("generating Self Signed Cert: ");
             callback("undefined");
           }
         });
       } catch (err) {
-        log("ERROR", "[CONFIG] Error in generating certificates" + err);
+        log.error("generating certificates" + err);
         callback("undefined");
       }
     } else { // When configuration already exists, just load configuration file
         var configData = data.toString("utf8");
         config = JSON.parse(configData);
         if (config.master.cert === "" ){
-          log("INFO", "[CONFIG] Regenerate PZP certificate as it failed getting certificate from PZH");
+          log.info("regenerate PZP certificate as it failed getting certificate from PZH");
           certificate.selfSigned(config, type, function(status, selfSignErr, conn_key, conn_cert, csr ) {
             if(status === "certGenerated") {
               session_configuration.storeKey(config.own.key_id, conn_key);
@@ -173,7 +173,7 @@ session_configuration.createDirectoryStructure = function (callback) {
       }, 100);
     });
   } catch (err){
-    log("ERROR", "[CONFIG] Error setting default Webinos Directories" + err.code);
+    log.error("error setting default Webinos Directories" + err.code);
   }
 }
 
@@ -183,10 +183,10 @@ session_configuration.storeConfig = function (config, callback) {
     fs.writeFile((webinosDemo+ "/config/"+config.name+".json"), JSON.stringify(config, null, " "), function(err) {
       if(err) {
         callback(false);
-        log("ERROR", "[CONFIG] Error saving configuration file - "+config.name);
+        log.error("error saving configuration file - "+config.name);
       } else {
         callback(true);
-        log("INFO", "[CONFIG] Saved configuration file - " + config.name);
+        log.info("saved configuration file - " + config.name);
       }
     });
   }
@@ -196,9 +196,9 @@ session_configuration.storeKey= function (key_id, value) {
   var webinosDemo = common.webinosConfigPath();
   fs.writeFile((webinosDemo+ "/keys/"+key_id), value, function(err) {
     if(err) {
-      log("ERROR", "[CONFIG] Error saving key " + err);
+      log.error("error saving key " + err);
     } else {
-      log("INFO", "[CONFIG] Saved key file @@ " +key_id);
+      log.info("saved key file @@ " +key_id);
     }
   });
 }
@@ -207,10 +207,10 @@ session_configuration.fetchKey= function (key_id, callback) {
   var webinosDemo = common.webinosConfigPath();
   fs.readFile((webinosDemo+ "/keys/"+key_id), function(err, data) {
     if(err) {
-      log("ERROR", "[CONFIG] Error saving key " + err);
+      log.error("error saving key " + err);
       callback(null);
     } else {
-      log("INFO", "[CONFIG] Fetched key file @@ "+ key_id);
+      log.info("fetched key file @@ "+ key_id);
       callback(data.toString());
     }
   });
@@ -222,7 +222,7 @@ session_configuration.signedCert = function (csr, config, name, type, callback) 
       // connection certificate signed by master certificate
       certificate.signRequest(csr, master_key, config.master.cert, type, config.serverName, function(result, signed_cert) {
         if(result === "certSigned") {
-          log("INFO", "[CONFIG] Generated Signed Certificate by CA");
+          log.info("generated Signed Certificate by CA");
           try {
             if(type === 1 || type === 0) { // PZH
               config.own.cert = signed_cert; // Signed connection certificate
@@ -235,7 +235,7 @@ session_configuration.signedCert = function (csr, config, name, type, callback) 
               callback(config);
             });
           } catch (err1) {
-            log("ERROR","[CONFIG] Error setting paramerters" + err1) ;
+            log.error("error setting paramerters" + err1) ;
             callback("undefined");
             return;
           }
@@ -243,7 +243,7 @@ session_configuration.signedCert = function (csr, config, name, type, callback) 
       });
     });
   } catch (err){
-    log("ERROR", "[CONFIG] Error in generating signed certificate by CA" + err);
+    log.error("error in generating signed certificate by CA" + err);
     callback("undefined");
   }
 };
@@ -279,7 +279,7 @@ function selfSignedMasterCert(config, callback){
   try {
     certificate.selfSigned(config, config.type+"CA", function(result, selfSignErr, master_key, master_cert) {
       if(result === "certGenerated") {
-        log("INFO", "[CONFIG] Generated CA Certificate");
+        log.info("generated CA Certificate");
         // Store all master certificate information
         config.master.cert = master_cert.cert;
         config.master.crl  = master_cert.crl;
@@ -288,11 +288,11 @@ function selfSignedMasterCert(config, callback){
           callback(config);
         });
       } else {
-        log("ERROR", "Error in generting certificate");
+        log.error("error in generting certificate");
       }
     });
   } catch (err) {
-    log("ERROR", "[CONFIG] Error in generating master self signed certificate " + err);
+    log.error("error in generating master self signed certificate " + err);
     callback("undefined");
   }
 }

@@ -20,7 +20,7 @@
 if (typeof webinos === "undefined") { webinos = {}; }
 if (!webinos.discovery) { webinos.discovery = {}; }
 
-	var localdisc = process.binding('bluetooth');
+	var localdisc = require('bluetooth');
 	
 	//Enforce Policy in
 	/**

@@ -32,7 +32,6 @@ var util        = require("util");
 var crypto      = require("crypto");
 
 var webinos = require("webinos")(__dirname);
-var log     = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debug;
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var qrcode  = require("./pzh_qrcode.js");
 var revoke  = require("./pzh_revoke.js");
@@ -218,11 +217,9 @@ pzh_internal_apis.restartPzh = function(instance, callback) {
       if (id.match(elem[0]) !== null) {
 
         elem[1] = crypto.createCredentials(farm.pzhs[id].options).context;
-        console.log("Restarting PZH ... ");
       }
     });
   } catch(err) {
-    log(instance.sessionId, "ERROR", "Pzh restart failed " + err);
     callback.call(instance, err);
   }
 };

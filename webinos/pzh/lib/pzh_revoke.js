@@ -32,8 +32,8 @@ var crypto  = require("crypto");
 var util    = require("util");
 
 var webinos = require("webinos")(__dirname);
-var log     = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debug;
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
+var log     = new session.common.debug("pzh_revoke");
 
 // Main interface: remove a PZP here.
 function revoke(instance, pzpCert, callback) {
@@ -56,7 +56,7 @@ function revoke(instance, pzpCert, callback) {
         });
 
       } else {
-        log(instance.sessionId, "ERROR", "[PZH - "+instance.sessionId+"] Failed to revoke client certificate [" + pzpCert + "]");
+        log.error("failed to revoke client certificate [" + pzpCert + "]");
         callback(false);
       }
     });
@@ -73,7 +73,7 @@ function removeRevokedCert(instance, pzpid, config, callback) {
       callback(true);
     });
   } catch (err) {
-    log(instance.sessionId, "INFO", "[PZH - "+ instance.sessionId+"] Unable to rename certificate " + err);
+    log.error("unable to rename certificate " + err);
     callback(false);
   }
 }
@@ -84,17 +84,17 @@ revoker.revokePzp = function (pzpid, pzh, callback ) {
   if (typeof pzpcert !== "undefined" ) {
     revoke(pzh, pzpcert, function(result) {
       if (result) {
-        log(pzh.sessionId, "INFO", "[PZH - "+ pzh.sessionId+"] Revocation success! " + pzpid + " should not be able to connect anymore ");
+        log.info("revocation success! " + pzpid + " should not be able to connect anymore ");
 
         removeRevokedCert(pzh, pzpid, pzh.config, function(status2) {
           if (!status2) {
-            log(pzh.sessionId, "INFO", "[PZH - "+ pzh.sessionId+"] Could not rename certificate");
+            log.error("could not rename certificate");
           }
           callback({cmd:"revokePzp", pzpid: pzpid});
           return;
         });
       } else {
-        log(pzh.sessionId, "INFO", "[PZH - "+ pzh.sessionId+"] Revocation failed! ");
+        log.error("revocation failed! ");
         callback("failed to update CRL");
       }
     });

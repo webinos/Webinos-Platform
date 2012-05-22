@@ -1,0 +1,80 @@
+#!/usr/bin/env node
+var child = require('child_process').exec
+var list = [];
+var fs = require('fs');
+var prefix;
+var cmd = process.argv[2];
+var prefixPath = process.argv[3];
+
+if (typeof cmd === "undefined") {
+  help();
+}
+
+if (cmd ==="--help") {
+  help();
+}
+
+function help() {
+  console.log("To install Webinos please run");
+  console.log("\t node installer.js install");
+  console.log("\t node installer.js uninstall/clean");
+  console.log("\t (Be default installs in /usr/local to install in different location) ");
+  console.log("\t node installer.js install --prefix ");
+  process.exit();
+}
+
+
+function exec(list) {
+  var key =0;
+  for (key =0; key < list.length; key += 1) {
+    console.log(list[key]);
+    child(list[key], function(err, stdout, stderr) {
+       if(err) {
+         console.log(err);
+         process.exit(1);
+       }
+       
+    });
+  } 
+}
+
+if (typeof prefixPath !== "undefined") {
+  prefix = prefixPath;
+} else {
+  prefix = '/usr/local';
+}
+
+if (cmd === "install") {
+  var filePath = [prefix+"/bin", prefix+"/lib", prefix+"/lib/node_modules", prefix+"/lib/node_modules/webinos_platform" ];
+  for ( var key = 0; key < filePath.length; key += 1) {
+    if (!fs.existsSync(filePath[key])) {
+      fs.mkdirSync(filePath[key]);
+    }
+  }
+  
+  child("node-gyp configure", function(err, stdout, stderr) {
+    console.log(stderr)
+    if (err) {
+      console.log(" Error running, please run manually node-gyp configure");
+    }
+    else {
+      child("node-gyp build", function(err, stdout, stderr) {
+        console.log(stderr);
+        if (!err ) { 
+          list.push("cp -r webinos/* " + prefix + "/lib/node_modules/webinos_platform/ ")
+          list.push("cp -r node_modules/*      "+prefix+"/lib/node_modules/");
+          
+          list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzh/lib/pzh_start.js "+prefix+"/bin/webinos_pzh")
+          list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzp/lib/pzp_start.js "+prefix+"/bin/webinos_pzp")
+            
+          exec(list);
+        }  
+      });
+    }
+  });
+} else {
+  list.push("rm -rf " + prefix+ "/bin/webinos_pzh");
+  list.push("rm -rf " + prefix+ "/bin/webinos_pzp");
+  list.push("rm -rf build/");
+  exec(list);
+}

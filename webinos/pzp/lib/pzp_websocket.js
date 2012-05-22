@@ -27,8 +27,8 @@ var http = require("http"),
   WebSocketServer = require("websocket").server;
 
 var webinos        = require("webinos")(__dirname);
-var log            = require("./session").common.debug;
 var session        = require("./session");
+var log            = new session.common.debug("pzp_websocket");
 var rpc            = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
 var wrtServer;
 
@@ -36,7 +36,7 @@ if(process.platform == "android") {
   try {
     wrtServer = require("bridge").load("org.webinos.app.wrt.channel.WebinosSocketServerImpl", exports);
   } catch(e) {
-    log("ERROR", "PZP pzp_websocket.js: exception attempting to open wrt server " + e);
+    log.error("exception attempting to open wrt server " + e);
   }
 }
 
@@ -101,28 +101,28 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
     });
 
     cs.listen(session.configuration.pzpWebServerPort, config.pzpHost, function(){
-      log("INFO",  "[PZP WebServer]: Listening on port "+session.configuration.pzpWebServerPort);
+      log.info("listening on port "+session.configuration.pzpWebServerPort);
     });
 
     var httpserver = http.createServer(function(request, response) {
-      log("INFO",  "[PZP WSServer]: Received request for " + request.url);
+      log.info("received request for " + request.url);
       response.writeHead(404);
       response.end();
     });
 
     httpserver.on("error", function(err) {
-      log("ERROR",  "[PZP WSServer]: got error " + err);
+      log.error(err);
       if (err.code === "EADDRINUSE") {
         // BUG why make up a port ourselves?
         // Response: not making port, doing it automatically instead of throwing error .., if user wants different ports they can do themselves at startup
         session.configuration.pzpHttpServerPort = parseInt(session.configuration.pzpHttpServerPort, 10) +1;
-        log("ERROR",  "[PZP WSServer]: address in use, now trying port " + session.configuration.pzpHttpServerPort);
+        log.error("address in use, now trying port " + session.configuration.pzpHttpServerPort);
         httpserver.listen(session.configuration.pzpHttpServerPort, config.pzpHost);
       }
     });
 
     httpserver.listen(session.configuration.pzpHttpServerPort, config.pzpHost, function() {
-      log("INFO",  "[PZP WSServer]: Listening on port "+session.configuration.pzpHttpServerPort + " and hostname "+config.pzpHost);
+      log.info("listening on port "+session.configuration.pzpHttpServerPort + " and hostname "+config.pzpHost);
       callback("startedWebSocketServer");
     });
 
@@ -135,14 +135,14 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
         invalidSchemaCheck = session.schema.checkSchema(msg);
 
       } catch (err) {
-        log("ERROR", "[PZP WSServer]: " + err);
+        log.error(err);
       }
       if(invalidSchemaCheck) {
         // For debug purposes, we only print a message about unrecognized packet,
         // in the final version we should throw an error.
         // Currently there is no a formal list of allowed packages and throw errors
         // would prevent the PZP from working
-        log("ERROR",  "[PZP WSServer]: msg schema is not valid " + JSON.stringify(msg));
+        log.error("msg schema is not valid " + JSON.stringify(msg));
       }
       else {
         // schema check is false, so validation is ok
@@ -171,13 +171,12 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
   }
 
   function wsClose(connection) {
-    log("INFO",  "[PZP WSServer]: Peer disconnected.");
+    log.info("web client disconnected.");
   }
 
   if(wrtServer) {
     wrtServer.listener = function(connection) {
-      log("INFO",  "[PZP WSServer]: Connection accepted.");
-      log("INFO",  "[PZP WSServer]: adding proxy connection methods.");
+      log.info("connection accepted and adding proxy connection methods.");
       connection.socket = { pause: function(){}, resume: function(){} };
       connection.sendUTF = connection.send;
 
@@ -186,7 +185,7 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
       connection.listener = {
         onMessage: function(ev) { wsMessage(connection, ev.data); },
         onClose: function() { wsClose(connection); },
-        onError: function(reason) { log("INFO",  "[PZP WSServer]: onError(): " + reason); }
+        onError: function(reason) { log.info("onError(): " + reason); }
       };
     };
   }
@@ -196,7 +195,7 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
   });
 
   wsServer.on("connect", function(connection) {
-    log("INFO",  "[PZP WSServer]: Connection accepted.");
+    log.info("connection accepted.");
     pzp.connectedApp(connection);
     connection.on("message", function(message) { wsMessage(connection, message.utf8Data); });
     connection.on("close", wsClose);
