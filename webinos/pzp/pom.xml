@@ -18,6 +18,8 @@
     <!-- One module tag per child module -->
   </modules>
   
+  <!-- Uncomment the plugin executions you need. If you're component structure is correct, 
+  everything will run as it should. -->
   <build>
     <plugins>
       <plugin>
@@ -37,7 +39,8 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
-          <!-- Activation for build-node-modules. Activate by uncommenting the execution tag. Only needed when C files that need to be compiled to a node module are present in the src folder. -->
+          <!-- Activation for build-node-modules. Activate by uncommenting the execution tag. 
+          Only needed when C files that need to be compiled to a node module are present in the src folder. -->
           <!--
           <execution>
             <id>compile-node-module</id>
@@ -46,7 +49,8 @@
             </goals>
           </execution>
           -->
-          <!-- Activation for jasmine-node-testing. Runs jasmine node tests specified in .spec.js files in the jasmine test folder.-->
+          <!-- Activation for jasmine-node-testing. 
+          Runs jasmine node tests specified in .spec.js files in the jasmine test folder.-->
           <execution>
             <id>jasmine-node-testing</id>
             <goals>

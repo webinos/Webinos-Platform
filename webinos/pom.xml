@@ -69,7 +69,7 @@
       <build> 
         <pluginManagement>
           <plugins>
-           <!-- Perform JSLint validation on javascript files -->
+            <!-- Perform JSLint validation on javascript files -->
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-antrun-plugin</artifactId>
@@ -103,7 +103,8 @@
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
               <executions>
-               <!-- Builds C files to node modules with gyp. Requires the webinos.gyp file in location tools/gyp_tools/ -->         
+               <!-- Builds C files to node modules with gyp. 
+                    Requires the webinos.gyp file in location tools/gyp_tools/ -->         
                <execution>
                 <id>compile-node-module</id>
                 <phase>compile</phase>
@@ -184,7 +185,7 @@
               <artifactId>exec-maven-plugin</artifactId>
               <version>1.2.1</version>
               <executions>
-              <!-- Builds C files to node modules with node-waf --> 
+                <!-- Builds C files to node modules with node-waf --> 
                 <execution>
                   <id>compile-node-module</id>
                   <phase>compile</phase>

@@ -14,14 +14,16 @@
   <name>Keystore manager</name>
   <url>http://www.webinos.org</url>
 
-  <!-- Uncomment the plugin executions you need. If you're component structure is correct, everything will run as it should. -->
+  <!-- Uncomment the plugin executions you need. If you're component structure is correct, 
+  everything will run as it should. -->
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
-          <!-- Activation for jslint-validation. Activate by uncommenting the execution tag. Runs Jslint validation on the javascript files -->
+          <!-- Activation for jslint-validation. Activate by uncommenting the execution tag. 
+          Runs Jslint validation on the javascript files -->
           <!--
           <execution>
             <id>jslint-validation</id>
@@ -43,7 +45,8 @@
               <goal>exec</goal>
             </goals>
           </execution>
-          <!-- Activation for jasmine-node-testing. Runs jasmine node tests specified in .spec.js files in the jasmine test folder -->          
+          <!-- Activation for jasmine-node-testing. 
+          Runs jasmine node tests specified in .spec.js files in the jasmine test folder -->          
           <execution>
             <id>jasmine-node-testing</id>
             <goals>

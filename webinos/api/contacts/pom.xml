@@ -14,7 +14,8 @@
   <name>Contacts</name>
   <url>http://www.w3.org/ns/api-perms/contacts</url>
 
-  <!-- Uncomment the plugin executions you need. If you're component structure is correct, everything will run as it should. -->
+  <!-- Uncomment the plugin executions you need. If you're component structure is correct, 
+  everything will run as it should. -->
   <build>
     <plugins>
       <plugin>
@@ -41,7 +42,8 @@
               <goal>exec</goal>
             </goals>
           </execution>
-          <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag. Only needed when *.spec.js files in the jasmine test folder need to run.-->
+          <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag. 
+          Only needed when *.spec.js files in the jasmine test folder need to run.-->
           <!--
           <execution>
             <id>jasmine-node-testing</id>
