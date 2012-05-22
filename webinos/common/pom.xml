@@ -16,8 +16,9 @@
 
   <modules>
     <!-- One module tag per child module -->
+    <module>android</module>
     <module>rpc</module>
     <module>manager</module>
-	<module>xmpp</module>
+    <module>xmpp</module>
   </modules>
 </project>
