@@ -22,5 +22,6 @@
     <module>policy_manager</module>
     <module>storage</module>
     <module>certificate_manager</module>
+    <module>widget_manager</module>
   </modules>
 </project>
