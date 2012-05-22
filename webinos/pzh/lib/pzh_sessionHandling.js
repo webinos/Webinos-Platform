@@ -34,15 +34,15 @@ util = require("util");
 if (typeof exports !== "undefined") {
   try {
     var webinos        = require("webinos")(__dirname);
-    var log            = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debugPzh;
     var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
+    var log            = new session.common.debug("pzh_session");
     var rpc            = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
     var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
     var RPCHandler     = rpc.RPCHandler;
     var authcode       = require("./pzh_authcode");
     var farm           = require("./pzh_farm");
   } catch (err) {
-    console.log("[ERROR] Webinos modules missing, please check webinos installation" + err);
+    log.error("webinos modules missing, please check webinos installation" + err);
     return;
   }
 }
@@ -73,7 +73,7 @@ var Pzh = function (modules) {
 Pzh.prototype.prepMsg = function (from, to, status, message) {
   var msg = null;
   if (from === null || to === null || status === null || message === null) {
-    log(this.sessionId, "INFO", "Prep message failed");
+    log.error("prep message failed");
   } else {
     msg = {"type"  : "prop",
     "from" : from,
@@ -94,11 +94,11 @@ Pzh.prototype.sendMessage = function (message, address, conn) {
   var self = this;
 
   var jsonString = JSON.stringify(message);
-  var buf = new Buffer(4 + jsonString.length, 'utf8');
+  var buf = new Buffer(4 + jsonString.length, "utf8");
   buf.writeUInt32LE(jsonString.length, 0);
   buf.write(jsonString, 4);
 
-  log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Send to '+ address + ' Message ' + jsonString);
+  log.info("send to "+ address + " message " + jsonString);
   
   try {
     if (self.connectedPzh.hasOwnProperty(address)) {
@@ -114,10 +114,10 @@ Pzh.prototype.sendMessage = function (message, address, conn) {
       conn.write(buf);
       conn.resume();
     } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
-      log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Client ' + address + ' is not connected');
+      log.info("client " + address + " is not connected");
     }
   } catch(err) {
-    log(self.sessionId, 'ERROR', '[PZH -'+ self.sessionId+'] Exception in sending packet ' + err);
+    log.error("exception in sending packet " + err);
   }
 };
 
@@ -132,17 +132,17 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
   * Allows PZP to connect if it has proper QRCode
   */
   if(conn.authorized === false) {
-    log(self.sessionId, "INFO", "[PZH -"+self.sessionId+"] Connection NOT authorised at PZH");
+    log.info(" connection NOT authorised at PZH");
     /**
     * @descriptpzhion: If this is a new PZP, we allow if it has proper QRCode
     */
     self.expecting.isExpected(function(expected) {
       if (!expected || conn.authorizationError !== "UNABLE_TO_GET_CRL"){
         //we"re not expecting anything - disallow.
-        log(self.sessionId, "INFO", "Ending connect: " + conn.authorizationError);
+        log.info("ending connect: " + conn.authorizationError);
         conn.socket.end();
       } else {
-        log(self.sessionId, "INFO","Continuing connect - expected: " + conn.authorizationError);
+        log.info("continuing connect - expected: " + conn.authorizationError);
       }
     });
   }
@@ -152,29 +152,29 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
   */
   if(conn.authorized) {
     var cn, data;
-    log(self.sessionId, 'INFO', '[PZH-'+self.sessionId+'] Connection authorised at PZH');
+    log.info("connection authorised at PZH");
     try {
       // Get peer certificate details from the certiicate
       cn = conn.getPeerCertificate().subject.CN;
       var text = decodeURIComponent(cn);
-      data = text.split(':');
+      data = text.split(":");
     } catch(err) {
-      log(self.sessionId, 'ERROR', '[PZH-'+self.sessionId+'] Exception in reading common name of peer PZH certificate ' + err);
+      log.error("exception in reading common name of peer PZH certificate " + err);
       return;
     }
     /**
       * Connecting PZH details are fetched from the certiciate and then information is stored in internal structures of PZH
       */
-    if(data[0] === 'Pzh' ) {
+    if(data[0] === "Pzh" ) {
       var  pzhId, otherPzh = [], myKey;
       try {
         pzhId = data[1];
       } catch (err1) {
-        log(self.sessionId, 'ERROR', '[PZH -'+self.sessionId+'] Pzh information in certificate is in unrecognized format ' + err1);
+        log.error("pzh information in certificate is in unrecognized format " + err1);
         return;
       }
 
-      log(self.sessionId, "INFO", "[PZH -"+self.sessionId+"] PZH "+pzhId+" Connected");
+      log.info("pzh - " + pzhId+" Connected");
       if(!self.connectedPzh.hasOwnProperty(pzhId)) {
         
       }
@@ -186,10 +186,10 @@ Pzh.prototype.handleConnectionAuthorization = function (self, conn) {
       try {
         sessionId = self.sessionId+"/"+data[1];
       } catch(err1) {
-        log(self.sessionId, "ERROR ","[PZH  -" + self.sessionId + "] Exception in reading common name of PZP certificate " + err1);
+        log.error("exception in reading common name of PZP certificate " + err1);
         return;
       }
-      log(self.sessionId, "INFO", "[PZH -"+self.sessionId+"] PZP "+sessionId+" Connected");
+      log.info("pzp - "+sessionId+" Connected");
 
       // Used for communication purpose. Address is used as PZP might have different IP addresses
       self.connectedPzp[sessionId] = {"socket": conn,  "address": conn.socket.remoteAddress};
@@ -216,7 +216,7 @@ Pzh.prototype.handleData = function(conn, buffer) {
       self.processMsg(conn, obj);
     });
   } catch (err) {
-    log(this.sessionId, 'ERROR', '[PZH] Exception in processing recieved message ' + err);
+    log.error("exception in processing recieved message " + err);
   } finally {
     conn.resume();
   }
@@ -282,12 +282,12 @@ Pzh.prototype.addNewPZPCert = function (parse, cb) {
         // Fail message
         var payload = {};
         var msg = self.prepMsg(self.sessionId, parse.from, "failedCert", payload);
-        log(self.sessionId, "INFO", "[PZH -"+self.sessionId+"] Failed to create client certificate: not expected code, please generate via PZH");
+        log.info("failed to create client certificate: not expected code, please generate via PZH");
         cb.call(self, null, msg);
       }
     });
   } catch (err) {
-    log(self.sessionId, "ERROR ", "[PZH -"+self.sessionId+"] Error Signing Client Certificate" + err);
+    log.error("error signing client certificate" + err);
     cb.call(self, "Could not create client certificate");
   }
 };
@@ -300,12 +300,12 @@ Pzh.prototype.addNewPZPCert = function (parse, cb) {
 Pzh.prototype.processMsg = function(conn, msgObj) {
   var self = this;
   session.common.processedMsg(self, msgObj, function(validMsgObj) {
-    log(self.sessionId, 'DEBUG', '[PZH -'+self.sessionId+'] Received message' + JSON.stringify(validMsgObj));
+    log.info("received message" + JSON.stringify(validMsgObj));
     // Message sent by PZP connecting first time based on this message it generates client certificate
-    if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'clientCert' ) {
+    if(validMsgObj.type === "prop" && validMsgObj.payload.status === "clientCert" ) {
       self.addNewPZPCert(validMsgObj, function(err, msg) {
         if (err !== null) {
-          log(self.sessionId, 'INFO', err);
+          log.error(err);
           return;
         } else {
           self.sendMessage(msg, validMsgObj.from, conn);
@@ -314,29 +314,29 @@ Pzh.prototype.processMsg = function(conn, msgObj) {
       });
     }
     else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
-      log(self.sessionId, "INFO", "[PZH -"+ self.sessionId+"] Receiving details from PZP...");
+      log.info("receiving details from PZP...");
       self.sendPzpUpdate(validMsgObj.from, conn, validMsgObj.payload.message);
     }
     // information sent by connecting PZP about services it supports. These details are then used by findServices 
-    else if(validMsgObj.type === "prop" && validMsgObj.payload.status === 'registerServices') {
-      log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Receiving Webinos Services from PZP...');
+    else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "registerServices") {
+      log.info("receiving Webinos services from PZP...");
       self.rpcHandler.addRemoteServiceObjects(validMsgObj.payload.message);
     }   
     // Send findServices information to connected PZP..
-    else if(validMsgObj.type === "prop" && validMsgObj.payload.status === 'findServices') {
-      log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Trying to send Webinos Services from this RPC handler to ' + validMsgObj.from + '...');
+    else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
+      log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
       var services = self.rpcHandler.getAllServices(validMsgObj.from);
-      var msg = self.prepMsg(self.sessionId, validMsgObj.from, 'foundServices', services);
+      var msg = self.prepMsg(self.sessionId, validMsgObj.from, "foundServices", services);
       msg.payload.id = validMsgObj.payload.message.id;
       self.sendMessage(msg, validMsgObj.from);
-      log(self.sessionId, 'INFO', '[PZH -'+ self.sessionId+'] Sent ' + (services && services.length) || 0 + ' Webinos Services from this RPC handler.');
+      log.info("sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
     }
     // Message is forwarded to Messaging manager
     else {
       try {
         self.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
       } catch (err2) {
-        log(self.sessionId, 'ERROR', '[PZH -'+ self.sessionId+'] Error Message Sending to Messaging ' + err2);
+        log.error("error message sending to messaging " + err2);
         return;
       }
     }
@@ -363,11 +363,11 @@ Pzh.prototype.setMessageHandler = function() {
 */
 exports.addPzh = function ( uri, modules, callback) {
   if (typeof farm.server === "undefined" || farm.server === null) {
-    log(null, "ERROR", "[PZH] Farm is not running, please startFarm");
+    log.error("farm is not running, please startFarm");
     callback(false);
   } else {
     if (typeof uri === "undefined" || uri === "null" || typeof modules === "undefined" || modules === "null" ){
-      log(null, "ERROR","PZH could not be started as one of the details are missing ");
+      log.error("pzh could not be started as one of the details are missing");
       callback(false);
     } else {
       var name = uri.split("/")[1];
@@ -397,7 +397,7 @@ exports.addPzh = function ( uri, modules, callback) {
         instance.rpcHandler.setSessionId(instance.sessionId);
 
         if (typeof farm.server === "undefined" || farm.server === null) {
-          log(instance.sessionId, "ERROR", "[PZH -"+ instance.sessionId+"] Farm is not running, please startFarm");
+          log.error("farm is not running, please startFarm");
         } else {
           // This adds SNI context to existing running PZH server
           farm.server.addContext(uri, options);

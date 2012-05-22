@@ -449,5 +449,5 @@ extern "C" {
 	  BTDiscovery::Init(target);
   }
 
-  NODE_MODULE(node_bluetooth, init);
+  NODE_MODULE(bluetooth, init);
 }

@@ -37,7 +37,7 @@
 		else {
 			//this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
 			try {
-				this.pmNativeLib = process.binding('pm');
+				this.pmNativeLib = require('pm');
 			} catch (err) {
 				console.log("policy manager could not be loaded");
 			}

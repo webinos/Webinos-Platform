@@ -19,7 +19,7 @@
 var tls   = require("tls");
 
 var session = require("./session");
-var logs    = session.common.debug;
+var log     = new session.common.debug("pzp_client");
 var global  = session.configuration;
 
 var PzpClient = function() {
@@ -42,7 +42,7 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
     client = tls.connect(msg.port, msg.address, options, function () {
       if (client.authorized) {
       self.peerSessionId = msg.name;
-      logs("INFO", "[PZP Client-" + self.sessionId + "]: Authorized & Connected to PZP: " + msg.address + " name = " + msg.name);
+      log.info("authorized & connected to PZP: " + msg.address + " name = " + msg.name);
 
       if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
         parent.mode   = global.modes[3];
@@ -60,7 +60,7 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       parent.sendMessage(msg1, msg.name);
 
       } else {
-        logs("INFO", "[PZP Client-" + self.sessionId + "]: Connection failed, first connect with PZH ");
+        log.info("connection failed, first connect with PZH ");
       }
     });
 
@@ -70,7 +70,7 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
         session.common.readJson(self, buffer, function(obj) {
           session.common.processedMsg(self, obj, function(validMsgObj) {
             if(validMsgObj.type === "prop" && validMsgObj.payload.status === "foundServices") {
-              logs("INFO", "[PZP Client-"+self.sessionId+"]: Received message about available remote services.");
+              log.info("received message about available remote services.");
               parent.serviceListener && parent.serviceListener(validMsgObj.payload);
             } else {
               parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
@@ -79,12 +79,12 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
         });
         client.resume();
       } catch (err) {
-        logs("ERROR", "[PZP Client-" + self.sessionId + "]: Exception" + err);
+       log.error(err);
       }
     });
 
     client.on("end", function () {
-      logs("INFO", "[PZP Client-" + self.sessionId + "]: Connection terminated");
+      log.info("connection terminated");
       parent.connectedPzp[self.peerSessionId].state = global.states[3];
       if (parent.mode === global.modes[2]) {
         parent.state = global.states[0];
@@ -105,12 +105,12 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
       parent.connectedPzp[self.peerSessionId].state = global.states[0];
-      logs('INFO','[PZP Client-'+ self.sessionId+'] Mode '+ parent.mode + ' State '+parent.state);
+      log.info('mode '+ parent.mode + ' state '+parent.state);
 
     });
 
     client.on("error", function (err) {
-      logs("ERROR", "[PZP Client-" + self.sessionId + "]:  " + err);
+      log.error(err);
       parent.connectedPzp[self.peerSessionId].state = global.states[3];
       if (parent.mode === global.modes[2]) {
         parent.state = global.states[0];
@@ -131,11 +131,11 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
       parent.connectedPzp[self.peerSessionId].state = global.states[0];
-      logs('INFO','[PZP Client-'+ self.sessionId+'] Mode '+ self.mode + ' State '+self.state);
+      log.info('mode '+ self.mode + ' state '+self.state);
     });
 
     client.on("close", function () {
-      logs("INFO", "[PZP Client-" + self.sessionId + "]:  Connection closed by PZP Server");
+      log.info("connection closed by PZP Server");
     });
   });
 };

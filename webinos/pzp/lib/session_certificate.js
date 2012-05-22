@@ -16,7 +16,7 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 
-var log  = require("./session_common").debug;
+var log  = new require("./session_common").debug("cert");
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
@@ -30,13 +30,9 @@ exports.selfSigned = function(config, type, callback) {
   var obj = {cert: "", crl:""};
 
   try {
-      if(process.platform !== "android") {
-        //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-        certman = process.binding("certificate_manager");
-      } else {
-        certman = require("certificate_manager");
-      }
+    certman = require("certificate_manager");
   } catch (err) {
+    log.error("failed loading certificate manager");
     callback("failed", err);
     return;
   }
@@ -44,7 +40,7 @@ exports.selfSigned = function(config, type, callback) {
   try {
     key = certman.genRsaKey(1024);
   } catch(err1) {
-    console.log("Failed Generating Key");
+    log.error("Failed Generating Key");
     callback("failed", err1);
     return;
   }
@@ -85,7 +81,7 @@ exports.selfSigned = function(config, type, callback) {
          ""); //email
     }
   } catch (e) {
-    console.log("Failed Generating CSR");
+    log.error("failed Generating CSR");
     callback("failed", e);
     return;
   }
@@ -93,7 +89,7 @@ exports.selfSigned = function(config, type, callback) {
   try {
     obj.cert = certman.selfSignRequest(csr, 3600, key, certType, config.serverName);
   } catch (e1) {
-    console.log("Failed Generating Self Signed Certifcate");
+    log.error("failed Generating Self Signed Certifcate");
     callback("failed", e1);
     return;
   }
@@ -115,8 +111,7 @@ exports.signRequest = function(csr, master_key, master_cert, certType, uri, call
   var certman;
 
   try {
-    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-    certman = process.binding("certificate_manager");
+    certman = require("certificate_manager");
   } catch (err) {
     callback( "failed");
     return;
@@ -126,7 +121,7 @@ exports.signRequest = function(csr, master_key, master_cert, certType, uri, call
     var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, uri);
     callback("certSigned", clientCert);
   } catch(err1) {
-    log("ERROR", "Failed to sign certificate: " + err1.code + ", " + err1.stack);
+    log.error("failed to sign certificate: " + err1.msg);
     callback("failed");
     return;
   }
@@ -137,10 +132,9 @@ exports.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
   var certman;
 
   try {
-    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-    certman = process.binding("certificate_manager");
+    certman = require("certificate_manager");
   } catch (err) {
-    log("ERROR", "Failed to find the certificate manager");
+    log.error("failed loading certificate manager");
     callback("failed", err);
     return;
   }
@@ -150,7 +144,7 @@ exports.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
     // master.key.value, master.cert.value
     callback("certRevoked",  crl);
   } catch(err1) {
-    log("ERROR", "Error: " + err1);
+    log.error(err1);
     callback("failed", err1);
     return;
   }

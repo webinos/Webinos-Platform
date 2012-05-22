@@ -26,8 +26,8 @@ var util        = require("util");
 var fs          = require("fs");
 
 var webinos = require("webinos")(__dirname);
-var log     = webinos.global.require(webinos.global.pzp.location, "lib/session").common.debug;
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
+var log     = new session.common.debug("pzh_farm");
 var pzh     = require("./pzh_sessionHandling.js");
 
 var farm = exports;
@@ -43,7 +43,7 @@ function loadPzhs(config) {
   for ( myKey in config.pzhs) {
     if(typeof config.pzhs[myKey] !== "undefined") {
       pzh.addPzh(myKey, config.pzhs[myKey], function(res, instance) {
-        log("INFO","[PZHFARM] Started PZH ... " + instance.config.name);
+        log.info("started PZH ... " + instance.config.name);
       });
     }
   }
@@ -61,7 +61,7 @@ farm.startFarm = function (url, name, callback) {
     // Configuration setting for pzh, returns set values and connection key
     session.configuration.setConfiguration(name,"PzhFarm", url, function (config, conn_key) {
       if (config === "undefined") {
-        log("ERROR", "[PZHFARM] Failed setting configuration, details are missing")
+        log.error("failed setting configuration, details are missing");
         return;
       }
       // Connection parameters for PZH pzh_farm TLS server.
@@ -79,10 +79,9 @@ farm.startFarm = function (url, name, callback) {
         farm.server = tls.createServer (options, function (conn) {
           // if servername existes in conn and pzh_farm.pzhs has details about pzh instance, message will be routed to respective PZH authorization function
           if (conn.servername && farm.pzhs[conn.servername]) {
-            log("INFO", "[PZHFARM] sending message to " + conn.servername);
             farm.pzhs[conn.servername].handleConnectionAuthorization(farm.pzhs[conn.servername], conn);
           } else {
-            log("ERROR", "[PZHFARM] Server Is Not Registered in Farm "+conn.servername);
+            log.error("server Is Not Registered in Farm "+conn.servername);
             conn.socket.end();
             return;
           }
@@ -92,18 +91,18 @@ farm.startFarm = function (url, name, callback) {
             if(conn.servername && farm.pzhs[conn.servername]) {
               farm.pzhs[conn.servername].handleData(conn, data);
             } else {
-              log("INFO", "[PZHFARM] " + conn.servername + " is not registered in the farm");
+              log.info("("+conn.servername+") is not registered in the farm");
             }
           });
             // In case of error
           conn.on("end", function(err) {
-            log("INFO", "[PZHFARM] Client of " +conn.servername+" ended connection");
+            log.info("("+conn.servername+") client ended connection");
           });
 
           // It calls removeClient to remove PZH from list.
           conn.on("close", function() {
             try {
-              log("INFO", "[PZHFARM] ("+conn.servername+") Pzh/Pzp  closed");
+              log.info("("+conn.servername+") Pzh/Pzp  closed");
               if(conn.servername && farm.pzhs[conn.servername]) {
                 var cl = farm.pzhs[conn.servername];
                 var removed = session.common.removeClient(cl, conn);
@@ -113,17 +112,17 @@ farm.startFarm = function (url, name, callback) {
                 }
               }
             } catch (err) {
-              log("ERROR", "[PZHFARM] ("+conn.servername+") Remove client from connectedPzp/connectedPzh failed" + err);
+              log.error("("+conn.servername+") Remove client from connectedPzp/connectedPzh failed" + err);
             }
           });
 
           conn.on("error", function(err) {
-            log("ERROR", "[PZHFARM] ("+conn.servername+") General Error" + err);
+            log.error("("+conn.servername+") General Error" + err);
           });
         });
 
         farm.server.on("listening", function(){
-          log("INFO", "[PZHFARM] Initialized at " + resolvedAddress);
+          log.info("initialized at " + resolvedAddress);
           // Load PZH"s that we already have registered ...
           loadPzhs(farm.config);
           // Start web interface, this webinterface will adapt depending on user who logins
@@ -157,10 +156,10 @@ farm.getOrCreatePzhInstance = function (host, user, callback) {
   var myKey = host+"/"+name;
 
   if ( farm.pzhs[myKey] && farm.pzhs[myKey].config.name === name ) {
-    log("INFO", "[PZHFARM] User already registered");
+    log.info("user already registered");
     callback(myKey, farm.pzhs[myKey]);
   } else if(farm.pzhs[myKey]) { // Cannot think of this case, but still might be useful
-    log("INFO", "[PZHFARM] User first time login");
+    log.info("user first time login");
     farm.pzhs[myKey].config.name     = name;
     farm.pzhs[myKey].config.email    = user.email;
     farm.pzhs[myKey].config.country  = user.country;
@@ -169,7 +168,7 @@ farm.getOrCreatePzhInstance = function (host, user, callback) {
       callback(myKey, farm.pzhs[myKey]);
     });
   } else {
-    log("INFO", "[PZHFARM] Adding new PZH - " + myKey);
+    log.info("adding new PZH - " + myKey);
     var pzhModules = session.configuration.pzhDefaultServices;
     pzh.addPzh(myKey, pzhModules, function(){
       farm.pzhs[myKey].config.name     = name;

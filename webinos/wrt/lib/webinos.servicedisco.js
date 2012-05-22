@@ -127,7 +127,7 @@
 
         var serviceAddress;
         if (typeof this.rpcHandler.parent !== 'undefined') {
-        	serviceAddress = this.rpcHandler.parent.pzhId;
+        	serviceAddress = this.rpcHandler.parent.config.pzhId;
         } else {
         	serviceAddress = webinos.session.getServiceLocation();
         }

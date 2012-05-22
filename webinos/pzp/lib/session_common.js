@@ -27,6 +27,9 @@ var path = require("path");
 var fs = require("fs");
 var os = require("os");
 
+var ansi = require('ansi');
+var cursor = ansi(process.stderr);
+
 var writeError = [];
 var message = "";
 
@@ -34,22 +37,25 @@ var session_common = exports;
 
 var validation   = require("./session_schema");
 
-
-session_common.debug = function(num, msg) {
-  "use strict";
-  var info = true; // Change this if you want no prints from session manager
-  var debug = true;
-
-  if(num === "ERROR" || num === 1) {
-    console.log("ERROR: " + msg);
-  } else if((num === "INFO" || num === 2) & info) {
-    console.log("INFO: " + msg);
-  } else if((num === "DEBUG" || num === 3) && debug) {
-    console.log("DEBUG: " + msg);
-  }
+session_common.debug = function(id) {
+    this.store_id = id;
 };
 
-session_common.debugPzh = function(id, type, msg) {
+session_common.debug.prototype.error = function(msg) {
+  cursor.fg.red().write('error ')
+    .fg.cyan().write(this.store_id)
+    .fg.red().write(' ' + msg + '\n')
+    .reset();
+}; 
+
+session_common.debug.prototype.info = function(msg) {
+  cursor.fg.blue().write('info ')
+    .fg.cyan().write(this.store_id)
+    .fg.white().write(' ' + msg + '\n')
+    .reset();
+};
+
+/*session_common.debugPzh = function(id, type, msg) {
   var info = true; // Change this if you want no prints from session manager
 
   if (id !== null && typeof id !== "undefined" && typeof writeError[id] === "undefined"){
@@ -74,15 +80,7 @@ session_common.debugPzh = function(id, type, msg) {
   if (typeof writeError[id] !== "undefined" && type === "ERROR") {
     writeError[id].write(msg);
   }
-
-  if(type === "ERROR" || type === 1) {
-    console.log("ERROR: " + msg);
-  } else if((type === "INFO" || type === 2) & info) {
-    console.log("INFO: " + msg);
-  } else if((type === "DEBUG" || type === 3)) {
-    console.log("DEBUG: " + msg);
-  }
-};
+};*/
 /**
  * @description: returns root path of .webinos folder. In this folder all information is stored.
  */
@@ -152,7 +150,7 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       jsonStr = buffer.toString('utf8', offset + 4, offset + len + 4);
       offset += len + 4;
     }
-    
+
     if (jsonStr.length < len) {
       instanceMap[instance] = {
           restLen: len - jsonStr.length,
