@@ -30,12 +30,7 @@ exports.selfSigned = function(config, type, callback) {
   var obj = {cert: "", crl:""};
 
   try {
-      if(process.platform !== "android") {
-        //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-        certman = process.binding("certificate_manager");
-      } else {
-        certman = require("certificate_manager");
-      }
+    certman = require("certificate_manager");
   } catch (err) {
     callback("failed", err);
     return;
@@ -115,8 +110,7 @@ exports.signRequest = function(csr, master_key, master_cert, certType, uri, call
   var certman;
 
   try {
-    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-    certman = process.binding("certificate_manager");
+    certman = require("certificate_manager");
   } catch (err) {
     callback( "failed");
     return;
@@ -137,8 +131,7 @@ exports.revokeClientCert = function(master_key, master_crl, pzpCert, callback) {
   var certman;
 
   try {
-    //certman = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
-    certman = process.binding("certificate_manager");
+    certman = require("certificate_manager");
   } catch (err) {
     log("ERROR", "Failed to find the certificate manager");
     callback("failed", err);
