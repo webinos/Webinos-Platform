@@ -38,7 +38,7 @@
   require('./storageCheck')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 
-  var ServiceDiscovery = webinos_.global.require(webinos.global.api['service_discovery']).ServiceDiscovery;
+  var ServiceDiscovery =  webinos_.global.require(webinos_.global.wrt.location, 'lib/webinos.servicedisco').ServiceDiscovery;
   var webinosServiceDiscovery = null;
 
 

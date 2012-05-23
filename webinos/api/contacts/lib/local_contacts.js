@@ -19,7 +19,7 @@
 
 var localcontacts;
 try {
-	localcontacts =  process.binding('localcontacts');
+	localcontacts =  require('localcontacts');
 } catch (Err) {
 	console.log("local contacts could not be loaded ");
 }
