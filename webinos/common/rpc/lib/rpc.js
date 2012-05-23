@@ -620,13 +620,15 @@
 			// Not in peer mode and connected
 			var entityRefCount = (this.parent.mode !== global.modes[2] && this.parent.state === global.states[2])? 1 : 0; 
 			// Fetch from peers that are connected
-			if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && this.parent.state === global.states[2]) {
-				for (var key in this.parent.connectedPzp) { //
-				  if (this.parent.connectedPzp.hasOwnProperty(key)) {
-					if(this.parent.connectedPzp[key].state === global.states[2]) {
-					  entityRefCount += 1;
+			if (this.parent && this.parent.config.type === "Pzp") {
+				if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && this.parent.state === global.states[2]) {
+					for (var key in this.parent.connectedPzp) { //
+						if (this.parent.connectedPzp.hasOwnProperty(key)) {
+							if(this.parent.connectedPzp[key].state === global.states[2]) {
+								entityRefCount += 1;
+							}
+						}
 					}
-				  }
 				}
 			}
 			// no connection to a PZH & other connected Peers, don't ask for remote services
@@ -655,17 +657,19 @@
 				}
 			})(results, entityRefCount);
 
-			// ask for remote service objects
-			if (this.parent.mode !== global.modes[2] && this.parent.state === global.states[2]) { // Not in peer mode & connected
-				this.parent.prepMsg(this.parent.sessionId, this.parent.config.pzhId, 'findServices', {id: callbackId});
-			}
+			if (this.parent && this.parent.config.type === "Pzp") {
+				// ask for remote service objects
+				if (this.parent.mode !== global.modes[2] && this.parent.state === global.states[2]) { // Not in peer mode & connected
+					this.parent.prepMsg(this.parent.sessionId, this.parent.config.pzhId, 'findServices', {id: callbackId});
+				}
 
-			if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && 
-					this.parent.state === global.states[2]) {
-				for (var key in this.parent.connectedPzp) { //
-					if (this.parent.connectedPzp.hasOwnProperty(key) && key !== this.parent.sessionId) {
-						if(this.parent.connectedPzp[key].state === global.states[2]) {
-							this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
+				if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && 
+						this.parent.state === global.states[2]) {
+					for (var key in this.parent.connectedPzp) { //
+						if (this.parent.connectedPzp.hasOwnProperty(key) && key !== this.parent.sessionId) {
+							if(this.parent.connectedPzp[key].state === global.states[2]) {
+								this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
+							}
 						}
 					}
 				}

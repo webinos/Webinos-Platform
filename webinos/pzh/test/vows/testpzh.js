@@ -15,176 +15,185 @@
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-var vows = require('vows'),
-assert   = require('assert');
+var vows  = require('vows'),
+  assert  = require('assert'),
+  webinos = require('webinos')(__dirname),
+  os      = require('os');
 
-var farm = require('../../lib/pzh_farm.js');
-var pzhapis = require('../../lib/pzh_internal_apis.js');
-var pzp = require('../../../pzp/lib/pzp_sessionHandling.js');
+var pzh     = webinos.global.require(webinos.global.pzh.location, 'lib/pzh');
+var pzp     = webinos.global.require(webinos.global.pzp.location, 'lib/pzp');
+var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
 
 // First start farm ..
-exports.desc = desc = vows.describe('Start Farm');
+exports.desc  = desc  = vows.describe('Start Farm');
 exports.desc1 = desc1 = vows.describe('Add PZH');
-exports.desc2 = desc2 = vows.describe('Add Another PZH');
-exports.desc3 = desc3 = vows.describe('PZH Functionality');
-exports.desc4 = desc4 = vows.describe('PZH - PZH Functionality');
-exports.desc5 = desc5 = vows.describe('PZH - PZP Functionality');
-exports.desc6 = desc6 = vows.describe('PZP Functionality');
+exports.desc2 = desc2 = vows.describe('PZH Functionality');
+exports.desc3 = desc3 = vows.describe('PZH - PZP Functionality');
+exports.desc4 = desc4 = vows.describe('PZP Functionality');
 
-var pzh, pzh2, pzp, code;
-
+var firstPzh, secondPzh, firstPzp, secondPzp, name;
+/**
+ * Create a PZH Farm
+ * 1. Create PZH farm instance
+ * 2. Check PZH farm status
+ * 3. Check PZH farn certificate
+ * 4. Check if web server certifcates are in place
+ **/
 desc.addBatch({
-	'start farm': {
-		topic: function() {
-			farm.startFarm('0.0.0.0', '', this.callback);
-		},
-		'if started': function(results, configure) {
-			assert.isTrue(results);
-		},
-		'check farm configuration': function(results, config) {
-			assert.equal(config.details.servername, '0.0.0.0');
-			assert.isString(config.conn.cert);
-			assert.equal(config.conn.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(config.master.cert);
-			assert.equal(config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(config.master.crl);
-			assert.equal(config.master.crl.substring(0,24), "-----BEGIN X509 CRL-----");
-		},
-		'check web interface': function(results, config) {
-			assert.isString(config.webServer.cert);
-		},
-	}
+  'start farm': {
+    topic: function() {
+      name = os.hostname();
+      pzh.farm.startFarm('localhost', '', this.callback);
+    },
+    'check status': function(results, configure) {
+      assert.isTrue(results);
+      assert.equal(configure.type, "PzhFarm");
+      assert.equal(configure.name, name+"_PzhFarm");
+      assert.equal(configure.serverName, "localhost");
+    },
+    'check certificates': function(results, config) {
+      assert.isString(config.own.cert);
+      assert.equal(config.own.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+      
+      assert.isString(config.master.cert);
+      assert.equal(config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+      
+      assert.isString(config.master.crl);
+      assert.equal(config.master.crl.substring(0,24), "-----BEGIN X509 CRL-----");
+    },
+    'check web interface': function(results, config) {
+      assert.isString(config.webServer.cert);
+      assert.equal(config.webServer.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+    },
+  }
 });
-
+/**
+ * Create a PZH in PZH Farm
+ * 1. Create pzh instance
+ * 2. Check PZH status
+ * 3. Check PZH certificate
+ **/
 desc1.addBatch({
-	'PZH André Initialization': {
-		topic: function() {
-			var userDetails = {};
-			userDetails.username = 'AndréPaul'
-			farm.getOrCreatePzhInstance('0.0.0.0', userDetails, this.callback);
-		},
-		'check PZH status': function(name, pzh1) {
-			pzh = pzh1;
-			assert.equal(name, '0.0.0.0/AndréPaul');
-			assert.equal(pzh.sessionId, 'AndréPaul');
-			assert.isString(pzh.config.conn.cert);
-			assert.equal(pzh.config.conn.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(pzh.config.master.cert);
-			assert.equal(pzh.config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(pzh.config.master.crl);
-			assert.equal(pzh.config.master.crl.substring(0,24), "-----BEGIN X509 CRL-----");
-			assert.equal(pzh.config.details.type, "Pzh");
-			assert.equal(pzh.config.details.servername, "0.0.0.0/AndréPaul");
-		},
-	}
+  'PZH Alice Initialization': {
+    topic: function() {
+      var userDetails = {};
+      userDetails.username = 'Alice'
+      pzh.farm.getOrCreatePzhInstance('localhost', userDetails, this.callback);
+    },
+    'check PZH status': function(name, pzh) {
+      firstPzh = pzh;
+      assert.equal(pzh.config.serverName, 'localhost/Alice');
+      assert.equal(pzh.config.name, 'Alice');
+      assert.equal(pzh.config.type, 'Pzh');      
+    },
+    'check PZH certificate': function(name, pzh) {
+      assert.isString(pzh.config.own.cert);
+      assert.equal(pzh.config.own.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+
+      assert.isString(pzh.config.master.cert);
+      assert.equal(pzh.config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+
+      assert.isString(pzh.config.master.crl);
+      assert.equal(pzh.config.master.crl.substring(0,24), "-----BEGIN X509 CRL-----");
+    },
+    
+  }
 });
 
+/**
+ * Test PZH Functionalities
+ * 1. Check list devices
+ * 2. Check if new code is generated
+ **///Alicé
 desc2.addBatch({
-	'PZH Habib Initialization': {
-		topic: function() {
-			var userDetails = {};
-			userDetails.username = 'HabibVirji'
-			farm.getOrCreatePzhInstance('0.0.0.0', userDetails, this.callback);
-		},
-		'check PZH status': function(name, pzh) {
-			pzh2 = pzh;
-			assert.equal(name, '0.0.0.0/HabibVirji');
-			assert.equal(pzh.sessionId, 'HabibVirji');
-			assert.isString(pzh.config.conn.cert);
-			assert.equal(pzh.config.conn.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(pzh.config.master.cert);
-			assert.equal(pzh.config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(pzh.config.master.crl);
-			assert.equal(pzh.config.master.crl.substring(0,24), "-----BEGIN X509 CRL-----");
-			assert.equal(pzh.config.details.type, "Pzh");
-			assert.equal(pzh.config.details.servername, "0.0.0.0/HabibVirji");
-		},
-	}
+  'list devices': {
+    topic: function() {
+      pzh.apis.listZoneDevices(firstPzh, this.callback);
+    },
+    'device status': function(result, result1) {
+      assert.isNotNull(result.payload.pzhs);
+    }
+  },
+  'add new pzp code': {
+    topic: function() {
+      pzh.apis.addPzpQR(firstPzh, this.callback);
+    },
+   'check pzp code': function(result, result1) {
+      code = result.payload.code;
+      assert.equal(result.cmd, 'addPzpQR');
+      assert.isNotNull(result.payload.code);
+    }
+  }
 });
 
-// We are checking only PZH André
+/**
+ * Test PZH - PZP connection
+ * 1. First generate authCode
+ * 2. Initialize PZP
+ * 3. Check PZP status 
+ * 4. Check if certificates are in place
+ **/
 desc3.addBatch({
-	'list devices': {
-		topic: function() {
-			pzhapis.listZoneDevices(pzh, this.callback);
-		},
-		'device status': function(result, result1) {
-			assert.isNotNull(result.payload.pzhs);
-		}
-	},
-	'crash logs': {
-		topic: function() {
-			pzhapis.crashLog(pzh, this.callback);
-		},
-		'crash log': function(result, result1) {
-			assert.equal(result.cmd, 'crashLog');
-		}
-	},
-	'add new pzp code': {
-		topic: function() {
-			pzhapis.addPzpQR(pzh, this.callback);
-		},
-	       'check pzp code': function(result, result1) {
-			code = result.payload.code;
-			assert.equal(result.cmd, 'addPzpQR');
-			assert.isNotNull(result.payload.code);
-		}
-	}
+  'PZH to PZP communication': {
+    topic:function() {
+      var self = this;
+      pzh.apis.addPzpQR(firstPzh, function(result) {
+        var pzpModules = [
+          {name: "context", param: {}},
+          {name: "events", param: {}},
+          {name: "get42", param: {}}
+        ];
+        var config = {};
+        config.pzhHost = 'localhost/Alice';
+        config.pzpHost = 'localhost'
+        config.pzpName = '';
+        config.code    = result.payload.code;
+        var pzp1 = new pzp.session();
+        pzp1.initializePzp(config, pzpModules, self.callback);
+      });
+    },
+    'check PZP Status ': function(result, instance) {
+      firstPzp = instance;
+      assert.equal(result, 'startedPZP');
+      assert.equal(firstPzp.config.name, name+"_Pzp");
+      assert.equal(firstPzp.config.type, "Pzp");
+      assert.equal(firstPzp.config.serverName, 'localhost/Alice')
+      assert.equal(firstPzp.config.pzhId, 'Alice');
+    },
+    'check certificate' : function(result, instance) {
+      assert.isString(instance.config.own.cert);
+      assert.equal(instance.config.own.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+      assert.isString(instance.config.master.cert);
+      assert.equal(instance.config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
+      }
+  },
 });
-
+/**
+ * Test Service Discovery
+ * Test done:
+ * 1. Find Service 
+ * 2. Bind Service
+ * 3. Check result of bind service if the service is found
+ * */
 desc4.addBatch({
-	'PZH to PZH communication': {
-		topic: function() {
-			pzhapis.addPzhCertificate(pzh, pzh2.config.details.servername, this.callback);
-		},
-		'connect pzh status':function(result, result1) {
-			assert.isTrue(result1);
-		},
-	},
-});
-
-
-desc5.addBatch({
-	'PZH to PZP communication': {
-		topic:function() {
-			var pzpModules = [
-				{name: "context", param: {}},
-				{name: "events", param: {}},
-				{name: "get42", param: {}}
-			];
-			var config = {};
-			config.pzhHost = '0.0.0.0/AndréPaul';
-			config.pzpHost = '0.0.0.0'
-			config.pzpName = '';
-			config.code    = code;
-			pzp.startPzp(config, pzpModules, this.callback);
-		},
-		'check pzp ': function(result, instance) {
-			pzp = instance;
-			assert.equal(result, 'startedPZP');
-			assert.isString(instance.config.conn.cert);
-			assert.equal(instance.config.conn.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.isString(instance.config.master.cert);
-			assert.equal(instance.config.master.cert.substring(0,27), "-----BEGIN CERTIFICATE-----");
-			assert.equal(instance.config.details.type, "Pzp");
-			assert.equal(instance.config.details.servername, '0.0.0.0/AndréPaul')
-			assert.equal(instance.pzhId, 'AndréPaul');
-		},
-	},
-});
-
-/*desc6.addBatch({
-	'PZP functionality':{
-		topic: function() {
-			 webinos.discovery.findServices(new ServiceType('http://webinos.org/api/test'),
-				{onFound: function (service) {
-					service.bindService({onBind:function() {
-						service.get42('foo', this.callback);
-					}});
-				}});
-		},
-		'check get42 result': function(result, result1) {
-			console.log(result)
-		}
-	},
-})*/
+  'PZP functionality':{
+    topic: function() {
+      var self = this;
+      var service42
+      var ServiceDisco = webinos.global.require(webinos.global.wrt.location, 'lib/webinos.servicedisco').ServiceDiscovery;
+      var get42        = webinos.global.require(webinos.global.wrt.location, 'lib/webinos.get42').TestModule;
+      console.log(get42)
+      var discovery    = new ServiceDisco(firstPzp.rpcHandler);
+      discovery.findServices(new ServiceType('http://webinos.org/api/test'),
+        { onFound: function (service) {
+          service42 = service;
+          service42.bindService({onBind:self.callback});
+      }});
+    },
+    'check bind service result': function(bindResult, result1) {
+      assert.equal(bindResult.api, 'http://webinos.org/api/test');
+      assert.equal(bindResult.serviceAddress, firstPzp.sessionId);
+      assert.equal(bindResult._testAttr, 'HelloWorld');
+    }
+  },
+})
