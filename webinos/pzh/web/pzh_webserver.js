@@ -27,8 +27,8 @@ var fs       = require('fs');
 var webSocket= require('websocket').server;
 
 var webinos = require('webinos')(__dirname);
-var log     = webinos.global.require(webinos.global.pzp.location, 'lib/session').common.debugPzh;
 var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
+var log     = new session.common.debug("pzh_webserver");
 
 var pzhapis = require('../lib/pzh_internal_apis');
 var farm    = require('../lib/pzh_farm');
@@ -92,11 +92,11 @@ pzhWebInterface.start = function(hostname, callback) {
         });
 
         server.listen(session.configuration.webServerPort, hostname, function() {
-                log('INFO','[WEB SERVER] STARTED on '+ session.configuration.webServerPort);
+                log.info('listening on '+ session.configuration.webServerPort);
         });
 
         server.on('error', function(err) {
-                log('INFO','[WEB SERVER] Server Error' + err);
+                log.error(err);
         });
 
         var httpsServer = https.createServer(webServer, function(request, response) {
@@ -105,7 +105,7 @@ pzhWebInterface.start = function(hostname, callback) {
         });
 
         httpsServer.listen(session.configuration.httpServerPort, hostname, function(){
-                log('INFO','[WEB SERVER] Http Server listening on '+ session.configuration.httpServerPort);
+                log.info('http Server listening on '+ session.configuration.httpServerPort);
                 callback(true);
         });
 
@@ -115,7 +115,7 @@ pzhWebInterface.start = function(hostname, callback) {
         });
 
         wsServer.on('connect', function(conn) {
-                log('INFO','[WEB SERVER] '+conn.remoteAddress + ' connected ');
+                log.info(conn.remoteAddress + ' connected ');
                 connection = conn;
                 // TODO: Send only to main.html and not to all ..
                 if (typeof pzh !== 'undefined' && pzh[currentPzh]){
@@ -168,12 +168,12 @@ pzhWebInterface.start = function(hostname, callback) {
                     }
                 });
                 conn.on('close', function() {
-                        log('INFO','[WEB SERVER] Connection Closed');
+                        log.info('connection Closed');
                 });
         });
 
         wsServer.on('error', function(err) {
-            log('INFO','[WEB SERVER] Error '+ err);
+            log.error(err);
         })
     });
 }
@@ -237,9 +237,9 @@ function authenticate(hostname, url) {
 
     rely.authenticate(url, false, function(error, authUrl) {
         if(error){
-            log('INFO','[WEB SERVER] Error '+ error);
+            log.error(error);
         } else if (!authUrl) {
-            log('INFO','[WEB SERVER] Authentication failed as url to redirect after authentication is missing');
+            log.error('authentication failed as url to redirect after authentication is missing');
         } else {
             result({cmd:'auth-url', payload: authUrl});
         }
@@ -249,7 +249,7 @@ function authenticate(hostname, url) {
 function fetchOpenIdDetails(req, res, callback){
     rely.verifyAssertion(req, function(err, userDetails){
         if (err){
-            console.log("[ERROR] UNABLE TO LOGIN " + err.message);
+            log.error("unable to login " + err.message);
             res.writeHead(302, {Location: '/index.html?error='+err.message}); // redirection to same page but without details fetched from google.
             res.end();
         }
@@ -296,7 +296,7 @@ function fetchOpenIdDetails(req, res, callback){
 
             farm.getOrCreatePzhInstance(host, details, function(key, pzhInt){
                 pzh[details.id] = pzhInt;	
-				pzhapis.listZoneDevices(pzhInt, result);
+                pzhapis.listZoneDevices(pzhInt, result);
             });
         }
     });
@@ -327,7 +327,7 @@ function createWebInterfaceCertificate (config, callback) {
                     });
                 });
             } else {
-                    log('ERROR', '[WEB SERVER] Certificate generation error')
+                    log.error('certificate generation error')
             }
         });
     } else {

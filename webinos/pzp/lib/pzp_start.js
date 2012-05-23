@@ -1,4 +1,4 @@
-#!/usr/local/webinos
+#!/usr/bin/env node
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -19,8 +19,11 @@
 
 var pzp = require("./pzp").session,//require("../webinos/pzp/lib/pzp_sessionHandling.js"),
   websocket = require("./pzp").websocket,//require("../webinos/pzp/lib/pzp_websocket.js"),
+  debug = require("./session_common").debug,
   fs = require("fs"),
   path = require("path");
+  
+var log = new debug("pzp_start");
 
 var options = {};
 var pzpInstance;
@@ -128,12 +131,17 @@ if (options.pzhHost === "" || options.pzhPort <= 0) {
       if (options.preference) {
         config.preference = options.preference;
       }
-    initializePzp(config, pzpModules);
+      initializePzp(config, pzpModules);
   });
 };
 
 function initializePzp(config, pzpModules) {
-  pzpInstance = new pzp(config, pzpModules);
+  pzpInstance = new pzp();
+  pzpInstance.initializePzp(config, pzpModules, function(result) {
+    if (result === "startedPZP"){
+      log.info("sucessfully started");
+    }
+  });
 }
 
 //Added in order to be able to get the rpc handler from the current pzp
@@ -156,4 +164,3 @@ function getPzhId() {
     return instance.pzhId;
   }
 }
-
