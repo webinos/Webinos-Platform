@@ -95,9 +95,7 @@ Pzp.prototype.sendMessage = function (message, address) {
   var self = this;
   
   var jsonString = JSON.stringify(message);
-  var buf = new Buffer(4 + jsonString.length, 'utf8');
-  buf.writeUInt32LE(jsonString.length, 0);
-  buf.write(jsonString, 4);
+  var buf = session.common.jsonStr2Buffer(jsonString);
   
   log.info('send to '+ address + ' message ' + jsonString);
   log.info('mode '+ self.mode + ' state '+self.state);

@@ -94,9 +94,7 @@ Pzh.prototype.sendMessage = function (message, address, conn) {
   var self = this;
 
   var jsonString = JSON.stringify(message);
-  var buf = new Buffer(4 + jsonString.length, "utf8");
-  buf.writeUInt32LE(jsonString.length, 0);
-  buf.write(jsonString, 4);
+  var buf = session.common.jsonStr2Buffer(jsonString);
 
   log.info("send to "+ address + " message " + jsonString);
   
