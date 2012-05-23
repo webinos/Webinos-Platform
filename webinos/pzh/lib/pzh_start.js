@@ -1,4 +1,4 @@
-#!/usr/local/webinos
+#!/usr/bin/env node
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
