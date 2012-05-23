@@ -1,7 +1,7 @@
 { "name": "certificate_manager"
 , "description": "An interface to OpenSSL's certificate creation and revocation functions"
-, "version": "1"
-, "main": "src/build/Release/certificate_manager.node"
+, "version": "0.0.1"
+, "main": "build/Release/certificate_manager.node"
 , "keywords": ["OpenSSL","Crypto","Certificate","CRL"]
 , "maintainers": [{ "name": "John Lyle"}]
 , "contributors": [{ "name": "John Lyle"}]
@@ -14,9 +14,4 @@
     , "url": "http://github.com/isaacs/npm/raw/master/LICENSE"
     }
   ]
-, "repositories": 
-  [ { "type" : "git",
-      "url"  : "http://dev.webinos.org/git/wp4.git"
-    }
-  ] 
 }
