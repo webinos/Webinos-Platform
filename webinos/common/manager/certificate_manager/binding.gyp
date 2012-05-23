@@ -7,9 +7,10 @@
     {
        # Needed declarations for the target
       'target_name': 'certificate_manager',
+      'product_name': 'certificate_manager',
         'sources': [ #Specify your source files here
-          'certificate_manager.cpp',
-          'openssl_wrapper.cpp',
+          'src/certificate_manager.cpp',
+          'src/openssl_wrapper.cpp',
         ],
       
       'conditions': [
