@@ -134,69 +134,77 @@ this.WidgetManager = (function() {
 	 * @return the IProcessingResult with the results
 	 */
 	WidgetManager.prototype.prepareInstall = function(resource, constraints, listener) {
-		/* perform the widget processing */
-		if(!path.existsSync(resource)) throw new Error("Widget resource file does not exist");
-		var processor = new WidgetProcessor(resource, constraints);
-		var that = this;
-		var storage = this.storage;
-
-		var onProcess = function(processingResult) {
-			if(processingResult.status != WidgetConfig.STATUS_OK) {
-				callPrepareListener(listener, processingResult);
-				return;
-			}
-
-			/* basic processing was successful, so determine status of any existing
-			 * version of this widget */
-			var existingConfig, existingValidation;
-			var installId = processingResult.widgetConfig.installId;
-			if(storage.containsItem(installId)) {
-				/* generate comparison */
-				existingConfig = that.getWidgetConfig(installId);
-				if(existingConfig) {
-					existingValidation = WidgetPersistence.readWidgetPolicy(storage, installId);
-					var comparisonResult = processor.compareTo(existingConfig, existingValidation, storage.hasUserdata(installId));
-					if(comparisonResult.getError()) {
-						callPrepareListener(listener, processingResult);
-						return;
+		try {
+			/* perform the widget processing */
+			if(!path.existsSync(resource)) throw new Error("Widget resource file does not exist");
+			var processor = new WidgetProcessor(resource, constraints);
+			var that = this;
+			var storage = this.storage;
+	
+			var onProcess = function(processingResult) {
+				if(processingResult.status != WidgetConfig.STATUS_OK) {
+					callPrepareListener(listener, processingResult);
+				}
+	
+				/* basic processing was successful, so determine status of any existing
+				 * version of this widget */
+				var existingConfig, existingValidation;
+				var installId = processingResult.widgetConfig.installId;
+				if(storage.containsItem(installId)) {
+					/* generate comparison */
+					existingConfig = that.getWidgetConfig(installId);
+					if(existingConfig) {
+						existingValidation = WidgetPersistence.readWidgetPolicy(storage, installId);
+						var comparisonResult = processor.compareTo(existingConfig, existingValidation, storage.hasUserdata(installId));
+						if(comparisonResult.getError()) {
+							callPrepareListener(listener, processingResult);
+						}
 					}
 				}
-			}
-
-			/* allocate space in the storage if necessary */
-			storage.createItem(installId);
-
-			/* extract icon */
-			var widgetConfig = processingResult.widgetConfig;
-			if(widgetConfig.prefIcon)
-				WidgetPersistence.extractFile(that.storage.getWidgetDir(installId), processingResult.widgetResource, processingResult.localisedFileMapping, widgetConfig.prefIcon);
-
-			/* if all OK, this pending install is ready for async dependencies */
-			var pendingInstall = new PendingInstall(processor, processor.getWidgetResource(), processingResult, widgetConfig, listener);
-			that.pendingInstalls[installId] = pendingInstall;
-
-			/* process pending async dependencies, if any */
-			var hasAsync = false;
-			if(constraints && constraints.processAsyncDependencies) {
-				var dependencies = processor.asyncDependencies;
-				if(dependencies) {
-					for(var i in dependencies) {
-						dependencies[i].resolve(storage, installId, pendingInstall);
-						pendingInstall.pendingAsyncCount++;
-						hasAsync = true;
+	
+				/* allocate space in the storage if necessary */
+				storage.createItem(installId);
+	
+				/* extract icon */
+				var widgetConfig = processingResult.widgetConfig;
+				if(widgetConfig.prefIcon)
+					WidgetPersistence.extractFile(that.storage.getWidgetDir(installId), processingResult.widgetResource, processingResult.localisedFileMapping, widgetConfig.prefIcon);
+	
+				/* if all OK, this pending install is ready for async dependencies */
+				var pendingInstall = new PendingInstall(processor, processor.getWidgetResource(), processingResult, widgetConfig, listener);
+				that.pendingInstalls[installId] = pendingInstall;
+	
+				/* process pending async dependencies, if any */
+				var hasAsync = false;
+				if(constraints && constraints.processAsyncDependencies) {
+					var dependencies = processor.asyncDependencies;
+					if(dependencies) {
+						for(var i in dependencies) {
+							dependencies[i].resolve(storage, installId, pendingInstall);
+							pendingInstall.pendingAsyncCount++;
+							hasAsync = true;
+						}
 					}
 				}
-			}
-
-			/* if nothing pending, complete now */
-			if(!hasAsync) {
-				/* complete now */
-				that.postAsync(pendingInstall);
-				callPrepareListener(listener, processingResult);
-			}
-		};
-
-		processor.process(false, onProcess);
+	
+				/* if nothing pending, complete now */
+				if(!hasAsync) {
+					/* complete now */
+					that.postAsync(pendingInstall);
+					callPrepareListener(listener, processingResult);
+				}
+			};
+	
+			processor.process(false, onProcess);
+			return WidgetConfig.STATUS_OK;
+		} catch(e) {
+			Logger.logAction(Logger.LOG_ERROR, "WidgetManager.prepareInstall() exception", e.stack);
+			var processingResult = new ProcessingResult();
+			e.status = WidgetConfig.STATUS_IO_ERROR;
+			processingResult.setError(e);
+			callPrepareListener(processingResult, listener);
+			return e.status;
+		}
 	};
 
 	/*
