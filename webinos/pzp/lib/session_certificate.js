@@ -16,7 +16,8 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 
-var log  = new require("./session_common").debug("cert");
+var log1  =  require("./session_common");
+var log   =  new log1.debug("cert");
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
