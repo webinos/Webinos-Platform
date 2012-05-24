@@ -29,24 +29,34 @@ import org.webinos.app.wrt.mgr.WidgetManagerService;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 
-public class WidgetInstallActivity extends Activity {
+public class WidgetInstallActivity extends Activity implements WidgetManagerService.LaunchListener {
 	
 	private static final int INSTALL_PROGRESS_DIALOG = 1;
 	private static final String TAG = "org.webinos.app.wrt.ui.WidgetInstallActivity";
-	
-	private int shownDialog = -1;
+
+	private Dialog pendingDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance();
-		if(widgetMgr == null)
-			throw new RuntimeException("WidgetInstallActivity.onCreate(): unable to get WidgetManager");
+		final WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance(this, this);
+		if(widgetMgr != null)
+			onWidgetManagerAvailable(widgetMgr);
+	}
 
+	@Override
+	public void onLaunch(WidgetManagerImpl mgr) {
+		Log.e(TAG, "WidgetInstallActivity: WidgetManagerService must be running");
+		finish();
+	}
+
+	public void onWidgetManagerAvailable(final WidgetManagerImpl widgetMgr) {
 		Bundle extras = getIntent().getExtras();
 		if(extras == null)
 			throw new RuntimeException("WidgetInstallActivity.onCreate(): unable to get Intent extras");
@@ -64,30 +74,42 @@ public class WidgetInstallActivity extends Activity {
 				} else {
 					/* FIXME: add install prompt */
 					widgetMgr.completeInstall(processingResult.widgetConfig.installId);
+
+					/* since the install was successful, go to the widget list */
+					Intent listIntent = new Intent();
+					listIntent.setClass(WidgetInstallActivity.this, WidgetListActivity.class);
+					startActivity(listIntent);
 				}
+				clearDialog();
+				Intent resultIntent = new Intent();
+				resultIntent.putExtra("path", wgtPaths);
+				setResult(Activity.RESULT_OK, resultIntent);
+				finish();
 			}
 		};
 
 		(new AsyncTask<String[], Void, String>() {
 			@Override
 			protected void onPreExecute() {
-				showDialog(shownDialog = INSTALL_PROGRESS_DIALOG);
+				showDialog(INSTALL_PROGRESS_DIALOG);
 			}
 
 			@Override
 			protected String doInBackground(String[]... params) {
 				final String[] wgtPaths = params[0];
-				for(String wgtPath : wgtPaths)
-					widgetMgr.prepareInstall(wgtPath, null, listener);
+				for(String wgtPath : wgtPaths) {
+					try {
+						widgetMgr.prepareInstall(wgtPath, null, listener);
+					} catch(Exception e) {
+						Log.e(TAG, "WidgetInstallActivity: exception thrown in prepareInstall(); error: " + e);
+					}
+				}
 				return null;
 			}
 
 			@Override
 			protected void onPostExecute(String result) {
-				if(shownDialog != -1)
-					dismissDialog(shownDialog);
-				setResult(Activity.RESULT_OK);
-				finish();
+				clearDialog();
 			}
 		}).execute(wgtPaths);
 	}
@@ -97,8 +119,21 @@ public class WidgetInstallActivity extends Activity {
 		if(id == INSTALL_PROGRESS_DIALOG) {
 			ProgressDialog progressDialog = new ProgressDialog(this);
 			progressDialog.setMessage(getString(R.string.installing_widget));
-			return progressDialog;
+			return (pendingDialog = progressDialog);
 		}
 		return super.onCreateDialog(id);
+	}
+
+	@Override
+	public void onDestroy() {
+		clearDialog();
+		super.onDestroy();
+	}
+
+	private void clearDialog() {
+		if(pendingDialog != null) {
+			pendingDialog.dismiss();
+			pendingDialog = null;
+		}
 	}
 }

@@ -22,6 +22,8 @@
     <string name="scanning_storage_card">Scanning storage card</string>
     <string name="widget_icon">Widget Icon</string>
     <string name="list_activity_title">Webinos applications</string>
+    <string name="install_activity_title">Installing application</string>
+    <string name="download_activity_title">Downloading application</string>
     <string name="uninstall_activity_title">Uninstalling application</string>
     <string name="settings_activity_title">Application details</string>
     <string name="menu_uninstall">Uninstall</string>
