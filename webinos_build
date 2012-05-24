@@ -6,6 +6,29 @@ var prefix;
 var cmd = process.argv[2];
 var prefixPath = process.argv[3];
 
+var fileList = "--js ./webinos/common/rpc/lib/rpc.js" +
+              " --js ./webinos/common/manager/messaging/lib/messagehandler.js" +
+              " --js ./webinos/wrt/lib/webinos.session.js" + 
+              " --js ./webinos/wrt/lib/webinos.servicedisco.js" + 
+              " --js ./webinos/wrt/lib/webinos.js" + 
+              " --js ./webinos/api/file/lib/webinos.path.js" + 
+              " --js ./webinos/common/rpc/lib/webinos.utils.js" + 
+              " --js ./webinos/wrt/lib/webinos.file.js" + 
+              " --js ./webinos/wrt/lib/webinos.tv.js" + 
+              " --js ./webinos/wrt/lib/webinos.oauth.js" + 
+              " --js ./webinos/wrt/lib/webinos.get42.js" + 
+              " --js ./webinos/wrt/lib/webinos.geolocation.js" + 
+              " --js ./webinos/wrt/lib/webinos.sensors.js" + 
+              " --js ./webinos/wrt/lib/webinos.events.js" + 
+              " --js ./webinos/wrt/lib/webinos.applauncher.js" + 
+              " --js ./webinos/wrt/lib/webinos.vehicle.js" + 
+              " --js ./webinos/wrt/lib/webinos.deviceorientation.js" + 
+              " --js ./webinos/wrt/lib/webinos.context.js" + 
+              " --js ./webinos/wrt/lib/webinos.devicestatus.js" + 
+              " --js ./webinos/wrt/lib/webinos.contacts.js" + 
+              " --js ./webinos/wrt/lib/webinos.discovery.js" + 
+              " --js ./webinos/wrt/lib/webinos.authentication.js";
+                    
 if (typeof cmd === "undefined") {
   help();
 }
@@ -66,7 +89,8 @@ if (cmd === "install") {
           
           list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzh/lib/pzh_start.js "+prefix+"/bin/webinos_pzh")
           list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzp/lib/pzp_start.js "+prefix+"/bin/webinos_pzp")
-            
+          list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
+  
           exec(list);
         }  
       });
