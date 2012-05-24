@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var widgetmanager = require('widgetmanager');
+var widgetmanager = require('widget_manager');
 var util = require('util');
 var wm = widgetmanager.widgetmanager;
 var path = require('path');
