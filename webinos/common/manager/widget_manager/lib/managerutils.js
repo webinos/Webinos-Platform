@@ -90,10 +90,10 @@ this.ManagerUtils = (function() {
 	 */
 	ManagerUtils.copyFile = function(source, dest, overwrite) {
 		if(!path.existsSync(source))
-			throw new Error('ManagerUtils.copyFile: specified source file does not exist');
+			throw new Error('ManagerUtils.copyFile: specified source file does not exist: ' + source);
 		if(path.existsSync(dest)) {
 			if(!overwrite)
-				throw new Error('ManagerUtils.copyFile: specified dest file aleady exists');
+				throw new Error('ManagerUtils.copyFile: specified dest file aleady exists: ' + dest);
 			fs.unlink(dest);
 		}
 		var destDir = path.dirname(dest);

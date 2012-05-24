@@ -25,6 +25,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.webinos.app.R;
+import org.webinos.app.wrt.mgr.WidgetManagerImpl;
+import org.webinos.app.wrt.mgr.WidgetManagerService;
+import org.webinos.app.wrt.mgr.WidgetManagerService.LaunchListener;
 import org.webinos.util.ModuleUtils;
 
 import android.app.Activity;
@@ -77,17 +80,21 @@ public class WidgetDownloadActivity extends Activity {
 			protected void onPostExecute(File wgtResource) {
 				dismissProgressDialog();
 				installFromFile(wgtResource.getAbsolutePath());
-				wgtResource.delete();
-				finish();
 			}
 		}).execute(downloadUri.toString());
 	}
 
 	private void installFromFile(String path) {
-		Intent installIntent = new Intent();
+		final Intent installIntent = new Intent();
 		installIntent.setClass(this, WidgetInstallActivity.class);
 		installIntent.putExtra("path", new String[]{path});
-		startActivityForResult(installIntent, 0);
+		WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance(this, new LaunchListener() {
+			@Override
+			public void onLaunch(WidgetManagerImpl mgr) {
+				startActivityForResult(installIntent, 0);
+			}});
+		if(widgetMgr != null)
+			startActivityForResult(installIntent, 0);
 	}
 
 	public void showProgressDialog(String message) {
@@ -104,5 +111,15 @@ public class WidgetDownloadActivity extends Activity {
 		if (downloadProgressDialog != null)
 			downloadProgressDialog.dismiss();
 		downloadProgressDialog = null;
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		CharSequence[] paths = data.getCharSequenceArrayExtra("path");
+		if(paths.length > 0) {
+			File wgtResource = new File(paths[0].toString());
+			wgtResource.delete();
+		}
+		finish();		
 	}
 }
