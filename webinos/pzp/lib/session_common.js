@@ -125,8 +125,26 @@ session_common.removeClient = function(self, conn) {
 };
 
 /**
+ * Converts a JSON string to Buffer.
+ *
+ * Given JSON string is converted into a byte length prefixed Buffer. The first
+ * four bytes contain the byte length of the JSON string. Use this function
+ * to send JSON over a TCP socket.
+ * @param jsonString JSON string to be converted.
+ * @returns byte lenght prefixed buffer.
+ */
+session_common.jsonStr2Buffer = function(jsonString) {
+	var strByteLen = Buffer.byteLength(jsonString, 'utf8');
+	var buf = new Buffer(4 + strByteLen, 'utf8');
+	buf.writeUInt32LE(strByteLen, 0);
+	buf.write(jsonString, 4);
+	return buf;
+}
+
+/**
 * Read in JSON objects from buffer and call objectHandler for each parsed
 * object.
+* @param instance PZH/PZP instance.
 * @param buffer Buffer instance containing JSON serialized objects.
 * @param objectHandler Callback for parsed object.s
 */
@@ -147,13 +165,15 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       
     } else {
       len = buffer.readUInt32LE(offset);
-      jsonStr = buffer.toString('utf8', offset + 4, offset + len + 4);
-      offset += len + 4;
+      offset += 4;
+      jsonStr = buffer.toString('utf8', offset, offset + len);
+      offset += len;
     }
 
-    if (jsonStr.length < len) {
+    var readByteLen = Buffer.byteLength(jsonStr, 'utf8');
+    if (readByteLen < len) {
       instanceMap[instance] = {
-          restLen: len - jsonStr.length,
+          restLen: len - readByteLen,
           part: jsonStr
       }
       return;

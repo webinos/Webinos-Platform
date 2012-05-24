@@ -95,9 +95,7 @@ Pzp.prototype.sendMessage = function (message, address) {
   var self = this;
   
   var jsonString = JSON.stringify(message);
-  var buf = new Buffer(4 + jsonString.length, 'utf8');
-  buf.writeUInt32LE(jsonString.length, 0);
-  buf.write(jsonString, 4);
+  var buf = session.common.jsonStr2Buffer(jsonString);
   
   log.info('send to '+ address + ' message ' + jsonString);
   log.info('mode '+ self.mode + ' state '+self.state);
@@ -187,10 +185,10 @@ Pzp.prototype.unauthenticated = function(conn, sessionId, pzhId, conn_csr, code)
   try{
     var msg = {"type" : "prop", "from" : sessionId, "to": pzhId,
       "payload": {"status": "clientCert", "message": {csr: conn_csr, code: code}}};
+
     var jsonString = JSON.stringify(msg);
-    var buf = new Buffer(4 + jsonString.length, 'utf8');
-    buf.writeUInt32LE(jsonString.length, 0);
-    buf.write(jsonString, 4);
+    var buf = session.common.jsonStr2Buffer(jsonString);
+
     log.info('send to '+ pzhId + ' message ' + jsonString);
     conn.write(buf);
   } catch(err) {
