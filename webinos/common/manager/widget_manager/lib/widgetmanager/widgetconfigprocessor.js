@@ -492,7 +492,7 @@ this.WidgetConfigProcessor = (function() {
 					 * Otherwise, the width attribute is in error and the user agent MUST
 					 * ignore the attribute.
 					 */
-					if(!'src' in attrs) {
+					if(!('src' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-roCaKRxZhS", "ignoring icon with invalid path");
 						elt.isValid = false;
 						return;
@@ -576,7 +576,7 @@ this.WidgetConfigProcessor = (function() {
 					 * rule for finding a file within a widget package to path. If file is
 					 * null or in error, then the user agent MUST ignore this element.
 					 */
-					if(!'src' in attrs) {
+					if(!('src' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-LTUJGJFCOU", "ignoring content with invalid path");
 						elt.isValid = false;
 						return;
@@ -690,7 +690,7 @@ this.WidgetConfigProcessor = (function() {
 						Logger.logAction(Logger.LOG_MINOR, "ta-rZdcMBExBX", "ignoring out of place feature element");
 						return;
 					}
-					if(!'name' in attrs) {
+					if(!('name' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-rZdcMBExBX", "ignoring feature with invalid name");
 						elt.isValid = false;
 						return;
@@ -769,7 +769,7 @@ this.WidgetConfigProcessor = (function() {
 					 * string, then this param element is in error and the user agent MUST
 					 * ignore this element.
 					 */
-					if(!'name' in attrs) {
+					if(!('name' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-xlgUWUVzCY", "ignoring param with no name");
 						elt.isValid = false;
 						return;
@@ -780,7 +780,7 @@ this.WidgetConfigProcessor = (function() {
 						elt.isValid = false;
 						return;
 					}
-					if(!'value' in attrs) {
+					if(!('value' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-EGkPfzCBOz", "ignoring param with no value");
 						elt.isValid = false;
 						return;
@@ -856,7 +856,7 @@ this.WidgetConfigProcessor = (function() {
 					 * If the origin attribute is absent, then this element is in error and the user agent
 					 * MUST ignore this element.
 					 */
-					if(!'origin' in attrs) {
+					if(!('origin' in attrs)) {
 						Logger.logAction(Logger.LOG_MINOR, "ta-6", "ignoring access with missing or empty origin");
 						elt.isValid = false;
 						return;
