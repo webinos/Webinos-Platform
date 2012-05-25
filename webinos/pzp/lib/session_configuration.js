@@ -102,8 +102,9 @@ session_configuration.setConfiguration = function (name, type, url, callback) {
               try{
                   // Used for initial connection, will be replaced by cert received from PZH
                 config.own.cert = conn_cert.cert;
+                config.csr      = csr;
                 session_configuration.storeConfig(config, function() {
-                  callback(config, conn_key, csr);
+                  callback(config, conn_key, config.csr);
                 });
               } catch (err) {
                 log.error("storing key in key store "+ err);
@@ -123,15 +124,8 @@ session_configuration.setConfiguration = function (name, type, url, callback) {
         var configData = data.toString("utf8");
         config = JSON.parse(configData);
         if (config.master.cert === "" ){
-          log.info("regenerate PZP certificate as it failed getting certificate from PZH");
-          certificate.selfSigned(config, type, function(status, selfSignErr, conn_key, conn_cert, csr ) {
-            if(status === "certGenerated") {
-              session_configuration.storeKey(config.own.key_id, conn_key);
-              config.own.cert = conn_cert.cert;
-              session_configuration.storeConfig(config, function() {
-                callback(config, conn_key, csr);
-              });
-            }
+          session_configuration.fetchKey(config.own.key_id, function(conn_key){
+            callback(config, conn_key, config.csr);
           });
         } else {
           session_configuration.fetchKey(config.own.key_id, function(conn_key){
@@ -266,6 +260,7 @@ function createConfigStructure (name, type) {
     config.pzhs        = {}; //contents: "", modules:""
   } else if (type === "Pzp" ) {
     config.own         = { key_id: name+"_conn_key", cert:""};
+    config.csr         = "";
     config.master      = { cert:"", crl:"" };
     config.pzhId       = '';
   };
