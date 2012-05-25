@@ -14,7 +14,7 @@
 			'utils.cc',
 		],
 		'conditions': [
-			['OS=="linux"', {
+			['OS=="freebsd" or OS=="openbsd" or OS=="solaris" or (OS=="linux")', {
 				'defines': ['OS_LINUX'],
 				'sources': ['aspects/platform/linux/*.cc']
 			}],
