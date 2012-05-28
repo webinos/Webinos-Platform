@@ -1,7 +1,6 @@
 {
   'variables': {
     'module_name': 'promptMan',#Specify the module name here
-	#you may override the variables found in node_module.gypi here or through command line
   },
   'targets': [
     {
