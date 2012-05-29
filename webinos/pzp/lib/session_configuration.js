@@ -40,6 +40,9 @@ session_configuration.pzpWebServerPort  = 8080;
 // PZP TLS Server to allow PZP"s to connect
 session_configuration.pzpServerPort = 8040;
 
+//PZP Zeroconf port for service advertisement
+session_configuration.pzpZeroconfPort = 4321;
+
 // Default webinos services available when no configuration exists yet
 session_configuration.pzhDefaultServices = [
   {name: "context", params: {}},

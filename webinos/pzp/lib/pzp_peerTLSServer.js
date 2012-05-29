@@ -64,9 +64,12 @@ PzpServer.prototype.startServer = function (parent, callback) {
         }
 
         parent.state = global.states[2];
-
-        parent.connectedPzp[clientSessionId].socket = conn;
-        parent.connectedPzp[clientSessionId].state  = global.states[2];
+	
+	if(typeof parent.connectedPzp[clientSessionId] !== "undefined")
+	{
+          parent.connectedPzp[clientSessionId].socket = conn;
+          parent.connectedPzp[clientSessionId].state  = global.states[2];
+	}
 
         var msg = parent.messageHandler.registerSender(parent.sessionId, clientSessionId);
         parent.sendMessage(msg, clientSessionId);
