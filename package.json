@@ -13,7 +13,8 @@
     "qrcode":"0.x.x",
     "websocket":"1.0.2",
     "vows":"0.x.x",
-    "ansi": "0.0.x"
+    "ansi": "0.0.x",
+    "connect": "2.x.x"
   },
   "keywords": ["webinos", "api"],
   "repository": "git://github.com/webinos",
