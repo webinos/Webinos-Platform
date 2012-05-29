@@ -85,7 +85,8 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
 
     client.on("end", function () {
       log.info("connection terminated");
-      parent.connectedPzp[self.peerSessionId].state = global.states[3];
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")
+        parent.connectedPzp[self.peerSessionId].state = global.states[3];
       if (parent.mode === global.modes[2]) {
         parent.state = global.states[0];
       }
@@ -104,14 +105,16 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       } else {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
-      parent.connectedPzp[self.peerSessionId].state = global.states[0];
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
+        parent.connectedPzp[self.peerSessionId].state = global.states[0];
       log.info('mode '+ parent.mode + ' state '+parent.state);
 
     });
 
     client.on("error", function (err) {
       log.error(err);
-      parent.connectedPzp[self.peerSessionId].state = global.states[3];
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
+        parent.connectedPzp[self.peerSessionId].state = global.states[3];
       if (parent.mode === global.modes[2]) {
         parent.state = global.states[0];
       }
@@ -130,7 +133,9 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       } else {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
-      parent.connectedPzp[self.peerSessionId].state = global.states[0];
+	
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
+        parent.connectedPzp[self.peerSessionId].state = global.states[0];
       log.info('mode '+ self.mode + ' state '+self.state);
     });
 

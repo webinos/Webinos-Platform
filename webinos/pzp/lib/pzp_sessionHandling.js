@@ -15,6 +15,7 @@
  *
  * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
  * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
+ * Copyright 2011 Ziran Sun, Samsung Electronics (UK) Ltd
  *******************************************************************************/
 
 /**
@@ -25,6 +26,8 @@
 var path = require("path");
 var tls = require("tls");
 var fs   = require("fs");
+var mdns = require('mdns');
+var os = require("os");
 
 var webinos       = require("webinos")(__dirname);
 var session       = require("./session");
@@ -46,6 +49,7 @@ var Pzp = function () {
   this.connectedWebApp = {}; // List of connected apps i.e session with browser
   this.sessionWebApp   = 0;
   this.webServerState  = global.states[0];
+  this.pzptlsServerState  = global.states[0];
   this.config          = {}//Configuration details of Pzp (certificates, file names)
   this.tlsId           = ""; // Used for session reuse
   this.serviceListener;   // For a single callback to be registered via addRemoteServiceListener.
@@ -54,6 +58,32 @@ var Pzp = function () {
   this.inputConfig     = {};  
 };
 
+
+function getelement(service, element)
+{
+  var srv = JSON.stringify(service);
+  var ret = null;
+  if(element === 'name')
+  {
+    var nm = srv.split(element)[2];
+    var index = nm.indexOf(",");
+    //remove "" 
+    ret = nm.slice(3, index-1); 
+  }
+  else if(element ==='addresses')
+  {
+    var el = srv.split(element)[1];
+    var index = el.indexOf(","); 
+    ret = el.slice(4, index-2);
+  } 
+  else
+  {
+    var el = srv.split(element)[1];
+    var index = el.indexOf(","); 
+    ret = el.slice(2, index);
+  }
+  return ret;	
+}
 
 Pzp.prototype.checkMode = function(config) {
   // Check if it is virgin mode
@@ -147,6 +177,15 @@ Pzp.prototype.update = function(callback) {
     callback.call(this, "startedPZP", this);
   }
   this.connectedApp();
+  this.webServerState = global.states[2];
+  var ad = mdns.createAdvertisement(mdns.tcp('pzp'), global.pzpZeroconfPort);
+  ad.start();
+  
+  ad.on('error', function(err) {
+   log.error("Zeroconf PZP Advertisement error: (" + err+")");
+  });
+  
+  log.info("started pzp");                      
 }
 
 Pzp.prototype.authenticated = function(cn, instance, callback) {
@@ -176,6 +215,7 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     server.startServer(self, function() {
       // The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP"s
       self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
+      self.pzptlsServerState = global.states[2];
       callback.call(self, "startedPZP");
     });
   }
@@ -280,22 +320,75 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
           self.mode = global.modes[2]; // Go in peer mode
                 // state will be peer mode state
         } else if (self.mode === global.modes[1] ) { //hub mode
-          self.state = global.states[0]; // not connected
-        }        
+            self.state = global.states[0]; // not connected
+
+      	    var browser = mdns.createBrowser(mdns.tcp('pzp'));   
+            browser.on('error', function(err) {
+            log.error("browser error: (" + err+")");
+            });
+            browser.start();
+	     
+            var msg ={};
+            browser.on('serviceUp', function(service) {
+	        log.info("service up");
+            msg.name = getelement(service, 'name');
+            msg.port = getelement(service, 'port');
+            msg.address = getelement(service, 'addresses');
+		
+            log.info("Check ZeroConf discovery list");		
+            var hostname = os.hostname();
+            if(msg.name !== os.hostname()) {
+              //Update connection - msg.name is machine name   
+              msg.name = self.config.pzhId + "/" + msg.name + "_Pzp";
+		
+              // Use case - Had connected to this PZP at least once 
+              if((typeof self.connectedPzp[msg.name] !== "undefined") && self.connectedPzp[msg.name].state === global.states[0] ) {
+		      self.connectedPzp[msg.name].address = msg.address;
+		      //Use default port number?
+		      self.connectedPzp[msg.name].port = 8040;
+		      var client = new pzpClient(); 
+		      client.connectOtherPZP(self, msg);
+              }
+              else if (typeof self.connectedPzp[msg.name] === "undefined") {
+                log.info("new peer");	
+                msg.port = 8040;
+
+		        self.connectedPzp[msg.name] = {};
+		        self.connectedPzp[msg.name].address = msg.address;
+		        self.connectedPzp[msg.name].port    = msg.port;
+		        self.connectedPzp[msg.name].state   = global.states[1];
+		        self.mode  = global.modes[2];
+		        self.state = global.states[1];
+		        var client = new pzpClient(); 
+		        client.connectOtherPZP(self, msg);
+              }
+            }
+          });
+        }       
       } else {
         self.mode = global.modes[1];
         self.state = global.states[0];
-      }
+        }
       // Special case if started in hub disconnected mode
       if (self.webServerState !== global.states[2]) {
         pzpWebSocket.startPzpWebSocketServer(self, self.inputConfig, function() {
           self.rpcHandler.setSessionId(self.sessionId);
           setupMessageHandler(self);
-          self.connectedApp();
-          log.info("started pzp");
-          self.webServerState = global.states[2];
+          self.update(callback);
+          
         });
       }
+      if(self.pzptlsServerState === global.states[0])
+      {
+        log.info("Zeroconf: calling start pzptlsServer");	
+        var server = new pzpServer(); 
+        server.startServer(self, function() {
+        // The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP"s
+        self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
+        self.pzptlsServerState = global.states[2];
+        });
+      } 
+	
       log.info("pzp mode " + self.mode + " and state is " + self.state);
     });
 
@@ -346,6 +439,7 @@ Pzp.prototype.connectedApp = function(connection) {
       }
     }
   }
+ 
 };
 
 Pzp.prototype.processMsg = function(msgObj, callback) {
@@ -441,21 +535,13 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
             self.connect(conn_key, conn_csr, config.code, function(result) {
               if(result === "startedPZP") {
                 pzpWebSocket.startPzpWebSocketServer(self, config, function() {
-                  self.connectedApp();
-                  log.info("started pzp " + self.sessionId);
-                  self.webServerState = global.states[2];
-                  if(typeof callback !== "undefined")
-                    callback.call(self, "startedPZP", self);
+                  self.update(callback);
                 });
               } else if(result === "startPZPAgain") {
                 self.connect(conn_key, null, null, function(result){
                   if (result === "startedPZP") {
                     pzpWebSocket.startPzpWebSocketServer(self, config, function() {
-                      self.connectedApp();
-                      log.info("started pzp " + self.sessionId);
-                      self.webServerState = global.states[2];
-                      if(typeof callback !== "undefined")
-                        callback.call(self, "startedPZP", self);
+                      self.update(callback);
                     });
                   }
                 });
