@@ -374,7 +374,7 @@ exports.addPzh = function ( uri, modules, callback) {
       authcode.createAuthCounter(function (res) {
         instance.expecting = res;
       });
-      session.configuration.setConfiguration(name, "Pzh", uri, function(config, conn_key) {
+      session.configuration.setConfiguration(name, "Pzh", uri, null, function(config, conn_key) {
         instance.config    = config;
         instance.sessionId = name ; 
         instance.modules   = modules;     // modules loaded in pzh
