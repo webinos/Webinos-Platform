@@ -59,7 +59,7 @@ farm.startFarm = function (url, name, callback) {
   // The directory structure which pzh_farms needs for putting in files
   session.configuration.createDirectoryStructure(function(){
     // Configuration setting for pzh, returns set values and connection key
-    session.configuration.setConfiguration(name,"PzhFarm", url, function (config, conn_key) {
+    session.configuration.setConfiguration(name,"PzhFarm", url, null, function (config, conn_key) {
       if (config === "undefined") {
         log.error("failed setting configuration, details are missing");
         return;

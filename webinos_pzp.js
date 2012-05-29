@@ -29,7 +29,8 @@ var pzpInstance;
 function help() {
   console.log("Usage: webinos_pzp [options]");
   console.log("Options:");
-  console.log("--pzh-host=[host]        host of the pzh (default localhost/OpenID)");
+  console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
+  console.log("--pzh-name=[name]        name of the pzh (default "")");
   console.log("--pzp-name=[name]        name of the pzp (default WebinosPzp)");
   console.log("--pzp-host=[name]        host of the pzp (default localhost)");
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
@@ -46,11 +47,14 @@ process.argv.forEach(function (arg) {
       case "--pzh-host":
         options.pzhHost = parts[1];
         break;
-      case "--pzp-name":
-        options.pzpName = parts[1];
+      case "--pzh-name":
+        options.pzhName = parts[1];
         break;
       case "--pzp-host":
         options.pzpHost = parts[1];
+        break;
+      case "--pzp-name":
+        options.pzpName = parts[1];
         break;
       case "--preference":
         options.preference = parts[1];
@@ -87,52 +91,54 @@ var pzpModules = [
   {name: "discovery", params: {}}
 ];
 
-if (options.pzhHost === "" || options.pzhPort <= 0) {
-  help();
-} else {
-  fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
-      var config;
+fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
+    var config;
 
-      if (err) {
-        config = {};
-      }
-      else {
-        config = JSON.parse(data);
-      }
+    if (err) {
+      config = {};
+    }
+    else {
+      config = JSON.parse(data);
+    }
 
-      if (!config.pzhHost) {
-        config.pzhHost = "localhost/OpenIDUserName";
-      }
-      if (!config.pzpHost) {
-        config.pzpHost="localhost";
-      }
-      if (!config.pzpName) {
-        config.pzpName = "";
-      }
-      if (!config.code) {
-        config.code = "DEBUG";
-      }
-      if (!config.preference) {
-        config.prefence = "hub";
-      }
-      if (options.pzhHost) {
-        config.pzhHost = options.pzhHost;
-      }
-      if (options.pzpHost) {
-        config.pzpHost = options.pzpHost;
-      }
-      if (options.pzpName) {
-        config.pzpName = options.pzpName;
-      }
-      if (options.code) {
-        config.code = options.code;
-      }
-      if (options.preference) {
-        config.preference = options.preference;
-      }
-      initializePzp(config, pzpModules);
-  });
-};
+    if (!config.pzhHost) {
+      config.pzhHost = "localhost";
+    }
+    if (!config.pzhName) {
+      config.pzhName = "";
+    }
+    if (!config.pzpHost) {
+      config.pzpHost="localhost";
+    }
+    if (!config.pzpName) {
+      config.pzpName = "";
+    }
+    if (!config.code) {
+      config.code = "DEBUG";
+    }
+    if (!config.preference) {
+      config.prefence = "hub";
+    }
+    if (options.pzhHost) {
+      config.pzhHost = options.pzhHost;
+    }
+    if (options.pzhName) {
+      config.pzhName = options.pzhName;
+    }
+    if (options.pzpHost) {
+      config.pzpHost = options.pzpHost;
+    }
+    if (options.pzpName) {
+      config.pzpName = options.pzpName;
+    }
+    if (options.code) {
+      config.code = options.code;
+    }
+    if (options.preference) {
+      config.preference = options.preference;
+    }
+    initializePzp(config, pzpModules);
+});
 
 function initializePzp(config, pzpModules) {
   pzpInstance = new pzp.session();
