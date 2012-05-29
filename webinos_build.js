@@ -38,11 +38,12 @@ if (cmd ==="--help") {
 }
 
 function help() {
-  console.log("To install Webinos please run");
-  console.log("\t node installer.js install");
-  console.log("\t node installer.js uninstall/clean");
+  console.log("*** This script currently only works for LINUX ****");
+  console.log("To compile & install webinos please run");
+  console.log("\t node webinos_build.js install");
+  console.log("\t node webinos_build.js uninstall/clean");
   console.log("\t (Be default installs in /usr/local to install in different location) ");
-  console.log("\t node installer.js install --prefix ");
+  console.log("\t node webinos_build.js install --prefix ");
   process.exit();
 }
 
@@ -84,11 +85,13 @@ if (cmd === "install") {
       child("node-gyp build", function(err, stdout, stderr) {
         console.log(stderr);
         if (!err ) { 
-          list.push("cp -r webinos/* " + prefix + "/lib/node_modules/webinos_platform/ ")
-          list.push("cp -r node_modules/*      "+prefix+"/lib/node_modules/");
           
-          list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzh/lib/pzh_start.js "+prefix+"/bin/webinos_pzh")
-          list.push("ln -sf "+prefix+ "/lib/node_modules/webinos_platform/pzp/lib/pzp_start.js "+prefix+"/bin/webinos_pzp")
+          //list.push("cp -r webinos/* " + prefix + "/lib/node_modules/webinos_platform/ ")
+          //list.push("cp -r node_modules/*      "+prefix+"/lib/node_modules/");
+                    
+          list.push("ln -sf "+__dirname+"/webinos_pzh.js "+prefix+"/bin/webinos_pzh")
+          list.push("ln -sf "+__dirname+"/webinos_pzp.js "+prefix+"/bin/webinos_pzp")
+          
           list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
   
           exec(list);

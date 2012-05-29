@@ -15,18 +15,17 @@
 * limitations under the License.
 *
 *******************************************************************************/
+var pzp   = require("./webinos/pzp/lib/pzp");
 
+var debug = require("./webinos/pzp/lib/session").common.debug;
+var log   = new debug("pzp_start");
 
-var pzp = require("./pzp").session,//require("../webinos/pzp/lib/pzp_sessionHandling.js"),
-  websocket = require("./pzp").websocket,//require("../webinos/pzp/lib/pzp_websocket.js"),
-  debug = require("./session_common").debug,
-  fs = require("fs"),
-  path = require("path");
-  
-var log = new debug("pzp_start");
+var fs = require("fs"),
+    path = require("path");
 
 var options = {};
 var pzpInstance;
+
 function help() {
   console.log("Usage: webinos_pzp [options]");
   console.log("Options:");
@@ -136,7 +135,7 @@ if (options.pzhHost === "" || options.pzhPort <= 0) {
 };
 
 function initializePzp(config, pzpModules) {
-  pzpInstance = new pzp();
+  pzpInstance = new pzp.session();
   pzpInstance.initializePzp(config, pzpModules, function(result) {
     if (result === "startedPZP"){
       log.info("sucessfully started");
@@ -146,21 +145,21 @@ function initializePzp(config, pzpModules) {
 
 //Added in order to be able to get the rpc handler from the current pzp
 function getPzp() {
-  if (typeof instance !== "undefined") {
-    return instance;
+  if (typeof pzpInstance !== "undefined") {
+    return pzpInstance;
   } else {
     return null;
   }
 }
 
 function getPzpId() {
-  if (typeof instance !== "undefined") {
-    return instance.sessionId;
+  if (typeof pzpInstance !== "undefined") {
+    return pzpInstance.sessionId;
   }
 }
 
 function getPzhId() {
-  if (typeof instance !== "undefined") {
-    return instance.pzhId;
+  if (typeof pzpInstance !== "undefined") {
+    return pzpInstance.config.pzhId;
   }
 }
