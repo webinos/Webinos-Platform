@@ -566,7 +566,6 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
             } else if(result === "startPZPAgain") {
               self.connect(conn_key, null, null, function(result){
                 if (result === "startedPZP" && self.webServerState !== global.states[2]) {
-                  console.log(self.webServerState);
                   pzpWebSocket.startPzpWebSocketServer(self, config, function() {
                     self.update(callback);
                   });
@@ -587,7 +586,6 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
 
 function checkConfiguration(config) {
   log.info("Your device has not been enrolled to PZH yet");
-  console.log(config);
   if (config.pzhHost === "") {
     log.error("pzhHost should be ip address or a domain name, by default value it is localhost");
     return false;

@@ -30,7 +30,7 @@ function help() {
   console.log("Usage: webinos_pzp [options]");
   console.log("Options:");
   console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
-  console.log("--pzh-name=[name]        name of the pzh (default "")");
+  console.log("--pzh-name=[name]        name of the pzh (default \"\")");
   console.log("--pzp-name=[name]        name of the pzp (default WebinosPzp)");
   console.log("--pzp-host=[name]        host of the pzp (default localhost)");
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
