@@ -22,6 +22,7 @@
     <module>events</module>
     <module>applauncher</module>
     <module>file</module>
+    <module>galery</module>
     <module>geolocation</module>
     <module>get42</module>
     <module>payment</module>
