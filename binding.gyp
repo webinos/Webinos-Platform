@@ -9,7 +9,7 @@
       'webinos/api/contacts/src/binding.gyp:localcontacts',
       'webinos/api/devicestatus/src/binding.gyp:devicestatus',
       'webinos_wrt#host',
-	  'webinos/api/discovery/src/binding.gyp:bluetooth',
+      'webinos/api/discovery/src/binding.gyp:bluetooth',
     ],
     'conditions': [ 
       [ 'OS=="win"', {
@@ -36,16 +36,16 @@
         ],
         'destination': 'node_modules/',
       }],
-	'conditions': [ 
-      [ 'OS=="win"', {
-        'copies': [{
-			'files': [
-				 'build/Release/promptMan.node',
-			],
+    'conditions': [ 
+        [ 'OS=="win"', {
+            'copies': [{
+                'files': [
+                    'build/Release/promptMan.node',
+            ],
             'destination': 'node_modules/',
-		}],
-       },
-      ],
+            }],
+        },
+        ],
     ],
     }, # end webinos_wrt
   ], 
