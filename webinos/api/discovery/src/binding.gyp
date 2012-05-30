@@ -12,6 +12,11 @@
           'cflags':['-std=gnu++0x'] ,
         },
         ],
+		[ 'OS=="win"', {
+		  'sources': [            
+			'bluetooth_NotImplemented.cc',
+		  ],
+        }]
       ],
     },
   ] # end targets
