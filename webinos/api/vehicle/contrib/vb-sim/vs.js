@@ -200,6 +200,8 @@ DeviceMotionEvent.prototype.initDeviceMotionEvent = function(data){
 
 
 var fs = require('fs'), url = require('url'), path = require('path');
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 		function getContentType(uri) {
 			var contentType = {"Content-Type": "text/plain"};
@@ -231,7 +233,7 @@ var fs = require('fs'), url = require('url'), path = require('path');
 var httpServer = require('http').createServer(function(request, response) {  
 			var uri = url.parse(request.url).pathname;  
 			var filename = path.join(__dirname, uri);  
-            path.exists(filename, function(exists) {  
+			nPathV.exists(filename, function(exists) {  
 				if(!exists) {  
 					response.writeHead(404, {"Content-Type": "text/plain"});
 					response.write("404 Not Found\n");

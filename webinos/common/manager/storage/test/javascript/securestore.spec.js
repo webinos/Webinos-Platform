@@ -21,6 +21,9 @@ var path = require('path');
 var securestore = require('../../main/javascript/securestore.js');
 var fs = require('fs');
 
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
+
 
 var testfilecontent = "Do not delete - I am testing.\n";
 var pass = "nruowgunrwognworu2";
@@ -66,13 +69,13 @@ describe("zip and unzip", function() {
 			    //rimraf it
 			    rimrafSync(zipPath);					
                 //check that the directory is dead
-                expect(path.existsSync(zipPath)).toBeFalsy();
+                expect(nPathV.existsSync(zipPath)).toBeFalsy();
 			    // test unzip again
 			    securestore.unzipFile(zipFile, function() {
                     //check the directory exists
                     console.log("Running from: " + process.cwd());
                     console.log(path.resolve(zipPath));
-                    expect(path.existsSync(zipPath)).toBeTruthy();
+                    expect(nPathV.existsSync(zipPath)).toBeTruthy();
 				    read(testfile, function(unzipData) {
 					    expect(origdata).toEqual(unzipData);
                         expect(testfilecontent).toEqual(unzipData);
@@ -91,14 +94,14 @@ describe("open (no file) and close", function() {
         securestore.open(pass, testNoStoreFile, testStoreDir, function(err) {	
 	        expect(err).toBeUndefined();
 	        // check that the store directory exists
-	        expect(path.existsSync(testStoreDir)).toBeTruthy();
+	        expect(nPathV.existsSync(testStoreDir)).toBeTruthy();
 	        //store a key value
 	        securestore.storeKeyValue(testStoreDir, "Why", {because: "we have to store something"}, function() { 
 	            securestore.getKeyValue(testStoreDir, "Why", function(err, val) {
 	                expect(val["because"]).toEqual("we have to store something");
                     securestore.close(pass, testNoStoreFile, testStoreDir, function(err) {
-    	                expect(path.existsSync(testStoreDir)).toBeFalsy();
-		                expect(path.existsSync(testNoStoreFile)).toBeTruthy();
+    	                expect(nPathV.existsSync(testStoreDir)).toBeFalsy();
+		                expect(nPathV.existsSync(testNoStoreFile)).toBeTruthy();
 	                });	        
 	            });
             });

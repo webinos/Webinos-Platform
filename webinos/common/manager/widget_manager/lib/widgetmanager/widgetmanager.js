@@ -1,11 +1,11 @@
 /*******************************************************************************
-*  Code contributed to the webinos project
+*	Code contributed to the webinos project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
 *
-*     http://www.apache.org/licenses/LICENSE-2.0
+*		 http://www.apache.org/licenses/LICENSE-2.0
 *
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,9 @@
 
 this.WidgetManager = (function() {
 	var path = require('path');
+	var fs   = require('fs');
+	var nPathV = parseFloat(process.versions.node);
+	if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 	var MODE_INSTALL = 0,
 	    MODE_UPDATE  = 1;
@@ -136,7 +139,7 @@ this.WidgetManager = (function() {
 	WidgetManager.prototype.prepareInstall = function(resource, constraints, listener) {
 		try {
 			/* perform the widget processing */
-			if(!path.existsSync(resource)) throw new Error("Widget resource file does not exist");
+			if(!nPathV.existsSync(resource)) throw new Error("Widget resource file does not exist");
 			var processor = new WidgetProcessor(resource, constraints);
 			var that = this;
 			var storage = this.storage;

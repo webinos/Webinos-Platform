@@ -24,6 +24,8 @@ var fs = require('fs');
 var Zipper = require('zipper').Zipper; //for zipping
 var zipfile = require('zipfile'); // for unzipping (!!)
 var zipHelper = exports;
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 //helper function for recursing through a directory
 zipHelper.makeStruct = function (filepath) {
@@ -102,10 +104,10 @@ zipHelper.makeZipFile = function (directoryPath, zipFileName, callback) {
 zipHelper.mkdirRecursiveSync = function (fname) {
     "use strict";
     var dirParent = path.dirname(fname);
-    if (!path.existsSync(dirParent)) {
+    if (!nPathV.existsSync(dirParent)) {
         zipHelper.mkdirRecursiveSync(dirParent);
     }
-    if (!path.existsSync(fname)) {
+    if (!nPathV.existsSync(fname)) {
         fs.mkdirSync(fname, 448);
     }
     return;
@@ -122,7 +124,7 @@ zipHelper.unzipFile = function (fname, callback) {
         dir = path.dirname(zf.names[i]);
         filname = path.basename(zf.names[i]);
         zipHelper.mkdirRecursiveSync(dir);
-        if (!path.existsSync(zf.names[i])) {
+        if (!nPathV.existsSync(zf.names[i])) {
             buffer = zf.readFileSync(zf.names[i]);
             fs.writeFileSync(zf.names[i], buffer, "binary");
         }

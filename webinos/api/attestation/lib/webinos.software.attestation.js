@@ -37,6 +37,8 @@
 var path = require('path');
 var fs = require('fs');
 var x509 = require('./x509Reader.js');
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 var UNKNOWN_ERROR = 0;
 var INVALID_ARGUMENT_ERROR = 1;
@@ -96,7 +98,7 @@ function getAllKeyIds() {
 //Does a key with the given ID exist?
 function keyExists(keyid) {
 	"use strict";
-    return path.existsSync(config.getAikDir()) && path.existsSync(getKeyPath(keyid));
+    return nPathV.existsSync(config.getAikDir()) && nPathV.existsSync(getKeyPath(keyid));
 }
 
 //
