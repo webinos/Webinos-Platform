@@ -2,9 +2,12 @@
 var child = require('child_process').exec
 var list = [];
 var fs = require('fs');
+var path = require('path');
 var prefix;
 var cmd = process.argv[2];
 var prefixPath = process.argv[3];
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 var fileList = "--js ./webinos/common/rpc/lib/rpc.js" +
               " --js ./webinos/common/manager/messaging/lib/messagehandler.js" +
@@ -71,7 +74,7 @@ if (typeof prefixPath !== "undefined") {
 if (cmd === "install") {
   var filePath = [prefix+"/bin", prefix+"/lib", prefix+"/lib/node_modules", prefix+"/lib/node_modules/webinos_platform" ];
   for ( var key = 0; key < filePath.length; key += 1) {
-    if (!fs.existsSync(filePath[key])) {
+    if (!nPathV.existsSync(filePath[key])) {
       fs.mkdirSync(filePath[key]);
     }
   }

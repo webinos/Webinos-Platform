@@ -20,7 +20,8 @@
 this.WidgetStorage = (function() {
   var fs = require('fs');
   var path = require('path');
-
+  var nPathV = parseFloat(process.versions.node);
+  if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
   /* private static variables */
   var WGT_FILE         = '.wgt',
       CONFIG_FILE      = '.config',
@@ -54,21 +55,21 @@ this.WidgetStorage = (function() {
   /* public instance methods */
   WidgetStorage.prototype.createItem = function(item) {
     var dir = this.getItemDir(item, false);
-    if(path.existsSync(dir))
+    if(nPathV.existsSync(dir))
     	ManagerUtils.deleteDir(dir);
     ManagerUtils.mkdirs(dir);
   };
 
   WidgetStorage.prototype.deleteItem = function(item) {
     var dir = this.getItemDir(item, false);
-	if(!path.existsSync(dir)) {
+    if(!nPathV.existsSync(dir)) {
       dir = this.getItemDir(item, true);
-      if(!path.existsSync(dir))
+      if(!nPathV.existsSync(dir))
         throw new Error('WidgetStorage.deleteItem ' + item + ": item doesn't exist");
 	}
 	/* atomically rename to remove this from visibility of the manager */
 	var deleteTmpDir = path.resolve(this.rootPath, DELETE_TMP);
-	if(path.existsSync(deleteTmpDir))
+	if(nPathV.existsSync(deleteTmpDir))
 	  ManagerUtils.deleteDir(deleteTmpDir);
 	fs.renameSync(dir, deleteTmpDir);
 
@@ -81,7 +82,7 @@ this.WidgetStorage = (function() {
     var result = path.existsSync(dir);
 	if(!result) {
       dir = this.getItemDir(item, true);
-      result = path.existsSync(dir);
+      result = nPathV.existsSync(dir);
 	}
     return result;
   };
@@ -90,8 +91,8 @@ this.WidgetStorage = (function() {
     var newStateDir = this.getItemDir(item, newState);
     var oldState = !newState;
     var oldStateDir = this.getItemDir(item, oldState);
-    var newStateExists = path.existsSync(newStateDir);
-    var oldStateExists = path.existsSync(oldStateDir);
+    var newStateExists = nPathV.existsSync(newStateDir);
+    var oldStateExists = nPathV.existsSync(oldStateDir);
 
     /* work out what action to do ... */
     if(!oldStateExists) {
@@ -109,7 +110,7 @@ this.WidgetStorage = (function() {
       if (copyUserdata) {
         var oldUserData = path.resolve(oldStateDir, PERSIST_DIR);
         var newUserData = path.resolve(newStateDir, PERSIST_DIR);
-        if(path.existsSync(oldUserData) && path.existsSync(newUserData))
+        if(nPathV.existsSync(oldUserData) && nPathV.existsSync(newUserData))
           ManagerUtils.copyDir(newUserData, oldUserData);
 
 		/* remove the new state now */
@@ -122,7 +123,7 @@ this.WidgetStorage = (function() {
 
   WidgetStorage.prototype.getMetaFile = function(item, name, isDir) {
     var metaFile = path.resolve(this.getMetadataDir(item), name);
-    if(!path.existsSync(metaFile)) {
+    if(!nPathV.existsSync(metaFile)) {
       if(isDir)
         fs.mkdirSync(metaFile);
       else
@@ -165,9 +166,9 @@ this.WidgetStorage = (function() {
       return path.resolve(this.rootPath, (item + (enabled ? '' : DISABLED_CHAR)));
 
     var dir = this.getItemDir(item, false);
-    if(!path.existsSync(dir)) {
+    if(!nPathV.existsSync(dir)) {
       dir = this.getItemDir(item, true);
-      if(!path.existsSync(dir))
+      if(!nPathV.existsSync(dir))
         throw new Error('WidgetStorage.getItemDir: ' + item + ": item doesn't exist");
     }
     return dir;
@@ -175,7 +176,7 @@ this.WidgetStorage = (function() {
 
   WidgetStorage.prototype.getContentDir = function(item) {
     var wgtDir = path.resolve(this.getItemDir(item), EXTRACT_DIR);
-	if(!path.existsSync(wgtDir))
+	if(!nPathV.existsSync(wgtDir))
 	  fs.mkdirSync(wgtDir);
 
 	return wgtDir;
