@@ -134,11 +134,9 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
         config = JSON.parse(configData);
         if (config.serverName.split('/') === -1 && pzhName === "") {
           log.error("Please specify pzh-name to connect to pzh, else you will be running in virgin mode");
-        } else if (config.pzhName !== "") {
-          if (config.serverName.split('/')){
-            config.serverName = config.serverName + pzhName; 
-          } else {
-            config.serverName = config.serverName + '/' + pzhName; 
+        } else if (pzhName !== "") {
+          if (config.serverName.split('/') === -1){
+            config.serverName = config.serverName + '/' + pzhName;
           }
         }
         if (config.master.cert === "" ){
