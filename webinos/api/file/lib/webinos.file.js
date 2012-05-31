@@ -43,6 +43,9 @@
 		nStream = require("stream"),
 		nUtil = require("util");
 
+	var nPathV = parseFloat(process.versions.node);
+	if (nPathV >= 0.7) { nPathV = nFs;} else { nPathV = nPath;}
+	
 	// TODO Move this somewhere.
 	nPath.mkdirSyncRecursive = function (path, position) {
 		var parts = nPath.resolve(path).split(nPathSeparator);
@@ -1284,7 +1287,7 @@
 		var fullPath = this.resolve(path),
 			entry;
 
-		if (nPath.existsSync(this.filesystem.realize(fullPath))) {
+		if (nPathV.existsSync(this.filesystem.realize(fullPath))) {
 			if (options && options.create && options.exclusive)
 				throw new exports.FileException(exports.FileException.PATH_EXISTS_ERR);
 
@@ -1316,7 +1319,7 @@
 		var fullPath = this.resolve(path),
 			entry;
 
-		if (nPath.existsSync(this.filesystem.realize(fullPath))) {
+		if (nPathV.existsSync(this.filesystem.realize(fullPath))) {
 			if (options && options.create && options.exclusive)
 				throw new exports.FileException(exports.FileException.PATH_EXISTS_ERR);
 
