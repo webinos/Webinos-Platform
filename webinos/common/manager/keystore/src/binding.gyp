@@ -29,7 +29,10 @@
 		  'sources': [            
 			'ksImpl_Linux.cpp',
 		  ],
-		  'libraries': ['--cflags --libs' ],
+		  'cflags': ['<!@(pkg-config --cflags gnome-keyring-1)'], #call pkg-config to get the cflags
+		  'libraries': ['<!@(pkg-config --libs-only-l gnome-keyring-1)'], #call pkg-config to get the libraries
+		  'cflags!': [ '-fno-exceptions' ], #this is required to allow the class to throw exceptions
+		  'cflags_cc!': [ '-fno-exceptions' ],
         }],
       ],
     },
