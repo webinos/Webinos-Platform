@@ -42,7 +42,7 @@
 				console.log("policy manager could not be loaded");
 			}
 			if (os.platform()==='win32'){
-				this.promptMan = require('../src/promptMan/build/Release/promptMan.node');
+				this.promptMan = require('promptMan');
 			}
 		}
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt();
