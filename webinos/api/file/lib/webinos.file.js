@@ -39,13 +39,37 @@
 
 	var nFs = require("fs"),
 		nPath = require("path"),
+		nPathSeparator = process.platform === "win32" ? '\\' : '/',
 		nStream = require("stream"),
 		nUtil = require("util");
+
+	// TODO Move this somewhere.
+	nPath.mkdirSyncRecursive = function (path, position) {
+		var parts = nPath.resolve(path).split(nPathSeparator);
+
+		position = position || 0;
+
+	    if (position >= parts.length) {
+	    	return true;
+	    }
+
+	    var directory = parts.slice(0, position + 1).join(nPathSeparator) || nPathSeparator;
+
+	    try {
+	    	nFs.statSync(directory);
+	    	nPath.mkdirSyncRecursive(path, position + 1);
+	    } catch (exception) {
+	    	nFs.mkdirSync(directory);
+	    	nPath.mkdirSyncRecursive(path, position + 1);
+	    }
+	};
 
 	var webinos = require("webinos")(__dirname);
 		webinos.dom = require("./webinos.dom.js"),
 		webinos.path = require("./webinos.path.js"),
 		webinos.utils = webinos.global.require(webinos.global.rpc.location, "lib/webinos.utils.js");
+
+	var commonPaths = webinos.global.require(webinos.global.manager.context_manager.location, "lib/commonPaths.js");
 
 	var mUtils = {};
 
@@ -969,7 +993,21 @@
 	 * TODO Choose filesystem according to specification.
 	 */
 	exports.LocalFileSystemSync.prototype.requestFileSystemSync = function (type, size) {
-		return new exports.FileSystemSync("default", nPath.join(process.cwd(), "default"));
+		// TODO Determine only once.
+		var storage = commonPaths.getUserFolder();
+
+		if (storage === null) {
+			console.log("webinos.file.js: Error getting user folder (falling back to CWD).");
+
+			storage = process.cwd();
+		}
+
+		var realPath = nPath.join(storage, "file", "default");
+
+		// TODO Check success.
+		nPath.mkdirSyncRecursive(realPath);
+
+		return new exports.FileSystemSync("default", realPath);
 	};
 
 	// Resolving a local URL is currently not supported.
