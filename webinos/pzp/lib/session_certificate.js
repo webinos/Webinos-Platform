@@ -39,9 +39,13 @@ exports.selfSigned = function(config, type, callback) {
   }
 
   try {
-    key = certman.genRsaKey(1024);
+    if (type === "PzhFarmCA" ||  type === "PzhCA"){
+      key = certman.genRsaKey(4096);
+    } else {
+      key = certman.genRsaKey(2048);
+    }
   } catch(err1) {
-    log.error("Failed Generating Key");
+    log.error("failed generating certificate");
     callback("failed", err1);
     return;
   }
@@ -90,7 +94,7 @@ exports.selfSigned = function(config, type, callback) {
   try {
     obj.cert = certman.selfSignRequest(csr, 3600, key, certType, config.serverName);
   } catch (e1) {
-    log.error("failed Generating Self Signed Certifcate");
+    log.error("failed generating self signed certifcate");
     callback("failed", e1);
     return;
   }
