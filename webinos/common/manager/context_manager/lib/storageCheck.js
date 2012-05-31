@@ -22,6 +22,9 @@ var oldSettings = null;
 var commonPaths = null;
 //console.log("STORAGE CHECK LOADED");
 
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
+
 var pathSeperator = process.platform !== 'win32' ? '/' : '\\';
 
 module.exports = function(myCommonPaths, myStorageInfo){
@@ -29,7 +32,7 @@ module.exports = function(myCommonPaths, myStorageInfo){
 	storageInfo = myStorageInfo;
 	if (commonPaths.storage == null) throw 'Storage Path not set';
 	var clearStorage = false;
-	if (path.existsSync(commonPaths.storage + pathSeperator + ".storageVersion.json")){
+	if (nPathV.existsSync(commonPaths.storage + pathSeperator + ".storageVersion.json")){
 		if(require(commonPaths.storage + pathSeperator + ".storageVersion.json").version != storageInfo.Version){
 			clearStorage = true;
 		}else{
@@ -41,7 +44,7 @@ module.exports = function(myCommonPaths, myStorageInfo){
 		clearStorage = true;
 	}
 	if (clearStorage){
-		if (path.existsSync(commonPaths.storage + pathSeperator + "settings.json")){
+		if (nPathV.existsSync(commonPaths.storage + pathSeperator + "settings.json")){
 			oldSettings = require(commonPaths.storage + pathSeperator + "settings.json");
 		}
 		rmdirSyncRecursive(commonPaths.storage, true);

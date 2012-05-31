@@ -27,6 +27,8 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 var zipHelper = require("./zipHelper");
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 // we're creating an inner directory for arbitary json storage.
 var jsonDirSuffix = "json";
@@ -133,7 +135,7 @@ secstore.close = function (password, storeFile, storeDirectory, done) {
     // zip up the directory structure
     secstore.zipDir(storeFile, storeDirectory, function () {
         // encrypt
-        if (path.existsSync(storeFile)) {
+        if (nPathV.existsSync(storeFile)) {
             secstore.encryptFile(storeFile, password, function () {
                 // secure delete storage, recursive.
                 rimrafSync(storeDirectory);
@@ -150,7 +152,7 @@ secstore.close = function (password, storeFile, storeDirectory, done) {
 // will overwrite the file if necessary.
 secstore.zipDir = function zipDir(zipFile, inPath, fn) {
     "use strict";
-    if (path.existsSync(zipFile)) {
+    if (nPathV.existsSync(zipFile)) {
         fs.unlinkSync(zipFile);
     }
     zipHelper.makeZipFile(inPath, zipFile, fn);

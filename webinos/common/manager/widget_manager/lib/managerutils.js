@@ -20,6 +20,8 @@
 this.ManagerUtils = (function() {
 	var fs = require('fs');
 	var path = require('path');
+	var nPathV = parseFloat(process.versions.node);
+	if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 	function ManagerUtils() {}
 
@@ -45,7 +47,7 @@ this.ManagerUtils = (function() {
 			var elt = pathElements.shift();
 			if(elt == '') continue;
 			dirPath = path.resolve(dirPath, elt);
-			if(path.existsSync(dirPath)) {
+			if(nPathV.existsSync(dirPath)) {
 				var stat = fs.statSync(dirPath);
 				if(stat.isFile())
 					throw new Error('ManagerUtils.mkdirs: specified path is a file');
@@ -63,7 +65,7 @@ this.ManagerUtils = (function() {
 	 * dirPath: the directory to delete.
 	 */
 	ManagerUtils.deleteDir = function(dirPath) {
-		if(!path.existsSync(dirPath))
+		if(!nPathV.existsSync(dirPath))
 			return;
 		var stat = fs.statSync(dirPath);
 		if(!stat.isDirectory())
@@ -89,9 +91,9 @@ this.ManagerUtils = (function() {
 	 * overwrite: boolean, force overwrite
 	 */
 	ManagerUtils.copyFile = function(source, dest, overwrite) {
-		if(!path.existsSync(source))
+		if(!nPathV.existsSync(source))
 			throw new Error('ManagerUtils.copyFile: specified source file does not exist: ' + source);
-		if(path.existsSync(dest)) {
+		if(nPathV.existsSync(dest)) {
 			if(!overwrite)
 				throw new Error('ManagerUtils.copyFile: specified dest file aleady exists: ' + dest);
 			fs.unlink(dest);
@@ -117,9 +119,9 @@ this.ManagerUtils = (function() {
 	 * overwrite: boolean, force overwrite
 	 */
 	ManagerUtils.copyDir = function(source, dest, overwrite) {
-		if(!path.existsSync(source))
+		if(!nPathV.existsSync(source))
 			throw new Error('ManagerUtils.copyDir: specified source dir does not exist');
-		if(path.existsSync(dest)) {
+		if(nPathV.existsSync(dest)) {
 			if(!overwrite)
 				throw new Error('ManagerUtils.copyDir: specified dest dir aleady exists');
 			ManagerUtils.deleteDir(dest);

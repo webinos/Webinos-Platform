@@ -26,6 +26,8 @@ var path            = require('path'),
     webCert         = require(path.join(webinosRoot, dependencies.pzh.location, 'web/pzh_web_certs.js')),
     certman         = require(path.resolve(webinosRoot,dependencies.manager.certificate_manager.location));
 
+var nPathV = parseFloat(process.versions.node);
+if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 var RSA_START       = "-----BEGIN RSA PRIVATE KEY-----";
 var RSA_END         = "-----END RSA PRIVATE KEY-----";
@@ -88,10 +90,10 @@ function createPZH() {
 };
 
 function deleteFiles() {
-    if (path.existsSync("./webserver-key.pem")) {
+    if (nPathV.existsSync("./webserver-key.pem")) {
         fs.unlinkSync("./webserver-key.pem");
     }
-    if (path.existsSync("./webserver-cert.pem")) {
+    if (nPathV.existsSync("./webserver-cert.pem")) {
         fs.unlinkSync("./webserver-cert.pem");
     }
 
@@ -113,13 +115,13 @@ describe("generate web server certificate", function() {
             expect(wsCert).not.toBeNull();
             expect(wsCert).toContain(CERT_START);
             expect(wsCert).toContain(CERT_END);
-            expect(path.existsSync(certPath)).toBeTruthy();  
+            expect(nPathV.existsSync(certPath)).toBeTruthy();  
             expect(fs.readFileSync(certPath).toString()).toEqual(wsCert);
                         
             expect(wsKey).not.toBeNull(); 
             expect(wsKey).toContain(RSA_START);
             expect(wsKey).toContain(RSA_END);
-            expect(path.existsSync(keyPath)).toBeTruthy();  
+            expect(nPathV.existsSync(keyPath)).toBeTruthy();  
             expect(fs.readFileSync(keyPath).toString()).toEqual(wsKey);
             
             deleteFiles();
