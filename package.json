@@ -15,7 +15,8 @@
     "vows":"0.x.x",
     "ansi": "0.0.x",
     "connect": "2.x.x",
-    "mdns": "0.x.x"
+    "mdns": "0.x.x",
+    "jsormdb": "0.1.x"
   },
   "engines" : {
     "node" : ">=0.6.18",
