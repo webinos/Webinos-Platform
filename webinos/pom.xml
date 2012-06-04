@@ -103,7 +103,7 @@
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
               <executions>
-               <!-- Builds C files to node modules with gyp. 
+                <!-- Builds C files to node modules with gyp. 
                     Requires the webinos.gyp file in location tools/gyp_tools/ -->         
                <execution>
                 <id>compile-node-module</id>
@@ -136,7 +136,27 @@
                     <param>1</param>
                   </successCodes>
                 </configuration>
-              </execution>
+               </execution>
+               <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
+               <execution>
+                <id>jsdoc</id>
+                <phase>test</phase>
+                <configuration>
+                  <executable>java</executable>
+                  <arguments>
+                    <argument>-jar</argument>
+                    <argument>${JSDOC_ROOT}/jsrun.jar</argument>
+                    <argument>${JSDOC_ROOT}/app/run.js</argument>
+                    <argument>-t=${JSDOC_ROOT}/templates/jsdoc</argument>
+                    <argument>-d=${basedir}/jsdoc</argument>
+                    <argument>${basedir}/lib/</argument>
+                  </arguments>
+                  <successCodes>
+                    <param>0</param>
+                    <param>1</param>
+                  </successCodes>
+                </configuration>
+               </execution>
               </executions>
             </plugin>          
           </plugins>
@@ -217,7 +237,27 @@
                       <param>1</param>
                     </successCodes>
                   </configuration>
-                </execution>          
+                </execution>
+                <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
+                <execution>
+                  <id>jsdoc</id>
+                  <phase>test</phase>
+                  <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                      <argument>-jar</argument>
+                      <argument>${JSDOC_ROOT}/jsrun.jar</argument>
+                      <argument>${JSDOC_ROOT}/app/run.js</argument>
+                      <argument>-t=${JSDOC_ROOT}/templates/jsdoc</argument>
+                      <argument>-d=${basedir}/jsdoc</argument>
+                      <argument>${basedir}/lib/</argument>
+                    </arguments>
+                    <successCodes>
+                      <param>0</param>
+                      <param>1</param>
+                    </successCodes>
+                  </configuration>
+                </execution>                
               </executions>
             </plugin>        
           </plugins>
