@@ -39,24 +39,50 @@
     <plugins>
         <!-- Plugin to add delete path to build cycle (clean phase) -->
         <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
-        <configuration>
-          <filesets>
-          <fileset>
-            <directory>reports</directory>
-          </fileset>
-          <fileset>
-            <directory>src/build</directory>
-          </fileset>
-          <fileset>
-            <directory>src</directory>
-            <includes>
-            <include>**/.lock-wscript</include>
-            </includes>
-          </fileset>
-          </filesets>
-        </configuration>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.4.1</version>
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>reports</directory>
+              </fileset>
+              <fileset>
+                <directory>src/build</directory>
+              </fileset>
+              <fileset>
+                <directory>src</directory>
+                <includes>
+                <include>**/.lock-wscript</include>
+                </includes>
+              </fileset>
+            </filesets>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <executions>
+            <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
+            <execution>
+              <id>jsdoc</id>
+              <phase>site</phase>
+              <configuration>
+                <executable>java</executable>
+                <arguments>
+                  <argument>-jar</argument>
+                  <argument>${JSDOC_ROOT}/jsrun.jar</argument>
+                  <argument>${JSDOC_ROOT}/app/run.js</argument>
+                  <argument>-t=${JSDOC_ROOT}/templates/jsdoc</argument>
+                  <argument>-d=${basedir}/target/site/jsdoc</argument>
+                  <argument>${basedir}/lib/</argument>
+                </arguments>
+                <successCodes>
+                  <param>0</param>
+                  <param>1</param>
+                </successCodes>
+              </configuration>
+            </execution>     
+          </executions>
         </plugin>
     </plugins>
   </build>
@@ -136,27 +162,7 @@
                     <param>1</param>
                   </successCodes>
                 </configuration>
-               </execution>
-               <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
-               <execution>
-                <id>jsdoc</id>
-                <phase>test</phase>
-                <configuration>
-                  <executable>java</executable>
-                  <arguments>
-                    <argument>-jar</argument>
-                    <argument>${JSDOC_ROOT}/jsrun.jar</argument>
-                    <argument>${JSDOC_ROOT}/app/run.js</argument>
-                    <argument>-t=${JSDOC_ROOT}/templates/jsdoc</argument>
-                    <argument>-d=${basedir}/jsdoc</argument>
-                    <argument>${basedir}/lib/</argument>
-                  </arguments>
-                  <successCodes>
-                    <param>0</param>
-                    <param>1</param>
-                  </successCodes>
-                </configuration>
-               </execution>
+               </execution>           
               </executions>
             </plugin>          
           </plugins>
@@ -237,27 +243,7 @@
                       <param>1</param>
                     </successCodes>
                   </configuration>
-                </execution>
-                <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
-                <execution>
-                  <id>jsdoc</id>
-                  <phase>test</phase>
-                  <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                      <argument>-jar</argument>
-                      <argument>${JSDOC_ROOT}/jsrun.jar</argument>
-                      <argument>${JSDOC_ROOT}/app/run.js</argument>
-                      <argument>-t=${JSDOC_ROOT}/templates/jsdoc</argument>
-                      <argument>-d=${basedir}/jsdoc</argument>
-                      <argument>${basedir}/lib/</argument>
-                    </arguments>
-                    <successCodes>
-                      <param>0</param>
-                      <param>1</param>
-                    </successCodes>
-                  </configuration>
-                </execution>                
+                </execution>                            
               </executions>
             </plugin>        
           </plugins>
