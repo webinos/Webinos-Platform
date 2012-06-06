@@ -55,13 +55,80 @@ public class ConfigActivity extends Activity implements StateListener {
 	private Context ctx;
 	private Button startButton;
 	private Button stopButton;
-	private EditText pzpText;
-	private EditText pzhText;
+	private EditText pzhHost;
+	private EditText pzhName;
+	private EditText pzpName;
+	private EditText authCode;
 	private TextView stateText;
 	private Handler viewHandler = new Handler();
 	private long uiThread;
 	private String instance;
 	private Isolate isolate;
+	
+	private class ConfigParams {
+		String pzhHost;
+		String pzhName;
+		String pzpName;
+		String authCode;
+
+		void readConfig() {
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(openFileInput(LASTCONFIG)));
+				pzhHost = reader.readLine();
+				pzhName = reader.readLine();
+				pzpName = reader.readLine();
+				authCode = reader.readLine();
+			} catch (IOException e) {
+			} finally {
+				try {
+					if(reader != null)
+						reader.close();
+				} catch (IOException e) {}
+			}
+		}
+		
+		void writeConfig() {
+			BufferedWriter writer = null;
+			try {
+				writer = new BufferedWriter(new OutputStreamWriter(openFileOutput(LASTCONFIG, MODE_PRIVATE)));
+				writer.write(pzhHost + '\n');
+				writer.write(pzhName + '\n');
+				writer.write(pzpName + '\n');
+				/* writer.write(authCode + '\n'); */
+			} catch (IOException e) {
+			} finally {
+				try {
+					if(writer != null)
+						writer.close();
+				} catch (IOException e) {}
+			}
+		}
+
+		void fromEditText() {
+			pzhHost = ConfigActivity.this.pzhHost.getText().toString();
+			pzhName = ConfigActivity.this.pzhName.getText().toString();
+			pzpName = ConfigActivity.this.pzpName.getText().toString();
+			authCode = ConfigActivity.this.authCode.getText().toString();
+		}
+
+		String getCmd() {
+			HashMap<String, String> args = new HashMap<String, String>();
+			args.put("pzh.host", pzhHost);
+			args.put("pzh.name", pzhName);
+			args.put("pzp.name", pzpName);
+			args.put("auth_code", authCode);
+			Config config = Config.getInstance();
+			String cmd = config.getProperty("pzp.cmd");
+			for(String key : args.keySet()) {
+				String argValue = args.get(key);
+				if(argValue != null && !argValue.isEmpty())
+					cmd += " " + config.getProperty("pzp.cmd." + key).replace("%" + key, argValue);
+			}
+
+			return cmd;			
+		}
+	}
 
 	/** Called when the activity is first created. */
 	@Override
@@ -74,36 +141,6 @@ public class ConfigActivity extends Activity implements StateListener {
 		uiThread = viewHandler.getLooper().getThread().getId();
 	}
 	
-	private String readLastConfig() {
-		String pzhHost = null;
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new InputStreamReader(openFileInput(LASTCONFIG)));
-			pzhHost = reader.readLine();
-		} catch (IOException e) {
-		} finally {
-			try {
-				if(reader != null)
-					reader.close();
-			} catch (IOException e) {}
-		}
-		return pzhHost;
-	}
-	
-	private void writeLastConfig(String config) {
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter(new OutputStreamWriter(openFileOutput(LASTCONFIG, MODE_PRIVATE)));
-			writer.write(config);
-		} catch (IOException e) {
-		} finally {
-			try {
-				if(writer != null)
-					writer.close();
-			} catch (IOException e) {}
-		}
-	}
-	
 	private void initUI() {
 		Config config = Config.getInstance();
 		startButton = (Button)findViewById(R.id.start_button);
@@ -112,30 +149,46 @@ public class ConfigActivity extends Activity implements StateListener {
 		stopButton = (Button)findViewById(R.id.stop_button);
 		stopButton.setOnClickListener(new StopClickListener());
 
-		pzhText = (EditText)findViewById(R.id.args_pzhText);
-		String pzh = readLastConfig();
-		if(pzh == null)
-			pzh = config.getProperty("pzh.default");
-		if(pzh != null)
-			pzhText.setText(pzh);
+		pzhHost = (EditText)findViewById(R.id.args_pzhHost);
+		ConfigParams configParams = new ConfigParams();
+		configParams.readConfig();
+		String pzhHostText = configParams.pzhHost;
+		if(pzhHostText == null)
+			pzhHostText = config.getProperty("pzh.host.default");
+		if(pzhHostText != null)
+			pzhHost.setText(pzhHostText);
 
-		pzpText = (EditText)findViewById(R.id.args_pzpText);
-		String pzp = config.getProperty("pzp.default");
-		if(pzp != null)
-			pzpText.setText(pzp);
+		pzhName = (EditText)findViewById(R.id.args_pzhName);
+		String pzhNameText = configParams.pzhName;
+		if(pzhNameText == null)
+			pzhNameText = config.getProperty("pzh.name.default");
+		if(pzhNameText != null)
+			pzhName.setText(pzhNameText);
+
+		pzpName = (EditText)findViewById(R.id.args_pzpName);
+		String pzpNameText = configParams.pzpName;
+		if(pzpNameText == null)
+			pzpNameText = config.getProperty("pzp.name.default");
+		if(pzpNameText != null)
+			pzpName.setText(pzpNameText);
+
+		authCode = (EditText)findViewById(R.id.args_authCode);
+		String authCodeText = configParams.authCode;
+		if(authCodeText == null)
+			authCodeText = config.getProperty("auth_code.default");
+		if(authCodeText != null)
+			authCode.setText(authCodeText);
 
 		stateText = (TextView)findViewById(R.id.args_stateText);
 		__stateChanged(Runtime.STATE_CREATED);
 	}
 
 	private void startAction() {
-		writeLastConfig(pzhText.getText().toString());
-		HashMap<String, String> args = new HashMap<String, String>();
-		args.put("pzh", pzhText.getText().toString());
-		args.put("pzp", pzpText.getText().toString());
-		String cmd = Config.getInstance().getProperty("pzp.cmd");
-		for(String key : args.keySet())
-			cmd = cmd.replace("%" + key, args.get(key));
+		ConfigParams configParams = new ConfigParams();
+		configParams.fromEditText();
+		configParams.writeConfig();
+		String cmd = configParams.getCmd();
+		Log.v(TAG, "PZP start: starting with cmd: " + cmd);
 
 		try {
 			Runtime.initRuntime(this, new String[]{});
