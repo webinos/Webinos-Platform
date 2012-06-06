@@ -8,6 +8,7 @@
 		<!-- Creates app/assets/webinos.zip -->
 		<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
 			<zipfileset dir="${basedir}" prefix="wp4" includes="
+			webinos_pzp.js,
 			node_modules/,
 			webinos/" excludes="
 			webinos/common/android/,

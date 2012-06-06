@@ -5,8 +5,10 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="arguments">Arguments:</string>
-    <string name="pzhName">PZH (host name or IP address):</string>
-    <string name="pzpName">PZP (user name):</string>
+    <string name="pzhHost">PZH host name or IP address:</string>
+    <string name="pzhName">User name (OpenID):</string>
+    <string name="pzpName">Device name:</string>
+    <string name="authCode">Authorisation code:</string>
     <string name="run_state">Run state</string>
     <string name="created">Created</string>
     <string name="started">Started</string>
