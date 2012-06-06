@@ -26,8 +26,12 @@
 var path = require("path");
 var tls  = require("tls");
 var fs   = require("fs");
-var mdns = require('mdns');
 var os   = require("os");
+
+var mdns;
+try {
+  mdns = require('mdns');
+} catch(e) {}
 
 var webinos       = require("webinos")(__dirname);
 var session       = require("./session");
