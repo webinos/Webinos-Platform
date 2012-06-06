@@ -43,7 +43,11 @@ function loadPzhs(config) {
   for ( myKey in config.pzhs) {
     if(typeof config.pzhs[myKey] !== "undefined") {
       pzh.addPzh(myKey, config.pzhs[myKey], function(res, instance) {
-        log.info("started PZH ... " + instance.config.name);
+        if (res) {
+          log.info("started PZH ... " + instance.config.name);
+        } else {
+          log.error("failed started PZH ... ");
+        }
       });
     }
   }
@@ -170,14 +174,18 @@ farm.getOrCreatePzhInstance = function (host, user, callback) {
   } else {
     log.info("adding new PZH - " + myKey);
     var pzhModules = session.configuration.pzhDefaultServices;
-    pzh.addPzh(myKey, pzhModules, function(){
-      farm.pzhs[myKey].config.name     = name;
-      farm.pzhs[myKey].config.email    = user.email;
-      farm.pzhs[myKey].config.country  = user.country;
-      farm.pzhs[myKey].config.image    = user.image;
-      session.configuration.storeConfig(farm.pzhs[myKey].config, function() {
-        callback(myKey, farm.pzhs[myKey]);
-      });
+    pzh.addPzh(myKey, pzhModules, function(status){
+      if (status) {
+        farm.pzhs[myKey].config.name     = name;
+        farm.pzhs[myKey].config.email    = user.email;
+        farm.pzhs[myKey].config.country  = user.country;
+        farm.pzhs[myKey].config.image    = user.image;
+        session.configuration.storeConfig(farm.pzhs[myKey].config, function() {
+          callback(myKey, farm.pzhs[myKey]);
+        });
+      } else {
+        callback(myKey, null);
+      }
     });
   }
 };
