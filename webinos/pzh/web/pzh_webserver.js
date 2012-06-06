@@ -229,7 +229,7 @@ function authenticate(hostname, url) {
     });
     exts.push(attr);
 
-    rely = new openid.RelyingParty('https://'+hostname+':9000/main.html?id=verify',
+    rely = new openid.RelyingParty('https://'+hostname+':'+session.configuration.webServerPort+'/main.html?id=verify',
         null,
         false,
         false,
