@@ -87,8 +87,10 @@ PzpServer.prototype.startServer = function (parent, callback) {
                 msg.payload.id = validMsgObj.payload.message.id;
                 parent.sendMessage(msg, validMsgObj.from);
                 log.info("sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
-              }
-              else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
+              } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "foundServices") {
+                log.info("received message about available remote services.");
+                parent.serviceListener && parent.serviceListener(validMsgObj.payload);
+              } else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
                 if(parent.connectedPzp[validMsgObj.from]) {
                   parent.connectedPzp[validMsgObj.from].port = validMsgObj.payload.message;
                 } else {
