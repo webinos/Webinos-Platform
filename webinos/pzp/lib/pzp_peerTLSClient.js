@@ -72,7 +72,14 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
             if(validMsgObj.type === "prop" && validMsgObj.payload.status === "foundServices") {
               log.info("received message about available remote services.");
               parent.serviceListener && parent.serviceListener(validMsgObj.payload);
-            } else {
+            } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
+                log.info("trying to send Webinos Services from this RPC handler to " + validMsgObj.from + "...");
+                var services = parent.rpcHandler.getAllServices(validMsgObj.from);
+                var msg = {"type":"prop", "from":parent.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
+                msg.payload.id = validMsgObj.payload.message.id;
+                parent.sendMessage(msg, validMsgObj.from);
+                log.info("sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
+              }else {
               parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
             }
           });
