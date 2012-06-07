@@ -24,8 +24,8 @@ var host = null, name = null;
 function help() {
   console.log("Usage: node startPzh.js [options]");
   console.log("Options:");
-  console.log("--host=[host]            host of the pzh (default localhost)");
-  console.log("--name=[identifier]      common name in the certificate (default PzhFarm)");
+  console.log("--host=[host]            host of the pzh farm (default localhost)");
+  console.log("--farm-name=[identifier] farm name (default machine-name)");
   process.exit();
 }
 
@@ -38,7 +38,7 @@ process.argv.forEach(function (arg) {
       case "--host":
         host = parts[1];
         break;
-      case "--name":
+      case "--farm-name":
         name = parts[1];
         break;
       }

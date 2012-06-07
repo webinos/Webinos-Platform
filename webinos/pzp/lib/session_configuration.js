@@ -86,7 +86,7 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
       var config = createConfigStructure(name, type);
       config.name = name;
 
-      if (pzhName !== '' || pzhName !== null  ) {
+      if (type === "Pzp" && (pzhName !== '' || pzhName !== null )) {
         config.serverName = host+'/'+pzhName;
       } else {
         config.serverName = host;
