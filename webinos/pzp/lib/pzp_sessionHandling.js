@@ -177,8 +177,9 @@ Pzp.prototype.addRemoteServiceListener = function(callback) {
 };
 
 Pzp.prototype.update = function(callback) {
-  this.connectedApp();
-  this.webServerState = global.states[2];
+  var self = this;
+  self.connectedApp();
+  self.webServerState = global.states[2];
 
   // Zeroconf changes
   switch(os.type().toLowerCase()){
@@ -190,7 +191,7 @@ Pzp.prototype.update = function(callback) {
           var ad = mdns.createAdvertisement(mdns.tcp('pzp'), global.pzpZeroconfPort);
           ad.start();
           ad.on('error', function(err) {
-          log.error("Zeroconf PZP Advertisement error: (" + err+")");
+            log.error("Zeroconf PZP Advertisement error: (" + err+")");
           });
           log.info("started pzp");
           break;
@@ -202,6 +203,8 @@ Pzp.prototype.update = function(callback) {
       break;
   }
   //end - Zeroconf changes
+  // The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP"s
+  self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
   if (typeof callback !== "undefined") {
     callback.call(this, "startedPZP", this);
   }
@@ -216,7 +219,20 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     self.mode = global.modes[1];
 
     self.connectedPzh[self.config.pzhId] = instance;
-    self.pzpAddress = instance.socket.address().address;
+    if (os.platform().toLowerCase() !== "android") {
+      var ifaces=os.networkInterfaces();
+      for (var iface in ifaces) {
+        ifaces[iface].foreach( function(detail) {
+          if (detail.family === "IPv4" and detail.internal === "false" ) {
+            self.pzpAddress = detail.address; // take the first address
+            break;
+          }
+        });
+      }
+    } else {
+      self.pzpAddress = instance.socket.address().address;
+    }
+    
     self.tlsId[self.sessionId] = instance.getSession();
 
     instance.socket.setKeepAlive(true, 100);
@@ -232,8 +248,6 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     if (self.pzptlsServerState !== global.states[2]) {
       var server = new pzpServer();
       server.startServer(self, function() {
-        // The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP"s
-        self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
         self.pzptlsServerState = global.states[2];
         callback.call(self, "startedPZP");
       });
@@ -361,7 +375,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
                     msg.port = getelement(service, 'port');
                     msg.address = getelement(service, 'addresses');
         
-                    log.info("Check ZeroConf discovery list");      
+                    log.info("Check ZeroConf discovery list");
                     var hostname = os.hostname();
                     if(msg.name !== os.hostname()) {
                       //Update connection - msg.name is machine name   
@@ -403,19 +417,17 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, callback) {
           pzpWebSocket.startPzpWebSocketServer(self, self.inputConfig, function() {
             self.rpcHandler.setSessionId(self.sessionId);
             setupMessageHandler(self);
-            self.update(callback);          
+            self.update(callback);
           });
         }
         if(self.pzptlsServerState === global.states[0])
         {
-          log.info("Calling start pzptlsServer"); 
+          log.info("calling start pzptlsServer"); 
           if (typeof self.pzpAddress === "undefined") {
             self.pzpAddress = self.inputConfig.pzpHost;
           }
           var server = new pzpServer(); 
           server.startServer(self, function() {
-          // The reason we send to PZH is because PZH acts as a point of synchronization for connecting PZP"s
-            self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
             self.pzptlsServerState = global.states[2];
           });
         } 
@@ -558,9 +570,15 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
       }
 
       try {
+        var host;
+        if (configure.serverName.split("/") !== -1) {
+          host = configure.serverName.split("/")[0];
+        } else {
+          host = configure.serverName;
+        }
         self.states = global.states[1];
-        session.common.resolveIP(config.pzhHost, function(resolvedAddress) {
-          log.info("connecting Address: " + resolvedAddress);
+        session.common.resolveIP(host, function(resolvedAddress) {
+          log.info("connecting address: " + resolvedAddress);
           self.address = resolvedAddress;
           self.connect(conn_key, conn_csr, config.code, function(result) {
             if(result === "startedPZP" && self.webServerState !== global.states[2]) {
