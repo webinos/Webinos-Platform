@@ -222,17 +222,15 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     if (os.platform().toLowerCase() !== "android") {
       var ifaces=os.networkInterfaces();
       for (var iface in ifaces) {
-        ifaces[iface].foreach( function(detail) {
-          if (detail.family === "IPv4" and detail.internal === "false" ) {
+        ifaces[iface].forEach( function(detail) {            
+          if (detail.family === "IPv4" ) {
             self.pzpAddress = detail.address; // take the first address
-            break;
           }
         });
       }
     } else {
       self.pzpAddress = instance.socket.address().address;
     }
-    
     self.tlsId[self.sessionId] = instance.getSession();
 
     instance.socket.setKeepAlive(true, 100);
