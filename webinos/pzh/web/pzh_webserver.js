@@ -295,8 +295,12 @@ function fetchOpenIdDetails(req, res, callback){
             }
 
             farm.getOrCreatePzhInstance(host, details, function(key, pzhInt){
-                pzh[details.id] = pzhInt;	
+              if (typeof pzhInt !== "undefined" || pzhInt === null) {
+                pzh[details.id] = pzhInt;
                 pzhapis.listZoneDevices(pzhInt, result);
+              } else {
+                log.error("failed adding pzh");
+              }
             });
         }
     });
