@@ -3,11 +3,12 @@ Manager/Context/Storage/data/context.json
 webinos/common/manager/context_manager/data/log.json
 
 # generated webinos.js
-demo/client/webinos.js
+webinos/test/client/webinos.js
 
 # eclipse project files
 .project
 .settings
+/.metadata/
 
 # vstudio prj files
 *.sln
@@ -58,13 +59,10 @@ RPC/node_modules/dojo-node/
 RPC/node_modules/prototype/
 RPC/node_modules/xmlhttprequest/
 
-#node_modules
-/.metadata/
-
-#pzh logs
-demo/crash.txt
-demo/info.txt
-WebinosPzh_crash.txt
-*_crash.txt
+# node_modules
+/node_modules/
+!/node_modules/webinos/
+!/node_modules/expat2.js
+!/node_modules/xmldigsig.js
 
 webinos/api/geolocation/node_modules
