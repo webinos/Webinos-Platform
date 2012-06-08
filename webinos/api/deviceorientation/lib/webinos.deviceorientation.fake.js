@@ -99,7 +99,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
     switch(params[0]){
         case "devicemotion":
             objectRefsDo.push([objectRef, params[0]]);
-			if (typeof successCB === 'function') successCB();
+            if (typeof successCB === 'function') successCB();
             console.log('listening to device motion');
             if(!listeningToDeviceMotion){
                 listeningToDeviceMotion = true;
@@ -108,7 +108,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             break;
         case "deviceorientation":
             objectRefsDo.push([objectRef, params[0]]);
-			if (typeof successCB === 'function') successCB();
+            if (typeof successCB === 'function') successCB();
             if(!listeningToDeviceOrientation){
                 listeningToDeviceOrientation = true;
                 simulateDeviceOrientation();
@@ -116,7 +116,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             break;
         case "compassneedscalibration":
             objectRefsDo.push([objectRef, params[0]]);
-			if (typeof successCB === 'function') successCB();
+            if (typeof successCB === 'function') successCB();
             if(!listeningToCompassNeedsCalibration){
                 listeningToCompassNeedsCalibration = true;
                 simulateCompassNeedsCalibration();
@@ -125,7 +125,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             
         default:
             console.log('ERROR: not available');
-			if (typeof errorCB === 'function') errorCB();
+            if (typeof errorCB === 'function') errorCB();
             break;
     }
 }
@@ -214,7 +214,7 @@ function simulateDeviceOrientation(){
 function removeEventListener(params, successCB, errorCB, objectRef){
     //params[0] => objectRef from Listener // params[1] => type of Event [70, 'devicemotion']
     var registeredListeners = 0;
-	var locatedRef = false;
+    var locatedRef = false;
     for(i = 0; i < objectRefsDo.length; i++ ){
         if(objectRefsDo[i][1] == params[1]){ //CHECK IF THERE ARE OTHER LISTENERS FOR A CERTAIN EVENT TYPE
 			registeredListeners++;
