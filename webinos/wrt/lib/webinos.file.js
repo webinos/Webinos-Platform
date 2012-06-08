@@ -33,10 +33,10 @@ if (typeof webinos.file === "undefined")
 	var hex2ArrayBuffer = function (hex) {
 		var buffer = new ArrayBuffer(hex.length / 2);
 		var view = new Uint8Array(buffer);
-		
+
 		for (var i = 0; i < view.length; i++)
 			view[i] = parseInt(hex.substr(i * 2, 2), 16);
-		
+
 		return buffer;
 	};
 	
@@ -45,8 +45,8 @@ if (typeof webinos.file === "undefined")
 		var view = new Uint8Array(buffer);
 		
 		for (var i = 0; i < view.length; i++)
-			hex += view[i].toString(16);
-		
+			hex += ("00" + view[i].toString(16)).slice(-2);
+
 		return hex;
 	};
 
