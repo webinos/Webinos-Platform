@@ -24,10 +24,6 @@
 (function (exports) {
 	"use strict";
 
-	// <HACK>
-	require("./webinos.file.hack.js");
-	// </HACK>
-
 	var nUtil = require("util");
 
 	var webinos = require("webinos")(__dirname);
@@ -369,7 +365,7 @@
 		};
 	};
 
-	exports.Service = function (rpc) {
+	exports.Service = function (rpc, params) {
 		RPCWebinosService.call(this, {
 			api: "http://webinos.org/api/file",
 			displayName: "File API",
@@ -377,6 +373,10 @@
 		});
 
 		this.rpc = rpc;
+
+		// <HACK>
+		require("./webinos.file.hack.js")(this, params);
+		// </HACK>
 	};
 
 	nUtil.inherits(exports.Service, RPCWebinosService);

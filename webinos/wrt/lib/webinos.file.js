@@ -515,6 +515,14 @@ if (typeof webinos.file === "undefined")
 		}), this)(url);
 	};
 
+	exports.LocalFileSystem.prototype.getAddress = function (successCallback, errorCallback) {
+    webinos.utils.bind(webinos.rpcHandler.request(this, "getAddress", null, function (result) {
+      webinos.utils.callback(successCallback, this)(result);
+    }, function (error) {
+      webinos.utils.callback(errorCallback, this)(error);
+    }), this)();
+  };
+
 	exports.FileSystem = function (service, name, realPath) {
 		this.name = name;
 		this.root = new exports.DirectoryEntry(this, "/");
