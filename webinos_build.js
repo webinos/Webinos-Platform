@@ -102,6 +102,10 @@ if (cmd === "install") {
       });
     }
   });
+} else if (cmd === "wrt") {
+    list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
+
+    exec(list);
 } else {
   list.push("rm -rf " + prefix+ "/bin/webinos_pzh");
   list.push("rm -rf " + prefix+ "/bin/webinos_pzp");
