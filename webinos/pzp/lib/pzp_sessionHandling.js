@@ -221,16 +221,9 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     self.mode = global.modes[1];
 
     self.connectedPzh[self.config.pzhId] = instance;
-    if (os.platform().toLowerCase() !== "android") {
-      var ifaces=os.networkInterfaces();
-      for (var iface in ifaces) {
-        ifaces[iface].forEach( function(detail) {            
-          if (detail.family === "IPv4" ) {
-            self.pzpAddress = detail.address; // take the first address
-          }
-        });
-      }
-    } else {
+  
+  if(typeof self.pzpAddrss === "undefined")
+  { 
       self.pzpAddress = instance.socket.address().address;
     }
     self.tlsId[self.sessionId] = instance.getSession();
@@ -566,6 +559,17 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
       } else {
         self.sessionId = configure.pzhId + '/' + configure.name;
       }
+	
+     if (os.platform().toLowerCase() !== "android") {
+      var ifaces=os.networkInterfaces();
+      for (var iface in ifaces) {
+        ifaces[iface].forEach( function(detail) {            
+          if (detail.family === "IPv4" ) {
+            self.pzpAddress = detail.address; // take the first address
+          }
+        });
+      }
+    } 
 
       try {
         var host;
