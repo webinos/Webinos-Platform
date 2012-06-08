@@ -174,11 +174,11 @@ PzpServer.prototype.startServer = function (parent, callback) {
     });
 
     server.on("listening", function () {
-      log.info("listening as server on port :" + session.configuration.pzpServerPort + " address : "+ parent.pzpAddress);
+      log.info("listening as server on port :" + session.configuration.pzpServerPort);
       callback.call(parent, "started");
     });
 
-    server.listen(session.configuration.pzpServerPort, parent.pzpAddress);
+    server.listen(session.configuration.pzpServerPort);
   });
 };
 
