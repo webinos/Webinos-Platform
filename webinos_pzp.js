@@ -73,9 +73,10 @@ process.argv.forEach(function (arg) {
   }
 });
 
-var pzpModules = [
+var fileParams = {},
+  pzpModules = [
   {name: "get42", params: {num: "21"}},
-  {name: "file", params: {}},
+  {name: "file", params: fileParams},
   {name: "geolocation", params: {connector : "geoip"}},
   {name: "applauncher", params: {}},
   {name: "sensors", params: {}},
@@ -137,6 +138,7 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (options.preference) {
       config.preference = options.preference;
     }
+    fileParams.pzpHost = config.pzpHost;
     initializePzp(config, pzpModules);
 });
 
