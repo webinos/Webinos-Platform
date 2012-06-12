@@ -626,7 +626,7 @@
 			// Fetch from peers that are connected
 			if (this.parent && this.parent.config.type === "Pzp") {
 				if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && this.parent.state === global.states[2]) {
-					for (var key in this.parent.connectedPzp) { //
+					for (var key in this.parent.connectedPzp) {
 						if (this.parent.connectedPzp.hasOwnProperty(key)) {
 							if(this.parent.connectedPzp[key].state === global.states[2]) {
 								entityRefCount += 1;
@@ -641,11 +641,19 @@
 				return;
 			}
 
-			// store callback in map for lookup on returned remote results
 			var callbackId = getNextID();
 			var that = this;
+
+			// deliver results once timeout kicks in
+			setTimeout(function() {
+				if (that.remoteServicesFoundCallbacks[callbackId]) {
+					that.remoteServicesFoundCallbacks[callbackId]([], callbackId, true);
+				}
+			}, options && typeof options.timeout !== 'undefined' ? options.timeout : 120000); // default: 120 secs
+
+			// store callback in map for lookup on returned remote results
 			this.remoteServicesFoundCallbacks[callbackId] = (function(res, refCnt) {
-				return function(remoteServices, cId) {
+				return function(remoteServices, cId, ignoreCnt) {
 
 					function isServiceType(el) {
 						return el.api === serviceType.api ? true : false;
@@ -653,7 +661,7 @@
 					res = res.concat(remoteServices.filter(isServiceType));
 					refCnt -= 1;
 
-					if (refCnt < 1) {
+					if (refCnt < 1 || ignoreCnt) {
 						// entity reference counter is zero, got all answers, so continue
 						deliverResults(res);
 						delete that.remoteServicesFoundCallbacks[cId];
