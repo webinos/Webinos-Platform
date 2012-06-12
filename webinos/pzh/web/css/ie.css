@@ -1,0 +1,19 @@
+.toggleLink {
+display: inline;
+float: none;
+margin-left: 2%
+}
+
+fieldset input[type=text] {
+margin-left: -10px;
+}
+
+
+fieldset select {
+margin-left: -10px
+}
+
+fieldset textarea {
+margin-left: -10px;
+}
+
