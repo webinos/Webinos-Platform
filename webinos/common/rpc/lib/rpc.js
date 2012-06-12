@@ -518,7 +518,11 @@
 			var filteredRO = receiverObjs.filter(function(el, idx, array) {
 				return el.id !== callback.id;
 			});
-			this.objects[callback.api] = filteredRO;
+			if (filteredRO.length > 0) {
+				this.objects[callback.api] = filteredRO;
+			} else {
+				delete this.objects[callback.api];
+			}
 		}
 	};
 
