@@ -1,0 +1,23 @@
+{ "name": "gallery"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Gallery API"
+, "keywords": [ "webinos", "gallery", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": ""
+, "repository":
+  { "type": "git"  , "url": "http://dev.webinos.org/git/wp4.git"  }, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { 
+                   "test": "./test"
+                 }
+, "main": ""
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}
