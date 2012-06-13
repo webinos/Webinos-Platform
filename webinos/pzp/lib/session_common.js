@@ -155,11 +155,13 @@ session_common.readJson = function(instance, buffer, objectHandler) {
   var offset = 0;
   
   for (;;) {
+    var readByteLen;
     if (instanceMap[instance]) {
       // we already read from a previous buffer, read the rest
       len = instanceMap[instance].restLen;
-      jsonStr = instanceMap[instance].part;
-      jsonStr += buffer.toString('utf8', offset, offset + len);
+      var jsonStrTmp = buffer.toString('utf8', offset, offset + len);
+      readByteLen = Buffer.byteLength(jsonStrTmp, 'utf8');
+      jsonStr = instanceMap[instance].part + jsonStrTmp;
       offset += len;
       instanceMap[instance] = undefined;
       
@@ -167,10 +169,10 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       len = buffer.readUInt32LE(offset);
       offset += 4;
       jsonStr = buffer.toString('utf8', offset, offset + len);
+      readByteLen = Buffer.byteLength(jsonStr, 'utf8');
       offset += len;
     }
 
-    var readByteLen = Buffer.byteLength(jsonStr, 'utf8');
     if (readByteLen < len) {
       instanceMap[instance] = {
           restLen: len - readByteLen,
