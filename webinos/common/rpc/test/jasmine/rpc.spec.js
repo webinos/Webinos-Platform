@@ -95,7 +95,7 @@ describe('common.RPC', function() {
 		var service;
 		var rpc;
 
-		this.beforeEach(function() {
+		beforeEach(function() {
 			service = new RPCWebinosService();
 			service.api = 'prop-api';
 			service.displayName = 'prop-displayName';
@@ -119,28 +119,108 @@ describe('common.RPC', function() {
 		});
 	});
 
-	it('can execute and handle RPC', function() {
-		var service = new RPCWebinosService();
-		service.api = 'prop-api';
-		service.displayName = 'prop-displayName';
-		service.description = 'prop-description';
-		var rpc = rpcHandler.createRPC(service, 'functionName', [1]);
-		rpcHandler.registerObject(service);
+	describe('RPC service request and response', function() {
+		var service;
 
-		var msgHandler = {
-				write: function() {
-					rpcHandler.handleMessage(rpc);
-				}
-		};
-		rpcHandler.setMessageHandler(msgHandler);
-		spyOn(rpcHandler, 'handleMessage')
+		beforeEach(function() {
+			// create and register mock service
+			var MockService = function(privRpcHandler, params) {
+				this.base = RPCWebinosService;
+				this.base({
+					api: 'prop-api',
+					displayName: 'prop-displayName',
+					description: 'prop-description'
+				});
+				this.testListen = function(params, success, error, objRef) {
+					var rpc = rpcHandler.createRPC(objRef, 'onEvent', {testProp: 42});
+					rpcHandler.executeRPC(rpc);
+				};
+			};
+			MockService.prototype = new RPCWebinosService();
+			MockService.prototype.testSuccess = function(params, success, error, objRef) {
+				// tests success callback provided by rpc.js
+				success();
+			};
+			MockService.prototype.testError = function(params, success, error, objRef) {
+				// tests error callback provided by rpc.js
+				error();
+			};
+			service = new MockService();
+			rpcHandler.registerObject(service);
 
-		rpcHandler.executeRPC(rpc);
-		expect(rpcHandler.handleMessage).toHaveBeenCalled();
-		expect(rpcHandler.handleMessage.mostRecentCall.args.length).toEqual(1);
-		expect(rpcHandler.handleMessage.mostRecentCall.args[0].method).toBeDefined();
-		expect(rpcHandler.handleMessage.mostRecentCall.args[0].id).toBeDefined();
-		expect(rpcHandler.handleMessage.mostRecentCall.args[0].params).toBeDefined();
+			// use our own message handler write function, usually this would
+			// write the request out to the remote peer
+			var msgHandler = {
+					write: function(rpc) {
+						rpcHandler.handleMessage(rpc);
+					}
+			};
+			rpcHandler.setMessageHandler(msgHandler);
+		});
+
+		it('with successfull response', function() {
+			spyOn(rpcHandler, 'handleMessage').andCallThrough();
+			spyOn(rpcHandler, 'executeRPC').andCallThrough();
+
+			var rpc = rpcHandler.createRPC(service, 'testSuccess', [1]);
+			rpcHandler.executeRPC(rpc);
+
+			// request
+			expect(rpcHandler.handleMessage).toHaveBeenCalled();
+			expect(rpcHandler.handleMessage.calls[0].args.length).toEqual(1);
+			expect(rpcHandler.handleMessage.calls[0].args[0].method).toBeDefined();
+			expect(rpcHandler.handleMessage.calls[0].args[0].id).toBeDefined();
+			expect(rpcHandler.handleMessage.calls[0].args[0].params).toBeDefined();
+
+			// response
+			expect(rpcHandler.handleMessage.calls[1].args.length).toEqual(1);
+			expect(rpcHandler.handleMessage.calls[1].args[0].id).toBeDefined();
+			expect(rpcHandler.handleMessage.calls[1].args[0].result).toBeDefined();
+
+			// called once for request and once for response
+			expect(rpcHandler.executeRPC.calls.length).toEqual(2);
+		});
+
+		it('with error response', function() {
+			spyOn(rpcHandler, 'handleMessage').andCallThrough();
+			spyOn(rpcHandler, 'executeRPC').andCallThrough();
+
+			var rpc = rpcHandler.createRPC(service, 'testError', [1]);
+			rpcHandler.executeRPC(rpc);
+
+			// response
+			expect(rpcHandler.handleMessage.calls[1].args.length).toEqual(1);
+			expect(rpcHandler.handleMessage.calls[1].args[0].id).toBeDefined();
+			expect(rpcHandler.handleMessage.calls[1].args[0].error).toBeDefined();
+			expect(rpcHandler.handleMessage.calls[1].args[0].error.code).toEqual(32000);
+
+			// called once for request and once for response
+			expect(rpcHandler.executeRPC.calls.length).toEqual(2);
+		});
+
+		it('with successful responce for client side listener pattern', function() {
+			spyOn(rpcHandler, 'handleMessage').andCallThrough();
+			spyOn(rpcHandler, 'executeRPC').andCallThrough();
+
+			var rpc = rpcHandler.createRPC(service, 'testListen', [1]);
+			rpc.fromObjectRef = 2342; // this is totally a unique id
+
+			// create a temporary webinos service for our callback onEvent
+			var callback = new RPCWebinosService({api:rpc.fromObjectRef});
+			callback.onEvent = function (){}; // empty, using spyOn instead
+			spyOn(callback, 'onEvent');
+			rpcHandler.registerCallbackObject(callback);
+			rpcHandler.executeRPC(rpc);
+
+			// response
+			expect(rpcHandler.handleMessage.calls[1].args.length).toEqual(1);
+			expect(rpcHandler.handleMessage.calls[1].args[0].id).toBeDefined();
+
+			// called once for request and once for response
+			expect(rpcHandler.executeRPC.calls.length).toEqual(2);
+
+			expect(callback.onEvent).toHaveBeenCalled();
+			expect(callback.onEvent.calls[0].args[0].testProp).toEqual(42);
+		});
 	});
-
 });
