@@ -39,6 +39,7 @@ var log           = new session.common.debug("pzp_session");
 var global        = session.configuration
 var rpc           = webinos.global.require(webinos.global.rpc.location);
 var Registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
+var Discovery     = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
 
 var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
 var RPCHandler     = rpc.RPCHandler;
@@ -232,7 +233,7 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     var msg = self.messageHandler.registerSender(self.sessionId, self.config.pzhId);
     self.sendMessage(msg, self.config.pzhId);
 
-    var localServices = self.rpcHandler.getRegisteredServices();
+    var localServices = self.discovery.getRegisteredServices();
     self.prepMsg(self.sessionId, self.config.pzhId, "registerServices", localServices);
     log.info("sent msg to register local services with pzh");
     if (self.pzptlsServerState !== global.states[2]) {
@@ -531,6 +532,8 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
   var self = this;
   self.registry       = new Registry();
   self.rpcHandler     = new RPCHandler(this, self.registry); // Handler for remote method calls.
+  self.discovery      = new Discovery(self.rpcHandler, [self.registry]);
+  self.registry.registerObject(self.discovery);
   self.registry.loadModules(modules, self.rpcHandler); // load specified modules
   self.messageHandler = new MessageHandler(this.rpcHandler); // handler for all things message
   self.modules        = modules;

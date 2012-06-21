@@ -74,7 +74,7 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
               parent.serviceListener && parent.serviceListener(validMsgObj.payload);
             } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
                 log.info("trying to send Webinos Services from this RPC handler to " + validMsgObj.from + "...");
-                var services = parent.rpcHandler.getAllServices(validMsgObj.from);
+                var services = parent.discovery.getAllServices(validMsgObj.from);
                 var msg = {"type":"prop", "from":parent.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
                 msg.payload.id = validMsgObj.payload.message.id;
                 parent.sendMessage(msg, validMsgObj.from);
