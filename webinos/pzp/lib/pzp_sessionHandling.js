@@ -531,10 +531,10 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
   var self = this;
   self.registry       = new Registry();
   self.rpcHandler     = new RPCHandler(this, self.registry); // Handler for remote method calls.
+  self.registry.loadModules(modules, self.rpcHandler); // load specified modules
   self.messageHandler = new MessageHandler(this.rpcHandler); // handler for all things message
   self.modules        = modules;
   self.inputConfig    = config;
-  self.rpcHandler.loadModules(modules);// load specified modules
   
   
   global.createDirectoryStructure( function() {

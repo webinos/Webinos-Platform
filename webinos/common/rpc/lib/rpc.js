@@ -46,7 +46,7 @@
 	 *  @constructor
 	 *  @param parent The PZP object or optional else.
 	 */
-	_RPCHandler = function(parent) {
+	_RPCHandler = function(parent, registry) {
 		/**
 		 * Parent is the PZP. The parameter is not used/optional on PZH and the
 		 * web browser.
@@ -54,35 +54,29 @@
 		this.parent = parent;
 
 		/**
+		 * Registry of registered RPC objects.
+		 */
+		this.registry = registry;
+
+		/**
+		 * session id
+		 */
+		this.sessionId = '';
+
+		/**
 		 * Used to store objectRefs for callbacks that get invoked more than once
+		 * Holds other Service objects, not registered here. Only used on the
+		 * PZH.
 		 */
 		this.objRefCacheTable = {};
+		this.remoteServiceObjects = [];
 
 		/**
 		 * Used on the client side by executeRPC to store callbacks that are
 		 * invoked once the RPC finished.
-		 */
-		this.awaitingResponse = {};
-
-		/**
-		 * session id
-		 * Holds registered Webinos Service objects local to this RPC.
-		 *
-		 * Service objects are stored in this dictionary with their API url as
-		 * key.
-		 */
-		this.sessionId = '';
-		this.objects = {};
-
-		/**
-		 * Holds other Service objects, not registered here. Only used on the
-		 * PZH.
-		 */
-		this.remoteServiceObjects = [];
-
-		/**
 		 * Holds callbacks for findServices callbacks from the PZH
 		 */
+		this.awaitingResponse = {};
 		this.remoteServicesFoundCallbacks = {};
 
 		if (typeof this.parent !== 'undefined') {
@@ -214,14 +208,7 @@
 
 		console.log('INFO: [RPC] '+"Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
 
-		var receiverObjs = this.objects[service];
-		if (!receiverObjs)
-			receiverObjs = [];
-		var filteredRO = receiverObjs.filter(function(el, idx, array) {
-			return el.id === serviceId;
-		});
-		var includingObject = filteredRO[0];
-		if (typeof includingObject === 'undefined') includingObject = receiverObjs[0];
+		var includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
 
 		if (typeof includingObject === 'undefined'){
 			console.log('INFO: [RPC] '+"No service found with id/type " + service);
@@ -458,71 +445,11 @@
 	};
 
 	/**
-	 * Registers a Webinos service object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	_RPCHandler.prototype.registerObject = function (callback) {
-		if (typeof callback !== 'undefined') {
-			console.log('INFO: [RPC] '+"Adding handler: " + callback.api);
-
-			var receiverObjs = this.objects[callback.api];
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			// generate id
-			var md5sum = crypto.createHash('md5');
-			callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
-			// verify id isn't existing already
-			var filteredRO = receiverObjs.filter(function(el, idx, array) {
-				return el.id === callback.id;
-			});
-			if (filteredRO.length > 0)
-				throw new Error('cannot register, already got object with same id. try changing your service desc.');
-
-			receiverObjs.push(callback);
-			this.objects[callback.api] = receiverObjs;
-		}
-	};
-
-	/**
 	 * Registers an object as RPC request receiver.
 	 * @param callback The callback object that contains the methods available via RPC.
 	 */
 	_RPCHandler.prototype.registerCallbackObject = function (callback) {
-		if (typeof callback !== 'undefined') {
-			console.log('INFO: [RPC] '+"Adding handler: " + callback.api);
-
-			var receiverObjs = this.objects[callback.api];
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			receiverObjs.push(callback);
-			this.objects[callback.api] = receiverObjs;
-		}
-	};
-
-	/**
-	 * Unregisters an object, so it can no longer receives requests.
-	 * @param callback The callback object to unregister.
-	 */
-	_RPCHandler.prototype.unregisterObject = function (callback) {
-		if (typeof callback !== 'undefined' && callback != null){
-			console.log('INFO: [RPC] '+"Removing handler: " + callback.api);
-			var receiverObjs = this.objects[callback.api];
-
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			var filteredRO = receiverObjs.filter(function(el, idx, array) {
-				return el.id !== callback.id;
-			});
-			if (filteredRO.length > 0) {
-				this.objects[callback.api] = filteredRO;
-			} else {
-				delete this.objects[callback.api];
-			}
-		}
-	};
+		this.registry.registerCallbackObject(callback);
 
 	/**
 	 * Used by the ServiceDiscovery to search for registered services.
@@ -814,37 +741,6 @@
 	};
 
 	/**
-	 * Used to load and register webinos services.
-	 * @private
-	 * @param modules An array of services, must be valid node add-ons exporting a Service constructor.
-	 */
-	_RPCHandler.prototype.loadModules = function(modules) {
-		if (typeof module === 'undefined') return;
-
-		var webinos = require('webinos')(__dirname);
-		var _modules;
-		if (!modules){
-			_modules = [];
-		} else {
-			_modules = modules.slice(0); // copy array
-		}
-
-		// add ServiceDiscovery, which should always be present
-		_modules.unshift({name: "service_discovery", param: {}});
-
-		for (var i = 0; i < _modules.length; i++){
-			try{
-				var Service = webinos.global.require(webinos.global.api[_modules[i].name].location).Service;
-				this.registerObject(new Service(this, _modules[i].params));
-			}
-			catch (error){
-				console.log('INFO: [RPC] '+error);
-				console.log('INFO: [RPC] '+"Could not load module " + _modules[i].name + " with message: " + error );
-			}
-		}
-	};
-
-	/**
 	 * Set session id.
 	 * @param id Session id.
 	 */
@@ -859,8 +755,6 @@
 		exports.RPCHandler = _RPCHandler;
 		exports.RPCWebinosService = RPCWebinosService;
 		exports.ServiceType = ServiceType;
-		// none webinos modules
-		var crypto = require('crypto');
 
 	} else {
 		// export for web browser

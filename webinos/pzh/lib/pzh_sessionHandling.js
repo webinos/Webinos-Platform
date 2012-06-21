@@ -59,8 +59,8 @@ var Pzh = function (modules) {
   this.connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
   this.registry     = new Registry();
   this.rpcHandler   = new RPCHandler(undefined, this.registry); // Handler for remote method calls.
+  this.registry.loadModules(modules, this.rpcHandler); // load specified modules
   this.messageHandler = new MessageHandler(this.rpcHandler);// handler of all things message
-  this.rpcHandler.loadModules(modules);// load specified modules
   this.expecting;    // Set by authcode directly
 };
 
