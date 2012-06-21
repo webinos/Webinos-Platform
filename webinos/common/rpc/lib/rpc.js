@@ -30,7 +30,6 @@
 		var exports = module.exports = {};
 	}
 
-	var sessionId = "";
 	var idCount = 0;
 	//Code to enable Context from settings file
 //	var contextEnabled = false;
@@ -66,11 +65,13 @@
 		this.awaitingResponse = {};
 
 		/**
+		 * session id
 		 * Holds registered Webinos Service objects local to this RPC.
 		 *
 		 * Service objects are stored in this dictionary with their API url as
 		 * key.
 		 */
+		this.sessionId = '';
 		this.objects = {};
 
 		/**
@@ -123,20 +124,19 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCObj = function(id) {
+	var newJSONRPCObj = function(sessionId, id) {
 		return {
 			jsonrpc: '2.0',
-			id: id || getNextID()
+			id: id || getNextID(sessionId)
 		};
 	};
-
 
 	/**
 	 * Creates a new unique identifier to be used for RPC requests and responses.
 	 * @function
 	 * @private
 	 */
-	var getNextID = function(){
+	var getNextID = function(sessionId) {
 		if (idCount == Number.MAX_VALUE) idCount = 0;
 		idCount++;
 		return sessionId + idCount;
@@ -147,8 +147,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params) {
-		var rpc = newJSONRPCObj();
+	var newJSONRPCRequest = function(method, params, sessionId) {
+		var rpc = newJSONRPCObj(sessionId);
 		rpc.method = method;
 		rpc.params = params || [];
 		return rpc;
@@ -159,8 +159,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseResult = function(id, result) {
-		var rpc = newJSONRPCObj(id);
+	var newJSONRPCResponseResult = function(id, result, sessionId) {
+		var rpc = newJSONRPCObj(sessionId, id);
 		rpc.result = typeof result === 'undefined' ? {} : result;
 		return rpc;
 	};
@@ -170,8 +170,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseError = function(id, error) {
-		var rpc = newJSONRPCObj(id);
+	var newJSONRPCResponseError = function(id, error, sessionId) {
+		var rpc = newJSONRPCObj(sessionId, id);
 		rpc.error = {
 			data: error,
 			code: 32000,
@@ -254,7 +254,7 @@
 
 			function successCallback(result) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseResult(id, result);
+				var rpc = newJSONRPCResponseResult(id, result, that.sessionId);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 
 				// CONTEXT LOGGING HOOK
@@ -264,7 +264,7 @@
 			}
 			function errorCallback(error) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseError(id, error);
+				var rpc = newJSONRPCResponseError(id, error, that.sessionId);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 			}
 
@@ -409,7 +409,7 @@
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
+		var rpcRequest = newJSONRPCRequest(rpcMethod, params, this.sessionId);
 
 		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
 			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
@@ -849,7 +849,7 @@
 	 * @param id Session id.
 	 */
  	_RPCHandler.prototype.setSessionId = function(id) {
-		sessionId = id;
+		this.sessionId = id;
 	};
 
 	/**
@@ -859,7 +859,6 @@
 		exports.RPCHandler = _RPCHandler;
 		exports.RPCWebinosService = RPCWebinosService;
 		exports.ServiceType = ServiceType;
-		//exports.setSessionId = setSessionId;
 		// none webinos modules
 		var crypto = require('crypto');
 
