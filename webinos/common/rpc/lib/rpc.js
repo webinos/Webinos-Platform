@@ -22,15 +22,13 @@
 	if (typeof webinos === 'undefined')
 		webinos = {};
 
-	if (typeof module === 'undefined')
+	if (typeof module === 'undefined') {
 		var exports = {};
-	else
-		var exports = module.exports = {};
-
-	if (typeof module !== 'undefined')
-		var utils = require('./webinos.utils.js');
-	else
 		var utils = webinos.utils || (webinos.utils = {});
+	} else {
+		var utils = require('./webinos.utils.js');
+		var exports = module.exports = {};
+	}
 
 	var sessionId = "";
 	var idCount = 0;
@@ -773,7 +771,7 @@
 	 * @constructor
 	 * @param obj Object with fields describing the service.
 	 */
-	this.RPCWebinosService = function (obj) {
+	RPCWebinosService = function (obj) {
 		if (!obj) {
 			this.id = '';
 			this.api = '';
@@ -793,7 +791,7 @@
 	 * Get an information object from the service.
 	 * @returns Object including id, api, displayName, serviceAddress.
 	 */
-	this.RPCWebinosService.prototype.getInformation = function () {
+	RPCWebinosService.prototype.getInformation = function () {
 		return {
 			id: this.id,
 			api: this.api,
@@ -808,7 +806,7 @@
 	 * @constructor
 	 * @param api String with API URI.
 	 */
-	this.ServiceType = function(api) {
+	ServiceType = function(api) {
 		if (!api)
 			throw new Error('ServiceType: missing argument: api');
 
@@ -868,5 +866,7 @@
 	} else {
 		// export for web browser
 		this.RPCHandler = _RPCHandler;
+		this.RPCWebinosService = RPCWebinosService;
+		this.ServiceType = ServiceType;
 	}
 })();
