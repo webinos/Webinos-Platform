@@ -37,7 +37,8 @@ var webinos       = require("webinos")(__dirname);
 var session       = require("./session");
 var log           = new session.common.debug("pzp_session");
 var global        = session.configuration
-var rpc           = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
+var rpc           = webinos.global.require(webinos.global.rpc.location);
+var Registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
 
 var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
 var RPCHandler     = rpc.RPCHandler;
@@ -528,7 +529,8 @@ Pzp.prototype.processMsg = function(msgObj, callback) {
 
 Pzp.prototype.initializePzp = function(config, modules, callback) {
   var self = this;
-  self.rpcHandler     = new RPCHandler(this); // Handler for remote method calls.
+  self.registry       = new Registry();
+  self.rpcHandler     = new RPCHandler(this, self.registry); // Handler for remote method calls.
   self.messageHandler = new MessageHandler(this.rpcHandler); // handler for all things message
   self.modules        = modules;
   self.inputConfig    = config;

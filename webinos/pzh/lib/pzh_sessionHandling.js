@@ -36,7 +36,8 @@ if (typeof exports !== "undefined") {
     var webinos        = require("webinos")(__dirname);
     var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
     var log            = new session.common.debug("pzh_session");
-    var rpc            = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
+    var rpc            = webinos.global.require(webinos.global.rpc.location);
+    var Registry       = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
     var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
     var RPCHandler     = rpc.RPCHandler;
     var authcode       = require("./pzh_authcode");
@@ -56,7 +57,8 @@ var Pzh = function (modules) {
   this.config       = {};/** Holds PZH Configuration particularly certificates */
   this.connectedPzh = {};/** Holds Connected PZH information such as IP address, port and socket */
   this.connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
-  this.rpcHandler = new RPCHandler();// Handler for remote method calls.
+  this.registry     = new Registry();
+  this.rpcHandler   = new RPCHandler(undefined, this.registry); // Handler for remote method calls.
   this.messageHandler = new MessageHandler(this.rpcHandler);// handler of all things message
   this.rpcHandler.loadModules(modules);// load specified modules
   this.expecting;    // Set by authcode directly

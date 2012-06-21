@@ -1,0 +1,156 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *	 http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
+ ******************************************************************************/
+
+(function () {
+	var Registry = function() {
+
+		/**
+		 * Holds registered Webinos Service objects local to this RPC.
+		 *
+		 * Service objects are stored in this dictionary with their API url as
+		 * key.
+		 */
+		this.objects = {};
+	};
+
+	/**
+	 * Registers a Webinos service object as RPC request receiver.
+	 * @param callback The callback object that contains the methods available via RPC.
+	 */
+	Registry.prototype.registerObject = function (callback) {
+		if (!callback) {
+			return;
+		}
+		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+
+		var receiverObjs = this.objects[callback.api];
+		if (!receiverObjs)
+			receiverObjs = [];
+
+		// generate id
+		var md5sum = crypto.createHash('md5');
+		callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
+		// verify id isn't existing already
+		var filteredRO = receiverObjs.filter(function(el, idx, array) {
+			return el.id === callback.id;
+		});
+		if (filteredRO.length > 0)
+			throw new Error('cannot register, already got object with same id. try changing your service desc.');
+
+		receiverObjs.push(callback);
+		this.objects[callback.api] = receiverObjs;
+	};
+
+	/**
+	 * Registers an object as RPC request receiver.
+	 * @param callback The callback object that contains the methods available via RPC.
+	 */
+	Registry.prototype.registerCallbackObject = function (callback) {
+		if (!callback) {
+			return;
+		}
+		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+
+		var receiverObjs = this.objects[callback.api];
+		if (!receiverObjs)
+			receiverObjs = [];
+
+		receiverObjs.push(callback);
+		this.objects[callback.api] = receiverObjs;
+	};
+
+	/**
+	 * Unregisters an object, so it can no longer receives requests.
+	 * @param callback The callback object to unregister.
+	 */
+	Registry.prototype.unregisterObject = function (callback) {
+		if (!callback) {
+			return;
+		}
+		console.log('INFO: [Registry] '+"Removing: " + callback.api);
+		var receiverObjs = this.objects[callback.api];
+
+		if (!receiverObjs)
+			receiverObjs = [];
+
+		var filteredRO = receiverObjs.filter(function(el, idx, array) {
+			return el.id !== callback.id;
+		});
+		if (filteredRO.length > 0) {
+			this.objects[callback.api] = filteredRO;
+		} else {
+			delete this.objects[callback.api];
+		}
+	};
+
+	/**
+	 * Used to load and register webinos services.
+	 * @private
+	 * @param modules An array of services, must be valid node add-ons exporting a Service constructor.
+	 */
+	Registry.prototype.loadModules = function(modules, rpcHandler) {
+		if (!modules) return;
+
+		var webinos = require('webinos')(__dirname);
+
+		for (var i = 0; i < modules.length; i++){
+			try{
+				var Service = webinos.global.require(webinos.global.api[modules[i].name].location).Service;
+				this.registerObject(new Service(rpcHandler, modules[i].params));
+			}
+			catch (error){
+				console.log('INFO: [Registry] '+error);
+				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error );
+			}
+		}
+	};
+
+	/**
+	 * 
+	 */
+	Registry.prototype.getRegisteredObjectsMap = function() {
+		return this.objects;
+	}
+
+	/**
+	 * 
+	 */
+	Registry.prototype.getServiceWithTypeAndId = function(serviceTyp, serviceId) {
+		var receiverObjs = this.objects[serviceTyp];
+		if (!receiverObjs)
+			receiverObjs = [];
+
+		var filteredRO = receiverObjs.filter(function(el, idx, array) {
+			return el.id === serviceId;
+		});
+
+		if (typeof filteredRO[0] === 'undefined') 
+			return receiverObjs[0];
+
+		return filteredRO[0];
+	}
+
+	// Export definitions for node.js
+	if (typeof module !== 'undefined'){
+		exports.Registry = Registry;
+		var crypto = require('crypto');
+	} else {
+		// export for web browser
+		this.Registry = Registry;
+	}
+})();
