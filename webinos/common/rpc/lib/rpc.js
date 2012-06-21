@@ -22,17 +22,14 @@
 	if (typeof webinos === 'undefined')
 		webinos = {};
 
-	if (typeof module === 'undefined')
+	if (typeof module === 'undefined') {
 		var exports = {};
-	else
-		var exports = module.exports = {};
-
-	if (typeof module !== 'undefined')
-		var utils = require('./webinos.utils.js');
-	else
 		var utils = webinos.utils || (webinos.utils = {});
+	} else {
+		var utils = require('./webinos.utils.js');
+		var exports = module.exports = {};
+	}
 
-	var sessionId = "";
 	var idCount = 0;
 	//Code to enable Context from settings file
 //	var contextEnabled = false;
@@ -49,12 +46,22 @@
 	 *  @constructor
 	 *  @param parent The PZP object or optional else.
 	 */
-	_RPCHandler = function(parent) {
+	_RPCHandler = function(parent, registry) {
 		/**
 		 * Parent is the PZP. The parameter is not used/optional on PZH and the
 		 * web browser.
 		 */
 		this.parent = parent;
+
+		/**
+		 * Registry of registered RPC objects.
+		 */
+		this.registry = registry;
+
+		/**
+		 * session id
+		 */
+		this.sessionId = '';
 
 		/**
 		 * Used to store objectRefs for callbacks that get invoked more than once
@@ -66,44 +73,6 @@
 		 * invoked once the RPC finished.
 		 */
 		this.awaitingResponse = {};
-
-		/**
-		 * Holds registered Webinos Service objects local to this RPC.
-		 *
-		 * Service objects are stored in this dictionary with their API url as
-		 * key.
-		 */
-		this.objects = {};
-
-		/**
-		 * Holds other Service objects, not registered here. Only used on the
-		 * PZH.
-		 */
-		this.remoteServiceObjects = [];
-
-		/**
-		 * Holds callbacks for findServices callbacks from the PZH
-		 */
-		this.remoteServicesFoundCallbacks = {};
-
-		if (typeof this.parent !== 'undefined') {
-			var that = this;
-
-			// add listener to pzp object, to be called when remote services
-			// are returned by the pzh
-			this.parent.addRemoteServiceListener(function (payload) {
-				var callback = that.remoteServicesFoundCallbacks[payload.id];
-
-				if (!callback) {
-					console.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
-					return;
-				}
-
-				callback(payload.message, payload.id);
-			});
-		}
-
-		this.requesterMapping = [];
 
 		this.messageHandler = {
 				write: function() {
@@ -125,20 +94,19 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCObj = function(id) {
+	var newJSONRPCObj = function(sessionId, id) {
 		return {
 			jsonrpc: '2.0',
-			id: id || getNextID()
+			id: id || getNextID(sessionId)
 		};
 	};
-
 
 	/**
 	 * Creates a new unique identifier to be used for RPC requests and responses.
 	 * @function
 	 * @private
 	 */
-	var getNextID = function(){
+	var getNextID = function(sessionId) {
 		if (idCount == Number.MAX_VALUE) idCount = 0;
 		idCount++;
 		return sessionId + idCount;
@@ -149,8 +117,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params) {
-		var rpc = newJSONRPCObj();
+	var newJSONRPCRequest = function(method, params, sessionId) {
+		var rpc = newJSONRPCObj(sessionId);
 		rpc.method = method;
 		rpc.params = params || [];
 		return rpc;
@@ -161,8 +129,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseResult = function(id, result) {
-		var rpc = newJSONRPCObj(id);
+	var newJSONRPCResponseResult = function(id, result, sessionId) {
+		var rpc = newJSONRPCObj(sessionId, id);
 		rpc.result = typeof result === 'undefined' ? {} : result;
 		return rpc;
 	};
@@ -172,8 +140,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseError = function(id, error) {
-		var rpc = newJSONRPCObj(id);
+	var newJSONRPCResponseError = function(id, error, sessionId) {
+		var rpc = newJSONRPCObj(sessionId, id);
 		rpc.error = {
 			data: error,
 			code: 32000,
@@ -216,14 +184,7 @@
 
 		console.log('INFO: [RPC] '+"Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
 
-		var receiverObjs = this.objects[service];
-		if (!receiverObjs)
-			receiverObjs = [];
-		var filteredRO = receiverObjs.filter(function(el, idx, array) {
-			return el.id === serviceId;
-		});
-		var includingObject = filteredRO[0];
-		if (typeof includingObject === 'undefined') includingObject = receiverObjs[0];
+		var includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
 
 		if (typeof includingObject === 'undefined'){
 			console.log('INFO: [RPC] '+"No service found with id/type " + service);
@@ -249,14 +210,13 @@
 
 			// callback registration (one request to many responses)
 			if (typeof request.fromObjectRef !== 'undefined' && request.fromObjectRef != null) {
-				this.requesterMapping[request.fromObjectRef] = from;
 				this.objRefCacheTable[request.fromObjectRef] = {'from':from, msgId: msgid};
 				fromObjectRef = request.fromObjectRef;
 			}
 
 			function successCallback(result) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseResult(id, result);
+				var rpc = newJSONRPCResponseResult(id, result, that.sessionId);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 
 				// CONTEXT LOGGING HOOK
@@ -266,7 +226,7 @@
 			}
 			function errorCallback(error) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseError(id, error);
+				var rpc = newJSONRPCResponseError(id, error, that.sessionId);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 			}
 
@@ -411,7 +371,7 @@
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
+		var rpcRequest = newJSONRPCRequest(rpcMethod, params, this.sessionId);
 
 		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
 			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
@@ -460,300 +420,11 @@
 	};
 
 	/**
-	 * Registers a Webinos service object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	_RPCHandler.prototype.registerObject = function (callback) {
-		if (typeof callback !== 'undefined') {
-			console.log('INFO: [RPC] '+"Adding handler: " + callback.api);
-
-			var receiverObjs = this.objects[callback.api];
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			// generate id
-			var md5sum = crypto.createHash('md5');
-			callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
-			// verify id isn't existing already
-			var filteredRO = receiverObjs.filter(function(el, idx, array) {
-				return el.id === callback.id;
-			});
-			if (filteredRO.length > 0)
-				throw new Error('cannot register, already got object with same id. try changing your service desc.');
-
-			receiverObjs.push(callback);
-			this.objects[callback.api] = receiverObjs;
-		}
-	};
-
-	/**
 	 * Registers an object as RPC request receiver.
 	 * @param callback The callback object that contains the methods available via RPC.
 	 */
 	_RPCHandler.prototype.registerCallbackObject = function (callback) {
-		if (typeof callback !== 'undefined') {
-			console.log('INFO: [RPC] '+"Adding handler: " + callback.api);
-
-			var receiverObjs = this.objects[callback.api];
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			receiverObjs.push(callback);
-			this.objects[callback.api] = receiverObjs;
-		}
-	};
-
-	/**
-	 * Unregisters an object, so it can no longer receives requests.
-	 * @param callback The callback object to unregister.
-	 */
-	_RPCHandler.prototype.unregisterObject = function (callback) {
-		if (typeof callback !== 'undefined' && callback != null){
-			console.log('INFO: [RPC] '+"Removing handler: " + callback.api);
-			var receiverObjs = this.objects[callback.api];
-
-			if (!receiverObjs)
-				receiverObjs = [];
-
-			var filteredRO = receiverObjs.filter(function(el, idx, array) {
-				return el.id !== callback.id;
-			});
-			if (filteredRO.length > 0) {
-				this.objects[callback.api] = filteredRO;
-			} else {
-				delete this.objects[callback.api];
-			}
-		}
-	};
-
-	/**
-	 * Used by the ServiceDiscovery to search for registered services.
-	 * @param serviceType ServiceType object to search for.
-	 * @param callback Callback to call with results.
-	 * @param options Timeout, optional.
-	 * @param filter Filters based on location, name, description, optional.
-	 * @private
-	 */
-	_RPCHandler.prototype.findServices = function (serviceType, callback, options, filter) {
-		console.log('INFO: [RPC] '+"findService: searching for ServiceType: " + serviceType.api);
-		var results = [];
-		var cstar = serviceType.api.indexOf("*");
-		if(cstar !== -1){
-			//*c*
-			if(serviceType.api.lastIndexOf("*") !== 0){
-				var len = serviceType.api.length - 1;
-				var midString = serviceType.api.substring(1, len);
-				for (var i in this.objects){
-					if(i.indexOf(midString) != -1) {
-						for( var j = 0; j <this.objects[i].length; j++){
-							results.push(this.objects[i][j]);
-						}
-					}
-				}
-			}
-			//*, *c
-			else {
-				if(serviceType.api.length == 1) {
-					for (var i in this.objects){
-						for( var j = 0; j <this.objects[i].length;j++){
-							results.push(this.objects[i][j]);
-						}
-					}
-				}
-				else {
-					var restString = serviceType.api.substr(1);
-					for (var i in this.objects) {
-						if(i.indexOf(restString, i.length - restString.length) !== -1)	{
-							for( var j = 0; j <this.objects[i].length; j++){
-								results.push(this.objects[i][j]);
-							}
-						}
-					}
-				}
-			}
-			callback(results);
-
-		}
-		else {
-		   function deliverResults(r) {
-				function isDuplicate(sv, pos) {
-					var cnt = 0;
-					for (var i=0; i<r.length; i++) {
-						if (sv.id === r[i].id & sv.serviceAddress === r[i].serviceAddress) {
-							if (i === pos && cnt === 0) {
-								return true;
-							}
-							cnt += 1;
-						}
-					}
-					return false;
-				}
-				r = r.filter(isDuplicate);
-
-				// filter results for zoneId
-				if (filter && typeof filter.zoneId === 'object') {
-					function hasZoneId(sv) {
-						for (var i=0; i<filter.zoneId.length; i++) {
-							var found = sv.serviceAddress.indexOf(filter.zoneId[i]) !== -1 ? true : false;
-							if (found) return true;
-						}
-						return false;
-					}
-					r = r.filter(hasZoneId);
-				}
-
-				// finally return results
-				callback(r);
-			}
-
-			for (var i in this.objects) {
-				if (i === serviceType.api) {
-					console.log('INFO: [RPC] '+"findService: found matching service(s) for ServiceType: " + serviceType.api);
-					results = this.objects[i];
-				}
-			}
-
-			// add address where this service is available, namely this pzp/pzh sessionid
-			for (var i=0; i<results.length; i++) {
-				results[i].serviceAddress = sessionId; // This is source addres, it is used by messaging for returning back
-			}
-			var webinos_ = require('webinos')(__dirname);
-			var global = webinos_.global.require(webinos_.global.pzp.location,'lib/session').configuration;
-			
-			// reference counter of all entities we expect services back from
-			// Not in peer mode and connected
-			var entityRefCount = (this.parent.mode !== global.modes[2] && this.parent.state === global.states[2])? 1 : 0; 
-			// Fetch from peers that are connected
-			if (this.parent && this.parent.config.type === "Pzp") {
-				if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && this.parent.state === global.states[2]) {
-					for (var key in this.parent.connectedPzp) {
-						if (this.parent.connectedPzp.hasOwnProperty(key)) {
-							if(this.parent.connectedPzp[key].state === global.states[2]) {
-								entityRefCount += 1;
-							}
-						}
-					}
-				}
-			}
-			// no connection to a PZH & other connected Peers, don't ask for remote services
-			if (!this.parent || entityRefCount === 0) {
-				deliverResults(results);
-				return;
-			}
-
-			var callbackId = getNextID();
-			var that = this;
-
-			// deliver results once timeout kicks in
-			setTimeout(function() {
-				if (that.remoteServicesFoundCallbacks[callbackId]) {
-					that.remoteServicesFoundCallbacks[callbackId]([], callbackId, true);
-				}
-			}, options && typeof options.timeout !== 'undefined' ? options.timeout : 120000); // default: 120 secs
-
-			// store callback in map for lookup on returned remote results
-			this.remoteServicesFoundCallbacks[callbackId] = (function(res, refCnt) {
-				return function(remoteServices, cId, ignoreCnt) {
-
-					function isServiceType(el) {
-						return el.api === serviceType.api ? true : false;
-					}
-					res = res.concat(remoteServices.filter(isServiceType));
-					refCnt -= 1;
-
-					if (refCnt < 1 || ignoreCnt) {
-						// entity reference counter is zero, got all answers, so continue
-						deliverResults(res);
-						delete that.remoteServicesFoundCallbacks[cId];
-					}
-				}
-			})(results, entityRefCount);
-
-			if (this.parent && this.parent.config.type === "Pzp") {
-				// ask for remote service objects
-				if (this.parent.mode !== global.modes[2] && this.parent.state === global.states[2]) { // Not in peer mode & connected
-					this.parent.prepMsg(this.parent.sessionId, this.parent.config.pzhId, 'findServices', {id: callbackId});
-				}
-
-				if ((this.parent.mode === global.modes[3] || this.parent.mode === global.modes[2]) && 
-						this.parent.state === global.states[2]) {
-					for (var key in this.parent.connectedPzp) { //
-						if (this.parent.connectedPzp.hasOwnProperty(key) && key !== this.parent.sessionId) {
-							if(this.parent.connectedPzp[key].state === global.states[2]) {
-								this.parent.prepMsg(this.parent.sessionId, key, 'findServices', {id: callbackId});
-							}
-						}
-					}
-				}
-			}
-		}
-	};
-
-	/**
-	 * Add services to internal array. Used by PZH.
-	 * @param services Array of services to be added.
-	 */
-	_RPCHandler.prototype.addRemoteServiceObjects = function(services) {
-		console.log('INFO: [RPC] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
-		this.remoteServiceObjects = this.remoteServiceObjects.concat(services);
-	};
-
-	/**
-	 * Remove services from internal array. Used by PZH.
-	 * @param address Remove all services for this address.
-	 */
-	_RPCHandler.prototype.removeRemoteServiceObjects = function(address) {
-		var oldCount = this.remoteServiceObjects.length;
-
-		function isNotServiceFromAddress(element) {
-			return address !== element.serviceAddress;
-		}
-
-		this.remoteServiceObjects = this.remoteServiceObjects.filter(isNotServiceFromAddress);
-
-		var removedCount = oldCount - this.remoteServiceObjects.length;
-		console.log("removeRemoteServiceObjects: removed " + removedCount + " services from: " + address);
-	};
-
-	/**
-	 * Get an array of all known services, including local and remote
-	 * services. Used by PZH.
-	 * @param exceptAddress Address of services that match will be excluded from
-	 * results.
-	 * @returns Array with known services.
-	 * @private
-	 */
-	_RPCHandler.prototype.getAllServices = function(exceptAddress) {
-		var results = [];
-
-		function isNotExceptAddress(el) {
-			return (el.serviceAddress !== exceptAddress) ? true : false;
-		}
-		results = this.remoteServiceObjects.filter(isNotExceptAddress);
-
-		results = results.concat(this.getRegisteredServices());
-
-		return results;
-	};
-
-	/**
-	 * Get an array of all registered Service objects.
-	 * @returns Array with said objects.
-	 * @private
-	 */
-	_RPCHandler.prototype.getRegisteredServices = function() {
-		var results = [];
-
-		for (var service in this.objects) {
-			results = results.concat(this.objects[service]);
-		}
-
-		function getServiceInfo(el) {
-			el = el.getInformation();
-			el.serviceAddress = sessionId;
-			return el;
-		}
-		return results.map(getServiceInfo);
+		this.registry.registerCallbackObject(callback);
 	};
 
 	/**
@@ -773,7 +444,7 @@
 	 * @constructor
 	 * @param obj Object with fields describing the service.
 	 */
-	this.RPCWebinosService = function (obj) {
+	RPCWebinosService = function (obj) {
 		if (!obj) {
 			this.id = '';
 			this.api = '';
@@ -793,7 +464,7 @@
 	 * Get an information object from the service.
 	 * @returns Object including id, api, displayName, serviceAddress.
 	 */
-	this.RPCWebinosService.prototype.getInformation = function () {
+	RPCWebinosService.prototype.getInformation = function () {
 		return {
 			id: this.id,
 			api: this.api,
@@ -808,7 +479,7 @@
 	 * @constructor
 	 * @param api String with API URI.
 	 */
-	this.ServiceType = function(api) {
+	ServiceType = function(api) {
 		if (!api)
 			throw new Error('ServiceType: missing argument: api');
 
@@ -816,42 +487,11 @@
 	};
 
 	/**
-	 * Used to load and register webinos services.
-	 * @private
-	 * @param modules An array of services, must be valid node add-ons exporting a Service constructor.
-	 */
-	_RPCHandler.prototype.loadModules = function(modules) {
-		if (typeof module === 'undefined') return;
-
-		var webinos = require('webinos')(__dirname);
-		var _modules;
-		if (!modules){
-			_modules = [];
-		} else {
-			_modules = modules.slice(0); // copy array
-		}
-
-		// add ServiceDiscovery, which should always be present
-		_modules.unshift({name: "service_discovery", param: {}});
-
-		for (var i = 0; i < _modules.length; i++){
-			try{
-				var Service = webinos.global.require(webinos.global.api[_modules[i].name].location).Service;
-				this.registerObject(new Service(this, _modules[i].params));
-			}
-			catch (error){
-				console.log('INFO: [RPC] '+error);
-				console.log('INFO: [RPC] '+"Could not load module " + _modules[i].name + " with message: " + error );
-			}
-		}
-	};
-
-	/**
 	 * Set session id.
 	 * @param id Session id.
 	 */
  	_RPCHandler.prototype.setSessionId = function(id) {
-		sessionId = id;
+		this.sessionId = id;
 	};
 
 	/**
@@ -861,12 +501,11 @@
 		exports.RPCHandler = _RPCHandler;
 		exports.RPCWebinosService = RPCWebinosService;
 		exports.ServiceType = ServiceType;
-		//exports.setSessionId = setSessionId;
-		// none webinos modules
-		var crypto = require('crypto');
 
 	} else {
 		// export for web browser
 		this.RPCHandler = _RPCHandler;
+		this.RPCWebinosService = RPCWebinosService;
+		this.ServiceType = ServiceType;
 	}
 })();

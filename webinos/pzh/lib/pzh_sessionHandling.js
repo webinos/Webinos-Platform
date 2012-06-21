@@ -36,7 +36,9 @@ if (typeof exports !== "undefined") {
     var webinos        = require("webinos")(__dirname);
     var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
     var log            = new session.common.debug("pzh_session");
-    var rpc            = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
+    var rpc            = webinos.global.require(webinos.global.rpc.location);
+    var Registry       = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
+    var Discovery      = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
     var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
     var RPCHandler     = rpc.RPCHandler;
     var authcode       = require("./pzh_authcode");
@@ -56,9 +58,12 @@ var Pzh = function (modules) {
   this.config       = {};/** Holds PZH Configuration particularly certificates */
   this.connectedPzh = {};/** Holds Connected PZH information such as IP address, port and socket */
   this.connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
-  this.rpcHandler = new RPCHandler();// Handler for remote method calls.
+  this.registry     = new Registry();
+  this.rpcHandler   = new RPCHandler(undefined, this.registry); // Handler for remote method calls.
+  this.discovery    = new Discovery(this.rpcHandler, [this.registry]);
+  this.registry.registerObject(this.discovery);
+  this.registry.loadModules(modules, this.rpcHandler); // load specified modules
   this.messageHandler = new MessageHandler(this.rpcHandler);// handler of all things message
-  this.rpcHandler.loadModules(modules);// load specified modules
   this.expecting;    // Set by authcode directly
 };
 
@@ -318,12 +323,12 @@ Pzh.prototype.processMsg = function(conn, msgObj) {
     // information sent by connecting PZP about services it supports. These details are then used by findServices 
     else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "registerServices") {
       log.info("receiving Webinos services from pzp...");
-      self.rpcHandler.addRemoteServiceObjects(validMsgObj.payload.message);
+      this.discovery.addRemoteServiceObjects(validMsgObj.payload.message);
     }   
     // Send findServices information to connected PZP..
     else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
       log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
-      var services = self.rpcHandler.getAllServices(validMsgObj.from);
+      var services = this.discovery.getAllServices(validMsgObj.from);
       var msg = self.prepMsg(self.sessionId, validMsgObj.from, "foundServices", services);
       msg.payload.id = validMsgObj.payload.message.id;
       self.sendMessage(msg, validMsgObj.from);

@@ -19,76 +19,79 @@
 describe('common.RPC', function() {
 	var webinos = require('webinos')(__dirname);
 
+	var Registry = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
+	var registry;
 	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
 	var rpcHandler;
 
 	beforeEach(function() {
-		rpcHandler = new RPCHandler();
+		registry = new Registry();
+		rpcHandler = new RPCHandler(undefined, registry);
 	});
 
-	it('RPCHandler is exported from node module', function() {
-		expect(RPCHandler).toEqual(jasmine.any(Function));
-	});
+	describe('rpcHandler', function() {
 
-	it('RPCHandler object instantiated', function() {
-		expect(rpcHandler).toBeDefined();
-	});
+		it('RPCHandler is exported from node module', function() {
+			expect(RPCHandler).toEqual(jasmine.any(Function));
+		});
 
-	it('has createRPC function', function() {
-		expect(rpcHandler.createRPC).toEqual(jasmine.any(Function));
-	});
+		it('RPCHandler object instantiated', function() {
+			expect(rpcHandler).toBeDefined();
+		});
 
-	it('has executeRPC function', function() {
-		expect(rpcHandler.executeRPC).toEqual(jasmine.any(Function));
-	});
+		it('has createRPC function', function() {
+			expect(rpcHandler.createRPC).toEqual(jasmine.any(Function));
+		});
 
-	it('has registerObject function', function() {
-		expect(rpcHandler.registerObject).toEqual(jasmine.any(Function));
-	});
+		it('has executeRPC function', function() {
+			expect(rpcHandler.executeRPC).toEqual(jasmine.any(Function));
+		});
 
-	it('has unregisterObject function', function() {
-		expect(rpcHandler.unregisterObject).toEqual(jasmine.any(Function));
-	});
+		it('has registerCallbackObject function', function() {
+			expect(rpcHandler.registerCallbackObject).toEqual(jasmine.any(Function));
+		});
 
-	it('has registerCallbackObject function', function() {
-		expect(rpcHandler.registerCallbackObject).toEqual(jasmine.any(Function));
-	});
+		it('has registerCallbackObject function', function() {
+			expect(rpcHandler.registerCallbackObject).toEqual(jasmine.any(Function));
+		});
 
-	it('createRPC with service as string type', function() {
-		var rpc = rpcHandler.createRPC('Service', 'functionName', [1]);
-		expect(rpc).toEqual(jasmine.any(Object));
+		it('createRPC with service as string type', function() {
+			var rpc = rpcHandler.createRPC('Service', 'functionName', [1]);
+			expect(rpc).toEqual(jasmine.any(Object));
 
-		expect(rpc.jsonrpc).toBeDefined();
-		expect(rpc.jsonrpc).toEqual('2.0');
+			expect(rpc.jsonrpc).toBeDefined();
+			expect(rpc.jsonrpc).toEqual('2.0');
 
-		expect(rpc.id).toBeDefined();
-		expect(rpc.id).toEqual(jasmine.any(String));
+			expect(rpc.id).toBeDefined();
+			expect(rpc.id).toEqual(jasmine.any(String));
 
-		expect(rpc.method).toBeDefined();
-		expect(rpc.method).toEqual(jasmine.any(String));
+			expect(rpc.method).toBeDefined();
+			expect(rpc.method).toEqual(jasmine.any(String));
 
-		expect(rpc.params).toBeDefined();
-		expect(rpc.params).toEqual(jasmine.any(Object));
-	});
+			expect(rpc.params).toBeDefined();
+			expect(rpc.params).toEqual(jasmine.any(Object));
+		});
 
-	it('createRPC with service as RPCWebinosService', function() {
-		var service = new RPCWebinosService();
-		var rpc = rpcHandler.createRPC(service, 'functionName', [1]);
-		expect(rpc).toEqual(jasmine.any(Object));
+		it('createRPC with service as RPCWebinosService', function() {
+			var service = new RPCWebinosService();
+			var rpc = rpcHandler.createRPC(service, 'functionName', [1]);
+			expect(rpc).toEqual(jasmine.any(Object));
 
-		expect(rpc.jsonrpc).toBeDefined();
-		expect(rpc.jsonrpc).toEqual('2.0');
+			expect(rpc.jsonrpc).toBeDefined();
+			expect(rpc.jsonrpc).toEqual('2.0');
 
-		expect(rpc.id).toBeDefined();
-		expect(rpc.id).toEqual(jasmine.any(String));
+			expect(rpc.id).toBeDefined();
+			expect(rpc.id).toEqual(jasmine.any(String));
 
-		expect(rpc.method).toBeDefined();
-		expect(rpc.method).toEqual(jasmine.any(String));
+			expect(rpc.method).toBeDefined();
+			expect(rpc.method).toEqual(jasmine.any(String));
 
-		expect(rpc.serviceAddress).toBeDefined();
+			expect(rpc.serviceAddress).toBeDefined();
 
-		expect(rpc.params).toBeDefined();
-		expect(rpc.params).toEqual(jasmine.any(Object));
+			expect(rpc.params).toBeDefined();
+			expect(rpc.params).toEqual(jasmine.any(Object));
+		});
+
 	});
 
 	describe('RPC service registration', function() {
@@ -103,19 +106,31 @@ describe('common.RPC', function() {
 			rpc = rpcHandler.createRPC(service, 'functionName', [1]);
 		});
 
+		it('Registry is exported from node module', function() {
+			expect(Registry).toEqual(jasmine.any(Function));
+		});
+
+		it('has registerObject function', function() {
+			expect(registry.registerObject).toEqual(jasmine.any(Function));
+		});
+
+		it('has unregisterObject function', function() {
+			expect(registry.unregisterObject).toEqual(jasmine.any(Function));
+		});
+
 		it('has no registered services initially', function() {
-			expect(Object.keys(rpcHandler.objects).length).toEqual(0);
+			expect(Object.keys(registry.objects).length).toEqual(0);
 		});
 
 		it('has exactly one registered service after registering', function() {
-			rpcHandler.registerObject(service);
-			expect(Object.keys(rpcHandler.objects).length).toEqual(1);
+			registry.registerObject(service);
+			expect(Object.keys(registry.objects).length).toEqual(1);
 		});
 
 		it('has no registered services after unregistering', function() {
-			rpcHandler.registerObject(service);
-			rpcHandler.unregisterObject(service);
-			expect(Object.keys(rpcHandler.objects).length).toEqual(0);
+			registry.registerObject(service);
+			registry.unregisterObject(service);
+			expect(Object.keys(registry.objects).length).toEqual(0);
 		});
 	});
 
@@ -146,7 +161,7 @@ describe('common.RPC', function() {
 				error();
 			};
 			service = new MockService();
-			rpcHandler.registerObject(service);
+			registry.registerObject(service);
 
 			// use our own message handler write function, usually this would
 			// write the request out to the remote peer

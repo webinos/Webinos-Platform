@@ -112,7 +112,7 @@ farm.startFarm = function (url, name, callback) {
                 var removed = session.common.removeClient(cl, conn);
                 if (removed !== null && typeof removed !== "undefined"){
                   cl.messageHandler.removeRoute(removed, conn.servername);
-                  cl.rpcHandler.removeRemoteServiceObjects(removed);
+                  cl.discovery.removeRemoteServiceObjects(removed);
                 }
               }
             } catch (err) {
