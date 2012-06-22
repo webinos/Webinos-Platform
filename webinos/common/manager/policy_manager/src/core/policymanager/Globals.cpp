@@ -50,7 +50,7 @@ string modFunction(const string& func, const string& val){
 		return val.substr(0, pos2);
 	}
 	else if(func == "path"){
-		int pos4 = val.find("?");
+		unsigned int pos4 = val.find("?");
 		if(pos4 == string::npos)
 			pos4 = val.length();
 		return val.substr(pos2, pos4-pos2);
