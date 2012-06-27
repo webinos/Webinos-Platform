@@ -263,6 +263,7 @@
   <reporting>
     <plugins>
       <!-- Generate JsDoc documentation -->
+      <!--
       <plugin>
         <groupId>nl.windgazer</groupId>
         <artifactId>jsdoctk-plugin</artifactId>
@@ -281,6 +282,7 @@
           </exclude>
         </configuration>
       </plugin>
+      -->
     </plugins>
   </reporting>
 </project>
