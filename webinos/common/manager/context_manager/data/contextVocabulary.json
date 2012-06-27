@@ -723,10 +723,6 @@
       "URI" : "http://webinos.org/api/"
    },
    {
-      "APIname" : "PlatformattestationAPI",
-      "URI" : "http://webinos.org/api/"
-   },
-   {
       "APIname" : "ServiceDicoveryAPI",
       "URI" : "http://webinos.org/api/"
    },

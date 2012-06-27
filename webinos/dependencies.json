@@ -4,10 +4,6 @@
       "name": "Applauncher module",
       "location": "api/applauncher/"
     },
-    "attestation": {
-      "name": "Attestation",
-      "location": "api/attestation/"
-     },
     "authentication": {
       "name": "Authentication",
       "location": "api/authentication/"
