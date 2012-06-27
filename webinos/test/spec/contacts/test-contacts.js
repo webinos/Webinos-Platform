@@ -290,7 +290,6 @@ var recentService = "";
 		param.pwd = "";
 		param.type = "local";
 		param.addressBookName=(document.URL.split('/').slice(0, -1).join('/')+'/' + "abook.mab").replace("file://","");
-        alert(param.addressBookName);
 	}
 	
 	//contacts_module<local>,test if W3C Contacts Module asks for path to a valid mab file if addressed platform it's not Android
