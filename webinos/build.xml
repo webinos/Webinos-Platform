@@ -12,10 +12,6 @@
 		<!-- API's' -->
 		<!-- AppLauncher -->
 		<file name="api/applauncher/lib/applauncher.js"/>
-		<!-- Attestation -->
-		<file name="api/attestation/lib/webinos.software.attestation.js"/>
-		<file name="api/attestation/lib/webinos.tpm.attestation.js"/>
-		<file name="api/attestation/lib/x509Reader.js"/>
 		<!-- Authentication -->
 		<file name="api/authentication/lib/webinos.authentication.rpc.js"/>
 		<!-- Contacts -->

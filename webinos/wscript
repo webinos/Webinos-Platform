@@ -11,7 +11,6 @@ def configure(conf):
   conf.check_tool("compiler_cxx")
   conf.check_tool("compiler_cc")
   conf.check_tool("node_addon")
-  conf.check_cfg(package="tspi",  args='--cflags --libs' )
   conf.check_cfg(package='bluez', args='--cflags --libs', uselib_store='BLUEZ')
   conf.check_cfg(package='openobex', args='--cflags --libs', uselib_store='OPENOBEX')
   conf.check_cfg(package='obexftp', args='--cflags --libs', uselib_store='OBEXFTP')
@@ -27,9 +26,7 @@ def build(bld):
   obj.cxxflags = ["-fpermissive", "-g", "-D_FILE_OFFSET_BITS=64", "-D_LARGEFILE_SOURCE", "-Wall"]
   obj.target = "webinos"
   obj.includes = ["api/contacts/src/thunderbird_AB_parser", "api/contacts/contrib", ]
-  obj.source = ["api/attestation/src/linux/attestation.c",
-		"api/attestation/src/linux/tssbridge.cpp",
-		"api/contacts/src/thunderbird_AB_parser/node_contacts_mork.cpp",
+  obj.source = ["api/contacts/src/thunderbird_AB_parser/node_contacts_mork.cpp",
 		"api/contacts/src/thunderbird_AB_parser/MorkAddressBook.cpp",
 		"api/contacts/contrib/MorkParser.cpp",
 		"api/discovery/src/bluetooth.cc",
@@ -56,5 +53,5 @@ def build(bld):
     obj.source.append("common/manager/keystore/src/ksImpl_Darwin.cpp")
   else:
     obj.source.append("common/manager/keystore/src/ksImpl_Linux.cpp")
-  obj.uselib = ["TSPI", 'BLUEZ', 'OPENOBEX', 'OBEXFTP', 'LDFLAGS'];
+  obj.uselib = ['BLUEZ', 'OPENOBEX', 'OBEXFTP', 'LDFLAGS'];
 
