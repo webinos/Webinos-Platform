@@ -99,6 +99,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
     switch(params[0]){
         case "devicemotion":
             objectRefsDo.push([objectRef, params[0]]);
+            if (typeof successCB === 'function') successCB();
             console.log('listening to device motion');
             if(!listeningToDeviceMotion){
                 listeningToDeviceMotion = true;
@@ -107,15 +108,15 @@ function addEventListener(params, successCB, errorCB, objectRef){
             break;
         case "deviceorientation":
             objectRefsDo.push([objectRef, params[0]]);
+            if (typeof successCB === 'function') successCB();
             if(!listeningToDeviceOrientation){
                 listeningToDeviceOrientation = true;
                 simulateDeviceOrientation();
             }
-
             break;
-            
         case "compassneedscalibration":
             objectRefsDo.push([objectRef, params[0]]);
+            if (typeof successCB === 'function') successCB();
             if(!listeningToCompassNeedsCalibration){
                 listeningToCompassNeedsCalibration = true;
                 simulateCompassNeedsCalibration();
@@ -124,6 +125,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             
         default:
             console.log('ERROR: not available');
+            if (typeof errorCB === 'function') errorCB();
             break;
     }
 }
@@ -135,7 +137,7 @@ function simulateDeviceMotion(){
     dme = new DeviceMotionEvent(new Acceleration(1,2,3), new Acceleration(2,4,6), new RotationRate(10,20,30), 2000);
 
     var randomTime = Math.floor(Math.random()*1000*10);
-    console.log("Milliseconds until next DeviceMotionEvent: " + randomTime);
+   
     
     var json = null;
     for(i = 0; i < objectRefsDo.length; i++){
@@ -147,6 +149,7 @@ function simulateDeviceMotion(){
         }
     }
     if(listeningToDeviceMotion){
+            console.log("Milliseconds until next DeviceMotionEvent: " + randomTime);
             setTimeout(function(){ simulateDeviceMotion(); }, randomTime);        
     }
 }
@@ -160,7 +163,7 @@ function simulateCompassNeedsCalibration(){
     cnce = new WDomEvent('compassneedscalibration', null, null, null, false, true, stamp);
     
     var randomTime = Math.floor(Math.random()*1000*10);
-    console.log("Milliseconds until next CompassNeedsCalibrationEvent: " + randomTime);
+    
     
     var json = null;
     for(i = 0; i < objectRefsDo.length; i++){
@@ -172,6 +175,7 @@ function simulateCompassNeedsCalibration(){
         }
     }
     if(listeningToCompassNeedsCalibration){
+            console.log("Milliseconds until next CompassNeedsCalibrationEvent: " + randomTime);
             setTimeout(function(){ simulateCompassNeedsCalibration(); }, randomTime);        
     }
 
@@ -183,7 +187,7 @@ function simulateDeviceOrientation(){
     doe = new DeviceOrientationEvent(Math.floor(Math.random()*360), Math.floor(Math.random()*360), Math.floor(Math.random()*360));
     
     var randomTime = Math.floor(Math.random()*1000*10);
-    console.log("Milliseconds until next DeviceOrientationEvent: " + randomTime);
+    
     
     var json = null;
     for(i = 0; i < objectRefsDo.length; i++){
@@ -201,6 +205,7 @@ function simulateDeviceOrientation(){
         }
     }
     if(listeningToDeviceOrientation){
+            console.log("Milliseconds until next DeviceOrientationEvent: " + randomTime);
             setTimeout(function(){ simulateDeviceOrientation(); }, randomTime);        
     }
     
@@ -208,19 +213,20 @@ function simulateDeviceOrientation(){
 
 function removeEventListener(params, successCB, errorCB, objectRef){
     //params[0] => objectRef from Listener // params[1] => type of Event [70, 'devicemotion']
-    console.log(params);
-    console.log(objectRef);
     var registeredListeners = 0;
+    var locatedRef = false;
     for(i = 0; i < objectRefsDo.length; i++ ){
         if(objectRefsDo[i][1] == params[1]){ //CHECK IF THERE ARE OTHER LISTENERS FOR A CERTAIN EVENT TYPE
 			registeredListeners++;
-		}
-		if(objectRefsDo[i][0] == params[0]){ //FIND RELEVANT OBJECTREF AND REMOVE IT FROM THE LISTENER LIST
-			objectRefsDo.splice(i,1);
-			console.log('object# ' + params[0] + " removed (" +  params[1] + ")");
+			if(objectRefsDo[i][0] == params[0]){ //FIND RELEVANT OBJECTREF AND REMOVE IT FROM THE LISTENER LIST
+				objectRefsDo.splice(i,1);
+				if (typeof successCB === 'function') successCB();
+				locatedRef = true;
+				console.log('object# ' + params[0] + " removed (" +  params[1] + ")");
+			}
 		}
 	}
-    
+    if (!locatedRef && typeof errorCB === 'function') errorCB();
     if(registeredListeners <= 1){
         console.log('disabling event generation for' + params[1]);
         switch(params[1]){
