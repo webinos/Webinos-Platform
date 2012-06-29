@@ -283,8 +283,13 @@ tcData.r = 456;
 
 
 var psrData = new Object();
-
-var psfData = new Object();
+psrData.ol = 255;
+psrData.l = 255;
+psrData.ml = 255;
+psrData.mr = 255;
+psrData.r = 255;
+psrData.or = 255;
+var psfData = psrData;
 
 //LIGHTS
 var lfrData = false;
