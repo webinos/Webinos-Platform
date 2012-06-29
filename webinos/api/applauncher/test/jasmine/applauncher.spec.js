@@ -1,49 +1,44 @@
 describe('api.applauncher', function() {
 
 	var webinos = require('webinos')(__dirname);
-	
-	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
-	var service = webinos.global.require(webinos.global.api.applauncher.location).Service;
-	var applauncher = new service(RPCHandler);
+
+	// make sure RPCWebinosService is defined as it is needed by applauncher.js
+	webinos.global.require(webinos.global.rpc.location).RPCHandler;
+	var WebinosAppLauncher = webinos.global.require(webinos.global.api.applauncher.location).Service;
+
+	var applauncher;
+
 	beforeEach(function() {
-		this.addMatchers({
-			toBeFunction: function() {
-				return typeof this.actual === 'function';
-			},
-			toBeObject: function() {
-				return typeof this.actual === 'object';
-			},
-			toBeString: function() {
-				return typeof this.actual === 'string';
-			},
-			toBeNumber: function() {
-				return typeof this.actual === 'number';
-			}
-		});
+		applauncher = new WebinosAppLauncher(undefined, {});
 	});
-	
-	it('Applauncher has funtion launchApplication', function() {
-		expect(applauncher.launchApplication).toBeFunction();
+
+	it('has funtion launchApplication', function() {
+		expect(applauncher.launchApplication).toEqual(jasmine.any(Function));
 	});
-	
-	
-	it('Applauncher has funtion appInstalled', function() {
-		expect(applauncher.appInstalled).toBeFunction();
+
+	it('has funtion appInstalled', function() {
+		expect(applauncher.appInstalled).toEqual(jasmine.any(Function));
 	});
-	
-	
-	it('Applauncher api equals http://webinos.org/api/applauncher', function() {
+
+	it('api property has right ServiceType', function() {
 		expect(applauncher.api).toEqual('http://webinos.org/api/applauncher');
 	});
-	
-	it('Applauncher displayName is string', function() {
-		expect(applauncher.displayName).toBeString();
+
+	it('displayName property is string', function() {
+		expect(applauncher.displayName).toEqual(jasmine.any(String));
 	});
-	
-	it('Applauncher description is string', function() {
-		expect(applauncher.description).toBeString();
+
+	it('description property is string', function() {
+		expect(applauncher.description).toEqual(jasmine.any(String));
 	});
-	
-	
-	
+
+	it('can launch the default web browser', function() {
+		waitsFor(function() {
+			return !!applauncher.browserExecPath;
+		});
+
+		runs(function() {
+			expect(applauncher.browserExecPath).toBeDefined();
+		})
+	});
 });
