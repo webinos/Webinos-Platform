@@ -43,24 +43,18 @@ describe("Events API", function() {
 
 	it("has the necessary properties as service object", function() {
 		expect(eventsService).toHaveProp("state");
-		expect(eventsService).toHaveProp("api");
 		expect(eventsService.api).toEqual(jasmine.any(String));
-		expect(eventsService).toHaveProp("id");
 		expect(eventsService.id).toEqual(jasmine.any(String));
-		expect(eventsService).toHaveProp("displayName");
 		expect(eventsService.displayName).toEqual(jasmine.any(String));
-		expect(eventsService).toHaveProp("description");
 		expect(eventsService.description).toEqual(jasmine.any(String));
-		expect(eventsService).toHaveProp("icon");
 		expect(eventsService.icon).toEqual(jasmine.any(String));
-		expect(eventsService).toHaveProp("bindService");
 		expect(eventsService.bindService).toEqual(jasmine.any(Function));
 	});
 
 	it("can be bound", function() {
 		var bound = false;
 
-		eventsService.bind({onBind: function(service) {
+		eventsService.bindService({onBind: function(service) {
 			eventsService = service;
 			bound = true;
 		}});
@@ -75,11 +69,8 @@ describe("Events API", function() {
 	});
 
 	it("has the necessary properties and functions as Events API service", function() {
-		expect(eventsService).toHaveProp("createWebinosEvent");
 		expect(eventsService.createWebinosEvent).toEqual(jasmine.any(Function));
-		expect(eventsService).toHaveProp("addWebinosEventListener");
 		expect(eventsService.addWebinosEventListener).toEqual(jasmine.any(Function));
-		expect(eventsService).toHaveProp("removeWebinosEventListener");
 		expect(eventsService.removeWebinosEventListener).toEqual(jasmine.any(Function));
 	});
 
@@ -89,9 +80,7 @@ describe("Events API", function() {
 		expect(ev).toHaveProp("addressing");
 		expect(ev).toHaveProp("id");
 		expect(ev).toHaveProp("timeStamp");
-		expect(ev).toHaveProp("dispatchWebinosEvent");
 		expect(ev.dispatchWebinosEvent).toEqual(jasmine.any(Function));
-		expect(ev).toHaveProp("forwardWebinosEvent");
 		expect(ev.forwardWebinosEvent).toEqual(jasmine.any(Function));
 	});
 
