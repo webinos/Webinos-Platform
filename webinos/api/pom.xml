@@ -15,7 +15,6 @@
   <packaging>pom</packaging>
   <modules>
     <!-- One module tag per child module -->
-    <!--<module>attestation</module>-->
     <module>authentication</module>
     <module>context</module>
     <module>devicestatus</module>
