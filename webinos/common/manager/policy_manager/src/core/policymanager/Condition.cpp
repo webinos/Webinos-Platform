@@ -25,7 +25,6 @@ Condition::Condition(TiXmlElement* condition){
 		combine = (strcmp(condition->Attribute("combine"),"or")==0) ? OR : AND;
 	else
 		combine = AND;
-	int iii=0;
 	int num_match = 0;
 	for(TiXmlNode * node = (TiXmlNode*)condition->FirstChild(); node;
 			node = (TiXmlNode*)node->NextSibling() ) {
@@ -43,7 +42,7 @@ Condition::Condition(TiXmlElement* condition){
 			string tmp = (child->Attribute("match")!=NULL) ? child->Attribute ("match") : "";
 			if (tmp.length() == 0)
 				tmp = (child->GetText() != NULL) ? child->GetText() : "";
-			int nextPos, pos = 0;
+			unsigned int nextPos, pos = 0;
 		
 			//LOG("[Policy]  : match value: id"<<++iii);	
 			while(pos < tmp.length())
@@ -55,7 +54,7 @@ Condition::Condition(TiXmlElement* condition){
 					nextPos = tmp.length();			
 				if(pos != nextPos){
 					string attr = child->Attribute("attr");
-					int dot_pos = attr.find(".");
+					unsigned int dot_pos = attr.find(".");
 					string key = (dot_pos != string::npos) ? attr.substr(0, dot_pos) : attr;
 					
 					match_info_str * tmp_info = new match_info_str();
@@ -95,7 +94,7 @@ ConditionResponse Condition::evaluate(Request * req){
 	
 	if (combine==AND)
 	{
-		for (int i=0; i<conditions.size(); i++)
+		for (unsigned int i=0; i<conditions.size(); i++)
 		{
 			tmpCR = conditions[i]->evaluate(req);
 			LOGD("[SUB-COND EVAL AND] %d ",tmpCR);
@@ -135,7 +134,7 @@ ConditionResponse Condition::evaluate(Request * req){
 	}
 	else if (combine==OR)
 	{
-		for (int i=0; i<conditions.size(); i++)
+		for (unsigned int i=0; i<conditions.size(); i++)
 		{
 			tmpCR = conditions[i]->evaluate(req);
 			LOGD("[COND EVAL OR] %d", tmpCR);
@@ -191,7 +190,7 @@ ConditionResponse Condition::evaluateEnvironment(Request* req){
 			LOGD("[ENVIRONMENT] my_roaming null");
 		
 		string req_bearer = requestEnvironment_attrs["bearer-type"];
-		for(int j=0; j<my_bearer_vet.size(); j++){
+		for(unsigned int j=0; j<my_bearer_vet.size(); j++){
 			if(equals(req_bearer, my_bearer_vet[j]->value, string2strcmp_mode(my_bearer_vet[j]->equal_func)))
 				return MATCH;
 		}
@@ -210,7 +209,7 @@ ConditionResponse Condition::evaluateEnvironment(Request* req){
 			LOGD("[ENVIRONMENT] my_roaming null");
 		
 		string req_bearer = requestEnvironment_attrs["bearer-type"];
-		for(int j=0; j<my_bearer_vet.size(); j++){
+		for(unsigned int j=0; j<my_bearer_vet.size(); j++){
 			if(!equals(req_bearer, my_bearer_vet[j]->value, string2strcmp_mode(my_bearer_vet[j]->equal_func)))
 				return NO_MATCH;
 		}
@@ -237,9 +236,9 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 
 	if(combine == AND){
 		// find any No Match
-		for(int j=0; req_features && j<my_features.size(); j++){
+		for(unsigned int j=0; req_features && j<my_features.size(); j++){
 			found = false;
-			for(int i=0; i<req_features->size(); i++){
+			for(unsigned int i=0; i<req_features->size(); i++){
 				string mod_function = my_features[j]->mod_func;
 				string s = (mod_function != "") 
 							? modFunction(mod_function, req_features->at(i))
@@ -260,8 +259,8 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 	}
 	else if(combine == OR){
 		// find any Match
-		for(int j=0; req_features && j<my_features.size(); j++){
-			for(int i=0; i<req_features->size(); i++){
+		for(unsigned int j=0; req_features && j<my_features.size(); j++){
+			for(unsigned int i=0; i<req_features->size(); i++){
 				string mod_function = my_features[j]->mod_func;
 				string s = (mod_function != "") 
 							? modFunction(mod_function, req_features->at(i))
@@ -317,10 +316,10 @@ ConditionResponse Condition::evaluateCapabilities(Request* req){
 	if(combine == AND){
 		// find any No Match
 		LOGD("my_capabilities_params.size() %d",my_capabilities_params.size());
-		for(int j=0; j<my_capabilities_params.size(); j++){
+		for(unsigned int j=0; j<my_capabilities_params.size(); j++){
 			found = false;
 			LOGD("req_capabilities_params->size() %d",req_capabilities_params->size());
-			for(int i=0; i<req_capabilities_params->size(); i++){
+			for(unsigned int i=0; i<req_capabilities_params->size(); i++){
 				string mod_function = my_capabilities_params[j]->mod_func;
 				string s = (mod_function != "") 
 							? modFunction(mod_function, req_capabilities_params->at(i))
@@ -347,8 +346,8 @@ ConditionResponse Condition::evaluateCapabilities(Request* req){
 	}
 	else if(combine == OR){
 	// find any Match
-		for(int j=0; j<my_capabilities_params.size(); j++){
-			for(int i=0; i<req_capabilities_params->size(); i++){
+		for(unsigned int j=0; j<my_capabilities_params.size(); j++){
+			for(unsigned int i=0; i<req_capabilities_params->size(); i++){
 				string mod_function = my_capabilities_params[j]->mod_func;
 				string s = (mod_function != "") 
 							? modFunction(mod_function, req_capabilities_params->at(i))

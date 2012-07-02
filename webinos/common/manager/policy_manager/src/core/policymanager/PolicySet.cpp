@@ -76,7 +76,7 @@ bool PolicySet::matchSubject(Request* req){
 	if(subjects.size() == 0)
 		return true;
 	else
-		for(int i=0; i<subjects.size(); i++){
+		for(unsigned int i=0; i<subjects.size(); i++){
 			if(subjects[i]->match(req))
 				return true;
 		}
@@ -85,7 +85,7 @@ bool PolicySet::matchSubject(Request* req){
 
 Effect PolicySet::evaluatePolicies(Request * req){
 	
-	for(int i=0; i<policies.size(); i++){
+	for(unsigned int i=0; i<policies.size(); i++){
 			LOGD("policies[%d] = %s",i,policies[i]->description.data());
 	}
 	
@@ -96,7 +96,7 @@ Effect PolicySet::evaluatePolicies(Request * req){
 	if(policyCombiningAlgorithm == deny_overrides_algorithm){
 		LOGD("[PolicySet] deny_overrides algorithm");
 		int effects_result[] = {0,0,0,0,0,0,0};
-		for(int i=0; i<sortArray.size(); i++){
+		for(unsigned int i=0; i<sortArray.size(); i++){
 			effects_result[sortArray[i]->evaluate(req)]++;
 			if(effects_result[DENY] > 0)
 				return DENY;
@@ -139,7 +139,7 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		LOGD("[PolicySet] permit_overrides algorithm");
 		int effects_result[] = {0,0,0,0,0,0,0};
 		
-		for(int i=0; i<sortArray.size(); i++){
+		for(unsigned int i=0; i<sortArray.size(); i++){
 			effects_result[sortArray[i]->evaluate(req)]++;
 			if(effects_result[PERMIT] > 0)
 				return PERMIT;
@@ -172,7 +172,7 @@ Effect PolicySet::evaluatePolicies(Request * req){
 	}
 	else if(policyCombiningAlgorithm == first_matching_target_algorithm){
 		LOGD("[PolicySet] first_matching_target algorithm");
-		for(int i=0; i<sortArray.size(); i++){
+		for(unsigned int i=0; i<sortArray.size(); i++){
 			LOGD("[PolicySet] try eval %s",sortArray[i]->description.data());
 			if(sortArray[i]->matchSubject(req)){
 				LOGD("[PolicySet] eval %s",sortArray[i]->description.data());

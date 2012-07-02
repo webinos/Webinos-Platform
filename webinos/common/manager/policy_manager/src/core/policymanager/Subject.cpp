@@ -29,7 +29,7 @@ Subject::Subject(TiXmlElement* subject){
 		if (tmp.length() == 0)
 			tmp = (child->GetText() != NULL) ? child->GetText() : "";
 		
-		int nextPos, pos = 0;
+		unsigned int nextPos, pos = 0;
 		while(pos < tmp.length())
 		{
 			nextPos = tmp.find(" ",pos);
@@ -37,7 +37,7 @@ Subject::Subject(TiXmlElement* subject){
 				nextPos = tmp.length();			
 			if(pos != nextPos){
 				string attr = child->Attribute("attr");
-				int dot_pos = attr.find(".");
+				unsigned int dot_pos = attr.find(".");
 				string key = (dot_pos != string::npos) ? attr.substr(0, dot_pos) : attr;
 				match_info_str * tmp_info = new match_info_str();
 				tmp_info->equal_func = (child->Attribute("func")!=NULL) ? child->Attribute("func") : "glob";
@@ -70,9 +70,9 @@ bool Subject::match(Request* req){
 		if(req->getSubjectAttrs().find(it_policy->first) != req->getSubjectAttrs().end()){
 			vector<string>* req_vet = req->getSubjectAttrs()[it_policy->first];
 			vector<match_info_str*> info_vet = it_policy->second;		
-			for(int j=0;j<info_vet.size(); j++){ //iteration on all policy's elements
+			for(unsigned int j=0;j<info_vet.size(); j++){ //iteration on all policy's elements
 				foundInBag = false;
-				for(int i=0; !foundInBag && i<req_vet->size(); i++){ //iteration on request's elements. 
+				for(unsigned int i=0; !foundInBag && i<req_vet->size(); i++){ //iteration on request's elements. 
 					string mod_function = info_vet[j]->mod_func;
 					string s = (mod_function != "") 
 						? modFunction(mod_function, req_vet->at(i))

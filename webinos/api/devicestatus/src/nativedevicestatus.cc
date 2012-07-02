@@ -45,7 +45,7 @@ namespace nativedevicestatus_v8 {
 
 			vector<string> components = aspect->getComponents();
 			
-			for (int i=0; i < components.size(); i++) {
+			for (unsigned int i=0; i < components.size(); i++) {
 				array->Set(i, String::New(components[i].c_str(), components[i].length()));
 			}
 
