@@ -125,7 +125,6 @@ class BTDiscovery: ObjectWrap
   static Handle<Value> Scan_device(const Arguments& args)
   {
     HandleScope scope;
-    Local<Object> result =  Object::New();
 
     // Convert first argument to V8 String
     v8::String::Utf8Value v8str(args[0]);
