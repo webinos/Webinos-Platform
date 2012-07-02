@@ -44,6 +44,9 @@ string Battery::getPropertyValue(string * property, string * component)
 
 	if (*property == "batteryBeingCharged")
 		return batteryBeingCharged(*component);
+
+	// TODO: instead trigger the error callback with DOMError of type InvalidAccessError (or abort if no error callback defined)
+	return "Invalid property";
 }
 
 string Battery::batteryLevel(string batteryName)

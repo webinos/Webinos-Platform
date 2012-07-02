@@ -152,6 +152,9 @@ Effect Policy::evaluate(Request* req){
 					continue;
 			}
 			return INAPPLICABLE;
+		} else {
+		  // TODO: is that right? what should happen with unknown values?
+		  return UNDETERMINED;
 		}
 	}
 	else

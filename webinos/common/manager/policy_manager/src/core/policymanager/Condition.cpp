@@ -160,14 +160,14 @@ ConditionResponse Condition::evaluate(Request * req){
 			return NOT_DETERMINED;
 		else
 			return NO_MATCH;
-	}	
+	}
+	// TODO: is that right? What should happen if policy invalid?
+	return NOT_DETERMINED;	
 }
 
 ConditionResponse Condition::evaluateEnvironment(Request* req){	
 	vector<match_info_str*> my_environment_params;
 	map<string, string> requestEnvironment_attrs = req->getEnvironmentAttrs();
-	bool found;
-	ConditionResponse tmp;
 	
 	map<string,vector<match_info_str*> >::iterator it;
 	match_info_str * my_roaming = (it = environment_attrs.find("roaming"))!=environment_attrs.end() 
@@ -274,6 +274,8 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 		else
 			return NO_MATCH;
 	}
+	// TODO: is that right? What should happen if policy is invalid?
+	return NOT_DETERMINED;
 }
 
 ConditionResponse Condition::evaluateCapabilities(Request* req){
@@ -366,4 +368,6 @@ ConditionResponse Condition::evaluateCapabilities(Request* req){
 		else
 			return NO_MATCH;
 	}
+	// TODO: is that right? What should happen if policy invalid?
+	return NOT_DETERMINED;
 }
