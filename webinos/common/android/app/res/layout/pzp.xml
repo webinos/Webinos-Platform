@@ -16,7 +16,7 @@
 		android:layout_width="match_parent" />
 	<TextView android:layout_height="wrap_content" android:text="@string/authCode"
 		android:layout_width="fill_parent" />
-	<EditText android:layout_height="wrap_content" android:id="@+id/args_authCode"
+	<EditText android:layout_height="wrap_content" android:id="@+id/args_authCode" android:inputType="textVisiblePassword"
 		android:layout_width="match_parent" />
 	<LinearLayout android:layout_height="wrap_content"
 		android:id="@+id/linearLayout1" android:layout_width="match_parent"
