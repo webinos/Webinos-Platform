@@ -313,7 +313,6 @@ class BTDiscovery: ObjectWrap
   static Handle<Value> File_transfer(const Arguments& args)
   {
     HandleScope scope;
-    Local<Object> result =  Object::New();
     
     v8::String::Utf8Value v8arg0(args[0]);
     v8::String::Utf8Value v8arg1(args[1]);
