@@ -1,0 +1,25 @@
+<html>
+
+<head>
+<!-- A stylesheet for the test output -->
+<link rel="stylesheet" type="text/css" href="../../lib/simple-test-framework/testStyle.css"  />
+
+<!-- Include the test framework js -->
+<script src='../../lib/simple-test-framework/testFramework.js'></script>
+<!-- Include html test output logger -->
+<script src='../../lib/simple-test-framework/htmlOutput.js'></script>
+</head>
+
+
+<body>
+<button type='text' onclick='javascript:runContactsTests(logTestResultToHTML);'>run basic tests</button>
+
+<!-- Container to receive the test results -->
+<div id='testResults'></div>
+
+<!--<script type="text/javascript" src="http://localhost:8080/client/webinos.js" onError="alert('PZP is not running!'); logTestResultToHTML('webinos.js', false, ' not loaded!');" onLoad="logTestResultToHTML('webinos.js', true, ' loaded!');"></script>-->
+<script type="text/javascript" src="../../client/webinos.js"></script>
+<script src='test-contacts.js'></script>
+</body>
+
+</html>
