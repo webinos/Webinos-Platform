@@ -251,7 +251,6 @@ inline bool MorkParser::parseComment()
 bool MorkParser::parseCell()
 {
 	bool Result = true;
-	bool bColumnOid = false;
 	bool bValueOid = false;
 	bool bColumn = true;
 	int Corners = 0;
@@ -272,16 +271,12 @@ bool MorkParser::parseCell()
 		case '^':
 			// Oids
 			Corners++;
-			if ( 1 == Corners )
-			{
-				bColumnOid = true;
-			}
-			else if ( 2 == Corners )
+			if ( 2 == Corners )
 			{
 				bColumn = false;
 				bValueOid = true;
 			}
-			else
+			else if ( 1 != Corners)
 			{
 				Text += cur;
 			}
