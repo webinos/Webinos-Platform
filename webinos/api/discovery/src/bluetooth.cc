@@ -140,7 +140,7 @@ class BTDiscovery: ObjectWrap
     char dev_name_tmp[248] = { 0 }; // device name
 
     uuid_t svc_uuid;
-    // int err;
+    int err;
     bdaddr_t target;
     bdaddr_t source;
     sdp_list_t *response_list = NULL, *search_list, *attrid_list;
@@ -224,8 +224,13 @@ class BTDiscovery: ObjectWrap
         attrid_list = sdp_list_append( NULL, &range );
 
         // get a list of service records that have the specified UUID, e.g. 0x1106
-        // err = sdp_service_search_attr_req( session, search_list,	\
+        err = sdp_service_search_attr_req( session, search_list,	\
         SDP_ATTR_REQ_RANGE, attrid_list, &response_list);
+
+	if (err) {
+	  printf("Error while getting list of service records, go to next device\n");
+	  continue;
+	}
 
         sdp_list_t *r = response_list;
 
