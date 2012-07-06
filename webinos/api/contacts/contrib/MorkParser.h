@@ -13,7 +13,7 @@
 #ifndef __MorkParser_h__
 #define __MorkParser_h__
 
-#pragma warning(disable : 4786 4503)
+//#pragma warning(disable : 4786 4503)
 
 #include <string>
 #include <map>

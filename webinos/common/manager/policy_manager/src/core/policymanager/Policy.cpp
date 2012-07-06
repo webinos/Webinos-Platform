@@ -59,7 +59,7 @@ bool Policy::matchSubject(Request* req){
 		return true;		// Policy is valid for all widget
 	}
 	else
-		for(int i=0; i<subjects.size(); i++){
+		for(unsigned int i=0; i<subjects.size(); i++){
 			if(subjects[i]->match(req)){
 				return true;
 			}
@@ -85,7 +85,7 @@ Effect Policy::evaluate(Request* req){
 		if(ruleCombiningAlgorithm == deny_overrides_algorithm){
 			LOGD("[Policy::evaluate] deny_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
-			for(int i=0; i<rules.size(); i++){
+			for(unsigned int i=0; i<rules.size(); i++){
 				int tmp = rules[i]->evaluate(req);
 				LOGD("eval : %d",tmp);
 				effects_result[tmp]++;
@@ -114,7 +114,7 @@ Effect Policy::evaluate(Request* req){
 		else if(ruleCombiningAlgorithm == permit_overrides_algorithm){
 			LOGD("[Policy::evaluate] permit_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
-			for(int i=0; i<rules.size(); i++){
+			for(unsigned int i=0; i<rules.size(); i++){
 				effects_result[rules[i]->evaluate(req)]++;
 				if(effects_result[PERMIT] > 0)
 					return PERMIT;
@@ -142,7 +142,7 @@ Effect Policy::evaluate(Request* req){
 		else if(ruleCombiningAlgorithm == first_applicable_algorithm){
 			LOGD("[Policy] first_applicable algorithm");
 			Effect tmp_effect;
-			for(int i=0; i<rules.size(); i++){
+			for(unsigned int i=0; i<rules.size(); i++){
 				tmp_effect = rules[i]->evaluate(req);
 				if(tmp_effect != UNDETERMINED && tmp_effect != INAPPLICABLE)
 					return tmp_effect;
@@ -152,6 +152,9 @@ Effect Policy::evaluate(Request* req){
 					continue;
 			}
 			return INAPPLICABLE;
+		} else {
+		  // TODO: is that right? what should happen with unknown values?
+		  return UNDETERMINED;
 		}
 	}
 	else

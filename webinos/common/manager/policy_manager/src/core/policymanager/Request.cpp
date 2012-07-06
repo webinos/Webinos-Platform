@@ -85,7 +85,7 @@ TiXmlElement* Request::getXmlSubjectTag(){
 	for(map<string,vector<string>*>::iterator it=subject_attrs.begin(); it!=subject_attrs.end(); it++)
 	{
 		tmp = it->second;
-		for(int i=0; i<tmp->size(); i++){
+		for(unsigned int i=0; i<tmp->size(); i++){
 			attribute = new TiXmlElement("Attribute");
 			attributeValue = new TiXmlElement("AttributeValue");
 			attribute->SetAttribute("AttributeId", it->first);
@@ -106,7 +106,7 @@ TiXmlElement* Request::getXmlResourcesTag(){
 	vector<string>* tmp;
 	for(map<string,vector<string>*>::iterator it=resource_attrs.begin(); it!=resource_attrs.end(); it++){
 		tmp = it->second;
-		for(int i=0; i<tmp->size(); i++){
+		for(unsigned int i=0; i<tmp->size(); i++){
 			attribute = new TiXmlElement("Attribute");
 			attributeValue = new TiXmlElement("AttributeValue");
 			attribute->SetAttribute("AttributeId", it->first);
