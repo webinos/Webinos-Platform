@@ -62,7 +62,7 @@ const bool compare_regexp(const string& target,const string& expression) {
 string glob2regexp (const string& glob) {
     string result = "";
 //    cout << "\n Converting " << glob << " with size " << glob.size();
-    for (int i = 0;i<glob.size();++i)
+    for (unsigned int i = 0;i<glob.size();++i)
     {
 	if (glob[i]=='?')
 	    result+=".";

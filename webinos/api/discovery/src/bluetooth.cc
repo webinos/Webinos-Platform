@@ -125,7 +125,6 @@ class BTDiscovery: ObjectWrap
   static Handle<Value> Scan_device(const Arguments& args)
   {
     HandleScope scope;
-    Local<Object> result =  Object::New();
 
     // Convert first argument to V8 String
     v8::String::Utf8Value v8str(args[0]);
@@ -225,8 +224,13 @@ class BTDiscovery: ObjectWrap
         attrid_list = sdp_list_append( NULL, &range );
 
         // get a list of service records that have the specified UUID, e.g. 0x1106
-        err = sdp_service_search_attr_req( session, search_list, \
+        err = sdp_service_search_attr_req( session, search_list,	\
         SDP_ATTR_REQ_RANGE, attrid_list, &response_list);
+
+	if (err) {
+	  printf("Error while getting list of service records, go to next device\n");
+	  continue;
+	}
 
         sdp_list_t *r = response_list;
 
@@ -314,7 +318,6 @@ class BTDiscovery: ObjectWrap
   static Handle<Value> File_transfer(const Arguments& args)
   {
     HandleScope scope;
-    Local<Object> result =  Object::New();
     
     v8::String::Utf8Value v8arg0(args[0]);
     v8::String::Utf8Value v8arg1(args[1]);
