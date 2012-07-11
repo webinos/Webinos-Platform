@@ -78,7 +78,8 @@ farm.startFarm = function (url, name, callback) {
         requestCert       : true,
         rejectUnauthorised: false
       };
-      session.common.resolveIP(url, function(resolvedAddress) {
+      session.common.fetchIP(function(resolvedAddress){
+      //session.common.resolveIP(url, function(resolvedAddress) {
         // Main pzh_farm TLS server
         farm.server = tls.createServer (options, function (conn) {
           // if servername existes in conn and pzh_farm.pzhs has details about pzh instance, message will be routed to respective PZH authorization function
