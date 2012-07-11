@@ -1,15 +1,15 @@
 <html>
 <head>
 	<title>webinos | vehicle testbed</title>
-	<link rel="icon" href="webinos.ico" type="image/x-icon">
+	<link rel="icon" href="../general/webinos.ico" type="image/x-icon">
 	<link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-	<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
-	<script type="text/javascript" src="./fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
-	<script type="text/javascript" src="./fancybox/jquery.fancybox-1.3.4.pack.js"></script>
-	<script type="text/javascript" src="jcanvas.min.js"></script>
+	<script type="text/javascript" src="../general/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="fancybox/jquery.mousewheel-3.0.4.pack.js"></script>
+	<script type="text/javascript" src="fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+	<script type="text/javascript" src="../general/jcanvas.min.js"></script>
 	<script type="text/javascript" src="/client/webinos.js"></script>
 
-	<link rel="stylesheet" type="text/css" href="./fancybox/jquery.fancybox-1.3.4.css" media="screen" />
+	<link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox-1.3.4.css" media="screen" />
 	
 		<script type="text/javascript">
 			
@@ -311,7 +311,7 @@
 								$('#vehicleDataId').removeAttr('disabled');
 								//$('#requestGuidance').removeAttr('disabled');
 							
-								$('#info').html("<img src='ajaxloader.gif'>");
+								$('#info').html("<img src='../general/ajaxloader.gif'>");
 							
 								disableInit('Vehicle API',$('#initVehicle'), $('#pzh_pzp_list').val());
 						}});
@@ -334,7 +334,7 @@
 								geolocation.bindService({onBind: function (service) {}});
 								$('#getLocation').removeAttr('disabled');
 								$('#watchPosition').removeAttr('disabled');
-								$('#info').html("<img src='ajaxloader.gif'>");
+								$('#info').html("<img src='../general/ajaxloader.gif'>");
 								disableInit('Geolocation API',$('#initGeolocation'), $('#pzh_pzp_list').val());
 						}});
                     });
@@ -424,7 +424,7 @@
 					$('#removeListener').bind('click', function(){
 						vehicle.removeEventListener($('#vehicleDataId').val(), getMessageHandler($('#vehicleDataId').val()), false);
 						postMessage('info','Listener removed for' + $('#vehicleDataId').val());
-						$('#info').html("<img src='ajaxloader.gif'>");
+						$('#info').html("<img src='../general/ajaxloader.gif'>");
 						for(i = 0; listeners.length; i++){
 							if(listeners[i] == $('#vehicleDataId').val()){
 								listeners.splice(i,1);
