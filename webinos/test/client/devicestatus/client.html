@@ -1,19 +1,17 @@
 <html>
 <head>
 <title>Webinos RPC - DeviceStatus API Test</title>
-	<script type="text/javascript" src="/client/webinos.js"></script>
-	<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
 	<!-- script type="text/javascript" src="./webinos.client.devicestatus.js"></script-->
-	<script type="text/javascript" src="./vocabulary.js"></script>
-	<script type="text/javascript" src="./client.js"></script>
-    	<link rel="stylesheet" type="text/css" href="/client/style.css" media="screen"/>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
+  <script type="text/javascript" src="./webinos.js"></script>
+	<script type="text/javascript" src="devicestatus/vocabulary.js"></script>
+	<script type="text/javascript" src="devicestatus/client.js"></script>
+  
 <body>
 	PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br>
 	<button id="findService">Find Service</button>
 	<button id="bindService">Bind Service</button>
-	
 	<hr>
-
 	Aspects:<br>
 	<select id="aspects_list"></select>
 	<button id="getComponents">Get Components</button><br>
