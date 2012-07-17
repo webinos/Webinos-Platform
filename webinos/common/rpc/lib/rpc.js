@@ -94,10 +94,10 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCObj = function(sessionId, id) {
+	var newJSONRPCObj = function(id) {
 		return {
 			jsonrpc: '2.0',
-			id: id || getNextID(sessionId)
+			id: id || getNextID()
 		};
 	};
 
@@ -106,10 +106,11 @@
 	 * @function
 	 * @private
 	 */
-	var getNextID = function(sessionId) {
-		if (idCount == Number.MAX_VALUE) idCount = 0;
-		idCount++;
-		return sessionId + idCount;
+	var getNextID = function() {
+		function s4() {
+			return ((1 + Math.random()) * 0x10000|0).toString(16).substr(1);
+		}
+		return s4() + s4() + s4();
 	}
 
 	/**
@@ -117,8 +118,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params, sessionId) {
-		var rpc = newJSONRPCObj(sessionId);
+	var newJSONRPCRequest = function(method, params) {
+		var rpc = newJSONRPCObj();
 		rpc.method = method;
 		rpc.params = params || [];
 		return rpc;
@@ -129,8 +130,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseResult = function(id, result, sessionId) {
-		var rpc = newJSONRPCObj(sessionId, id);
+	var newJSONRPCResponseResult = function(id, result) {
+		var rpc = newJSONRPCObj(id);
 		rpc.result = typeof result === 'undefined' ? {} : result;
 		return rpc;
 	};
@@ -140,8 +141,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseError = function(id, error, sessionId) {
-		var rpc = newJSONRPCObj(sessionId, id);
+	var newJSONRPCResponseError = function(id, error) {
+		var rpc = newJSONRPCObj(id);
 		rpc.error = {
 			data: error,
 			code: 32000,
@@ -216,7 +217,7 @@
 
 			function successCallback(result) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseResult(id, result, that.sessionId);
+				var rpc = newJSONRPCResponseResult(id, result);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 
 				// CONTEXT LOGGING HOOK
@@ -226,7 +227,7 @@
 			}
 			function errorCallback(error) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseError(id, error, that.sessionId);
+				var rpc = newJSONRPCResponseError(id, error);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 			}
 
@@ -371,7 +372,7 @@
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params, this.sessionId);
+		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
 
 		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
 			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
