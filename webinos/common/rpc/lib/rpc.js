@@ -357,6 +357,7 @@
 	 * 		  camera service) as RPCWebinosService object instance.
 	 * @param method The method that should be invoked on the service.
 	 * @param params An optional array of parameters to be used.
+	 * @returns RPC object to execute.
 	 */
 	_RPCHandler.prototype.createRPC = function (service, method, params) {
 		if (typeof service === 'undefined') throw "Service is undefined";
@@ -383,6 +384,40 @@
 	};
 
 	/**
+	 * Registers an object as RPC request receiver.
+	 * @param callback RPC object from createRPC with added methods available via RPC.
+	 */
+	_RPCHandler.prototype.registerCallbackObject = function (callback) {
+		if (typeof callback.id === 'undefined') {
+			callback.id = getNextID();
+		}
+		if (typeof callback.api === 'undefined') {
+			// api property must exist, since that is used to register an object
+			callback.api = callback.id;
+
+			// for listener rpc calls it was previously needed to manually add
+			// fromObjRef to an rpc object. instead, now the rpc object can be
+			// used directly with registerCallbackObject which will add the
+			// fromObjRef property
+			callback.fromObjectRef = callback.id;
+		}
+		this.registry.registerCallbackObject(callback);
+	};
+
+	/**
+	 * Unregisters an object as RPC request receiver.
+	 * @param callback The callback object to unregister.
+	 */
+	_RPCHandler.prototype.unregisterCallbackObject = function (callback) {
+		if (typeof callback.id === 'undefined') {
+			// id property is needed. in case of listener rpc calls it's usually
+			// the same as api property
+			callback.id = callback.api;
+		}
+		this.registry.unregisterObject(callback);
+	};
+
+	/**
 	 * Utility method that combines createRPC and executeRPC.
 	 * @param service The service (e.g., the file reader or the
 	 * 		  camera service) as RPCWebinosService object instance.
@@ -399,7 +434,9 @@
 			var params = Array.prototype.slice.call(arguments);
 			var message = self.createRPC(service, method, params);
 
-			if (objectRef)
+			if (objectRef && objectRef.api)
+				message.fromObjectRef = objectRef.api;
+			else if (objectRef)
 				message.fromObjectRef = objectRef;
 
 			self.executeRPC(message, utils.callback(successCallback, this), utils.callback(errorCallback, this));
@@ -418,14 +455,6 @@
 	 */
 	_RPCHandler.prototype.notify = function (service, method, objectRef) {
 		return this.request(service, method, objectRef, function(){}, function(){});
-	};
-
-	/**
-	 * Registers an object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	_RPCHandler.prototype.registerCallbackObject = function (callback) {
-		this.registry.registerCallbackObject(callback);
 	};
 
 	/**
