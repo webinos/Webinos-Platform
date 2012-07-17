@@ -39,7 +39,7 @@ var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
  *
  * inspiration for subclassing methodology comes from http://www.webreference.com/js/column79/4.html
  */
-function GenericFeature(rpcHandler) {
+function GenericFeature() {
 	EventEmitter.call(this);
 	
     this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
@@ -49,7 +49,6 @@ function GenericFeature(rpcHandler) {
     this.ns = null;                                             // name space that (globally) uniquely defines the service type
 	this.local = false;
 	this.shared = false; // only used for local features
-	this.rpcHandler = rpcHandler;
 	
     this.remove = function() {                                  // call this when this feature is removed.
 		this.emit('remove', this);

@@ -37,7 +37,7 @@ var get42 = require(webinosRoot + dependencies.api.get42.location);
  * Remote-alert Feature, defines as subclass of GenericFeature
  */
 function Get42Feature(rpcHandler) {
-	GenericFeature.GenericFeature.call(this, rpcHandler);
+	GenericFeature.GenericFeature.call(this);
 
 	this.service = new get42.Service(rpcHandler);
 	this.api = NS;
@@ -82,7 +82,7 @@ function Get42Feature(rpcHandler) {
 	//     at this time invoke is handled by the GenericFeature to dispatch the call locally or remotely.
 	
 	// We add the 'id' to the name of the feature to make this feature unique to the client.
-	rpcHandler.registerObject(this);  // RPC name
+	rpcHandler.registry.registerObject(this);  // RPC name
 }
 
 //sys.inherits(Get42Feature, get42.testModule);

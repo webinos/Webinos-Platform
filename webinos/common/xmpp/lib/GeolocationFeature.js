@@ -47,7 +47,7 @@ var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.lo
 var NS = "urn:services-webinos-org:geolocation";
 
 function GeolocationFeature(rpcHandler, connector) {
-	GenericFeature.GenericFeature.call(this, rpcHandler);
+	GenericFeature.GenericFeature.call(this);
 
     if (connector === undefined) {
         this.geo = new geolocation.Service(rpcHandler, { 'connector': 'geoip'});
@@ -97,7 +97,7 @@ function GeolocationFeature(rpcHandler, connector) {
 	//     at this time invoke is handled by the GenericFeature to dispatch the call locally or remotely.
 	
 	// We add the 'id' to the name of the feature to make this feature unique to the client.
-	rpcHandler.registerObject(this);  // RPC name
+	rpcHandler.registry.registerObject(this);  // RPC name
 }
 
 sys.inherits(GeolocationFeature, GenericFeature.GenericFeature);

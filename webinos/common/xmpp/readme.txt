@@ -19,19 +19,19 @@ Author: Eelco Cramer, TNO
 
 ****** CURRENT STATUS: not working with current code base *****
 
-This is the prototype of a XMPP libary that can connect the PZP to the PZH and in the future
+This is the prototype of a XMPP library that can connect the PZP to the PZH and in the future
 maybe connect different PZPs as well.
 
 The code is based upon the code of the XMPP demo built by Victor Klos (TNO) which can be found at
 http://www.servicelab.org/xmppdemo/ but has a few differences. One is the way disco is implemented.
-In de xmppdemo the client does not query unknown hashtables. The current version of this client always
-queries hashtables (it has no cache at the moment).
+In de xmppdemo the client does not query unknown hash-tables. The current version of this client always
+queries hash-tables (it has no cache at the moment).
 
 Disco is the only working feature at the moment. Next thing is find how discovered services are propagated
-to the requred code that is using the client and build in service execution.
+to the required code that is using the client and build in service execution.
 
 No xmpp server is configured in the client. The service is determined by the domain part of the jid. First the
-client tries to get the domains DNS SRV record or if it does not exsists tries to connect to the domain directly. This
+client tries to get the domains DNS SRV record or if it does not exists tries to connect to the domain directly. This
 is all part of the node-xmpp lib. 
 
 The client uses TLS to connect to the xmpp server when available.
