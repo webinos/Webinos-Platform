@@ -118,8 +118,7 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 
 	var watchId = setInterval(function() {getPos(); }, tint);
 	
-	var watchIdKey = args[1];
-	watchIdTable[watchIdKey] = watchId;
+	watchIdTable[objectRef] = watchId;
 }
 
 /**
