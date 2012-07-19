@@ -37,7 +37,7 @@
 
     var WebinosPayment, Payment, ShoppingBasket, ShoppingItem, SuccessShoppingBasketCallback, PaymentSuccessCB, PaymentErrorCB, PendingOperation, PaymentError;
 
-    var implShoppingBasket;
+    var implShoppingBasket, implShoppingBasketState;
     var implServiceProviderID, implCustomerID, implShopID;
     
     /**
@@ -45,9 +45,6 @@
      *
      */
     WebinosPayment = function () {
-        //TODO implement constructor logic if needed!
-
-        //TODO initialize attributes
 
         this.payment = new Payment();
     };
@@ -72,10 +69,12 @@
         this.items =new Array(); 
         this.extras =new Array(); 
         this.totalBill = 0.0;
+       
     };
     
     function createEmptyShoppingBasket(){ 
-    return ( new ShoppingBasket())};
+          return ( new ShoppingBasket())
+    };
   
     function setEmptyShoppingBasket(){ 
        basket = new ShoppingBasket(); 
@@ -128,6 +127,21 @@
         console.log("Implementation of addItem called");
         
         // Some basic arror checking
+        
+        // is basket still valid?
+        if(this.items==null) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+        // is basket state still valid?
+        if(implShoppingBasketState!=1) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
         // does item even exist?
         if(item==null) {
           error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
@@ -139,6 +153,20 @@
          if((item.description==null)||(item.description.length==0)) {
           error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
           error.message = "Item description is missing";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+        // do we have a currency value?
+         if((item.currency==null)||(item.currency.length<2)) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Currency is missing";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+        // The item number should not be null
+         if(item.itemCount==null) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Item count must not be null for an item";
           errorCallback(error); 
           return new PendingOperation();         
         }
@@ -229,6 +257,21 @@
      */
     ShoppingBasket.prototype.update = function (successCallback, errorCallback) {
 
+        // is basket still valid?
+        if(this.items==null) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+        // is basket state still valid?
+        if(implShoppingBasketState!=1) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+
       // check for GSMA type payment
       // GSMA does not have an equivalent to Update, so we just return without doing anything
         if(implServiceProviderID=="GSMA"){
@@ -304,6 +347,21 @@
      */
     ShoppingBasket.prototype.checkout = function (successCallback, errorCallback) {
 
+        // is basket still valid?
+        if(this.items==null) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+        // is basket state still valid?
+        if(implShoppingBasketState!=1) {
+          error.code = PaymentError.prototype.PAYMENT_CHARGE_FAILED;
+          error.message = "Basket no longer valid";
+          errorCallback(error); 
+          return new PendingOperation();         
+        }
+
         // checkout for GSMA type payment
         if(implServiceProviderID=="GSMA"){
             if(this.items.length==0){        
@@ -314,12 +372,15 @@
             }
 
            GSMA_Checkout ( successCallback, errorCallback, implCustomerID, implShopID,  this.totalBill, this.items[0].currency);
+           this.items=null;
+           implShoppingBasketState=2;
            return new PendingOperation();
          }
         
-        // we don't have any real checkout function yet - this
-        // requires a service provider - so we just release the shopping basket
-         console.log("Implementation of checkout called");
+        // for local version we just release the shopping basket
+        console.log("Implementation of checkout called");
+        this.items=null;
+        implShoppingBasketState=2;
         self=null;
         successCallback(this);
         return new PendingOperation();
@@ -341,7 +402,7 @@
         if(implServiceProviderID=="GSMA"){
            GSMA_Release ( implCustomerID, implShopID);
          }
-
+        implShoppingBasketState=3;
         self=null;
         return;
     };
@@ -614,6 +675,7 @@
       implServiceProviderID = serviceProviderID;
       implCustomerID = customerID;
       implShopID = shopID; 
+      implShoppingBasketState=1;
      
       // cover a number of possible error conditions
       error = {};

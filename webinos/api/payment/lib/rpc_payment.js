@@ -27,8 +27,9 @@ var basket = null;
  * Webinos Service constructor.
  * @param rpcHandler A handler for functions that use RPC to deliver their result.  
  */
-var PaymentModule = function(rpcHandler) {
+var PaymentModule = function(rpcHandler, params) {
         // inherit from RPCWebinosService
+ console.log("{PAYMENT CONSTRUCTION");        
         this.base = RPCWebinosService;
         this.base({
                 api:'http://webinos.org/api/payment',
