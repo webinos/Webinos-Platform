@@ -41,8 +41,14 @@ this.ZipWidgetResource = (function() {
 
   ZipWidgetResource.prototype.readFileSync = function(name) {
     var result;
-    if(name in this.contents)
-      result = this.zipfile.readFileSync(name);
+    if (name in this.contents) {
+		// Avoid 'archive error' exceptions due to resource being encrypted.
+		try {
+			result = this.zipfile.readFileSync(name);
+		} catch (e) {
+			result = null;
+		}
+	}
     return result;
   };
 
