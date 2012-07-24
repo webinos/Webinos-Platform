@@ -1,0 +1,21 @@
+<policy-set combine="first-matching-target" description="policy2">
+    <policy combine="first-applicable" description="PZOwner">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="user1"/>
+            </subject>
+        </target>
+        <rule effect="permit"></rule>
+    </policy>
+    <policy combine="first-applicable" description="PZFriend">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="user2"/>
+            </subject>
+        </target>
+        <rule effect="prompt-blanket"></rule>
+    </policy>
+    <policy combine="first-applicable" description="untrusted">
+        <rule effect="deny"></rule>
+    </policy>
+</policy-set>
