@@ -78,16 +78,15 @@
 	 */
 	function listenerFor42(listener, options) {
 		var rpc = webinos.rpcHandler.createRPC(this, "listenAttr.listenFor42", [options]);
-		rpc.fromObjectRef = Math.floor(Math.random()*101); //random object ID	
 
-		// create a temporary webinos service on the browser
-		var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-		callback.onEvent = function (obj) {
+		// add one listener, could add more later
+		rpc.onEvent = function(obj) {
 			// we were called back, now invoke the given listener
-			listener(obj); 
+			listener(obj);
+			webinos.rpcHandler.unregisterCallbackObject(rpc);
 		};
-		webinos.rpcHandler.registerCallbackObject(callback);
 
+		webinos.rpcHandler.registerCallbackObject(rpc);
 		webinos.rpcHandler.executeRPC(rpc);
 	}
 	
