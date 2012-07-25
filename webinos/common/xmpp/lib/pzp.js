@@ -31,7 +31,9 @@ var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
 var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
+var webinos       = require("webinos")(__dirname);
+var rpc           = webinos.global.require(webinos.global.rpc.location);
+var registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry");
 
 var argv = process.argv;
 var WebinosFeatures = require('./WebinosFeatures.js');
@@ -80,7 +82,8 @@ logger.trace("Done parsing command line.");
 port = 8000+10*index;
 logger.info("Using index=" + index + ", jid=" + jid + " and port=" + port);
 
-var rpcHandler = new _RPCHandler();
+var rpcRegistry = new registry.Registry();
+var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
 var connection = new xmpp.Connection(rpcHandler);
 
 logger.trace("Starting servers...");
