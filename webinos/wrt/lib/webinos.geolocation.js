@@ -76,20 +76,16 @@ function getCurrentPosition(positionCB, positionErrorCB, positionOptions) {
  * @returns Registered listener id.
  */
 function watchPosition(positionCB, positionErrorCB, positionOptions) {
-	var watchIdKey = Math.floor(Math.random()*101);
+	var rpc = webinos.rpcHandler.createRPC(this, "watchPosition", [positionOptions]);
 
-	var rpc = webinos.rpcHandler.createRPC(this, "watchPosition", [positionOptions, watchIdKey]);
-	rpc.fromObjectRef = Math.floor(Math.random()*101); //random object ID	
-
-	var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-	callback.onEvent = function (position) {
+	rpc.onEvent = function (position) {
 		positionCB(msSinceEpochToDate(position));
 	};
-	webinos.rpcHandler.registerCallbackObject(callback);
 
+	webinos.rpcHandler.registerCallbackObject(rpc);
 	webinos.rpcHandler.executeRPC(rpc);
 
-	return watchIdKey;
+	return parseInt(rpc.fromObjectRef, 16);
 };
 
 /**
@@ -97,8 +93,12 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
  * @param watchId The id as returned by watchPosition to clear.
  */
 function clearWatch(watchId) {
-	var rpc = webinos.rpcHandler.createRPC(this, "clearWatch", [watchId]); 
-	webinos.rpcHandler.executeRPC(rpc, function() {}, function() {});
+	var watchIdStr = (watchId).toString(16);
+
+	var rpc = webinos.rpcHandler.createRPC(this, "clearWatch", [watchIdStr]);
+	webinos.rpcHandler.executeRPC(rpc);
+
+	webinos.rpcHandler.unregisterCallbackObject({api:watchIdStr});
 };
 
 })();

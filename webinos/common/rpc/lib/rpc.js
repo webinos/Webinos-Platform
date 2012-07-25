@@ -94,10 +94,10 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCObj = function(sessionId, id) {
+	var newJSONRPCObj = function(id) {
 		return {
 			jsonrpc: '2.0',
-			id: id || getNextID(sessionId)
+			id: id || getNextID()
 		};
 	};
 
@@ -106,10 +106,11 @@
 	 * @function
 	 * @private
 	 */
-	var getNextID = function(sessionId) {
-		if (idCount == Number.MAX_VALUE) idCount = 0;
-		idCount++;
-		return sessionId + idCount;
+	var getNextID = function() {
+		function s4() {
+			return ((1 + Math.random()) * 0x10000|0).toString(16).substr(1);
+		}
+		return s4() + s4() + s4();
 	}
 
 	/**
@@ -117,8 +118,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params, sessionId) {
-		var rpc = newJSONRPCObj(sessionId);
+	var newJSONRPCRequest = function(method, params) {
+		var rpc = newJSONRPCObj();
 		rpc.method = method;
 		rpc.params = params || [];
 		return rpc;
@@ -129,8 +130,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseResult = function(id, result, sessionId) {
-		var rpc = newJSONRPCObj(sessionId, id);
+	var newJSONRPCResponseResult = function(id, result) {
+		var rpc = newJSONRPCObj(id);
 		rpc.result = typeof result === 'undefined' ? {} : result;
 		return rpc;
 	};
@@ -140,8 +141,8 @@
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCResponseError = function(id, error, sessionId) {
-		var rpc = newJSONRPCObj(sessionId, id);
+	var newJSONRPCResponseError = function(id, error) {
+		var rpc = newJSONRPCObj(id);
 		rpc.error = {
 			data: error,
 			code: 32000,
@@ -216,7 +217,7 @@
 
 			function successCallback(result) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseResult(id, result, that.sessionId);
+				var rpc = newJSONRPCResponseResult(id, result);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 
 				// CONTEXT LOGGING HOOK
@@ -226,7 +227,7 @@
 			}
 			function errorCallback(error) {
 				if (typeof id === 'undefined') return;
-				var rpc = newJSONRPCResponseError(id, error, that.sessionId);
+				var rpc = newJSONRPCResponseError(id, error);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 			}
 
@@ -356,6 +357,7 @@
 	 * 		  camera service) as RPCWebinosService object instance.
 	 * @param method The method that should be invoked on the service.
 	 * @param params An optional array of parameters to be used.
+	 * @returns RPC object to execute.
 	 */
 	_RPCHandler.prototype.createRPC = function (service, method, params) {
 		if (typeof service === 'undefined') throw "Service is undefined";
@@ -371,7 +373,7 @@
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params, this.sessionId);
+		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
 
 		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
 			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
@@ -379,6 +381,40 @@
 		}
 
 		return rpcRequest;
+	};
+
+	/**
+	 * Registers an object as RPC request receiver.
+	 * @param callback RPC object from createRPC with added methods available via RPC.
+	 */
+	_RPCHandler.prototype.registerCallbackObject = function (callback) {
+		if (typeof callback.id === 'undefined') {
+			callback.id = getNextID();
+		}
+		if (typeof callback.api === 'undefined') {
+			// api property must exist, since that is used to register an object
+			callback.api = callback.id;
+
+			// for listener rpc calls it was previously needed to manually add
+			// fromObjRef to an rpc object. instead, now the rpc object can be
+			// used directly with registerCallbackObject which will add the
+			// fromObjRef property
+			callback.fromObjectRef = callback.id;
+		}
+		this.registry.registerCallbackObject(callback);
+	};
+
+	/**
+	 * Unregisters an object as RPC request receiver.
+	 * @param callback The callback object to unregister.
+	 */
+	_RPCHandler.prototype.unregisterCallbackObject = function (callback) {
+		if (typeof callback.id === 'undefined') {
+			// id property is needed. in case of listener rpc calls it's usually
+			// the same as api property
+			callback.id = callback.api;
+		}
+		this.registry.unregisterObject(callback);
 	};
 
 	/**
@@ -398,7 +434,9 @@
 			var params = Array.prototype.slice.call(arguments);
 			var message = self.createRPC(service, method, params);
 
-			if (objectRef)
+			if (objectRef && objectRef.api)
+				message.fromObjectRef = objectRef.api;
+			else if (objectRef)
 				message.fromObjectRef = objectRef;
 
 			self.executeRPC(message, utils.callback(successCallback, this), utils.callback(errorCallback, this));
@@ -417,14 +455,6 @@
 	 */
 	_RPCHandler.prototype.notify = function (service, method, objectRef) {
 		return this.request(service, method, objectRef, function(){}, function(){});
-	};
-
-	/**
-	 * Registers an object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	_RPCHandler.prototype.registerCallbackObject = function (callback) {
-		this.registry.registerCallbackObject(callback);
 	};
 
 	/**
