@@ -1,0 +1,21 @@
+<policy-set combine="first-matching-target" description="policy4">
+    <policy combine="first-applicable" description="PZOwner">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="http://www.webinos.org/subject/user-info/id/pz-owner"/>
+            </subject>
+        </target>
+        <rule effect="permit"></rule>
+    </policy>
+    <policy combine="first-applicable" description="PZFriend">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="http://www.webinos.org/subject/user-info/id/pz-member"/>
+            </subject>
+        </target>
+        <rule effect="prompt-blanket"></rule>
+    </policy>
+    <policy combine="first-applicable" description="untrusted">
+        <rule effect="deny"></rule>
+    </policy>
+</policy-set>
