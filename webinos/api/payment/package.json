@@ -1,4 +1,4 @@
-{ "name": "sensors"
+{ "name": "payment"
 , "publishConfig": { "tag": "alpha" }
 , "description": "Payment API"
 , "keywords": [ "webinos", "payment", "API"]
