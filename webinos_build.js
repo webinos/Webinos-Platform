@@ -5,7 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var prefix;
 var cmd = process.argv[2];
-var prefixPath = process.argv[3];
+var prefixPath = process.argv[4];
 var nPathV = parseFloat(process.versions.node);
 if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
