@@ -33,6 +33,7 @@
             	<file name="wrt/lib/webinos.contacts.js"/>
             	<file name="wrt/lib/webinos.devicestatus.js"/>
 		<file name="wrt/lib/webinos.discovery.js"/>
+		<file name="wrt/lib/webinos.payment.js"/>
             </sources>
         </jscompiler>
     </target>	

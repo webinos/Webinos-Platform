@@ -1,56 +1,56 @@
 (function() {
-	
-	var isOnNode = function() {
-		return typeof module === "object" ? true : false;
-	};
+        
+        var isOnNode = function() {
+                return typeof module === "object" ? true : false;
+        };
     
     var ServiceDiscovery = function(rpcHandler) {
-    	this.rpcHandler = rpcHandler;
-    	this.registeredServices = 0;
-    	
-    	this._webinosReady = false;
-    	
-    	if (isOnNode()) {
-    		return;
-    	}
-    	// further code only runs in the browser
-    	
-    	var that = this;
-    	webinos.session.addListener('registeredBrowser', function() {
-    		that._webinosReady = true;
-    		
-    		finishCallers();
-    	});
+        this.rpcHandler = rpcHandler;
+        this.registeredServices = 0;
+        
+        this._webinosReady = false;
+        
+        if (isOnNode()) {
+                return;
+        }
+        // further code only runs in the browser
+        
+        var that = this;
+        webinos.session.addListener('registeredBrowser', function() {
+                that._webinosReady = true;
+                
+                finishCallers();
+        });
     };
     
-	/**
-	 * Export definitions for node.js
-	 */
-	if (isOnNode()) {
-		exports.ServiceDiscovery = ServiceDiscovery;
-	} else {
-		// this adds ServiceDiscovery to the window object in the browser
-		this.ServiceDiscovery = ServiceDiscovery;
-	}
-	
-	var callerCache = [];
-	
-	var finishCallers = function() {
-		for (var i = 0; i < callerCache.length; i++) {
-			var caller = callerCache[i];
-			webinos.discovery.findServices(caller.serviceType, caller.callback, caller.options, caller.filter);
-		}
-		callerCache = [];
-	}
-	
+        /**
+         * Export definitions for node.js
+         */
+        if (isOnNode()) {
+                exports.ServiceDiscovery = ServiceDiscovery;
+        } else {
+                // this adds ServiceDiscovery to the window object in the browser
+                this.ServiceDiscovery = ServiceDiscovery;
+        }
+        
+        var callerCache = [];
+        
+        var finishCallers = function() {
+                for (var i = 0; i < callerCache.length; i++) {
+                        var caller = callerCache[i];
+                        webinos.discovery.findServices(caller.serviceType, caller.callback, caller.options, caller.filter);
+                }
+                callerCache = [];
+        }
+        
     ServiceDiscovery.prototype.findServices = function (serviceType, callback, options, filter) {
-    	var that = this;
-    	
-    	if (!isOnNode() && !this._webinosReady) {
-    		callerCache.push({serviceType: serviceType, callback: callback, options: options, filter: filter});
-    		return;
-    	}
-    	
+        var that = this;
+        
+        if (!isOnNode() && !this._webinosReady) {
+                callerCache.push({serviceType: serviceType, callback: callback, options: options, filter: filter});
+                return;
+        }
+        
         // pure local services..
         if (serviceType == "BlobBuilder"){
             var tmp = new BlobBuilder();
@@ -78,7 +78,7 @@
                 typeMap['http://webinos.org/api/sensors'] = Sensor;
                 typeMap['http://webinos.org/api/sensors.temperature'] = Sensor;
             }                       
-            if (typeof PaymentManager !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentManager;
+            if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
             if (typeof UserProfileIntModule !== 'undefined') typeMap['UserProfileInt'] = UserProfileIntModule;
             if (typeof TVManager !== 'undefined') typeMap['http://webinos.org/api/tv'] = TVManager;
             if (typeof DeviceStatusManager !== 'undefined') typeMap['http://wacapps.net/api/devicestatus'] = DeviceStatusManager;
@@ -89,19 +89,19 @@
             if (typeof AuthenticationModule !== 'undefined') typeMap['http://webinos.org/api/authentication'] = AuthenticationModule;
             
             if (isOnNode()) {
-            	var path = require('path');
-            	var moduleRoot = path.resolve(__dirname, '../') + '/';
-            	var moduleDependencies = require(moduleRoot + '/dependencies.json');
-            	var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-            	var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
-            	
-            	var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
+                var path = require('path');
+                var moduleRoot = path.resolve(__dirname, '../') + '/';
+                var moduleDependencies = require(moduleRoot + '/dependencies.json');
+                var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
+                var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
+                
+                var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
                 typeMap['http://webinos.org/api/context'] = Context;
             }
 
             var ServiceConstructor = typeMap[baseServiceObj.api];
             if (typeof ServiceConstructor !== 'undefined') {
-            	// elevate baseServiceObj to usable local WebinosService object
+                // elevate baseServiceObj to usable local WebinosService object
                 var service = new ServiceConstructor(baseServiceObj, that.rpcHandler);
                 this.registeredServices++;
                 callback.onFound(service);
@@ -127,9 +127,9 @@
 
         var serviceAddress;
         if (typeof this.rpcHandler.parent !== 'undefined') {
-        	serviceAddress = this.rpcHandler.parent.config.pzhId;
+                serviceAddress = this.rpcHandler.parent.config.pzhId;
         } else {
-        	serviceAddress = webinos.session.getServiceLocation();
+                serviceAddress = webinos.session.getServiceLocation();
         }
         
         rpc.serviceAddress = serviceAddress;
