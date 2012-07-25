@@ -115,8 +115,8 @@ describe("contactsAPI test", function() {
 	
 	  beforeEach(function(){
 	      param[0]['type'] = 'remote';       
-	      param[0]['usr']  = 'gregg01';
-	      param[0]['pwd']  = 'lazio001';  
+	      param[0]['usr']  = '';
+	      param[0]['pwd']  = '';  
 	      fakeAuth = "";
 	      contactsObj = "";
 	  });
