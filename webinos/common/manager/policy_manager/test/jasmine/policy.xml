@@ -1,0 +1,40 @@
+<policy-set combine="first-matching-target" description="policy5">
+    <policy combine="first-applicable" description="PZOwner">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="user1"/>
+            </subject>
+        </target>
+        <rule effect="permit">
+            <condition combine="or">
+                <resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+            </condition>
+        </rule>
+        <rule effect="prompt-blanket">
+            <condition combine="or">
+                <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+            </condition>
+        </rule>
+        <rule effect="deny"></rule>
+    </policy>
+    <policy combine="first-applicable" description="PZFriend">
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="user2"/>
+            </subject>
+        </target>
+        <rule effect="prompt-oneshot">
+            <condition combine="or">
+                <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+            </condition>
+        </rule>
+    </policy>
+    <policy combine="first-applicable" description="untrusted">
+        <rule effect="deny"></rule>
+    </policy>
+</policy-set>

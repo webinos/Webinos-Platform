@@ -1,0 +1,3 @@
+<policy combine="first-applicable" description="catch">
+	<rule effect="permit"></rule>
+</policy>
