@@ -1,5 +1,6 @@
 var localPzp = "";
 
+
 function fillPZAddrs(data) {
 	var pzpId = data.from;
 	var pzhId, connectedPzh , connectedPzp;
@@ -289,13 +290,13 @@ var recentService = "";
 		param.usr = "";
 		param.pwd = "";
 		param.type = "local";
-		param.addressBookName=(document.URL.split('/').slice(0, -1).join('/')+'/' + "abook.mab").replace("file://","");
+		//param.addressBookName=(document.URL.split('/').slice(0, -1).join('/')+'/' + "abook.mab").replace("file://","");		
+		param.addressBookName="";
 	}
 	
 	//contacts_module<local>,test if W3C Contacts Module asks for path to a valid mab file if addressed platform it's not Android
 	function test_localContacts_validMabFile(completeCB) {
 	    test_localContacts_setup();	    	  
-	    param.addressBookName="";
 
 	    recentService.authenticate(param, function(result){
 		//  clearTimeout(timer);
@@ -304,7 +305,7 @@ var recentService = "";
 		  else
 		        completeCB(false, "authentication succeed")
 	    });
-	    //alert("Allow Policy Manager, before confirming this message.");
+	    //alert("Allow Policy Manager, before confirming this message.");	  			    
 	}
 	
 	
@@ -313,6 +314,7 @@ var recentService = "";
 	//contacts_module<local>, check if local contacts address book is loaded
 	function test_localContacts_addressBookLoaded(completeCB) {       
 		test_localContacts_setup();
+		param.addressBookName=prompt("Please enter a valid address to a mab file", "");
 		
 		recentService.isAlreadyAuthenticated(param, function(result){
 			if(result === false){ 
@@ -418,16 +420,16 @@ var recentService = "";
 
 	// Define each test in this array, with a descriptive name followed by the test method itself.
 	var tests = [ 	{ testName: 'Contacts Module', testMethod: test_contactsModule_isModuleDiscoveredAndLoadedLocally },
-				{ testName: 'path to valid mab file', testMethod: test_localContacts_validMabFile},
-				{ testName: 'test if local contacts address book is loaded', testMethod: test_localContacts_addressBookLoaded},
-				{ testName: 'test if fields of the contacts structure are filled in', testMethod: test_localContacts_testContactsStructure},
-				{ testName: 'test retrived contacts is formed as expected', testMethod: test_localContacts_checkReturnedContact},
 				{ testName: 'user not yet authenticated', testMethod: test_remoteContacts_isAlreadyAuthenticated },
 				{ testName: 'user fails to authenticate, automatically', testMethod: test_remoteContacts_authenticateFailure },
 				{ testName: 'user fails to authenticate for denied access', testMethod: test_remoteContacts_authenticateDeny },
 				{ testName: 'user succeeded to authenticate', testMethod: test_remoteContacts_authenticate },
 				{ testName: 'get all contacts', testMethod: test_remoteContacts_getAllContacts },
 				{ testName: 'filter contacts', testMethod: test_remoteContacts_find },
+				{ testName: 'path to valid mab file', testMethod: test_localContacts_validMabFile},
+				{ testName: 'test if local  address book is loaded', testMethod: test_localContacts_addressBookLoaded},
+				{ testName: 'test if fields of the contacts structure are filled in', testMethod: test_localContacts_testContactsStructure},
+				{ testName: 'test retrived contacts is formed as expected', testMethod: test_localContacts_checkReturnedContact},
 				//TODO: (this cause the contacts API to fails. Sometimes it crashes...){ testName: 'search for not existing contact', testMethod: test_remoteContacts_filterForNotExistingContact},
 				//TODO: (this cause the contacts API to fails. Sometimes it crashes...){ testName: 'search for malformed contact', testMethod: test_remoteContacts_filterForMalformedContact},
 			];
