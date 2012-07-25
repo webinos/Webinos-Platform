@@ -1,0 +1,3 @@
+<policy combine="first-applicable" description="policy3">
+    <rule effect="deny"></rule>
+</policy>
