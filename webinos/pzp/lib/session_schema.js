@@ -55,12 +55,12 @@ schema.checkSchema = function(msg) {
  */
 checkPropSchema = function(message) {
   var myEnv, assert, schema, validation;
-  
+
   myEnv = require("schema")("myEnvironment", { fallbacks: "STRICT_FALLBACKS" });
   assert = require("assert");
-  
+
   // "prop" type package schema
-  // required fields: "type", "from", "to" and "payload" 
+  // required fields: "type", "from", "to" and "payload"
   schema = myEnv.Schema.create({
     "type": "object",
     "properties":{
@@ -83,10 +83,10 @@ checkPropSchema = function(message) {
       "payload": {
         "type": "object",
         "default":[]
-      }     
+      }
     },
     // no other fields allowed
-    "additionalProperties": false
+    "additionalProperties": true
   });
   try {
     validation = schema.validate(message);
@@ -107,12 +107,12 @@ checkPropSchema = function(message) {
  */
 checkJSONRPCSchema = function(message) {
   var myEnv, assert, schema, validation;
-  
+
   myEnv = require("schema")("myEnvironment", { fallbacks: "STRICT_FALLBACKS" });
   assert = require("assert");
-  
+
   // "JSONRPC" package schema
-  // required fields: "type", "from", "to" and "payload" 
+  // required fields: "type", "from", "to" and "payload"
   // optiona fields: "register", "id", "resp_to"
   schema = myEnv.Schema.create({
     "type": "object",
@@ -148,7 +148,7 @@ checkJSONRPCSchema = function(message) {
       "payload": {
         "type": ["object", "null"],
         "default":[]
-      }     
+      }
     },
     // no other fields allowed
     "additionalProperties": false
@@ -172,10 +172,10 @@ checkJSONRPCSchema = function(message) {
  */
 checkTypeSchema = function(message) {
   var myEnv, assert, schema, validation;
-  
+
   myEnv = require("schema")("myEnvironment", { fallbacks: "STRICT_FALLBACKS" });
   assert = require("assert");
-  
+
   // only "prop" and "JSONRPC" types are allowed
   schema = myEnv.Schema.create({
     "type": "object",
@@ -183,7 +183,7 @@ checkTypeSchema = function(message) {
       "type": {
         "type": "string",
         "enum": ["JSONRPC", "prop"]
-      }     
+      }
     },
     // other fields allowed (in this function we test only "type" field)
     "additionalProperties": true
