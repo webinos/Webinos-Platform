@@ -26,12 +26,11 @@ var log         = new common.debug("config");
 var session_configuration = exports;
 
 // If modifying, please change both ports
-session_configuration.pzhPort    = 8000; // used by PZP
-session_configuration.farmPort   = 8000; // used by farm when starting
+session_configuration.pzhPort    = 80; // used by PZP
+session_configuration.farmPort   = 80; // used by farm when starting
 
 // PZH webserver uses these ports
-session_configuration.httpServerPort = 8900;
-session_configuration.webServerPort  = 9000;
+session_configuration.webServerPort  = 443;
 
 //PZP webserver uses these ports
 session_configuration.pzpHttpServerPort = 8081;
@@ -55,10 +54,10 @@ session_configuration.modes  = ["VIRGIN", "HUB", "PEER", "HUB_PEER"];
 session_configuration.PZH_MSG = "0";
 session_configuration.PZP_MSG = "1";
 /**
-* @descripton Checks for master certificate, if certificate is not found 
-* it calls generating certificate function defined in certificate manager. 
+* @descripton Checks for master certificate, if certificate is not found
+* it calls generating certificate function defined in certificate manager.
 * This function is crypto sensitive.
-* @param {function} callback It is callback function that is invoked after 
+* @param {function} callback It is callback function that is invoked after
 * checking/creating certificates
 */
 session_configuration.setConfiguration = function (name, type, host, pzhName, callback) {
@@ -79,9 +78,13 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
   if (name === "" && (type === "Pzp" || type === "PzhFarm")){
     name = os.hostname() + "_"+ type; //devicename_type
   }
- 
+
   fs.readFile(( webinosDemo+"/config/"+ name +".json"), function(err, data) {
-    if ( err && err.code=== "ENOENT" ) {
+      if(err && err.code ==="EACCES") {
+        log.error("configuration file read failed... try with sudo ");
+        process.exit();
+      }
+      if ( err && err.code=== "ENOENT" ) {
       // CREATE NEW CONFIGURATION
       var config = createConfigStructure(name, type);
       config.name = name;
@@ -307,4 +310,3 @@ function selfSignedMasterCert(config, callback){
     callback("undefined");
   }
 }
-

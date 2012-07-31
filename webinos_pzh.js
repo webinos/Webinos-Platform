@@ -50,7 +50,7 @@ process.argv.forEach(function (arg) {
 });
 
 if ( host === null) {
-  host = "localhost";
+  host = "";
 }
 
 if ( name === null) {
