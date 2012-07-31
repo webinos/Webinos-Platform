@@ -20,95 +20,91 @@
 <html>
 <head>
 
-<script type="text/javascript" src="../jquery-1.7.2.min.js"></script>
-
-<script type="text/javascript" src="../webinos.js"></script>
-<link rel="stylesheet" type="text/css" href="../style.css" media="screen"/>
-<script type="text/javascript"
-  src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
+<script type="text/javascript" src="./webinos.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/style.css" media="screen"/>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js"></script>
 <script type="text/javascript">
-
-$(document).ready(function() {
-
+  $(document).ready(function() {
     function logMessage(msg) {
-	    if (msg) {
-		$('#message').append('<li>' + msg + '</li>');
-	    }
+      if (msg) {
+        $('#message').append('<li>' + msg + '</li>');
+      }
     }
 
     function fillPZAddrs(data) {
-	var pzpId = data.from;
-	var pzhId, connectedPzh , connectedPzp;
-	if (pzpId !== "virgin_pzp") {
-	  pzhId = data.payload.message.pzhId;
-	  connectedPzp = data.payload.message.connectedPzp; // all connected pzp
-	  connectedPzh = data.payload.message.connectedPzh; // all connected pzh
+      var pzpId = data.from;
+      var pzhId, connectedPzh , connectedPzp;
+      if (pzpId !== "virgin_pzp") {
+        pzhId = data.payload.message.pzhId;
+        connectedPzp = data.payload.message.connectedPzp; // all connected pzp
+        connectedPzh = data.payload.message.connectedPzh; // all connected pzh
 
-	  logMessage('registeredBrowser msg from ' + pzpId);
-	  console.log('+++++++++++++registeredBrowser msg from ' + pzpId);
-	}
+        logMessage('registeredBrowser msg from ' + pzpId);
+        console.log('+++++++++++++registeredBrowser msg from ' + pzpId);
+      }
     }
     webinos.session.addListener('registeredBrowser', fillPZAddrs);
 
-  function updatePZAddrs(data) {
-      if(typeof data.payload.message.pzp !== "undefined") {
-	  logMessage('new pzp ' + data.payload.message.pzp);
-      } else {
-	  logMessage('new pzh ' + data.payload.message.pzh);
-      }
-  }
-  webinos.session.addListener('update', updatePZAddrs);
+    function updatePZAddrs(data) {
+        if(typeof data.payload.message.pzp !== "undefined") {
+      logMessage('new pzp ' + data.payload.message.pzp);
+        } else {
+      logMessage('new pzh ' + data.payload.message.pzh);
+        }
+    }
+    webinos.session.addListener('update', updatePZAddrs);
 
 
-  function printInfo(data) {
-	  logMessage(data.payload.message);
-  }
-  webinos.session.addListener('info', printInfo);
+    function printInfo(data) {
+      logMessage(data.payload.message);
+    }
+    webinos.session.addListener('info', printInfo);
     
-  var contactsService = {};
-  var recentService;
+    var contactsService = {};
+    var recentService;
 
 
 
-  $('#btnFindService').bind('click', function() {
-	console.log('********ContactsClient: find service button clicked');
-		  contactsService = {};
-		  recentService = null;
-		  $('#getContactsServices').empty();
+    $('#btnFindService').bind('click', function() {
+      console.log('********ContactsClient: find service button clicked');
+      contactsService = {};
+      recentService = null;
+      $('#getContactsServices').empty();
 
-	  webinos.discovery.findServices(
-	  new ServiceType('http://www.w3.org/ns/api-perms/contacts'),
-	  {
-	    onFound: function (service) {
-	      console.log("Service: ",service," found!  YAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!");
-	      contactsService[service.serviceAddress] = service;
-	      $('#getContactsServices').append($('<option>' + service.serviceAddress + '</option>'));
-      }
+      webinos.discovery.findServices(
+      new ServiceType('http://www.w3.org/ns/api-perms/contacts'),
+      {
+        onFound: function (service) {
+          console.log("Service: ",service," found!  YAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!");
+          contactsService[service.serviceAddress] = service;
+          $('#getContactsServices').append($('<option>' + service.serviceAddress + '</option>'));
+        }
+      });
     });
-  });
 
-  $("#getContactsServices option").live('click', function(event) {
-	  $(this).parent().attr("recent", $(this).val());
-  });
+    $("#getContactsServices option").live('click', function(event) {
+      $(this).parent().attr("recent", $(this).val());
+    });
 
 
-  $('#btnBindService').bind('click', function() {
-	  console.log("********************* Bind button clicked!!!!************")
-	  recentService = contactsService[$('#getContactsServices').attr('recent')];
-	  recentService.bindService({onBind:function(service) {
-	  logMessage('CONTACTS API ' + service.api + ' bound.');
-	  $('#html_contacts').html("<i><b>Contacts</b></i> webinos rpc service found!<br>Please select contacts type, fill the text areas then press <i>Authenticate</i> button above.");
-      }});
-  });
+    $('#btnBindService').bind('click', function() {
+      console.log("********************* Bind button clicked!!!!************")
+      recentService = contactsService[$('#getContactsServices').attr('recent')];
+      recentService.bindService({onBind:function(service) {
+      logMessage('CONTACTS API ' + service.api + ' bound.');
+      $('#html_contacts').html("<i><b>Contacts</b></i> webinos rpc service found!<br>Please select contacts type, fill the text areas then press <i>Authenticate</i> button above.");
+        }});
+    });
 
-  $('#registerBrowser').bind('click', function() {
-	var options = {type: 'prop', payload: {status:'registerBrowser'}};
-	webinos.session.message_send(options);
-});
+    $('#registerBrowser').bind('click', function() {
+      var options = {type: 'prop', payload: {status:'registerBrowser'}};
+      webinos.session.message_send(options);
+    });
 
 
 //  function authenticate_cb()
-$('#btnAuthenticate').bind('click', function()
+  $('#btnAuthenticate').bind('click', function()
   {
     if(recentService) //(contactsService[0])
     {
@@ -150,20 +146,20 @@ $('#btnAuthenticate').bind('click', function()
       {
         parameters.type = "remote";
         //contactsService[0].
-	recentService.isAlreadyAuthenticated(parameters, function(result)
+        recentService.isAlreadyAuthenticated(parameters, function(result)
         {
           //contactsService[0].
-	  recentService.getAllContacts(parameters, print_contact_list);
+          recentService.getAllContacts(parameters, print_contact_list);
         });
       }
       else if ($("input[@name='contactType']:checked").val() == 'local')
       {
         parameters.type = "local";
         //contactsService[0].
-	recentService.isAlreadyAuthenticated(parameters, function(result)
+        recentService.isAlreadyAuthenticated(parameters, function(result)
         {
           //contactsService[0]
-	  recentService.getAllContacts(parameters, print_contact_list);
+          recentService.getAllContacts(parameters, print_contact_list);
         });
       }
     }
@@ -213,7 +209,7 @@ $('#btnAuthenticate').bind('click', function()
 
   function handle_authentication_query(status) // see function
   {
-	console.log('------------------handle_auth : '+status);
+    console.log('------------------handle_auth : '+status);
     if (status)
     {
       if ($("input[@name='contactType']:checked").val() == 'remote')
@@ -224,7 +220,7 @@ $('#btnAuthenticate').bind('click', function()
     else
 //       document.getElementById('authStatus').innerHTML = "<font color='#FF0000'><b><u>" + "CANNOT" + "</u>"
 //         + "Authenticate: check GMail username and password or address book file name" + "</b></font>";
-            $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
+      $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
   }
 
   // Print a contact list to HTML document
@@ -289,14 +285,14 @@ $('#btnAuthenticate').bind('click', function()
             if(list[i].photos[j].type=="file") //is base64 string	
              contactString+="<img src=\"data:image/png;base64,"+list[i].photos[j].value+"\" alt=\"Image\"><br>";
             
-	    else if(list[i].photos[j].type=="url") //is an URL
-                contactString+="<img src=\""+list[i].photos[j].value+"\" alt=\"Image\"><br>";
-	   
-	   //TODO: quick and dirty solution for android issue. Photos arrays starts as array and get here as object
-	   else { //if (/*(list[i].photos instanceof Object) &&*/ list[i].photos.value) {
-		var photo = list[i].photos[j].value;
-		contactString+="<img alt=\"Image\" , src=\"data:image\/png;base64, "+photo+"\" /><br>";
-	   }
+            else if(list[i].photos[j].type=="url") //is an URL
+                      contactString+="<img src=\""+list[i].photos[j].value+"\" alt=\"Image\"><br>";
+           
+           //TODO: quick and dirty solution for android issue. Photos arrays starts as array and get here as object
+           else { //if (/*(list[i].photos instanceof Object) &&*/ list[i].photos.value) {
+            var photo = list[i].photos[j].value;
+            contactString+="<img alt=\"Image\" , src=\"data:image\/png;base64, "+photo+"\" /><br>";
+          }
           }
         }
 
@@ -323,19 +319,17 @@ $('#btnAuthenticate').bind('click', function()
 </head>
 <body>
   <!--Right part of the table-->
-  <table border="1" style="height: 100%; width: 100%;">
+  <table border="1" >
     <tr valign="top">
       <td width="50%">
         <div>
           <div style="background-color:lightgray; border:1px solid black">
-	    <button id="registerBrowser" class="button">Register
-								Browser</button>
-	    <br>
-        		<!--PZH PZP LIST : <select id="pzh_pzp_list"> <option>  </option> </select> <br>-->
-	    <button id="btnFindService" class="button">Find Contacts Service</button>
-	    <br>
-	    <select id="getContactsServices" size="5"></select>
-	    <br><button id="btnBindService" class="button">Bind Service</button>
+          <button id="registerBrowser" class="button">Register Browser</button>
+          <br><!--PZH PZP LIST : <select id="pzh_pzp_list"> <option>  </option> </select> <br>-->
+          <button id="btnFindService" class="button">Find Contacts Service</button>
+          <br>
+          <select id="getContactsServices" size="5"></select>
+          <br><button id="btnBindService" class="button">Bind Service</button>
             <p>
               <input type="radio" name="contactType" value="remote"
                 id="cnt_remote" checked="checked"">Remote
@@ -371,15 +365,10 @@ $('#btnAuthenticate').bind('click', function()
           <!--   </p> -->
 
           <div id="html_contacts" style="background-color:lightgray; border:1px solid black">
-
-            <script>
-                          document.write("NO SERVICE");
-                        </script>
+            <script> document.write("NO SERVICE"); </script>
           </div>
           <div id="authStatus" style="background-color:lightgray; border:1px solid black">
-            <script>
-                          document.write("NOT YET AUTHENTICATED");
-                        </script>
+            <script>document.write("NOT YET AUTHENTICATED"); </script>
           </div>
           <!--           <div id="contactList">
             <script>
@@ -412,9 +401,7 @@ $('#btnAuthenticate').bind('click', function()
             </p>
           </div>
           <div id="contactList">
-            <script>
-                          document.write("");
-                        </script>
+            <script> document.write(""); </script>
           </div>
         </div>
 

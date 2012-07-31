@@ -20,11 +20,11 @@
 <head>
 <title>Webinos HRM demo</title>
 <!---<link href='http://fonts.googleapis.com/css?family=Bowlby+One+SC' rel='stylesheet' type='text/css'>-->
-<link rel="stylesheet" href="./hrm.css">
+<link rel="stylesheet" href="discovery/Android/hrm.css">
 <meta name="viewport" content="format-detection=no,initial-scale=1.0,maximum-scale=1.0,user-scalable=0,width=device-width" />
-<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="hrm.js"></script>
-<!--script type="text/javascript" src="../../webinos.js"></script> -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="discovery/Android/hrm.js"></script>
+<script type="text/javascript" src="./webinos.js"></script> 
 </head>
 
 <body>
@@ -37,7 +37,7 @@
 		</div>
 		
 		<div id="loader"></div>
-		<div id="graph"><img src="img/median.png" class="graphbckgr" id="pulseMed">
+		<div id="graph"><img src="discovery/Android/img/median.png" class="graphbckgr" id="pulseMed">
 			<canvas id="canvas" height="100" width="400">
 				<p>
 				YOU YOU ARE NOT USING A BROWSER THAT SUPPORTS THE
@@ -50,7 +50,7 @@
 		<div class="connectbuttons"><a href="javascript:connectWebinos()">Connect to PZP</a><a href="javascript:startHRM()"  id="HRM">StartHRM</a></div>
 
 
-		<img id="imgbckgr" src="img/darkoverlay.png">
+		<img id="imgbckgr" src="discovery/Android/img/darkoverlay.png">
 		
 		
 <script type="text/javascript">
@@ -140,7 +140,7 @@
 			{
 				$('#HRM').text('StopHRM');
 				try {
-					$('#loader').html("<img src='img/ajaxloader.gif'>");
+					$('#loader').html("<img src='discovery/Android/img/ajaxloader.gif'>");
 				}
 				catch(e) {
 				console.log("startHRM - loader: "+e.message);

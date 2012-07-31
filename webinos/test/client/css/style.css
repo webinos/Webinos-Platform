@@ -17,7 +17,7 @@
 				background:-ms-linear-gradient(top, #055084, #0071BC); /* IE */
 				background:linear-gradient(top, #055084, #0071BC); /* W3C Standard */
 				background-color:#0879a9;
-				background-image: url(rauschen.png) ;
+				background-image: url(../images/rauschen.png) ;
 				margin: 0 0 0 0;
 				padding: 0 0 0 0;
 			}
@@ -25,7 +25,7 @@
 			body{
 				margin: 0 0 0 0;
 				padding: 0 0 0 0;
-				background-image: url(testbed_bg2.png) ;
+				background-image: url(../images/testbed_bg2.png) ;
 				background-repeat: repeat-x; background-position:top;
 				
 				}
@@ -84,14 +84,14 @@
 				border-radius:4px; /* CSS3 */
 				border: 1px solid #a0a0a0;
 				
-				background: url(rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
-				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(rauschen.png); /* Safari, Chrome*/
-				 background: url(rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
-				background:  url(rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
-				background:  url(rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
+				background: url(../images/rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
+				 background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(../images/rauschen.png); /* Safari, Chrome*/
+				 background: url(../images/rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
+				background:  url(../images/rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
+				background:  url(../images/rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
 				
 				
-				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				background:  url(../images/rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
 				
 				color: #fff;
 				font-family: Helvetica, Arial, sans-serif;
@@ -109,14 +109,14 @@
 				border-radius:4px; /* CSS3 */
 				border: 1px solid #a0a0a0;
 				
-				background: url(rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
-				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(rauschen.png); /* Safari, Chrome*/
-				 background: url(rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
-				background:  url(rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
-				background:  url(rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
+				background: url(../images/rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
+				 background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(../images/rauschen.png); /* Safari, Chrome*/
+				 background: url(../images/rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
+				background:  url(../images/rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
+				background:  url(../images/rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
 				
 				
-				background:  url(rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
+				background:  url(../images/rauschen.png), linear-gradient(top, #626262, #959595); /* W3C Standard */
 				
 				color: #fff;
 				font-family: Helvetica, Arial, sans-serif;
@@ -136,14 +136,14 @@
 				border-radius:4px; /* CSS3 */
 				border: 1px solid #a0a0a0;
 				
-				background: url(rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
-				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(rauschen.png); /* Safari, Chrome*/
-				 background: url(rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
-				background:  url(rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
-				background:  url(rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+				background: url(../images/rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				 background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(../images/rauschen.png); /* Safari, Chrome*/
+				 background: url(../images/rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  url(../images/rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  url(../images/rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
 				
 				
-				background:  url(rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
+				background:  url(../images/rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
 				
 				color: #000;
 				font-family: Helvetica, Arial, sans-serif;
@@ -172,14 +172,14 @@
 			
 			
 			#status.error{
-								background: url(rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
-				 background:  url(rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(rauschen.png); /* Safari, Chrome*/
-				 background: url(rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
-				background:  url(rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
-				background:  url(rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
+        background:  url(../images/rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+				background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(../images/rauschen.png); /* Safari, Chrome*/
+				background:  url(../images/rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
+				background:  url(../images/rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
+				background:  url(../images/rauschen.png), -ms-linear-gradient(top, #ffb500, #ffff00); /* IE */
 				
 				
-				background:  url(rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
+				background:  url(../images/rauschen.png), linear-gradient(top, #ffb500, #ffff00); /* W3C Standard */
 				opacity 1.0;
 				color: #FFF;
 			}
