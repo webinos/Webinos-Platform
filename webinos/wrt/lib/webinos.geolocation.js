@@ -44,14 +44,6 @@ WebinosGeolocation.prototype.bindService = function (bindCB, serviceId) {
 	};
 }
 
-// converts ms since epoch to Date object, helper method
-function msSinceEpochToDate(position) {
-	if (position && position.timestamp) {
-		position.timestamp = new Date(position.timestamp);
-		return position;
-	}
-}
-
 /**
  * Retrieve the current position.
  * @param positionCB Success callback.
@@ -61,7 +53,7 @@ function msSinceEpochToDate(position) {
 function getCurrentPosition(positionCB, positionErrorCB, positionOptions) { 
 	var rpc = webinos.rpcHandler.createRPC(this, "getCurrentPosition", positionOptions); // RPC service name, function, position options
 	webinos.rpcHandler.executeRPC(rpc, function (position) {
-		positionCB(msSinceEpochToDate(position));
+		positionCB(position);
 	},
 	function (error) {
 		positionErrorCB(error);
@@ -79,7 +71,7 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
 	var rpc = webinos.rpcHandler.createRPC(this, "watchPosition", [positionOptions]);
 
 	rpc.onEvent = function (position) {
-		positionCB(msSinceEpochToDate(position));
+		positionCB(position);
 	};
 
 	webinos.rpcHandler.registerCallbackObject(rpc);
