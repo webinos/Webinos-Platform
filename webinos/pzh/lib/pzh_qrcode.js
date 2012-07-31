@@ -95,7 +95,7 @@ pzh_qrcode.addPzpQRAgain = function(pzh, next) {
   pzh.expecting.setExpectedCode(code,function() {
     pzh.getMyUrl(function(url) {
       create(url, code, function(err, qrimg) {
-        next({cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
+        next({to: pzh.config.serverName, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
       });
     });
   }); 

@@ -25,7 +25,7 @@ var log     = new session.common.debug("pzp_server");
 var global  = session.configuration;
 
 var PzpServer = function() {
-    
+
 }
 
 PzpServer.prototype.startServer = function (parent, callback) {
@@ -57,24 +57,22 @@ PzpServer.prototype.startServer = function (parent, callback) {
         clientSessionId = parent.config.pzhId + "/"+ cn; //parent.pzhId + "/" +cn;
         log.info("client authenticated " + clientSessionId) ;
 
-        if (parent.mode === global.modes[1]) {
+        if (parent.mode === global.modes[1] || parent.mode === global.modes[3]) {
           parent.mode = global.modes[3];
         } else {
           parent.mode = global.modes[2];
         }
 
         parent.state = global.states[2];
-	
-	if(typeof parent.connectedPzp[clientSessionId] !== "undefined")
-	{
+
+        if(typeof parent.connectedPzp[clientSessionId] !== "undefined") {
           parent.connectedPzp[clientSessionId].socket = conn;
           parent.connectedPzp[clientSessionId].state  = global.states[2];
-	}
-
-        var msg = parent.messageHandler.registerSender(parent.sessionId, clientSessionId);
-        parent.sendMessage(msg, clientSessionId);
-
-      } 
+        }
+          var msg = parent.messageHandler.registerSender(parent.sessionId, clientSessionId);
+          parent.sendMessage(msg, clientSessionId);
+          parent.connectedApp();
+      }
 
       conn.on("data", function (buffer) {
         try{
@@ -117,19 +115,20 @@ PzpServer.prototype.startServer = function (parent, callback) {
         }
 
         if(status) {// No pzp is connected directly
-          if (parent.mode === global.modes[3]) {
+          if (parent.mode === global.modes[3] || parent.mode === global.modes[1]) {
             parent.mode = global.modes[1];
           } else if (parent.mode === global.modes[2]) {
             parent.state = global.states[0];
           }
-        } 
-        
+        }
+
         for (var key in parent.connectedPzp) {
           if (parent.connectedPzp[key].socket === conn){
-            parent.connectedPzp[key].state = global.states[0];
+            delete parent.connectedPzp[key];
           }
         }
         log.info('mode '+ parent.mode + ' state '+parent.state);
+        parent.connectedApp();
       });
 
       // It calls removeClient to remove PZP from connected_client and connectedPzp.
@@ -149,16 +148,17 @@ PzpServer.prototype.startServer = function (parent, callback) {
         }
 
         if(status) {// No pzp is connected directly
-          if (parent.mode === global.modes[3]) {
+          if (parent.mode === global.modes[3] || parent.mode === global.modes[1]) {
             parent.mode = global.modes[1];
           } else if (parent.mode === global.modes[2]) {
             parent.state = global.states[0];
           }
-        } 
+        }
 
         for (var key in parent.connectedPzp) {
           if (parent.connectedPzp[key].socket === conn){
-            parent.connectedPzp[key].state = global.states[0];
+            delete parent.connectedPzp[key];
+            parent.connectedApp();
           }
         }
         log.info('mode '+ parent.mode + ' state '+parent.state);
