@@ -243,3 +243,15 @@ session_common.resolveIP = function(serverName, callback) {
     });
   }
 };
+
+session_common.fetchIP = function(callback) {
+  var socket = net.createConnection(80, "www.google.com");
+  socket.on('connect', function() {
+    if (typeof callback === "function") { callback(socket.address().address);}
+    socket.end();
+  });
+  socket.on('error', function() { // Assuming this will happen as internet is not reachable
+    if (typeof callback === "function") { callback("0.0.0.0");}
+
+  });
+}
