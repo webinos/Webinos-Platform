@@ -40,12 +40,11 @@ else
 
   if (!require(commonPaths.storage + '/settings.json').contextEnabled){
     console.log("CONTEXT MANAGER DISABLED");
-//  return;
   }else{
     console.log("CONTEXT MANAGER ENABLED");
-//  }
 
-    var  sessionPzp =  webinos_.global.require(webinos.global.pzp.location, 'lib/pzp').session;
+//    var  sessionPzp =  webinos_.global.require(webinos_.global.pzp.location, 'lib/pzp').session;
+
 
 //  This class represents the context objects that will be logged
     webinos.context.ContextData = function(method, params, results) {
@@ -119,6 +118,7 @@ else
 
     var registeredListeners = [];
 
+      var current = null;
 
 //  Open the database
 
@@ -128,7 +128,7 @@ else
     function saveContextData(_dataInLog, _dataIn)
     {
       
-      var pmlib = webinos_.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec;
+      var pmlib = webinos_.global.require(webinos_.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec;
       policyManager = new pmlib.policyManager();
 
       var res, request = {}, subjectInfo = {}, resourceInfo = {};
@@ -179,12 +179,23 @@ else
 
     webinos.context.logContext = function(myObj, res) {
       if (!res['result']) res['result']={};
+         if (current==null){
+             current = {};
+             current.Pzp = getPzp();
+             current.PzpId = getPzpId();
+             current.PzhId = getPzhId();
+         }
+//        if (sessionPzp == undefined) sessionPzp =  webinos_.global.require(webinos_.global.pzp.location, 'lib/pzp').session;
+//
+//        var t1 = getPzp();
+//        var t2 = getPzpId();
+//        var t3 = getPzhId();
 
       // Create the data object to log
       var myData = new webinos.context.ContextData(myObj['method'],myObj['params'], res['result']);
 
       var dataIn = {timestamp:myData.timestamp, api: myData.call.api, hash: myData.call.hash, method: myData.call.method, params:myData.params, result:myData.results};
-      var dataInLog = {timestamp:myData.timestamp, api: myData.call.api, hash: myData.call.hash, method: myData.call.method, session: sessionPzp.getPzpId()};
+      var dataInLog = {timestamp:myData.timestamp, api: myData.call.api, hash: myData.call.hash, method: myData.call.method, session: current.PzpId};
 
 
       //Don't log Context API calls

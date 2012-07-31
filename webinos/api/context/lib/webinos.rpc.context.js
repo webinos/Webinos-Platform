@@ -67,7 +67,7 @@
 					break;
 				}
 
-				var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/contextDBManagerPZH.js');
+				var contextDB = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/contextDBManagerPZH.js');
 				if(_query.type == "getrawview")
 				{
 					contextDB.getrawview(function(results) {
@@ -133,7 +133,7 @@
 	RemoteContextManager.prototype.executeQuery = function(query, successCallback, errorCallback) {
 		switch (query.type) {
 		case "DB-insert"://PZH
-		  var contextDB = webinos.global.require(webinos.global.manager.context.location, 'lib/contextDBManagerPZH.js');
+		  var contextDB = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/contextDBManagerPZH.js');
 			contextDB.insert(query.data); //TODO: Add success callback
 			break;
 		case "getrawview"://PZH
