@@ -108,7 +108,7 @@ describe("Geolocation API", function() {
 			runs(function() {
 				expect(success).toEqual(true);
 				expect(position.coords).toEqual(jasmine.any(Object));
-				expect(position.timestamp).toEqual(jasmine.any(Object));
+				expect(position.timestamp).toEqual(jasmine.any(Number));
 				var coords = position.coords;
 				expect(coords.latitude).toEqual(jasmine.any(Number));
 				expect(coords.longitude).toEqual(jasmine.any(Number));
@@ -136,7 +136,7 @@ describe("Geolocation API", function() {
 				var tmpCounter = counter;
 
 				expect(position.coords).toEqual(jasmine.any(Object));
-				expect(position.timestamp).toEqual(jasmine.any(Object));
+				expect(position.timestamp).toEqual(jasmine.any(Number));
 				var coords = position.coords;
 				expect(coords.latitude).toEqual(jasmine.any(Number));
 				expect(coords.longitude).toEqual(jasmine.any(Number));
