@@ -27,6 +27,7 @@
 
   var path = require('path');
   var moduleRoot = path.resolve(__dirname, '../') + '/';
+  var webinos_ = require('webinos')(__dirname);
 
   require('./AsciiArt')
 
@@ -47,23 +48,30 @@
   var databasehelper = require('JSORMDB');
   bufferDB = new databasehelper.JSONDatabase({path : bufferpath, transactional : false});
 
-  sessionPzp =   webinos_.global.require(webinos.global.pzp.location, 'lib/webinos_pzp').session;
+//  sessionPzp =   webinos_.global.require(webinos_.global.pzp.location, 'lib/pzp').session;
 
   var sessionInstance =null;
 
+    var current = null;
 
   ////////////////////////////////////////////////////////////////////////////////////////
   //Running on the PZP
   //////////////////////////////////////////////////////////////////////////////////////
   exports.handleContextData = function(contextData){
+      if (current==null){
+          current = {};
+          current.Pzp = getPzp();
+          current.PzpId = getPzpId();
+          current.PzhId = getPzhId();
+      }
 
-    var connectedPzh = sessionPzp.getPzhId();
+    var connectedPzh = current.PzhId;
     if (connectedPzh == "null" || connectedPzh == "undefined"){
       bufferDB.insert(contextData)
       console.log("Successfully commited Context Object to the context buffer");
     }else{
       if (sessionInstance === null){
-        sessionInstance = sessionPzp.getPzp();
+        sessionInstance = current.Pzp;
         webinosServiceDiscovery = new ServiceDiscovery(sessionInstance.rpcHandler);
       }
       bufferDB.db.load();

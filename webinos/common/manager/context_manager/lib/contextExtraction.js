@@ -27,12 +27,22 @@ var databasehelper = require('JSORMDB');
 //Initialize helper classes
 
 var Fs = require('fs');
+var path = require('path');
+var moduleRoot = path.resolve(__dirname, '../') + '/';
+var webinos_ = require('webinos')(__dirname);
+
 var vocdbpath = path.resolve(moduleRoot +'/data/contextVocabulary.json');
 webinos.context.DB = require('./contextDBManagerPZP')
 
-var sessionPzp =   webinos_.global.require(webinos.global.pzp.location, 'lib/pzp').session;
+//var sessionPzp =   webinos_.global.require(webinos_.global.pzp.location, 'lib/pzp').session;
+    var current = null;
 webinos.context.saveContext = function(dataIn, success, fail) {
-
+    if (current==null){
+        current = {};
+        current.Pzp = getPzp();
+        current.PzpId = getPzpId();
+        current.PzhId = getPzhId();
+    }
   var contextVocJSON = JSON.parse(Fs.readFileSync(vocdbpath, 'utf-8'));
   var contextItem = {};
   contextItem.API = {};
@@ -161,7 +171,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
                 contextItem.API = API.APIname;
                 contextItem.device = {}; 
                 contextItem.application = {};
-                contextItem.session = sessionPzp.getPzpId();
+                contextItem.session = current.PzpId;
                 contextItem.contextObject = cObject.objectName;
                 contextItem.method = method.objectName;
                 contextItem.timestamp = new Date().getTime();
@@ -192,7 +202,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
               contextItem.API = API.APIname;
               contextItem.device = {}; 
               contextItem.application = {};
-              contextItem.session = sessionPzp.getPzpId();
+              contextItem.session = current.PzpId;
               contextItem.contextObject = cObject.objectName;
               contextItem.method = method.objectName;
               contextItem.timestamp = new Date().getTime();

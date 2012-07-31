@@ -642,4 +642,6 @@ function checkConfiguration(config) {
   return true;
 }
 
+var context_manager= webinos.global.require(webinos.global.manager.context_manager.location);
+
 module.exports = Pzp;
