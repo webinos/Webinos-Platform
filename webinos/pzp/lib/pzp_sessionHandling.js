@@ -48,6 +48,8 @@ var pzpWebSocket  = require("./pzp_websocket"); // Needed as we start PZP server
 var pzpServer     = require("./pzp_peerTLSServer"); // Needed as we start PZP server from here
 var pzpClient     = require("./pzp_peerTLSClient"); // Needed as we start PZP server from here
 
+var context_manager= webinos.global.require(webinos.global.manager.context_manager.location);
+
 var Pzp = function () {
   "use strict";
   this.connectedPzh    = {}; // Stores PZH server details
