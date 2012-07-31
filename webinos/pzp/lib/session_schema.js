@@ -86,7 +86,7 @@ checkPropSchema = function(message) {
       }     
     },
     // no other fields allowed
-    "additionalProperties": false
+    "additionalProperties": true
   });
   try {
     validation = schema.validate(message);

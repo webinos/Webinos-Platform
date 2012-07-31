@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Connect to Your PZH</title>
+<link rel="stylesheet" type="text/css" href="css/reset.css">
+<link rel="stylesheet" type="text/css" href="css/structure.css">
+<link rel="stylesheet" type="text/css" href="css/login.css">
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
+<script type="text/javascript" src="./webinos.js"></script>
+<script>
+  $(document).ready(function() {
+    $("#connectPzh").click( function() {
+      if (document.getElementById("own_pzh") && document.getElementById("own_pzh").value !== "undefined" && document.getElementById("own_pzh").value !== "") {
+        value = document.getElementById("own_pzh").value;
+      } else {
+        value = $("#pzh_list option:selected").val();
+      }
+      to = value;
+      var options = {type: 'prop', payload: {status: "login", to: value}};
+      webinos.session.message_send(options);
+    });
+
+    function displayLogin(html_input) {
+      $('#main').html('<article class="module width_full"><header><h3> Login to Your PZH </h3></header><div class="module_content">'+ html_input.payload.message +
+     '</div></article><div class="spacer"></div>');
+    }
+    webinos.session.addListener('login', displayLogin);
+    function authenticate(msg){
+     window.location.href=msg.payload.url;
+    }
+    webinos.session.addListener('authenticate-google', authenticate);
+
+  });
+</script>
+
+</head>
+<body>
+<form class="box login">
+  <header>
+    <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png" width="100px">
+    <label>Connect to PZH </label>
+  </header>
+  <fieldset class="boxBody">
+    <label>Select Your PZH Provider</label>
+    <select value="pzh_list" id="pzh_list">
+      <option value="pzh.webinos.org"> pzh.webinos.org </option>
+    </select>
+    <label> (Or) Enter PZH Address</label>
+      <input type="text" value="" id="own_pzh"> </input>
+    <input type="button" class="btnLogin" id="connectPzh" value="Login to Your PZH!">
+    <submit> </submit>
+  </fieldset>
+</form>
+<footer id="main">
+  <a href="http://wwww.webinos.org">Powered by webinos</a> | <a href="http://developer.webinos.org">Developer resources on webinos</a>
+</footer>
+</body>
+</html>
