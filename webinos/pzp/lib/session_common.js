@@ -39,48 +39,53 @@ var validation   = require("./session_schema");
 
 session_common.debug = function(id) {
     this.store_id = id;
+    this.sessionId;
 };
 
+session_common.debug.prototype.addId = function(id) {
+  this.sessionId = id;
+}
 session_common.debug.prototype.error = function(msg) {
-  cursor.fg.red().write('error ')
-    .fg.cyan().write(this.store_id)
-    .fg.red().write(' ' + msg + '\n')
-    .reset();
-}; 
+  cursor.bg.black();
+  cursor.fg.red().write('error ');
+  cursor.fg.cyan().write(this.store_id);
+  if (typeof this.sessionId !== "undefined")
+    cursor.fg.green().write(' ' + this.sessionId);
+  cursor.fg.red().write(' ' + msg + '\n');
+  cursor.reset();
 
-session_common.debug.prototype.info = function(msg) {
-  cursor.fg.blue().write('info ')
-    .fg.cyan().write(this.store_id)
-    .fg.white().write(' ' + msg + '\n')
-    .reset();
-};
-
-/*session_common.debugPzh = function(id, type, msg) {
-  var info = true; // Change this if you want no prints from session manager
-
-  if (id !== null && typeof id !== "undefined" && typeof writeError[id] === "undefined"){
+  if (typeof this.sessionId !== "undefined" && typeof writeError[this.sessionId] === "undefined"){
     var filepath = session_common.webinosConfigPath();
-    var filename = path.join(filepath+"/logs/", id+".json");
+    var filename = path.join(filepath+"/logs/", this.sessionId+".json");
     try{
       fs.exists(filename, function(status){
         // If file does not exist, we create it , create write stream does not create file directly :) ..
         if (!status) {
           fs.writeFile(filename, function(){
-            writeError[id] = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+            writeError[this.sessionId] = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
           });
         } else {
-          writeError[id] = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+          writeError[this.sessionId] = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
         }
       });
     } catch (err){
       console.log("Error Initializing logs" + err);
     }
+  } else if(this.sessionId && writeError[this.sessionId]) {
+    writeError[this.sessionId].write(msg + '\n');
   }
+};
 
-  if (typeof writeError[id] !== "undefined" && type === "ERROR") {
-    writeError[id].write(msg);
-  }
-};*/
+session_common.debug.prototype.info = function(msg) {
+  cursor.bg.black();
+  cursor.fg.white().write('info ');
+  cursor.fg.cyan().write(this.store_id);
+  if (typeof this.sessionId !== "undefined")
+    cursor.fg.green().write(' ' + this.sessionId);
+  cursor.fg.white().write(' ' + msg + '\n')
+  cursor.reset();
+};
+
 /**
  * @description: returns root path of .webinos folder. In this folder all information is stored.
  */
@@ -113,11 +118,19 @@ session_common.webinosConfigPath = function() {
  */
 session_common.removeClient = function(self, conn) {
   "use strict";
-  var i, delId, delPzhId;
 
   for (var id in self.connectedPzp){
     if (self.connectedPzp[id].socket === conn) {
-      delete self.connectedPzp[i];
+      console.log("removed pzp instance details -" + id)
+      delete self.connectedPzp[id];
+      return id;
+    }
+  }
+
+   for (var id in self.connectedPzh){
+    if (self.connectedPzh[id].socket === conn) {
+      console.log("removed pzh instance details -" + id)
+      delete self.connectedPzh[id];
       return id;
     }
   }
@@ -153,7 +166,7 @@ session_common.readJson = function(instance, buffer, objectHandler) {
   var jsonStr;
   var len;
   var offset = 0;
-  
+
   for (;;) {
     var readByteLen;
     if (instanceMap[instance]) {
@@ -164,7 +177,7 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       jsonStr = instanceMap[instance].part + jsonStrTmp;
       offset += len;
       instanceMap[instance] = undefined;
-      
+
     } else {
       len = buffer.readUInt32LE(offset);
       offset += 4;
@@ -180,10 +193,10 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       }
       return;
     }
-    
+
     // call handler with parsed message object
     objectHandler(JSON.parse(jsonStr));
-    
+
     if (offset >= buffer.length) {
       // finished reading buffer
       return;
@@ -199,7 +212,7 @@ session_common.readJson = function(instance, buffer, objectHandler) {
  */
 session_common.processedMsg = function(self, msgObj, callback) {
   "use strict";
-  
+
   // BEGIN OF POLITO MODIFICATIONS
   var valError = validation.checkSchema(msgObj);
   if(valError === false) { // validation error is false, so validation is ok
@@ -219,7 +232,7 @@ session_common.processedMsg = function(self, msgObj, callback) {
 };
 
 /**
- * @description: It uses both resolve and lookup to fetch IP address. 
+ * @description: It uses both resolve and lookup to fetch IP address.
  * Used by PZP before connecting to PZH
  */
 session_common.resolveIP = function(serverName, callback) {

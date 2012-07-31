@@ -41,23 +41,25 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
 
     client = tls.connect(msg.port, msg.address, options, function () {
       if (client.authorized) {
-      self.peerSessionId = msg.name;
-      log.info("authorized & connected to PZP: " + msg.address + " name = " + msg.name);
+        self.peerSessionId = msg.name;
+        log.info("authorized & connected to PZP: " + msg.address + " name = " + msg.name);
 
-      if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
-        parent.mode   = global.modes[3];
-      } else {
-        parent.mode   = global.modes[2];
-      }
-      parent.state = global.states[2];
+        if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
+          parent.mode   = global.modes[3];
+        } else {
+          parent.mode   = global.modes[2];
+        }
+        parent.state = global.states[2];
 
-      // Updating at two places as parent.state should tell you at least one is connected in peer mode
-      // The process whole connectedPzp to find which is and which is not connected
-      parent.connectedPzp[msg.name].state  = global.states[2]
-      parent.connectedPzp[msg.name].socket = client;
+        // Updating at two places as parent.state should tell you at least one is connected in peer mode
+        // The process whole connectedPzp to find which is and which is not connected
+        parent.connectedPzp[msg.name].state  = global.states[2]
+        parent.connectedPzp[msg.name].socket = client;
 
-      var msg1 = parent.messageHandler.registerSender(self.sessionId, msg.name);
-      parent.sendMessage(msg1, msg.name);
+        var msg1 = parent.messageHandler.registerSender(self.sessionId, msg.name);
+        parent.sendMessage(msg1, msg.name);
+
+        parent.connectedApp();
 
       } else {
         log.info("connection failed, first connect with PZH ");
@@ -97,7 +99,7 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       if (parent.mode === global.modes[2]) {
         parent.state = global.states[0];
       }
-        
+
       if (parent.mode === global.modes[3]) {
         var status = true;
         for (var key in self.connectedPzp) {
@@ -112,21 +114,25 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       } else {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
-        parent.connectedPzp[self.peerSessionId].state = global.states[0];
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
+        delete parent.connectedPzp[self.peerSessionId].state;
+        parent.connectedApp();
+      }
+
       log.info('mode '+ parent.mode + ' state '+parent.state);
 
     });
 
     client.on("error", function (err) {
       log.error(err);
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
         parent.connectedPzp[self.peerSessionId].state = global.states[3];
-      if (parent.mode === global.modes[2]) {
+      }
+      if (parent.mode === global.modes[2] ) {
         parent.state = global.states[0];
       }
-        
-      if (parent.mode === global.modes[3]) {
+
+      if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
         var status = true;
         for (var key in self.connectedPzp) {
           if(parent.connectedPzp[key].state === global.states[2]) {
@@ -140,10 +146,12 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
       } else {
         parent.mode = global.modes[1]; // Go back in hub mode
       }
-	
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")	
-        parent.connectedPzp[self.peerSessionId].state = global.states[0];
-      log.info('mode '+ self.mode + ' state '+self.state);
+      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
+        delete parent.connectedPzp[self.peerSessionId];
+        parent.connectedApp();
+      }
+      log.info('mode '+ parent.mode + ' state '+parent.state);
+
     });
 
     client.on("close", function () {
