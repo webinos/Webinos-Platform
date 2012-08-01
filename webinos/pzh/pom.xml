@@ -58,12 +58,14 @@
             </goals>
           </execution>
           <!-- Activation for jsdoc. Runs creating js documentation. -->
+          <!-- Commented out as empty jsdoc comments crash build
           <execution>
             <id>jsdoc</id>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+          -->
         </executions>
       </plugin>
     </plugins>
