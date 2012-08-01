@@ -26,7 +26,7 @@
    * Webinos Service constructor.
    *
    * @constructor
-   * @name RemoteContextManager
+   * @alias RemoteContextManager
    * @param rpcHandler A handler for functions that use RPC to deliver their result.
    */
 	var RemoteContextManager = function(rpcHandler) {
