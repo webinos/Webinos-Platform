@@ -152,7 +152,7 @@ function initializePzp(config, pzpModules) {
 }
 
 //Added in order to be able to get the rpc handler from the current pzp
-function getPzp() {
+getPzp = function() {
   if (typeof pzpInstance !== "undefined") {
     return pzpInstance;
   } else {
@@ -160,13 +160,13 @@ function getPzp() {
   }
 }
 
-function getPzpId() {
+getPzpId = function() {
   if (typeof pzpInstance !== "undefined") {
     return pzpInstance.sessionId;
   }
 }
 
-function getPzhId() {
+getPzhId = function() {
   if (typeof pzpInstance !== "undefined") {
     return pzpInstance.config.pzhId;
   }

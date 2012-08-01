@@ -16,7 +16,7 @@
 * Copyright 2012 EPU-National Technical University of Athens
 ******************************************************************************/
 (function() {
-  var webinos_ = require('webinos')(__dirname);
+
   if (typeof webinos === 'undefined') {
     webinos = {};
     console.log("webinos not found");
@@ -28,6 +28,7 @@
 
   var path = require('path');
   var moduleRoot = path.resolve(__dirname, '../') + '/';
+  var webinos_ = require('webinos')(__dirname);
 
   require('./AsciiArt')
 
@@ -39,7 +40,7 @@
   require('./storageCheck.js')(commonPaths, require(moduleRoot + '/data/storage.json'));
 
 
-  var ServiceDiscovery = webinos.global.require(webinos.global.wrt.location, 'lib/webinos.servicedisco').ServiceDiscovery;;
+  var ServiceDiscovery = webinos_.global.require(webinos_.global.api.service_discovery.location).ServiceDiscovery;;
 
   var webinosServiceDiscovery = null;
 
