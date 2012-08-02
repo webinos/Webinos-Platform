@@ -210,7 +210,7 @@
 
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var entityRefCount = (this.rpcHandler.parent && this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0;
+				var entityRefCount = (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0; 
 				// Fetch from peers that are connected
 				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
 					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) && this.rpcHandler.parent.state === global.states[2]) {

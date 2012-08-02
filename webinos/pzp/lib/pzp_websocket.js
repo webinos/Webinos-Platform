@@ -72,7 +72,6 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
   var cs = http.createServer(function(request, response) {
     var parsed = url.parse(request.url, true);
     if (parsed.query) {
-      console.log(parsed.query);
       switch(parsed.query.cmd){
       // PZP Auto-Enrollment
       // PZH Existing - Third Message
@@ -142,7 +141,6 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
   });
 
   httpserver.on("error", function(err) {
-    log.error(err);
     if (err.code === "EADDRINUSE") {
       // BUG why make up a port ourselves?
       // Response: not making port, doing it automatically instead of throwing error .., if user wants different ports they can do themselves at startup
