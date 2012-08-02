@@ -32,7 +32,6 @@ var log     = new session.common.debug("pzh_webserver");
 var pzhapis = require('../lib/pzh_internal_apis');
 var farm    = require('../lib/pzh_farm');
 var openid  = require('./pzh_openid.js');
-var enroll  = require('./pzh_enroll.js');
 
 var storeInfo = [];
 
