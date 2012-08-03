@@ -97,7 +97,7 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
             farm.createPzh(hostname, storeInfo[query.to], function(id) {
               var msgSend = {"type":"prop","from":query.to, "to": query.id, "payload":
                 {
-                  "status":"auth-status", "message": true, "pzhid":id
+                  "status":"auth-status", "message": "true", "pzhid":id
                 }
               }
               if (farm.pzhs[id]) {
