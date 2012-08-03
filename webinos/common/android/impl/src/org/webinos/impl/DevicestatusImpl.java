@@ -141,28 +141,4 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 		 */
 		if(D) Log.v(TAG, "DevicestatusImpl: stopModule");
 	}
-	
-	/*****************************
-	 * Helpers
-	 *****************************/
-	  class DiscoveryPendingOperation extends PendingOperation {
-
-			private Thread t=null;
-			private Runnable r=null;
-			
-			public DiscoveryPendingOperation(Thread t, Runnable r) {
-				this.t = t;
-				this.r = r;
-			}
-			
-			public void cancel() {
-				Log.d(TAG, "DiscoveryPendingOperation cancel");
-				if(t!=null) {
-					Log.v(TAG, "DiscoveryPendingOperation cancel - send interrupt...");
-					//Is this interrupt needed??? - copied from messaging
-					t.interrupt();
-				}
-			}
-		}
-	
 }
