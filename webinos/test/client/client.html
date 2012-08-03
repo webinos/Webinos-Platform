@@ -179,7 +179,7 @@
       function authStatus(msg) {
         console.log(msg);
 
-        if (msg.payload.message) {
+        if (msg.payload.message === "true") {
           var existPzh = confirm(" Do you wish to enrol device with following PZH: ("+msg.payload.pzhid+")") ;
           if (existPzh === true) {
             var options = {"type": 'prop', "payload":

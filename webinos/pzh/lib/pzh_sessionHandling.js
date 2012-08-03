@@ -444,7 +444,7 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
           }
         }
         // Certificate parameters that will be added in SNI context of farm
-        self.options = {
+        var options = {
           key  : conn_key,
           cert : config.own.cert,
           ca   : caList,
@@ -474,7 +474,7 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
           self.log.error("farm is not running, please run webinos_pzh");
         } else {
           // This adds SNI context to existing running PZH server
-          farm.server.addContext(uri, self.options);
+          farm.server.addContext(uri, options);
         }
 
         callback(true, self);
