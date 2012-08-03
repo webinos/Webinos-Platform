@@ -14,7 +14,7 @@
 * limitations under the License.
 *
 * Copyright 2011-2012 Paddy Byers
-*
+* Copyright 2011-2012 Ziran Sun Samsung Electronics(UK) Ltd
 ******************************************************************************/
 
 package org.webinos.impl;
@@ -32,10 +32,20 @@ import org.webinos.api.devicestatus.WatchOptions;
 
 import android.content.Context;
 
+import android.telephony.TelephonyManager;
+import android.net.wifi.WifiManager;
+import android.provider.Settings.System;
+import android.util.Log;
+
 public class DevicestatusImpl extends DevicestatusManager implements IModule {
 
 	private Context androidContext;
-
+	private static final String TAG = "org.webinos.impl.DevicestatusImpl";
+	private static final boolean D = true;
+	
+	private TelephonyManager tm;
+	private WifiManager mWiFiManager;
+	
 	/*****************************
 	 * DevicestatusManager methods
 	 *****************************/
@@ -58,6 +68,30 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 			ErrorCallback errorCallback, PropertyRef prop)
 			throws DeviceAPIError {
 		// TODO Auto-generated method stub
+		
+		String prop_value = null;
+		
+		if(prop.aspect.equals("Device")) 
+		{	
+			if (prop.property.equals("imei"))
+				prop_value = tm.getDeviceId();
+			else if (prop.property.equals("model"))
+				prop_value = android.os.Build.MODEL;
+			//To get unqiue Android ID
+			else if (prop.property.equals("identity"))
+				prop_value = System.getString(androidContext.getContentResolver(),System.ANDROID_ID);
+		}
+		else if (prop.aspect.equals("WiFiNetwork"))
+		{
+			if(prop.property.equals("macAddress"))
+				prop_value = mWiFiManager.getConnectionInfo().getMacAddress();
+		}
+		
+		Log.d(TAG, String.format("getPropertyValue: aspect=%s, prop_value=%s", prop.aspect, prop_value));
+		
+		if(prop_value != null)
+			successCallback.onsuccess(prop_value, prop);
+		
 		return null;
 	}
 
@@ -82,9 +116,21 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 	@Override
 	public Object startModule(IModuleContext ctx) {
 		androidContext = ((AndroidContext)ctx).getAndroidContext();
+		
+		if(D) Log.v(TAG, "DevicestatusImpl: startModule");
 		/*
 		 * perform any module initialisation here ...
 		 */
+		
+		androidContext = ((AndroidContext)ctx).getAndroidContext();
+		
+		// Setup WiFi
+		mWiFiManager = (WifiManager) androidContext.getSystemService(Context.WIFI_SERVICE);
+		if(!mWiFiManager.isWifiEnabled()){
+			Log.v(TAG, "DevicestatusImpl: Enable WiFi");
+			mWiFiManager.setWifiEnabled(true);  
+		}
+		
 		return this;
 	}
 
@@ -93,5 +139,6 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 		/*
 		 * perform any module shutdown here ...
 		 */
+		if(D) Log.v(TAG, "DevicestatusImpl: stopModule");
 	}
 }
