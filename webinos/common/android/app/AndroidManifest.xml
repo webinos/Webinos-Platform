@@ -15,7 +15,10 @@
 <uses-permission android:name="android.permission.READ_SMS"></uses-permission>
 <uses-permission android:name="android.permission.WRITE_SMS"></uses-permission>
 <uses-permission android:name="android.permission.RECEIVE_SMS"></uses-permission>
-
+<uses-permission android:name="android.permission.INTERNET"></uses-permission>
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
+<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+<uses-feature android:name="android.hardware.wifi" />
     <application android:label="@string/app_name" android:icon="@drawable/webinos_icon">
         <activity android:name="org.webinos.app.anode.AnodeActivity"
                   android:label="@string/app_name">
