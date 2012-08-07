@@ -79,34 +79,34 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
   if (name === "" && (type === "Pzp" || type === "PzhFarm")){
     name = os.hostname() + "_"+ type; //devicename_type
   }
-  
+
   //Get Android devices identity
   if((os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android"))
   {
-		var bridge = require("bridge");
-		/* If WiFi Mac address is prefered
-		* var prop = {
-		*	aspect: "WiFiNetwork",
-		*	property: "macAddress"
-		* } 	
-		*/
-		var prop = {
-			aspect: "Device",
-			property: "identity"
-		} 	
+    var bridge = require("bridge");
+    /* If WiFi Mac address is prefered
+    * var prop = {
+    *	aspect: "WiFiNetwork",
+    *	property: "macAddress"
+    * }
+    */
+    var prop = {
+      aspect: "Device",
+      property: "identity"
+    }
 
-		function onsuccess(prop_value, prop)
-		{
-			name = prop_value + "_"+ type; //devicename_type
-		}
+    function onsuccess(prop_value, prop)
+    {
+      name = prop_value + "_"+ type; //devicename_type
+    }
 
-		function onerror()
-		{
-			log.error("Android get device name returns error"); 
-		}
-	
-		var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
-		devStatusModule.getPropertyValue(onsuccess, onerror, prop);
+    function onerror()
+    {
+      log.error("Android get device name returns error");
+    }
+
+    var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
+    devStatusModule.getPropertyValue(onsuccess, onerror, prop);
   }
 
   fs.readFile(( webinosDemo+"/config/"+ name +".json"), function(err, data) {
