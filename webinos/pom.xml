@@ -22,42 +22,29 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>jsdoctk1</id>
-      <url>http://jsdoctk-plugin.googlecode.com/svn/repo</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>jsdoctk2</id>
-      <url>http://jsdoctk-plugin.googlecode.com/svn/repo</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
     <plugins>
-        <!-- Plugin to add delete path to build cycle (clean phase) -->
-        <plugin>
+      <!-- Plugin to add delete path to build cycle (clean phase) -->
+      <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <version>2.4.1</version>
         <configuration>
           <filesets>
-          <fileset>
-            <directory>reports</directory>
-          </fileset>
-          <fileset>
-            <directory>src/build</directory>
-          </fileset>
-          <fileset>
-            <directory>src</directory>
-            <includes>
-            <include>**/.lock-wscript</include>
-            </includes>
-          </fileset>
+            <fileset>
+              <directory>reports</directory>
+            </fileset>
+            <fileset>
+              <directory>src/build</directory>
+            </fileset>
+            <fileset>
+              <directory>src</directory>
+              <includes>
+              <include>**/.lock-wscript</include>
+              </includes>
+            </fileset>
           </filesets>
         </configuration>
-        </plugin>
+      </plugin>        
     </plugins>
   </build>
   
@@ -103,7 +90,7 @@
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
               <executions>
-               <!-- Builds C files to node modules with gyp. 
+                <!-- Builds C files to node modules with gyp. 
                     Requires the webinos.gyp file in location tools/gyp_tools/ -->         
                <execution>
                 <id>compile-node-module</id>
@@ -136,7 +123,24 @@
                     <param>1</param>
                   </successCodes>
                 </configuration>
-              </execution>
+               </execution>
+               <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
+               <execution>
+                 <id>jsdoc</id>
+                 <phase>site</phase>
+                 <configuration>
+                   <executable>jsdoc.cmd</executable>
+                   <arguments>
+                     <argument>-d</argument>
+                     <argument>${basedir}/target/site/jsdoc</argument>
+                     <argument>${basedir}/lib/</argument>
+                   </arguments>
+                   <successCodes>
+                     <param>0</param>
+                     <param>1</param>
+                   </successCodes>
+                  </configuration>
+               </execution>           
               </executions>
             </plugin>          
           </plugins>
@@ -217,7 +221,24 @@
                       <param>1</param>
                     </successCodes>
                   </configuration>
-                </execution>          
+                </execution>
+                <!-- Create documentation from the jsdoc comments. Documentation will placed to folder 'jsdoc'. -->
+                <execution>
+                  <id>jsdoc</id>
+                  <phase>site</phase>
+                  <configuration>
+                    <executable>jsdoc</executable>
+                    <arguments>
+                      <argument>-d</argument>
+                      <argument>${basedir}/target/site/jsdoc</argument>
+                      <argument>${basedir}/lib/</argument>
+                    </arguments>
+                    <successCodes>
+                      <param>0</param>
+                      <param>1</param>
+                    </successCodes>
+                  </configuration>
+                </execution>
               </executions>
             </plugin>        
           </plugins>
@@ -233,28 +254,4 @@
     </profile>
   </profiles>
 
-  <!-- Reporting -->
-  <reporting>
-    <plugins>
-      <!-- Generate JsDoc documentation -->
-      <plugin>
-        <groupId>nl.windgazer</groupId>
-        <artifactId>jsdoctk-plugin</artifactId>
-        <version>2.3.2</version>
-        <inherited>false</inherited>
-        <configuration>
-          <srcDir>${basedir}</srcDir>
-          <directory>${basedir}/target/site/jsdoc</directory>
-          <template>${basedir}/target/toolkit/templates/jsdoc</template>
-          <recurse>5</recurse>
-          <exclude>
-            <param>.*\.spec\.js</param>
-            <param>.*/cc/.*</param>
-            <param>.*/build/.*</param>
-            <param>.*/target/.*</param>
-          </exclude>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
 </project>

@@ -22,10 +22,13 @@
 	var appContext = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/appContext.js');
  
 
-	/**
-	 * Webinos Service constructor.
-	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
-	 */
+  /**
+   * Webinos Service constructor.
+   *
+   * @constructor
+   * @alias RemoteContextManager
+   * @param rpcHandler A handler for functions that use RPC to deliver their result.
+   */
 	var RemoteContextManager = function(rpcHandler) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
@@ -38,12 +41,23 @@
 
 	RemoteContextManager.prototype = new RPCWebinosService;
 
-
-
+  /**
+   * Register application context object.
+   * 
+   * @param APPName Application name.
+   * @param ContextObjectName Context object name.
+   * @param ContextFields Context fields .
+   * @param callback A handler for functions that use RPC to deliver their result.
+   */
 	RemoteContextManager.prototype.registerAppContextObject = function(APPName, ContextObjectName, ContextFields, callback) {
 	  appContext.registerContextObject(APPName, ContextObjectName, ContextFields, function(response){callback(response);})
 	}
-	
+
+  /**
+   * Enforce context data access
+   * @private
+   * @function
+   */
 	function enforceContextDataAccess(_mode, _query, _successCallback)
 	{
 
@@ -130,6 +144,13 @@
 		}
 	}
 
+  /**
+   * Execute query.
+   *
+   * @param query Executed query.
+   * @param successCallback A handler for function that called if function completed successfully.
+   * @param errorCallback A handler for functions that called if there was an error.
+   */
 	RemoteContextManager.prototype.executeQuery = function(query, successCallback, errorCallback) {
 		switch (query.type) {
 		case "DB-insert"://PZH

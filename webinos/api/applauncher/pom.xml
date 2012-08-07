@@ -23,12 +23,14 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <executions>
             <!-- Activation for jslint-validation. Runs Jslint validation on the javascript files -->
+            <!--
             <execution>
               <id>jslint-validation</id>
               <goals>
                 <goal>run</goal>
               </goals>
             </execution>
+            -->
           </executions>
       </plugin>
       <plugin>
@@ -55,6 +57,13 @@
             </goals>
           </execution>
           -->
+          <!-- Activation for jsdoc. Runs creating js documentation. -->
+          <execution>
+            <id>jsdoc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
