@@ -66,16 +66,6 @@ var Pzp = function () {
   this.inputConfig     = {};
 };
 
-if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
-{
-	// Console.log redefinition
-	console.log = function(dataLog) {
-		var id = fs.openSync("/sdcard/console.log", "a");
-		fs.writeSync(id, dataLog+"\n", null, 'utf8');
-		fs.closeSync(id);
-	}
-}
-
 function getelement(service, element)
 {
   var srv = JSON.stringify(service);
@@ -369,8 +359,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
 									case "android":
 									{
 										function onFound(service){
-											console.log("Android-Mdns onFound callback: found service."); 
-					
+										
 											if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined"))
 											{ 
 												var msg ={};
@@ -380,8 +369,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                       	
 												// Use case - Had connected to this PZP at least once 
 												if((typeof self.connectedPzp[msg.name] !== "undefined") && (self.connectedPzp[msg.name].state === global.states[0])) {
-													console.log("trying to connect to PZP");
-	                      	
+													
 													self.connectedPzp[msg.name].address = msg.address;
 													self.connectedPzp[msg.name].port = global.pzpServerPort;
 													var client = new pzpClient();
@@ -389,11 +377,9 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
 													//client.connectOtherPZP(self, msg);
 												}
 												else if (typeof self.connectedPzp[msg.name] === "undefined") {
-													console.log("new peer");   
-							
+													
 												msg.port = global.pzpServerPort;
 												self.connectedPzp[msg.name] = {};
-												console.log("found peer address:" + msg.address);										
 												self.connectedPzp[msg.name].address = msg.address;
 												self.connectedPzp[msg.name].port    = global.pzpServerPort;
 												self.connectedPzp[msg.name].state   = global.states[1];
@@ -412,18 +398,15 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
 											} 
 											var bridge = require("bridge");
 											mdnsModule = bridge.load('org.webinos.impl.discovery.DiscoveryMdnsImpl', this);
-											console.log("\n test msdndiscovery...");
-				  		
+											
 											try {
 												mdnsModule.findServices(servicetype, onFound);
-											console.log("startDiscovery - END");
 											}
 											catch(e) {
-												console.log("Android mdns Findservices - error: "+e.message);
+												
 											}
 										}
 										catch(e){
-											console.log("error: "+e.message);
 										}
 									}
 									break;
