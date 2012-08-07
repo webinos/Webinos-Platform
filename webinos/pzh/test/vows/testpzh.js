@@ -19,7 +19,7 @@ var vows  = require('vows'),
   assert  = require('assert'),
   webinos = require('webinos')(__dirname),
   os      = require('os'),
-  cs      = require('child_process').exec;
+  fs      = require('fs');
 
 var pzh     = webinos.global.require(webinos.global.pzh.location, 'lib/pzh');
 var pzp     = webinos.global.require(webinos.global.pzp.location, 'lib/pzp');
@@ -189,13 +189,10 @@ desc3.addBatch({
 desc5.addBatch({
   'Cleanup': {
     'topic': function() {
-      if (os.platform()!== "android") {
-        var path = session.common.webinosConfigPath();
-        console.log(path);
-        cs('rm -rf ' + path +'/config/Alicé.json', this.callback);
-        cs('rm -rf ' + path +'/config/'+name+'_PzhFarm.json', this.callback);
-        cs('rm -rf ' + path +'/config/'+name+'_Pzp.json', this.callback);
-      }
+      var path = session.common.webinosConfigPath();
+      fs.unlink(path +'/config/Alicé.json', this.callback);
+      fs.unlink(path +'/config/'+name+'_PzhFarm.json', this.callback);
+      fs.unlink(path +'/config/'+name+'_Pzp.json', this.callback);
     },
     'check if deleted': function(err) {
       assert.isNotNull(err);

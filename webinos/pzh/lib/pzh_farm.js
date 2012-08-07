@@ -146,6 +146,10 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
         });
       });
       farm.server.on("error", function(error) {
+        if(err && err.code ==="EACCES") {
+          log.error("starting farm failed... try with sudo ");
+          process.exit();
+        }
         log.error(error);
       });
 
