@@ -419,7 +419,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
 											console.log("startDiscovery - END");
 											}
 											catch(e) {
-												console.log("startHRM - error: "+e.message);
+												console.log("Android mdns Findservices - error: "+e.message);
 											}
 										}
 										catch(e){
