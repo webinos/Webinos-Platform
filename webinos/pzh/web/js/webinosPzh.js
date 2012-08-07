@@ -14,34 +14,35 @@ var webinosPZH = {
     if(webinosPZH.channel.readyState === 4) {
       var msg = webinosPZH.channel.responseText;
       console.log('Message Received : ' + JSON.stringify(msg));
-      if( typeof msg === 'string'){
+      if( typeof msg === 'string' && msg !== ""){
         msg = JSON.parse(msg);
-      }
-      if(msg.payload.status=== "authenticate-google") {
-        window.location.href=msg.payload.url;
-      }
-      switch(msg.cmd){
-        case 'listDevices':
-          if (typeof webinosPZH.callbacks.listDevices === 'function') webinosPZH.callbacks.listDevices(msg.payload);
-          break;
-        case 'userDetails':
-          if (typeof webinosPZH.callbacks.userDetails === 'function') webinosPZH.callbacks.userDetails(msg.payload);
-          break;
-        case 'addPzpQR':
-          if (typeof webinosPZH.callbacks.addPzpQR === 'function') webinosPZH.callbacks.addPzpQR(msg.payload);
-          break;
-        case 'crashLog':
-          if (typeof webinosPZH.callbacks.crashLog === 'function') webinosPZH.callbacks.crashLog(msg.payload);
-          break;
-        case 'pzhPzh':
-          if (typeof webinosPZH.callbacks.pzhPzh === 'function') webinosPZH.callbacks.pzhPzh(msg.payload);
-          break;
-        case 'listPzp':
-          if (typeof webinosPZH.callbacks.listPzp === 'function') webinosPZH.callbacks.listPzp(msg.payload);
-          break;
-        case 'revokePzp':
-          if (typeof webinosPZH.callbacks.revokePzp === 'function') webinosPZH.callbacks.revokePzp(msg.pzpid);
-          break;
+
+        if(msg.payload.status=== "authenticate-google") {
+          window.location.href=msg.payload.url;
+        }
+        switch(msg.cmd){
+          case 'listDevices':
+            if (typeof webinosPZH.callbacks.listDevices === 'function') webinosPZH.callbacks.listDevices(msg.payload);
+            break;
+          case 'userDetails':
+            if (typeof webinosPZH.callbacks.userDetails === 'function') webinosPZH.callbacks.userDetails(msg.payload);
+            break;
+          case 'addPzpQR':
+            if (typeof webinosPZH.callbacks.addPzpQR === 'function') webinosPZH.callbacks.addPzpQR(msg.payload);
+            break;
+          case 'crashLog':
+            if (typeof webinosPZH.callbacks.crashLog === 'function') webinosPZH.callbacks.crashLog(msg.payload);
+            break;
+          case 'pzhPzh':
+            if (typeof webinosPZH.callbacks.pzhPzh === 'function') webinosPZH.callbacks.pzhPzh(msg.payload);
+            break;
+          case 'listPzp':
+            if (typeof webinosPZH.callbacks.listPzp === 'function') webinosPZH.callbacks.listPzp(msg.payload);
+            break;
+          case 'revokePzp':
+            if (typeof webinosPZH.callbacks.revokePzp === 'function') webinosPZH.callbacks.revokePzp(msg.pzpid);
+            break;
+        }
       }
     }
   },
@@ -51,7 +52,11 @@ var webinosPZH = {
     if (urlArgs.length >= 2) payload.from = urlArgs[2];
     webinosPZH.channel = new XMLHttpRequest();
     webinosPZH.channel.onreadystatechange = webinosPZH.messageRecieved;
-    webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS");
+    if (typeof location.port !== "undefined") {
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS");
+    } else {
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS");
+    }
     webinosPZH.channel.setRequestHeader("Content-Type","application/json");
     webinosPZH.channel.send(JSON.stringify(payload));
   },
