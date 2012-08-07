@@ -54,7 +54,14 @@
             </goals>
           </execution>
           -->
-	      </executions>
+          <!-- Activation for jsdoc. Runs creating js documentation. -->
+          <execution>
+            <id>jsdoc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

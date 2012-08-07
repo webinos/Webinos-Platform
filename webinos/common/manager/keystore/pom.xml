@@ -53,6 +53,16 @@
               <goal>exec</goal>
             </goals>
           </execution>
+          <!-- Activation for jsdoc.  Activate by uncommenting the execution tag.
+          Runs creating js documentation. -->
+          <!--
+          <execution>
+            <id>jsdoc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          -->
         </executions>
       </plugin>
     </plugins>
