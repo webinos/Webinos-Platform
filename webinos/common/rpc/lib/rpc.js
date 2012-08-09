@@ -114,15 +114,37 @@
 	}
 
 	/**
+	 * Preliminary object to hold information to create JSONRPC request object.
+	 * @function
+	 * @private
+	 */
+	var newPreRPCRequest = function(method, params) {
+		var rpc = newJSONRPCObj();
+		rpc.method = method;
+		rpc.params = params || [];
+		rpc.preliminary = true;
+		return rpc;
+	};
+
+	/**
 	 * Create and return a new JSONRPC 2.0 request object.
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params) {
-		var rpc = newJSONRPCObj();
-		rpc.method = method;
-		rpc.params = params || [];
-		return rpc;
+	var toJSONRPC = function(preRPCRequest) {
+		if (preRPCRequest.preliminary) {
+			var rpcRequest = newJSONRPCObj(preRPCRequest.id);
+			rpcRequest.method = preRPCRequest.method;
+			rpcRequest.params = preRPCRequest.params;
+
+			if (preRPCRequest.fromObjectRef) {
+				// TODO this will go away at some later point
+				rpcRequest.fromObjectRef = preRPCRequest.fromObjectRef;
+			}
+			return rpcRequest;
+		} else {
+			return preRPCRequest;
+		}
 	};
 
 	/**
@@ -299,14 +321,16 @@
 	 * @param from Sender.
 	 * @param msgid An id.
 	 */
-	_RPCHandler.prototype.executeRPC = function (rpc, callback, errorCB, from, msgid) {
+	_RPCHandler.prototype.executeRPC = function (preRpc, callback, errorCB, from, msgid) {
+		var rpc = toJSONRPC(preRpc);
+
 		// service invocation case
-		if (typeof rpc.serviceAddress !== 'undefined') {
+		if (typeof preRpc.serviceAddress !== 'undefined') {
 			if (typeof module !== 'undefined') {
-				this.messageHandler.write(rpc, rpc.serviceAddress);
+				this.messageHandler.write(rpc, preRpc.serviceAddress);
 			} else {
 				// this only happens in the web browser
-				webinos.session.message_send(rpc, rpc.serviceAddress);// TODO move the whole mmessage_send function here?
+				webinos.session.message_send(rpc, preRpc.serviceAddress);// TODO move the whole mmessage_send function here?
 			}
 
 			if (typeof callback === 'function'){
@@ -373,14 +397,13 @@
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
+		var preRPCRequest = newPreRPCRequest(rpcMethod, params);
 
 		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
-			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
-			rpcRequest.serviceAddress = service.serviceAddress;
+			preRPCRequest.serviceAddress = service.serviceAddress;
 		}
 
-		return rpcRequest;
+		return preRPCRequest;
 	};
 
 	/**
