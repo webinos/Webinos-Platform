@@ -207,7 +207,7 @@ describe('common.RPC', function() {
 			expect(rpcHandler.handleMessage.calls[1].args.length).toEqual(1);
 			expect(rpcHandler.handleMessage.calls[1].args[0].id).toBeDefined();
 			expect(rpcHandler.handleMessage.calls[1].args[0].error).toBeDefined();
-			expect(rpcHandler.handleMessage.calls[1].args[0].error.code).toEqual(32000);
+			expect(rpcHandler.handleMessage.calls[1].args[0].error.code).toEqual(-31000);
 
 			// called once for request and once for response
 			expect(rpcHandler.executeRPC.calls.length).toEqual(2);

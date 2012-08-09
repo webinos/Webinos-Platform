@@ -145,7 +145,7 @@
 		var rpc = newJSONRPCObj(id);
 		rpc.error = {
 			data: error,
-			code: 32000,
+			code: -31000,
 			message: 'Method Invocation returned with error'
 		};
 		return rpc;
