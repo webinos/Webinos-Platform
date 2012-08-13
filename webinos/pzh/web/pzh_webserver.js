@@ -99,16 +99,12 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
               }
               break;
              case 'authenticate-google':
-              if(typeof query.id !== "undefined") {
                 storeInfo[query.id] = query;
-              }
-              openid.authenticate(hostname, 'http://www.google.com/accounts/o8/id', res, query);
+                openid.authenticate(hostname, 'http://www.google.com/accounts/o8/id', res, query);
               break;
              case 'authenticate-yahoo':
-               if(typeof query.id !== "undefined") {
                 storeInfo[query.id] = query;
-              }
-              openid.authenticate(hostname, 'http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds', res, query);
+                openid.authenticate(hostname, 'http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds', res, query);
               break;
             case "registerPzh":
               if (storeInfo[query.to]) {
@@ -219,7 +215,7 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
         }
 
         if (query && query.cmd){
-          if(query.cmd === "verify" && storeInfo[query.id]) {
+          if(query.cmd === "verify") {
             openid.fetchOpenIdDetails(req, res, storeInfo[query.id], function(host, details) {
               if (query.id === "undefined") {
                 if (!farm.pzhs[hostname +'/'+details.username+"/"]) {
