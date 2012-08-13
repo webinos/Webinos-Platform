@@ -200,7 +200,7 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
       if(query.cmd === "verify") {
         openid.fetchOpenIdDetails(req, res, storeInfo[query.id], function(host, details) {
           if (query.id === "undefined") {
-            if (!farm.pzhs[hostname +'/'+details.username]) {
+            if (!farm.pzhs[hostname +'/'+details.username+"/"]) {
               farm.createPzh(host, details, function(id, instance) {
                 log.info("***** created pzh " + id+ " *****");
                 var crypt = new Buffer(hostname + '/' +details.username).toString('base64');
@@ -214,7 +214,7 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
             }
           } else {
             var storeDetails = storeInfo[query.id], status, auth_code;
-            var id = hostname+'/'+details.username;
+            var id = hostname+'/'+details.username+"/";
             if (farm.pzhs[id]) {
               status = true;
               pzhapis.addPzpQR(farm.pzhs[id], function(result) {

@@ -188,7 +188,8 @@ Pzp.prototype.update = function(callback) {
    /*
    * Zerconf: Advertise itself as a PZP service _tcp_pzp once authenticated by PZH. service type: _pzp._tcp
    */
-   switch(os.type().toLowerCase()){
+   if(typeof mdns!=="undefined") {
+     switch(os.type().toLowerCase()){
     case "linux":
       switch(os.platform().toLowerCase()){
         case "android":
@@ -207,6 +208,7 @@ Pzp.prototype.update = function(callback) {
       break;
     case "windows_nt":
       break;
+    }
   }
   //end - Zeroconf changes
 
@@ -299,7 +301,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
           self.authenticated(self.config.pzhId, pzpInstance, callback);
         });
       } else {
-        log.info("not authenticated " );
+        log.info("not authenticated " +pzpInstance.authorizationError);
         if(pzpInstance.authorizationError === 'CERT_NOT_YET_VALID') {
           log.info("possible clock difference between PZH and your PZP, try updating time and try again");
         }
@@ -354,7 +356,8 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
         } else if (self.mode === global.modes[1] ) { //hub mode
             self.state = global.states[0]; // not connected
             //Zeroconf - start
-            switch(os.type().toLowerCase()){
+            if (typeof mdns !== "undefined") {
+              switch(os.type().toLowerCase()){
               case "linux":
                 switch(os.platform().toLowerCase()){
                   case "android":
@@ -409,28 +412,27 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
             case "windows_nt":
               break;
             }
-            //end - zeroconf
           }
-
-            // Special case if started in hub disconnected mode
-          if (self.webServerState !== global.states[2]) {
-            pzpWebSocket.startPzpWebSocketServer(self, self.inputConfig, function() {
-              self.rpcHandler.setSessionId(self.sessionId);
-              setupMessageHandler(self);
-              self.update(callback);
-            });
-          }
-          if(self.pzptlsServerState === global.states[0])
-          {
-            log.info("Zeroconf: calling start pzptlsServer");
-            var server = new pzpServer();
-            server.startServer(self, function() {
-            self.pzptlsServerState = global.states[2];
-          });
+            //end - zeroconf    
         }
       } else {
             self.mode = global.modes[1];
             self.state = global.states[0];
+      }
+   // Special case if started in hub disconnected mode
+      if (self.webServerState !== global.states[2]) {
+        pzpWebSocket.startPzpWebSocketServer(self, self.inputConfig, function() {
+          self.rpcHandler.setSessionId(self.sessionId);
+          setupMessageHandler(self);
+          self.update(callback);
+        });
+      }
+      if(self.pzptlsServerState === global.states[0]){
+        log.info("calling start pzptlsServer");
+        var server = new pzpServer();
+        server.startServer(self, function() {
+          self.pzptlsServerState = global.states[2];
+        });
       }
       if (self.config.pzhId) {
         for (var key in self.connectedPzh) {
