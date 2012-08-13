@@ -44,7 +44,7 @@ exports.authenticate = function(hostname, url, res, query) {
   });
   exts.push(attr);
   rely = new openid.RelyingParty('https://'+hostname+':'+
-      session.configuration.webServerPort+'/main.html?cmd=verify&id='+query.id,
+      session.configuration.port.farm_webServerPort+'/main.html?cmd=verify&id='+query.id,
     null,
     false,
     false,
@@ -68,7 +68,7 @@ exports.fetchOpenIdDetails = function(req, res, query, callback){
       if (err){
         log.error("unable to login " + err.message);
         address = req.connection.socket.remoteAddress;
-        res.writeHead(302, {Location: "http://"+address+":"+query.httpport+"/"+query.returnPath+"?cmd=error&reason="+err.message});
+        res.writeHead(302, {Location: "http://"+query.returnPath+"?cmd=error&reason="+err.message});
         res.end();
       }
       else if (userDetails.authenticated) {

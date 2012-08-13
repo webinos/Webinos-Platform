@@ -180,7 +180,7 @@
         console.log(msg);
 
         if (msg.payload.message === "true") {
-          var existPzh = confirm(" Do you wish to enrol device with following PZH: ("+msg.payload.pzhid+")") ;
+          var existPzh = confirm(" Enroll PZP at "+msg.payload.pzhid) ;
           if (existPzh === true) {
             var options = {"type": 'prop', "payload":
                             {
@@ -192,7 +192,7 @@
             alert ("connection with PZH aborted");
           }
         } else {
-          var createPzh = confirm(" You are not registered, do you wish to create following PZH  " + msg.payload.pzhid ) ;
+          var createPzh = confirm(" Create PZH - " + msg.payload.pzhid ) ;
           if (createPzh === true) {
              var options ={"type": 'prop',  "payload":
                             {

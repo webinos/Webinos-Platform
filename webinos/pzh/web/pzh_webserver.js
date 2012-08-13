@@ -203,12 +203,12 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
             if (!farm.pzhs[hostname +'/'+details.username+"/"]) {
               farm.createPzh(host, details, function(id, instance) {
                 log.info("***** created pzh " + id+ " *****");
-                var crypt = new Buffer(hostname + '/' +details.username).toString('base64');
+                var crypt = new Buffer(hostname + '/' +details.username+'/').toString('base64');
                 res.writeHead(302, {Location: '/main.html?provider='+details.provider+'&id='+crypt});
                 res.end();
               });
             } else {
-              var crypt = new Buffer(hostname + '/' +details.username).toString('base64');
+              var crypt = new Buffer(hostname + '/' +details.username+'/').toString('base64');
               res.writeHead(302, {Location: '/main.html?provider='+details.provider+'&id='+crypt});
               res.end();
             }
@@ -219,14 +219,14 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
               status = true;
               pzhapis.addPzpQR(farm.pzhs[id], function(result) {
                 auth_code = result.payload.code;
-                res.writeHead(302, {Location: "http://"+storeDetails.ipAddress+":"+storeDetails.httpport+"/"+ storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id+"&auth_code="+auth_code});
+                res.writeHead(302, {Location: "http://"+storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id+"&auth_code="+auth_code});
                 res.end();
               });
               delete storeInfo[query.id];
             } else {
               status = false;
               storeInfo[id]=details;
-              res.writeHead(302, {Location: "http://"+storeDetails.ipAddress+":"+storeDetails.httpport+"/"+ storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id});
+              res.writeHead(302, {Location: "http://"+storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id});
               res.end();
             }
           }
@@ -260,9 +260,9 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
   });
 
 
-  server.listen(session.configuration.webServerPort, hostname, function() {
-      log.info('listening on '+ session.configuration.webServerPort);
-      callback(true);
+  server.listen(session.configuration.port.farm_webServerPort, hostname, function() {
+    log.info('listening on '+ session.configuration.port.farm_webServerPort);
+    callback(true);
   });
   });
 };
