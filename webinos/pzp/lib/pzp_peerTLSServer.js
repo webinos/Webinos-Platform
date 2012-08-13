@@ -168,17 +168,17 @@ PzpServer.prototype.startServer = function (parent, callback) {
     server.on("error", function (err) {
       if (err.code === "EADDRINUSE") {
         log.error("address in use, trying next available port ... ");
-        session.configuration.pzpServerPort = parseInt(session.configuration.pzpServerPort, 10) + 1;
-        server.listen(session.configuration.pzpServerPort, parent.pzpAddress);
+        session.configuration.pzpServerPort = parseInt(session.configuration.port.pzp_tlsServer, 10) + 1;
+        server.listen(session.configuration.port.pzp_tlsServer, parent.pzpAddress);
       }
     });
 
     server.on("listening", function () {
-      log.info("listening as server on port :" + session.configuration.pzpServerPort);
+      log.info("listening as server on port :" + session.configuration.port.pzp_tlsServer);
       callback.call(parent, "started");
     });
 
-    server.listen(session.configuration.pzpServerPort);
+    server.listen(session.configuration.port.pzp_tlsServer);
   });
 };
 
