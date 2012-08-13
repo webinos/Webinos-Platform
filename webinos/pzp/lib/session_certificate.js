@@ -40,9 +40,9 @@ exports.selfSigned = function(config, type, callback) {
 
   try {
     if (type === "PzhFarmCA" ||  type === "PzhCA"){
-      key = certman.genRsaKey(4096);
-    } else {
       key = certman.genRsaKey(2048);
+    } else {
+      key = certman.genRsaKey(1024);
     }
   } catch(err1) {
     log.error("failed generating certificate");
@@ -57,7 +57,7 @@ exports.selfSigned = function(config, type, callback) {
   }
   if (type === "PzhFarmCA" ||  type === "PzhCA") {
     certType = 0;
-  } else if (type === "Pzh" || type === "PzhFarm" || 
+  } else if (type === "Pzh" || type === "PzhFarm" ||
     type === "PzhWebServer" || type === "PzhWebSocketServer") {
     certType = 1;
   } else {
@@ -92,13 +92,13 @@ exports.selfSigned = function(config, type, callback) {
   }
 
   try {
-    obj.cert = certman.selfSignRequest(csr, 3600, key, certType, config.serverName);
+      var server = "DNS:"+config.serverName;
+      obj.cert = certman.selfSignRequest(csr, 3600, key, certType, server);
   } catch (e1) {
     log.error("failed generating self signed certifcate");
     callback("failed", e1);
     return;
   }
-
   try {
     obj.crl = certman.createEmptyCRL(key, obj.cert, 3600, 0);
   } catch (e2) {
@@ -123,7 +123,8 @@ exports.signRequest = function(csr, master_key, master_cert, certType, uri, call
   }
 
   try {
-    var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, uri);
+    var server = "DNS:"+uri;
+    var clientCert = certman.signRequest(csr, 3600, master_key, master_cert, certType, server);
     callback("certSigned", clientCert);
   } catch(err1) {
     log.error("failed to sign certificate: " + err1.msg);

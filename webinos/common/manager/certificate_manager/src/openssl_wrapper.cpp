@@ -201,7 +201,7 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
   EVP_PKEY* reqPub;
 
   //redo all the certificate details, because OpenSSL wants us to work hard
-  if(!(err =  X509_set_version(cert, 3)))
+  if(!(err =  X509_set_version(cert, 2)))
   {
     BIO_free(bioReq);
     BIO_free(bioCAKey);
@@ -220,7 +220,7 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
   // This is temp solution for putting pzp validity 5 minutes before current time
   // If there is a small clock difference between machines, it results in cert_not_yet_valid
   // It does set GMT time but is relevant to machine time.
-  // A better solution would be to have ntp server contacted to get proper time. 
+  // A better solution would be to have ntp server contacted to get proper time.
   if(certType == 2) {
     X509_gmtime_adj(s, long(0-300));
   }
@@ -262,16 +262,11 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
   X509V3_set_ctx_nodb(&ctx);
   X509V3_set_ctx(&ctx, cert, cert, NULL, NULL, 0);
 
-  char *str = (char*)malloc(strlen("URI:") + strlen(url) + 1);
-  strcpy(str, "URI:");
-  strcpy(str + strlen("URI:"), url);
-  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_alt_name, (char*)str))) {
-    free(str);
+  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_alt_name, (char*)url))) {
     return 0;
   } else {
     X509_add_ext(cert, ex, -1);
   }
-  free(str);
 
   if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_key_identifier, (char*)"hash"))) {
     return 0;
@@ -304,16 +299,12 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
     } else {
       X509_add_ext(cert, ex, -1);
     }
-    char *str = (char*)malloc(strlen("URI:") + strlen(url) + 1);
-    strcpy(str, "URI:");
-    strcpy(str + strlen("URI:"), url);
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_crl_distribution_points, (char*)str))) {
-      free(str);
+
+    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_crl_distribution_points, (char*)url))) {
       return 0;
     } else {
       X509_add_ext(cert, ex, -1);
     }
-    free(str);
   }
 
   if (!(err = X509_sign(cert,caKey,EVP_sha1()))) {
@@ -364,6 +355,12 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
 
   X509* cert = X509_new();
   EVP_PKEY* reqPub;
+  if(!(err =  X509_set_version(cert, 2)))
+  {
+    BIO_free(bioReq);
+    BIO_free(bioCAKey);
+    return err;
+  }
 
   //redo all the certificate details, because OpenSSL wants us to work hard
   X509_set_issuer_name(cert, X509_get_subject_name(caCert));
@@ -374,13 +371,13 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   // This is temp solution for putting pzp validity 5 minutes before current time
   // If there is a small clock difference between machines, it results in cert_not_yet_valid
   // It does set GMT time but is relevant to machine time.
-  // A better solution would be to have ntp server contacted to get a proper time. 
+  // A better solution would be to have ntp server contacted to get a proper time.
   if(certType == 2) {
     X509_gmtime_adj(s, long(0-300));
   }
   else {
     X509_gmtime_adj(s, long(0));
-  } 
+  }
   // End of WP-37
   X509_set_notBefore(cert, s);
 
@@ -403,33 +400,32 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   X509V3_set_ctx_nodb(&ctx);
   X509V3_set_ctx(&ctx, cert, cert, NULL, NULL, 0);
 
-  char *str = (char*)malloc(strlen("caIssuers;URI:") + strlen(url) + 1);
+  char *str = (char*)malloc(strlen("caIssuers;") + strlen(url) + 1);
   if (str == NULL) {
     return -10;
   }
-
-  strcpy(str, "caIssuers;URI:");
+  strcpy(str, "caIssuers;");
   strcat(str, url);
 
-  char *altname = (char*)malloc(strlen("URI:") + strlen(url) + 1);
-  if (altname == NULL) {
-    return -10;
-  }
-  strcpy(altname, "URI:");
-  strcat(altname, url);
-
-  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_alt_name, (char*)altname))) {
+  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_info_access, (char*)str))) {
     free(str);
-    free(altname);
+    return 0;
+  } else {
+    X509_add_ext(cert, ex, -1);
+  }
+  free(str);
+  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_alt_name, (char*)url))) {
+    return 0;
+  } else {
+    X509_add_ext(cert, ex, -1);
+  }
+  if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_issuer_alt_name, (char*)"issuer:copy"))) {
     return 0;
   } else {
     X509_add_ext(cert, ex, -1);
   }
 
-
   if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_subject_key_identifier, (char*)"hash"))) {
-    free(str);
-    free(altname);
     return 0;
   } else {
     X509_add_ext(cert, ex, -1);
@@ -437,68 +433,24 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
 
   if( certType == 1) {
     if(!(ex = X509V3_EXT_conf_nid(NULL,  &ctx, NID_basic_constraints, (char*)"critical, CA:FALSE"))) {
-      free(str);
-      free(altname);
       return 0;
     } else {
       X509_add_ext(cert, ex, -1);
     }
-
 
     if(!(ex = X509V3_EXT_conf_nid(NULL,  &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
-      free(str);
-      free(altname);
       return 0;
     } else {
       X509_add_ext(cert, ex, -1);
     }
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_issuer_alt_name, (char*)"issuer:copy"))) {
-      free(str);
-      free(altname);
-      return 0;
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_info_access, (char*)str))) {
-      free(altname);
-      free(str);
-      return 0;
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
   } else if( certType == 2) {
     if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_basic_constraints, (char*)"critical, CA:FALSE"))) {
-      free(str);
-      free(altname);
       return 0;
     } else {
       X509_add_ext(cert, ex, -1);
     }
 
     if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
-      free(str);
-      free(altname);
-      return 0;
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_issuer_alt_name, (char*)"issuer:copy"))) {
-      free(str);
-      free(altname);
-      return 0;
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
-
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_info_access, (char*)str))) {
-      free(str);
-      free(altname);
       return 0;
     } else {
       X509_add_ext(cert, ex, -1);
@@ -510,8 +462,6 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
     BIO_free(bioReq);
     BIO_free(bioCert);
     BIO_free(bioCAKey);
-    free(str);
-    free(altname);
     return err;
   }
 
@@ -526,9 +476,6 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   BIO_free(bioReq);
   BIO_free(bioCert);
   BIO_free(bioCAKey);
-
-  free(str);
-  free(altname);
 
   return 0;
 }
