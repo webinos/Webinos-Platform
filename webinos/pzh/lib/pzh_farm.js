@@ -154,7 +154,7 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
       });
 
       farm.server.on("listening", function(){
-        log.info("initialized at " + connectingAddress);
+        log.info("initialized at " + connectingAddress+" and port " +session.configuration.port.farmPort);
         // Load PZH"s that we already have registered ...
         loadPzhs(farm.config);
         // Start web interface, this webinterface will adapt depending on user who logins
@@ -164,7 +164,7 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
           }
         });
       });
-      farm.server.listen(session.configuration.farmPort, connectingAddress);
+      farm.server.listen(session.configuration.port.farmPort, connectingAddress);
     });
 
 };

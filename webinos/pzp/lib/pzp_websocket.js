@@ -90,7 +90,7 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
               msg.to = appId;
               pzp.connectedWebApp[appId].sendUTF(JSON.stringify(msg));
             }
-          }, 3000);
+          }, 1000);
         break;
       }
     }
@@ -125,13 +125,13 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
 
   cs.on("error", function(err) {
     if (err.code === "EADDRINUSE") {
-      session.configuration.pzpWebServerPort = parseInt(session.configuration.pzpWebServerPort, 10) + 1;
-      cs.listen(session.configuration.pzpWebServerPort, pzp.address);
+      session.configuration.port.pzp_http_webSocket= parseInt(session.configuration.port.pzp_web_webSocket, 10) + 1;
+      cs.listen(session.configuration.port.pzp_web_webSocket, pzp.address);
     }
   });
 
-  cs.listen(session.configuration.pzpWebServerPort, pzp.address, function(){
-    log.info("listening on port "+session.configuration.pzpWebServerPort + " and hostname "+pzp.address);
+  cs.listen(session.configuration.port.pzp_web_webSocket, pzp.address, function(){
+    log.info("listening on port "+session.configuration.port.pzp_web_webSocket + " and hostname "+pzp.address);
   });
 
   var httpserver = http.createServer(function(request, response) {
@@ -144,14 +144,14 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
     if (err.code === "EADDRINUSE") {
       // BUG why make up a port ourselves?
       // Response: not making port, doing it automatically instead of throwing error .., if user wants different ports they can do themselves at startup
-      session.configuration.pzpHttpServerPort = parseInt(session.configuration.pzpHttpServerPort, 10) +1;
-      log.error("address in use, now trying port " + session.configuration.pzpHttpServerPort);
-      httpserver.listen(session.configuration.pzpHttpServerPort, pzp.address);
+      session.configuration.port.pzp_webSocket = parseInt(session.configuration.port.pzp_webSocket, 10) +1;
+      log.error("address in use, now trying port " + session.configuration.port.pzp_webSocket);
+      httpserver.listen(session.configuration.port.pzp_webSocket, pzp.address);
     }
   });
 
-  httpserver.listen(session.configuration.pzpHttpServerPort, pzp.address, function() {
-    log.info("listening on port "+session.configuration.pzpHttpServerPort + " and hostname "+pzp.address);
+  httpserver.listen(session.configuration.port.pzp_webSocket, pzp.address, function() {
+    log.info("listening on port "+session.configuration.port.pzp_webSocket + " and hostname "+pzp.address);
     callback("startedWebSocketServer");
   });
 
@@ -270,9 +270,7 @@ function connectPzh(pzp, cmd, from, to, authCode) {
   if (cmd === "authenticate-google" || cmd === "authenticate-yahoo") {
     payload = {"cmd": cmd,
                 "id":from,
-                "ipAddress": self.connectingAddress,
-                "httpport":  global.pzpWebServerPort,
-                "returnPath":"client/client.html"};
+               "returnPath":"localhost:"+global.port.pzp_web_webSocket+"/client/client.html"};
   } else if (cmd === "login") {
     payload = {"cmd": cmd};
   } else if (cmd === "enrollPzp") {

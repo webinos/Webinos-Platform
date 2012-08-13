@@ -290,7 +290,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
           servername: self.config.serverName
       };
     }
-    pzpInstance = tls.connect(global.pzhPort, address, config, function(conn) {
+    pzpInstance = tls.connect(global.port.farmPort, address, config, function(conn) {
       log.info("connection to pzh status: " + pzpInstance.authorized );
       log.info("reusing session : " + pzpInstance.isSessionReused());
 
@@ -385,7 +385,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                       // Use case - Had connected to this PZP at least once
                     if((typeof self.connectedPzp[msg.name] !== "undefined") && self.connectedPzp[msg.name].state === global.states[0] ) {
                       self.connectedPzp[msg.name].address = msg.address;
-                      self.connectedPzp[msg.name].port = global.pzpServerPort;
+                      self.connectedPzp[msg.name].port = global.port.pzp_tlsServer;
                       var client = new pzpClient();
                       client.connectOtherPZP(self, msg);
                     }
@@ -395,7 +395,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                       msg.port = global.pzpServerPort;
                       self.connectedPzp[msg.name] = {};
                       self.connectedPzp[msg.name].address = msg.address;
-                      self.connectedPzp[msg.name].port    = global.pzpServerPort;
+                      self.connectedPzp[msg.name].port    = global.port.pzp_tlsServer;
                       self.connectedPzp[msg.name].state   = global.states[1];
                       self.mode  = global.modes[2];
                       self.state = global.states[1];
@@ -413,7 +413,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
               break;
             }
           }
-            //end - zeroconf    
+            //end - zeroconf
         }
       } else {
             self.mode = global.modes[1];
@@ -595,7 +595,7 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
         self.states = global.states[1];
         session.common.resolveIP(host, function(address) {
           resolvedAddress = address;
-          self.address = "0.0.0.0";
+          self.address = "localhost";
           session.common.fetchIP(function(address){
             self.connectingAddress= address;
           });
