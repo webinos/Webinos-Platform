@@ -69,7 +69,8 @@ function getPzpInfoSync(instance, pzpId) {
 // Synchronous method for getting information about a PZH with a certain ID.
 function getPzhInfoSync(instance, pzhId) {
   "use strict";
-  if (pzhId && pzhId.split("_")[0] === instance.config.name) {
+  if (pzhId && instance && instance.config && instance.config.name &&
+      pzhId.split("_")[0] === instance.config.name) {
     //we know that this PZH is alive
     return {
       id : pzhId + " (Your PZH)",
@@ -77,18 +78,20 @@ function getPzhInfoSync(instance, pzhId) {
       isConnected: true
     };
   } else {
-    for (var i in instance.connectedPzh) {
-      if (instance.connectedPzh.hasOwnProperty(i)) {
-        //session IDs append the PZH to the front of the PZP ID.
-        if (i === pzhId.split('/')[1]) {
-          return {
-            id          : i,
-            url         : pzhId,
-            isConnected : true
-          };
+    if(instance.connectedPzh) {
+      for (var i in instance.connectedPzh) {
+        if (instance.connectedPzh.hasOwnProperty(i)) {
+          //session IDs append the PZH to the front of the PZP ID.
+          if (i === pzhId.split('/')[1]) {
+            return {
+              id          : i,
+              url         : pzhId,
+              isConnected : true
+            };
+          }
         }
       }
-    }    
+    }
     // We did not find pzh connected
      return {
       id          : pzhId.split("/")[1],
@@ -108,19 +111,28 @@ pzh_internal_apis.addPzpQR = function (instance, callback) {
 pzh_internal_apis.listPzp = function(instance, callback) {
   "use strict";
   var result = {signedCert: [], revokedCert: []};
-  for (var i in instance.config.signedCert){
-    if (typeof instance.config.signedCert[i] !== "undefined") {
-      result.signedCert.push(getPzpInfoSync(instance, i));
+  if (instance && instance.config) {
+    if(instance.config.signedCert) {
+      for (var i in instance.config.signedCert){
+        if (instance.config.signedCert.hasOwnProperty(i)) {
+          result.signedCert.push(getPzpInfoSync(instance, i));
+        }
+      }
+    }
+    if (instance.config.revokedCert) {
+      for (var i in instance.config.revokedCert) {
+        if (instance.config.revokedCert.hasOwnProperty(i)) {
+          result.revokedCert.push(getPzpInfoSync(instance, i));
+        }
+      }
+    }
+    if (instance.config.serverName) {
+      var payload = {to: instance.config.serverName, cmd:"listPzp", payload:result};
+      callback(payload);
+    } else {
+      callback();
     }
   }
-
-  for (var i in instance.config.revokedCert) {
-    if (typeof instance.config.revokedCert[i] !== "undefined") {
-      result.revokedCert.push(getPzpInfoSync(instance, i));
-    }
-  }
-  var payload = {to: instance.config.serverName, cmd:"listPzp", payload:result};
-  callback(payload);
 };
 
 
@@ -129,36 +141,48 @@ pzh_internal_apis.listZoneDevices = function(instance, callback) {
   "use strict";
   var result = {pzps: [], pzhs: []};
   if (instance && instance.config) {
-    for (var i in instance.config.signedCert){
-      if (typeof instance.config.signedCert[i] !== "undefined") {
-        result.pzps.push(getPzpInfoSync(instance, i));
+    if (instance.config.signedCert) {
+      for (var i in instance.config.signedCert){
+        if (instance.config.signedCert.hasOwnProperty(i)) {
+          result.pzps.push(getPzpInfoSync(instance, i));
+        }
       }
     }
-  
-   for (var i in instance.config.otherCert) {
-      if (typeof instance.config.otherCert[i] !== "undefined" && instance.config.otherCert[i].cert !== "") {
-        result.pzhs.push(getPzhInfoSync(instance, i));
+    if(instance.config.otherCert) {
+      for (var i in instance.config.otherCert) {
+        if (instance.config.otherCert.hasOwnProperty(i)
+        && instance.config.otherCert[i].cert !== "") {
+          result.pzhs.push(getPzhInfoSync(instance, i));
+        }
       }
     }
     result.pzhs.push(getPzhInfoSync(instance, instance.sessionId));
-    var payload = {to: instance.config.serverName, cmd:"listDevices", payload:result};
-    callback(payload);
+    if (instance.config.serverName) {
+      var payload = {to: instance.config.serverName, cmd:"listDevices", payload:result};
+      callback(payload);
+    } else {
+      callback();
+    }
   }
 };
 
 // Return the crashlog of this PZH.
 pzh_internal_apis.crashLog = function(instance, callback){
   "use strict";
-  var filename = path.join(session.common.webinosConfigPath()+"/logs/", instance.sessionId+".json");
-  fs.readFile(filename, function(err, data){
-    var payload = {to: instance.config.serverName, cmd:"crashLog", payload:""};
-    if (data !== null && typeof data !== "undefined"){
-      payload.payload = data.toString("utf8");
-      callback(payload);
-    } else {
-      callback(payload);
-    }
-  });
+  if (instance && instance.sessionId) {
+    var filename = path.join(session.common.webinosConfigPath()+"/logs/", instance.sessionId+".json");
+    fs.readFile(filename, function(err, data){
+      if (instance.config && instance.config.serverName) {
+        var payload = {to: instance.config.serverName, cmd:"crashLog", payload:""};
+        if (data !== null && typeof data !== "undefined"){
+          payload.payload = data.toString("utf8");
+          callback(payload);
+        } else {
+          callback(payload);
+        }
+      }
+    });
+  }
 };
 
 pzh_internal_apis.revoke = function(instance, pzpid, callback) {
@@ -169,14 +193,16 @@ pzh_internal_apis.revoke = function(instance, pzpid, callback) {
 // This is sending side action on PZH end
 pzh_internal_apis.addPzhCertificate = function(instance, to, callback) {
   // temp solution till we decide how to trigger
-  
   if (to && to.split('/')) {
-    if (instance.config.otherCert[to]) {
+    if (instance && instance.config && instance.config.otherCert &&
+      instance.config.otherCert[to] && instance.config.serverName) {
       callback({cmd:'pzhPzh', to: instance.config.serverName, payload: "already connected"});
     } else {
       var pzh_connecting = require('./pzh_connecting.js');
       var pzhConnect = new pzh_connecting(instance);
-      pzhConnect.sendCertificate(to, callback); 
+      if(typeof pzhConnect !== "undefined") {
+        pzhConnect.sendCertificate(to, callback);
+      }
     }
   } else {
     callback({cmd:'pzhPzh', to: instance.config.serverName, payload: "connecting address is wrong"});
@@ -187,12 +213,14 @@ pzh_internal_apis.restartPzh = function(instance, callback) {
   "use strict";
   try {
     // Reload contents
-    var id = instance.config.serverName;
-    farm.server._contexts.some(function(elem) {
-      if (id.match(elem[0]) !== null) {
-        elem[1] = crypto.createCredentials(farm.pzhs[id].options).context;
-      }
-    });
+    if (instance && instance.config && instance.config.serverName && farm.server) {
+      var id = instance.config.serverName;
+      farm.server._contexts.some(function(elem) {
+        if (id.match(elem[0]) !== null && farm.pzhs[id]) {
+          elem[1] = crypto.createCredentials(farm.pzhs[id].options).context;
+        }
+      });
+    }
   } catch(err) {
     callback.call(instance, err);
   }
