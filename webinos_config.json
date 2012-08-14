@@ -6,5 +6,6 @@
     "pzp_web_webSocket" :8080,
     "pzp_tlsServer"     :8040,
     "pzp_zeroConf"      :4321
-  }
+  },
+  "pzhDefaultServices": ["context", "events", "get42"],
 }

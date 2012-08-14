@@ -574,7 +574,7 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
       self.checkMode(configure);
       if (self.mode === global.modes[0]) { // VIRGIN MODE
         if (!checkConfiguration(self.inputConfig, configure)) {
-          callback("undefined");
+          callback("error", "configuration check failed");
         }
       }
       self.config = configure;

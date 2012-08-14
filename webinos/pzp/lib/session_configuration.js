@@ -24,19 +24,106 @@ var certificate = require("./session_certificate");
 var common      = require("./session_common");
 var log         = new common.debug("config");
 
-var session_configuration = exports;
+fetchDeviceName = function(type) {
+   //Get Android devices identity
+  if(type === "Pzp" && (os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android")){
+    var bridge = require("bridge");
+    /* If WiFi Mac address is prefered
+    * var prop = {
+    *	aspect: "WiFiNetwork",
+    *	property: "macAddress"
+    * }
+    */
+    var prop = {
+      aspect: "Device",
+      property: "identity"
+    }
 
-// Default webinos services available when no configuration exists yet
-session_configuration.pzhDefaultServices = [
-  {name: "context", params: {}},
-  {name: "events", params: {}},
-  {name: "get42", params: {}}
-];
+    function onsuccess(prop_value, prop){
+      return (prop_value + "_"+ type); //devicename_type
+    }
 
-session_configuration.states = ["NOT_CONNECTED", "CONNECTING", "CONNECTED", "DISCONNECTING"];
-session_configuration.modes  = ["VIRGIN", "HUB", "PEER", "HUB_PEER"];
-session_configuration.PZH_MSG = "0";
-session_configuration.PZP_MSG = "1";
+    function onerror(){
+      log.error("android get device name returns error");
+      return ("android"+ "_"+ type);
+    }
+
+    var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
+    devStatusModule.getPropertyValue(onsuccess, onerror, prop);
+  } else  if ((type === "Pzp" || type === "PzhFarm")){
+    return (os.hostname() + "_"+ type); //devicename_type
+  } else {
+    return name;
+  }
+};
+
+fetchPortDetails = function() {
+  fs.readFile("webinos_config.json", function(err,data) {
+    var port = {};
+    if (!err) {
+      var port_data = JSON.parse(data.toString());
+      port.farmPort           = port_data.ports.farm;
+      port.farm_webServerPort = port_data.ports.farm_webServer;
+      port.pzp_webSocket      = port_data.ports.pzp_webSocket;
+      port.pzp_web_webSocket  = port_data.ports.pzp_web_webSocket;
+      port.pzp_tlsServer      = port_data.ports.pzp_tlsServer;
+      port.pzp_zeroConf       = port_data.ports.pzp_zeroConf;
+      return port;
+    } else { // We failed in reading configuration file, assign defaults
+      port.farmPort           = 80;
+      port.farm_webServerPort = 443;
+      port.pzp_webSocket      = 8081;
+      port.pzp_web_webSocket  = 8080;
+      port.pzp_tlsServer      = 8040;
+      port.pzp_zeroConf       = 4321;
+      return port;
+    }
+  });
+};
+
+/**
+ * @description: returns root path of .webinos folder. In this folder all information is stored.
+ */
+webinosConfigPath = function() {
+  "use strict";
+  var webinosDemo;
+  switch(os.type().toLowerCase()){
+    case "windows_nt":
+      webinosDemo = path.resolve(process.env.appdata + "/webinos/");
+      break;
+    case "linux":
+      switch(os.platform().toLowerCase()){
+        case "android":
+          webinosDemo = path.resolve(process.env.EXTERNAL_STORAGE + "/.webinos/");
+          break;
+        case "linux":
+          webinosDemo = path.resolve(process.env.HOME + "/.webinos/");
+          break;
+      }
+      break;
+    case "darwin":
+      webinosDemo = path.resolve(process.env.HOME + "/.webinos/");
+      break;
+  }
+  return webinosDemo;
+};
+
+var Config = function(friendlyName, webinosType, sessionIdentity) {
+  this.friendlyName = friendlyName;
+  this.webinosName  = fetchDeviceName(webinosType);
+  this.webinosType  = webinosType;
+
+  this.serverName   = sessionIdentity;
+  this.ports        = fetchPortDetails();
+
+  this.states       = ["NOT_CONNECTED", "CONNECTING", "CONNECTED", "DISCONNECTING"];
+  this.modes        = ["VIRGIN", "HUB", "PEER"];
+
+  this.certificate  = {"master":"", "connection":""};
+
+  this.webinosRoot  = webinosConfigPath()+"/"+this.webinosName+"/";
+}
+
 /**
 * @descripton Checks for master certificate, if certificate is not found
 * it calls generating certificate function defined in certificate manager.
@@ -44,66 +131,57 @@ session_configuration.PZP_MSG = "1";
 * @param {function} callback It is callback function that is invoked after
 * checking/creating certificates
 */
-session_configuration.setConfiguration = function (name, type, host, pzhName, callback) {
-  var webinosDemo = common.webinosConfigPath();
-
+Config.prototype.setConfiguration = function (callback) {
+  var self = this;
   if (typeof callback !== "function") {
-    log.error("callback function is not defined");
-    callback("undefined");
+    callback("error", "callback missing");
     return;
   }
-
-  if (type !== "PzhFarm" && type !== "Pzh" && type !== "Pzp") {
-    log.error("wrong type is mentioned");
-    callback("undefined");
-    return;
-  }
-
-  fetchDeviceName(name, type, function(name){
-    parsePortConfiguration(function() {
-      fs.readFile(( webinosDemo+"/config/"+ name +".json"), function(err, data) {
-          if(err && err.code ==="EACCES") {
-            log.error("configuration file read failed... try with sudo ");
-            process.exit();
-          }
-          if ( err && err.code=== "ENOENT" ) {
-          // CREATE NEW CONFIGURATION
-          var config = createConfigStructure(name, type);
-          config.name = name;
-
-          if (type === "Pzp" && typeof pzhName !== "undefined" && (pzhName !== '' || pzhName !== null )) {
-            config.serverName = host+'/'+pzhName;
-          } else {
-            config.serverName = host;
-          }
-
-          // This self signed certificate is for getting connection certificate CSR.
-          try {  // From this certificate generated only csr is used
-            certificate.selfSigned(config, type, function(status, selfSignErr, conn_key, conn_cert, csr ) {
-              if(status === "certGenerated") {
-                session_configuration.storeKey(config.own.key_id, conn_key);
-                log.info("generated connection certificates");
-                if (type !== "Pzp") {
-                  // This self signed certificate is  master certificate / CA
-                  selfSignedMasterCert(config, function(config_master){
-                    // Sign connection certifcate
-                    session_configuration.signedCert(csr, config_master, null, 1, function(config_signed) { // PZH CONN CERT 1
-                      callback(config_signed, conn_key);
+  var filePath = path.join(self.webinosRoot, self.webinosName+".json");
+  fs.readFile(filePath, function(err, data) {
+      if(err && err.code ==="EACCES") {
+        log.error("configuration file read failed, try running as sudo or admin ");
+        process.exit();
+      }
+      if ( err && err.code=== "ENOENT" ) {// CREATE NEW CONFIGURATION
+        try {
+          certificate.generateSelfSignedCertificate(self.webinosType,
+            function(status, selfSignErr, conn_key, conn_cert, conn_csr ) {
+            if(status !== "success") {
+              log.error("connection self signed certificate failed");
+              callback("error", "connection self signed certificate failed");
+              return;
+            } else {
+              log.info("generated connection certificates");
+              if (self.webinosType !== "Pzp") {
+                certificate.generateMasterCertificate(self.certificate, function(status, master_cert){ // Master Certificate
+                  if (status === "success") {
+                    certificate.generateSignedCertificate(conn_csr, master_cert, null, self.webinosType, // Connecton
+                    function(status, config_signed) {
+                      if(status === "success") {
+                        callback("success", config_signed, conn_key);
+                      } else {
+                        callback("error", "signing connection certificate failed");
+                      }
                     });
-                  });
-                } else {
-                  // PZP will only generate only 1 certificate
-                  try{
-                      // Used for initial connection, will be replaced by cert received from PZH
-                    config.own.cert = conn_cert.cert;
-                    config.csr      = csr;
-                    session_configuration.storeConfig(config, function() {
-                      callback(config, conn_key, config.csr);
-                    });
-                  } catch (err) {
-                    log.error("storing configuration"+ err);
-                    return;
+                  } else {
+                    callback("error", "generating master certificate failed");
                   }
+                });
+              } else {
+                try{
+                  // Used for initial connection, will be replaced by cert received from PZH
+                  self.certificate.connection = conn_cert.cert;
+                  self.certificate.csr        = csr;
+                  self.storePzpCertificate(self.certificate, function(status) {
+                    if (status === "success") {
+                      callback(status, config, conn_key, config.csr);
+                    }
+                  });
+                } catch (err) {
+                  log.error("storing configuration"+ err);
+                  return;
+                }
                 }
               } else {
                 log.error("generating self signed cert: ");
@@ -135,97 +213,8 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
             }
         }
       });
-    });
   });
 };
-
-function parsePortConfiguration(callback) {
-  fs.readFile("webinos_config.json", function(err,data) {
-    if (!err) {
-      var port_data = JSON.parse(data.toString());
-      session_configuration.port = {};
-      session_configuration.port.farmPort           = port_data.ports.farm;
-      session_configuration.port.farm_webServerPort = port_data.ports.farm_webServer;
-      session_configuration.port.pzp_webSocket = port_data.ports.pzp_webSocket;
-      session_configuration.port.pzp_web_webSocket  = port_data.ports.pzp_web_webSocket;
-      session_configuration.port.pzp_tlsServer      = port_data.ports.pzp_tlsServer;
-      session_configuration.port.pzp_zeroConf       = port_data.ports.pzp_zeroConf;
-      callback();
-    }
-  });
-}
-
-function fetchDeviceName(name, type, callback) {
-   //Get Android devices identity
-  if((os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android"))
-  {
-    var bridge = require("bridge");
-    /* If WiFi Mac address is prefered
-    * var prop = {
-    *	aspect: "WiFiNetwork",
-    *	property: "macAddress"
-    * }
-    */
-    var prop = {
-      aspect: "Device",
-      property: "identity"
-    }
-
-    function onsuccess(prop_value, prop)
-    {
-      name = prop_value + "_"+ type; //devicename_type
-      callback(name);
-    }
-
-    function onerror()
-    {
-      log.error("Android get device name returns error");
-    }
-
-    var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
-    devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-  } else  if (name === "" && (type === "Pzp" || type === "PzhFarm")){
-    name = os.hostname() + "_"+ type; //devicename_type
-    callback(name);
-  } else {
-    callback(name);
-  }
-};
-
-session_configuration.createDirectoryStructure = function (callback) {
-  var webinosDemo = common.webinosConfigPath();
-  try {
-    // Main webinos directory
-    fs.readdir( webinosDemo, function(err) {
-      if ( err && err.code === "ENOENT" ) {
-        fs.mkdirSync( webinosDemo,"0700");
-      }
-      setTimeout(function(){
-        // Configuration directory, which holds information about certificate, ports, openid details
-        fs.readdir ( webinosDemo+"/config", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/config","0700");
-          }
-        });
-        // logs
-        fs.readdir ( webinosDemo+"/logs", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/logs","0700");
-          }
-        });
-        // keys
-        fs.readdir ( webinosDemo+"/keys", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/keys","0700");
-          }
-        });
-        callback(true);
-      }, 100);
-    });
-  } catch (err){
-    log.error("error setting default Webinos Directories" + err.code);
-  }
-}
 
 session_configuration.storeConfig = function (config, callback) {
   var webinosDemo = common.webinosConfigPath();
@@ -239,111 +228,5 @@ session_configuration.storeConfig = function (config, callback) {
         log.info("saved configuration file - " + config.name);
       }
     });
-  }
-}
-// TODO: Put this keys in secure storage ..
-session_configuration.storeKey= function (key_id, value) {
-  var webinosDemo = common.webinosConfigPath();
-  fs.writeFile((webinosDemo+ "/keys/"+key_id), value, function(err) {
-    if(err) {
-      log.error("error saving key " + err);
-    } else {
-      log.info("saved key file @@ " +key_id);
-    }
-  });
-}
-
-session_configuration.fetchKey= function (key_id, callback) {
-  var webinosDemo = common.webinosConfigPath();
-  fs.readFile((webinosDemo+ "/keys/"+key_id), function(err, data) {
-    if(err) {
-      log.error("error saving key " + err);
-      callback(null);
-    } else {
-      log.info("fetched key file @@ "+ key_id);
-      callback(data.toString());
-    }
-  });
-}
-
-session_configuration.signedCert = function (csr, config, name, type, callback) {
-  try {
-    session_configuration.fetchKey(config.master.key_id, function(master_key){
-      // connection certificate signed by master certificate
-      certificate.signRequest(csr, master_key, config.master.cert, type, config.serverName, function(result, signed_cert) {
-        if(result === "certSigned") {
-          log.info("generated Signed Certificate by CA");
-          try {
-            if(type === 1 || type === 0) { // PZH
-              config.own.cert = signed_cert; // Signed connection certificate
-            } else {
-              config.signedCert[name] = signed_cert;
-            }
-
-            // Update with the signed certificate
-            session_configuration.storeConfig(config, function() {
-              callback(config);
-            });
-          } catch (err1) {
-            log.error("error setting paramerters" + err1) ;
-            callback("undefined");
-            return;
-          }
-        }
-      });
-    });
-  } catch (err){
-    log.error("error in generating signed certificate by CA" + err);
-    callback("undefined");
-  }
-};
-
-function createConfigStructure (name, type) {
-  var config = {};
-  if (type === "Pzh") {
-    config.own         = { key_id: name+"_conn_key",   cert:""};
-    config.master      = { key_id: name+"_master_key", cert:"", crl:"" };
-    config.signedCert  = {};
-    config.revokedCert = {};
-    config.otherCert   = {};
-    config.email       = "";
-    config.country     = "";
-    config.image       = "";
-  } else if (type === "PzhFarm") {
-    config.own         = { key_id: name+"_conn_key",   cert:""};
-    config.master      = { key_id: name+"_master_key", cert:""} ;
-    config.webServer   = { key_id: name+"_ws_key",     cert:""} ;
-    config.pzhs        = {}; //contents: "", modules:""
-  } else if (type === "Pzp" ) {
-    config.own         = { key_id: name+"_conn_key", cert:""};
-    config.csr         = "";
-    config.master      = { cert:"", crl:"" };
-    config.pzhId       = '';
-  };
-  config.type        = type;
-  config.name        = '';
-  config.serverName  = '';
-  return config;
-}
-
-function selfSignedMasterCert(config, callback){
-  try {
-    certificate.selfSigned(config, config.type+"CA", function(result, selfSignErr, master_key, master_cert) {
-      if(result === "certGenerated") {
-        log.info("generated CA Certificate");
-        // Store all master certificate information
-        config.master.cert = master_cert.cert;
-        config.master.crl  = master_cert.crl;
-        session_configuration.storeKey(config.master.key_id, master_key);
-        session_configuration.storeConfig(config, function() {
-          callback(config);
-        });
-      } else {
-        log.error("error in generting certificate");
-      }
-    });
-  } catch (err) {
-    log.error("error in generating master self signed certificate " + err);
-    callback("undefined");
   }
 }

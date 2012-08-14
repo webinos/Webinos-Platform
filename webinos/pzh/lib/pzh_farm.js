@@ -37,7 +37,7 @@ farm.config = {};
 farm.server;
 farm.pzhWI  = webinos.global.require(webinos.global.pzh.location, "web/pzh_webserver");
 
-function loadPzhs(config) {
+loadPzhs = function(config) {
   "use strict";
   var myKey;
   for ( myKey in config.pzhs) {
@@ -54,34 +54,19 @@ function loadPzhs(config) {
   }
 }
 
-/**
-* @description: Starts farm.
-* @param {string} url: pzh farm url for e.g. pzh.webinos.org
-* @param {function} callback: true in case successful or else false in case unsuccessful
-*/
-farm.startFarm = function (url, name, callback) {
+fetchIP = function(callback) {
   "use strict";
-  var connectingAddress, hostname;
-  // The directory structure which pzh_farms needs for putting in files
-  session.configuration.createDirectoryStructure(function(){
-    // Configuration setting for pzh, returns set values and connection key
-    if (url === "") {
-      session.common.fetchIP(function(resolvedAddress){
-        connectingAddress = resolvedAddress;
-        hostname = connectingAddress;
-        farm.loadFarm(hostname, connectingAddress, callback);
-      });
-    } else {
-      session.common.resolveIP(url, function(resolvedAddress) {
-        connectingAddress = "0.0.0.0";
-        hostname = url;
-        farm.loadFarm(hostname, connectingAddress, callback);
-      });
-    }
+  var socket = net.createConnection(80, "www.google.com");
+  socket.on('connect', function() {
+    if (typeof callback === "function") { callback(socket.address().address);}
+    socket.end();
   });
-};
+  socket.on('error', function() { // Assuming this will happen as internet is not reachable
+    if (typeof callback === "function") { callback("0.0.0.0");}
 
-farm.loadFarm = function(hostname, connectingAddress, callback) {
+  });
+}
+loadFarm = function(hostname, connectingAddress, callback) {
   session.configuration.setConfiguration('',"PzhFarm", hostname, null, function (config, conn_key) {
     if (config === "undefined") {
       log.error("failed setting configuration, details are missing");
@@ -129,7 +114,7 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
             log.info("("+conn.servername+") Pzh/Pzp  closed");
             if(conn.servername && farm.pzhs[conn.servername]) {
               var cl = farm.pzhs[conn.servername];
-              var removed = session.common.removeClient(cl, conn);
+              var removed = self.removeClient(cl, conn);
               if (removed !== null && typeof removed !== "undefined"){
                 //farm.pzhWI.updateList(farm.pzhs[conn.servername]);
                 cl.messageHandler.removeRoute(removed, conn.servername);
@@ -166,7 +151,55 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
       });
       farm.server.listen(session.configuration.port.farmPort, connectingAddress);
     });
+};
 
+
+/** @desription It removes the connected PZP/Pzh details.
+ */
+Provider.prototype.removeClient = function(self, conn) {
+  "use strict";
+
+  for (var id in self.connectedPzp){
+    if (self.connectedPzp[id].socket === conn) {
+      console.log("removed pzp instance details -" + id)
+      delete self.connectedPzp[id];
+      return id;
+    }
+  }
+
+   for (var id in self.connectedPzh){
+    if (self.connectedPzh[id].socket === conn) {
+      console.log("removed pzh instance details -" + id)
+      delete self.connectedPzh[id];
+      return id;
+    }
+  }
+    // TODO: Remove PZH details...
+};
+
+/**
+* @description: Starts farm.
+* @param {string} url: pzh farm url for e.g. pzh.webinos.org
+* @param {function} callback: true in case successful or else false in case unsuccessful
+*/
+farm.startFarm = function (url, name, callback) {
+  "use strict";
+  var connectingAddress, hostname;
+  // The directory structure which pzh_farms needs for putting in files
+  session.configuration.createDirectoryStructure(function(){
+    // Configuration setting for pzh, returns set values and connection key
+    if (url === "") {
+      fetchIP(function(resolvedAddress){
+        connectingAddress = resolvedAddress;
+        hostname          = connectingAddress;
+        farm.loadFarm(hostname, connectingAddress, callback);
+      });
+    } else {
+      connectingAddress = "0.0.0.0";
+      hostname          = url;
+      loadFarm(hostname, connectingAddress, callback);
+    }
+  });
 };
 
 /**
