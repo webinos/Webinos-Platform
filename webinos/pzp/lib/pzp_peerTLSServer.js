@@ -168,7 +168,7 @@ PzpServer.prototype.startServer = function (parent, callback) {
     server.on("error", function (err) {
       if (err.code === "EADDRINUSE") {
         log.error("address in use, trying next available port ... ");
-        session.configuration.pzpServerPort = parseInt(session.configuration.port.pzp_tlsServer, 10) + 1;
+        session.configuration.port.pzp_tlsServer = parseInt(session.configuration.port.pzp_tlsServer, 10) + 1;
         server.listen(session.configuration.port.pzp_tlsServer, parent.pzpAddress);
       }
     });
