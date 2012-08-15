@@ -58,7 +58,18 @@ var Pzh = function () {
   this.connectedPzh = {};/** Holds Connected PZH information such as IP address, port and socket */
   this.connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
   this.expecting;    // Set by authcode directly
+  this.modules; // holds startup modules
+  this.listenerMap  = {}; // holds listeners/callbacks, mostly for pzh internal api
   this.log;
+};
+
+/**
+ * 
+ */
+Pzh.prototype.addMsgListener = function (callback) {
+  var id = (parseInt((1 + Math.random()) * 0x10000)).toString(16).substr(1);
+  this.listenerMap[id] = callback;
+  return id;
 };
 
 /**
@@ -376,6 +387,15 @@ Pzh.prototype.processMsg = function(conn, msgObj) {
       self.sendMessage(msg, validMsgObj.from);
       self.log.info("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
     }
+    else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "unregServicesReply") {
+        self.log.info("receiving initial modules from pzp...");
+      if (!validMsgObj.payload.id) {
+        self.log.error("cannot find callback");
+        return;
+      }
+      self.listenerMap[validMsgObj.payload.id](validMsgObj.payload.message);
+      delete self.listenerMap[validMsgObj.payload.id];
+    }
     // Message is forwarded to Messaging manager
     else {
       try {
@@ -401,6 +421,15 @@ Pzh.prototype.setMessageHandler = function() {
   self.messageHandler.setSendMessage(messageHandlerSend);
   self.messageHandler.setSeparator("/");
 }
+
+/**
+ * Returns the module list the PZH was initialized with.
+ * @returns Array of startup modules.
+ */
+Pzh.prototype.getInitModules = function() {
+	return this.modules;
+};
+
 /**
 * @description: ADDs PZH in a farm ..
 * @param {string} uri: pzh url you want to add .. assumption it is of form pzh.webinos.org/nick
@@ -453,7 +482,8 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
           rejectUnauthorized: false
         };
 
-        self.registry     = new Registry();
+        self.modules      = modules;
+        self.registry     = new Registry(this);
         self.rpcHandler   = new RPCHandler(undefined, self.registry); // Handler for remote method calls.
         self.discovery    = new Discovery(self.rpcHandler, [self.registry]);
         self.registry.registerObject(self.discovery);

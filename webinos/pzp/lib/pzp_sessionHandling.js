@@ -64,6 +64,7 @@ var Pzp = function () {
   this.state           = global.states[0]; // State is applicable for hub mode but for peer mode, we need to check individually
   this.mode            = global.modes[0]; //  4 modes a pzp can be, for peer mode, each PZP needs to be checked if it is connected
   this.inputConfig     = {};
+  this.modules         = []; // list of initially loaded modules
 };
 
 
@@ -111,6 +112,18 @@ Pzp.prototype.prepMsg = function(from, to, status, message) {
     "payload":{"status":status,
         "message":message}};
   this.sendMessage(msg, to);
+};
+
+Pzp.prototype.makeMsg = function(to, status, message) {
+  return {
+    "type": "prop",
+    "from": this.sessionId,
+    "to"  : to,
+    "payload": {
+      "status" : status,
+      "message": message
+    }
+  };
 };
 
 Pzp.prototype.wsServerMsg = function(message) {
@@ -180,6 +193,16 @@ Pzp.prototype.addRemoteServiceListener = function(callback) {
   this.serviceListener = callback;
 };
 
+/**
+ * 
+ */
+Pzp.prototype.registerServicesWithPzh = function() {
+  var localServices = this.discovery.getRegisteredServices();
+  var msg = this.makeMsg(this.config.pzhId, "registerServices", {services:localServices, from:this.sessionId});
+  this.sendMessage(msg, msg.to);
+  log.info("sent msg to register local services with pzh");
+};
+
 Pzp.prototype.update = function(callback) {
   var self = this;
   self.connectedApp();
@@ -236,10 +259,9 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
     var msg = self.messageHandler.registerSender(self.sessionId, self.config.pzhId);
     self.sendMessage(msg, self.config.pzhId);
 
-    var localServices = self.discovery.getRegisteredServices();
-    self.prepMsg(self.sessionId, self.config.pzhId, "registerServices", localServices);
+    self.registerServicesWithPzh();
+
     callback("startedPZP");
-    log.info("sent msg to register local services with pzh");
     if (self.pzptlsServerState !== global.states[2]) {
       var server = new pzpServer();
       server.startServer(self, function() {
@@ -545,6 +567,24 @@ Pzp.prototype.processMsg = function(msgObj, callback) {
     } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'foundServices') {
       log.info('received message about available remote services.');
       this.serviceListener && this.serviceListener(validMsgObj.payload);
+    } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'listUnregServices') {
+      var services = self.getInitModules();
+      var msg = self.makeMsg(self.config.pzhId, "unregServicesReply", services);
+      msg.payload.id = validMsgObj.payload.message.listenerId;
+      self.sendMessage(msg, msg.to);
+      log.info("sent " + ((services && services.length) || 0) + " initially loaded modules to " + validMsgObj.from);
+    } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'registerService') {
+      var m = {
+        "name": validMsgObj.payload.message.name,
+        "params": validMsgObj.payload.message.params
+      };
+      self.registry.loadModule(m, self.rpcHandler);
+    } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'unregisterService') {
+      var sv = {
+        "id": validMsgObj.payload.message.svId,
+        "api": validMsgObj.payload.message.svAPI
+      };
+      self.registry.unregisterObject(sv);
     }
     // Forward message to message handler
     else {
@@ -553,16 +593,23 @@ Pzp.prototype.processMsg = function(msgObj, callback) {
   });
 };
 
+/**
+ * Returns the module list the PZP was initialized with.
+ * @returns Array of startup modules.
+ */
+Pzp.prototype.getInitModules = function() {
+  return this.modules;
+};
 
 Pzp.prototype.initializePzp = function(config, modules, callback) {
   var self = this;
-  self.registry       = new Registry();
+  self.modules        = modules;
+  self.registry       = new Registry(this);
   self.rpcHandler     = new RPCHandler(this, self.registry); // Handler for remote method calls.
   self.discovery      = new Discovery(self.rpcHandler, [self.registry]);
   self.registry.registerObject(self.discovery);
   self.registry.loadModules(modules, self.rpcHandler); // load specified modules
   self.messageHandler = new MessageHandler(this.rpcHandler); // handler for all things message
-  self.modules        = modules;
   self.inputConfig    = config;
 
   global.createDirectoryStructure( function() {
