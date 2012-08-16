@@ -196,6 +196,18 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
               case 'listPzp':
                 pzhapis.listPzp(farm.pzhs[currentPzh], result);
                 break;
+              case 'listAllServices':
+                pzhapis.listAllServices(farm.pzhs[currentPzh], result);
+                break;
+              case 'listUnregServices':
+                pzhapis.listUnregServices(farm.pzhs[currentPzh], query.at, result);
+                break;
+              case 'registerService':
+                pzhapis.registerService(farm.pzhs[currentPzh], query.at, query.name, result);
+                break;
+              case 'unregisterService':
+                pzhapis.unregisterService(farm.pzhs[currentPzh], query.at, query.svId, query.svAPI, result);
+                break;
             }
           }
          }
