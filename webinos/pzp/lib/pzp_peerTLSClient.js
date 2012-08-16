@@ -80,9 +80,9 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
                 var msg = {"type":"prop", "from":parent.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
                 msg.payload.id = validMsgObj.payload.message.id;
                 parent.sendMessage(msg, validMsgObj.from);
-                log.info("sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
-              }else {
-              parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
+                log.info("sent " + ((services && services.length) || 0) + " Webinos Services from this RPC handler.");
+            } else {
+                parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
             }
           });
         });

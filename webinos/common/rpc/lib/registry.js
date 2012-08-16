@@ -17,7 +17,9 @@
  ******************************************************************************/
 
 (function () {
-	var Registry = function() {
+	var Registry = function(parent) {
+
+		this.parent = parent;
 
 		/**
 		 * Holds registered Webinos Service objects local to this RPC.
@@ -28,11 +30,7 @@
 		this.objects = {};
 	};
 
-	/**
-	 * Registers a Webinos service object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	Registry.prototype.registerObject = function (callback) {
+	var _registerObject = function (callback) {
 		if (!callback) {
 			return;
 		}
@@ -54,6 +52,18 @@
 
 		receiverObjs.push(callback);
 		this.objects[callback.api] = receiverObjs;
+	};
+
+	/**
+	 * Registers a Webinos service object as RPC request receiver.
+	 * @param callback The callback object that contains the methods available via RPC.
+	 */
+	Registry.prototype.registerObject = function (callback) {
+		_registerObject.call(this, callback);
+
+		if (this.parent.registerServicesWithPzh) {
+			this.parent.registerServicesWithPzh();
+		}
 	};
 
 	/**
@@ -96,6 +106,29 @@
 		} else {
 			delete this.objects[callback.api];
 		}
+
+		if (this.parent.registerServicesWithPzh) {
+			this.parent.registerServicesWithPzh();
+		}
+	};
+
+	var load = function(modules) {
+		var webinos = require('webinos')(__dirname);
+
+		return modules.map(function(m) {
+			return webinos.global.require(webinos.global.api[m.name].location).Service;
+		});
+	};
+
+	Registry.prototype.loadModule = function(module, rpcHandler) {
+		var Service = load([module])[0];
+		try {
+			this.registerObject(new Service(rpcHandler, module.params));
+		}
+		catch (error) {
+			console.log('INFO: [Registry] '+error);
+			console.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
+		}
 	};
 
 	/**
@@ -106,16 +139,16 @@
 	Registry.prototype.loadModules = function(modules, rpcHandler) {
 		if (!modules) return;
 
-		var webinos = require('webinos')(__dirname);
+		var services = load(modules);
 
-		for (var i = 0; i < modules.length; i++){
-			try{
-				var Service = webinos.global.require(webinos.global.api[modules[i].name].location).Service;
-				this.registerObject(new Service(rpcHandler, modules[i].params));
+		for (var i = 0; i < services.length; i++){
+			try {
+				var Service = services[i];
+				_registerObject.call(this, new Service(rpcHandler, modules[i].params));
 			}
-			catch (error){
+			catch (error) {
 				console.log('INFO: [Registry] '+error);
-				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error );
+				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error);
 			}
 		}
 	};

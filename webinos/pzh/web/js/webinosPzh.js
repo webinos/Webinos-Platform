@@ -42,6 +42,12 @@ var webinosPZH = {
           case 'revokePzp':
             if (typeof webinosPZH.callbacks.revokePzp === 'function') webinosPZH.callbacks.revokePzp(msg.pzpid);
             break;
+          case 'listAllServices':
+            if (typeof webinosPZH.callbacks.listAllServices === 'function') webinosPZH.callbacks.listAllServices(msg.payload);
+            break;
+          case 'listUnregServices':
+            if (typeof webinosPZH.callbacks.listUnregServices === 'function') webinosPZH.callbacks.listUnregServices(msg.payload);
+            break;
         }
       }
     }
@@ -67,7 +73,8 @@ var webinosPZH = {
     crashLog: null,
     pzhPzh: null,
     listPzp: null,
-    revokePzp: null
+    revokePzp: null,
+    listAllServices: null
   },
   commands: {
     authenticate: {
@@ -76,7 +83,7 @@ var webinosPZH = {
       },
       yahoo: function(){
         webinosPZH.send({cmd:"authenticate-yahoo"});
-      },
+      }
     },
     logout: function(){
       webinosPZH.send("logout");
@@ -108,6 +115,23 @@ var webinosPZH = {
       webinosPZH.callbacks.revokePzp = callback;
       webinosPZH.send({cmd:"revokePzp","pzpid":id});
     },
+    listAllServices: function(callback){
+        webinosPZH.callbacks.listAllServices = callback;
+        webinosPZH.send({cmd:"listAllServices"});
+    },
+    listUnregServices: function(at, callback){
+        webinosPZH.callbacks.listUnregServices = callback;
+        webinosPZH.send({cmd:"listUnregServices", "at":at});
+    },
+    registerService: function(at, name, callback){
+        webinosPZH.callbacks.registerService = callback;
+        console.log("hi");
+        webinosPZH.send({cmd:"registerService", "at":at, "name":name});
+    },
+    unregisterService: function(svAddress, svId, svAPI, callback){
+        webinosPZH.callbacks.unregisterService = callback;
+        webinosPZH.send({cmd:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI});
+    },
     crashLog: function(callback){
       webinosPZH.callbacks.crashLog = callback;
       webinosPZH.send({cmd:'crashLog'});
@@ -118,6 +142,6 @@ var webinosPZH = {
     },
     restartPzh: function(){
       webinosPZH.send({cmd:'restartPzh'});
-    },
+    }
   }
 };

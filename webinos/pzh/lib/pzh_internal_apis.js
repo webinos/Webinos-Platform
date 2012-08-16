@@ -135,6 +135,65 @@ pzh_internal_apis.listPzp = function(instance, callback) {
   }
 };
 
+pzh_internal_apis.listAllServices = function(instance, callback) {
+  "use strict";
+  var result = {pzEntityList: []};
+  result.pzEntityList.push({pzId:instance.sessionId});
+  for (var i in instance.config.signedCert){
+    if (typeof instance.config.signedCert[i] !== "undefined") {
+      result.pzEntityList.push({pzId:getPzpInfoSync(instance, i).cname});
+    }
+  }
+
+  result.services = instance.discovery.getAllServices();
+
+  var payload = {to: instance.config.serverName, cmd:"listAllServices", payload:result};
+  callback(payload);
+};
+
+pzh_internal_apis.listUnregServices = function(instance, at, callback) {
+  "use strict";
+
+  function runCallback(pzEntityId, modules) {
+	  var result = {
+	    "pzEntityId": pzEntityId,
+	    "modules"   : modules
+	  };
+	  callback({to: instance.config.serverName, cmd:"listUnregServices", payload:result});
+  }
+
+  if (instance.sessionId !== at) {
+    var id = instance.addMsgListener(function(modules) {
+      runCallback(at, modules);
+    });
+    var msg = instance.prepMsg(instance.sessionId, at, "listUnregServices", {listenerId:id});
+    instance.sendMessage(msg, at);
+  } else {
+    runCallback(instance.sessionId, instance.getInitModules());
+  }
+};
+
+pzh_internal_apis.registerService = function(instance, at, name, callback) {
+  "use strict";
+
+  if (instance.sessionId !== at) {
+    var msg = instance.prepMsg(instance.sessionId, at, "registerService", {name:name, params:{}});
+    instance.sendMessage(msg, at);
+  } else {
+    instance.registry.loadModule({"name":name, "params":{}}, instance.rpcHandler);
+  }
+};
+
+pzh_internal_apis.unregisterService = function(instance, at, svId, svAPI, callback) {
+  "use strict";
+
+  if (instance.sessionId !== at) {
+    var msg = instance.prepMsg(instance.sessionId, at, "unregisterService", {svId:svId, svAPI:svAPI});
+    instance.sendMessage(msg, at);
+  } else {
+    instance.registry.unregisterObject({"id":svId, "api":svAPI});
+  }
+};
 
 // Get a list of all Personal zone devices.
 pzh_internal_apis.listZoneDevices = function(instance, callback) {
