@@ -17,8 +17,6 @@
 
 Author: Eelco Cramer, TNO
 
-****** CURRENT STATUS: not working with current code base *****
-
 This is the prototype of a XMPP library that can connect the PZP to the PZH and in the future
 maybe connect different PZPs as well.
 
@@ -51,11 +49,14 @@ Files:
 
 Installation prerequests:
 
+0. Open op a command line window and cd into the '<webinos home>webinos/common/xmpp/lib' folder.
+
 1. Node.js ;-)
 
 2. LibExpat:
 
 On Ubuntu / Debian: apt-get install libexpat1
+On OS X please use homebrew or macports to install libexpat.
 
 3. Node-Xmpp or Node-Bosh-Xmpp:
 
