@@ -131,6 +131,7 @@
                  <configuration>
                    <executable>jsdoc.cmd</executable>
                    <arguments>
+                     <argument>-r</argument>
                      <argument>-d</argument>
                      <argument>${basedir}/target/site/jsdoc</argument>
                      <argument>${basedir}/lib/</argument>
@@ -229,6 +230,7 @@
                   <configuration>
                     <executable>jsdoc</executable>
                     <arguments>
+                      <argument>-r</argument>
                       <argument>-d</argument>
                       <argument>${basedir}/target/site/jsdoc</argument>
                       <argument>${basedir}/lib/</argument>
