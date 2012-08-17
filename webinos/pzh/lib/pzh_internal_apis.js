@@ -36,8 +36,6 @@ var session = webinos.global.require(webinos.global.pzp.location, "lib/session")
 var qrcode  = require("./pzh_qrcode.js");
 var revoke  = require("./pzh_revoke.js");
 
-var farm    = require("./pzh_farm.js");
-
 var pzh_internal_apis = exports;
 
 // Synchronous method for getting information about a PZP with a certain ID.

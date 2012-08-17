@@ -1,7 +1,7 @@
 { "name": "keystore"
 , "description": "An interface to the native password/keystorage interface. Currently works for Linux and Mac OS X"
 , "version": "1"
-, "main": "src/build/Release/keystore.node"
+, "main": "lib/keystore.js"
 , "keywords": ["Gnome keyring","Keychain Services"]
 , "maintainers": [{ "name": "Shamal Faily, Habib Virji"}]
 , "contributors": [{ "name": "Shamal Faily, Habib Virji"}]
@@ -14,9 +14,9 @@
     , "url": "http://github.com/isaacs/npm/raw/master/LICENSE"
     }
   ]
-, "repositories": 
+, "repositories":
   [ { "type" : "git",
       "url"  : "http://dev.webinos.org/git/wp4.git"
     }
-  ] 
+  ]
 }

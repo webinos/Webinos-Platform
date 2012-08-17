@@ -177,7 +177,6 @@ ASN1_INTEGER* getRandomSN()
 
 
 int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, char *url, char* result)  {
-
   BIO* bioReq = BIO_new_mem_buf(pemRequest, -1);
   BIO* bioCAKey = BIO_new_mem_buf(pemCAKey, -1);
 
@@ -275,7 +274,6 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
   }
 
   if( certType == 0) {
-
     if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_basic_constraints, (char*)"critical, CA:TRUE"))) {
       return 0;
     } else {

@@ -27,10 +27,9 @@ var crypto    = require('crypto');
 
 var webinos = require('webinos')(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
-var log     = new session.common.debug("pzh_webserver");
+var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")("pzh_web");
 
 var pzhapis = require('../lib/pzh_internal_apis');
-var farm    = require('../lib/pzh_farm');
 var openid  = require('./pzh_openid.js');
 
 var storeInfo = [];
@@ -335,7 +334,7 @@ function result(response) {
  * */
 function createWebInterfaceCertificate (config, callback) {
   if (config && config.webServer && config.webServer.cert === "") {
-    session.certificate.selfSigned(config, 'PzhWebServer',
+    session.certificate.selfSigned(config, 'PzhWS',
       function(status, selfSignErr, ws_key, ws_cert, csr ) {
       if(status === 'certGenerated') {
         session.configuration.fetchKey(config.master.key_id, function(master_key) {

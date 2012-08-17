@@ -26,8 +26,7 @@ var tls       = require("tls");
 var crypto    = require("crypto");
 
 var webinos = require("webinos")(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var farm    = require('./pzh_farm');
+//var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 
 var PzhConnecting = function(parent) {
   this.sessionId = parent.sessionId;

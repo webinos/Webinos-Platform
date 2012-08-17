@@ -63,7 +63,9 @@ var Pzp = function () {
   this.serviceListener;   // For a single callback to be registered via addRemoteServiceListener.
   this.state           = global.states[0]; // State is applicable for hub mode but for peer mode, we need to check individually
   this.mode            = global.modes[0]; //  4 modes a pzp can be, for peer mode, each PZP needs to be checked if it is connected
-  this.inputConfig     = {};
+
+  this.states       = ["NOT_CONNECTED", "CONNECTING", "CONNECTED", "DISCONNECTING"];
+  this.modes        = ["VIRGIN", "HUB", "PEER"];
 };
 
 

@@ -4,9 +4,9 @@
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,7 @@ var util    = require("util");
 
 var webinos = require("webinos")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var log     = new session.common.debug("pzh_revoke");
+var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")("pzh_farm");
 
 // Main interface: remove a PZP here.
 function revoke(instance, pzpCert, callback) {
@@ -77,7 +77,7 @@ function removeRevokedCert(instance, pzpid, config, callback) {
     callback(false);
   }
 }
-  
+
 revoker.revokePzp = function (pzpid, pzh, callback ) {
   "use strict";
   var pzpcert = pzh.config.signedCert[pzpid];

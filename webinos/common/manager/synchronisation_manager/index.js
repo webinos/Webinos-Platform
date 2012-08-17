@@ -1,3 +1,21 @@
+/*******************************************************************************
+*  Code contributed to the webinos project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+* Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+*******************************************************************************/
+
 var crypto = require('crypto');
 
 // Create Weak and Strong CheckSum
@@ -6,12 +24,12 @@ var Sync = function (sessionId, hashSize) {
   this.sessionId   = sessionId;
   this.hashSize    = hashSize;
   this.policy      = [];
-  this.setting     = []; //includes master, signed, revoked, otherPzh cert  
+  this.setting     = []; //includes master, signed, revoked, otherPzh cert
 };
 
 
 function weak_alg() {
-  
+
 }
 
 Sync.prototype.rsyncHash = function(file) {
@@ -21,13 +39,13 @@ Sync.prototype.rsyncHash = function(file) {
     if (!stat.isDirectory()){
       fs.readFile(file, function(err, data) {
         for (var i = 0 ; i < data.length; i += self.hashSize) {
-          var dataHash = data.slice(i, self.hashSize);    
-          obj.strong   = crypto.createHash("md5").update(dataHash).digest("hex"); 
-          obj.weak     = weak_alg(); 
+          var dataHash = data.slice(i, self.hashSize);
+          obj.strong   = crypto.createHash("md5").update(dataHash).digest("hex");
+          obj.weak     = weak_alg();
         }
       });
     } else {
-      return -3; 
+      return -3;
     }
   }
 }
@@ -59,16 +77,16 @@ Sync.prototype.createChecksum = function(folder) {
         }
       });
     }
-  });  
+  });
 }
 
 // Find Difference
 function findChecksum() {
-  
+
 }
 
 exports.webinos_iniitialize = function() {
-  
+
 }
 
 exports.webinos_createChecksum = function(fileName) {

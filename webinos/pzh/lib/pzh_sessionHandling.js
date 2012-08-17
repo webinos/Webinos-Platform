@@ -40,8 +40,8 @@ if (typeof exports !== "undefined") {
     var Discovery      = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
     var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
     var RPCHandler     = rpc.RPCHandler;
+    var log            =  webinos.global.require(webinos.global.util.location, "lib/logging.js");
     var authcode       = require("./pzh_authcode");
-    var farm           = require("./pzh_farm");
   } catch (err) {
     console.log("webinos modules missing, please check webinos installation" + err);
     return;
@@ -409,7 +409,7 @@ Pzh.prototype.setMessageHandler = function() {
 */
 Pzh.prototype.addPzh = function ( uri, modules, callback) {
   var self = this;
-  self.log = new session.common.debug("pzh_session");
+  self.log = new log("pzh_session");
   if (typeof farm.server === "undefined" || farm.server === null) {
     self.log.error("farm is not running, please run webinos_pzh");
     callback(false);

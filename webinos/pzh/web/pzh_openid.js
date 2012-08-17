@@ -16,16 +16,8 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 ********************************************************************************/
 var openid   = require('openid');
-
 var url      = require('url');
 var querystr = require('querystring');
-
-var webinos = require('webinos')(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
-var log     = new session.common.debug("pzh_openid");
-
-var farm    = require('../lib/pzh_farm');
-var ws      = require('./pzh_webserver.js');
 
 var rely;
 

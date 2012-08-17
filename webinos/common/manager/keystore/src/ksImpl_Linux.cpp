@@ -54,8 +54,7 @@ int __get(const char * svc, void ** secret) throw(::KeyStoreException)
 	return ::strlen(secretMem);
 }
 
-void __put(const char * svc, void * secret) throw(::KeyStoreException)
-{
+void __put(const char * svc, void * secret) throw(::KeyStoreException) {
 	std::string account(userName());
 	gchar * secretStr = static_cast<gchar *>(secret);
 	int secretLength = ::strlen(secretStr);
