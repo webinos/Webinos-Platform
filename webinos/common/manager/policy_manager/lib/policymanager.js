@@ -78,7 +78,7 @@
 			}
 		}
 		else {
-			if(res>1) {
+			if(res>1 && res<5) {
 				if (this.promptMan) { // if there is a promptMan then show a message
 					var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
 					var choices = new Array();
