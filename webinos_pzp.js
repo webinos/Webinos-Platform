@@ -124,7 +124,7 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
       config.pzhHost = options.pzhHost;
     }
     if (options.pzhName) {
-      config.pzhName = options.pzhName;
+      config.pzhName = options.pzhName+'/';
     }
     if (options.pzpHost) {
       config.pzpHost = options.pzpHost;
