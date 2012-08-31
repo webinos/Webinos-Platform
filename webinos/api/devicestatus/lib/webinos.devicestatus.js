@@ -1,8 +1,12 @@
 (function () {
 	"use strict";
 	var webinos = require('webinos')(__dirname);
-	var nativeDeviceStatus = require('nativedevicestatus'),
-	pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'),
+	var nativeDeviceStatus;
+	try{
+      nativeDeviceStatus = require('nativedevicestatus');
+    }catch(err){
+	}
+	var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'),
 	policyManager;
 	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation,
 	policyManager;

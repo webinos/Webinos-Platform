@@ -179,7 +179,10 @@
 		}
 		if (PAMUsage === true) {
 			// on linux and mac we require unixlib module to use PAM
+          try {
 			unixlib = require('unixlib');
+          }catch(err) {
+		  }
 		}
 		else {
 			console.log("Authentication API: no useful PAM file found, password file is used as a fallback");
