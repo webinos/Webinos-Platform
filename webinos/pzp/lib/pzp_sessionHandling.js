@@ -631,7 +631,7 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
       } else {
         self.sessionId = configure.pzhId + '/' + configure.name;
       }
-
+	configure.serverName=configure.serverName+'/'
       try {
         var host, connectingAdd;
         if (configure.serverName.split("/") !== -1) {
