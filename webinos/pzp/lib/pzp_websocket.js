@@ -296,7 +296,6 @@ function connectPzh(pzp, cmd, from, to, authCode) {
       'Content-Length': JSON.stringify(payload).length
     }
   };
-console.log(options);
 
   var req = https.request(options, function(res) {
     res.on('data', function(data) {
