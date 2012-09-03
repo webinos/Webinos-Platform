@@ -140,7 +140,19 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
 };
 
 function parsePortConfiguration(callback) {
-  fs.readFile("webinos_config.json", function(err,data) {
+
+  var filename;
+  if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
+  {
+    //TODO: the full file path has to be given - check if any alternative way
+    filename = "/data/data/org.webinos.app/node_modules/webinos/wp4/webinos_config.json";
+  }
+  else
+  {
+    filename = "webinos_config.json";
+  }
+
+  fs.readFile(filename, function(err,data) {
     if (!err) {
       var port_data = JSON.parse(data.toString());
       session_configuration.port = {};
@@ -152,6 +164,18 @@ function parsePortConfiguration(callback) {
       session_configuration.port.pzp_zeroConf       = port_data.ports.pzp_zeroConf;
       callback();
     }
+    else
+    {
+	//file read fails - add default port numbers
+      session_configuration.port = {};
+      session_configuration.port.farmPort           = 80;
+      session_configuration.port.farm_webServerPort = 443;
+      session_configuration.port.pzp_webSocket = 8081;
+      session_configuration.port.pzp_web_webSocket  = 8080;
+      session_configuration.port.pzp_tlsServer      = 8040;
+      session_configuration.port.pzp_zeroConf       = 4321;
+      callback();
+    }	
   });
 }
 
