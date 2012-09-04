@@ -16,13 +16,13 @@
  ******************************************************************************/
 
 -->
-<!DOCTYPE html>
+
 <html>
 <head>
 
+
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
 <script type="text/javascript" src="./webinos.js"></script>
-<link rel="stylesheet" type="text/css" href="./css/style.css" media="screen"/>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
@@ -41,7 +41,7 @@
         connectedPzh = data.payload.message.connectedPzh; // all connected pzh
 
         logMessage('registeredBrowser msg from ' + pzpId);
-        console.log('+++++++++++++registeredBrowser msg from ' + pzpId);
+        console.log('++registeredBrowser msg from ' + pzpId);
       }
     }
     webinos.session.addListener('registeredBrowser', fillPZAddrs);
@@ -76,7 +76,7 @@
       new ServiceType('http://www.w3.org/ns/api-perms/contacts'),
       {
         onFound: function (service) {
-          console.log("Service: ",service," found!  YAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!");
+          console.log("Service: ",service," found!!");
           contactsService[service.serviceAddress] = service;
           $('#getContactsServices').append($('<option>' + service.serviceAddress + '</option>'));
         }
@@ -89,7 +89,7 @@
 
 
     $('#btnBindService').bind('click', function() {
-      console.log("********************* Bind button clicked!!!!************")
+      console.log("**Bind button clicked**")
       recentService = contactsService[$('#getContactsServices').attr('recent')];
       recentService.bindService({onBind:function(service) {
       logMessage('CONTACTS API ' + service.api + ' bound.');
@@ -315,17 +315,18 @@
   });
 </script>
 
-
+     
 </head>
 <body>
-  <!--Right part of the table-->
-  <table border="1" >
+
+
+ <table border="1" >
     <tr valign="top">
       <td width="50%">
         <div>
           <div style="background-color:lightgray; border:1px solid black">
           <button id="registerBrowser" class="button">Register Browser</button>
-          <br><!--PZH PZP LIST : <select id="pzh_pzp_list"> <option>  </option> </select> <br>-->
+          <br>
           <button id="btnFindService" class="button">Find Contacts Service</button>
           <br>
           <select id="getContactsServices" size="5"></select>
@@ -341,46 +342,31 @@
               <!-- We'd better put an "open file" form -->
               <input type="text" id="addressBookNameText" size="40"
                 placeholder="<path_to_your_Thunderbird_.mab file>" />
-              <!-- But it uses C:\fakepath :( ==> no way to get full path <input type="file" id="getAddressBook" accept=".mab">-->
               <br> <label for="usernameText">Username: </label> <input
                 type="text" id="usernameText"
                 placeholder="enter username" /> <br> <label
                 for="passwordText">Password: </label> <input
                 type="password" id="passwordText"
                 placeholder="enter password" /> <br>
-              <!--     <label for="fileContent">File Content</label> <br>
-    <textarea rows='8' size=500 id="fileContent"></textarea> -->
 	
             </p>
           </div>
-          <!--   <p> -->
-          <div style="background-color:lightgray; border:1px solid black">
 
-	    <!--<br>-->
+          <div style="background-color:lightgray; border:1px solid black">
             <button id="btnAuthenticate" class="button">Authenticate/Open</button>
             <br>
-            <!--<button id="btnContacts" class="button">Get All Contacts List</button>-->
             <button id="btnFindServiceContacts" class="button" title="Leave search fields empty to get the whole contacts list">Find Contact!</button>
           </div>
-          <!--   </p> -->
 
           <div id="html_contacts" style="background-color:lightgray; border:1px solid black">
-            <script> document.write("NO SERVICE"); </script>
-          </div>
+	    <script> document.getElementById('html_contacts').innerHTML = "NO SERVICE";</script>
+	  </div>
           <div id="authStatus" style="background-color:lightgray; border:1px solid black">
-            <script>document.write("NOT YET AUTHENTICATED"); </script>
-          </div>
-          <!--           <div id="contactList">
-            <script>
-                          document.write("");
-                        </script>
+	    <script> document.getElementById('authStatus').innerHTML = "NOT AUTHENTICATED, YET";</script>
+	  </div>
 
-                        <div>
-              <ul id="list"></ul>
-            </div>
-          </div>
-          </div> -->
       </td>
+
       <!--Right part of the table-->
       <td width="50%">
         <div>
@@ -401,21 +387,14 @@
             </p>
           </div>
           <div id="contactList">
-            <script> document.write(""); </script>
+            <script> document.getElementById('contactList').innerHTML = "";</script>
           </div>
         </div>
 
       </td>
     </tr>
   </table>
-<!--<div id="status">STATUS: <span id="message2"></span></div>
-<script type="text/javascript">
-$('#status').mouseenter(function(){
-	var that = $(this);
-	var right = that.css("right");
-	that.css("right",(right==="0px")?"":"0px");
-});
-</script>-->
+
+
 </body>
 </html>
-

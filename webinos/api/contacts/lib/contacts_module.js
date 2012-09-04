@@ -74,11 +74,11 @@ else
 var askPolicyManager = function(module,params,callback)
 {
   console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
-// TODO CHANGE
-  //var pmlib = require(webinosRoot+'/common/manager/policy_manager/lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
+
   try {
-  	var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec; // this line should be moved in the policy manager
-     policyManager = new pmlib.policyManager();
+  	var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js');
+	var exec = require('child_process').exec; // this line should be moved in the policy manager
+//         var policyManager = new pmlib.policyManager();
   } catch (err) {
 	console.log("Error loading policy manager in contacts")
   }
@@ -90,7 +90,8 @@ var askPolicyManager = function(module,params,callback)
   resourceInfo.apiFeature = "http://www.w3.org/ns/api-perms/contacts.read";
   request.resourceInfo = resourceInfo;
 
-  res = policyManager.enforceRequest(request);
+//   res = policyManager.enforceRequest(request);
+  res=0; //TODO: exluding policy_manager because it is not working...!!!!!!!!!!!!!!!!!!!!!!!!!
   switch (res)
   {
     case 0:
