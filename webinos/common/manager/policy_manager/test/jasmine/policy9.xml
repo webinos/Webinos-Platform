@@ -1,0 +1,13 @@
+<policy-set combine="first-matching-target" description="policy9">
+	<policy combine="first-applicable" description="TrustedDevice">
+		<target>
+			<subject>
+				<subject-match attr="requestor-id" match="device1"/>
+			</subject>
+		</target>
+		<rule effect="permit"></rule>
+	</policy>
+	<policy combine="first-applicable" description="untrusted">
+		<rule effect="deny"></rule>
+	</policy>
+</policy-set>
