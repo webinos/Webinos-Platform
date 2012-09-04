@@ -1,0 +1,13 @@
+<policy-set combine="first-matching-target" description="policy7">
+	<policy combine="first-applicable" description="TrustedApp">
+		<target>
+			<subject>
+				<subject-match attr="distributor-key-cn" match="http://www.webinos.org/subject/info/id/trusted"/>
+			</subject>
+		</target>
+		<rule effect="permit"></rule>
+	</policy>
+	<policy combine="first-applicable" description="untrusted">
+		<rule effect="deny"></rule>
+	</policy>
+</policy-set>

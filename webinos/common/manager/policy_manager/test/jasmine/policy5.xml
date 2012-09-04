@@ -11,12 +11,7 @@
                 <resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
-            </condition>
-        </rule>
-        <rule effect="prompt-blanket">
-            <condition combine="or">
                 <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
-                <resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
             </condition>
         </rule>
         <rule effect="deny"></rule>
@@ -27,7 +22,7 @@
                 <subject-match attr="user-id" match="user2"/>
             </subject>
         </target>
-        <rule effect="prompt-oneshot">
+        <rule effect="permit">
             <condition combine="or">
                 <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
