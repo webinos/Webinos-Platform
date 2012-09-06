@@ -72,7 +72,7 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
           config.name = name;
 
           if (type === "Pzp" && typeof pzhName !== "undefined" && (pzhName !== '' || pzhName !== null )) {
-            config.serverName = host+'/'+pzhName;
+            config.serverName = host+'/'+pzhName+'/';
           } else {
             config.serverName = host;
           }
