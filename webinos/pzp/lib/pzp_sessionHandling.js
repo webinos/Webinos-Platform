@@ -67,6 +67,15 @@ var Pzp = function () {
   this.modules         = []; // list of initially loaded modules
 };
 
+if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
+{
+	// Console.log redefinition
+	console.log = function(dataLog) {
+		var id = fs.openSync("/sdcard/console.log", "a");
+		fs.writeSync(id, dataLog+"\n", null, 'utf8');
+		fs.closeSync(id);
+	}
+}
 
 function getelement(service, element)
 {
@@ -381,9 +390,68 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
             if (typeof mdns !== "undefined") {
               switch(os.type().toLowerCase()){
               case "linux":
-                switch(os.platform().toLowerCase()){
-                  case "android":
-                    break;
+								switch(os.platform().toLowerCase()){
+									case "android":
+									{
+										function onFound(service){
+											console.log("Android-Mdns onFound callback: found service."); 
+					
+											if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined"))
+											{ 
+												var msg ={};
+												msg.name = service.deviceNames[0];
+												msg.address = service.deviceAddresses[0];
+												msg.name = self.config.pzhId + "/" + msg.name + "_Pzp";
+                      	
+												// Use case - Had connected to this PZP at least once 
+												if((typeof self.connectedPzp[msg.name] !== "undefined") && (self.connectedPzp[msg.name].state === global.states[0])) {
+													console.log("trying to connect to PZP");
+	                      	
+													self.connectedPzp[msg.name].address = msg.address;
+													self.connectedPzp[msg.name].port = global.pzpServerPort;
+													var client = new pzpClient();
+													//TODO: Android PZP peer connection  
+													//client.connectOtherPZP(self, msg);
+												}
+												else if (typeof self.connectedPzp[msg.name] === "undefined") {
+													console.log("new peer");   
+							
+												msg.port = global.pzpServerPort;
+												self.connectedPzp[msg.name] = {};
+												console.log("found peer address:" + msg.address);										
+												self.connectedPzp[msg.name].address = msg.address;
+												self.connectedPzp[msg.name].port    = global.pzpServerPort;
+												self.connectedPzp[msg.name].state   = global.states[1];
+												self.mode  = global.modes[2];
+												self.state = global.states[1];
+												var client = new pzpClient();
+												//TODO: Android PZP peer connection 
+												//client.connectOtherPZP(self, msg);
+												}
+											} 
+										}	
+					
+										try{
+											var servicetype = {
+												api: "_pzp._tcp.local."
+											} 
+											var bridge = require("bridge");
+											mdnsModule = bridge.load('org.webinos.impl.discovery.DiscoveryMdnsImpl', this);
+											console.log("\n test msdndiscovery...");
+				  		
+											try {
+												mdnsModule.findServices(servicetype, onFound);
+											console.log("startDiscovery - END");
+											}
+											catch(e) {
+												console.log("startHRM - error: "+e.message);
+											}
+										}
+										catch(e){
+											console.log("error: "+e.message);
+										}
+									}
+									break;
                   case "linux":
                     var browser = mdns.createBrowser(mdns.tcp('pzp'));
                     browser.on('error', function(err) {
