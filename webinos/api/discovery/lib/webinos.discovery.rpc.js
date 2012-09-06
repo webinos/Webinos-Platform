@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2012 Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
 * 
 ******************************************************************************/
 
@@ -32,6 +32,7 @@
 	{
 		discoverymodule = require('./webinos.discovery.general.js');
 		var hrmmodule = require('./webinos.discovery.hrm.js');
+		var dnsmodule = require('./webinos.discovery.dns.js');
 	} 
 	
 	/**
@@ -62,6 +63,17 @@
 	DiscoveryModule.prototype.BTfindservice = function(data, successCallback){
 
 			discoverymodule.BTfindservice(
+				data, successCallback);   
+	}
+	
+	/**
+	 * To find devices that support the specific service. Android WiFi DNS
+	 * @param data Service type.
+	 * @param successCallback Success callback.
+	 */
+	DiscoveryModule.prototype.DNSfindservice = function(data, successCallback){
+
+			dnsmodule.DNSfindservice(
 				data, successCallback);   
 	}
 	
