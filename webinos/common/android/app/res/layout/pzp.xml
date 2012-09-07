@@ -1,31 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<TextView android:layout_height="wrap_content" android:text="@string/pzhHost"
-		android:layout_width="fill_parent" />
-	<EditText android:layout_height="wrap_content" android:id="@+id/args_pzhHost"
-		android:layout_width="match_parent" />
-	<TextView android:layout_height="wrap_content" android:text="@string/pzhName"
-		android:layout_width="fill_parent" />
-	<EditText android:layout_height="wrap_content" android:id="@+id/args_pzhName"
-		android:layout_width="match_parent" />
-	<TextView android:layout_height="wrap_content" android:text="@string/pzpName"
-		android:layout_width="fill_parent" />
-	<EditText android:layout_height="wrap_content" android:id="@+id/args_pzpName"
-		android:layout_width="match_parent" />
-	<TextView android:layout_height="wrap_content" android:text="@string/authCode"
-		android:layout_width="fill_parent" />
-	<EditText android:layout_height="wrap_content" android:id="@+id/args_authCode" android:inputType="textVisiblePassword"
-		android:layout_width="match_parent" />
-	<LinearLayout android:layout_height="wrap_content"
-		android:id="@+id/linearLayout1" android:layout_width="match_parent"
-		android:weightSum="1">
-		<Button android:id="@+id/start_button" android:layout_height="wrap_content"
-			android:text="@string/start" android:layout_width="wrap_content" />
-		<Button android:id="@+id/stop_button" android:layout_height="wrap_content"
-			android:text="@string/stop" android:layout_width="wrap_content" />
-		<TextView android:layout_height="wrap_content" android:id="@+id/args_stateText"
-			android:layout_width="105dp" android:layout_weight="0.54" />
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="vertical" android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<TextView android:layout_height="wrap_content" android:text="@string/pzhHost"
+			android:layout_width="fill_parent" />
+		<EditText android:layout_height="wrap_content" android:id="@+id/args_pzhHost"
+			android:layout_width="match_parent" />
+		<TextView android:layout_height="wrap_content" android:text="@string/pzhName"
+			android:layout_width="fill_parent" />
+		<EditText android:layout_height="wrap_content" android:id="@+id/args_pzhName"
+			android:layout_width="match_parent" />
+		<TextView android:layout_height="wrap_content" android:text="@string/pzpName"
+			android:layout_width="fill_parent" />
+		<EditText android:layout_height="wrap_content" android:id="@+id/args_pzpName"
+			android:layout_width="match_parent" />
+		<TextView android:layout_height="wrap_content" android:text="@string/authCode"
+			android:layout_width="fill_parent" />
+		<EditText android:layout_height="wrap_content" android:id="@+id/args_authCode" android:inputType="textVisiblePassword"
+			android:layout_width="match_parent" />
+		<LinearLayout android:layout_height="wrap_content"
+			android:id="@+id/linearLayout1" android:layout_width="match_parent"
+			android:weightSum="1">
+			<Button android:id="@+id/start_button" android:layout_height="wrap_content"
+				android:text="@string/start" android:layout_width="wrap_content" />
+			<Button android:id="@+id/stop_button" android:layout_height="wrap_content"
+				android:text="@string/stop" android:layout_width="wrap_content" />
+			<TextView android:layout_height="wrap_content" android:id="@+id/args_stateText"
+				android:layout_width="105dp" android:layout_weight="0.54" />
+		</LinearLayout>
 	</LinearLayout>
-</LinearLayout>
+</ScrollView>
