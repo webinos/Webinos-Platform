@@ -19,9 +19,14 @@ var openid   = require('openid');
 var url      = require('url');
 var querystr = require('querystring');
 
-var rely;
+function OpenId() {
+  this.rely;
+  this.storeInfo = [];
+}
 
-exports.authenticate = function(hostname, url, res, query) {
+OpenId.prototype.authenticate = function(url, res, query) {
+  var self = this;
+  self.storeInfo[query.id] = query;
   var exts= [];
   var attr = new openid.AttributeExchange({
     "http://axschema.org/contact/country/home":     "required",
@@ -35,13 +40,13 @@ exports.authenticate = function(hostname, url, res, query) {
     "http://axschema.org/person/gender/":           "required"
   });
   exts.push(attr);
-  rely = new openid.RelyingParty('https://'+hostname+':'+
-      session.configuration.port.farm_webServerPort+'/main.html?cmd=verify&id='+query.id,
+  self.rely = new openid.RelyingParty('https://'+self.hostname+':'+
+    self.config.port.provider_webServerPort +'/main.html?cmd=verify&id='+query.id,
     null,
     false,
     false,
     exts);
-  rely.authenticate(url, false, function(error, authUrl) {
+  self.rely.authenticate(url, false, function(error, authUrl) {
     if(error){
       log.error(error);
     } else if (!authUrl) {
@@ -54,9 +59,10 @@ exports.authenticate = function(hostname, url, res, query) {
   });
 }
 
-exports.fetchOpenIdDetails = function(req, res, query, callback){
-  if (typeof rely !== "undefined") {
-    rely.verifyAssertion(req, function(err, userDetails){
+OpenId.prototype.fetchOpenIdDetails = function(req, res, query, callback){
+  var self= this;
+  if (typeof self.rely !== "undefined") {
+    self.rely.verifyAssertion(req, function(err, userDetails){
       if (err){
         log.error("unable to login " + err.message);
         address = req.connection.socket.remoteAddress;
@@ -107,3 +113,5 @@ exports.fetchOpenIdDetails = function(req, res, query, callback){
     });
   }
 }
+
+module.exports = OpenId;

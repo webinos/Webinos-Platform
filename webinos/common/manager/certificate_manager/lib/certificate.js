@@ -27,6 +27,10 @@ var keystore = webinos.global.require(webinos.global.manager.keystore.location);
  */
 function Certificate() {
   keystore.call(this);
+  this.cert         = {};
+  this.cert.internal= {};
+  this.cert.external= [];
+  this.cert.internal= {master: {}, conn: {}, web: {}};
 };
 
 util.inherits(Certificate, keystore);
@@ -37,17 +41,16 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
   try {
     certman = require("certificate_manager");
   } catch (err) {
-    callback("error", "exception", err);
-    return;
+    return callback(false, err);
   }
-  if (type === "PzhProviderCA" || type === "PzhCA") {
-    key_id = self.cert.master.key_id;
+  if (type === "PzhPCA" || type === "PzhCA") {
+    key_id = self.cert.internal.master.key_id = self.metaData.webinosName + "_master";
     cert_type = 0;
-  } else if (type === "PzhProvider" || type === "Pzh" || type === "Pzp") {
-    key_id = self.cert.conn.key_id;
+  } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
+    key_id = self.cert.internal.conn.key_id = self.metaData.webinosName + "_conn";;
     cert_type = 1;
   } else  if (type === "PzhWS") {
-    key_id = self.cert.web.key_id;
+    key_id = self.cert.internal.web.key_id  = self.metaData.webinosName + "_web";;
     cert_type = 2;
   }
   if (type === "Pzp") {
@@ -58,53 +61,52 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
     cn = cn.substring(0, 40);
   }
 
-  self.generateKey(type, key_id, function(status, errorDetails, key) {
-    if (status === "error") {
-      callback(status, "write file", errorDetails);
+  self.generateKey(type, key_id, function(status, value) {
+    if (!status) {
+       return callback(false, value);
     } else {
       try {
-        obj.csr = certman.createCertificateRequest(key,
-          self.certData.country,
-          self.certData.state, // state
-          self.certData.city, //city
-          self.certData.orgname, //orgname
-          self.certData.orgunit, //orgunit
+        obj.csr = certman.createCertificateRequest(value,
+          self.userPref.certData.country,
+          self.userPref.certData.state, // state
+          self.userPref.certData.city, //city
+          self.userPref.certData.orgname, //orgname
+          self.userPref.certData.orgunit, //orgunit
           cn,
-          self.certData.email);
-        } catch (err) {
-        callback("error", "exception", err);
-        return;
+          self.userPref.certData.email);
+      } catch (err) {
+        return callback(false, err);
       }
 
       try {
-        var server = "DNS:"+self.serverName;
-        obj.cert = certman.selfSignRequest(obj.csr, 3600, key, cert_type, server);
+        var server = "DNS:"+self.metaData.serverName;
+        obj.cert = certman.selfSignRequest(obj.csr, 3600, value, cert_type, server);
       } catch (e1) {
-        console.log(e1);
-        callback("error", "exception", e1);
-        return;
+        return callback(false, e1);
       }
       try {
-        obj.crl = certman.createEmptyCRL(key, obj.cert, 3600, 0);
+        obj.crl = certman.createEmptyCRL(value, obj.cert, 3600, 0);
       } catch (e2) {
-        callback("error", "exception", e2);
-        return;
+        return callback(false, e2);
       }
 
-      if (type === "PzhProviderCA" || type === "PzhCA") {
-        self.cert.master.cert = obj.cert;
-        self.cert.master.crl  = obj.crl;
-        self.generateSignedCertificate(self.cert.conn.csr, 1, function(status, errorDetails, cert) {
-          self.cert.conn.cert = cert;
+      if (type === "PzhPCA" || type === "PzhCA") {
+        self.cert.internal.master.cert = obj.cert;
+        self.crl              = obj.crl;
+        self.generateSignedCertificate(self.cert.internal.conn.csr, 1, function(status, value) {
+          if (status) {
+            self.cert.internal.conn.cert = value;
+          } else {
+            return callback(status, value);
+          }
         });
-      } else if (type === "PzhProvider" || type === "Pzh" || type === "Pzp") {
-        self.cert.conn.cert   = obj.cert;
-        self.cert.conn.csr    = obj.csr;
-
+      } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
+        self.cert.internal.conn.cert   = obj.cert;
+        self.cert.internal.conn.csr    = obj.csr;
       } else if (type === "PzhWS") {
-        self.cert.web.cert = obj.cert;
+        return callback(true, obj.csr, value);
       }
-      callback("success", "", key);
+      return callback(true, value);
     }
   });
 };
@@ -117,40 +119,45 @@ Certificate.prototype.generateSignedCertificate = function(csr, cert_type,  call
   try {
     certman = require("certificate_manager");
   } catch (err) {
-    callback("error", "exception", err);
-    return;
+    return callback(false, err);
   }
 
   try {
-    this.fetchKey(this.cert.master.key_id, function(status, errorDetails, master_key) {
-      var server = "DNS:"+self.serverName;
-      var clientCert = certman.signRequest(csr, 3600, master_key, self.cert.master.cert,  cert_type, server);
-      callback("success", "", clientCert);
+    self.fetchKey(self.cert.internal.master.key_id, function(status, value) {
+      if(status) {
+        var server = "DNS:"+self.metaData.serverName;
+        var clientCert = certman.signRequest(csr, 3600, value, self.cert.internal.master.cert,  cert_type, server);
+        return callback(true, clientCert);
+      } else {
+        return callback(false, value);
+      }
     });
   } catch(err1) {
-    callback("error", "exception", err1);
-    return;
+    return callback(false, err1);
   }
 };
 
 Certificate.prototype.revokeClientCert = function(pzpCert, callback) {
   "use strict";
-  var certman;
+  var certman, self = this;
   try {
     certman = require("certificate_manager");
   } catch (err) {
-    callback("error", "exception", err);
-    return;
+    return callback(false, err);
   }
   try {
-    this.keystore.fetchKey(this.master.key_id, function(status, errorDetails, key) {
-      var crl = certman.addToCRL("" + key, "" + this.master.crl, "" + pzpCert);
-      // master.key.value, master.cert.value
-      callback("success", "", crl);
+    self.keystore.fetchKey(self.cert.internal.master.key_id, function(status, value) {
+      if (status) {
+        var crl = certman.addToCRL("" + value, "" + self.cert.internal.master.crl, "" + pzpCert);
+        // master.key.value, master.cert.value
+        return callback(true, crl);
+      } else {
+        return callback(status, value)
+      }
     });
   } catch(err1) {
-    callback("error", "exception", err1);
-    return;
+    return callback(false, err1);
+
   }
 }
 

@@ -44,31 +44,6 @@ if(process.platform == "android") {
 }
 
 exports.startPzpWebSocketServer = function(pzp, config, callback) {
-  function getContentType(uri) {
-    var contentType = "text/plain";
-    switch (uri.substr(uri.lastIndexOf("."))) {
-      case ".js":
-        contentType = "application/x-javascript";
-        break;
-      case ".html":
-        contentType = "text/html";
-        break;
-      case ".css":
-        contentType = "text/css";
-        break;
-      case ".jpg":
-        contentType = "image/jpeg";
-        break;
-      case ".png":
-        contentType = "image/png";
-        break;
-      case ".gif":
-        contentType = "image/gif";
-        break;
-    }
-    return {"Content-Type": contentType};
-  }
-
   var cs = http.createServer(function(request, response) {
     var parsed = url.parse(request.url, true);
     if (parsed.query) {

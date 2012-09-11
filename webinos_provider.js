@@ -56,15 +56,12 @@ if ( name === null) {
   name = "";
 }
 
-var provider = Object.create(pzh.prototype,
-                {"hostname"    : {value:host, writable:true, configurable:true},
-                 "friendlyName": {value:name, writable:true, configurable:true}
-                 });
-provider.start(function(result, errorDetails) {
-  if (result === "success") {
-    console.log("******* PZH FARM STARTED *******");
+var provider = new pzh(host, name);
+provider.start(function(result, details) {
+  if (result) {
+    console.log("PZH PROVIDER STARTED " + details);
   } else {
-    console.log(result + " " + errorDetails);
+    console.log("PZH PROVIDER FAILED STARTING " + details);
   }
 });
 

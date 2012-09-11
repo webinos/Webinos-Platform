@@ -22,7 +22,7 @@
 var os = require('os');
 var path = require('path');
 
-exports.webinosConfigPath = function() {
+exports.webinosPath = function() {
   "use strict";
   var webinosDemo;
   switch(os.type().toLowerCase()){
