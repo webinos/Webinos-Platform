@@ -96,7 +96,7 @@
                 <id>compile-node-module</id>
                 <phase>compile</phase>
                 <configuration>
-                  <executable>node-gyp</executable>
+                  <executable>node-gyp.cmd</executable>
                   <workingDirectory>${basedir}/src</workingDirectory>
                   <arguments>
                     <argument>configure</argument>
