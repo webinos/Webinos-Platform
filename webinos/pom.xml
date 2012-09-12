@@ -195,7 +195,7 @@
                   <id>compile-node-module</id>
                   <phase>compile</phase>
                   <configuration>
-                    <executable>node-waf</executable>
+                    <executable>node-gyp</executable>
                     <arguments>
                       <argument>configure</argument>
                       <argument>build</argument>
