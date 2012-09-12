@@ -96,11 +96,11 @@
                 <id>compile-node-module</id>
                 <phase>compile</phase>
                 <configuration>
-                  <executable>webinos-gyp</executable>
+                  <executable>node-gyp</executable>
                   <workingDirectory>${basedir}/src</workingDirectory>
                   <arguments>
-                    <argument>module.gyp</argument>
-                    <argument>make</argument>             
+                    <argument>configure</argument>
+                    <argument>build</argument>            
                   </arguments>
                   <successCodes>
                     <param>0</param>
