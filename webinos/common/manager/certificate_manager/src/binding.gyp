@@ -9,8 +9,8 @@
       'target_name': 'certificate_manager',
       'product_name': 'certificate_manager',
         'sources': [ #Specify your source files here
-          'src/certificate_manager.cpp',
-          'src/openssl_wrapper.cpp',
+          'certificate_manager.cpp',
+          'openssl_wrapper.cpp',
         ],
       
       'conditions': [
