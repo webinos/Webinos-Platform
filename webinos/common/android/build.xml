@@ -29,9 +29,20 @@
 			webinos/common/android/,
 			webinos/pzh/,
 			webinos/wrt/,
-                        webinos/test/,
-
-			**/test/,
+                     
+			webinos/test/lib/,
+                        webinos/test/spec/,
+			webinos/test/default/,
+			webinos/test/*.html,
+			webinos/test/*.xml,
+			webinos/test/*.json,
+			webinos/test/*.js,
+			
+			webinos/api/**/test/,
+			webinos/common/**/test/,
+			webinos/pzp/test/,
+			webinos/pzh/test/,		        
+	
 			**/build/,
 			**/deps/,
 			**/.gitignore" />
