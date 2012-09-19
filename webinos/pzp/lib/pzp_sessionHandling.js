@@ -71,9 +71,11 @@ if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "andr
 {
 	// Console.log redefinition
 	console.log = function(dataLog) {
-		var id = fs.openSync("/sdcard/console.log", "a");
-		fs.writeSync(id, dataLog+"\n", null, 'utf8');
-		fs.closeSync(id);
+		fs.open("/sdcard/console.log", "a", function(err, fd) {
+			if (err) return; // no sdcard?
+			fs.writeSync(fd, dataLog+"\n", null, 'utf8');
+			fs.closeSync(fd);
+		});
 	}
 }
 
