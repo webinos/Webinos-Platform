@@ -285,7 +285,7 @@ Pzp.prototype.authenticated = function(cn, instance, callback) {
       var server = new pzpServer();
       server.startServer(self, function() {
         self.pzptlsServerState = global.states[2];
-        self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", global.pzpServerPort);
+        self.prepMsg(self.sessionId, self.config.pzhId, "pzpDetails", 8040);
       });
     }
   }
@@ -511,7 +511,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                     else if (typeof self.connectedPzp[msg.name] === "undefined") {
                       log.info("new peer");
 
-                      msg.port = global.pzpServerPort;
+                      msg.port = 8040;
                       self.connectedPzp[msg.name] = {};
                       self.connectedPzp[msg.name].address = msg.address;
                       self.connectedPzp[msg.name].port    = pzp_tlsServer;
