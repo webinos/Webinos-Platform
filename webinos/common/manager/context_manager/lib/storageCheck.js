@@ -98,29 +98,20 @@ function mkdirSyncRecursive(folderPath, position) {
 	var parts = path.resolve(folderPath).split(pathSeperator);
 
     position = position || 0;
-    
-  
-    if (position >= parts.length) {
-      return true;
-    }
-  
-    var directory = parts.slice(0, position + 1).join(pathSeperator) || pathSeperator;
-    try {
-      fs.statSync(directory);
-      mkdirSyncRecursive(folderPath, position + 1);
-    } catch (e) {
-//      try {
-        fs.mkdirSync(directory);
-        mkdirSyncRecursive(folderPath, position + 1);
-//      } catch (e) {
-//        if (e.errno != 17) {
-//          throw e;
-//        }
-//        mkdirSyncRecursive(folderPath, position + 1);
-//      }
-    }
-  }
 
+    if (position >= parts.length) {
+        return true;
+    }
+
+    var directory = parts.slice(0, position + 1).join(pathSeperator) || pathSeperator;
+    var stats = fs.statSync(directory);
+
+    if (!stats.isDirectory() && !stats.isFile()) {
+        fs.mkdirSync(directory);
+    }
+
+    mkdirSyncRecursive(folderPath, position + 1);
+}
 
 /*
  * based on: https://github.com/ryanmcgrath/wrench-js/
