@@ -195,11 +195,11 @@ var PzpWSS = function() {
         connection.socket = { pause: function(){}, resume: function(){} };
         connection.sendUTF = connection.send;
 
-        self.connectedApp(connection);
+        connectedApp(connection);
 
         connection.listener = {
-          onMessage: function(ev)   { self.wsMessage(connection, ev.data); },
-          onClose: function()       { self.wsClose(connection); },
+          onMessage: function(ev)   { wsMessage(connection, ev.data); },
+          onClose: function()       { wsClose(connection); },
           onError: function(reason) { log.error(reason); }
         };
       };
@@ -366,9 +366,14 @@ var PzpWSS = function() {
       connectedWebApp[address].socket.pause();
       connectedWebApp[address].sendUTF(jsonString);
       connectedWebApp[address].socket.resume();
+    } else {
+      log.error("unknown destination " + address );
     }
   };
-  this.updateApp = function() {
+  this.updateApp = function(inputSessionId) {
+    if (inputSessionId) {
+      sessionId = inputSessionId;
+    }
     connectedApp();
   }
 };

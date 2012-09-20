@@ -108,6 +108,11 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
       self.fetchCertificate("internal", function(status, value) {
         if (status) {  // certificate
           self.cert.internal = value;
+          self.fetchCertificate("external", function(status, value){
+            if(status){
+              self.cert.external = value;
+            }
+          });
           self.fetchCrl(function(status, value) {
             if(status ){ // crl
               self.crl = value;

@@ -47,7 +47,7 @@ var Provider = function(input_hostname, input_friendlyName) {
   this.config       = [];
   this.friendlyName = input_friendlyName;
   this.hostname     = input_hostname;
-  var that = this;
+  var self = this;
 
   /**
    *
@@ -149,14 +149,13 @@ var Provider = function(input_hostname, input_friendlyName) {
    */
   function loadPzhs(pzhs, server, trustedPzh) {
     "use strict";
-    var myKey, pzh, key;
+    var myKey, key;
     for (myKey = 0 ; myKey < trustedPzh.length; myKey=myKey+1) {
       key = trustedPzh[myKey];
-      log.info(key);
-      pzh = new pzh_session();
-      pzh.addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
+      pzhs[key] = new pzh_session();
+      pzhs[key].addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
         if (status) {
-          pzhs[pzhId] = pzh;
+          log.info(JSON.stringify(value));
           server.addContext(pzhId, value);
           log.info("started pzh " + pzhId);
         } else {
@@ -166,14 +165,16 @@ var Provider = function(input_hostname, input_friendlyName) {
     }
   }
 
+
+
   /**
    *
    * @param callback
    */
   function loadSession (callback) {
-    "use strict"
-    that.config  = new session.configuration();
-    that.config.setConfiguration(that.friendlyName, "PzhP", that.hostname, function (status, value) {
+    "use strict";
+    self.config  = new session.configuration();
+    self.config.setConfiguration(self.friendlyName, "PzhP", self.hostname, function (status, value) {
       if (!status) {
         return callback(status, value);
       } else {
@@ -181,8 +182,8 @@ var Provider = function(input_hostname, input_friendlyName) {
         // Note this is the main server, pzh started are stored as SNIContext to this server
         var options = {
           key  : value,
-          cert : that.config.cert.internal.conn.cert,
-          ca   : that.config.cert.internal.master.cert,
+          cert : self.config.cert.internal.conn.cert,
+          ca   : self.config.cert.internal.master.cert,
           requestCert       : true,
           rejectUnauthorised: false
         };
@@ -201,13 +202,13 @@ var Provider = function(input_hostname, input_friendlyName) {
         });
 
         server.on("listening", function(){
-          log.info("initialized at " + that.address +" and port " +that.config.userPref.ports.provider);
+          log.info("initialized at " + self.address +" and port " +self.config.userPref.ports.provider);
           // Load PZH"s that we already have registered ...
-          loadPzhs(pzhs, server, that.config.trustedList.pzh);
+          loadPzhs(pzhs, server, self.config.trustedList.pzh);
           // Start web interface, this web interface will adapt depending on user who logins
           callback(true);
         });
-        server.listen(that.config.userPref.ports.provider, that.address);
+        server.listen(self.config.userPref.ports.provider, self.address);
       }
     });
   }
@@ -219,6 +220,7 @@ var Provider = function(input_hostname, input_friendlyName) {
    * @param options
    */
   function storeServerDetails(pzh, pzhId, options){
+    log.info(options);
     server.addContext(pzhId, options);
     pzhs[pzhId] = pzh;
   }
@@ -279,10 +281,9 @@ var Provider = function(input_hostname, input_friendlyName) {
    */
   this.start = function (callback) {
     "use strict";
-    var self = this;
-    if (that.hostname === "") { // Configuration setting for pzh, returns set values and connection key
+    if (self.hostname === "") { // Configuration setting for pzh, returns set values and connection key
       setHostName(function(hostname) {
-        that.hostname = hostname;//self.pzhs, self.server, self.config, self.friendlyName, self.hostname,
+        self.hostname = hostname;//self.pzhs, self.server, self.config, self.friendlyName, self.hostname,
         loadSession(function(status, config){
           if (status) { // loaded session data
             self.startWebServer(function (status, value) {

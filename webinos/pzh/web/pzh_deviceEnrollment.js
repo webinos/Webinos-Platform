@@ -1,10 +1,10 @@
+
 var utils = require("util");
 var fs    = require("fs");
 var path  = require("path");
 
 var pzhP        = require("../lib/pzh_provider.js");
 var pzh_openid  = require("./pzh_openid.js");
-var pzh_api     = require("../lib/pzh_internal_apis.js");
 var qrcode      = require("../lib/pzh_qrcode.js")
 
 var webinos = require('webinos')(__dirname);

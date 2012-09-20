@@ -17,7 +17,9 @@
  ******************************************************************************/
 
 (function () {
-	var Registry = function() {
+  var webinos       = require("webinos")(__dirname);
+  var log           = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+  var Registry = function() {
 
 		/**
 		 * Holds registered Webinos Service objects local to this RPC.
@@ -36,7 +38,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		log.info("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -64,7 +66,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		log.info("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -82,7 +84,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Removing: " + callback.api);
+		log.info("Removing: " + callback.api);
 		var receiverObjs = this.objects[callback.api];
 
 		if (!receiverObjs)
@@ -114,8 +116,8 @@
 				this.registerObject(new Service(rpcHandler, modules[i].params));
 			}
 			catch (error){
-				console.log('INFO: [Registry] '+error);
-				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error );
+				log.error(error);
+				log.error("Could not load module " + modules[i].name + " with message: " + error );
 			}
 		}
 	};

@@ -36,7 +36,7 @@ var PZH_WebServer = function() {
   enrollment.call(this);
   var storeInfo = [];
   var self = this;
-
+  var inactivity = [];
   function result(response) {
     if (response && response.to && storeInfo.hasOwnProperty(response.to)) {
       storeInfo[response.to].writeHeader(200, {'Content-Type':
@@ -103,9 +103,9 @@ var PZH_WebServer = function() {
       if(value) {
         if (query.id === "undefined") {
           if (self.config.trustedList.pzh.indexOf(self.hostname +'/'+details.username+"/") === -1){
-            self.createPzh(details, function(status, value, pzhId) {
+            self.createPzh(details, function(status, value) {
               if (status) {
-                log.info("***** created pzh " + pzhId+ " *****");
+                log.info("***** created pzh " +value+ " *****");
                 var crypt = new Buffer(self.hostname + '/' +details.username+'/').toString('base64');
                 res.writeHead(302, {Location: '/main.html?provider='+details.provider+'&id='+crypt});
                 res.end();
@@ -184,9 +184,16 @@ var PZH_WebServer = function() {
       res.end();
       return;
     }
+    if (inactivity.hasOwnProperty(currentPzh) && inactivity[currentPzh] > 100 && query.payload.status === "listDevices") {
+      res.end();
+      return;
+    } else if (!inactivity.hasOwnProperty(currentPzh) || query.payload.status !== "listDevices"){
+      inactivity[currentPzh] = 0;
+    }
     storeInfo[currentPzh] = res;
     switch(query.payload.status) {
       case 'listDevices':
+        inactivity[currentPzh] = inactivity[currentPzh] + 1;
         instance.listZoneDevices(result);
         break;
       case 'userDetails':
@@ -205,7 +212,7 @@ var PZH_WebServer = function() {
         instance.listPzp(result);  // USED BEFORE REVOKE..
         break;
       case 'pzhPzh':
-        instance.addOtherZoneCert(query.payload.message, result);
+        instance.addOtherZoneCert(query.payload.message, self.refreshCert, result);
         break;
       case 'revokePzp':
         revoke.revokePzp(pzpid, instance, result);

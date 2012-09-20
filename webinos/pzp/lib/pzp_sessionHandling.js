@@ -180,7 +180,6 @@ var Pzp = function () {
         servername: config.metaData.serverName
       };
     }
-
   }
   function authenticated(instance, pzhId, callback) {
     if(!connectedPzp.hasOwnProperty(sessionId)) {
@@ -285,7 +284,7 @@ var Pzp = function () {
     var pzpClient, master, options = {};
     try {
       options = setConnParam(conn_key);
-
+      console.log(options);
       pzpClient = tls.connect(config.userPref.ports.provider, address, options, function(conn) {
         handleAuthorization(pzpClient, code, callback);
       });
@@ -353,7 +352,7 @@ var Pzp = function () {
               if (status) {
                 connectHub(value, config.metaData.serverName, function(status, value) {
                   if (status){
-                    self.updateApp();
+                    self.updateApp(sessionId);
                   }
                 });
               }

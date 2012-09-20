@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2012 Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun, Samsung Electronics(UK) Ltd
 ******************************************************************************/
 (function ()	{
 "use strict";
@@ -22,7 +22,7 @@
 		for (var myKey in obj)	{
 			if (typeof obj[myKey] === 'object')
 			{
-				console.log(name + "["+myKey +"] = "+obj[myKey]);
+				log.info(name + "["+myKey +"] = "+obj[myKey]);
 				logObj(obj[myKey], name + "." + myKey);
 			}
 		}
@@ -65,7 +65,8 @@
 	 *  @constructor
 	 *  @param rpcHandler RPC handler manager.
 	 */
-
+var webinos = require('webinos')(__dirname);
+var log    = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 	var MessageHandler = function (rpcHandler) {
 		this.sendMsg = null;
 		this.objectRef = null;
@@ -236,7 +237,7 @@
 
 			if ((!this.clients[session1]) && (!this.clients[session2]))  // not registered either way
 			{
-				console.log("MSGHANDLER:  session not set up");
+				log.info("session not set up");
 				var occurences = (message.to.split(this.separator).length - 1);
 
 				var data = message.to.split(this.separator);
@@ -252,7 +253,7 @@
 
 					if (this.clients[new_session1] || this.clients[new_session2]) {
 						forwardto = id;
-						console.log("MSGHANDLER:  forwardto", forwardto);
+						log.info("forwardto ", forwardto);
 					}
 				}
 				if (forwardto === data[0]) {
@@ -274,11 +275,11 @@
 				this.sendMsg(message, forwardto, this.objectRef);
 			}
 			else if (this.clients[session2]) {
-				console.log("MSGHANDLER:  clients[session2]:" + this.clients[session2]);
+				log.info("clients[session2]:" + this.clients[session2]);
 				this.sendMsg(message, this.clients[session2], this.objectRef);
 			}
 			else if (this.clients[session1]) {
-				console.log("MSGHANDLER:  clients[session1]:" + this.clients[session1]);
+				log.info("clients[session1]:" + this.clients[session1]);
 				this.sendMsg(message, this.clients[session1], this.objectRef);
 			}
 		}
@@ -298,7 +299,7 @@
 			try {
 				message = JSON.parse(message);
 			} catch (e) {
-				console.log("JSON.parse (message) - error: "+ e.message);
+				log.error("JSON.parse (message) - error: "+ e.message);
 			}
 		}
 
@@ -317,7 +318,7 @@
 					this.clients[regid] = sessionid;
 				}
 
-				console.log("register Message");
+				log.info("register Message");
 			}
 			return;
 		}
@@ -327,7 +328,7 @@
 
 			//check if a session with destination has been stored
 			if(message.to !== this.self) {
-				console.log("forward Message");
+				log.info("forward Message");
 
 				//if no session is available for the destination, forward to the hop nearest,
 				//i.e A->D, if session for D is not reachable, check C, then check B if C is not reachable
@@ -376,7 +377,7 @@
 							}
 						}
 					}
-					console.log("message forward to:" + forwardto);
+					log.info("message forward to:" + forwardto);
 					this.sendMsg(message, forwardto, this.objectRef);
 				}
 				else if (this.clients[session2]) {

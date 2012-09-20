@@ -40,7 +40,7 @@ if (typeof exports !== "undefined") {
     var Discovery      = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
     var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
     var RPCHandler     = rpc.RPCHandler;
-    var log            = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+    var log            = webinos.global.require(webinos.global.util.location, "lib/logging.js");
     var authcode       = require("./pzh_authcode");
     var pzh_other      = require("./pzh_connecting");
   } catch (err) {
@@ -58,7 +58,7 @@ var Pzh = function () {
   var sessionId    = ""; /** Holds PZH Session Id */
   var connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
   this.expecting;    // Set by authcode directly
-
+  this.log;
   var config      = {};/** Holds PZH Configuration particularly certificates */
   var connectedPzh= {};
   var messageHandler;
@@ -77,7 +77,7 @@ var Pzh = function () {
   function prepMsg (from, to, status, message) {
     var msg = null;
     if (from === null || to === null || status === null || message === null) {
-      log.error("prep message failed");
+      self.log.error("prep message failed");
     } else {
       msg = {"type"  : "prop",
         "from" : from,
@@ -94,7 +94,7 @@ var Pzh = function () {
     var jsonString = JSON.stringify(message);
     var buf = session.common.jsonStr2Buffer(jsonString);
 
-    log.info("send to "+ address + " message " + jsonString);
+    self.log.info("send to "+ address + " message " + jsonString);
 
     try {
       if (connectedPzh.hasOwnProperty(address)) {
@@ -111,10 +111,10 @@ var Pzh = function () {
         conn.write(buf);
         conn.resume();
       } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
-        log.info("client " + address + " is not connected");
+        self.log.info("client " + address + " is not connected");
       }
     } catch(err) {
-      log.error("exception in sending packet " + err);
+      self.log.error("exception in sending packet " + err);
     }
   }
 
@@ -136,7 +136,7 @@ var Pzh = function () {
     var msg = prepMsg(sessionId, validMsgObj.from, "foundServices", services);
     msg.payload.id = validMsgObj.payload.message.id;
     sendMessage(msg, validMsgObj.from);
-    log.info("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
+    self.log.info("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
   }
 
 
@@ -157,9 +157,9 @@ var Pzh = function () {
     config.userData.image    = user.image;
     config.storeUserData(config.userData, function(status) {
       if(status){
-        log.info("stored user data ")
+        self.log.info("stored user data ")
       } else {
-        log.error("failed saving pzh user data");
+        self.log.error("failed saving pzh user data");
       }
     });
   }
@@ -208,7 +208,7 @@ var Pzh = function () {
     var err, pzpId;
     pzpId = sessionId+"/"+data[2];
 
-    log.info("pzp "+pzpId+"  connected");
+    self.log.info("pzp "+pzpId+"  connected");
 
     // Used for communication purpose. Address is used as PZP might have different IP addresses
     connectedPzp[pzpId] = {"socket": conn,  "address": conn.socket.remoteAddress};
@@ -224,7 +224,7 @@ var Pzh = function () {
     var  pzhId, otherPzh = [], msg, localServices;
     pzhId = data[1];
 
-    log.info("pzh " + pzhId+" connected");
+    self.log.info("pzh " + pzhId+" connected");
     self.connectedPzh[pzhId] = {"socket": conn,  "address": conn.socket.remoteAddress};
     // Register PZP with message handler
     msg = self.messageHandler.registerSender(self.sessionId, pzhId);
@@ -234,7 +234,7 @@ var Pzh = function () {
     msg = self.prepMsg(self.sessionId, pzhId, "registerServices", services);
     sendMessage(msg, pzhId);
 
-    log.info("sent " + (services && services.length) || 0 + " webinos services to " + pzhId);
+    self.log.info("sent " + (services && services.length) || 0 + " webinos services to " + pzhId);
     sendPzhUpdate();
   }
 
@@ -247,12 +247,12 @@ var Pzh = function () {
    */
   function processMsg (conn, msgObj) {
     session.common.processedMsg(this, msgObj, function(validMsgObj) {
-      log.info("received message" + JSON.stringify(validMsgObj));
+      self.log.info("received message" + JSON.stringify(validMsgObj));
       // Message sent by PZP connecting first time based on this message it generates client certificate
       if(validMsgObj.type === "prop" && validMsgObj.payload.status === "clientCert" ) {
         self.addNewPZPCert(validMsgObj, function(err, msg) {
           if (err !== null) {
-            log.error(err);
+            self.log.error(err);
             return;
           } else {
             sendMessage(msg, validMsgObj.from, conn);
@@ -261,17 +261,17 @@ var Pzh = function () {
         });
       }
       else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
-        log.info("receiving details from pzp...");
+        self.log.info("receiving details from pzp...");
         sendPzpUpdate(validMsgObj.from, conn, validMsgObj.payload.message);
       }
       // information sent by connecting PZP about services it supports. These details are then used by findServices
       else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "registerServices") {
-        log.info("receiving Webinos services from pzp...");
+        self.log.info("receiving Webinos services from pzp...");
         discovery.addRemoteServiceObjects(validMsgObj.payload.message);
       }
       // Send findServices information to connected PZP..
       else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
-        log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
+        self.log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
         sendServices(validMsgObj);
       }
       // Message is forwarded to Messaging manager
@@ -279,43 +279,32 @@ var Pzh = function () {
         try {
           messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
         } catch (err2) {
-          log.error("error message sending to messaging " + err2);
+          self.log.error("error message sending to messaging " + err2);
           return;
         }
       }
     });
   }
-  /**
-   * @description: Calls processmsg to handle incoming message to PZH. This is called by PZH Farm
-   * @param {Object} conn: Socket connection details of client socket ..
-   * @param {Buffer} buffer: Incoming data received from other PZH or PZP
-   */
-    this.handleData=function(conn, buffer) {
-    try {
-      conn.pause();
-      session.common.readJson(this, buffer, function(obj) {
-        processMsg(conn, obj);
-      });
-    } catch (err) {
-      log.error("exception in processing recieved message " + err);
-    } finally {
-      conn.resume();
-    }
-  };
+
 
   function connectOtherPzh() {
-    var key;
-    for (key in config.cert.external) {
-      if (!connectedPzh[key]) {
-        this.connectOtherPZH(key, function(status, errorDetails) {
-          if (!status) {
-            log.error("connecting to pzh " + key + " failed - due to" + errorDetails);
-          } else {
-            log.info("connected to " + key);
+    var key, options;
+    config.fetchKey(config.cert.internal.conn.key_id, function (status, value) {
+      if(status){
+        for (key = 0; key <  config.trustedList.pzh.length; key = key + 1) {
+          if (!connectedPzh.hasOwnProperty(config.trustedList.pzh[key])) {
+            options = setOptions(value);
+            self.connectOtherPZH(config.trustedList.pzh[key], options, config.userPref.ports.provider, function(status, errorDetails) {
+              if (!status) {
+                self.log.error("connecting to pzh " + config.trustedList.pzh[key] + " failed - due to" + errorDetails);
+              } else {
+                self.log.info("connected to " + config.trustedList.pzh[key]);
+              }
+            });
           }
-        });
+        }
       }
-    }
+    });
   }
 
   function setOptions(value) {
@@ -327,7 +316,7 @@ var Pzh = function () {
     for ( key in config.cert.external) {
       if(config.cert.external.hasOwnProperty(key)) {
         caList.push(config.cert.external[key].cert);
-        crlList.push(config.cert.external[key].crl);
+        //crlList.push(config.cert.external[key].crl);
       }
     }
     // Certificate parameters that will be added in SNI context of farm
@@ -341,24 +330,41 @@ var Pzh = function () {
     };
   }
 
+  /**
+   * @description: Calls processmsg to handle incoming message to PZH. This is called by PZH Farm
+   * @param {Object} conn: Socket connection details of client socket ..
+   * @param {Buffer} buffer: Incoming data received from other PZH or PZP
+   */
+  this.handleData=function(conn, buffer) {
+    try {
+      conn.pause();
+      session.common.readJson(this, buffer, function(obj) {
+        processMsg(conn, obj);
+      });
+    } catch (err) {
+      self.log.error("exception in processing recieved message " + err);
+    } finally {
+      conn.resume();
+    }
+  };
   this.addExternalCert = function(to, parse, res, callback) {
-    if (!config.cert.external.hasOwnProperty(to)) {
-      config.cert.external[to] = { cert: parse.payload.cert, crl: parse.payload.crl};
+    if (!config.cert.external.hasOwnProperty(parse.from)) {
+      config.cert.external[parse.from] = { cert: parse.payload.cert, crl: parse.payload.crl};
       config.storeCertificate(config.cert.external,"external", function(status, value) {
         if(status) {
-          log.info("stored " + to + "in the external certificate list");
+          self.log.info("stored " + parse.from + "in the external certificate list");
         } else {
-          log.error("failed storing " + to + "in the external certificate list");
+          self.log.error("failed storing " + parse.from + "in the external certificate list");
         }
       });
     }
-    if (config.trustedList.pzh.indexOf(to) === -1) {
-      config.trustedList.pzh.push(to);
+    if (config.trustedList.pzh.indexOf(parse.from) === -1) {
+      config.trustedList.pzh.push(parse.from);
       config.storeTrustedList(config.trustedList, function(status, value){
         if(status) {
-          log.info("stored " + to + "in the trusted list");
+          self.log.info("stored " + parse.from + "in the trusted list");
         } else {
-          log.error("failed storing " + to + "in the trusted list");
+          self.log.error("failed storing " + parse.from + "in the trusted list");
         }
       });
     }
@@ -374,13 +380,12 @@ var Pzh = function () {
               crl:  config.crl
             }
           };
-
           res.write(JSON.stringify(payload));
           res.end()
-          return callback (config.metaData.serverName, setOptions(value));
         }
+        return callback (config.metaData.serverName, setOptions(value));
       } else {
-        log.error("failed fetching keys");
+        self.log.error("failed fetching keys");
       }
     });
   };
@@ -408,7 +413,7 @@ var Pzh = function () {
                   if(config.trustedList.pzp.indexOf(parse.from) === -1) {
                     config.trustedList.pzp.push(parse.from);
                     config.storeTrustedList(config.trustedList, function(){
-                      log.info("stored pzp "+parse.from +" into the trusted list");
+                      self.log.info("stored pzp "+parse.from +" into the trusted list");
                     });
                   }
                   callback(true, msg);
@@ -423,7 +428,7 @@ var Pzh = function () {
         }
       });
     } catch (err) {
-      log.error("error signing client certificate" + err);
+      self.log.error("error signing client certificate" + err);
       callback("false", "Could not create client certificate");
     }
   }
@@ -477,13 +482,13 @@ var Pzh = function () {
     callback({to: config.metaData.serverName, cmd:"listPzp", payload:result});
   };
 
-  this.addOtherZoneCert = function (to, callback) {
+  this.addOtherZoneCert = function (to, refreshCertF, callback) {
     // temp solution till we decide how to trigger
     if (to && to.split('/')) {
       if (config.cert.external.hasOwnProperty(to)) {
         callback({cmd:'pzhPzh', to: config.metaData.serverName, payload: "already connected"});
       } else {
-        this.sendCertificate(to, sessionId, config.metaData.serverName, config.userPref.ports.provider_webServer, config.cert.internal.master.cert, config.crl, callback);
+        this.sendCertificate(to, config.metaData.serverName, config.userPref.ports.provider_webServer, config.cert.internal.master.cert, config.crl, refreshCertF, callback);
       }
     } else {
       callback({cmd:'pzhPzh', to: config.metaData.serverName, payload: "connecting address is wrong"});
@@ -511,7 +516,7 @@ var Pzh = function () {
    * @param callback
    */
   this.fetchLogs = function(type, callback){
-    log.fetchLog(type, config.metaData.webinosType, config.metaData.friendlyName, function(data) {
+    self.log.fetchLog(type, config.metaData.webinosType, config.metaData.friendlyName, function(data) {
       var payload
       if (type === "error") {
         payload = {to: config.metaData.serverName, cmd:"crashLog", payload:data};
@@ -529,6 +534,7 @@ var Pzh = function () {
    */
   this.addPzh = function (friendlyName, uri, user, callback) {
     var options;
+    self.log = new log(__filename);
     authcode.createAuthCounter(function (res) {
      self.expecting = res;
     });
@@ -536,10 +542,10 @@ var Pzh = function () {
     config.setConfiguration(friendlyName, "Pzh", uri, function (status, value) {
       if (status) {
         sessionId = uri.split("/")[1];
-        log.addId(sessionId);
+        self.log.addId(sessionId);
         initializeRPC();
         setMessageHandler();
-        connectOtherPzh();
+        //connectOtherPzh();
         options = setOptions(value);
         if(typeof user !== "undefined" && user !== "") {
           storeData(user);
@@ -557,28 +563,28 @@ var Pzh = function () {
   this.handleConnectionAuthorization = function(conn) {
     // Allows PZP to connect if it has proper QRCode
     if(conn.authorized === false) {
-      log.info(" connection NOT authorised at pzh");
+      self.log.info(" connection NOT authorised at pzh");
       //If this is a new PZP, we allow if it has proper QRCode
       self.expecting.isExpected(function(expected) {
         if (!expected || conn.authorizationError !== "UNABLE_TO_GET_CRL" ){
           //we"re not expecting anything - disallow.
-          log.info("ending connect: " + conn.authorizationError);
+          self.log.info("ending connect: " + conn.authorizationError);
           conn.socket.end();
         } else {
-          log.info("continuing connect - expected: " + conn.authorizationError);
+          self.log.info("continuing connect - expected: " + conn.authorizationError);
         }
       });
     }
 
     if(conn.authorized) {// PZP/PZH connecting with proper certificate at both ends
       var cn;
-      log.info("connection authorised at pzh");
+      self.log.info("connection authorised at pzh");
       try {
         cn = conn.getPeerCertificate().subject.CN;// Get peer common name from the certiicate
         cn = decodeURIComponent(cn);
         cn = cn.split(":");
       } catch(err) {
-        log.error("exception in reading common name of peer pzh certificate " + err);
+        self.log.error("exception in reading common name of peer pzh certificate " + err);
         return;
       }
 
@@ -591,6 +597,12 @@ var Pzh = function () {
   };
   this.getSessionId = function(){
     return sessionId;
+  };
+
+  this.storeConnectedPzh = function(pzhId, conn) {
+    if (!connectedPzh.hasOwnProperty(pzhId)) {
+         connectedPzh[pzhId] = {socket: conn};
+    }
   }
 
 };

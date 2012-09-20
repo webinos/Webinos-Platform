@@ -45,14 +45,18 @@ var Log = function(filename) {
   logging.addId   = function(id) {
     this.id = id;
   };
+  function getLineNumber () {
+    var error = new Error();
+    return (error.stack.split('\n')[3].split(':')[1]);
+  }
   logging.addType = function(name) {
     instanceName = name;
   };
   logging.error = function(msg) {
     var date = new Date();
     var id =  this.id ? " " +this.id+" ": " ";
-    var time = date.getDate()+"."+date.getMonth()+"."+date.getFullYear()+ "-" + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+":"+date.getMilliseconds();
-    var formattedMsg =  "["+time+ "] error "+ this.name.split("/").pop() + id + msg + "\n";
+    var time = date.getDate()+"."+date.getMonth()+"."+date.getFullYear()+ " " + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+":"+date.getMilliseconds();
+    var formattedMsg =  "["+time+ "] error "+ this.name.split("/").pop() + " " +getLineNumber() + " " + id + msg + "\n";
     cursor.fg.red().write(formattedMsg);
     cursor.reset();
     this.writeLog("error", "<p>"+formattedMsg+"</p>");
@@ -61,7 +65,7 @@ var Log = function(filename) {
     var date = new Date();
     var id = this.id ? " "+this.id+" ": " ";
     var time = date.getDate()+"."+date.getMonth()+"."+date.getFullYear()+ "-" + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+":"+date.getMilliseconds();
-    var formattedMsg =  "["+time+ "] info " + this.name.split("/").pop() + id + msg + "\n";
+    var formattedMsg =  "["+time+ "] info " + this.name.split("/").pop() + "-" +getLineNumber() + " " +  id + msg + "\n";
     cursor.fg.grey().write(formattedMsg);
     cursor.reset();
     this.writeLog("info", "<p>"+formattedMsg+"</p>");
@@ -95,13 +99,12 @@ var Log = function(filename) {
         console.log("Error Initializing logs" + err);
       }
     } else {
-      if(self.writeError && self.writeInfo) {
-        if (type === "error") {
-          self.writeError.write(msg);
-        } else {
-          self.writeInfo.write(msg);
-        }
+      if(self.writeError && type === "error") {
+        self.writeError.write(msg);
+      } else if (self.writeIfo && type === "info"){
+        self.writeInfo.write(msg);
       }
+
     }
   };
   logging.fetchLog = function (logType, webinosType, friendlyName, callback){

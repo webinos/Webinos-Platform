@@ -28,7 +28,7 @@ function Certificate() {
   keystore.call(this);
   this.cert         = {};
   this.cert.internal= {};
-  this.cert.external= [];
+  this.cert.external= {};
   this.cert.internal= {master: {}, conn: {}, web: {}};
 };
 
@@ -56,8 +56,8 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
     cert_type = 2;
   }
   if (type === "PzhCA") {
-    self.cert.internal.signedCert = [];
-    self.cert.internal.revokedCert = [];
+    self.cert.internal.signedCert  = {};
+    self.cert.internal.revokedCert = {};
   }
   cn = encodeURIComponent(cn);
   if (cn.length > 40) {
@@ -165,6 +165,6 @@ Certificate.prototype.revokeClientCert = function(pzpCert, callback) {
     return callback(false, err1);
 
   }
-}
+};
 
 module.exports = Certificate;

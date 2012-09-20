@@ -33,7 +33,7 @@ var util    = require("util");
 
 var webinos = require("webinos")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")("pzh_farm");
+var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 
 // Main interface: remove a PZP here.
 function revoke(instance, pzpCert, callback) {
