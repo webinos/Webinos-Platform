@@ -1,0 +1,11 @@
+<!-- 
+  ta-xlgUWUVzCY
+  If a name attribute is used, but the value attribute is absent, then this 
+  param element is in error and the user agent must skip this element.
+ -->
+<widget id="d6:" xmlns='http://www.w3.org/ns/widgets'>
+<name>d6</name>
+  <feature name='feature:a9bb79c1'>
+    <param name='parameter'/>
+  </feature>
+</widget>

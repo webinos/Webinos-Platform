@@ -1,0 +1,6 @@
+<widget id="x1:" xmlns="http://www.w3.org/ns/widgets">
+	<name>x1</name>
+   <description>FAIL</description>
+   <description xml:lang="en">PASS</description>
+   <description xml:lang="en">FAIL</description>
+</widget>

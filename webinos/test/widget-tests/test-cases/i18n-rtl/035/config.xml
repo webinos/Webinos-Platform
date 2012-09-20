@@ -1,0 +1,5 @@
+<widget id="i18nrtl35:" xmlns="http://www.w3.org/ns/widgets">
+    <preference name="TEST" value="TEST" readonly="true" dir="rtl"/>
+    <name>i18nrtl35</name>
+</widget>
+ 

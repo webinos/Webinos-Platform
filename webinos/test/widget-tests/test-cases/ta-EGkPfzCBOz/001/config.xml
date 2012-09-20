@@ -1,0 +1,7 @@
+<widget id="dg:" xmlns="http://www.w3.org/ns/widgets">
+<name>dg</name>
+<feature name="feature:a9bb79c1" required="true">
+<param value="FAIL" />
+<param name="PASS" value="PASS" />
+</feature>
+</widget>

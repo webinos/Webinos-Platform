@@ -79,6 +79,8 @@ this.ManagerUtils = (function () {
 
         var files = fs.readdirSync(dirPath);
         for (var i in files) {
+            if (!files.hasOwnProperty(i))
+              continue;
             var item = path.resolve(dirPath, files[i]);
             stat = fs.statSync(item);
             if (stat.isFile())

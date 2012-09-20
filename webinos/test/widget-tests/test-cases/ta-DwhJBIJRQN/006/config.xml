@@ -1,0 +1,5 @@
+<widget id="bb:" xmlns="http://www.w3.org/ns/widgets">
+<name>bb</name>
+<preference name="a" value="a"/>
+<preference name="A" value="b"/>
+</widget>

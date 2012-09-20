@@ -1,0 +1,7 @@
+<widget id="a6:" xmlns="http://www.w3.org/ns/widgets">
+<name>a6</name>
+<preference value="FAIL"/>
+<preference name="PASS" value="PASS"/>
+<preference value="FAIL"/>
+<preference name="PASS" value="FAIL"/>
+</widget>
