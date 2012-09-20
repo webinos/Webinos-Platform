@@ -1,0 +1,6 @@
+<widget id="i18nrlo32:" xmlns="http://www.w3.org/ns/widgets">
+    <feature name="feature:a9bb79c1">
+        <param name="TEST" value="PASSED" dir="rlo"/>
+    </feature>
+    <name>i18nrlo32</name>
+</widget>

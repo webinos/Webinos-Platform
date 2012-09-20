@@ -1,0 +1,6 @@
+<widget id="i18nlro28:" xmlns="http://www.w3.org/ns/widgets"
+	width="500" height="500"
+>
+    <content src="index.htm" encoding="iso-8859-1" dir="lro"/>
+    <name>i18nlro28</name>
+</widget>

@@ -1,0 +1,5 @@
+<widget id="bs:" xmlns="http://www.w3.org/ns/widgets">
+<name>bs</name>
+<content src="pass.html"/>
+<content src="fail.html"/>
+</widget>

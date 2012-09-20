@@ -1,0 +1,7 @@
+<widget id="co:" xmlns="http://www.w3.org/ns/widgets">
+	<name>co</name>
+	<license xml:lang="x-x-test">FAIL</license>
+	<license>FAIL</license>
+    <license xml:lang="en">PASS</license>	 
+	<license xml:lang="en">FAIL</license>	
+</widget>

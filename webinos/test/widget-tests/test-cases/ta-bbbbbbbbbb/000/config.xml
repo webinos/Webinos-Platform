@@ -1,0 +1,7 @@
+<widget id="xx:" xmlns="http://www.w3.org/ns/widgets"
+xmlns:any="any:namespace">
+<name>xx</name>
+<CONTENT src="fail.html"/>
+<any:CONTENT src="fail.html"/>
+<content src="pass.html"/>
+</widget>

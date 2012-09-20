@@ -757,6 +757,11 @@ Pzp.prototype.initializePzp = function(config, modules, callback) {
                   });
                 }
               });
+            } else {
+              if (typeof callback !== "undefined") {
+                // Callback for virgin mode.
+                callback.call(self, "startedPZP", self);
+              }
             }
           });
         });

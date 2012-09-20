@@ -600,9 +600,16 @@ this.WidgetConfigProcessor = (function () {
                         return;
                     }
                     if (!processingResult.localisedFileMapping.contains(path)) {
+						// ***** HACK - Allow remote URL start paths *******
+						var startURL = url.parse(path);
+						if (typeof startURL.protocol === "undefined") {
                         Logger.logAction(Logger.LOG_MINOR, "ta-pIffQywZin, ta-LQcjNKBLUZ", "ignoring content with nonexistent path");
                         elt.isValid = false;
                         return;
+						} else {
+							// Start path appears to be external URL => allow this for now.
+							Logger.logAction(Logger.LOG_MINOR, "temporary hack", "allowing external url start path");
+						}
                     }
                     var contentType;
                     if ('type' in attrs) {

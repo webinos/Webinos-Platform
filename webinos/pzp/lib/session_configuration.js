@@ -243,6 +243,12 @@ session_configuration.createDirectoryStructure = function (callback) {
             fs.mkdirSync( webinosDemo +"/keys","0700");
           }
         });
+        // widget manager
+        fs.readdir ( webinosDemo+"/wrt", function(err) {
+          if ( err && err.code=== "ENOENT" ) {
+            fs.mkdirSync( webinosDemo +"/wrt","0700");
+          }
+        });
         callback(true);
       }, 100);
     });

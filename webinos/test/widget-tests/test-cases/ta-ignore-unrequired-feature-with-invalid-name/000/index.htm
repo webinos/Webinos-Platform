@@ -1,0 +1,5 @@
+<!DOCTYPE html>
+<title>PASS</title>
+<body style="background:green">
+<h1>PASS</h1>
+<script src="hook.js"></script>
