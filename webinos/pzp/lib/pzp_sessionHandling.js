@@ -393,11 +393,11 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
       if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
         if (self.mode === global.modes[3] ) { //hub_peer mode
           self.mode = global.modes[2]; // Go in peer mode
-                // state will be peer mode state
+          // state will be peer mode state
         } else if (self.mode === global.modes[1] ) { //hub mode
             self.state = global.states[0]; // not connected
             //Zeroconf - start
-             switch(os.type().toLowerCase()){
+            switch(os.type().toLowerCase()){
               case "linux":
                 //get pzp TLS port number    
                 var pzp_tlsServer = 8040;
@@ -418,10 +418,10 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                   }
                 });
               
-		        switch(os.platform().toLowerCase()){
-			      case "android":
-			      {
-				    function onFound(service){
+                switch(os.platform().toLowerCase()){
+                  case "android":
+                  {
+                    function onFound(service){
                       console.log("Android-Mdns onFound callback: found service."); 
 
                       if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined"))
@@ -521,7 +521,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                           }
                         }
                       });
-				    }
+                    }
                   break;
                 }
               break;
