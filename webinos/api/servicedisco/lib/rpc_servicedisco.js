@@ -203,26 +203,14 @@
 
 				// add address where this service is available, namely this pzp/pzh sessionid
 				for (var i=0; i<results.length; i++) {
-					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source addres, it is used by messaging for returning back
+					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source address, it is used by messaging for returning back
 				}
-				var webinos_ = require('webinos')(__dirname);
-				var global = webinos_.global.require(webinos_.global.pzp.location,'lib/session').configuration;
-
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var entityRefCount = (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0; 
-				// Fetch from peers that are connected
-				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
-					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) && this.rpcHandler.parent.state === global.states[2]) {
-						for (var key in this.rpcHandler.parent.connectedPzp) {
-							if (this.rpcHandler.parent.connectedPzp.hasOwnProperty(key)) {
-								if(this.rpcHandler.parent.connectedPzp[key].state === global.states[2]) {
-									entityRefCount += 1;
-								}
-							}
-						}
-					}
-				}
+				var connectedPzhIds = [], connectedPzpIds = [];
+				this.rpcHandler.parent.connectInfo(connectedPzpIds, connectedPzhIds);
+				var entityRefCount = connectedPzhIds.length + connectedPzpIds.length;
+
 				// no connection to a PZH & other connected Peers, don't ask for remote services
 				if (!this.rpcHandler.parent || entityRefCount === 0) {
 					deliverResults(results);
@@ -257,23 +245,7 @@
 					}
 				})(results, entityRefCount);
 
-				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
-					// ask for remote service objects
-					if (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2]) { // Not in peer mode & connected
-						this.rpcHandler.parent.prepMsg(this.rpcHandler.sessionId, this.rpcHandler.parent.config.pzhId, 'findServices', {id: callbackId});
-					}
-
-					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) &&
-							this.rpcHandler.parent.state === global.states[2]) {
-						for (var key in this.rpcHandler.parent.connectedPzp) { //
-							if (this.rpcHandler.parent.connectedPzp.hasOwnProperty(key) && key !== this.rpcHandler.sessionId) {
-								if(this.rpcHandler.parent.connectedPzp[key].state === global.states[2]) {
-									this.rpcHandler.parent.prepMsg(this.rpcHandler.sessionId, key, 'findServices', {id: callbackId});
-								}
-							}
-						}
-					}
-				}
+				this.rpcHandler.parent.sendMsg('findServices', {id: callbackId});
 			}
 		};
 	}

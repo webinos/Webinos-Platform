@@ -76,7 +76,7 @@ var Pzp = function () {
       "to"   : to,
       "payload":{"status":status,
         "message":message}};
-    sendMessage(msg, to);
+    self.sendMessage(msg, to);
   }
   function  initializeRPC_Message(loadModules) {
     self.registry       = new Registry();
@@ -143,7 +143,7 @@ var Pzp = function () {
     self.updateApp();
   }
 
-  function sendMessage(message, address) {
+  this.sendMessage = function(message, address) {
     var jsonString = JSON.stringify(message);
     var buf = session.common.jsonStr2Buffer(jsonString);
     log.info('send to '+ address + ' message ' + jsonString +' and mode '+ self.mode + ' state '+ self.state);
@@ -163,7 +163,7 @@ var Pzp = function () {
     } catch (err) {
       log.error("sending send message"+ err);
     }
-  }
+  };
   function setConnParam(conn_key) {
     if (self.mode === self.modes[1]) { // Hub Mode
       return{
@@ -201,7 +201,7 @@ var Pzp = function () {
       setupMessage_RPCHandler();
 
       var msg = self.messageHandler.registerSender(sessionId, pzhId);
-      sendMessage(msg, pzhId);
+      self.sendMessage(msg, pzhId);
 
       var localServices = self.discovery.getRegisteredServices();
       prepMsg(sessionId, config.metaData.pzhId, "registerServices", localServices);
@@ -414,7 +414,24 @@ var Pzp = function () {
         connectedPzhIds.push(key);
       }
     }
-  }
+  };
+
+  this.sendMsg = function(msg, payload) {
+    var key;
+    for (key in connectedPzp) {
+      if (connectedPzp.hasOwnProperty(key)) {
+        prepMsg(sessionId, key, msg, payload);
+      }
+    }
+    for ( key in connectedPzh) {
+      if (connectedPzh.hasOwnProperty(key)) {
+        prepMsg(sessionId, key, msg, payload);
+      }
+    }
+
+  };
+
+
 };
 util.inherits(Pzp, pzpWebSocket);
 

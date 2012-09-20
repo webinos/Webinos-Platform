@@ -131,7 +131,7 @@ var Pzh = function () {
     messageHandler.setSeparator("/");
   }
 
-  function sendServices(){
+  function sendServices(validMsgObj){
     var services = discovery.getAllServices(validMsgObj.from);
     var msg = prepMsg(sessionId, validMsgObj.from, "foundServices", services);
     msg.payload.id = validMsgObj.payload.message.id;
@@ -272,7 +272,7 @@ var Pzh = function () {
       // Send findServices information to connected PZP..
       else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
         log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
-        sendServices();
+        sendServices(validMsgObj);
       }
       // Message is forwarded to Messaging manager
       else {
