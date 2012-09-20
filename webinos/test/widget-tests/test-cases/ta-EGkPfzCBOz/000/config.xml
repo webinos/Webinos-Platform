@@ -1,0 +1,6 @@
+<widget id="dt:" xmlns="http://www.w3.org/ns/widgets">
+<name>dt</name>
+<feature name="feature:a9bb79c1" required="true">
+<param value="value1" />
+</feature>
+</widget>

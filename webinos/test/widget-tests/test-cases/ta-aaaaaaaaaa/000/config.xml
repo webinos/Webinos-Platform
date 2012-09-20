@@ -1,0 +1,6 @@
+<widget id="z1:" xmlns="http://www.w3.org/ns/widgets" width="500" height="500"> 
+ <name>z1</name>
+  <content src      = "start.test" 
+           type     = "text/html;charset=Windows-1252" 
+           encoding = "ISO-8859-1"/>
+</widget>

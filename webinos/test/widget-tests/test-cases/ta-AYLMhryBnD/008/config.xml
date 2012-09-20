@@ -1,0 +1,6 @@
+<widget id="oa:" xmlns="http://www.w3.org/ns/widgets">
+	<name xml:lang="x-x-test">FAIL</name>
+	<name>FAIL</name>
+    <name xml:lang="en">PASS</name>	 
+	<name xml:lang="en">FAIL</name>	
+</widget>

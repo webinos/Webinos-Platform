@@ -1,0 +1,11 @@
+<widget id="ha:" xmlns="http://www.w3.org/ns/widgets">
+<name>ha</name>
+<feature name="feature:a9bb79c1">
+  <param name="test" value="pass1"/>
+</feature>
+
+<feature name="feature:a9bb79c1">
+  <param name="test" value="pass2"/>
+</feature>
+
+</widget>
