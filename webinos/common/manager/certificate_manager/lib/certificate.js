@@ -1,6 +1,5 @@
 /*******************************************************************************
-*  Code contributed to the webinos project
-*
+*  Code contributed to the webinos project*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -56,24 +55,28 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
   if (type === "Pzp") {
     cert_type = 2;
   }
+  if (type === "PzhCA") {
+    self.cert.internal.signedCert = [];
+    self.cert.internal.revokedCert = [];
+  }
   cn = encodeURIComponent(cn);
   if (cn.length > 40) {
     cn = cn.substring(0, 40);
   }
 
   self.generateKey(type, key_id, function(status, value) {
-    if (!status) {
+     if (!status) {
        return callback(false, value);
     } else {
       try {
         obj.csr = certman.createCertificateRequest(value,
-          self.userPref.certData.country,
-          self.userPref.certData.state, // state
-          self.userPref.certData.city, //city
-          self.userPref.certData.orgname, //orgname
-          self.userPref.certData.orgunit, //orgunit
+          self.userData.country,
+          self.userData.state, // state
+          self.userData.city, //city
+          self.userData.orgname, //orgname
+          self.userData.orgunit, //orgunit
           cn,
-          self.userPref.certData.email);
+          self.userData.email);
       } catch (err) {
         return callback(false, err);
       }
@@ -101,8 +104,11 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
           }
         });
       } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
-        self.cert.internal.conn.cert   = obj.cert;
-        self.cert.internal.conn.csr    = obj.csr;
+        self.cert.internal.conn.cert = obj.cert;
+        self.cert.internal.conn.csr  = obj.csr;
+        if (type === "Pzp") {
+          self.crl                     = obj.crl;
+        }
       } else if (type === "PzhWS") {
         return callback(true, obj.csr, value);
       }

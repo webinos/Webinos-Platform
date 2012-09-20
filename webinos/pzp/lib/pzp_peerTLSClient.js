@@ -17,49 +17,46 @@
 *******************************************************************************/
 
 var tls   = require("tls");
-
-var session = require("./session");
-var log     = new session.common.debug("pzp_client");
-var global  = session.configuration;
+var webinos     = require("webinos")(__dirname);
+var log         = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 
 var PzpClient = function() {
-  this.sessionId;
-  this.peerSessionId;
+  this.peerSessionId = "";
 };
 
-PzpClient.prototype.connectOtherPZP = function (parent, msg) {
-  var self = this;
-  self.sessionId = parent.sessionId;
+PzpClient.prototype.setMode = function() {
+  if (this.mode === this.modes[1] || this.mode === this.modes[3] ) {
+    this.mode = this.modes[3];
+  } else {
+    this.mode = this.modes[2];
+  }
+  this.state  = this.states[2];
+};
 
-  session.configuration.fetchKey(parent.config.own.key_id, function(key) {
+PzpClient.prototype.connectOtherPZP = function (msg) {
+  var self = this;
+  self.config.fetchKey(self.config.cert.internal.conn.key_id, function(key) {
     var options = {
-        key:  key,
-        cert: parent.config.own.cert,
-        crl:  parent.config.master.crl,
-        ca:   parent.config.master.cert
+      key:  key,
+      cert: self.config.cert.internal.conn.cert,
+      crl:  self.config.crl,
+      ca:   self.config.cert.intenrnal.master.cert
     };
 
     client = tls.connect(msg.port, msg.address, options, function () {
       if (client.authorized) {
         self.peerSessionId = msg.name;
         log.info("authorized & connected to PZP: " + msg.address + " name = " + msg.name);
-
-        if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
-          parent.mode   = global.modes[3];
-        } else {
-          parent.mode   = global.modes[2];
-        }
-        parent.state = global.states[2];
-
-        // Updating at two places as parent.state should tell you at least one is connected in peer mode
+        self.setMode();
+        // Updating at two places as self.state should tell you at least one is connected in peer mode
         // The process whole connectedPzp to find which is and which is not connected
-        parent.connectedPzp[msg.name].state  = global.states[2]
-        parent.connectedPzp[msg.name].socket = client;
+        self.connectedPzp[msg.name].state  = self.states[2]
+        self.connectedPzp[msg.name].socket = client;
 
-        var msg1 = parent.messageHandler.registerSender(self.sessionId, msg.name);
-        parent.sendMessage(msg1, msg.name);
+        var msg1 = self.messageHandler.registerSender(self.sessionId, msg.name);
+        self.sendMessage(msg1, msg.name);
 
-        parent.connectedApp();
+        self.connectedApp();
 
       } else {
         log.info("connection failed, first connect with PZH ");
@@ -73,16 +70,16 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
           session.common.processedMsg(self, obj, function(validMsgObj) {
             if(validMsgObj.type === "prop" && validMsgObj.payload.status === "foundServices") {
               log.info("received message about available remote services.");
-              parent.serviceListener && parent.serviceListener(validMsgObj.payload);
+              self.serviceListener && self.serviceListener(validMsgObj.payload);
             } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
                 log.info("trying to send Webinos Services from this RPC handler to " + validMsgObj.from + "...");
-                var services = parent.discovery.getAllServices(validMsgObj.from);
-                var msg = {"type":"prop", "from":parent.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
+                var services = self.discovery.getAllServices(validMsgObj.from);
+                var msg = {"type":"prop", "from":self.sessionId, "to":validMsgObj.from, "payload":{"status":"foundServices", "message":services}};
                 msg.payload.id = validMsgObj.payload.message.id;
-                parent.sendMessage(msg, validMsgObj.from);
+                self.sendMessage(msg, validMsgObj.from);
                 log.info("sent " + (services && services.length) || 0 + " Webinos Services from this RPC handler.");
               }else {
-              parent.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
+              self.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
             }
           });
         });
@@ -94,63 +91,63 @@ PzpClient.prototype.connectOtherPZP = function (parent, msg) {
 
     client.on("end", function () {
       log.info("connection terminated");
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined")
-        parent.connectedPzp[self.peerSessionId].state = global.states[3];
-      if (parent.mode === global.modes[2]) {
-        parent.state = global.states[0];
+      if(typeof self.connectedPzp[self.peerSessionId] !== "undefined")
+        self.connectedPzp[self.peerSessionId].state = global.states[3];
+      if (self.mode === global.modes[2]) {
+        self.state = global.states[0];
       }
 
-      if (parent.mode === global.modes[3]) {
+      if (self.mode === global.modes[3]) {
         var status = true;
         for (var key in self.connectedPzp) {
-          if(parent.connectedPzp[key].state === global.states[2]) {
+          if(self.connectedPzp[key].state === global.states[2]) {
             status = false;
             break;
           }
         }
         if (status) {
-          parent.mode = global.modes[1];
+          self.mode = global.modes[1];
         }
       } else {
-        parent.mode = global.modes[1]; // Go back in hub mode
+        self.mode = global.modes[1]; // Go back in hub mode
       }
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
-        delete parent.connectedPzp[self.peerSessionId].state;
-        parent.connectedApp();
+      if(typeof self.connectedPzp[self.peerSessionId] !== "undefined") {
+        delete self.connectedPzp[self.peerSessionId].state;
+        self.connectedApp();
       }
 
-      log.info('mode '+ parent.mode + ' state '+parent.state);
+      log.info('mode '+ self.mode + ' state '+self.state);
 
     });
 
     client.on("error", function (err) {
       log.error(err);
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
-        parent.connectedPzp[self.peerSessionId].state = global.states[3];
+      if(typeof self.connectedPzp[self.peerSessionId] !== "undefined") {
+        self.connectedPzp[self.peerSessionId].state = global.states[3];
       }
-      if (parent.mode === global.modes[2] ) {
-        parent.state = global.states[0];
+      if (self.mode === global.modes[2] ) {
+        self.state = global.states[0];
       }
 
-      if (parent.mode === global.modes[3] || parent.mode === global.modes[1] ) {
+      if (self.mode === global.modes[3] || self.mode === global.modes[1] ) {
         var status = true;
         for (var key in self.connectedPzp) {
-          if(parent.connectedPzp[key].state === global.states[2]) {
+          if(self.connectedPzp[key].state === global.states[2]) {
             status = false;
             break;
           }
         }
         if (status) {
-          parent.mode = global.modes[1];
+          self.mode = global.modes[1];
         }
       } else {
-        parent.mode = global.modes[1]; // Go back in hub mode
+        self.mode = global.modes[1]; // Go back in hub mode
       }
-      if(typeof parent.connectedPzp[self.peerSessionId] !== "undefined") {
-        delete parent.connectedPzp[self.peerSessionId];
-        parent.connectedApp();
+      if(typeof self.connectedPzp[self.peerSessionId] !== "undefined") {
+        delete self.connectedPzp[self.peerSessionId];
+        self.connectedApp();
       }
-      log.info('mode '+ parent.mode + ' state '+parent.state);
+      log.info('mode '+ self.mode + ' state '+self.state);
 
     });
 

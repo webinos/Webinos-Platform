@@ -24,8 +24,9 @@ var fs = require("fs");
 var os = require("os");
 
 var session_common = exports;
-var validation   = require("./session_schema");
-
+var validation    = require("./session_schema");
+var webinos       = require("webinos")(__dirname);
+var log           = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 /**
  * Converts a JSON string to Buffer.
  *
@@ -120,16 +121,4 @@ session_common.processedMsg = function(self, msgObj, callback) {
 };
 
 
-session_common.fetchIP = function(callback) {
-  "use strict";
-  var socket = net.createConnection(80, "www.google.com");
-  socket.on('connect', function() {
-    if (typeof callback === "function") { callback(socket.address().address);}
-    socket.end();
-  });
-  socket.on('error', function() { // Assuming this will happen as internet is not reachable
-    if (typeof callback === "function") { callback("0.0.0.0");}
-
-  });
-}
 

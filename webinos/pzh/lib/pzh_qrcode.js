@@ -61,7 +61,7 @@ pzh_qrcode.addPzpQR = function(pzh, connection) {
       create(url, code, function(err, qrimg) {
         if (err === null) {
           var message = {
-            name: pzh.sessionId, 
+            name: pzh.getSessionId(),
             img: qrimg,
             result: "success"
             };
@@ -95,7 +95,7 @@ pzh_qrcode.addPzpQRAgain = function(pzh, next) {
   pzh.expecting.setExpectedCode(code,function() {
     pzh.getMyUrl(function(url) {
       create(url, code, function(err, qrimg) {
-        next({to: pzh.config.serverName, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
+        next({to: url, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
       });
     });
   }); 

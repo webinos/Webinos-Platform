@@ -15,9 +15,13 @@
       } else {
         value = $("#pzh_list option:selected").val();
       }
+      var options = {"type": 'prop',
+          "payload": {
+              "status": "login"
+          }
+      };
       to = value;
-      var options = {type: 'prop', payload: {status: "login", to: value}};
-      webinos.session.message_send(options);
+      webinos.session.message_send(options, value);
     });
 
     function displayLogin(html_input) {
@@ -28,7 +32,7 @@
     function authenticate(msg){
      window.location.href=msg.payload.url;
     }
-    webinos.session.addListener('authenticate-google', authenticate);
+    webinos.session.addListener('authenticate', authenticate);
 
   });
 </script>

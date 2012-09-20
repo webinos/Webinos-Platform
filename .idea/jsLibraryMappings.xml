@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <file url="file://$PROJECT_DIR$/webinos/pzp/lib/pzp_sessionHandling.js" libraries="{Node.js v0.8.6 Core Library}" />
+  </component>
+</project>
+

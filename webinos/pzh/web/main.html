@@ -31,20 +31,22 @@
       }
       $("#enumConnectedPzp").html(text);
       $('.column').equalHeight(); // Fix height
-  };
+  }
   function displayQRCode(payload){
       "use strict";
       var text = "<center>";
       text += "<p> <img src=" + payload.img + "> </img> </p> ";
       text += "<p> <h2>" +payload.code +"</p> </h2>";
       setArticle("PZP Authorization code",text);
-  };
+  }
   function setArticle(header,body){
     $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
     $('.column').equalHeight(); // Fix height
-  };
+  }
   function connectPzh(){
-    webinosPZH.commands.connectPzh(document.getElementById('connectPzhId').value, function(result){
+    var id =  document.getElementById('connectPzhId').value + "/";
+     alert(id);
+    webinosPZH.commands.connectPzh(id, function(result){
       if (result === true) {
         setArticle("Success", "<p>Pzh in now connected!</p>");
         webinosPZH.commands.listDevices(DisplayListOfDevices);
@@ -52,10 +54,10 @@
         setArticle("Fail", "<p>Pzh did not connect, reason -  " + result + "</p>" );
       }
     });
-  };
+  }
   function pzpRevokeResult(payload){
     setArticle("Certificate revoked", "<p>" + payload + " certificate revoked.</p>");
-  };
+  }
   function listPzpsToRevoke(payload){
       var i, id;
       var text = " <h3 align=center> Connected PZP's</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
@@ -72,10 +74,14 @@
       }
       text += '</table> </p>';
       setArticle("Revoke certificate", text);
-  };
+  }
+
   function showCrashLog(payload){
-    setArticle("Crash Log", payload);
-  };
+      setArticle("Crash Log", payload);
+  }
+  function showInfoLog(payload){
+      setArticle("Info Log", payload);
+  }
   function listUserDetails(payload){
       var text = "";
       if (!payload) {
@@ -83,7 +89,7 @@
           name: "Connected",
           country: "Undefined",
           email: "Undefined",
-          servername: "Undefined",
+          servername: "Undefined"
         }
       }
       if (payload.image){
@@ -97,7 +103,7 @@
       setArticle("User details", text);
       $("#userId").html(payload.name);
       webinosPZH.commands.listDevices(DisplayListOfDevices);
-  };
+  }
   $(document).ready(function() {
 
     webinosPZH.init(function(){
@@ -111,7 +117,7 @@
       webinosPZH.commands.addPzp(displayQRCode);
     });
     $("#connectPzh").click(function(){
-      var text = "Connect PZH: <input type='text' id='connectPzhId' value='localhost/WGuo'/>";
+      var text = "Connect PZH: <input type='text' id='connectPzhId' value=''/>";
       text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
       setArticle("Connect to pzh",text);
     });
@@ -120,6 +126,9 @@
     });
     $("#crashLog").click(function(){
       webinosPZH.commands.crashLog(showCrashLog);
+    });
+    $("#infoLog").click(function(){
+      webinosPZH.commands.infoLog(showInfoLog);
     });
     $("#userDetails").click(function(){
       webinosPZH.commands.userDetails(listUserDetails);
@@ -173,6 +182,7 @@
       <h3>PZH Admin</h3>
       <ul class="toggle" style="">
         <li> <a href="#crashLog" id="crashLog">Crash Log </a> </li>
+        <li> <a href="#infoLog" id="infoLog">Info Log </a> </li>
         <li> <a href="#restartPzh" id="restartPzh">Restart PZH </a> </li>
         <li> <a href="#userDetails" id="userDetails">User Details </a> </li>
       </ul>

@@ -25,8 +25,8 @@
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
 var webinos = require("webinos")(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")("pzh_farm");
+var wlog    = webinos.global.require(webinos.global.util.location, "lib/logging.js")
+var log     = new wlog("pzh_authCode");
 var tokenAuth = exports;
 
 /** @description: This creates an auth code object which can be used to set a new

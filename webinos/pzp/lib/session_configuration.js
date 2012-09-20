@@ -21,18 +21,17 @@ var os          = require("os");
 var util        = require("util");
 
 var webinos     = require("webinos")(__dirname);
-var logging     = webinos.global.require(webinos.global.util.location, "lib/logging.js");
+var log         = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 var wPath       = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
-var wId         = webinos.global.require(webinos.global.util.location, "lib/webinosId.js");
+var wId         = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
 
-var log         = Object.create(logging);
 var certificate = webinos.global.require(webinos.global.manager.certificate_manager.location);
 
 
 function Config() {
   certificate.call(this);
   this.metaData       = {};
-  this.trustedList    = {};
+  this.trustedList    = {pzh:[], pzp:[]};
   this.crl            = "";
   this.policies       = {};//todo: integrate policy in the configuration
   this.userData       = {};
@@ -49,74 +48,83 @@ util.inherits(Config, certificate);
 * checking/creating certificates
 */
 Config.prototype.setConfiguration = function (friendlyName, webinosType, sessionIdentity, callback) {
-  var self = this;
+  var self = this, conn_key, cn;
+  var deviceName = wId.fetchDeviceName(webinosType, friendlyName);
+  var webinosRoot  =  path.join(wPath.webinosPath(), deviceName);
+
+  log.addType(deviceName); // per instance this should be only set once..
+
   if (typeof callback !== "function") {
     log.error("callback missing");
     return;
   }
-  self.fetchMetaData(wPath.webinosPath(), wId.fetchDeviceName(webinosType, friendlyName), friendlyName, webinosType, sessionIdentity, function(status, value){
-    if (!status ) {//meta data
+
+  self.fetchMetaData(webinosRoot, deviceName, friendlyName, webinosType, sessionIdentity,
+  function(status, value){
+    if (status && value && value.code=== "ENOENT") {//meta data
       try {
-        if (value && value.code=== "ENOENT" ) {
-          var cn = self.metaData.webinosType + ":"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
-          self.generateSelfSignedCertificate(type, cn,
-            function(status, value ) {
-            if(!status) {
-              return callback(status, value);
-            } else {
-              if (self.metaData.webinosType !== "Pzp") {
-                var cn = self.metaData.webinosType + "CA:"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
-                self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn,
-                function(status, value){ // Master Certificate
-                  if (status) {
-                    self.storeCertificate(self.metaData.webinosType, self.config.cert.internal, "internal", function(status, value){
-                      if (status) {
-                        self.storeCrl(self.crl, function(status, value){
-                          return callback(status, value);
-                        });
-                      } else {
-                        return callback(status, value);
-                      }
-                    });
-                  } else {
-                    return callback(status, value);
-                  }
-                });
-              } else {
-                self.storeMetadata(self.metaData, function(status, value){
-                  if (status) {
-                    self.storeCertificate(self.metaData.webinosType, self.config.cert.internal, "internal", function(status, value){
-                      return callback(status, value);
-                    });
-                  }
-                });
-              }
-            }
-          });
+        if (webinosType === "Pzh" || webinosType === "PzhCA") {
+          cn = self.metaData.webinosType + ":"+ self.metaData.serverName  ;
         } else {
-          callback(false, "failed reading or storing configuration data");
+          cn = self.metaData.webinosType + ":"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
         }
+        self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
+          if(!status) {
+            return callback(status, value);
+          } else {
+            conn_key = value;
+            if (self.metaData.webinosType !== "Pzp") {
+              var cn = self.metaData.webinosType + "CA:"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
+              self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn,
+              function(status, value){ // Master Certificate
+                if (status) {
+                  self.storeAll(function(status, value) {
+                    if (status) {
+                      callback(true, conn_key);
+                    }  else {
+                      callack(false, value);
+                    }
+                  });
+                } else {
+                  return callback(status, value);
+                }
+              });
+            } else {
+              self.storeAll(function(status, value) {
+                if (status){
+                  callback(status, conn_key);
+                } else {
+                  callback(false, value);
+                }
+              });
+            }
+          }
+        });
       } catch (err) {
         return callback(false, err);
       }
     } else { //metaData
-      self.metaData = JSON.parse(value.toString("utf8"));
-      self.fetchCertificate(self.metaData.webinosType, "internal", function(status, value) {
+      self.metaData = value;
+      self.fetchCertificate("internal", function(status, value) {
         if (status) {  // certificate
-          self.cert.internal = JSON.parse(value.toString());
+          self.cert.internal = value;
           self.fetchCrl(function(status, value) {
             if(status ){ // crl
               self.crl = value;
-              self.trustedList(function(status,value) {
-                if (status) { // trusted list
-                  self.trustedList = JSON.parse(value.toString());
-                  self.fetchUserData(function(status, value) {
-                    if (status) { //user data
-                      self.userData = JSON.parse(value.toString());
-                      self.fetchUserPref(function(status,value)   {
-                        if (status) {
-                          self.userPref = JSON.parse(value.toString());
-                          return callback(status);
+              self.fetchUserData(function(status, value) {
+                if (status) { //user data
+                  self.userData = value;
+                  self.fetchUserPref(function(status,value)   {
+                    if (status) { // user pref
+                      self.userPref =value;
+                      self.fetchTrustedList(function(status,value) {
+                        if (status) { // trusted list
+                          self.trustedList = value;
+                          self.fetchKey(self.cert.internal.conn.key_id, function(status, value) {
+                            return callback(status, value);
+                          });
+                        } else {
+                          callback(status, value);
                         }
                       });
                     } else { // else userData
@@ -139,9 +147,32 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
   });
 };
 
-Config.prototype.storeCertificate = function (type, certificate, ext_int, callback) {
+Config.prototype.storeAll = function(callback) {
   var self = this;
-  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, type, self.metaData.webinosName, ".json");
+  self.storeCertificate(self.cert.internal, "internal", function(status, value){
+    if (status) {
+      self.storeCrl(self.crl, function(status, value){
+        if (status){
+          self.storeTrustedList(self.trustedList, function(status, value){
+            if (status) {
+              return callback(status);
+            } else {
+              return callback(status, value);
+            }
+          });
+        } else {
+          return callback(status, value);
+        }
+      });
+    } else {
+      return callback(status, value);
+    }
+  });
+};
+
+Config.prototype.storeCertificate = function (certificate, ext_int, callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(certificate, null, " "), function(err) {
     if(err) {
       return callback(false, err);
@@ -152,9 +183,9 @@ Config.prototype.storeCertificate = function (type, certificate, ext_int, callba
   });
 };
 
-Config.prototype.fetchCertificate = function(type, ext_int, callback) {
+Config.prototype.fetchCertificate = function(ext_int, callback) {
   var self = this;
-  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, type, self.metaData.webinosName, ".json");
+  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
   fs.readFile(path.resolve(filePath), function(err, data) {
     if (!err) {
       var certData = JSON.parse(data.toString());
@@ -176,14 +207,14 @@ Config.prototype.storeMetaData = function(data, callback) {
     }
   });
 };
-Config.prototype.fetchMetaData = function(webinosPath, webinosName, friendlyName, webinosType, sessionIdentity, callback) {
+Config.prototype.fetchMetaData = function(webinosRoot, webinosName, friendlyName, webinosType, sessionIdentity, callback) {
   var self = this;
-  var filePath = path.join(webinosPath, webinosName+".json");
+  var filePath = path.join(webinosRoot, webinosName+".json");
   fs.readFile(path.resolve(filePath), function(err, data) {
       if(err) {
         self.fetchConfigDetails(friendlyName, webinosType, sessionIdentity, function(status, value) {
           if (status) {
-            callback(err);
+            callback(true, err);// this is bit deceiving, we return  err as we want to trigger the certificate creation
           } else {
             callback(false, "webinos configuration failed to load, delete webinos directory and try again")
           }
@@ -197,7 +228,7 @@ Config.prototype.fetchMetaData = function(webinosPath, webinosName, friendlyName
 Config.prototype.storeCrl = function (data, callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"crl.pem");
-  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+  fs.writeFile(path.resolve(filePath), data, function(err) {
     if(err) {
       return callback(false, err);
     }
@@ -297,53 +328,53 @@ Config.prototype.createDirectories = function(callback) {
   var self = this, dirPath;
   try {
     // Main webinos directory
-    fs.readdir(self.metaData.webinosRoot, function(err) {
-      if ( err && err.code === "ENOENT" ) {
-        fs.mkdirSync(self.metaData.webinosRoot,"0700");
+    fs.readdir(wPath.webinosPath(), function(err) {
+      if (err && err.code === "ENOENT"){
+        fs.mkdirSync(wPath.webinosPath(),"0700");
       }
-      fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, self.metaData.webinosName)), function(err) {
-        if ( err && err.code=== "ENOENT" ) {
-          fs.mkdirSync( self.metaData.webinosRoot+"/"+self.metaData.webinosName,"0700");
-        }
-      dirPath = path.resolve(path.join(self.metaData.webinosRoot, self.metaData.webinosName));
-      fs.readdir ( path.resolve(path.join(dirPath, "policies")), function(err) {
-        if ( err && err.code=== "ENOENT" ) {
-          fs.mkdirSync( self.metaData.webinosRoot+"/policies","0700");
-        }
-        fs.readdir ( path.resolve(path.join(dirPath, "certificates")), function(err) {
+      setTimeout(function(){
+        fs.readdir ( path.resolve(path.join(wPath.webinosPath(),"logs")), function(err) { //logs
           if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( self.metaData.webinosRoot+"/certificates","0700");
+            fs.mkdirSync( wPath.webinosPath() +"/logs","0700");
           }
-          fs.readdir ( path.resolve(path.join(dirPath, "certificates", "external")), function(err) {
-            if ( err && err.code=== "ENOENT" ) {
-              fs.mkdirSync( self.metaData.webinosRoot+"/certificates/external","0700");
+          fs.readdir(self.metaData.webinosRoot, function(err) {
+            if ( err && err.code === "ENOENT" ) {
+              fs.mkdirSync(self.metaData.webinosRoot,"0700");
             }
-            fs.readdir ( path.resolve(path.join(dirPath,"certificates","internal")), function(err) {
+            fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "policies")), function(err) {
               if ( err && err.code=== "ENOENT" ) {
-                fs.mkdirSync( self.metaData.webinosRoot+"/certificates/internal","0700");
+                fs.mkdirSync( self.metaData.webinosRoot+"/policies","0700");
               }
-              fs.readdir ( path.resolve(path.join(dirPath,"userData")), function(err) {
+              fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates")), function(err) {
                 if ( err && err.code=== "ENOENT" ) {
-                  fs.mkdirSync( self.metaData.webinosRoot+"/userData","0700");
+                  fs.mkdirSync( self.metaData.webinosRoot+"/certificates","0700");
                 }
-                // logs
-                fs.readdir ( path.resolve(path.join(dirPath,"logs")), function(err) {
+                fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates", "external")), function(err) {
                   if ( err && err.code=== "ENOENT" ) {
-                    fs.mkdirSync( dirPath +"/logs","0700");
+                    fs.mkdirSync( self.metaData.webinosRoot+"/certificates/external","0700");
                   }
-                  // keys
-                  fs.readdir ( path.resolve(path.join(dirPath, "keys")), function(err) {
+                  fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"certificates","internal")), function(err) {
                     if ( err && err.code=== "ENOENT" ) {
-                      fs.mkdirSync( self.metaData.webinosRoot +"/keys","0700");
+                      fs.mkdirSync( self.metaData.webinosRoot+"/certificates/internal","0700");
                     }
-                    return callback(true);
+                    fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"userData")), function(err) {
+                      if ( err && err.code=== "ENOENT" ) {
+                        fs.mkdirSync( self.metaData.webinosRoot+"/userData","0700");
+                      }
+                      fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "keys")), function(err) {
+                        if ( err && err.code=== "ENOENT" ) {
+                          fs.mkdirSync( self.metaData.webinosRoot +"/keys","0700");
+                        }
+                        return callback(true);
+                      });
+                    });
                   });
                 });
               });
             });
           });
         });
-      });
+      }, 200);
     });
   } catch (err){
     return callback(false, err.code);
@@ -387,7 +418,7 @@ Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessio
     self.metaData.webinosType  = webinosType;
     self.metaData.serverName   = sessionIdentity;
     self.metaData.webinosName  = wId.fetchDeviceName(webinosType, friendlyName);
-    self.metaData.webinosRoot  = wPath.webinosPath();
+    self.metaData.webinosRoot  = wPath.webinosPath() + "/"+ self.metaData.webinosName;
     self.createDirectories(function(status){
       if (status){
         self.storeMetaData(self.metaData, function(status, value){

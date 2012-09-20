@@ -47,7 +47,7 @@ KeyStore.prototype.generateKey = function(type, id, callback) {
   } catch(err) {
     return callback(false, err);
   }
-}
+};
 
 KeyStore.prototype.storeKey = function (id, value, callback) {
   var self = this;
@@ -71,8 +71,7 @@ KeyStore.prototype.storeKey = function (id, value, callback) {
       }
     });
   }
-}
-
+};
 
 KeyStore.prototype.fetchKey = function (id, callback) {
   var self = this, key;

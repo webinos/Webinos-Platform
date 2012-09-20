@@ -177,29 +177,27 @@
       });
       // This is added here as we intend to get response back here
       function authStatus(msg) {
-        console.log(msg);
-
-        if (msg.payload.message === "true") {
-          var existPzh = confirm(" Enroll PZP at "+msg.payload.pzhid) ;
+        if (msg.payload.connected === "true") {
+          var existPzh = confirm(" Enroll PZP at "+msg.payload.pzhId) ;
           if (existPzh === true) {
-            var options = {"type": 'prop', "payload":
-                            {
-                              "status": "enrollPzp", "authCode": msg.payload.authCode, "pzhid": msg.payload.pzhid
+            var options = {"type": 'prop',
+                            "payload": {
+                              "status": "enrollPzp", message: msg.payload.authCode
                             }
                           };
-            webinos.session.message_send(options);
+            webinos.session.message_send(options, msg.payload.pzhId);
           } else {
             alert ("connection with PZH aborted");
           }
         } else {
-          var createPzh = confirm(" Create PZH - " + msg.payload.pzhid ) ;
+          var createPzh = confirm(" Create PZH - " + msg.payload.pzhId ) ;
           if (createPzh === true) {
-             var options ={"type": 'prop',  "payload":
-                            {
-                              "status": "registerPzh", "pzhid": msg.payload.pzhid
+             var options ={"type": 'prop',
+                           "payload": {
+                              "status": "registerPzh"
                             }
                           };
-             webinos.session.message_send(options);
+             webinos.session.message_send(options, msg.payload.pzhId);
           } else  {
             alert ("connection with PZH aborted");
 
@@ -207,7 +205,7 @@
         }
       };
 
-      webinos.session.addListener('auth-status', authStatus);
+      webinos.session.addListener('authStatus', authStatus);
       function error(msg) {
         alert(msg.error);
       }

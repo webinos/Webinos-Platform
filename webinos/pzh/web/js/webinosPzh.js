@@ -17,7 +17,7 @@ var webinosPZH = {
       if( typeof msg === 'string' && msg !== ""){
         msg = JSON.parse(msg);
 
-        if(msg.payload.status=== "authenticate-google") {
+        if(msg.payload.status=== "authenticate") {
           window.location.href=msg.payload.url;
         }
         switch(msg.cmd){
@@ -32,6 +32,9 @@ var webinosPZH = {
             break;
           case 'crashLog':
             if (typeof webinosPZH.callbacks.crashLog === 'function') webinosPZH.callbacks.crashLog(msg.payload);
+            break;
+          case 'infoLog':
+            if (typeof webinosPZH.callbacks.infoLog === 'function') webinosPZH.callbacks.infoLog(msg.payload);
             break;
           case 'pzhPzh':
             if (typeof webinosPZH.callbacks.pzhPzh === 'function') webinosPZH.callbacks.pzhPzh(msg.payload);
@@ -65,6 +68,7 @@ var webinosPZH = {
     userDetails: null,
     addPzpQR: null,
     crashLog: null,
+    infoLog:null,
     pzhPzh: null,
     listPzp: null,
     revokePzp: null
@@ -72,11 +76,11 @@ var webinosPZH = {
   commands: {
     authenticate: {
       google: function(){
-        webinosPZH.send({cmd:"authenticate-google"});
+        webinosPZH.send({payload:{status:"authenticate","message": {"provider"  :"google"}}});
       },
       yahoo: function(){
-        webinosPZH.send({cmd:"authenticate-yahoo"});
-      },
+        webinosPZH.send({payload:{status:"authenticate","message": {"provider"  :"yahoo"}}});
+      }
     },
     logout: function(){
       webinosPZH.send("logout");
@@ -90,34 +94,38 @@ var webinosPZH = {
     },
     listDevices: function(callback){
       webinosPZH.callbacks.listDevices = callback;
-       webinosPZH.send({cmd:"listDevices"});
+       webinosPZH.send({payload:{status:"listDevices"}});
     },
     addPzp: function(callback){
       webinosPZH.callbacks.addPzpQR = callback;
-      webinosPZH.send({cmd:"addPzp"});
+      webinosPZH.send({payload:{status:"addPzp"}});
     },
     connectPzh: function(connectPzhId, callback){
       webinosPZH.callbacks.pzhPzh = callback;
-      webinosPZH.send({cmd:"pzhPzh", "to":connectPzhId});
+      webinosPZH.send({payload:{status:"pzhPzh", "message":connectPzhId}});
     },
     listPzp: function(callback){
       webinosPZH.callbacks.listPzp = callback;
-      webinosPZH.send({cmd:"listPzp"});
+      webinosPZH.send({payload:{status:"listPzp"}});
     },
     revokePzp: function(id, callback) {
       webinosPZH.callbacks.revokePzp = callback;
-      webinosPZH.send({cmd:"revokePzp","pzpid":id});
+      webinosPZH.send({payload:{status:"revokePzp","pzpid":id}});
     },
     crashLog: function(callback){
       webinosPZH.callbacks.crashLog = callback;
-      webinosPZH.send({cmd:'crashLog'});
+      webinosPZH.send({payload:{status:'crashLog'}});
+    },
+    infoLog: function(callback){
+      webinosPZH.callbacks.infoLog = callback;
+      webinosPZH.send({payload:{status:'infoLog'}});
     },
     userDetails: function(callback){
       webinosPZH.callbacks.userDetails = callback;
-      webinosPZH.send({cmd:'userDetails'});
+      webinosPZH.send({payload:{status:'userDetails'}});
     },
     restartPzh: function(){
-      webinosPZH.send({cmd:'restartPzh'});
-    },
+      webinosPZH.send({payload:{status:'restartPzh'}});
+    }
   }
 };

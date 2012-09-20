@@ -17,9 +17,6 @@
 *******************************************************************************/
 var pzp   = require("./webinos/pzp/lib/pzp");
 
-var debug = require("./webinos/pzp/lib/session").common.debug;
-var log   = new debug("pzp_start");
-
 var fs = require("fs"),
     path = require("path");
 
@@ -31,8 +28,7 @@ function help() {
   console.log("Options:");
   console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
   console.log("--pzh-name=[name]        name of the pzh (default \"\")");
-  console.log("--pzp-name=[name]        name of the pzp (default WebinosPzp)");
-  console.log("--pzp-host=[name]        host of the pzp (default localhost)");
+  console.log("--pzp-name=[name]        name of the pzp (default \"\")");
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
   console.log("--preference=[option]    preference option (default hub, other option peer)");
   process.exit();
@@ -50,11 +46,8 @@ process.argv.forEach(function (arg) {
       case "--pzh-name":
         options.pzhName = parts[1];
         break;
-      case "--pzp-host":
-        options.pzpHost = parts[1];
-        break;
-      case "--pzp-name":
-        options.pzpName = parts[1];
+      case "--friendly-name":
+        options.friendlyName = parts[1];
         break;
       case "--preference":
         options.preference = parts[1];
@@ -111,8 +104,8 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (!config.pzpHost) {
       config.pzpHost="localhost";
     }
-    if (!config.pzpName) {
-      config.pzpName = "";
+    if (!config.friendlyName) {
+      config.friendlyName = "";
     }
     if (!config.code) {
       config.code = "DEBUG";
@@ -129,8 +122,8 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (options.pzpHost) {
       config.pzpHost = options.pzpHost;
     }
-    if (options.pzpName) {
-      config.pzpName = options.pzpName;
+    if (options.friendlyName) {
+      config.friendlyName = options.friendlyName;
     }
     if (options.code) {
       config.code = options.code;
@@ -138,15 +131,21 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (options.preference) {
       config.preference = options.preference;
     }
-    fileParams.pzpHost = config.pzpHost;
+    if (config.pzhName !== "") {
+      config.hostname = config.pzhHost+'/'+config.pzhName;
+    } else {
+      config.hostname = config.pzhHost;
+    }
     initializePzp(config, pzpModules);
 });
 
 function initializePzp(config, pzpModules) {
   pzpInstance = new pzp.session();
-  pzpInstance.initializePzp(config, pzpModules, function(result) {
-    if (result === "startedPZP"){
-      log.info("sucessfully started");
+  pzpInstance.initializePzp(config, pzpModules, function(status, result) {
+    if (status) {
+      console.log("successful started PZP" );
+    } else {
+      console.log("unsuccessful in starting PZP" + result);
     }
   });
 }
