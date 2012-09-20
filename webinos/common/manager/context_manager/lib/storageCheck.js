@@ -104,12 +104,13 @@ function mkdirSyncRecursive(folderPath, position) {
     }
 
     var directory = parts.slice(0, position + 1).join(pathSeperator) || pathSeperator;
-    var stats = fs.statSync(directory);
-
-    if (!stats.isDirectory() && !stats.isFile()) {
-        fs.mkdirSync(directory);
+    if (!nPathV.existsSync(directory)) {
+        try {
+            fs.mkdirSync(directory);
+        } catch (e) {
+            return false; // could be permission error
+        }
     }
-
     mkdirSyncRecursive(folderPath, position + 1);
 }
 
