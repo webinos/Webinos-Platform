@@ -226,8 +226,8 @@ Pzp.prototype.update = function(callback) {
     switch(os.type().toLowerCase()){
       case "linux":
         switch(os.platform().toLowerCase()){
-          case "android":
-            break;
+          /*case "android":
+            break; */
           case "linux":
             //Get zeroconf port number from configuration file
             var pzp_zeroConf = 4321;
@@ -390,17 +390,16 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
     });
 
     pzpInstance.on("error", function (err) {
-      log.error("error connecting server (" + err+")");
+      log.error("error connecting server (" + err+")");      
 
       if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
         if (self.mode === global.modes[3] ) { //hub_peer mode
           self.mode = global.modes[2]; // Go in peer mode
-                // state will be peer mode state
+          // state will be peer mode state
         } else if (self.mode === global.modes[1] ) { //hub mode
             self.state = global.states[0]; // not connected
             //Zeroconf - start
-            if (typeof mdns !== "undefined") {
-              switch(os.type().toLowerCase()){
+            switch(os.type().toLowerCase()){
               case "linux":
                 //get pzp TLS port number    
                 var pzp_tlsServer = 8040;
@@ -421,14 +420,14 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                   }
                 });
               
-		        switch(os.platform().toLowerCase()){
-			      case "android":
-			      {
-				    function onFound(service){
-                    console.log("Android-Mdns onFound callback: found service."); 
+                switch(os.platform().toLowerCase()){
+                  case "android":
+                  {
+                    function onFound(service){
+                      console.log("Android-Mdns onFound callback: found service."); 
 
-                    if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined"))
-                    {	 
+                      if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined"))
+                      {	
                         var msg ={};
                         msg.name = service.deviceNames[0];
                         msg.address = service.deviceAddresses[0];
@@ -436,18 +435,17 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
 
                         // Use case - Had connected to this PZP at least once 
                         if((typeof self.connectedPzp[msg.name] !== "undefined") && (self.connectedPzp[msg.name].state === global.states[0])) {
-                          console.log("trying to connect to PZP");
+                          console.log("trying to connect to known PZP");
 	
                           self.connectedPzp[msg.name].address = msg.address;
                           self.connectedPzp[msg.name].port = pzp_tlsServer;
                           var client = new pzpClient();
-                          //TODO: Android PZP peer connection  
-                          //client.connectOtherPZP(self, msg);
+                          client.connectOtherPZP(self, msg);
                         }
                         else if (typeof self.connectedPzp[msg.name] === "undefined") {
                           console.log("new peer");   
 	
-                          msg.port = global.pzpServerPort;
+                          msg.port = 8040;
                           self.connectedPzp[msg.name] = {};
                           console.log("found peer address:" + msg.address);										
                           self.connectedPzp[msg.name].address = msg.address;
@@ -456,8 +454,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                           self.mode  = global.modes[2];
                           self.state = global.states[1];
                           var client = new pzpClient();
-                          //TODO: Android PZP peer connection 
-                          //client.connectOtherPZP(self, msg);
+                          client.connectOtherPZP(self, msg);
                         }
                       } 
                     }	
@@ -475,7 +472,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                         console.log("startDiscovery - END");
                       }
                       catch(e) {
-                        console.log("startHRM - error: "+e.message);
+                        console.log("startDiscovery - error: "+e.message);
                       }
                     }
                     catch(e){
@@ -484,56 +481,57 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                   }
                     break;
                   case "linux":
-                    var browser = mdns.createBrowser(mdns.tcp('pzp'));
-                    browser.on('error', function(err) {
-                    log.error("browser error: (" + err+")");
-                    });
-                    browser.start();
+                    if (typeof mdns !== "undefined") {
+                      var browser = mdns.createBrowser(mdns.tcp('pzp'));
+                      browser.on('error', function(err) {
+                        log.error("browser error: (" + err+")");
+                      });
+                      browser.start();
 
-                    var msg ={};
-                    browser.on('serviceUp', function(service) {
-                    log.info("service up");
-                    msg.name = getelement(service, 'name');
-                    msg.port = getelement(service, 'port');
-                    msg.address = getelement(service, 'addresses');
+                      var msg ={};
+                      browser.on('serviceUp', function(service) {
+                        log.info("service up");
+                        msg.name = getelement(service, 'name');
+                        msg.port = getelement(service, 'port');
+                        msg.address = getelement(service, 'addresses');
 
-                    log.info("Check ZeroConf discovery list");
-                    var hostname = os.hostname();
-                    if(msg.name !== os.hostname()) {
-                      //Update connection - msg.name is machine name
-                      msg.name = self.config.pzhId + "/" + msg.name + "_Pzp";
+                        log.info("Check ZeroConf discovery list");
+                        var hostname = os.hostname();
+                        if(msg.name !== os.hostname()) {
+                          //Update connection - msg.name is machine name
+                          msg.name = self.config.pzhId + "/" + msg.name + "_Pzp";
 
-                      // Use case - Had connected to this PZP at least once
-                    if((typeof self.connectedPzp[msg.name] !== "undefined") && self.connectedPzp[msg.name].state === global.states[0] ) {
-                      self.connectedPzp[msg.name].address = msg.address;
-                      self.connectedPzp[msg.name].port = pzp_tlsServer;
-                      var client = new pzpClient();
-                      client.connectOtherPZP(self, msg);
+                          // Use case - Had connected to this PZP at least once
+                          if((typeof self.connectedPzp[msg.name] !== "undefined") && self.connectedPzp[msg.name].state === global.states[0] ) {
+                            self.connectedPzp[msg.name].address = msg.address;
+                            self.connectedPzp[msg.name].port = pzp_tlsServer;
+                            var client = new pzpClient();
+                            client.connectOtherPZP(self, msg);
+                          }
+                          else if (typeof self.connectedPzp[msg.name] === "undefined") {
+                            log.info("new peer");
+
+                            msg.port = 8040;
+                            self.connectedPzp[msg.name] = {};
+                            self.connectedPzp[msg.name].address = msg.address;
+                            self.connectedPzp[msg.name].port    = pzp_tlsServer;
+                            self.connectedPzp[msg.name].state   = global.states[1];
+                            self.mode  = global.modes[2];
+                            self.state = global.states[1];
+                            var client = new pzpClient();
+                            client.connectOtherPZP(self, msg);
+                          }
+                        }
+                      });
                     }
-                    else if (typeof self.connectedPzp[msg.name] === "undefined") {
-                      log.info("new peer");
-
-                      msg.port = 8040;
-                      self.connectedPzp[msg.name] = {};
-                      self.connectedPzp[msg.name].address = msg.address;
-                      self.connectedPzp[msg.name].port    = pzp_tlsServer;
-                      self.connectedPzp[msg.name].state   = global.states[1];
-                      self.mode  = global.modes[2];
-                      self.state = global.states[1];
-                      var client = new pzpClient();
-                      client.connectOtherPZP(self, msg);
-                    }
-                  }
-                });
-                break;
-              }
+                  break;
+                }
               break;
             case "darwin":
               break;
             case "windows_nt":
               break;
             }
-          }
             //end - zeroconf
         }
       } else {
