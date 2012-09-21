@@ -220,18 +220,17 @@ var Pzh = function () {
   }
 
   function handlePzhAuthorization(data, conn) {
-    var self = this;
     var  pzhId, otherPzh = [], msg, localServices;
     pzhId = data[1];
 
     self.log.info("pzh " + pzhId+" connected");
-    self.connectedPzh[pzhId] = {"socket": conn,  "address": conn.socket.remoteAddress};
+    connectedPzh[pzhId] = {"socket": conn,  "address": conn.socket.remoteAddress};
     // Register PZP with message handler
-    msg = self.messageHandler.registerSender(self.sessionId, pzhId);
-    self.sendMessage(msg, pzhId);
+    msg = messageHandler.registerSender(self.sessionId, pzhId);
+    sendMessage(msg, pzhId);
 
-    var services = self.discovery.getAllServices();
-    msg = self.prepMsg(self.sessionId, pzhId, "registerServices", services);
+    var services = discovery.getAllServices();
+    msg = prepMsg(sessionId, pzhId, "registerServices", services);
     sendMessage(msg, pzhId);
 
     self.log.info("sent " + (services && services.length) || 0 + " webinos services to " + pzhId);
@@ -287,14 +286,15 @@ var Pzh = function () {
   }
 
 
-  function connectOtherPzh() {
+  this.connectOtherPzh = function() {
     var key, options;
     config.fetchKey(config.cert.internal.conn.key_id, function (status, value) {
       if(status){
         for (key = 0; key <  config.trustedList.pzh.length; key = key + 1) {
           if (!connectedPzh.hasOwnProperty(config.trustedList.pzh[key])) {
             options = setOptions(value);
-            self.connectOtherPZH(config.trustedList.pzh[key], options, config.userPref.ports.provider, function(status, errorDetails) {
+            self.connectOtherPZH(config.metaData.serverName, config.trustedList.pzh[key], options, config.userPref.ports.provider,
+            function(status, errorDetails) {
               if (!status) {
                 self.log.error("connecting to pzh " + config.trustedList.pzh[key] + " failed - due to" + errorDetails);
               } else {
@@ -305,7 +305,7 @@ var Pzh = function () {
         }
       }
     });
-  }
+  };
 
   function setOptions(value) {
     var caList = [], crlList = [], key;
@@ -316,7 +316,7 @@ var Pzh = function () {
     for ( key in config.cert.external) {
       if(config.cert.external.hasOwnProperty(key)) {
         caList.push(config.cert.external[key].cert);
-        //crlList.push(config.cert.external[key].crl);
+        crlList.push(config.cert.external[key].crl);
       }
     }
     // Certificate parameters that will be added in SNI context of farm
@@ -545,7 +545,6 @@ var Pzh = function () {
         self.log.addId(sessionId);
         initializeRPC();
         setMessageHandler();
-        //connectOtherPzh();
         options = setOptions(value);
         if(typeof user !== "undefined" && user !== "") {
           storeData(user);

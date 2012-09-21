@@ -155,9 +155,11 @@ var Provider = function(input_hostname, input_friendlyName) {
       pzhs[key] = new pzh_session();
       pzhs[key].addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
         if (status) {
-          log.info(JSON.stringify(value));
+          console.log(pzhId);
+          console.log(value);
           server.addContext(pzhId, value);
           log.info("started pzh " + pzhId);
+          pzhs[key].connectOtherPzh();
         } else {
           log.error("failed starting pzh " + value);
         }

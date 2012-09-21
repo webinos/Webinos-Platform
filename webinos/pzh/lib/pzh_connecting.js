@@ -25,6 +25,9 @@ var https     = require("https");
 var tls       = require("tls");
 var crypto    = require("crypto");
 
+var webinos        = require("webinos")(__dirname);
+var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
+
 var PzhConnecting = function() {
   var self = this;
   function sendFoundService(validMsgObj){
@@ -38,7 +41,7 @@ var PzhConnecting = function() {
     self.log.info("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
   }
 
-  function processMsg (self, buffer){
+  function processMsg (buffer){
     session.common.readJson(self, buffer, function(obj) {
       session.common.processedMsg(self, obj, function(validMsgObj) {
         self.log.info("received message from peer pzh " + JSON.stringify(validMsgObj));
@@ -100,7 +103,7 @@ var PzhConnecting = function() {
           self.addExternalCert(parse.to, parse, null,function(serverName, options){
             refreshCert(serverName, options);
             //callback({to: parse.to, cmd: 'pzhPzh', payload:true});
-            self.connectOtherPZH(to, options, callback);
+            self.connectOtherPZH(parse.to, to, options, callback);
           });
 
         } else if (parse.payload.status === "error") {
@@ -116,12 +119,23 @@ var PzhConnecting = function() {
     req.end();
   };
 
-  this.connectOtherPZH = function(to, options, port, callback) {
+  this.connectOtherPZH = function(from, to, options, port,  callback) {
     "use strict";
     try {
         var connPzh, serverName = to.split("/")[0];
         options.servername = to;
-        connPzh = tls.connect(port, serverName, options, function() {
+        var localOptions = {
+          key: options.key,
+          cert: options.cert,
+          ca: options.ca,
+          crl: options.crl,
+          servername: to
+        };
+
+      console.log(to + " ====  " + from);
+      console.log(localOptions);
+
+        connPzh = tls.connect(port, serverName, localOptions, function() {
           self.log.info("connection status : "+connPzh.authorized);
           if(connPzh.authorized) {
             var connPzhId, msg;
@@ -138,14 +152,14 @@ var PzhConnecting = function() {
               if(config.cert.external.hasOwnProperty(to)) {
                 register_rpc_messaging(connPzhId, connPzh);
                 self.log.info("sent msg to register local services with pzh");
-                callback({cmd:'pzhPzh', to: config.metaData.serverName, payload:connPzh.authorized});
+                callback({cmd:'pzhPzh', to: from, payload:connPzh.authorized});
               }
             } catch (err1) {
               self.log.error("could not add pzh in the list " + err1);
               return;
             }
           } else {
-            callback({cmd:'pzhPzh', to: config.metaData.serverName, payload:connPzh.authorized});
+            callback({cmd:'pzhPzh', to: from, payload:connPzh.authorized});
             self.log.info("connection authorization Failed");
           }
 
