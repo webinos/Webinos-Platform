@@ -1,0 +1,12 @@
+[{
+	"name": "Megastore",
+	"description": "Fraunhofer FOKUS Megastore",
+	"location": "http://webinos.fokus.fraunhofer.de/store/",
+	"logo": "http://www.fokus.fraunhofer.de/en/fame/_images/_logos/megastore_logo.png"
+},
+{
+	"name": "UbiApps",
+	"description": "UbiApps demonstration webinos app store",
+	"location": "http://webinos.two268.com/",
+	"logo": "http://ubiapps.com/files/2012/05/ubiapps-120.png"
+}]
