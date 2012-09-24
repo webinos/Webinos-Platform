@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <groupId>org.webinos</groupId>
@@ -49,14 +49,26 @@
             </goals>
           </execution>
           -->
-          <!-- Activation for jasmine-node-testing. 
+          <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag.
           Runs jasmine node tests specified in .spec.js files in the jasmine test folder.-->
+          <!--
           <execution>
             <id>jasmine-node-testing</id>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+          -->
+          <!-- Activation for vows-testing. Activate by uncommenting the execution tag.
+          Runs vows node tests specified in test.spec.js files in the vows test folder.-->
+          <!--
+          <execution>
+            <id>vows-testing</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          -->
           <!-- Activation for jsdoc. Runs creating js documentation. -->
           <!-- Commented out as empty jsdoc comments crash build
           <execution>
