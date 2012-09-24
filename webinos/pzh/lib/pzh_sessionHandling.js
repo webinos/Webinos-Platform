@@ -473,7 +473,7 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
           }
         }
         // Certificate parameters that will be added in SNI context of farm
-        var options = {
+        self.options = {
           key  : conn_key,
           cert : config.own.cert,
           ca   : caList,
@@ -491,7 +491,14 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
         self.rpcHandler.setSessionId(self.sessionId);
         self.setMessageHandler();
         var pzh_connecting = require('./pzh_connecting.js');
-        for (var key in self.config.otherCert) {
+        
+
+        if (typeof farm.server === "undefined" || farm.server === null) {
+          self.log.error("farm is not running, please run webinos_pzh");
+        } else {
+          // This adds SNI context to existing running PZH server
+          farm.server.addContext(uri, self.options);
+		  for (var key in self.config.otherCert) {
           if (!self.connectedPzh[key]) {
             var pzhConnect = new pzh_connecting(self);
             pzhConnect.connectOtherPZH(key, function(status) {
@@ -499,12 +506,6 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
             });
           }
         }
-
-        if (typeof farm.server === "undefined" || farm.server === null) {
-          self.log.error("farm is not running, please run webinos_pzh");
-        } else {
-          // This adds SNI context to existing running PZH server
-          farm.server.addContext(uri, options);
         }
 
         callback(true, self);
