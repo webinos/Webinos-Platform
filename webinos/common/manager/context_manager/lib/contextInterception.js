@@ -110,7 +110,12 @@ else
     }
 
 //  Require the database class
-    var databasehelper = require('JSORMDB');
+      try {
+          var databasehelper = require('jsormdb');
+      }
+      catch (err) {
+          console.log('[ERROR] jsormdb node module is missing.', 'yellow+black_bg');
+      }
 
 //  Initialize helper classes
     var dbpath = path.resolve(commonPaths.storage + '/pzp/log.json');

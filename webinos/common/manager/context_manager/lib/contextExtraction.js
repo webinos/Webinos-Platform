@@ -22,7 +22,12 @@ if (typeof webinos === 'undefined') {
 if (typeof webinos.context === 'undefined')
   webinos.context = {};
 
-var databasehelper = require('JSORMDB');
+try {
+   var databasehelper = require('jsormdb');
+}
+catch (err) {
+    console.log('[ERROR] jsormdb node module is missing.', 'yellow+black_bg');
+}
 
 //Initialize helper classes
 
