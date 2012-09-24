@@ -37,12 +37,13 @@ var storeInfo = [];
 
 function receiveCertificate(instance, payload) {
   // TODO: Do not just add perform some security check
-  if (typeof instance !== "undefined" && typeof payload !== "undefined" &&
+  
+  if (instance && payload &&
     payload.name && payload.cert && payload.crl && instance.options.ca &&
-    instance.options.crl && instance.config && instance.config.otherCert[payload.name]) {
+    instance.options.crl) {
     instance.config.otherCert[payload.name] = { cert: payload.cert, crl: payload.crl};
-    instance.options.ca.push(instance.config.otherCert[payload.name].cert);
-    instance.options.crl.push(instance.config.otherCert[payload.name].crl);
+    instance.options.ca.push(payload.cert);
+    instance.options.crl.push(payload.crl);
     farm.server._contexts.some(function(elem) {
       if (instance.config.serverName.match(elem[0]) !== null) {
         elem[1] =  crypto.createCredentials(instance.options).context;
@@ -67,6 +68,7 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
       var server = https.createServer(webServer, function(req, res){
         req.on('data', function(data){
           var query = JSON.parse(data.toString());
+		  console.log(query);
           switch(query.cmd) {
             case "login":
               var filename = path.join(__dirname, "index.html");
@@ -288,7 +290,6 @@ pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
           });
         }
       });
-
 
       server.listen(session.configuration.port.farm_webServerPort, hostname, function() {
         log.info('listening on '+ session.configuration.port.farm_webServerPort);
