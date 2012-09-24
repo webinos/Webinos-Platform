@@ -67,7 +67,7 @@ public class WidgetDownloadActivity extends Activity {
 				String downloadUri = params[0];
 				String downloadPath = ModuleUtils.getResourceUriHash(downloadUri);
 				try {
-					return ModuleUtils.getResource(new URI(downloadUri), downloadPath);
+					return ModuleUtils.downloadResource(new URI(downloadUri), downloadPath);
 				} catch(IOException e) {
 					Log.v(TAG, "WidgetDownloadActivity: aborting (unable to download resource); exception: " + e + "; resource = " + downloadUri);
 				} catch(URISyntaxException e) {
