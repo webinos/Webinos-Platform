@@ -22,9 +22,10 @@
 /**
  * Webinos Geolocation service constructor  (server side).
  * @constructor
+ * @alias GeolocationModule
  * @param rpcHandler A handler for functions that use RPC to deliver their result.
  */
-function GeolocationModule(rpcHandler, params) {
+var GeolocationModule = function(rpcHandler, params) {
     var implFile;
     var car = null;
     var conncector = null;
@@ -93,7 +94,7 @@ function GeolocationModule(rpcHandler, params) {
 		implModule.clearWatch(params, successCB, errorCB, objectRef);
 	};
 	
-}
+};
 
 GeolocationModule.prototype = new RPCWebinosService;
 exports.Service = GeolocationModule;
