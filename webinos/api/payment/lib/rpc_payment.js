@@ -25,6 +25,8 @@ var basket = null;
 
 /**
  * Webinos Service constructor.
+ * @constructor
+ * @alias PaymentModule
  * @param rpcHandler A handler for functions that use RPC to deliver their result.  
  */
 var PaymentModule = function(rpcHandler, params) {
@@ -36,12 +38,20 @@ var PaymentModule = function(rpcHandler, params) {
                 displayName:'payment',
                 description:'A Webinos Payment API.'
         });
-}
+};
 
 
 
 PaymentModule.prototype = new RPCWebinosService;
 
+/**
+ * Creates a shopping basket.
+ * @param params Array of strings consisting of serviceProviderID, customerID,
+ *     customerID - in that order.
+ * @param successCallback Issued when the shopping basket is created.
+ * @param errorCallback Issued if an error occurs during the creation of the
+ *     shopping basket.
+ */
 PaymentModule.prototype.createShoppingBasket = function ( params, successCallback,  errorCallback){
 
   console.log("createShoppingBasket called on rpc receiver");
@@ -57,8 +67,15 @@ PaymentModule.prototype.createShoppingBasket = function ( params, successCallbac
        params[0], params[1], params[2]
   );
 
-}
+};
 
+/**
+ * Adds an item to a shopping basket.
+ * @param params Array of objects. At 4th index is a ShoppingBasket, at 5th
+ *     is the ShoppingItem.
+ * @param successCallback Issued when the adding of the item to the shopping basket is correctly finished.
+ * @param errorCallback Issued if an error occurs during adding the amount.
+ */
 PaymentModule.prototype.addItem = function ( params, successCallback,  errorCallback){
 
           console.log("addItem called on rpc receiver");
@@ -77,8 +94,14 @@ PaymentModule.prototype.addItem = function ( params, successCallback,  errorCall
          },
          params[4]
        );
-}
+};
 
+/**
+ * Updates the shopping basket.
+ * @param params Array of objects. At 4th index is a ShoppingBasket to update.
+ * @param successCallback Issued when the update is performed.
+ * @param errorCallback Issued if an error occurs during update.
+ */
 PaymentModule.prototype.update = function ( params, successCallback,  errorCallback){
 
           console.log("update (ShoppingBasket) called on rpc receiver");
@@ -96,8 +119,14 @@ PaymentModule.prototype.update = function ( params, successCallback,  errorCallb
             errorCallback(error);
          }
        );
-}    
+};
 
+/**
+ * Performs the checkout of the shopping basket.
+ * @param params Array of objects. At 4th index is a ShoppingBasket to checkout.
+ * @param successCallback Issued when the checkout is performed and payment is made.
+ * @param errorCallback Issued if an error occurs during adding the amount.
+ */
 PaymentModule.prototype.checkout = function ( params, successCallback,  errorCallback){
 
           console.log("checkout (ShoppingBasket) called on rpc receiver");
@@ -115,8 +144,14 @@ PaymentModule.prototype.checkout = function ( params, successCallback,  errorCal
             errorCallback(error);
          }
        );
-}    
+};
 
+/**
+ * Releases a shopping basket.
+ * @param params Array of objects. At 4th index is a ShoppingBasket to release.
+ * @param successCallback Issued when releasing finished successfully.
+ * @param errorCallback Issued if an error occurs during releasing.
+ */
 PaymentModule.prototype.release = function ( params, successCallback,  errorCallback){
 
           console.log("release (ShoppingBasket) called on rpc receiver");
@@ -132,7 +167,7 @@ PaymentModule.prototype.release = function ( params, successCallback,  errorCall
           // release the basket
           basket.release();
           successCallback(basket);
-}    
+};
 
 
 //export our object
