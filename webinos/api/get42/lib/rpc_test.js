@@ -22,6 +22,7 @@
  * 
  * This is an example, useful as a guide or writing a new service implementation.
  * @constructor
+ * @alias TestModule
  * @param rpcHandler A handler for functions that use RPC to deliver their result.
  * @param params Parameters to initialize the service.
  */

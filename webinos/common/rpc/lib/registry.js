@@ -17,6 +17,12 @@
  ******************************************************************************/
 
 (function () {
+	/**
+	 * Registry for service objects. Used by RPC.
+	 * @constructor
+	 * @alias Registry
+	 * @param parent PZH (optional).
+	 */
 	var Registry = function(parent) {
 
 		this.parent = parent;
@@ -154,14 +160,19 @@
 	};
 
 	/**
+	 * Get all registered objects.
 	 * 
+	 * Objects are returned in a key-value map whith service type as key and
+	 * value being an array of objects for that service type.
 	 */
 	Registry.prototype.getRegisteredObjectsMap = function() {
 		return this.objects;
 	}
 
 	/**
-	 * 
+	 * Get service matching type and id.
+	 * @param serviceTyp Service type as string.
+	 * @param serviceId Service id as string.
 	 */
 	Registry.prototype.getServiceWithTypeAndId = function(serviceTyp, serviceId) {
 		var receiverObjs = this.objects[serviceTyp];

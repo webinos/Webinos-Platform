@@ -33,9 +33,10 @@
 	/**
 	 * Webinos ServiceDiscovery service constructor (server side).
 	 * @constructor
+	 * @alias Discovery
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
 	 */
-	function Discovery(rpcHandler, params) {
+	var Discovery = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -276,7 +277,7 @@
 				}
 			}
 		};
-	}
+	};
 
 	Discovery.prototype = new RPCWebinosService;
 
