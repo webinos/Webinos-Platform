@@ -22,9 +22,9 @@
 var rpcHandler = null;
 var vs;
 
-function getCurrentPosition (params, successCB, errorCB, objectRef){
+function getCurrentPosition (params, successCB, errorCB){
 	
-	returnPosition(vs.get('geolocation'), successCB, errorCB, objectRef);
+	returnPosition(vs.get('geolocation'), successCB, errorCB);
 	return;
 }
 
@@ -36,7 +36,7 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 	console.log(listeners.length + " listener(s) watching");
 }
 
-function returnPosition(position, successCB, errorCB, objectRef){
+function returnPosition(position, successCB, errorCB){
 	if(position === undefined){
 		errorCB('Position could not be retrieved');		
 	}else{
@@ -53,7 +53,7 @@ function vehicleBusHandler(position){
 	}
 }
 
-function clearWatch(params, successCB, errorCB, objectRef) {
+function clearWatch(params, successCB, errorCB) {
 	var watchIdKey = params[0];
 
 	for(var i = 0; i < listeners.length; i++){
