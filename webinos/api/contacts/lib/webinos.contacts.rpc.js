@@ -48,7 +48,7 @@
  * valid address book file is aready open TODO this method has to be removed
  * when user profile will handle this
  */
-Contacts.prototype.authenticate = function (params, successCB, errorCB, objectRef)
+Contacts.prototype.authenticate = function (params, successCB, errorCB)
 {
   "use strict";
   contacts_module.authenticate(params,successCB);
@@ -59,7 +59,7 @@ Contacts.prototype.authenticate = function (params, successCB, errorCB, objectRe
  * valid address book file is aready open TODO this method has to be removed
  * when user profile will handle this
  */
-Contacts.prototype.isAlreadyAuthenticated = function (params, successCB, errorCB, objectRef)
+Contacts.prototype.isAlreadyAuthenticated = function (params, successCB, errorCB)
 {
   "use strict";
   contacts_module.isAlreadyAuthenticated(params,successCB);
@@ -69,7 +69,7 @@ Contacts.prototype.isAlreadyAuthenticated = function (params, successCB, errorCB
  * returns a list of all contact TODO remove once debugging and testing are
  * successfull
  */
-Contacts.prototype.getAllContacts = function (params, successCB, errorCB, objectRef)
+Contacts.prototype.getAllContacts = function (params, successCB, errorCB)
 {
   "use strict";
   contacts_module.getAllContacts(params,successCB);
@@ -78,11 +78,11 @@ Contacts.prototype.getAllContacts = function (params, successCB, errorCB, object
 /**
  * TODO full W3C Spec
  */
-Contacts.prototype.find = function (params, successCB, errorCB, objectRef)
+Contacts.prototype.find = function (params, successCB, errorCB)
 {
   "use strict";
   //TODO should type be handled by this module?
-  contacts_module.find(params[0]['type'],params[0]['fields'],successCB,errorCB,objectRef);
+  contacts_module.find(params[0]['type'],params[0]['fields'],successCB,errorCB);
   //contacts_module.findContacts(params,successCB);
   //contacts_module.find(params,successCB); //TODO use contacts_module.find() directly once switching remote/local contacts happens in a different way
 }

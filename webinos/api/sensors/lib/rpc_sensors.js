@@ -68,7 +68,7 @@ SensorModule.prototype = new RPCWebinosService;
  * @param successCB
  * @param errorCB
  */
-SensorModule.prototype.configureSensor = function (params, successCB, errorCB, objectRef){
+SensorModule.prototype.configureSensor = function (params, successCB, errorCB){
 	console.log("configuring temperature sensor");
 	
 	successCB();
@@ -80,7 +80,7 @@ SensorModule.prototype.configureSensor = function (params, successCB, errorCB, o
  * @param successCB Issued when sensor configuration succeeded.
  * @param errorCB Issued if sensor configuration fails.
  */
-SensorModule.prototype.getStaticData = function (params, successCB, errorCB, objectRef){
+SensorModule.prototype.getStaticData = function (params, successCB, errorCB){
 	var tmp = {};
 	tmp.maximumRange = 100;
 	tmp.minDelay = 10;

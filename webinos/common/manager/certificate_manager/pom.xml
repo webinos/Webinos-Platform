@@ -46,13 +46,15 @@
             </goals>
           </execution>
           <!-- Activation for jasmine-node-testing. 
-          Runs jasmine node tests specified in .spec.js files in the jasmine test folder -->          
+          Runs jasmine node tests specified in .spec.js files in the jasmine test folder -->
+          <!--
           <execution>
             <id>jasmine-node-testing</id>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+          -->
           <!-- Activation for jsdoc.  Activate by uncommenting the execution tag.
           Runs creating js documentation. -->
           <!--

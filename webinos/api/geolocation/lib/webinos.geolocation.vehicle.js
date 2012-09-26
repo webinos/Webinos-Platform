@@ -24,7 +24,7 @@ var rpcHandler = null;
 // car info
 var car = null;
 
-function getCurrentPosition (params, successCB, errorCB, objectRef){
+function getCurrentPosition (params, successCB, errorCB){
 	var position = new Object();
 	var d = new Date();
 	var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
@@ -47,7 +47,7 @@ function getCurrentPosition (params, successCB, errorCB, objectRef){
 	position.coords.heading = car.heading.get();
 	position.coords.speed = Math.floor(((car.speed.get() / 10) / 3600) * 1000 *1000) / 1000 ; // meters per second 
 
-	returnPosition(position, successCB, errorCB, objectRef);
+	returnPosition(position, successCB, errorCB);
 	return;
 }
 
@@ -60,7 +60,7 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 	console.log(listeners.length + " listener(s) watching");
 }
 
-function returnPosition(position, successCB, errorCB, objectRef){
+function returnPosition(position, successCB, errorCB){
 	if(position === undefined){
 		errorCB('Position could not be retrieved');		
 	}else{
@@ -97,7 +97,7 @@ function vehicleBusHandler(data){
 	}
 }
 
-function clearWatch(params, successCB, errorCB, objectRef) {
+function clearWatch(params, successCB, errorCB) {
 	var watchIdKey = params[0];
 
 	for(var i = 0; i < listeners.length; i++){
