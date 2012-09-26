@@ -34,9 +34,8 @@ var counter = 0;
  * @param params Optional options object for enabling higher accuracy.
  * @param successCB Success callback.
  * @param errorCB Error callback.
- * @param objectRef RPC object reference.
  */
-function getCurrentPosition (params, successCB, errorCB, objectRef){
+function getCurrentPosition (params, successCB, errorCB){
 	var error = {};
 	var geoip = null;
 	var http = require('http');
@@ -110,7 +109,7 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 		getCurrentPosition(params, function(e) {
 			var rpc = rpcHandler.createRPC(objectRef, 'onEvent', e);
 			rpcHandler.executeRPC(rpc);
-		}, errorCB, objectRef);
+		}, errorCB);
 	}
 	
 	// initial position
@@ -118,14 +117,14 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 
 	var watchId = setInterval(function() {getPos(); }, tint);
 	
-	watchIdTable[objectRef] = watchId;
+	watchIdTable[objectRef.rpcId] = watchId;
 }
 
 /**
  * Clear continuously position event for given listener id.
  * @param params Array, first item being the listener id.
  */
-function clearWatch (params, successCB, errorCB, objectRef) {
+function clearWatch (params, successCB, errorCB) {
 	var watchIdKey = params[0];
 	var watchId = watchIdTable[watchIdKey];
 	delete watchIdTable[watchIdKey];

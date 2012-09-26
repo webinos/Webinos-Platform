@@ -67,9 +67,8 @@ TestModule.prototype = new RPCWebinosService;
  * @param params Array with parameters.
  * @param successCB Success callback.
  * @param errorCB Error callback.
- * @param objectRef RPC object reference.
  */
-TestModule.prototype.get42 = function(params, successCB, errorCB, objectRef){
+TestModule.prototype.get42 = function(params, successCB, errorCB){
 	console.log("get42 was invoked");
 	successCB(this.blaa + " " + params[0]);
 }

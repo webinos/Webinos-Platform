@@ -77,7 +77,7 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
 	webinos.rpcHandler.registerCallbackObject(rpc);
 	webinos.rpcHandler.executeRPC(rpc);
 
-	return parseInt(rpc.fromObjectRef, 16);
+	return parseInt(rpc.id, 16);
 };
 
 /**

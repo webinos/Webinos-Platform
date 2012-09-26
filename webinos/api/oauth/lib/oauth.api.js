@@ -18,7 +18,7 @@ var oAuthModule = function(rpcHandler, params) {
 
 oAuthModule.prototype = new RPCWebinosService;
 
-oAuthModule.prototype.init = function(params, successCB, errorCB, objectRef){
+oAuthModule.prototype.init = function(params, successCB, errorCB){
 	var requestTokenUrl = params[0]; 
 	var consumer_key = params[1]; 
 	var consumer_secret= params[2]; 
@@ -40,7 +40,7 @@ oAuthModule.prototype.init = function(params, successCB, errorCB, objectRef){
                  // "1.0A", "http://127.0.0.1:8888/", "HMAC-SHA1"
 }
 
-oAuthModule.prototype.get = function(params, successCB, errorCB, objectRef){
+oAuthModule.prototype.get = function(params, successCB, errorCB){
 	console.log("oAuth get was invoked");
 	
 	var requestUrl = params[0];
@@ -56,7 +56,7 @@ oAuthModule.prototype.get = function(params, successCB, errorCB, objectRef){
 	});
 }
 
-oAuthModule.prototype.post = function(params, successCB, errorCB, objectRef){
+oAuthModule.prototype.post = function(params, successCB, errorCB){
 	console.log("oAuth post was invoked");
 	
 	var requestUrl = params[0];
