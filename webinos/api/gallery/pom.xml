@@ -49,12 +49,14 @@
           -->
           <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag. 
           Only needed when *.spec.js files in the jasmine test folder need to run.-->
+          <!--
           <execution>
             <id>jasmine-node-testing</id>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+          -->
           <!-- Activation for jsdoc. Runs creating js documentation. 
           Activate by uncommenting the execution tag. -->
           <!--
