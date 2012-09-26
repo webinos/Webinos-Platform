@@ -120,16 +120,14 @@
 		
 		
 		var rpc = webinos.rpcHandler.createRPC(this, "addWebinosEventListener",  req);
-		rpc.fromObjectRef =  Math.floor(Math.random()*1001);
 		
-		var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-		callback.handleEvent = function (params,scb,ecb) {
+		rpc.handleEvent = function (params,scb,ecb) {
 			console.log("Received a new WebinosEvent");
 			listener(params.webinosevent);
 			scb();
 		};
 		
-		webinos.rpcHandler.registerCallbackObject(callback);
+		webinos.rpcHandler.registerCallbackObject(rpc);
 		
 		
 		
@@ -231,34 +229,30 @@
 		
 			console.log("Registering delivery callback");
 			
-			rpc.fromObjectRef =  Math.floor(Math.random()*1001);
-		
-			var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-		
-			callback.onSending = function (params) {
+			rpc.onSending = function (params) {
 			//params.event, params.recipient
 				
 				if (typeof callbacks.onSending !== "undefined") {callbacks.onSending(params.event, params.recipient);}
 			};
-			callback.onCaching = function (params) {
+			rpc.onCaching = function (params) {
 				//params.event
 				if (typeof callbacks.onCaching !== "undefined") {callbacks.onCaching(params.event);}
 			};
-			callback.onDelivery = function (params) {
+			rpc.onDelivery = function (params) {
 			//params.event, params.recipient
 				if (typeof callbacks.onDelivery !== "undefined") {callbacks.onDelivery(params.event, params.recipient);}
 			};
-			callback.onTimeout = function (params) {
+			rpc.onTimeout = function (params) {
 			//params.event, params.recipient
 				if (typeof callbacks.onTimeout !== "undefined") {callbacks.onTimeout(params.event, params.recipient);}
 			};
-			callback.onError = function (params) {
+			rpc.onError = function (params) {
 			//params.event, params.recipient, params.error
 				if (typeof callbacks.onError !== "undefined") {callbacks.onError(params.event, params.recipient, params.error);}
 			};
 	
 		
-			webinos.rpcHandler.registerCallbackObject(callback);
+			webinos.rpcHandler.registerCallbackObject(rpc);
 		}
 		
 		webinos.rpcHandler.executeRPC(rpc);
