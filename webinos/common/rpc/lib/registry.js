@@ -67,7 +67,7 @@
 	Registry.prototype.registerObject = function (callback) {
 		_registerObject.call(this, callback);
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
