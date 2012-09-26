@@ -24,7 +24,7 @@
 var sys = require('util');
 var webinosFeatures = require('./WebinosFeatures');
 var http = require("http");
-var logger = require('nlogger').logger('LocalFeatureManager.js');
+var logger = require('./Logger').getLogger('LocatlFeatureManager', 'info');
 
 var features = {};
 
@@ -32,32 +32,24 @@ var connection;
 
 var client;
 
-
 function initialize(pzhConnection, jid, rpcHandler) {
 	connection = pzhConnection;
 	
 	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler, 'geoip');
-	geoLocationFeature.local = true;
-	geoLocationFeature.shared = false;
-	geoLocationFeature.device = jid;
-    geoLocationFeature.owner = jid.split("/")[0];
-	geoLocationFeature.uplink = connection;
-    
-	//TODO here goes the RPC stuff
-	// should result in a call to geoLocationFeature.invoke(payload);
+	geoLocationFeature.setConnection(jid, connection);
+    rpcHandler.registry.registerObject(geoLocationFeature);
 
 	var get42Feature = webinosFeatures.factory[webinosFeatures.NS.GET42](rpcHandler);
-	get42Feature.local = true;
-	get42Feature.shared = false;
-	get42Feature.device = jid;
-    get42Feature.owner = jid.split("/")[0];
-	get42Feature.uplink = connection;
-
-	//TODO here goes the RPC stuff
-	// should result in a call to remoteAlertFeature.invoke(payload);
-
+	get42Feature.setConnection(jid, connection);
+    rpcHandler.registry.registerObject(get42Feature);
+	
 	features[geoLocationFeature.id] = geoLocationFeature;
 	features[get42Feature.id] = get42Feature;
+
+	// we do not add the service discovery feature. This special kind of feature is not discoverable.
+	var serviceDiscoveryFeature = webinosFeatures.factory[webinosFeatures.NS.SERVICE_DISCOVERY](rpcHandler, features);
+	serviceDiscoveryFeature.setConnection(jid, pzhConnection);
+    rpcHandler.registry.registerObject(serviceDiscoveryFeature);
 }
 
 exports.features = features;

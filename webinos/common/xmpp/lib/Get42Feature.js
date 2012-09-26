@@ -23,9 +23,9 @@
  */
 var sys = require('util');
 var GenericFeature = require('./GenericFeature.js');
-var logger = require('nlogger').logger('Get42Feature.js');
+var logger = require('./Logger').getLogger('Get42Feature', 'info');
 
-var NS = "urn:services-webinos-org:get42";
+var NS = "http://webinos.org/api/test";
 
 var moduleRoot = require('../dependencies.json');
 var dependencies = require('../' + moduleRoot.root.location + '/dependencies.json');
@@ -41,12 +41,12 @@ function Get42Feature(rpcHandler) {
 
 	this.service = new get42.Service(rpcHandler);
 	this.api = NS;
-	this.displayName = 'Get42' + this.id;
+	this.displayName = 'Get42';
 	this.description = 'Test Module with the life answer.';
 	this.ns = this.api;
 
 	this.on('invoked-from-remote', function(featureInvoked, stanza) {
-		logger.trace('on(invoked-from-remote)');
+		logger.verbose('on(invoked-from-remote)');
 		logger.debug('The Get42Feature is invoked from remote. Answering it...');
 		logger.debug('Received the following XMPP stanza: ' + stanza);
 		
@@ -56,7 +56,7 @@ function Get42Feature(rpcHandler) {
 		if (params == null || params == '') {
 			params = "{}";
 		} else {
-			logger.trace('Query="' + params + '"');
+			logger.verbose('Query="' + params + '"');
 		}
 		
 		var payload = JSON.parse(params);
@@ -68,26 +68,21 @@ function Get42Feature(rpcHandler) {
 			conn.answer(stanza, JSON.stringify(result));
 		});
 
-		logger.trace('ending on(invoked-from-remote)');
+		logger.verbose('ending on(invoked-from-remote)');
 	});
 
 	this.on('invoked-from-local', function(featureInvoked, params, successCB, errorCB, objectRef) {
-		logger.trace('on(invoked-from-local)');
+		logger.verbose('on(invoked-from-local)');
 		this.service.get42(params, successCB, errorCB, objectRef);
-		logger.trace('ending on(invoked-from-local)');
+		logger.verbose('ending on(invoked-from-local)');
 	});
-
-	//TODO 'this' exposes all functions (and attributes?) to the RPC but only some a selection of features should be exposed.
-	//TODO remote clients use the function 'invoke' to invoke the geolocation feature but it should also be possible to have other functions.
-	//     at this time invoke is handled by the GenericFeature to dispatch the call locally or remotely.
 	
 	// We add the 'id' to the name of the feature to make this feature unique to the client.
-	rpcHandler.registry.registerObject(this);  // RPC name
 }
 
 //sys.inherits(Get42Feature, get42.testModule);
 sys.inherits(Get42Feature, GenericFeature.GenericFeature);
-exports.Get42Feature = Get42Feature;
+exports.Service = Get42Feature;
 exports.NS = NS;
 
 ///////////////////////// END Remote Alering Service /////////////////////////

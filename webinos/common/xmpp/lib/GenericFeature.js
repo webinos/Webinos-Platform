@@ -25,7 +25,7 @@
 var sys = require('util');
 var EventEmitter = require('events').EventEmitter;
 var uniqueId = Math.round(Math.random() * 10000);
-var logger = require('nlogger').logger('GenericFeature.js');
+var logger = require('./Logger').getLogger('GenericFeature', 'info');
 
 var path = require('path');
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
@@ -41,13 +41,13 @@ var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
  */
 function GenericFeature() {
 	EventEmitter.call(this);
-	
+
     this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
     this.owner = null;                                          // person that owns the device the service is running on
     this.device = null;                                         // (addressable) id of device the service is running on
     this.name = "(you shouldn't see this!)";                    // friendly name, to be overridden
     this.ns = null;                                             // name space that (globally) uniquely defines the service type
-	this.local = false;
+	this.local = true; // defaults to true
 	this.shared = false; // only used for local features
 	
     this.remove = function() {                                  // call this when this feature is removed.
@@ -62,25 +62,32 @@ function GenericFeature() {
 	    return (this.owner == webinos.owner);
 	}
 
+    this.setConnection = function(jid, connection) {
+    	this.device = jid;
+        this.owner = jid.split("/")[0];
+    	this.uplink = connection;
+    	this.serviceAddress = this.device;
+    }
+    
     /* called when a shared service is invoked from remote */
 	this.invoked = function(params, successCB, errorCB, objectRef) {
-		logger.trace('invoked(...)');
+		logger.verbose('invoked(...)');
 		
-		logger.trace('calling emit(invoked-from-remote)');
+		logger.verbose('calling emit(invoked-from-remote)');
 		this.emit('invoked-from-remote', this, params);
 		
-		logger.trace('ending invoked()');
+		logger.verbose('ending invoked()');
 	}
 
 	/* called to invoke a remote shared service */
     this.invoke = function(params, successCB, errorCB, objectRef) {
-		logger.trace('invoke(...)');
+		logger.verbose('invoke(...)');
 
 		if (this.local) {
-			logger.trace('calling emit(invoked-from-local)');
+			logger.verbose('calling emit(invoked-from-local)');
 			this.emit('invoked-from-local', this, params, successCB, errorCB, objectRef);
 		} else {
-			logger.trace('calling emit(invoke)');
+			logger.verbose('calling emit(invoke)');
 			this.emit('invoke', this, function(type, query) {
 				var params = query.getText();
 
@@ -94,7 +101,7 @@ function GenericFeature() {
 			}, params);
 		}
 		
-		logger.trace('ending invoke()');
+		logger.verbose('ending invoke()');
 	};  
 
     /* called when the result of a remote service invocation is received */

@@ -21,43 +21,61 @@
  * Author: Eelco Cramer, TNO
  */
 
-var http = require("http");
-var url = require("url");
-var path = require("path");
-var fs = require("fs");
-var logger = require('nlogger').logger('RpcServer.js');
-var io;
+ (function() {
+ 	"use strict";
+    var http = require("http");
+    var url = require("url");
+    var path = require("path");
+    var fs = require("fs");
+    var logger = require('./Logger').getLogger('RpcServer', 'verbose');
+    var rpcHandler;
 
-//RPC server initialization
-function configure(server, rpcHandler) {
-	io = server;
-	
-	io.of('/jsonrpc').on('connection', function(socket) {
-	    logger.trace((new Date()) + " Connection accepted.");
+    //RPC server initialization
+    function configure(wss, rpcHandler) {
+    	wss.on("connect", function(connection) {
+            logger.info("connection accepted.");
+      
+            connection.sendUTF('{ "type": "prop", "from": "eelco@servicelab.org/mobile", "payload": { "status": "registeredBrowser", "message": {"connectedPzp": [], "connectedPzh": ["eelco@servicelab.org"] }}}');
+      
+            connection.on("message", function(message) { wsMessage(message.utf8Data); });
+            connection.on("close", function(reason, description) { wsClose(description) });
+            
+            //RPC writer for this connection
+        	var messageHandler = {
+        		write: function(result, respto, msgid)	{
+        			logger.verbose('Sending result.', result);
+        			connection.sendUTF(JSON.stringify(result));
+        		}
+        	}
 
-	    socket.on('message', function(message) {
-			msg = JSON.parse(message);
-			logger.trace('calling rpc with message(' +  msg + ')');
-			logger.trace('message.method=' + msg.method);
-	        rpcHandler.handleMessage(msg, this, Math.round(Math.random() * 10000));
-			logger.trace('rpc called.');
-	    });
-		
-		socket.on('disconnect', function () {
-	    	logger.debug('user disconnected');
-	  	});
+        	function wsMessage(utf8Data) {
+                var msg = JSON.parse(utf8Data);
 
-		//RPC writer for this connection
-		var messageHandler = {
-    		write: function(result, respto, msgid)	{
-    			logger.trace('result(' + result + ')');
-    			socket.send(JSON.stringify(result));
-    			logger.trace('end result();')
-    		}
-		}
-		
-		rpcHandler.setMessageHandler(messageHandler);
-	});
-}
+                logger.verbose('Receiving message: ' + JSON.stringify(msg));
 
-exports.configure = configure;
+                if(msg.type === "prop" ) {
+                    // Legacy from initial implementation. Do we need to register the browser?
+                    // ignoring these for now
+                    logger.verbose('Ignoring legacy messages: ' + JSON.stringify(msg));
+                    
+                    //TODO add support for these
+                } else if (msg.type === 'JSONRPC' && msg.payload) {
+        	        rpcHandler.handleMessage(msg.payload, this, Math.round(Math.random() * 10000));
+        			logger.verbose('rpc called.');
+                } else {
+                    logger.debug('Don not know what to do with this message: ' + JSON.stringify(msg));
+                }
+            }
+
+            function wsClose(reason) {
+                logger.info(reason);
+                logger.debug('user disconnected');
+            }
+
+        	rpcHandler.setMessageHandler(messageHandler);
+        });
+    }
+
+    
+    exports.configure = configure;
+})();

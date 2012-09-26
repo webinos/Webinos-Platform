@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*******************************************************************************
 *  Code contributed to the webinos project
 *
@@ -23,8 +25,7 @@
 
 var xmpp = require('./xmpp');
 var ws = require('./webserver');
-var disco = require('./ServiceDiscovery');
-var status = require('./StatusServer');
+var featureManager = require('./LocalFeatureManager.js');
 
 var path = require('path');
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
@@ -37,7 +38,7 @@ var registry      = webinos.global.require(webinos.global.rpc.location, "lib/reg
 
 var argv = process.argv;
 var WebinosFeatures = require('./WebinosFeatures.js');
-var logger = require('nlogger').logger('pzp.js');
+var logger = require('./Logger').getLogger('pzp', 'info');
 
 var index;
 var port;
@@ -49,14 +50,14 @@ console.error();
 if (argv.length == 5 || argv.length == 6) {
 	var index = parseInt(argv[2], 10);
 	if (isNaN(index) || (index > 100)) {
-		console.error("*** " + argv[2] + " is not a valid index number.\r\n");
+		logger.error("*** " + argv[2] + " is not a valid index number.\r\n");
 	} else {
 		jid = argv[3];
 		// simple check for user@domain/resource format
 		if (jid.match(/^.+@.+\/./i)) {
 			arguments_ok = true;
 		} else {
-			console.error("*** " + argv[3] + " is not a valid full jid\r\n");
+			logger.error("*** " + argv[3] + " is not a valid full jid\r\n");
 		}
 		
 		bosh = argv[5];
@@ -78,7 +79,7 @@ if (!arguments_ok) {
     process.exit(1);
 }
 
-logger.trace("Done parsing command line.");
+logger.verbose("Done parsing command line.");
 port = 8000+10*index;
 logger.info("Using index=" + index + ", jid=" + jid + " and port=" + port);
 
@@ -86,14 +87,14 @@ var rpcRegistry = new registry.Registry();
 var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
 var connection = new xmpp.Connection(rpcHandler);
 
-logger.trace("Starting servers...");
-ws.start(port, rpcHandler);
-disco.start(ws.io, connection, jid, rpcHandler);
-status.start(ws.io, connection, jid);
+logger.verbose("Starting servers...");
+ws.start(port, port+1, rpcHandler);
 
-logger.trace("Done starting servers.");
+featureManager.initialize(connection, jid, rpcHandler);
 
-logger.trace("Initialising connection to xmpp server.");
+logger.verbose("Done starting servers.");
+
+logger.verbose("Initialising connection to xmpp server.");
 connection.connect({ jid: argv[3], password: argv[4], bosh: argv[5] }, function() {
 	logger.info("Connected to the XMPP server.");
 });
@@ -105,11 +106,11 @@ connection.on('end', function () {
 
 // installing a listerner for all features, just informational and for debugging purposes.
 connection.on('newFeature', function(feature) {
-	logger.trace("The feature " + feature.ns + " on " + feature.device + " became available.");
+	logger.verbose("The feature " + feature.ns + " on " + feature.device + " became available.");
 	
 	// do something with the feature.
 	feature.once('remove', function(feature) {
 		// do something when the feature is removed.
-		logger.trace("The feature " + feature.ns + " on " + feature.device + " became unavailable.");
+		logger.verbose("The feature " + feature.ns + " on " + feature.device + " became unavailable.");
 	});
 });

@@ -16,22 +16,18 @@
 *******************************************************************************/
 
 /**
- * The geolocation feature.
- * 
- * Reused and updated the orginal XmppDemo code of Victor Klos
+ * The geolocation feature wrapper.
  * Author: Eelco Cramer, TNO
  */
 
 var GenericFeature = require('./GenericFeature.js');
 var sys = require('util');
-var logger = require('nlogger').logger('GeolocationFeature.js');
+var logger = require('./Logger').getLogger('GeolocationFeature', 'info');
 
 var path = require('path');
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
 var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-//var rpc = require(path.join(webinosRoot, dependencies.rpc.location, "lib/rpc.js"));
 
 var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.location));
 
@@ -44,7 +40,7 @@ var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.lo
  * See the XMPP logging for the details.
  */
 
-var NS = "urn:services-webinos-org:geolocation";
+var NS = "http://webinos.org/api/w3c/geolocation";
 
 function GeolocationFeature(rpcHandler, connector) {
 	GenericFeature.GenericFeature.call(this);
@@ -61,7 +57,7 @@ function GeolocationFeature(rpcHandler, connector) {
 	this.ns = this.api;
 	
 	this.on('invoked-from-remote', function(featureInvoked, stanza) {
-		logger.trace('on(invoked-from-remote)');
+		logger.verbose('on(invoked-from-remote)');
 		logger.debug('The GeolocationFeature is invoked from remote. Answering it...');
 		logger.debug('Received the following XMPP stanza: ' + stanza);
 		
@@ -71,7 +67,7 @@ function GeolocationFeature(rpcHandler, connector) {
 		if (params == null || params == '') {
 			params = "{}";
 		} else {
-			logger.trace('Query="' + params + '"');
+			logger.verbose('Query="' + params + '"');
 		}
 		
 		var payload = JSON.parse(params);
@@ -83,13 +79,13 @@ function GeolocationFeature(rpcHandler, connector) {
 			conn.answer(stanza, JSON.stringify(result));
 		});
 
-		logger.trace('ending on(invoked-from-remote)');
+		logger.verbose('ending on(invoked-from-remote)');
 	});
 
 	this.on('invoked-from-local', function(featureInvoked, params, successCB, errorCB, objectRef) {
-		logger.trace('on(invoked-from-local)');
+		logger.verbose('on(invoked-from-local)');
 		this.geo.getCurrentPosition(params, successCB, errorCB, objectRef);
-		logger.trace('ending on(invoked-from-local)');
+		logger.verbose('ending on(invoked-from-local)');
 	});
 		
 	//TODO 'this' exposes all functions (and attributes?) to the RPC but only some a selection of features should be exposed.
@@ -97,11 +93,10 @@ function GeolocationFeature(rpcHandler, connector) {
 	//     at this time invoke is handled by the GenericFeature to dispatch the call locally or remotely.
 	
 	// We add the 'id' to the name of the feature to make this feature unique to the client.
-	rpcHandler.registry.registerObject(this);  // RPC name
 }
 
 sys.inherits(GeolocationFeature, GenericFeature.GenericFeature);
-exports.GeolocationFeature = GeolocationFeature;
+exports.Service = GeolocationFeature;
 exports.NS = NS;
 
 ////////////////////////// END Geolocation Feature //////////////////////////

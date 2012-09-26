@@ -29,7 +29,7 @@ var nodeType = 'http://webinos.org/pzp';
 var connection;
 var EventEmitter = require('events').EventEmitter;
 var WebinosFeatures = require('./WebinosFeatures.js');
-var logger = require('nlogger').logger('xmpp.js');
+var logger = require('./Logger').getLogger('xmpp', 'info');
 
 var xmpp;
 
@@ -62,7 +62,7 @@ exports.Connection = Connection;
  * (optional) params[bosh]: address of the BOSH server, for example: http://xmpp.servicelab.org:80/jabber
  */
 Connection.prototype.connect = function(params, onOnline) {
-	logger.trace("Entering connect()");
+	logger.verbose("Entering connect()");
 	this.remoteFeatures = new Array;
 	this.pendingRequests = new Array;
 	
@@ -160,7 +160,7 @@ Connection.prototype.invokeFeature = function(feature, callback, params) {
 
 // Send presence notification according to http://xmpp.org/extensions/xep-0115.html
 Connection.prototype.sendPresence = function(ver) {
-    logger.trace("XEP-0115 caps: " + this.featureMap[ver]);
+    logger.verbose("XEP-0115 caps: " + this.featureMap[ver]);
 
 	var presence = new xmpp.Element('presence', { }).
 		c('c', {
@@ -170,13 +170,13 @@ Connection.prototype.sendPresence = function(ver) {
 		  	'ver': ver
 	});
 
-	logger.trace('Presence message: ' + presence);
+	logger.verbose('Presence message: ' + presence);
 
 	this.client.send(presence);
 }
 
 Connection.prototype.onStanza = function(stanza) {
-	logger.trace('Stanza received = ' + stanza);
+	logger.verbose('Stanza received = ' + stanza);
 	
 	if (stanza.is('presence') && stanza.attrs.type !== 'error') {
 		if (stanza.attrs.type == 'unavailable') {
@@ -249,11 +249,11 @@ Connection.prototype.onPresenceBye = function(stanza) {
 	var from = stanza.attrs.from;
 	
 	if (this.remoteFeatures[from] != null) {
-		logger.trace('Number of features to be removed: ' + this.remoteFeatures[from].length);
+		logger.verbose('Number of features to be removed: ' + this.remoteFeatures[from].length);
 		
 		for (var i=0; i<this.remoteFeatures[from].length; i++) {
 			try {
-				logger.trace('Feature = ' + this.remoteFeatures[from][i].ns);
+				logger.verbose('Feature = ' + this.remoteFeatures[from][i].ns);
 			} catch (err) {
 				logger.warn(err);
 			}
@@ -284,8 +284,8 @@ Connection.prototype.onDiscoInfo = function(stanza) {
 		
 		logger.debug("Received service discovery information request: " + stanza);
 		
-		logger.trace("Received feature request for version: " + ver);
-		logger.trace("Returning the features for this version: " + this.featureMap[ver]);
+		logger.verbose("Received feature request for version: " + ver);
+		logger.verbose("Returning the features for this version: " + this.featureMap[ver]);
 		
 		currentFeatures = this.featureMap[ver];
 	} else {
@@ -318,7 +318,7 @@ Connection.prototype.onDiscoInfo = function(stanza) {
 Connection.prototype.onPresenceCaps = function (stanza) {
 	var c = stanza.getChild('c', 'http://jabber.org/protocol/caps');
 	
-	logger.trace("Capabilities received, for now we always query for the result.");
+	logger.verbose("Capabilities received, for now we always query for the result.");
 	logger.debug("Received new capabilities from " + stanza.attrs.from);
 	logger.debug("XMPP message = " + stanza);
 	
@@ -333,7 +333,7 @@ Connection.prototype.onPresenceCaps = function (stanza) {
 }
 
 Connection.prototype.onPresenceDisco = function (stanza) {
-	logger.trace('Entering onPresenceDisco');
+	logger.verbose('Entering onPresenceDisco');
 	
 	logger.debug('Received answer on capability query: ' + stanza);
 	
@@ -359,7 +359,7 @@ Connection.prototype.onPresenceDisco = function (stanza) {
 			var feature = currentFeatures[j];
 			
 			if (feature.ns == ns) {
-				logger.trace('Feature still exsists, do not remove it! ' + ns);
+				logger.verbose('Feature still exsists, do not remove it! ' + ns);
 				delete removedFeatures[j]; // if the feature still exsist it should not be removed
 				alreadyExists = true;
 				break;
@@ -367,22 +367,22 @@ Connection.prototype.onPresenceDisco = function (stanza) {
 		}
 
 		if (!alreadyExists) {
-			logger.trace('New feature, creating and adding it.');
+			logger.verbose('New feature, creating and adding it.');
 			this.createAndAddRemoteFeature(ns, from);
-			logger.trace('Done creating the feature');
+			logger.verbose('Done creating the feature');
 		}
 		
 		discoveredFeatures.push(ns);
 	} 
 
-	logger.trace('Removing ' + removedFeatures.length + ' feature(s) that have not been rediscovered.');
+	logger.verbose('Removing ' + removedFeatures.length + ' feature(s) that have not been rediscovered.');
 
 	for (var i in removedFeatures) {
 		//removedFeatures[i].remove();
 		
 		for (var j in this.remoteFeatures[from]) {
 			if (removedFeatures[i].ns == this.remoteFeatures[from][j].ns) {
-				logger.trace("Removed feature from remote feature list: " + feature.ns);
+				logger.verbose("Removed feature from remote feature list: " + feature.ns);
 				this.remoteFeatures[from][j].remove();
 				delete this.remoteFeatures[from][j];
 			}
@@ -393,15 +393,15 @@ Connection.prototype.onPresenceDisco = function (stanza) {
 }
 
 Connection.prototype.sharedServicesForNamespace = function(ns) {
-	logger.trace("Entering sharedServicesForNamespace: " + ns);
+	logger.verbose("Entering sharedServicesForNamespace: " + ns);
 	
 	var result = new Array;
 	
 	for (var key in this.remoteFeatures) {
-		logger.trace('Checking ' + this.remoteFeatures[key].length + ' features of ' + key + '...');
+		logger.verbose('Checking ' + this.remoteFeatures[key].length + ' features of ' + key + '...');
 
 		for (var i=0; i<this.remoteFeatures[key].length; i++) {
-			logger.trace('Checking feature with index: ' + i);
+			logger.verbose('Checking feature with index: ' + i);
 
 			if (typeof this.remoteFeatures[key][i] === 'undefined') {
 				// I experienced something that might point to a race condition here.
@@ -409,7 +409,7 @@ Connection.prototype.sharedServicesForNamespace = function(ns) {
 				// do not get removed from the array correctly all the time. This works around the issue. 
 				delete this.remoteFeatures[key][i];
 			} else {
-				logger.trace("Checking feature: " + this.remoteFeatures[key][i].ns + " from " + this.remoteFeatures[key][i].device);
+				logger.verbose("Checking feature: " + this.remoteFeatures[key][i].ns + " from " + this.remoteFeatures[key][i].device);
 
 				if (this.remoteFeatures[key][i].ns == ns) {
 					result.push(this.remoteFeatures[key][i]);
@@ -418,7 +418,7 @@ Connection.prototype.sharedServicesForNamespace = function(ns) {
 		}
 	}
 
-	logger.trace("Exiting sharedServicesForNamespace with " + result.length + " results.");
+	logger.verbose("Exiting sharedServicesForNamespace with " + result.length + " results.");
 	
 	return result;
 }
@@ -429,12 +429,12 @@ Connection.prototype.onError = function(error) {
 
 // Helper function that creates a service, adds it to the administration and invokes the callback
 Connection.prototype.createAndAddRemoteFeature = function(name, from) {
-	logger.trace('Entering createAndAddRemoteFeature(' + name + ', ' + from + ')');
+	logger.verbose('Entering createAndAddRemoteFeature(' + name + ', ' + from + ')');
 	
 	var factory = WebinosFeatures.factory[name];
 
 	if (factory != null) {
-		logger.trace('Factory != null');
+		logger.verbose('Factory != null');
 		
 		feature = factory(this.rpcHandler);
 	    feature.device = from;
@@ -447,14 +447,14 @@ Connection.prototype.createAndAddRemoteFeature = function(name, from) {
 
 	    this.remoteFeatures[from].push(feature);
 
-	    logger.trace('Created and added new service of type ' + name);
+	    logger.verbose('Created and added new service of type ' + name);
 
 		this.emit(feature.ns, feature);
 		this.emit('newFeature', feature);
 		feature.on('invoke', this.invokeFeature);
 	}
 	
-	logger.trace('End createAndAddRemoteFeature');
+	logger.verbose('End createAndAddRemoteFeature');
 }
 
 // Helper function to return a 'clean' id string based on a jid
