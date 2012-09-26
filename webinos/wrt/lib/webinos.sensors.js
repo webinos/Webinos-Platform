@@ -41,8 +41,6 @@
 		webinos.rpcHandler.executeRPC(rpc,
 				function (result){
 			
-					var _referenceMapping = new Array();
-					
 					self.maximumRange = result.maximumRange;
 					self.minDelay = result.minDelay;
 					self.power = result.power;
@@ -75,16 +73,11 @@
 					self.addEventListener = function(eventType, eventHandler, capture) {
 	
 							var rpc = webinos.rpcHandler.createRPC(this, "addEventListener", eventType);
-							rpc.fromObjectRef = Math.floor(Math.random()*101); //random object ID	
 							
-							_referenceMapping.push([rpc.fromObjectRef, eventHandler]);
-							console.log('# of references' + _referenceMapping.length);
-							
-							var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-							callback.onEvent = function (vehicleEvent) {
+							rpc.onEvent = function (vehicleEvent) {
 								eventHandler(vehicleEvent);
 							};
-							webinos.rpcHandler.registerCallbackObject(callback);
+							webinos.rpcHandler.registerCallbackObject(rpc);
 							
 							webinos.rpcHandler.executeRPC(rpc);
 	

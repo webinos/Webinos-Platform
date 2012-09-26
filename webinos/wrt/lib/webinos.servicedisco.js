@@ -116,14 +116,12 @@
         
         var id = Math.floor(Math.random()*1001);
         var rpc = this.rpcHandler.createRPC("ServiceDiscovery", "findServices", [serviceType, options, filter]);
-        rpc.fromObjectRef = Math.floor(Math.random()*101); //random object ID
 
-        var callback2 = new RPCWebinosService({api:rpc.fromObjectRef});
-        callback2.onservicefound = function (params, successCallback, errorCallback, objectRef) {
+        rpc.onservicefound = function (params) {
             // params
             success(params);
         };
-        this.rpcHandler.registerCallbackObject(callback2);
+        this.rpcHandler.registerCallbackObject(rpc);
 
         var serviceAddress;
         if (typeof this.rpcHandler.parent !== 'undefined') {
