@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/libnode"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/bridge-java"/>
 	<classpathentry kind="src" path="/util"/>
+	<classpathentry kind="lib" path="/app/libs/jmdns.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

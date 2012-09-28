@@ -9,6 +9,7 @@
 		<zip destfile="${basedir}/webinos/common/android/app/assets/modules/webinos.zip">
 			<zipfileset dir="${basedir}" prefix="wp4" includes="
 				webinos_pzp.js,
+				webinos_config.json,
 				node_modules/ansi/,
 				node_modules/connect/,
 				node_modules/crypt/,
@@ -28,9 +29,20 @@
 			webinos/common/android/,
 			webinos/pzh/,
 			webinos/wrt/,
-                        webinos/test/,
-
-			**/test/,
+                     
+			webinos/test/lib/,
+                        webinos/test/spec/,
+			webinos/test/default/,
+			webinos/test/*.html,
+			webinos/test/*.xml,
+			webinos/test/*.json,
+			webinos/test/*.js,
+			
+			webinos/api/**/test/,
+			webinos/common/**/test/,
+			webinos/pzp/test/,
+			webinos/pzh/test/,		        
+	
 			**/build/,
 			**/deps/,
 			**/.gitignore" />

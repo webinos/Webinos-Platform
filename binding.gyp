@@ -3,7 +3,7 @@
     {
     'target_name':'webinos',
     'dependencies': [
-      'webinos/common/manager/certificate_manager/binding.gyp:certificate_manager',
+      'webinos/common/manager/certificate_manager/src/binding.gyp:certificate_manager',
       'webinos/common/manager/policy_manager/src/binding.gyp:pm',
       'webinos/common/manager/keystore/src/binding.gyp:keystore',
       'webinos/api/contacts/src/binding.gyp:localcontacts',

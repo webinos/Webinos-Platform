@@ -1,0 +1,28 @@
+extends layout
+
+block content
+	script(type="text/javascript")
+		$(function() {
+			var timers = [];
+			$(".widgetStoreListItem").hover(
+				function() { 
+					$(this).addClass("widgetStoreListItemHighlight"); 
+				}, 
+				function() { 
+					$(this).removeClass("widgetStoreListItemHighlight"); 
+				}
+			);
+		});
+	- if (storeData.length)
+		div.widgetStoreList
+			- storeData.forEach(function(item){
+				div.widgetStoreListItem
+					img(width="64px", height="64px", src="http://webinos.two268.com/#{item.icon}")
+					div.widgetStoreListItemDetails
+						div #{item.name}&nbsp;
+						div= item.description			
+						br
+						a(href="/install/#{item.id}") install
+			- })
+	- else
+		h3 unable to contact store

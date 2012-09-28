@@ -29,6 +29,7 @@
 	/**
 	 * Webinos TV service constructor (server side).
 	 * @constructor
+	 * @alias RemoteTVManager
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.
 	 */
 	var RemoteTVManager = function(rpcHandler, params) {

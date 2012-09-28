@@ -179,7 +179,10 @@
 		}
 		if (PAMUsage === true) {
 			// on linux and mac we require unixlib module to use PAM
+          try {
 			unixlib = require('unixlib');
+          }catch(err) {
+		  }
 		}
 		else {
 			console.log("Authentication API: no useful PAM file found, password file is used as a fallback");
@@ -251,9 +254,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.authenticate = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.authenticate = function (params, successCB, errorCB) {
 		"use strict";
 		var child, password, error = {};
 		var that = this;
@@ -550,9 +552,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.isAuthenticated = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.isAuthenticated = function (params, successCB, errorCB) {
 		"use strict";
 		var authenticated, authfile, authrow, error = {};
 		
@@ -596,9 +597,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.getAuthenticationStatus = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.getAuthenticationStatus = function (params, successCB, errorCB) {
 		"use strict";
 		var authenticated, resp, authfile, authrow, auth_s = new AuthStatus(), error = {};
 		

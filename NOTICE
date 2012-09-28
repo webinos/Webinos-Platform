@@ -1,0 +1,21 @@
+webinos platform is released under the Apache License, Version 2.0. 
+
+~~~
+
+Portions of this software were developed at the
+National Technical University of Athens (NTUA).
+
+Portions of this software were developed at the 
+Fraunhofer Institute for Open Communication Systems (FOKUS).
+
+Portions of this software were developed at the 
+Interdisciplinary Institute for Broadband Technology (IBBT).
+
+~~~
+
+webinos platform uses and delivers, as part of the project, 
+the following 3rd party software:
+* Closure Compiler, Apache License 2.0 
+  http://code.google.com/p/closure-compiler/
+* jQuery BBQ: Back Button & Query Library, MIT and GPL 
+  licenses, http://benalman.com/projects/jquery-bbq-plugin/

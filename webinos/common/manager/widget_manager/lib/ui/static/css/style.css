@@ -1,0 +1,447 @@
+﻿html, body
+{
+	padding: 0px;
+	margin: 0px;
+	background-color: #E4EFF2;
+	/*line-height: 1.4em;*/
+}
+
+html, body, input
+{
+	font-size: 12px;
+	color: #595959;
+	font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+}
+
+input
+{
+    border: 1px solid #9FC6D0;
+}
+
+input[type="text"]
+{
+    padding-left: 2px;
+}
+
+a
+{
+    color: #006D9A;
+    text-decoration: none;
+}
+
+a:hover
+{
+    color: rgb(220,82,70);   
+}
+
+::-webkit-scrollbar 
+{
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track 
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb 
+{
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+
+.page
+{
+    background-color: #ffffff;
+    width: 90%;
+	min-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pageTitleContainer
+{
+    border-bottom: 1px solid #006d88;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.pageTitle
+{
+    position: relative;
+    top: 5px;
+    background-color: White;
+    margin-left: 54px;
+	color: #D33427;
+}
+
+.header
+{
+    margin-top: 10px;
+}
+
+.logo
+{
+    padding-top: 4px;
+}
+
+.menuContainer
+{
+    position: relative;
+    top: -14px;
+    right: 20px;
+    height: 62px;
+    float: right;
+    z-index: 99;
+}
+
+.menuLeft
+{
+    background-image: url('/images/mainMenu-left.png');
+    background-repeat: no-repeat;
+    width: 25px;
+    height: 62px;
+    float:left;
+}
+
+.menuMiddle
+{
+    background-image: url('/images/mainMenu-repeat.png');
+    background-repeat:  repeat-x;
+    min-width: 300px;
+    height: 62px;
+    float:left;
+}
+
+.menuRight
+{
+    background-image: url('/images/mainMenu-right.png');
+    background-repeat: no-repeat;
+    width: 25px;
+    height: 62px;
+    float:left;
+}
+
+.menuItems
+{
+    margin-top: 20px;
+}
+
+.menuItem
+{
+    padding: 16px 14px 15px 14px;
+}
+
+.commands a
+{
+    color: #C5DEE4;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.commands a:hover
+{
+    color: #ffffff;
+}
+
+.clearfix:after 
+{
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: &quot; &quot;;
+	clear: both;
+	height: 0;
+}
+
+.clearfix 
+{
+	display: inline-block;
+}
+
+.content
+{
+    padding: 0 10px 10px 10px;
+}
+
+/*
+.content a 
+{
+	background-image: url('/images/green-link.png');
+	background-position: 0px 1px;
+	background-repeat: no-repeat;
+	padding-left: 16px;
+}
+
+.content a:hover
+{
+	background-image: url('/images/red-link.png');
+}
+*/
+
+a.external 
+{
+	background-image: url('/images/green-external.png');
+	background-position: right 5px;
+	background-repeat: no-repeat;
+	padding-right: 11px;
+}
+
+a:hover.external
+{
+	background-image: url('/images/red-external.png');
+}
+
+a.widget-link
+{
+	background-image: url('/images/widget-icon.png');
+	background-position: 0px 0px;
+	background-repeat: no-repeat;
+	padding: 0px 0px 0px 20px;
+}
+
+.footer
+{
+	background-color: #006d88;
+    min-height: 20px;
+    padding: 10px;
+    margin-bottom: 10px;
+    color: #9FC6D0;
+}
+
+.footerRight
+{
+    font-size: .8em;
+    float: right;
+}
+
+.infoPanel
+{
+    margin-left: 38px;
+    /*border-left: 1px solid #006d88;*/
+    padding-left: 10px;
+}
+
+.connectionStatus img
+{
+	vertical-align: middle;
+}
+
+.widgetList
+{
+   
+}
+
+.widgetListItem
+{
+    border: 1px solid transparent;
+    height: 100px;
+    width: 100px;
+	float: left;
+}
+
+.widgetListItem a
+{
+	background-image: none;
+	padding-left: 0px;
+}
+
+.widgetListItemHighlight
+{
+    border: 1px solid #9FC6D0;
+    cursor: pointer;
+}
+
+.widgetListItemIcon
+{
+    width: 64px;
+    height: 64px;
+    margin: 2px auto 2px auto;}
+
+.widgetListItemDetails
+
+.widgetListItemTitle
+{
+    font-size: 0.8em;
+    text-align: center;
+}
+
+.widgetListOptions
+{
+    display: none;
+    color: #9FC6D0;
+		min-height: 64px;
+}
+
+.widgetListOption
+{
+	/*
+	background-color: #057591;
+	padding: 4px;
+	margin: 2px;
+	*/
+	border-bottom: 1px solid #ddd;
+}
+
+.widgetListOption a
+{
+    /*color: #C5DEE4;
+	background-image: url('/images/green-link.png');
+	*/
+	background-position: 0px 1px;
+	background-repeat: no-repeat;
+	padding-left: 16px;
+}
+
+.widgetListOption a:hover
+{
+	background-image: url('/images/red-link.png');
+}
+
+.loadingIndicator
+{
+	width:32px;
+	margin-left: auto;
+	margin-top:	100px;
+	margin-right: auto;
+	margin-bottom:	100px;
+}
+
+.list
+{
+}
+
+.listItem
+{
+    clear:both;
+    padding: 4px 4px 4px 4px;
+    min-height: 68px;
+    border-bottom: 1px dotted #9FC6D0;
+}
+
+.listItem img
+{
+    float:left;
+    min-width: 64px;
+}
+
+.listItemHighlight
+{
+    background-color: #e0e0e0;
+}
+
+.listItemDetails
+{
+    margin-left: 68px;
+}
+
+.settingField span
+{
+    display: inline-block;
+    width: 160px;
+}
+
+.settingField input[type="text"]
+{
+    width: 300px;
+}
+
+.settingSubmit
+{
+    width: 464px;
+	margin-bottom: 10px;
+}
+
+.settingSubmit input
+{
+    float: right;
+}
+
+.feedback
+{
+    position: fixed;
+    width: 100%;
+    left: 0px;
+    bottom: 0px;
+    color: White;
+    text-align: center;
+    padding: 10px;
+}
+
+.success
+{
+    background-color: Green;
+}
+
+.failure
+{
+    background-color: Red;
+}
+
+.testSection
+{
+	border-bottom: 1px dotted #9FC6D0;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+/* about widget */
+.widgetAboutPanel
+{
+	padding: 4px;
+	font-size: 1.1em;
+	font-weight: bold;
+	border-bottom: 1px solid #ddd;
+	color: #006d88;
+	cursor: pointer;
+}
+
+.widgetAboutField
+{
+	font-size: .9em;
+	padding: 4px;
+	margin-left: 50px;
+	color: black;
+}
+
+.widgetAboutFieldData
+{
+	font-size: .9em;
+	font-weight: normal;
+	background-color: white;
+	padding: 2px 4px 2px 4px;
+}
+
+.widgetAboutHeader
+{
+	background-color: white;
+	/*background-image: url('/images/webinos_logo.png');*/
+	background-repeat: no-repeat;
+	background-position: 0px 4px;
+	color: #333;
+	font-weight: bold;
+}
+
+.widgetAboutTitle
+{
+	padding-left: 4px;
+	padding-top: 4px;
+	font-size: 1.3em;
+}
+.widgetAboutTitle img
+{
+	vertical-align: bottom;
+}
+
+.widgetAboutOptions
+{
+	display:none;
+	text-align: right;
+	font-size: 1em;
+	padding-top: 10px;
+	padding-right: 4px;
+}
+

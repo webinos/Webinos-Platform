@@ -58,6 +58,8 @@ var Pzh = function () {
   var sessionId    = ""; /** Holds PZH Session Id */
   var connectedPzp = {};/** Holds connected PZP information such as IP address and socket connection */
   this.expecting;    // Set by authcode directly
+  this.modules; // holds startup modules
+  this.listenerMap  = {}; // holds listeners/callbacks, mostly for pzh internal api
   this.log;
   var config      = {};/** Holds PZH Configuration particularly certificates */
   var connectedPzh= {};
@@ -272,7 +274,16 @@ var Pzh = function () {
       else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
         self.log.info("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
         sendServices(validMsgObj);
+      } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "unregServicesReply") {
+        self.log.info("receiving initial modules from pzp...");
+        if (!validMsgObj.payload.id) {
+          self.log.error("cannot find callback");
+          return;
+        }
+        self.listenerMap[validMsgObj.payload.id](validMsgObj.payload.message);
+        delete self.listenerMap[validMsgObj.payload.id];
       }
+
       // Message is forwarded to Messaging manager
       else {
         try {
@@ -511,6 +522,7 @@ var Pzh = function () {
     });
   };
 
+
   /**
    *
    * @param callback
@@ -579,7 +591,7 @@ var Pzh = function () {
       var cn;
       self.log.info("connection authorised at pzh");
       try {
-        cn = conn.getPeerCertificate().subject.CN;// Get peer common name from the certiicate
+        cn = conn.getPeerCertificate().subject.CN;// Get peer common name from the certificate
         cn = decodeURIComponent(cn);
         cn = cn.split(":");
       } catch(err) {
@@ -605,6 +617,16 @@ var Pzh = function () {
   }
 
 };
+
+/**
+ *
+ */
+Pzh.prototype.addMsgListener = function (callback) {
+  var id = (parseInt((1 + Math.random()) * 0x10000)).toString(16).substr(1);
+  this.listenerMap[id] = callback;
+  return id;
+};
+
 
 util.inherits(Pzh, pzh_other);
 module.exports = Pzh;

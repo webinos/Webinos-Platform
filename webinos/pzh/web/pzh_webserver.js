@@ -137,7 +137,6 @@ var PZH_WebServer = function() {
           }
         }
       } else {
-
         if (store) {
           res.writeHead(302, {Location: "http://"+store.payload.message.returnPath+"?cmd=error&reason="+details});
         } else {
@@ -222,7 +221,18 @@ var PZH_WebServer = function() {
         break;
       case 'logout':
         instance.res.socket.end();
-
+      case 'listAllServices':
+        pzhapis.listAllServices(farm.pzhs[currentPzh], result);
+        break;
+      case 'listUnregServices':
+        pzhapis.listUnregServices(farm.pzhs[currentPzh], query.at, result);
+        break;
+      case 'registerService':
+        pzhapis.registerService(farm.pzhs[currentPzh], query.at, query.name, result);
+        break;
+      case 'unregisterService':
+        pzhapis.unregisterService(farm.pzhs[currentPzh], query.at, query.svId, query.svAPI, result);
+        break;
         break;
     }
 

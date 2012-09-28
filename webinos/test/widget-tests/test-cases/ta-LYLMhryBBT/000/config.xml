@@ -1,0 +1,8 @@
+<!-- 
+Tests the UA's ability to ignore subsequent repetitions of the name element. 
+To pass, the name of the widget must be "PASS".
+ -->
+<widget id="bx:" xmlns="http://www.w3.org/ns/widgets">
+  <name>PASS</name>
+  <name>FAIL</name>
+</widget>

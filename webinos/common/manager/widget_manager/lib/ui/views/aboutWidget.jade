@@ -1,0 +1,104 @@
+doctype 5
+html(lang="en")
+	head
+		link(type="text/css",href="/css/style.css",rel="stylesheet")
+		title about #{cfg.shortName ? cfg.shortName.unicode : (cfg.name ? cfg.name.unicode : "widget")}
+		script(type="text/javascript",src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+		script(type="text/javascript")
+			$(function() {
+				$(".widgetAboutField").hide();
+				$(".interesting").children().show();
+				$(".widgetAboutPanel").click(function() {
+					$(this).children().toggle();
+				});
+				$("#show").click(function() {
+					$(".widgetAboutPanel").children().show();
+					return false;
+				});
+				$("#hide").click(function() {
+					$(".widgetAboutPanel").children().hide();
+					return false;
+				});
+				$(".widgetAboutOptions").show();
+			});
+	body
+		div.widgetAboutHeader			
+			div.widgetAboutTitle 
+				img(src='/images/webinos_logo_small.png')
+				|&nbsp;&nbsp;|&nbsp;&nbsp;about #{(cfg.shortName ? cfg.shortName.unicode : (cfg.name ? cfg.name.unicode : "widget"))}
+			div.widgetAboutOptions
+				a(id="show",href="#") show all
+		div.widgetAboutPanel.interesting name 
+			div.widgetAboutField long name 
+				div.widgetAboutFieldData= (cfg.name ? cfg.name.unicode : "n/a")
+			div.widgetAboutField short name 
+				div.widgetAboutFieldData= (cfg.shortName ? cfg.shortName.unicode : "n/a")
+		div.widgetAboutPanel.interesting id 
+			div.widgetAboutField
+				div.widgetAboutFieldData= cfg.id
+		div.widgetAboutPanel.interesting version 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.version ? cfg.version.unicode : "n/a")
+		div.widgetAboutPanel.interesting description 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.description ? cfg.description.unicode : "n/a")
+		div.widgetAboutPanel.interesting author
+			div.widgetAboutField author name 
+				div.widgetAboutFieldData= (cfg.author && cfg.author.name ? cfg.author.name.unicode : "n/a")
+			div.widgetAboutField author email 
+				div.widgetAboutFieldData= (cfg.author && cfg.author.email ? cfg.author.email : "n/a")
+			div.widgetAboutField author website 
+				div.widgetAboutFieldData
+					-if (cfg.author && cfg.author.href)
+						a(target="_blank",href="#{cfg.author.href}")= cfg.author.href
+					-else
+						|n/a
+		div.widgetAboutPanel.interesting license 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.license && cfg.license.text ? cfg.license.text.unicode : "n/a")
+			div.widgetAboutField file 
+				div.widgetAboutFieldData= (cfg.license && cfg.license.file ? cfg.license.file : "n/a")
+			div.widgetAboutField URL
+				div.widgetAboutFieldData= (cfg.license && cfg.license.href ? cfg.license.href : "n/a")
+		div.widgetAboutPanel start file 
+			div.widgetAboutField path 
+				div.widgetAboutFieldData= cfg.startFile.path
+			div.widgetAboutField encoding 
+				div.widgetAboutFieldData= cfg.startFile.encoding
+			div.widgetAboutField content type 
+				div.widgetAboutFieldData= cfg.startFile.contentType
+		div.widgetAboutPanel pref icon
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.prefIcon ? cfg.prefIcon : "n/a")
+		div.widgetAboutPanel icons 
+			-if (cfg.icons)
+				-cfg.icons.forEach(function(item) {
+					div.widgetAboutField path 
+						div.widgetAboutFieldData= item.path
+					div.widgetAboutField width 
+						div.widgetAboutFieldData= item.width
+					div.widgetAboutField height 
+						div.widgetAboutFieldData= item.height			
+				-})
+			-else
+				div.widgetAboutField
+					div.widgetAboutFieldData n/a
+		div.widgetAboutPanel window modes 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.windowModes ? cfg.windowModes.toString() : "n/a")
+		div.widgetAboutPanel default locale 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.defaultLocale ? cfg.defaultLocale : "n/a")
+		div.widgetAboutPanel origin 
+			div.widgetAboutField
+				div.widgetAboutFieldData= (cfg.origin ? cfg.origin.toUriString() : "n/a")
+		div.widgetAboutPanel dimensions
+			div.widgetAboutField width 
+				div.widgetAboutFieldData= (cfg.width ? cfg.width : "n/a")
+			div.widgetAboutField height 
+				div.widgetAboutFieldData= (cfg.height ? cfg.height : "n/a")
+		div.widgetAboutPanel install id 
+			div.widgetAboutField
+				div.widgetAboutFieldData= cfg.installId
+			
+			

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
 *
 ******************************************************************************/
 (function () {
@@ -46,6 +46,20 @@
 	DiscoveryModule.prototype.BTfindservice = function (data, success) {
 		console.log("BT findservice");
 		var rpc = webinos.rpcHandler.createRPC(this, "BTfindservice", arguments);
+		webinos.rpcHandler.executeRPC(rpc, function(params) {
+			success(params);
+		});
+	};
+	
+	
+	/**
+	 * To find devices using DNS . This applies to Android
+	 * @param data Service type.
+	 * @param success Success callback.
+	 */
+	DiscoveryModule.prototype.DNSfindservice = function(data, success){
+		console.log("DNS findservice");
+		var rpc = webinos.rpcHandler.createRPC(this, "DNSfindservice", arguments);
 		webinos.rpcHandler.executeRPC(rpc, function(params) {
 			success(params);
 		});

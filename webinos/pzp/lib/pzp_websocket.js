@@ -68,6 +68,7 @@ var PzpWSS = function() {
     }
   }
 
+
   function wsMessage(connection, utf8Data) {
     //schema validation
     var msg = JSON.parse(utf8Data);
@@ -377,7 +378,5 @@ var PzpWSS = function() {
     connectedApp();
   }
 };
-
-
 
 module.exports = PzpWSS;

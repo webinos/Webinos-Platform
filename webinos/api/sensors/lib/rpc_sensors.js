@@ -20,6 +20,7 @@
 /**
  * Webinos Sensor service constructor (server side).
  * @constructor
+ * @alias SensorModule
  * @param rpcHandler A handler for functions that use RPC to deliver their result.  
  */
 var SensorModule = function(rpcHandler) {
@@ -61,13 +62,25 @@ var SensorModule = function(rpcHandler) {
 
 SensorModule.prototype = new RPCWebinosService;
 
-SensorModule.prototype.configureSensor = function (params, successCB, errorCB, objectRef){
+/**
+ * Configures a sensor.
+ * @param params
+ * @param successCB
+ * @param errorCB
+ */
+SensorModule.prototype.configureSensor = function (params, successCB, errorCB){
 	console.log("configuring temperature sensor");
 	
 	successCB();
-}
+};
 
-SensorModule.prototype.getStaticData = function (params, successCB, errorCB, objectRef){
+/**
+ * Get some initial static sensor data.
+ * @param params (unused)
+ * @param successCB Issued when sensor configuration succeeded.
+ * @param errorCB Issued if sensor configuration fails.
+ */
+SensorModule.prototype.getStaticData = function (params, successCB, errorCB){
 	var tmp = {};
 	tmp.maximumRange = 100;
 	tmp.minDelay = 10;

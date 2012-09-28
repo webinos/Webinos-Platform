@@ -1,0 +1,16 @@
+<!--
+testing the UA's ability to collapse the following unicode points into a single space character (x0020)
+--> 
+
+
+<widget id="ai:" xmlns="http://www.w3.org/ns/widgets">
+<author email=" 	
+		  		
+		 
+		PASS 
+	
+	
+ 
+"/>
+<name>ai</name>
+</widget>

@@ -29,5 +29,6 @@
     <module>servicedisco</module>
     <module>tv</module>
     <module>contacts</module>
+    <module>vehicle</module>
   </modules>
 </project>

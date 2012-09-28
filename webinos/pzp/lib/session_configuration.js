@@ -59,6 +59,7 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
     return;
   }
 
+
   self.fetchMetaData(webinosRoot, deviceName, friendlyName, webinosType, sessionIdentity,
   function(status, value){
     if (status && value && value.code=== "ENOENT") {//meta data
@@ -171,6 +172,7 @@ Config.prototype.storeAll = function(callback) {
       });
     } else {
       return callback(status, value);
+
     }
   });
 };
@@ -346,31 +348,36 @@ Config.prototype.createDirectories = function(callback) {
             if ( err && err.code === "ENOENT" ) {
               fs.mkdirSync(self.metaData.webinosRoot,"0700");
             }
-            fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "policies")), function(err) {
+            fs.readdir ( self.metaData.webinosRoot+"/wrt", function(err) {
               if ( err && err.code=== "ENOENT" ) {
-                fs.mkdirSync( self.metaData.webinosRoot+"/policies","0700");
+                fs.mkdirSync( webinosDemo +"/wrt","0700");
               }
-              fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates")), function(err) {
+              fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "policies")), function(err) {
                 if ( err && err.code=== "ENOENT" ) {
-                  fs.mkdirSync( self.metaData.webinosRoot+"/certificates","0700");
+                  fs.mkdirSync( self.metaData.webinosRoot+"/policies","0700");
                 }
-                fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates", "external")), function(err) {
+                fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates")), function(err) {
                   if ( err && err.code=== "ENOENT" ) {
-                    fs.mkdirSync( self.metaData.webinosRoot+"/certificates/external","0700");
+                    fs.mkdirSync( self.metaData.webinosRoot+"/certificates","0700");
                   }
-                  fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"certificates","internal")), function(err) {
+                  fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "certificates", "external")), function(err) {
                     if ( err && err.code=== "ENOENT" ) {
-                      fs.mkdirSync( self.metaData.webinosRoot+"/certificates/internal","0700");
+                      fs.mkdirSync( self.metaData.webinosRoot+"/certificates/external","0700");
                     }
-                    fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"userData")), function(err) {
+                    fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"certificates","internal")), function(err) {
                       if ( err && err.code=== "ENOENT" ) {
-                        fs.mkdirSync( self.metaData.webinosRoot+"/userData","0700");
+                        fs.mkdirSync( self.metaData.webinosRoot+"/certificates/internal","0700");
                       }
-                      fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "keys")), function(err) {
+                      fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot,"userData")), function(err) {
                         if ( err && err.code=== "ENOENT" ) {
-                          fs.mkdirSync( self.metaData.webinosRoot +"/keys","0700");
+                          fs.mkdirSync( self.metaData.webinosRoot+"/userData","0700");
                         }
-                        return callback(true);
+                        fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "keys")), function(err) {
+                          if ( err && err.code=== "ENOENT" ) {
+                            fs.mkdirSync( self.metaData.webinosRoot +"/keys","0700");
+                          }
+                          return callback(true);
+                        });
                       });
                     });
                   });

@@ -77,6 +77,7 @@ var Pzp = function () {
       "payload":{"status":status,
         "message":message}};
     self.sendMessage(msg, to);
+
   }
   function  initializeRPC_Message(loadModules) {
     self.registry       = new Registry();
@@ -99,6 +100,7 @@ var Pzp = function () {
     self.messageHandler.setSeparator("/");
   }
 
+
   function checkMode() {
     // Check if it is virgin mode
     if (config && (config.cert.internal.master.cert || config.metaData.serverName)) {
@@ -120,7 +122,6 @@ var Pzp = function () {
     }
     self.state = self.states[0];
   }
-
 
   function sendUpdateMsg(pzhId, cmd, msg) {
     var i;
@@ -269,6 +270,24 @@ var Pzp = function () {
           sendUpdateMsg(config.metaData.pzhId, validMsgObj.payload.status, validMsgObj.payload.message);
         } else if(validMsgObj.payload.status === 'foundServices') {
           self.serviceListener && self.serviceListener(validMsgObj.payload);
+        } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'listUnregServices') {
+          var services = self.getInitModules();
+          var msg = self.makeMsg(self.config.pzhId, "unregServicesReply", services);
+          msg.payload.id = validMsgObj.payload.message.listenerId;
+          self.sendMessage(msg, msg.to);
+          log.info("sent " + ((services && services.length) || 0) + " initially loaded modules to " + validMsgObj.from);
+        } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'registerService') {
+          var m = {
+            "name": validMsgObj.payload.message.name,
+            "params": validMsgObj.payload.message.params
+          };
+          self.registry.loadModule(m, self.rpcHandler);
+        } else if(validMsgObj.type === 'prop' && validMsgObj.payload.status === 'unregisterService') {
+          var sv = {
+            "id": validMsgObj.payload.message.svId,
+            "api": validMsgObj.payload.message.svAPI
+          };
+          self.registry.unregisterObject(sv);
         }
       } else {
         self.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
@@ -427,12 +446,10 @@ var Pzp = function () {
         prepMsg(sessionId, key, msg, payload);
       }
     }
-
   };
-
-
 };
 util.inherits(Pzp, pzpWebSocket);
+
 
 module.exports = Pzp;
 

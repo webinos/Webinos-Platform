@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<title>viewi</title> 
+<style>
+	body{
+		background-color:red;	
+	}
+	
+    @media (view-mode){ 
+	#ref{
+		visibility:hidden;
+	}
+	#ref::before 
+	{
+		visibility:visible;
+		content:"PASS";
+	}
+	body{
+		background-color:green;	
+	}
+    }
+</style>
+<h1 id="ref">Test did not run. User agent does not implement <code>view-mode</code> Media Feature.</h1>

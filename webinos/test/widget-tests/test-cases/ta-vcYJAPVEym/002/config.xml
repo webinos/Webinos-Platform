@@ -1,0 +1,7 @@
+<widget id="ra:" xmlns="http://www.w3.org/ns/widgets">
+<name>ra</name>
+<license href="PASS:">PASS</license>
+<license href="FAIL:">FAIL 1</license>
+<license href="FAIL:">FAIL 2</license>
+<license href="FAIL:">FAIL 3</license>
+</widget>

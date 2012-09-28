@@ -1,0 +1,4 @@
+<widget id="dc:" xmlns="http://www.w3.org/ns/widgets">
+  <name>dc</name>
+  <content src="index.php"  type="text/html"/>
+</widget>

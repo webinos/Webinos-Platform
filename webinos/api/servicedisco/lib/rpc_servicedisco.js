@@ -33,9 +33,10 @@
 	/**
 	 * Webinos ServiceDiscovery service constructor (server side).
 	 * @constructor
+	 * @alias Discovery
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
 	 */
-	function Discovery(rpcHandler, params) {
+	var Discovery = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -58,7 +59,7 @@
 		 * Holds other Service objects, not registered here. Only used on the
 		 * PZH.
 		 */
-		this.remoteServiceObjects = [];
+		this.remoteServiceObjects = {};
 
 		/**
 		 * Holds callbacks for findServices callbacks from the PZH
@@ -248,7 +249,7 @@
 				this.rpcHandler.parent.sendMsg('findServices', {id: callbackId});
 			}
 		};
-	}
+	};
 
 	Discovery.prototype = new RPCWebinosService;
 
@@ -256,9 +257,10 @@
 	 * Add services to internal array. Used by PZH.
 	 * @param services Array of services to be added.
 	 */
-	Discovery.prototype.addRemoteServiceObjects = function(services) {
+	Discovery.prototype.addRemoteServiceObjects = function(msg) {
+		var services = msg.services;
 		console.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
-		this.remoteServiceObjects = this.remoteServiceObjects.concat(services);
+		this.remoteServiceObjects[msg.from] = services;
 	};
 
 	/**
@@ -266,16 +268,9 @@
 	 * @param address Remove all services for this address.
 	 */
 	Discovery.prototype.removeRemoteServiceObjects = function(address) {
-		var oldCount = this.remoteServiceObjects.length;
-
-		function isNotServiceFromAddress(element) {
-			return address !== element.serviceAddress;
-		}
-
-		this.remoteServiceObjects = this.remoteServiceObjects.filter(isNotServiceFromAddress);
-
-		var removedCount = oldCount - this.remoteServiceObjects.length;
-		console.log("removeRemoteServiceObjects: removed " + removedCount + " services from: " + address);
+		var count = this.remoteServiceObjects[address].length;
+		delete this.remoteServiceObjects[address];
+		console.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
 	};
 
 	/**
@@ -308,15 +303,15 @@
 	 * @private
 	 */
 	Discovery.prototype.getAllServices = function(exceptAddress) {
+		var that = this;
 		var results = [];
-
-		function isNotExceptAddress(el) {
-			return (el.serviceAddress !== exceptAddress) ? true : false;
-		}
-		results = this.remoteServiceObjects.filter(isNotExceptAddress);
-
+		Object.keys(this.remoteServiceObjects).map(function(address) {
+			if (address === exceptAddress) {
+				return;
+			}
+			results = results.concat(that.remoteServiceObjects[address]);
+		});
 		results = results.concat(this.getRegisteredServices());
-
 		return results;
 	};
 

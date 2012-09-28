@@ -66,11 +66,6 @@
 		this.sessionId = '';
 
 		/**
-		 * Used to store objectRefs for callbacks that get invoked more than once
-		 */
-		this.objRefCacheTable = {};
-
-		/**
 		 * Used on the client side by executeRPC to store callbacks that are
 		 * invoked once the RPC finished.
 		 */
@@ -116,15 +111,32 @@
 	}
 
 	/**
+	 * Preliminary object to hold information to create JSONRPC request object.
+	 * @function
+	 * @private
+	 */
+	var newPreRPCRequest = function(method, params) {
+		var rpc = newJSONRPCObj();
+		rpc.method = method;
+		rpc.params = params || [];
+		rpc.preliminary = true;
+		return rpc;
+	};
+
+	/**
 	 * Create and return a new JSONRPC 2.0 request object.
 	 * @function
 	 * @private
 	 */
-	var newJSONRPCRequest = function(method, params) {
-		var rpc = newJSONRPCObj();
-		rpc.method = method;
-		rpc.params = params || [];
-		return rpc;
+	var toJSONRPC = function(preRPCRequest) {
+		if (preRPCRequest.preliminary) {
+			var rpcRequest = newJSONRPCObj(preRPCRequest.id);
+			rpcRequest.method = preRPCRequest.method;
+			rpcRequest.params = preRPCRequest.params;
+			return rpcRequest;
+		} else {
+			return preRPCRequest;
+		}
 	};
 
 	/**
@@ -147,7 +159,7 @@
 		var rpc = newJSONRPCObj(id);
 		rpc.error = {
 			data: error,
-			code: 32000,
+			code: -31000,
 			message: 'Method Invocation returned with error'
 		};
 		return rpc;
@@ -209,13 +221,6 @@
 		if (typeof includingObject === 'object'){
 			var id = request.id;
 			var that = this;
-			var fromObjectRef;
-
-			// callback registration (one request to many responses)
-			if (typeof request.fromObjectRef !== 'undefined' && request.fromObjectRef != null) {
-				this.objRefCacheTable[request.fromObjectRef] = {'from':from, msgId: msgid};
-				fromObjectRef = request.fromObjectRef;
-			}
 
 			function successCallback(result) {
 				if (typeof id === 'undefined') return;
@@ -227,11 +232,18 @@
 //					webinos.context.logContext(request,res);
 //				}
 			}
+
 			function errorCallback(error) {
 				if (typeof id === 'undefined') return;
 				var rpc = newJSONRPCResponseError(id, error);
 				that.executeRPC(rpc, undefined, undefined, from, msgid);
 			}
+
+			// registration object (in case of "one request to many responses" use)
+			var fromObjectRef = {
+				rpcId: request.id,
+				from: from
+			};
 
 			// call the requested method
 			includingObject[method](request.params, successCallback, errorCallback, fromObjectRef);
@@ -299,29 +311,10 @@
 	 * @param callback Success callback.
 	 * @param errorCB Error callback.
 	 * @param from Sender.
-	 * @param msgid An id.
 	 */
-	_RPCHandler.prototype.executeRPC = function (rpc, callback, errorCB, from, msgid) {
-		// service invocation case
-		if (typeof rpc.serviceAddress !== 'undefined') {
-			if (typeof module !== 'undefined') {
-				this.messageHandler.write(rpc, rpc.serviceAddress);
-			} else {
-				// this only happens in the web browser
-				webinos.session.message_send(rpc, rpc.serviceAddress);// TODO move the whole mmessage_send function here?
-			}
+	_RPCHandler.prototype.executeRPC = function (preRpc, callback, errorCB, from) {
+		var rpc = toJSONRPC(preRpc);
 
-			if (typeof callback === 'function'){
-				var cb = {};
-				cb.onResult = callback;
-				if (typeof errorCB === 'function') cb.onError = errorCB;
-				if (typeof rpc.id !== 'undefined') this.awaitingResponse[rpc.id] = cb;
-			}
-			return;
-		}
-
-
-		// ObjectRef invocation case
 		if (typeof callback === 'function'){
 			var cb = {};
 			cb.onResult = callback;
@@ -338,19 +331,13 @@
 			}
 
 		}
-		else if (rpc.method && rpc.method.indexOf('@') === -1) {
-			var objectRef = rpc.method.split('.')[0];
-			if (typeof this.objRefCacheTable[objectRef] !== 'undefined') {
-				from = this.objRefCacheTable[objectRef].from;
 
-			}
-			log.info('RPC MESSAGE' + " to " + from + " for callback " + objectRef);
+		if (typeof module !== 'undefined') {
+			this.messageHandler.write(rpc, from);
+		} else {
+			// this only happens in the web browser
+			webinos.session.message_send(rpc, from);// TODO move the whole mmessage_send function here?
 		}
-
-		//TODO check if rpc is request on a specific object (objectref) and get mapped from / destination session
-
-
-		this.messageHandler.write(rpc, from, msgid);
 	};
 
 	/**
@@ -367,22 +354,25 @@
 
 		var rpcMethod;
 
-		if (typeof service === 'object') {
+		if (service.api && service.id) {
 			// e.g. FileReader@cc44b4793332831dc44d30b0f60e4e80.truncate
 			// i.e. (class name) @ (md5 hash of service meta data) . (method in class to invoke)
 			rpcMethod = service.api + "@" + service.id + "." + method;
+		} else if (service.rpcId && service.from) {
+			rpcMethod = service.rpcId + "." + method;
 		} else {
 			rpcMethod = service + "." + method;
 		}
 
-		var rpcRequest = newJSONRPCRequest(rpcMethod, params);
+		var preRPCRequest = newPreRPCRequest(rpcMethod, params);
 
-		if (typeof service === 'object' && typeof service.serviceAddress !== 'undefined') {
-			// FIXME not a defined member of the JSON-RPC spec, maybe encode as part of the method
-			rpcRequest.serviceAddress = service.serviceAddress;
+		if (service.serviceAddress) {
+			preRPCRequest.serviceAddress = service.serviceAddress;
+		} else if (service.from) {
+			preRPCRequest.serviceAddress = service.from;
 		}
 
-		return rpcRequest;
+		return preRPCRequest;
 	};
 
 	/**
@@ -390,19 +380,16 @@
 	 * @param callback RPC object from createRPC with added methods available via RPC.
 	 */
 	_RPCHandler.prototype.registerCallbackObject = function (callback) {
-		if (typeof callback.id === 'undefined') {
+		if (!callback.id) {
+			// can only happen when registerCallbackObject is called before
+			// calling createRPC. file api impl does it this way. that's why
+			// the id generated here is then used in notify method below
+			// to overwrite the rpc.id, as they need to be the same
 			callback.id = getNextID();
 		}
-		if (typeof callback.api === 'undefined') {
-			// api property must exist, since that is used to register an object
-			callback.api = callback.id;
 
-			// for listener rpc calls it was previously needed to manually add
-			// fromObjRef to an rpc object. instead, now the rpc object can be
-			// used directly with registerCallbackObject which will add the
-			// fromObjRef property
-			callback.fromObjectRef = callback.id;
-		}
+		// api property must exist, since that is used to register an object
+		callback.api = callback.id;
 		this.registry.registerCallbackObject(callback);
 	};
 
@@ -437,9 +424,9 @@
 			var message = self.createRPC(service, method, params);
 
 			if (objectRef && objectRef.api)
-				message.fromObjectRef = objectRef.api;
+				message.id = objectRef.api;
 			else if (objectRef)
-				message.fromObjectRef = objectRef;
+				message.id = objectRef;
 
 			self.executeRPC(message, utils.callback(successCallback, this), utils.callback(errorCallback, this));
 		};

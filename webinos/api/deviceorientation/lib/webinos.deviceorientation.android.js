@@ -34,7 +34,7 @@ function addEventListener(params, successCB, errorCB, objectRef) {
         case "devicemotion":
             if (typeof objectRefs["devicemotion"] === "undefined")
                 objectRefs["devicemotion"] = [];
-            objectRefs["devicemotion"].push(objectRef);
+            objectRefs["devicemotion"].push(objectRef.rpcId);
             if (objectRefs["devicemotion"].length === 1) {
                 console.log("Adding device motion listener");
                 orientation.watchMotion(motionCb);
@@ -44,7 +44,7 @@ function addEventListener(params, successCB, errorCB, objectRef) {
         case "deviceorientation":
             if (typeof objectRefs["deviceorientation"] === "undefined")
                 objectRefs["deviceorientation"] = [];
-            objectRefs["deviceorientation"].push(objectRef);
+            objectRefs["deviceorientation"].push(objectRef.rpcId);
             if (objectRefs["deviceorientation"].length === 1) {
                 console.log("Adding device orientation listener");
                 orientation.watchOrientation(orientationCb);

@@ -103,7 +103,7 @@ public class ModuleUtils {
 		if(path.startsWith("http://") || path.startsWith("https://")) {
 			String filename = ModuleUtils.getResourceUriHash(path);
 			try {
-				moduleResource = getResource(new URI(path), filename);
+				moduleResource = downloadResource(new URI(path), filename);
 				remove_tmp_resource = true;
 			} catch(IOException e) {
 				Log.v(TAG, "install: aborting (unable to download resource); exception: " + e + "; resource = " + path);
@@ -288,7 +288,19 @@ public class ModuleUtils {
 		return result;
 	}
 
-	public static File getResource(URI httpUri, String filename) throws IOException {
+	public static File getResource(URI httpUri, boolean download) throws IOException {
+		String cacheFilename = getResourceUriHash(httpUri.toString());
+		File cachedFile = new File(resourceDir, cacheFilename);
+		if(cachedFile.exists())
+			return cachedFile;
+
+		if(download)
+			return downloadResource(httpUri, cacheFilename);
+
+		return null;
+	}
+
+	public static File downloadResource(URI httpUri, String filename) throws IOException {
 		/* download */
 		HttpClient http = new DefaultHttpClient();
 		HttpGet request = new HttpGet();

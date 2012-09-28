@@ -16,7 +16,6 @@
 *
 *******************************************************************************/
 var pzp   = require("./webinos/pzp/lib/pzp");
-
 var fs = require("fs"),
     path = require("path");
 
@@ -31,6 +30,7 @@ function help() {
   console.log("--pzp-name=[name]        name of the pzp (default \"\")");
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
   console.log("--preference=[option]    preference option (default hub, other option peer)");
+  console.log("--widgetServer           start widget server");
   process.exit();
 }
 
@@ -60,8 +60,15 @@ process.argv.forEach(function (arg) {
         break;
       }
     }
-    else if (parts[0] === "--help") {
-      help();
+    else {
+      switch (parts[0]) {
+        case "--help":
+          help();
+          break;
+        case "--widgetServer":
+          options.startWidgetServer = true;
+          break;
+      }
     }
   }
 });
@@ -117,7 +124,7 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
       config.pzhHost = options.pzhHost;
     }
     if (options.pzhName) {
-      config.pzhName = options.pzhName;
+  config.pzhName = options.pzhName;
     }
     if (options.pzpHost) {
       config.pzpHost = options.pzpHost;
@@ -139,11 +146,38 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     initializePzp(config, pzpModules);
 });
 
+function initializeWidgetServer() {
+  // Widget manager server
+  var wrt = require("./webinos/common/manager/widget_manager/lib/ui/widgetServer");
+  if (typeof wrt !== "undefined") {
+    // Attempt to start the widget server.
+    wrt.start(function (msg, wrtPort) {
+      if (msg === "startedWRT") {
+        // Write the websocket and widget server ports to file so the renderer can pick them up.
+        var wrtConfig = {};
+        wrtConfig.runtimeWebServerPort = wrtPort;
+        wrtConfig.pzpWebSocketPort = session.configuration.port.pzp_webSocket;
+        fs.writeFile((session.common.webinosConfigPath() + '/wrt/webinos_runtime.json'), JSON.stringify(wrtConfig, null, ' '), function (err) {
+          if (err) {
+            log.error('error saving runtime configuration file: ' + err);
+          } else {
+            log.info('saved configuration runtime file');
+          }
+        });            
+      } else {
+            log.error('error starting wrt server: ' + msg);
+      }
+    });
+  }
+}
+
 function initializePzp(config, pzpModules) {
   pzpInstance = new pzp.session();
   pzpInstance.initializePzp(config, pzpModules, function(status, result) {
     if (status) {
       console.log("successful started PZP" );
+      if (options.startWidgetServer)
+        initializeWidgetServer();
     } else {
       console.log("unsuccessful in starting PZP" + result);
     }

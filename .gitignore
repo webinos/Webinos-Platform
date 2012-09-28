@@ -1,33 +1,15 @@
+# generated webinos.js
+webinos/test/client/webinos.js
+
 # context db
 Manager/Context/Storage/data/context.json
 webinos/common/manager/context_manager/data/log.json
 
-# generated webinos.js
-webinos/test/client/webinos.js
-
-# eclipse project files
-.project
-.settings
-/.metadata/
-
-# vstudio prj files
-*.sln
-*.vcxproj*
-
-# generated certificates
-*.pem
-*.csr
-*.crl
-*.srl
-
-# backup files
-*~
-
-# waf lock files
-.lock-wscript
-
-# vi swap file
-*.swp
+# android generated build stuff
+webinos/common/android/*/bin/*
+webinos/common/android/*/gen/*
+webinos/common/android/app/assets/modules/webinos.zip
+webinos/common/android/wrt/assets/js/webinos.js
 
 # build stuff
 build
@@ -35,16 +17,11 @@ out
 *.node
 linker.lock
 *.o
+*.class
 
 # gyp generated
 webinos/common/manager/certificate_manager/src/Makefile
 webinos/common/manager/certificate_manager/src/*.mk
-
-# target folders
-target
-
-# reports folders
-reports
 
 # modules for vehicle connection
 webinos/api/vehicle/contrib/vb-con/
@@ -66,3 +43,34 @@ RPC/node_modules/xmlhttprequest/
 !/node_modules/xmldigsig.js
 
 webinos/api/geolocation/node_modules
+
+# generated certificates
+*.pem
+*.csr
+*.crl
+*.srl
+
+# target folders
+target
+
+# reports folders
+reports
+
+# eclipse project files
+.project
+.settings
+/.metadata/
+
+# vstudio prj files
+*.sln
+*.vcxproj*
+
+# waf lock files
+.lock-wscript
+
+# backup files
+*~
+
+# vi swap file
+*.swp
+

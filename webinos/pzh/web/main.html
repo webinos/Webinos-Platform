@@ -74,8 +74,33 @@
       }
       text += '</table> </p>';
       setArticle("Revoke certificate", text);
+  };
+  function listAllServices(payload){
+      var text = " <h3 align=center> Configure services</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      for (var i = 0; i < payload.pzEntityList.length; i += 1 ) {
+        var pzId = payload.pzEntityList[i].pzId;
+        text += '<tr><td><input type="button" onclick="webinosPZH.commands.listUnregServices(\'' +
+          pzId + '\', listUnregServices)" value="' + pzId + '"/></td></tr>';
+      }
+      text += "</table> </p>";
+      text += "<p><ul>";
+      for (var i = 0; i < payload.services.length; i += 1 ) {
+        var sv = payload.services[i];
+        text += "<li> " + sv.api + " @ " + sv.serviceAddress +
+          "<input type='button' value='unregister' onclick='webinosPZH.commands.unregisterService(\"" + sv.serviceAddress + "\",\"" + sv.id + "\",\"" + sv.api + "\")'></li>";
+      }
+      text += '</ul>';
+      setArticle("Services", text);
   }
-
+  function listUnregServices(payload){
+      var text = '<h3 align=center>Original Services from ' + payload.pzEntityId + '</h3><ul>';
+      for (var i = 0; i < payload.modules.length; i += 1) {
+        var mod = payload.modules[i];
+          text += '<li>' + mod.name + '<input type="button" value="register" onclick="webinosPZH.commands.registerService(\'' + payload.pzEntityId + '\',\'' + mod.name + '\')"></li>';
+      }
+      text += '</ul>';
+      setArticle("unregistered Services", text);
+  }
   function showCrashLog(payload){
       setArticle("Crash Log", payload);
   }
@@ -137,6 +162,9 @@
       webinosPZH.commands.restartPzh();
       setArticle("Command sent", "<p>Restart command sent!</p>");
     });
+    $("#serviceConfig").click(function(){
+      webinosPZH.commands.listAllServices(listAllServices);
+    });
 
 
     $('.column').equalHeight(); // Fix height
@@ -185,6 +213,7 @@
         <li> <a href="#infoLog" id="infoLog">Info Log </a> </li>
         <li> <a href="#restartPzh" id="restartPzh">Restart PZH </a> </li>
         <li> <a href="#userDetails" id="userDetails">User Details </a> </li>
+        <li> <a href="#serviceConfig" id="serviceConfig">Service Configuration </a> </li>
       </ul>
 
     <footer>
