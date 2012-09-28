@@ -42,15 +42,15 @@ Condition::Condition(TiXmlElement* condition){
 			string tmp = (child->Attribute("match")!=NULL) ? child->Attribute ("match") : "";
 			if (tmp.length() == 0)
 				tmp = (child->GetText() != NULL) ? child->GetText() : "";
-			unsigned int nextPos, pos = 0;
+			int nextPos, pos = 0;
 		
 			//LOG("[Policy]  : match value: id"<<++iii);	
-			while(pos < tmp.length())
+			while(pos < (int)tmp.length())
 			{
 			//LOG("[Policy]  : match value: id"<<iii);	
 					
 				nextPos = tmp.find(" ",pos);
-				if (nextPos == string::npos)
+				if (nextPos == (int)string::npos)
 					nextPos = tmp.length();			
 				if(pos != nextPos){
 					string attr = child->Attribute("attr");

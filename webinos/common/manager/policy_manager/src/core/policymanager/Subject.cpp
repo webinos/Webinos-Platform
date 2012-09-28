@@ -29,11 +29,11 @@ Subject::Subject(TiXmlElement* subject){
 		if (tmp.length() == 0)
 			tmp = (child->GetText() != NULL) ? child->GetText() : "";
 		
-		unsigned int nextPos, pos = 0;
-		while(pos < tmp.length())
+		int nextPos, pos = 0;
+		while(pos < (int)tmp.length())
 		{
 			nextPos = tmp.find(" ",pos);
-			if (nextPos == string::npos)
+			if (nextPos == (int)string::npos)
 				nextPos = tmp.length();			
 			if(pos != nextPos){
 				string attr = child->Attribute("attr");
