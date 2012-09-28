@@ -63,13 +63,14 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
   function(status, value){
     if (status && value && value.code=== "ENOENT") {//meta data
       try {
-        if (webinosType === "Pzh" || webinosType === "PzhCA") {
-          cn = self.metaData.webinosType + ":"+ self.metaData.serverName  ;
-        } else {
+        if (webinosType === "Pzp") {
           cn = self.metaData.webinosType + ":"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
+        } else {
+          cn = self.metaData.webinosType + ":"+ self.metaData.serverName  ;
         }
         self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
           if(!status) {
+            log.error("failed generating self signed certificate");
             return callback(status, value);
           } else {
             conn_key = value;
@@ -78,6 +79,7 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
               self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn,
               function(status, value){ // Master Certificate
                 if (status) {
+                  log.info("connection and master certificate generated");                  
                   self.storeAll(function(status, value) {
                     if (status) {
                       callback(true, conn_key);

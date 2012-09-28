@@ -18,6 +18,7 @@
 var ansi        = require('ansi');
 var path        = require('path');
 var fs          = require('fs');
+var os          = require("os");
 try {
   var cursor      = ansi(process.stderr);
 } catch (err) {
@@ -46,26 +47,33 @@ var Log = function(filename) {
     this.id = id;
   };
   function getLineNumber () {
-    var error = new Error();
-    return (error.stack.split('\n')[3].split(':')[1]);
+    var error = new Error();  
+    if(os.type().toLowerCase() === "windows_nt") 
+      return (error.stack.split('\n')[3].split(':')[2]);
+    else 
+      return (error.stack.split('\n')[3].split(':')[1]);
   }
   logging.addType = function(name) {
     instanceName = name;
   };
   logging.error = function(msg) {
-    var date = new Date();
+    var date = new Date(), name;
     var id =  this.id ? " " +this.id+" ": " ";
+    if (typeof msg === "object") {msg = JSON.stringify(msg);}
+    if (os.type().toLowerCase() === "windows_nt") { name = this.name.split("\\").pop(); } else { name = this.name.split("/").pop();}
     var time = date.getDate()+"."+date.getMonth()+"."+date.getFullYear()+ " " + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+":"+date.getMilliseconds();
-    var formattedMsg =  "["+time+ "] error "+ this.name.split("/").pop() + " " +getLineNumber() + " " + id + msg + "\n";
+    var formattedMsg =  "["+time+ "] error "+ name + " " +getLineNumber() + " " + id + msg + "\n";
     cursor.fg.red().write(formattedMsg);
     cursor.reset();
     this.writeLog("error", "<p>"+formattedMsg+"</p>");
   };
   logging.info = function(msg) {
-    var date = new Date();
+    var date = new Date(), name;
     var id = this.id ? " "+this.id+" ": " ";
+    if (typeof msg === "object") {msg = JSON.stringify(msg);}
+    if (os.type().toLowerCase() === "windows_nt") { name = this.name.split("\\").pop(); } else { name = this.name.split("/").pop();}
     var time = date.getDate()+"."+date.getMonth()+"."+date.getFullYear()+ "-" + date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()+":"+date.getMilliseconds();
-    var formattedMsg =  "["+time+ "] info " + this.name.split("/").pop() + "-" +getLineNumber() + " " +  id + msg + "\n";
+    var formattedMsg =  "["+time+ "] info " + name + "-" +getLineNumber() + " " +  id + msg + "\n";
     cursor.fg.grey().write(formattedMsg);
     cursor.reset();
     this.writeLog("info", "<p>"+formattedMsg+"</p>");

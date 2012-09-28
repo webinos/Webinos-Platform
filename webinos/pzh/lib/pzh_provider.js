@@ -34,16 +34,17 @@ var pzhWI       = webinos.global.require(webinos.global.pzh.location, "web/pzh_w
 
 var pzh_session = require("./pzh_sessionHandling.js");
 /**
- *
+ * Defines the constructor for the provider  and initializes the provider functions
  * @param input_hostname
  * @param input_friendlyName
  * @constructor
  */
 var Provider = function(input_hostname, input_friendlyName) {
+  "use strict";
   pzhWI.call(this);
-  this.address       = "0.0.0.0";
-  var server         = [];
-  var pzhs          = [];
+  var server        = []; // TLS server socket on which provider listens
+  var pzhs          = []; // instances of the pzh currently loaded
+  this.address      = "0.0.0.0";
   this.config       = [];
   this.friendlyName = input_friendlyName;
   this.hostname     = input_hostname;
@@ -51,7 +52,7 @@ var Provider = function(input_hostname, input_friendlyName) {
 
   /**
    *
-   * @param callback
+   * @param callback if successful returns public IP address if failed returns "0.0.0.0"
    */
   function setHostName(callback) {
     "use strict";
@@ -66,106 +67,18 @@ var Provider = function(input_hostname, input_friendlyName) {
   }
 
   /**
-   *
-   * @param instance
-   * @param conn
-   * @return {*}
-   */
-  function removeClient(instance, conn) {
-    "use strict";
-    var id;
-    for (id in instance.connectedPzp){
-      if (instance.connectedPzp.hasOwnProperty(id) && instance.connectedPzp[id].socket === conn) {
-        log.info("removed pzp instance details -" + id);
-        delete instance.connectedPzp[id];
-        return id;
-      }
-    }
-
-    for (id in instance.connectedPzh) {
-      if (instance.connectedPzh.hasOwnProperty(id) && instance.connectedPzh[id].socket === conn) {
-        log.info("removed pzh instance details -" + id);
-        delete instance.connectedPzh[id];
-        return id;
-      }
-    }
-  }
-
-  /**
-   *
-   * @param conn
-   */
-  function handleConnection(conn) {
-    "use strict";
-    // if server name exists in conn and pzh_provider.pzhs has details about pzh instance,
-    // message will be routed to respective PZH authorization function
-    if (conn.servername && pzhs[conn.servername]) {
-      pzhs[conn.servername].handleConnectionAuthorization(conn);
-    } else {
-      conn.socket.end();
-      log.error("server is not registered in "+conn.servername);
-    }
-    // In case data is received at pzh_provider
-    conn.on("data", function(data){
-      // forward message to respective PZH handleData function
-      if(conn.servername && pzhs[conn.servername]) {
-        pzhs[conn.servername].handleData(conn, data);
-      } else {
-        log.info("("+conn.servername+") is not registered in the provider");
-      }
-    });
-    // In case of error
-    conn.on("end", function(err) {
-      log.info("("+conn.servername+") client ended connection");
-    });
-
-    // It calls removeClient to remove PZH from list.
-    conn.on("close", function() {
-      try {
-        log.info("("+conn.servername+") Pzh/Pzp  closed");
-        if(conn.servername && pzhs[conn.servername]) {
-          var cl      = pzhs[conn.servername];
-          var removed = removeClient(cl, conn);
-          if (removed !== null && typeof removed !== "undefined"){
-            cl.messageHandler.removeRoute(removed, conn.servername);
-            cl.discovery.removeRemoteServiceObjects(removed);
-          }
-        }
-      } catch (err) {
-        log.error("("+conn.servername+") remove client from connectedPzp/connectedPzh failed" + err);
-      }
-    });
-
-    conn.on("error", function(err) {
-      log.error("("+conn.servername+") general error " + err);
-    });
-  }
-
-  /**
-   *
+   *  Provider stores PZH in the trusted list,
    * @param pzhs
    * @param server
    * @param trustedPzh
    */
-  function loadPzhs(pzhs, server, trustedPzh) {
+  function loadPzhs() {
     "use strict";
-    var myKey, key;
-    for (myKey = 0 ; myKey < trustedPzh.length; myKey=myKey+1) {
-      key = trustedPzh[myKey];
-      pzhs[key] = new pzh_session();
-      pzhs[key].addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
-        if (status) {
-          log.info(JSON.stringify(value));
-          server.addContext(pzhId, value);
-          log.info("started pzh " + pzhId);
-        } else {
-          log.error("failed starting pzh " + value);
-        }
-      });
+    var myKey;
+    for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
+      pzh_session.createPzh(trustedPzh[myKey]);
     }
   }
-
-
 
   /**
    *
@@ -187,6 +100,7 @@ var Provider = function(input_hostname, input_friendlyName) {
           requestCert       : true,
           rejectUnauthorised: false
         };
+        console.log(options);
         // Main pzh_provider TLS server
         server = tls.createServer (options, function (conn) {
           handleConnection(conn);
@@ -210,6 +124,47 @@ var Provider = function(input_hostname, input_friendlyName) {
         });
         server.listen(self.config.userPref.ports.provider, self.address);
       }
+    });
+  }
+
+  /**
+   * Handle connection coming from pzh or pzp and forwards request to respective pzh.
+   * The mechanism relies on "servername" received from the client.
+   * @param conn
+   */
+  function handleConnection(conn) {
+    "use strict";
+    // if server name exists and pzhs has details about pzh instance,
+    // message will be routed to respective PZH authorization function
+    if (conn.servername && pzhs[conn.servername]) {
+      pzhs[conn.servername].handleConnectionAuthorization(conn);
+    } else {
+      conn.socket.end();
+      log.error("pzh -  " + +conn.servername +" is not registered in this provider");
+    }
+    conn.on("data", function(data){
+      if(conn.servername && pzhs[conn.servername]) { // forward message to respective PZH handleData function
+        pzhs[conn.servername].handleData(data);
+      } else {
+        log.info("pzh - "+conn.servername+" is not registered in the provider");
+      }
+    });
+
+    conn.on("end", function(err) {
+      log.info("pzp in the pzh - "+conn.servername+" ended connection");
+    });
+
+    conn.on("close", function() {
+      if(conn.servername && pzhs[conn.servername]) {
+        pzhs[conn.servername].removeRoute(conn);
+        log.info("pzp in the pzh - "+conn.servername+" closed connection");
+      } else {
+        log.info("unknown entity ended connection");
+      }
+    });
+
+    conn.on("error", function(err) {
+      log.error("pzp in the pzh - "+conn.servername+" general error " + err.message);
     });
   }
 
