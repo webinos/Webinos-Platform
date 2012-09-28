@@ -37,13 +37,14 @@ Subject::Subject(TiXmlElement* subject){
 				nextPos = tmp.length();			
 			if(pos != nextPos){
 				string attr = child->Attribute("attr");
-				unsigned int dot_pos = attr.find(".");
-				string key = (dot_pos != string::npos) ? attr.substr(0, dot_pos) : attr;
+				int dot_pos = attr.find(".");
+				string key = (dot_pos != (int)string::npos) ? attr.substr(0, dot_pos) : attr;
 				match_info_str * tmp_info = new match_info_str();
 				tmp_info->equal_func = (child->Attribute("func")!=NULL) ? child->Attribute("func") : "glob";
 				tmp_info->value = tmp.substr(pos, nextPos-pos);
 				
-				tmp_info->mod_func = (dot_pos != string::npos) ? attr.substr(dot_pos+1) : "";
+				tmp_info->mod_func = (dot_pos != (int)string::npos) ? attr.substr(dot_pos+1) : "";
+				LOGD("subject() %d - equal_func=%s, value=%s, mod_func=%s", pos, tmp_info->equal_func.data(), tmp_info->value.data(), tmp_info->mod_func.data());
 				info[key].push_back(tmp_info);
 			}
 			pos = nextPos+1;
@@ -74,6 +75,7 @@ bool Subject::match(Request* req){
 				foundInBag = false;
 				for(unsigned int i=0; !foundInBag && i<req_vet->size(); i++){ //iteration on request's elements. 
 					string mod_function = info_vet[j]->mod_func;
+					LOGD("Subject.match() - mod_function=%s - req_vet=%s", mod_function.data(), req_vet->at(i).data());
 					string s = (mod_function != "") 
 						? modFunction(mod_function, req_vet->at(i))
 						: req_vet->at(i);
