@@ -68,8 +68,8 @@ session_configuration.setConfiguration = function (name, type, host, pzhName, ca
           }
           // check if the config json file is empty
           var tmp = data.toString("utf8");
-		  if (( err && err.code=== "ENOENT" ) || (tmp === "")){	  
-		  // CREATE NEW CONFIGURATION
+          if (( err && err.code=== "ENOENT" ) || (tmp === "")){	  
+          // CREATE NEW CONFIGURATION
           var config = createConfigStructure(name, type);
           config.name = name;
 
