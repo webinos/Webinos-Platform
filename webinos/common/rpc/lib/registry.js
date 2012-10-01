@@ -113,7 +113,7 @@
 			delete this.objects[callback.api];
 		}
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
