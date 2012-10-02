@@ -15,35 +15,30 @@
 *
 *******************************************************************************/
 
-/**
- * StatusServer.js
- * handles the connection status service
- * author: Eelco Cramer (TNO)
- */
+/* Logger wrapper: currently using log4js */
 
-var sys = require('util');
-var logger = require('nlogger').logger('StatusServer.js');
+(function() {
+    var log4js = require('log4js');
 
-var connection;
+    function getLogger(name, level) {
+        var defaultLevel = 'info';
 
-var io;
+        if (!level) {
+            level = defaultLevel;
+        } else if (level === 'verbose') {
+            level = 'trace';
+        }
 
-//TODO retrieve jid from pzhConnection
-function start(socketIO, pzhConnection, jid) {
-	logger.trace("Entering start()");
+        var logger = log4js.getLogger(name);
+        
+        logger.verbose = function(str) {
+            this.trace(str);
+        }
+        
+        logger.setLevel(level.toUpperCase());
+        
+        return logger;
+    }
 
-	io = socketIO;
-	connection = pzhConnection;
-	
-	io.of('/bootstrap').on('connection', function(socket) {
-		logger.trace("New connection.");
-		//TODO add boolean for connected status to XMPP server
-		socket.emit('status', { 'device': jid, 'owner': jid.split("/")[0]});
-	});
-	
-	//TODO add connection listener to update status if pzh connection is disconnected
-	
-	logger.trace("Leaving start()");
-}
-
-exports.start = start;
+    exports.getLogger = getLogger;
+})();
