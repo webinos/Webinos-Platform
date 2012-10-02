@@ -46,9 +46,9 @@ function GeolocationFeature(rpcHandler, connector) {
 	GenericFeature.GenericFeature.call(this);
 
     if (connector === undefined) {
-        this.geo = new geolocation.Service(rpcHandler, { 'connector': 'geoip'});
+        this.service = new geolocation.Service(rpcHandler, { 'connector': 'geoip'});
     } else {
-	    this.geo = new geolocation.Service(rpcHandler, { 'connector': connector} );
+	    this.service = new geolocation.Service(rpcHandler, { 'connector': connector} );
     }
     
 	this.api = NS;
@@ -73,7 +73,7 @@ function GeolocationFeature(rpcHandler, connector) {
 		var payload = JSON.parse(params);
 		var conn = this.uplink;
 
-		this.geo.getCurrentPosition(payload, function(result) {
+		this.service.getCurrentPosition(payload, function(result) {
 			logger.debug("The answer is: " + JSON.stringify(result));
 			logger.debug("Sending it back via XMPP...");
 			conn.answer(stanza, JSON.stringify(result));
@@ -84,7 +84,7 @@ function GeolocationFeature(rpcHandler, connector) {
 
 	this.on('invoked-from-local', function(featureInvoked, params, successCB, errorCB, objectRef) {
 		logger.verbose('on(invoked-from-local)');
-		this.geo.getCurrentPosition(params, successCB, errorCB, objectRef);
+		this.service.getCurrentPosition(params, successCB, errorCB, objectRef);
 		logger.verbose('ending on(invoked-from-local)');
 	});
 		

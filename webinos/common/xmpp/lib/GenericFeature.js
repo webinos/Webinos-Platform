@@ -66,7 +66,7 @@ function GenericFeature() {
     	this.device = jid;
         this.owner = jid.split("/")[0];
     	this.uplink = connection;
-    	this.serviceAddress = this.device;
+    	this.service.serviceAddress = this.device;
     }
     
     /* called when a shared service is invoked from remote */

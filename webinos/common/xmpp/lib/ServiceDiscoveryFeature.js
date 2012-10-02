@@ -50,6 +50,8 @@
     		displayName: 'ServiceDiscovery',
     		description:'The webinos service discovery API'
     	});
+    	
+    	this.service = this.base;
 
         RPCWebinosService.call(this.base);
 
