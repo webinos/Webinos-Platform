@@ -13,513 +13,489 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2012 Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
 ******************************************************************************/ -->
 <!DOCTYPE html>
 <html dir="ltr" lang="en-US">
-	<head>
-		<title>Webinos Local Discovery Prototype</title>
+  <head>
+    <title>Webinos Local Discovery Prototype</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" ></script>
-    <link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />-->
+    <link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
     <script type="text/javascript" src="./webinos.js"></script>
-	</head>
-	<body>	
-	<div id="content">	
-		<div id="header">
-		</div>
-		
-		<div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
-		
-		<div id="functions">	
-		<h2>Testfunctions:</h2>
-	    <h3> Discover Device and Service </h3>
-		<p>
-			<!--<INPUT TYPE="submit" onclick="connectWebinos()" VALUE="Connect to webinos" class="button" /><br />-->
-			<INPUT TYPE="submit" onclick="connectWebinos()" VALUE="Find Service" class="button" /><br />
-			<INPUT TYPE="submit" onclick="authenticate()" VALUE="Authenticate" class="button" /><br />
-			<select id='servicelist'>
-				<option>Pull down and select a service </option>
-				<OPTION VALUE="0x1106"          >FileService
-				<OPTION VALUE="0x1108"          >HeadsetService
-			</select><br/>
-		    <INPUT TYPE="submit" onclick="discoverdevice()" VALUE="Find Device with Selected Service" class="button" /><br />
-			<INPUT TYPE="submit" onclick="bindservice()" VALUE="Bind with device and service" class="button" /><br />
+    </head>
+    <body>	
+      <div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+      <div id="functions">	
+        <h2>Testfunctions:</h2>
+        <h3> Discover Device and Service </h3>
+        <p>
+          <INPUT TYPE="submit" onclick="connectWebinos()" VALUE="Find Service" class="button" /><br />
+          <!--<INPUT TYPE="submit" onclick="authenticate()" VALUE="Authenticate" class="button" /><br />-->
+          <select id='servicelist'>
+          <option>Pull down and select a service </option>
+            <OPTION VALUE="0x1106"          >FileService
+            <OPTION VALUE="0x1108"          >HeadsetService
+            </select><br/>
+            <INPUT TYPE="submit" onclick="discoverdevice()" VALUE="Find Device with Selected Service" class="button" /><br />
+            <INPUT TYPE="submit" onclick="bindservice()" VALUE="Bind with device and service" class="button" /><br />
 			
-		<h3> Use Discovered service</h3>
-			<INPUT TYPE="submit" onclick="listfile()" VALUE="Open Folder" class="button" /><br />
-			<INPUT TYPE="submit" onclick="upfolder()" VALUE="Go Back to Parent Folder" class="button" /><br />
-			<INPUT TYPE="submit" onclick="getfile()" VALUE="Get File" class="button" /><br />
-			<INPUT TYPE="submit" onclick="playfile()" VALUE="play file" class="button" /><br />
-			<div id="loader"></div>
-
-		</p>
-    </div>
+            <h3> Use Discovered service</h3>
+            <INPUT TYPE="submit" onclick="listfile()" VALUE="Open Folder" class="button" /><br />
+            <INPUT TYPE="submit" onclick="upfolder()" VALUE="Go Back to Parent Folder" class="button" /><br />
+            <INPUT TYPE="submit" onclick="getfile()" VALUE="Get File" class="button" /><br />
+            <INPUT TYPE="submit" onclick="playfile()" VALUE="play file" class="button" /><br />
+            <div id="loader"></div>
+        </p>
+      </div>
     		
-		<p> Found devices supporting selected service  :</p>
-	
-			<select id='devicelist' size="6" multiple="multiple">
-    	    	<OPTION VALUE="Select a device below to bind">Select a device below to bind</OPTION>
-			</select><br/>
+      <p> Found devices supporting selected service  :</p>
+      <select id='devicelist' size="6" multiple="multiple">
+        <OPTION VALUE="Select a device below to bind">Select a device below to bind</OPTION>
+      </select><br/>
 
-	  	<p> Folder list :</p>
+      <p> Folder list :</p>
+      <select id='folderlist' size="7" multiple="multiple">
+        <OPTION VALUE="Select a folder below">Select a folder below</OPTION>
+      </select>
+      <p> File list :</p>
+      <select id='filelist' size="10" multiple="multiple">
+        <OPTION VALUE="Select a file below">Select a file below</OPTION>
+      </select>
 		
-			<select id='folderlist' size="7" multiple="multiple">
-		        <OPTION VALUE="Select a folder below">Select a folder below</OPTION>
-			</select>
-		<p> File list :</p>
-	
-			<select id='filelist' size="10" multiple="multiple">
-		        <OPTION VALUE="Select a file below">Select a file below</OPTION>
-			</select>
-		
-		<hr />
-	    <p>Contacts:</p>
-	   <a href="mailto:ziran.sun@samsung.com">ziran.sun@samsung.com</a> 
+      <hr />
+        <p>Contacts:</p>
+	    <a href="mailto:ziran.sun@samsung.com">ziran.sun@samsung.com</a> 
 			
 	</body>
 	
-	<script type="text/javascript">
+  <script type="text/javascript">
 	
-	jQuery(window).ready(function() {
-            function fillPZAddrs(data) {
-            	var pzhId, connectedPzp, connectedPzh;
-	            if(data.from !== "virgin_pzp") {
-	                pzhId = data.payload.message.pzhId;
-	                connectedPzp = data.payload.message.connectedPzp;
-                    connectedPzh = data.payload.message.connectedPzh;
-	            }
-                var pzpId = data.from;
-               
-                
-                if(document.getElementById('pzh_pzp_list'))
-                    document.getElementById('pzh_pzp_list').innerHTML="";
-        
-                $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
-                
-                var i;
-                if(typeof connectedPzp !== "undefined") {
-		            for(i =0; i < connectedPzp.length; i++) {
-		                $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		            }
-		        }
-                $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
-                $("</optgroup>").appendTo("#pzh_pzp_list");
-                $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
-                if(typeof connectedPzh !== "undefined") {
-		            for(i =0; i < connectedPzh.length; i++) {
-		                $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		            }
-		        }
-                $("</optgroup>").appendTo("#pzh_pzp_list");
-            }
-            webinos.session.addListener('registeredBrowser', fillPZAddrs);
+  jQuery(window).ready(function() {
+    function fillPZAddrs(data) {
+      var pzhId, connectedPzp, connectedPzh;
+      if(data.from !== "virgin_pzp") {
+        pzhId = data.payload.message.pzhId;
+        connectedPzp = data.payload.message.connectedPzp;
+        connectedPzh = data.payload.message.connectedPzh;
+	  }
+      var pzpId = data.from;
+      if(document.getElementById('pzh_pzp_list'))
+      document.getElementById('pzh_pzp_list').innerHTML="";
+      
+      $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
+      var i;
+      if(typeof connectedPzp !== "undefined") {
+        for(i =0; i < connectedPzp.length; i++) {
+          $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
+        }
+	  }
+      $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
+      $("</optgroup>").appendTo("#pzh_pzp_list");
+      $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
+      if(typeof connectedPzh !== "undefined") {
+        for(i =0; i < connectedPzh.length; i++) {
+          $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
+        }
+      }
+      $("</optgroup>").appendTo("#pzh_pzp_list");
+    }
+    webinos.session.addListener('registeredBrowser', fillPZAddrs);
             
-            function updatePZAddrs(data) {
-                if(typeof data.payload.message.pzp !== "undefined") {
-                    $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
-                } else {
-                    $("<option value=" + data.payload.message.pzh + " >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
-                }
-            }
-            webinos.session.addListener('update', updatePZAddrs);
+    function updatePZAddrs(data) {
+      if(typeof data.payload.message.pzp !== "undefined") {
+        $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
+      } else {
+        $("<option value=" + data.payload.message.pzh + " >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
+      }
+    }
+    webinos.session.addListener('update', updatePZAddrs);
             
-            function printInfo(data) {
-                $('#message').append('<li>'+data.payload.message+'</li>');
-            }
-            webinos.session.addListener('info', printInfo);
-		});
+    function printInfo(data) {
+      $('#message').append('<li>'+data.payload.message+'</li>');
+    }
+    webinos.session.addListener('info', printInfo);
+  });
 	
+  var bluetoothService = null;
+  function emptyList( box ) {
+    box.options.length = 1;
+  }
 
-		var bluetoothService = null;
+  function fillList( box, arr0, arr1 ) {
+    // arr[0] holds the display text
+    // arr[1] are the values
 
-		function emptyList( box ) {
-			box.options.length = 1;
-		}
+    for ( i = 0; i < arr0.length; i++ ) {
+      option = new Option( arr0[i], arr1[i] );
+      box.options[box.length] = option;
+    }
+    box.selectedIndex=0;
+  }
 
-		function fillList( box, arr0, arr1 ) {
-			// arr[0] holds the display text
-			// arr[1] are the values
+  function changeHandler(event)
+  {
+    var index;
+    index = this.selectedIndex;
 
-			for ( i = 0; i < arr0.length; i++ ) {
+    if (index >= 0 && this.options.length > index)
+    {
+      // Get the new value
+      selected = this.options[index].value;
+    }
+    return selected;
+  }
 
-				option = new Option( arr0[i], arr1[i] );
-				box.options[box.length] = option;
-			}
-			box.selectedIndex=0;
-		}
-	
-		function changeHandler(event)
-		{
-			var index;
-			index = this.selectedIndex;
+  if (servicelist.addEventListener) 
+  {
+    // DOM2 standard
+    servicelist.addEventListener("change", changeHandler, false);
+  }
+  else if (service.attachEvent) 
+  {
+    // IE fallback
+    servicelist.attachEvent("onchange", changeHandler);
+  }
+  else 
+  {
+    // DOM0 fallback
+    servicelist.onchange = changeHandler;
+  }
 
-			if (index >= 0 && this.options.length > index)
-			{
-				// Get the new value
-  				selected = this.options[index].value;
- 			}
-     		return selected;
-		}
-		
-		if (servicelist.addEventListener) 
-		{
-  			// DOM2 standard
-  			servicelist.addEventListener("change", changeHandler, false);
-		}
-		else if (service.attachEvent) 
-		{
-  			// IE fallback
-  			servicelist.attachEvent("onchange", changeHandler);
-		}
-		else 
-		{
-  			// DOM0 fallback
-  			servicelist.onchange = changeHandler;
-		}
+  if (devicelist.addEventListener) 
+  {
+    // DOM2 standard
+    devicelist.addEventListener("change", changeHandler, false);
+  }
+  else if (devicelist.attachEvent) 
+  {
+    // IE fallback
+    devicelist.attachEvent("onchange", changeHandler);
+  }
+  else 
+  {
+    // DOM0 fallback
+    devicelist.onchange = changeHandler;
+  }
 
-		if (devicelist.addEventListener) 
-		{
-  			// DOM2 standard
-  			devicelist.addEventListener("change", changeHandler, false);
-		}
-		else if (devicelist.attachEvent) 
-		{
-  			// IE fallback
-  			devicelist.attachEvent("onchange", changeHandler);
-		}
-		else 
-		{
-  			// DOM0 fallback
-  			devicelist.onchange = changeHandler;
-		}
+  if (folderlist.addEventListener) 
+  {
+    // DOM2 standard
+    folderlist.addEventListener("change", changeHandler, false);
+  }
+  else if (folderlist.attachEvent) 
+  {
+    // IE fallback
+   folderlist.attachEvent("onchange", changeHandler);
+  }
+  else 
+  {
+    // DOM0 fallback
+    folderlist.onchange = changeHandler;
+  }		
+
+  if (filelist.addEventListener) 
+  {
+    // DOM2 standard
+    filelist.addEventListener("change", changeHandler, false);
+  }
+  else if (filelist.attachEvent) 
+  {
+    // IE fallback
+    filelist.attachEvent("onchange", changeHandler);
+  }
+  else 
+  {
+    // DOM0 fallback
+    filelist.onchange = changeHandler;
+  }		
+
+  function handle_authentication_query() // see function
+  {
+    console.log('------------------handle_auth : ');
+  }
 		
-		if (folderlist.addEventListener) 
-		{
-  			// DOM2 standard
-  			folderlist.addEventListener("change", changeHandler, false);
-		}
-		else if (folderlist.attachEvent) 
-		{
-  			// IE fallback
-  			folderlist.attachEvent("onchange", changeHandler);
-		}
-		else 
-		{
-  			// DOM0 fallback
-  			folderlist.onchange = changeHandler;
-		}		
+  function authenticate()
+  {
+    var parameters={};
+    bluetoothService.BTauthenticate(parameters, handle_authentication_query)
+  }
 		
-		if (filelist.addEventListener) 
-		{
-  			// DOM2 standard
-  			filelist.addEventListener("change", changeHandler, false);
-		}
-		else if (filelist.attachEvent) 
-		{
-  			// IE fallback
-  			filelist.attachEvent("onchange", changeHandler);
-		}
-		else 
-		{
-  			// DOM0 fallback
-  			filelist.onchange = changeHandler;
-		}		
-		
-		
-		function handle_authentication_query() // see function
-  		{
-			console.log('------------------handle_auth : ');
-		}
-		
-		function authenticate()
-		{
-			var parameters={};
-			bluetoothService.BTauthenticate(parameters, handle_authentication_query)
-		}
-		
-		function discoverdevice()
-		{
-			var serviceType = document.getElementById('servicelist').value;
-			console.log("serviceType:" + serviceType); 
+  function discoverdevice()
+  {
+    var serviceType = document.getElementById('servicelist').value;
+    console.log("serviceType:" + serviceType); 
 			
-			$('#loader').html("<img src='../../vehicle/ajaxloader.gif'>");
+    $('#loader').html("<img src='vehicle/ajaxloader.gif'>");
 	
-			//webinos.rpc.findServices(serviceType, {onFound: function (results) {		
-			//bluetoothService.findservices(serviceType,function (results){
-			bluetoothService.BTfindservice(serviceType,function (results){
-				document.getElementById("loader").innerHTML = "";
-				var textarray = [];
-				var valuearray = []; 
-				var temp = [];
-				console.log("results:" + results);
+    //webinos.rpc.findServices(serviceType, {onFound: function (results) {		
+    //bluetoothService.findservices(serviceType,function (results){
+    bluetoothService.BTfindservice(serviceType,function (results){
+      document.getElementById("loader").innerHTML = "";
+      var textarray = [];
+      var valuearray = []; 
+      var temp = [];
+      console.log("results:" + results);
 	
-				var str = String(results);
-				var str_split = str.split("\n");
+      var str = String(results);
+      var str_split = str.split("\n");
 				
-				var val = document.getElementById('devicelist');
-				emptyList(devicelist);
+      var val = document.getElementById('devicelist');
+      emptyList(devicelist);
 		
-				for (i = 0; i < str_split.length; i++)
-				{	
-					if(str_split[i].indexOf(",", 0) == 0)
-					{
-						// remove comma in the beginning
-						str_split[i] = str_split[i].substring(1, str_split[i].length);
-					}
-					textarray.push(str_split[i]);
-					valuearray.push(str_split[i]);
-				}
-				fillList(devicelist, textarray, valuearray);
-			});			
-		}
+      for (i = 0; i < str_split.length; i++)
+      {	
+        if(str_split[i].indexOf(",", 0) == 0)
+        {
+          // remove comma in the beginning
+          str_split[i] = str_split[i].substring(1, str_split[i].length);
+        }
+        textarray.push(str_split[i]);
+        valuearray.push(str_split[i]);
+      }
+      fillList(devicelist, textarray, valuearray);
+    });			
+  }
 		
-		function bindservice(){
-		
-			$('#loader').html("<img src='../../vehicle/ajaxloader.gif'>");	
-			var device = document.getElementById('devicelist').value;
-		    alert("You've chosen to bind service in device  " + device + "and see the root folder list");
+  function bindservice(){
+    $('#loader').html("<img src='vehicle/ajaxloader.gif'>");	
+    var device = document.getElementById('devicelist').value;
+    alert("You've chosen to bind service in device  " + device + "and see the root folder list");
 		    
-		    //only need MAC address 
-			var addresses = device.split(",");
-			console.log("addresses[1]" + addresses[1]);
-			addresses[1] = addresses[1] +'';
+    //only need MAC address 
+    var addresses = device.split(",");
+    console.log("addresses[1]" + addresses[1]);
+    addresses[1] = addresses[1] +'';
 			
-		    //connect the device
-		    //bluetoothService.binddevice(addresses[1], function (results){
-		    bluetoothService.bindservice(addresses[1], function (results){
-				document.getElementById("loader").innerHTML = "";
-				console.log("folder-response results:" + results);
+    //connect the device
+    //bluetoothService.binddevice(addresses[1], function (results){
+    bluetoothService.bindservice(addresses[1], function (results){
+      document.getElementById("loader").innerHTML = "";
+      console.log("folder-response results:" + results);
 		
-				var textarray = [];
-				var valuearray = []; 
-		
-				var str = String(results);
-				var folder_arr = str.split(",");
-				var occurences = (str.split(",").length - 1);
-		
-				var val = document.getElementById('folderlist');
-				emptyList(folderlist);
-		
-				for(var i = 0; i <= occurences; i++)	
-				{
-					if(folder_arr[i].indexOf("/") !== 0)
-					{
-						var slash = "/";
-						folder_arr[i] = slash.concat(folder_arr[i]);
-					}
-					textarray.push(folder_arr[i]);
-					valuearray.push(folder_arr[i]);
-				}
-		
-				fillList(folderlist, textarray, valuearray);
-			});
-		}	
-		
-		function filehandle(data, results)
-		{
-			document.getElementById("loader").innerHTML = "";
-		
-			var textarray = [];
-			var valuearray = []; 
-			var folder_textarray = [];
-			var folder_valuearray = [];
-		
-			//handle results
-			var substr = String(results);
-		
-			var occurences = (substr.split("file name").length - 1);
-			console.log("occurences:" + occurences);
-			if(occurences)
-			{
-				var filename = substr.split("file name=");
-			
-				var val = document.getElementById('filelist');
-				emptyList(filelist);
-			
-				for(var i = 1; i <= occurences; i++)	
-				{
-					var endpoint = filename[i].indexOf(" ");
-					filename[i] = filename[i].substring(0, endpoint);
-					//remove ""
-					filename[i] = filename[i].substring(1, filename[i].length -1);
-					var dir = data[1];
-					dir = dir.concat("/");
-					filename[i] = dir.concat(filename[i]);
-					textarray.push(filename[i]);
-					valuearray.push(filename[i]);
-				}
-			
-				fillList(filelist, textarray, valuearray);
-				// end of result handling
-			}
-			else
-			{
-				var folder_occur = (substr.split("folder name").length - 1);
-				if(folder_occur)
-				{
-					var foldername = substr.split("folder name=");
-					var val = document.getElementById('folderlist');
-					emptyList(folderlist);
-					
-					for(var i = 1; i <= folder_occur; i++)	
-					{
-						var endpoint = foldername[i].indexOf("/>");
-						foldername[i] = foldername[i].substring(0, endpoint);
-						//remove ""
-						foldername[i] = foldername[i].substring(1, foldername[i].length -1);
-					
-						var parentdir = data[1];
-						console.log("data[1]:" + data[1]);
-						parentdir = parentdir.concat("/");
-						foldername[i] = parentdir.concat(foldername[i]); 
-						if((foldername[i].indexOf("/") ===0) && (foldername[i].lastIndexOf("/") ===1)) 
-						{
-							foldername[i] = foldername[i].substring(1, foldername[i].length);
-						}
-					
-						folder_textarray.push(foldername[i]);
-						folder_valuearray.push(foldername[i]);
-					}
-					fillList(folderlist, folder_textarray, folder_valuearray);
-				}
-			}
-		}
-		
-		function listfile()
-		{
-			var val = document.getElementById('filelist');
-			emptyList(filelist);
-			var device = document.getElementById('devicelist').value;
-			
-			var addresses = device.split(",");
-			console.log("addresses[1]" + addresses[1]);
-			addresses[1] = addresses[1] +'';
-			
-			console.log("device:" + device);
-			var dir = document.getElementById('folderlist').value;
-			if(dir === "Select a folder below")
-				alert(" you need to select a folder in the folder list for this operation");
-			else
-			{
-				$('#loader').html("<img src='../../vehicle/ajaxloader.gif'>");
-				alert("Make sure that your files are bluetooth visible. e.g. enable Bluetooth visibility"); 
-				console.log("folder:" + dir);
-				var data = [];
-				data[0] = addresses[1];
-				data[1] = dir; 
-				if(data[1].indexOf("/") !== 0)
-				{
-					str1 = "/";
-					data[1] = str1.concat(data[1]);
-				}
-				
-				bluetoothService.listfile(data,function (results){
-				
-					filehandle(data, results);
+      var textarray = [];
+      var valuearray = []; 
 
-				});
-			}
-		}	
-		
-		function upfolder()
-		{	
-			var device = document.getElementById('devicelist').value;
-			
-			var addresses = device.split(",");
-			console.log("addresses[1]" + addresses[1]);
-			addresses[1] = addresses[1] +'';
-			
-			device = addresses[1];
-			
-			var currentfolder = document.getElementById('folderlist').value;
-			console.log("currentfolder:" + currentfolder);
-			if(currentfolder === "Select a folder below")
-			{
-			  alert(" you need to select a folder in the folder list for this operation");
-			
-			}
-			else
-			{
-				var index = currentfolder.lastIndexOf("/");
-				if(index !==0)
-				{
-					var parentfolder = currentfolder.substring(0, index);
-					var index2 = parentfolder.lastIndexOf("/");
-					console.log("index2:" + index2);
-					if(index2 === 0)
-					{
-						parentfolder = "/";
-					}
-					else
-					{
-						parentfolder = parentfolder.substring(0, index2);
-					}
-					console.log("parentfolder:" + parentfolder);
-				
-					var data = [];
-					data[0] = device;
-					data[1] = parentfolder;
-					bluetoothService.listfile(data,function (results){
-					
-						filehandle(data, results);
-					});	
-				}
-			}
-		}
+      var str = String(results);
+      var folder_arr = str.split(",");
+      var occurences = (str.split(",").length - 1);
 
-		function getfile()
-		{
-			$('#loader').html("<img src='../../vehicle/ajaxloader.gif'>");
-			var device = document.getElementById('devicelist').value;
-			
-			var addresses = device.split(",");
-			console.log("addresses[1]" + addresses[1]);
-			addresses[1] = addresses[1] +'';
-			
-			device = addresses[1];
-			
-			var selectedFile = document.getElementById('filelist').value;
-			
-			var data = [];
-			data[0] = device;
-			data[1] = selectedFile;
-			console.log("selectedFile: " + selectedFile); 
-			
-			var index= selectedFile.lastIndexOf("/");
-			data[2] = selectedFile.substring(index+1, selectedFile.length);
-			console.log("data[2]", data[2]);
-			
-			bluetoothService.transferfile(data,function (result){
-				document.getElementById("loader").innerHTML = "";
-			}); 
-		}
-		
-		function playfile()
-		{
-			var selectedFile = document.getElementById('filelist').value;
-		  	console.log("selectedFile:" + selectedFile);
-		  	// var str1 = "http://106.1.9.17:8000/";
-		  	var str1 = "http://localhost:8080/";
-		  
-		  	var index= selectedFile.lastIndexOf("/");
-		  	filetransferred = selectedFile.substring(index+1, selectedFile.length);
-		  	console.log("filetransferred:" + filetransferred);
-		  
-		  	newwindow = window.open(str1.concat(filetransferred),'name','height=400,width=300');
-		  	if (window.focus) {newwindow.focus()}
-        	}
+      var val = document.getElementById('folderlist');
+      emptyList(folderlist);
 
-		function connectWebinos()
-      		{	
-  			webinos.discovery.findServices(new ServiceType('http://webinos.org/api/discovery'), {onFound: function (service) {
-			
-			alert("Found DiscoveryService");
-			bluetoothService = service;
-			console.log("bluetoothService:" + bluetoothService);
-			}});
-		}
+      for(var i = 0; i <= occurences; i++)	
+      {
+        if(folder_arr[i].indexOf("/") !== 0)
+        {
+          var slash = "/";
+          folder_arr[i] = slash.concat(folder_arr[i]);
+        }
+        textarray.push(folder_arr[i]);
+        valuearray.push(folder_arr[i]);
+      }
+
+    fillList(folderlist, textarray, valuearray);
+    });
+  }	
 		
-	</script>
+  function filehandle(data, results)
+  {
+    document.getElementById("loader").innerHTML = "";
+
+    var textarray = [];
+    var valuearray = []; 
+    var folder_textarray = [];
+    var folder_valuearray = [];
+
+    //handle results
+    var substr = String(results);
+
+    var occurences = (substr.split("file name").length - 1);
+    console.log("occurences:" + occurences);
+    if(occurences)
+    {
+      var filename = substr.split("file name=");
+	
+      var val = document.getElementById('filelist');
+      emptyList(filelist);
+	
+      for(var i = 1; i <= occurences; i++)	
+      {
+        var endpoint = filename[i].indexOf(" ");
+        filename[i] = filename[i].substring(0, endpoint);
+        //remove ""
+        filename[i] = filename[i].substring(1, filename[i].length -1);
+        var dir = data[1];
+        dir = dir.concat("/");
+        filename[i] = dir.concat(filename[i]);
+        textarray.push(filename[i]);
+        valuearray.push(filename[i]);
+      }
+      fillList(filelist, textarray, valuearray);
+      // end of result handling
+	}
+    else
+    {
+      var folder_occur = (substr.split("folder name").length - 1);
+      if(folder_occur)
+      {
+        var foldername = substr.split("folder name=");
+        var val = document.getElementById('folderlist');
+        emptyList(folderlist);
+			
+        for(var i = 1; i <= folder_occur; i++)	
+        {
+          var endpoint = foldername[i].indexOf("/>");
+          foldername[i] = foldername[i].substring(0, endpoint);
+          //remove ""
+          foldername[i] = foldername[i].substring(1, foldername[i].length -1);
+
+          var parentdir = data[1];
+          console.log("data[1]:" + data[1]);
+          parentdir = parentdir.concat("/");
+          foldername[i] = parentdir.concat(foldername[i]); 
+          if((foldername[i].indexOf("/") ===0) && (foldername[i].lastIndexOf("/") ===1)) 
+          {
+            foldername[i] = foldername[i].substring(1, foldername[i].length);
+          }
+			
+          folder_textarray.push(foldername[i]);
+          folder_valuearray.push(foldername[i]);
+        }
+        fillList(folderlist, folder_textarray, folder_valuearray);
+      }
+    }
+  }
+		
+  function listfile()
+  {
+    var val = document.getElementById('filelist');
+    emptyList(filelist);
+    var device = document.getElementById('devicelist').value;
+
+    var addresses = device.split(",");
+    console.log("addresses[1]" + addresses[1]);
+    addresses[1] = addresses[1] +'';
+
+    console.log("device:" + device);
+    var dir = document.getElementById('folderlist').value;
+    if(dir === "Select a folder below")
+      alert(" you need to select a folder in the folder list for this operation");
+    else
+    {
+      $('#loader').html("<img src='vehicle/ajaxloader.gif'>");
+      alert("Make sure that your files are bluetooth visible. e.g. enable Bluetooth visibility"); 
+      console.log("folder:" + dir);
+      var data = [];
+      data[0] = addresses[1];
+      data[1] = dir; 
+      if(data[1].indexOf("/") !== 0)
+      {
+        str1 = "/";
+        data[1] = str1.concat(data[1]);
+      }
+      bluetoothService.listfile(data,function (results){
+        filehandle(data, results);
+      });
+    }
+  }	
+		
+  function upfolder()
+  {	
+    var device = document.getElementById('devicelist').value;
+	
+    var addresses = device.split(",");
+    console.log("addresses[1]" + addresses[1]);
+    addresses[1] = addresses[1] +'';
+	
+    device = addresses[1];
+	
+    var currentfolder = document.getElementById('folderlist').value;
+    console.log("currentfolder:" + currentfolder);
+    if(currentfolder === "Select a folder below")
+    {
+      alert(" you need to select a folder in the folder list for this operation");
+    }
+    else
+    {
+      var index = currentfolder.lastIndexOf("/");
+      if(index !==0)
+      {
+        var parentfolder = currentfolder.substring(0, index);
+        var index2 = parentfolder.lastIndexOf("/");
+        console.log("index2:" + index2);
+        if(index2 === 0)
+        {
+          parentfolder = "/";
+        }
+        else
+        {
+          parentfolder = parentfolder.substring(0, index2);
+        }
+        console.log("parentfolder:" + parentfolder);
+
+        var data = [];
+        data[0] = device;
+        data[1] = parentfolder;
+        bluetoothService.listfile(data,function (results){
+        
+        filehandle(data, results);
+	    });	
+      }
+	}
+  }
+
+  function getfile()
+  {
+    $('#loader').html("<img src='vehicle/ajaxloader.gif'>");
+    var device = document.getElementById('devicelist').value;
+	
+    var addresses = device.split(",");
+    console.log("addresses[1]" + addresses[1]);
+    addresses[1] = addresses[1] +'';
+	
+    device = addresses[1];
+	
+    var selectedFile = document.getElementById('filelist').value;
+	
+    var data = [];
+    data[0] = device;
+    data[1] = selectedFile;
+    console.log("selectedFile: " + selectedFile); 
+	
+    var index= selectedFile.lastIndexOf("/");
+    data[2] = selectedFile.substring(index+1, selectedFile.length);
+    console.log("data[2]", data[2]);
+	
+    bluetoothService.transferfile(data,function (result){
+      document.getElementById("loader").innerHTML = "";
+    }); 
+  }
+		
+  function playfile()
+  {
+    var selectedFile = document.getElementById('filelist').value;
+    console.log("selectedFile:" + selectedFile);
+    // var str1 = "http://106.1.9.17:8000/";
+    var str1 = "http://localhost:8080/";
+  
+    var index= selectedFile.lastIndexOf("/");
+    filetransferred = selectedFile.substring(index+1, selectedFile.length);
+    console.log("filetransferred:" + filetransferred);
+  
+    newwindow = window.open(str1.concat(filetransferred),'name','height=400,width=300');
+    if (window.focus) {newwindow.focus()}
+  }
+
+  function connectWebinos()
+  {	
+    webinos.discovery.findServices(new ServiceType('http://webinos.org/api/discovery'), {onFound: function (service) {
+      alert("Found DiscoveryService");
+      bluetoothService = service;
+      console.log("bluetoothService:" + bluetoothService);
+    }});
+  }
+
+  </script>
 	
 </html>
 
