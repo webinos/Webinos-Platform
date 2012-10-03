@@ -95,7 +95,7 @@ farm.loadFarm = function(hostname, connectingAddress, callback) {
       cert : farm.config.own.cert,
       ca   : farm.config.master.cert,
       requestCert       : true,
-      rejectUnauthorised: false
+      rejectUnauthorised: false  //TODO: Add configuration property for this
     };
 
     //session.common.resolveIP(url, function(resolvedAddress) {

@@ -362,7 +362,7 @@ function createWebInterfaceCertificate (config, callback) {
                         key : ws_key,
                         cert: config.webServer.cert,
                         ca  : config.master.cert,
-                        rejectUnauthorized: false
+                        rejectUnauthorized: false //TODO: Add configuration property for this
                 };
                 callback(wss);
               });

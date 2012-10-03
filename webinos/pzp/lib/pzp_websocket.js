@@ -296,7 +296,7 @@ function connectPzh(pzp, cmd, from, to, authCode) {
     port: global.port.farm_webServerPort,
     path: path,
     method: 'POST',
-    rejectUnauthorized: false,
+    rejectUnauthorized: false, //TODO: Add configuration property for this
     headers: {
       'Content-Length': JSON.stringify(payload).length
     }
