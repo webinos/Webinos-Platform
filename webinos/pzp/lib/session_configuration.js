@@ -304,6 +304,13 @@ session_configuration.createDirectoryStructure = function (callback) {
             fs.mkdirSync( webinosDemo +"/wrt","0700");
           }
         });
+        // policy file
+        fs.readFile ( webinosDemo+"/policy.xml", function(err) {
+          if ( err && err.code=== "ENOENT" ) {
+	    var data = fs.readFileSync("./webinos/common/manager/policy_manager/defaultpolicy.xml");
+	    fs.writeFileSync(webinosDemo+"/policy.xml", data);
+          }
+        });
         callback(true);
       }, 100);
     });
