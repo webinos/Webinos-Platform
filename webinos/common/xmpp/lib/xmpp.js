@@ -29,7 +29,7 @@ var nodeType = 'http://webinos.org/pzp';
 var connection;
 var EventEmitter = require('events').EventEmitter;
 var WebinosFeatures = require('./WebinosFeatures.js');
-var logger = require('./Logger').getLogger('xmpp', 'info');
+var logger = require('./Logger').getLogger('xmpp', 'trace');
 
 var xmpp;
 
@@ -103,7 +103,7 @@ Connection.prototype.disconnect = function() {
  */
 Connection.prototype.shareFeature = function(feature) {
     logger.debug("Sharing service with ns:" + feature.ns);
-    this.sharedFeatures[feature.ns] = feature;
+    this.sharedFeatures[feature.id] = feature;
 	this.updatePresence();
 }
 
@@ -112,7 +112,7 @@ Connection.prototype.shareFeature = function(feature) {
  */
 Connection.prototype.unshareFeature = function(feature) {
     logger.debug("Unsharing service with ns: " + feature.ns);
-    delete this.sharedFeatures[feature.ns];
+    delete this.sharedFeatures[feature.id];
     this.updatePresence();
 }
 
@@ -120,7 +120,8 @@ Connection.prototype.updatePresence = function() {
 	var allFeatures = this.basicFeatures.slice(0); // copies the basic features
 	
 	for (var key in this.sharedFeatures) { // add the shared features
-		allFeatures.push(key);
+	    logger.trace('Adding shared feature: ' + this.sharedFeatures[key].ns + '#' + this.sharedFeatures[key].id);
+		allFeatures.push(this.sharedFeatures[key].ns + '#' + this.sharedFeatures[key].id);
 	}
 
 	allFeatures = allFeatures.sort();
@@ -166,19 +167,21 @@ Connection.prototype.invokeFeature = function(feature, callback, method, params)
 
 // Send presence notification according to http://xmpp.org/extensions/xep-0115.html
 Connection.prototype.sendPresence = function(ver) {
-    logger.verbose("XEP-0115 caps: " + this.featureMap[ver]);
+    if (xmpp) {
+        logger.verbose("XEP-0115 caps: " + this.featureMap[ver]);
 
-	var presence = new xmpp.Element('presence', { }).
-		c('c', {
-			'xmlns': 'http://jabber.org/protocol/caps',
-		  	'hash': 'sha-1',
-		  	'node': nodeType,
-		  	'ver': ver
-	});
+    	var presence = new xmpp.Element('presence', { }).
+    		c('c', {
+    			'xmlns': 'http://jabber.org/protocol/caps',
+    		  	'hash': 'sha-1',
+    		  	'node': nodeType,
+    		  	'ver': ver
+    	});
 
-	logger.verbose('Presence message: ' + presence);
+    	logger.verbose('Presence message: ' + presence);
 
-	this.client.send(presence);
+    	this.client.send(presence);
+    }
 }
 
 Connection.prototype.onStanza = function(stanza) {
@@ -223,10 +226,10 @@ Connection.prototype.onStanza = function(stanza) {
 			var found = false;
 			
 			if (query != null && query.attrs.xmlns != null) {
-				var feature = connection.sharedFeatures[query.attrs.xmlns]; //TODO there is a limit to only 1 feature per namespace.
+    			var payload = JSON.parse(query.getChild('payload').getText());
+				var feature = connection.sharedFeatures[payload.attr.id];
 
 				if (feature != null) {
-        			var payload = JSON.parse(query.getChild('payload').getText());
 					feature.invokedFromRemote(stanza, payload.method, payload.params, payload.id);
 				} else {
 					// default respond with an error
@@ -328,7 +331,8 @@ Connection.prototype.onDiscoInfo = function(stanza) {
 		currentFeatures = this.basicFeatures.slice(0);
 		
 		for (var key in this.sharedFeatures) { // add the shared features
-			currentFeatures.push(key);
+		    logger.trace('Adding shared feature: ' + this.sharedFeatures[key].ns + '#' + this.sharedFeatures[key].id);
+			currentFeatures.push(this.sharedFeatures[key].ns + '#' + this.sharedFeatures[key].id);
 		}
 
 		currentFeatures = currentFeatures.sort();
@@ -339,7 +343,31 @@ Connection.prototype.onDiscoInfo = function(stanza) {
 	resultQuery.c('identity', {'category': 'client', 'type': 'webinos'});
 	
 	for (var i in currentFeatures) {
-		resultQuery.c('feature', {'var': currentFeatures[i]});
+	    logger.trace('key found: ' + currentFeatures[i]);
+	    var splitted = currentFeatures[i].split('#');
+	    var id = splitted[splitted.length - 1];
+	    
+	    logger.trace('Feature id found: ' + id);
+	    
+	    if (id && this.sharedFeatures[id]) {
+	        // a webinos feature
+	        logger.trace('Feature found: ' + id);
+    	    var feature = this.sharedFeatures[id];
+
+            var instanceNode = new ltx.Element('instance', {'xmlns': 'webinos:rpc#disco', 'id': feature.id });
+            instanceNode.cnode(new ltx.Element('displayName').t(feature.displayName));
+            instanceNode.cnode(new ltx.Element('description').t(feature.description));
+
+            var featureNode = new ltx.Element('feature', {'var': feature.ns});
+            featureNode.cnode(instanceNode);
+    		resultQuery.cnode(featureNode);
+	    } else {
+	        // an xmpp feature
+	        var feature = currentFeatures[i];
+
+            var featureNode = new ltx.Element('feature', {'var': feature});
+    		resultQuery.cnode(featureNode);
+	    }
 	}
 	
 	var result = new xmpp.Element('iq', { 'to': stanza.attrs.from, 'type': 'result', 'id': stanza.attrs.id });
@@ -388,26 +416,33 @@ Connection.prototype.onPresenceDisco = function (stanza) {
 	for (var i in featureNodes) {
 		var ns = featureNodes[i].attrs.var;
 		
-		var alreadyExists = false;
-		
-		for (var j in currentFeatures) {
-			var feature = currentFeatures[j];
-			
-			if (feature.ns == ns) {
-				logger.verbose('Feature still exsists, do not remove it! ' + ns);
-				delete removedFeatures[j]; // if the feature still exsist it should not be removed
-				alreadyExists = true;
-				break;
-			}
-		}
+		var instance = featureNodes[i].getChild('instance');
 
-		if (!alreadyExists) {
-			logger.verbose('New feature, creating and adding it.');
-			this.createAndAddRemoteFeature(ns, from);
-			logger.verbose('Done creating the feature');
+		if (instance && instance.attrs.xmlns == 'webinos:rpc#disco') {
+    		logger.trace('Found instance for <' + ns + '>: ' + instance);
+
+		    // all webinos services should have an instance element
+    		var alreadyExists = false;
+
+    		for (var j in currentFeatures) {
+    			var feature = currentFeatures[j];
+
+    			if (feature.ns == ns && feature.remoteId == instance.attrs.id) {
+    				logger.verbose('Feature still exsists, do not remove it! ' + ns);
+    				delete removedFeatures[j]; // if the feature still exsist it should not be removed
+    				alreadyExists = true;
+    				break;
+    			}
+    		}
+
+    		if (!alreadyExists) {
+    			logger.verbose('New feature, creating and adding it with id: ' + instance.attrs.id);
+    			this.createAndAddRemoteFeature(ns, from, instance.attrs.id, instance.getChild('displayName').getText(), instance.getChild('description').getText());
+    			logger.verbose('Done creating the feature');
+    		}
+
+    		discoveredFeatures.push(ns);
 		}
-		
-		discoveredFeatures.push(ns);
 	} 
 
 	logger.verbose('Removing ' + removedFeatures.length + ' feature(s) that have not been rediscovered.');
@@ -417,9 +452,10 @@ Connection.prototype.onPresenceDisco = function (stanza) {
 		
 		for (var j in this.remoteFeatures[from]) {
 			if (removedFeatures[i].ns == this.remoteFeatures[from][j].ns) {
-				logger.verbose("Removed feature from remote feature list: " + feature.ns);
+				logger.verbose("Removed feature from remote feature list: " + removedFeatures[i].ns);
 				this.remoteFeatures[from][j].remove();
 				delete this.remoteFeatures[from][j];
+				this.emit('removeFeature', removedFeatures[i]);
 			}
 		}
 	}
@@ -463,8 +499,8 @@ Connection.prototype.onError = function(error) {
 }
 
 // Helper function that creates a service, adds it to the administration and invokes the callback
-Connection.prototype.createAndAddRemoteFeature = function(name, from) {
-	logger.verbose('Entering createAndAddRemoteFeature(' + name + ', ' + from + ')');
+Connection.prototype.createAndAddRemoteFeature = function(name, from, id, displayName, description) {
+	logger.verbose('Entering createAndAddRemoteFeature(' + JSON.stringify(arguments) + ')');
 	
 	var factory = WebinosFeatures.factory[name];
 
@@ -474,6 +510,10 @@ Connection.prototype.createAndAddRemoteFeature = function(name, from) {
 		feature = factory(this.rpcHandler);
 	    feature.device = from;
 	    feature.owner = this.getBareJidFromJid(from);
+	    feature.local = false;
+	    feature.displayName = displayName + "#" + id;
+	    feature.description = description;
+	    feature.remoteId = id;
 	    //feature.id = this.jid2Id(from) + '-' + name;
 
 		if (!this.remoteFeatures[from]) {

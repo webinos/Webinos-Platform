@@ -24,7 +24,7 @@
 var sys = require('util');
 var webinosFeatures = require('./WebinosFeatures');
 var http = require("http");
-var logger = require('./Logger').getLogger('LocalFeatureManager', 'info');
+var logger = require('./Logger').getLogger('LocalFeatureManager', 'trace');
 
 var features = {};
 
@@ -41,10 +41,12 @@ function initialize(pzhConnection, jid, rpcHandler) {
 	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler, 'geoip');
 	geoLocationFeature.setConnection(jid, connection);
     rpcHandler.registry.registerObject(geoLocationFeature);
+	connection.shareFeature(geoLocationFeature);
 
 	var get42Feature = webinosFeatures.factory[webinosFeatures.NS.GET42](rpcHandler);
 	get42Feature.setConnection(jid, connection);
     rpcHandler.registry.registerObject(get42Feature);
+	connection.shareFeature(get42Feature);
 	
 	features[geoLocationFeature.id] = geoLocationFeature;
 	features[get42Feature.id] = get42Feature;
@@ -53,6 +55,14 @@ function initialize(pzhConnection, jid, rpcHandler) {
 	var serviceDiscoveryFeature = webinosFeatures.factory[webinosFeatures.NS.SERVICE_DISCOVERY](rpcHandler, features);
 	serviceDiscoveryFeature.setConnection(jid, pzhConnection);
     rpcHandler.registry.registerObject(serviceDiscoveryFeature);
+    
+    connection.on('newFeature', function(feature) {
+        rpcHandler.registry.registerObject(feature);
+    });
+    
+    connection.on('removeFeature', function (feature) {
+        rpcHandler.registry.unregisterObject(feature);
+    });
 }
 
 exports.features = features;

@@ -72,6 +72,7 @@ function GenericFeature() {
     this.embedService = function(service) {
         this.service = service;
         this.api = service.api;
+        this.ns = service.api;
         this.displayName = service.displayName;
         this.description = service.description;
         
