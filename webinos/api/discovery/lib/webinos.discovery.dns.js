@@ -31,14 +31,14 @@ var disc = require('bridge').load('org.webinos.impl.discovery.DiscoveryMdnsImpl'
  */
 
 DNSfindservice = function(serviceType, onFound){
-	try 
-	{
-		disc.findServices(serviceType, function(service){onFound(service);}, null, null);
-		console.log("DNSfindservice - END");
-	}
-	catch(e) {
-		console.log("DNSfindservice  - error: "+e.message);
-	}
+  try 
+  {
+    disc.findServices(serviceType, function(service){onFound(service);}, null, null);
+    console.log("DNSfindservice - END");
+  }
+  catch(e) {
+    console.log("DNSfindservice  - error: "+e.message);
+  }
 };
 
 exports.DNSfindservice = DNSfindservice;

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2012 Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
 * 
 ******************************************************************************/
 
@@ -32,14 +32,14 @@ var disc = require('bridge').load('org.webinos.impl.discovery.DiscoveryHRMImpl',
 
 HRMfindservice = function(serviceType,onFound){
 
-	try 
-	{
-		disc.findServices(serviceType, function(service){onFound(service);}, null, null);
-	//	disc.findServices(servicetype, {onFound:onFound}, null, null);
-	}
-	catch(e) {
-		console.log("discoveryTests - error: "+e.message);
-	}
+  try 
+  {
+    disc.findServices(serviceType, function(service){onFound(service);}, null, null);
+    //disc.findServices(servicetype, {onFound:onFound}, null, null);
+  }
+  catch(e) {
+    console.log("discoveryTests - error: "+e.message);
+  }
 };
 
 exports.HRMfindservice = HRMfindservice;
