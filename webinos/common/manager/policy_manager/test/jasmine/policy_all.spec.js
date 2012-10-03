@@ -19,6 +19,9 @@
 var pmlib;
 var fs = require("fs");
 var pm;
+var common = require("../../../../../pzp/lib/session_common");
+var policyFile = common.webinosConfigPath()+"/policy.xml";
+var policyBackup = common.webinosConfigPath()+"/policy.bak";
 
 var featureList = [
 	"http://webinos.org/api/discovery",
@@ -79,7 +82,22 @@ function loadManager() {
 function changepolicy(fileName) {
 	console.log("Change policy to file "+fileName);
 	var data = fs.readFileSync("./"+fileName);
-	fs.writeFileSync("./"+"policy.xml", data);
+	fs.writeFileSync(policyFile, data);
+}
+
+
+function backuppolicy() {
+	console.log("Backup policy");
+	var data = fs.readFileSync(policyFile);
+	fs.writeFileSync(policyBackup, data);
+}
+
+
+function restorepolicy() {
+	console.log("Restore policy");
+	var data = fs.readFileSync(policyBackup);
+	fs.writeFileSync(policyFile, data);
+	fs.unlinkSync(policyBackup);
 }
 
 
@@ -114,6 +132,13 @@ function checkFeature(policyName, userName, certName, featureName, deviceId) {
 
 
 describe("Manager.PolicyManager", function() {
+
+	it("Policy backup", function() {
+		runs(function() {
+			backuppolicy();
+		});
+	});
+
 	it("Every user can access every feature", function() {
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[0], companyList[0], featureList[0], deviceList[0]);
@@ -518,5 +543,10 @@ describe("Manager.PolicyManager", function() {
 
 	});
 
+	it("Restore policy", function() {
+		runs(function() {
+			restorepolicy();
+		});
+	});
 });
 
