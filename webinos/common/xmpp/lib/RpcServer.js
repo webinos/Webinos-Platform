@@ -31,11 +31,13 @@
     var rpcHandler;
 
     //RPC server initialization
-    function configure(wss, rpcHandler) {
+    function configure(wss, rpcHandler, jid) {
     	wss.on("connect", function(connection) {
             logger.info("connection accepted.");
       
-            connection.sendUTF('{ "type": "prop", "from": "eelco@servicelab.org/mobile", "to": "application", "payload": { "status": "registeredBrowser", "message": {"connectedPzp": [], "connectedPzh": ["eelco@servicelab.org"] }}}');
+            var pzh = jid.split("/")[0];
+      
+            connection.sendUTF('{ "type": "prop", "from": "' + jid + '", "to": "application", "payload": { "status": "registeredBrowser", "message": {"connectedPzp": [], "connectedPzh": ["' + pzh + '"] }}}');
       
             connection.on("message", function(message) { wsMessage(message.utf8Data); });
             connection.on("close", function(reason, description) { wsClose(description) });
@@ -52,7 +54,7 @@
         			    type: 'JSONRPC',
         			    payload: result,
         			    id: 0,
-        			    from: 'eelco@servicelab.org/mobile',
+        			    from: jid,
         			    to: 'application'
         			};
         			

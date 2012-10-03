@@ -76,7 +76,7 @@
         });
     }
 
-    function start(httpPort, wssPort, rpcHandler) {
+    function start(httpPort, wssPort, rpcHandler, jid) {
     	logger.verbose("Entering start()");
     	logger.debug("Creating web server on port " + httpPort);
 	
@@ -92,7 +92,7 @@
         });
     	
     	//TODO fix this
-    	rpcServer.configure(wss, rpcHandler);
+    	rpcServer.configure(wss, rpcHandler, jid);
 	
     	logger.verbose("Leaving start()");
     }

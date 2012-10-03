@@ -88,7 +88,7 @@ var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
 var connection = new xmpp.Connection(rpcHandler);
 
 logger.verbose("Starting servers...");
-ws.start(port, port+1, rpcHandler);
+ws.start(port, port+1, rpcHandler, jid);
 
 featureManager.initialize(connection, jid, rpcHandler);
 
