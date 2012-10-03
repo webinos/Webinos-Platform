@@ -56,7 +56,7 @@
         RPCWebinosService.call(this.base);
 
     	var publisher = function(feature, objectRef) {
-			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.ns + ' to browser');
+			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.api + ' to browser');
 
             //TODO onservicebound is not according to spec but it is according to implementation
 			var rpc = rpcHandler.createRPC(objectRef.rpcId, 'onservicefound', feature.getInformation());

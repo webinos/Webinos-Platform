@@ -77,6 +77,17 @@ function GenericFeature() {
         
         logger.verbose('service api: ' + service.api);
         logger.verbose('this.api: ' + this.api);
+        
+        for (i in this.service) {
+            if (typeof this.service[i] === 'function') {
+                if (!this[i]) { // add to proxy object if the method does not exist yet
+                    logger.debug('Adding to proxy object: ' + i);
+                    this[i] = new Function("this.invoke('" + i + "', arguments);");            
+                    
+                    //TODO it would be better to only add RPC methods 
+                }
+            }
+        }
     }
     
     /**
@@ -93,50 +104,49 @@ function GenericFeature() {
 		};
 	};
 	
-    /* called when a shared service is invoked from remote */
-	this.invoked = function(params, successCB, errorCB, objectRef) {
-		logger.verbose('invoked(...)');
+	this.invoke = function(method, parameters) {
+		logger.verbose('invoked');
 		
-		logger.verbose('calling emit(invoked-from-remote)');
-		this.emit('invoked-from-remote', this, params);
-		
-		logger.verbose('ending invoked()');
-	}
-
-	/* called to invoke a remote shared service */
-    this.invoke = function(params, successCB, errorCB, objectRef) {
-		logger.verbose('invoke(...)');
-
 		if (this.local) {
-			logger.verbose('calling emit(invoked-from-local)');
-			this.emit('invoked-from-local', this, params, successCB, errorCB, objectRef);
+    		this.service[method].apply(this.service, parameters);
 		} else {
-			logger.verbose('calling emit(invoke)');
-			this.emit('invoke', this, function(type, query) {
-				var params = query.getText();
-
-				if (params == null || params == '') {
-					params = "{}";
-				}
-
-				var payload = JSON.parse(params);
-
-				successCB(payload);
-			}, params);
+		    logger.verbose('invoking remove service');
+		    
+		    var callback = function(type, payload) {
+		        if (type != 'error') {
+		            parameters[1](payload.result);
+		        } else {
+		            parameters[2](payload.error);
+		        }
+		    }
+		    
+		    // footprint is (params, successCB, errorCB, objectRef): only send params
+		    this.emit('invoke-via-xmpp', this, callback, method, parameters[0])
 		}
 		
-		logger.verbose('ending invoke()');
-	};  
+		logger.verbose('ending (invoke');
+    }
+    
+    this.invokedFromRemote = function(stanza, method, params, id) {
+		logger.verbose('on(invoked-from-remote)');
+		logger.debug('Received the following XMPP stanza: ' + stanza);
+		
+		var conn = this.uplink;
 
-    /* called when the result of a remote service invocation is received */
-    this.result = function(params) {
-		this.emit('result', this, params);
-    };
+        var success = function(result) {
+			logger.debug("The answer is: " + JSON.stringify(result));
+			logger.debug("Sending it back via XMPP...");
+			conn.answer(stanza, id, result);
+        }
+        
+        var error = function(error) {
+            conn.error(stanza, id, result);
+        }
 
-	/* called when a remote service invocation resulted in an error */
-    this.error = function(err) {
-        this.emit('error', this, err);
-    };
+		this.service[method].apply(this, params, success, error);
+
+		logger.verbose('ending on(invoked-from-remote)');
+    }
 }
 
 sys.inherits(GenericFeature, RPCWebinosService);

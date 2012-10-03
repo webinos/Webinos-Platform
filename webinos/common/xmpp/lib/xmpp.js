@@ -143,18 +143,24 @@ Connection.prototype.updatePresence = function() {
 /**
  * Called to invoke a remote feature. Params is optional.
  */
-Connection.prototype.invokeFeature = function(feature, callback, params) {
-	logger.debug('Invoking feature ' + feature.ns + ' on ' + feature.device);
+Connection.prototype.invokeFeature = function(feature, callback, method, params) {
+	logger.trace('Invoking feature ' + feature.ns + ' on ' + feature.device);
 
 	var id = connection.getUniqueId('feature');
 	connection.pendingRequests[id] = callback;
 	
-	//TODO do something with optional params.
+	var payload = {
+	    'method': method,
+	    'params': params,
+	    'id': id
+	}
 	
+	//TODO do something with optional params.	
 	var xmppInvoke = new xmpp.Element('iq', { 'to': feature.device, 'type': 'get', 'id': id }).
-		c('query', {'xmlns': feature.ns});
+		c('query', {'xmlns': feature.ns}).
+		c('payload', {'xmlns': 'webinos:rpc#invoke', 'id': feature.id }).t(JSON.stringify(payload));
 		
-	logger.debug('Sending RPC message via XMPP: ' + xmppInvoke.tree());
+	logger.trace('Sending RPC message via XMPP: ' + xmppInvoke.tree());
 	connection.client.send(xmppInvoke);
 }
 
@@ -189,7 +195,7 @@ Connection.prototype.onStanza = function(stanza) {
 		}
 	}
 	
-	if (stanza.is('iq') && stanza.attrs.type !== 'error') {
+	if (stanza.is('iq')) { //&& stanza.attrs.type !== 'error') {
 		if (stanza.attrs.type == 'get' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
 			connection.onDiscoInfo(stanza);
 		} else if (stanza.attrs.type == 'result' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
@@ -208,7 +214,9 @@ Connection.prototype.onStanza = function(stanza) {
 				
 				logger.debug("Received RPC answer via XMPP: " + stanza);
 				
-				callback(stanza.attrs.type, query);
+				var payload = query.getChild('payload');
+				
+				callback(stanza.attrs.type, JSON.parse(payload.getText()));
 			}
 		} else if (stanza.attrs.type == 'get' || stanza.attrs.type == 'set') {
 			var query = stanza.getChild('query');
@@ -218,7 +226,8 @@ Connection.prototype.onStanza = function(stanza) {
 				var feature = connection.sharedFeatures[query.attrs.xmlns]; //TODO there is a limit to only 1 feature per namespace.
 
 				if (feature != null) {
-					feature.invoked(stanza);
+        			var payload = JSON.parse(query.getChild('payload').getText());
+					feature.invokedFromRemote(stanza, payload.method, payload.params, payload.id);
 				} else {
 					// default respond with an error
 					this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'result', 'to': stanza.attrs.from }).c('service-unavailable'));
@@ -234,11 +243,37 @@ Connection.prototype.onStanza = function(stanza) {
 /**
  * Answers the info query.
  */
-Connection.prototype.answer = function(stanza, result) {
+Connection.prototype.answer = function(stanza, id, result) {
 	var query = stanza.getChild('query');
 	
+    var payload = {
+        'result': result,
+        'id': id
+    }
+    
 	var xmppResult = new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'result', 'to': stanza.attrs.from }).
-		c('query', { xmlns: query.attrs.xmlns }).t(result);
+		c('query', { xmlns: query.attrs.xmlns }).
+		c('payload', { 'xmlns': 'webinos:rpc#result', 'id': query.getChild('payload').attrs.id }).t(JSON.stringify(payload));
+
+	logger.debug("Answering RPC with this XMPP message: " + xmppResult.tree());
+		
+	this.client.send(xmppResult);
+}
+
+/**
+ * Answers the info query with an error.
+ */
+Connection.prototype.error = function(stanza, id, error) {
+	var query = stanza.getChild('query');
+	
+    var payload = {
+        'error': error,
+        'id': id
+    }
+    
+	var xmppResult = new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).
+		c('query', { xmlns: query.attrs.xmlns }).
+		c('payload', { 'xmlns': 'webinos:rpc#result', 'id': query.getChild('payload').attrs.id }).t(JSON.stringify(payload));
 
 	logger.debug("Answering RPC with this XMPP message: " + xmppResult.tree());
 		
@@ -451,7 +486,7 @@ Connection.prototype.createAndAddRemoteFeature = function(name, from) {
 
 		this.emit(feature.ns, feature);
 		this.emit('newFeature', feature);
-		feature.on('invoke', this.invokeFeature);
+		feature.on('invoke-via-xmpp', this.invokeFeature);
 	}
 	
 	logger.verbose('End createAndAddRemoteFeature');
