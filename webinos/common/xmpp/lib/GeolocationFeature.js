@@ -46,15 +46,17 @@ function GeolocationFeature(rpcHandler, connector) {
 	GenericFeature.GenericFeature.call(this);
 
     if (connector === undefined) {
-        this.service = new geolocation.Service(rpcHandler, { 'connector': 'geoip'});
+        this.embedService(new geolocation.Service(rpcHandler, { 'connector': 'geoip'}));
     } else {
-	    this.service = new geolocation.Service(rpcHandler, { 'connector': connector} );
+	    this.embedService(new geolocation.Service(rpcHandler, { 'connector': connector}));
     }
     
-	this.api = NS;
-	this.displayName = "GeolocationFeature" + this.id;
-	this.description = 'Geolocation Feature.';
-	this.ns = this.api;
+    logger.verbose('API=' + this.api);
+    
+    // this.api = NS;
+    // this.displayName = "GeolocationFeature" + this.id;
+    // this.description = 'Geolocation Feature.';
+    // this.ns = this.api;
 	
 	this.on('invoked-from-remote', function(featureInvoked, stanza) {
 		logger.verbose('on(invoked-from-remote)');

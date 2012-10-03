@@ -39,11 +39,11 @@ var get42 = require(webinosRoot + dependencies.api.get42.location);
 function Get42Feature(rpcHandler) {
 	GenericFeature.GenericFeature.call(this);
 
-	this.service = new get42.Service(rpcHandler);
-	this.api = NS;
-	this.displayName = 'Get42';
-	this.description = 'Test Module with the life answer.';
-	this.ns = this.api;
+	this.embedService(new get42.Service(rpcHandler));
+    // this.api = NS;
+    // this.displayName = 'Get42';
+    // this.description = 'Test Module with the life answer.';
+    // this.ns = this.api;
 
 	this.on('invoked-from-remote', function(featureInvoked, stanza) {
 		logger.verbose('on(invoked-from-remote)');

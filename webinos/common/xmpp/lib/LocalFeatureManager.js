@@ -24,7 +24,7 @@
 var sys = require('util');
 var webinosFeatures = require('./WebinosFeatures');
 var http = require("http");
-var logger = require('./Logger').getLogger('LocatlFeatureManager', 'info');
+var logger = require('./Logger').getLogger('LocalFeatureManager', 'info');
 
 var features = {};
 
@@ -34,6 +34,9 @@ var client;
 
 function initialize(pzhConnection, jid, rpcHandler) {
 	connection = pzhConnection;
+	
+	//TODO the instantiation of service objects (or API proxies) should be refactored. Connection is now a property of a service object
+	//but this is the connection to the XMPP server. There can also be local connections.
 	
 	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler, 'geoip');
 	geoLocationFeature.setConnection(jid, connection);

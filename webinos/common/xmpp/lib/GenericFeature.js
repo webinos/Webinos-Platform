@@ -25,7 +25,7 @@
 var sys = require('util');
 var EventEmitter = require('events').EventEmitter;
 var uniqueId = Math.round(Math.random() * 10000);
-var logger = require('./Logger').getLogger('GenericFeature', 'info');
+var logger = require('./Logger').getLogger('GenericFeature', 'verbose');
 
 var path = require('path');
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
@@ -42,7 +42,7 @@ var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
 function GenericFeature() {
 	EventEmitter.call(this);
 
-    this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
+    //this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
     this.owner = null;                                          // person that owns the device the service is running on
     this.device = null;                                         // (addressable) id of device the service is running on
     this.name = "(you shouldn't see this!)";                    // friendly name, to be overridden
@@ -69,6 +69,30 @@ function GenericFeature() {
     	this.service.serviceAddress = this.device;
     }
     
+    this.embedService = function(service) {
+        this.service = service;
+        this.api = service.api;
+        this.displayName = service.displayName;
+        this.description = service.description;
+        
+        logger.verbose('service api: ' + service.api);
+        logger.verbose('this.api: ' + this.api);
+    }
+    
+    /**
+	 * Get an information object from the service.
+	 * @returns Object including id, api, displayName, serviceAddress.
+	 */
+	this.getInformation = function () {
+		return {
+			id: this.id,
+			api: this.api,
+			displayName: this.displayName,
+			description: this.description,
+			serviceAddress: this.device
+		};
+	};
+	
     /* called when a shared service is invoked from remote */
 	this.invoked = function(params, successCB, errorCB, objectRef) {
 		logger.verbose('invoked(...)');
