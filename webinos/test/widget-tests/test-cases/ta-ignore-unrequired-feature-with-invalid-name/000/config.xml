@@ -1,0 +1,4 @@
+<widget id="gg:" xmlns='http://www.w3.org/ns/widgets'>
+<name>gg</name>
+ <feature name=' this is not a valid uri ' required='false'/>
+</widget>

@@ -1,0 +1,5 @@
+<widget id="d9:" xmlns="http://www.w3.org/ns/widgets">
+  <name>d9</name>
+  <content src="doesnotexist.html" />
+  <content src="fail.html" />
+</widget>

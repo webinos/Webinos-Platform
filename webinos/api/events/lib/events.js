@@ -20,6 +20,7 @@
 	/**
 	 * Webinos Event service constructor (server side).
 	 * @constructor
+	 * @alias WebinosEventsModule
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
 	 */
 	var WebinosEventsModule = function(rpcHandler) {
@@ -38,16 +39,14 @@
 		 * @param params Event payload.
 		 * @param successCB Success callback.
 		 * @param errorCB Error callback.
-		 * @param ref RPC object reference.
+		 * @param objectRef RPC object reference.
 		 */
-		this.WebinosEvent.dispatchWebinosEvent = function (params, successCB, errorCB, ref){
+		this.WebinosEvent.dispatchWebinosEvent = function (params, successCB, errorCB, objectRef){
 			//callbacks, referenceTimeout, sync
 			console.log("dispatchWebinosEvent was invoked: Payload: " + params.webinosevent.payload + " Type: " + params.webinosevent.type + " from: " + params.webinosevent.addressing.source.id);
 
-			var objectRef = ref;
 			var useCB = false;
-
-			if (typeof objectRef !== "undefined"){
+			if (typeof objectRef !== "undefined"){ // TODO objectRef will always be there...
 				useCB = true;
 				console.log("Delivery callback was defined.");
 			}
@@ -159,19 +158,18 @@
 	/**
 	 * Create and return success calback for event delivery notification.
 	 * @param rpcHandler The RPC handler.
-	 * @param ref RPC object reference.
+	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
 	 * @param useCB Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getSuccessCB(rpcHandler, ref, params, useCB) {
-		var objectRef = ref;
+	function getSuccessCB(rpcHandler, objectRef, params, useCB) {
 		var cbParams = params;
 		function successCB() {  
 			//	event was successfully delivered, so send delivery notification if requested
 			console.log("Delivered Event successfully");
 			if (useCB){
-				console.log("Sending onDelivery to " + objectRef);
+				console.log("Sending onDelivery to " + objectRef.rpcId);
 				var cbjson = rpcHandler.createRPC(objectRef, "onDelivery", cbParams);
 				rpcHandler.executeRPC(cbjson);
 			}
@@ -183,13 +181,12 @@
 	/**
 	 * Create and return error calback for event delivery notification.
 	 * @param rpcHandler The RPC handler.
-	 * @param ref RPC object reference.
+	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
 	 * @param useCB Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getErrorCB(rpcHandler, ref, params, useCB) {
-		var objectRef = ref;
+	function getErrorCB(rpcHandler, objectRef, params, useCB) {
 		var cbParams = params;
 		function errorCB() {  
 			//event was not successfully delivered, so send error notification if requested

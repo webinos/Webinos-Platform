@@ -36,12 +36,14 @@
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
           <!-- Activation for build-node-modules. Compile c files to node modules -->
+          <!--
           <execution>
             <id>compile-node-module</id>
             <goals>
               <goal>exec</goal>
             </goals>
           </execution>
+          -->
           <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag. 
           Only needed when *.spec.js files in the jasmine test folder need to run.-->
           <!--
@@ -59,6 +61,16 @@
               <goal>exec</goal>
             </goals>
           </execution>
+          <!-- Activation for vows-testing. Activate by uncommenting the execution tag.  
+          Only needed when test.spec.js files in the vows test folder need to run.-->
+          <!--
+          <execution>
+            <id>vows-testing</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          -->
         </executions>
       </plugin>
     </plugins>

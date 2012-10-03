@@ -1,0 +1,5 @@
+<!DOCTYPE html>
+<title>FAIL</title>
+<body style="background:red;">
+<h1>FAIL</h1>
+<script src="hook.js"></script>

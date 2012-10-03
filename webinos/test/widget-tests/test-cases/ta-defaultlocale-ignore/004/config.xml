@@ -1,0 +1,5 @@
+<widget defaultlocale="esx-al" id="dlocignore04:" xmlns="http://www.w3.org/ns/widgets">
+    <name>FAIL</name>
+    <name xml:lang="esx-al">FAIL</name>
+    <name xml:lang="en">PASS</name>
+</widget>

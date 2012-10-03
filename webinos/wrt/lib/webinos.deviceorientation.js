@@ -37,16 +37,14 @@ function addEventListener(type, listener, useCapture) {
             console.log("LISTENER"+ listener);
     
 			var rpc = webinos.rpcHandler.createRPC(this, "addEventListener", [type, listener, useCapture]);
-            rpc.fromObjectRef = Math.floor(Math.random()*101); //random object ID	
-			_referenceMappingDo.push([rpc.fromObjectRef, listener]);
+			_referenceMappingDo.push([rpc.id, listener]);
 
 			console.log('# of references' + _referenceMappingDo.length);	
-			var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-			callback.onEvent = function (orientationEvent) {
+			rpc.onEvent = function (orientationEvent) {
 				listener(orientationEvent);
 			};
             
-			webinos.rpcHandler.registerCallbackObject(callback);
+			webinos.rpcHandler.registerCallbackObject(rpc);
 			webinos.rpcHandler.executeRPC(rpc);
 		}else{
 			console.log(type + ' not found');	

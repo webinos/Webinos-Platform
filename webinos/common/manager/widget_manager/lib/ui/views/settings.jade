@@ -1,0 +1,27 @@
+extends layout
+
+block content
+	div.infoPanel
+		form(method="post", enctype="application/x-www-form-urlencoded")
+			//div.settingField
+				span auth-code
+				input(type="text",name="authCode", value=authCode)
+			//div.settingField
+				span pzh-name
+				input(type="text", name="pzhName", value=pzhName)
+
+			//div.settingField
+				span path to node
+				input(type="text", name="nodePath", value=nodePath)
+		
+			div.settingField
+				span path to webinos installation
+				input(type="text", name="webinosPath", value=webinosPath)
+
+			div.settingSubmit &nbsp;
+				input(type="submit", value="save")
+		
+	- if (saved === "success")
+		div.feedback.success settings saved successfully
+	- else if (saved === "failure")
+		div.feedback.failure failed to save settings

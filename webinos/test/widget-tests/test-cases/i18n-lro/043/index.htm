@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<title>i18nlro43</title> 
+<style>
+	body{
+		background-color:white;	
+	}
+	@media (view-mode){
+		body{
+			background-color:red;	
+		}
+	
+    	#ref{
+			visibility:hidden;
+		}
+		
+		#ref::before{
+			visibility:visible;
+			content:"FAIL";
+		}
+	}
+	
+    @media (view-mode: floating), (view-mode: windowed), (view-mode: maximized) 
+    {
+	#ref{
+		visibility:hidden;
+	}
+	#ref::before 
+	{
+		visibility:visible;
+		content:"PASS";
+	}
+	body{
+		background-color:green;	
+	}
+    }
+</style>
+<h1 id="ref">Test did not run. User agent does not implement <code>view-mode</code> Media Feature.</h1>

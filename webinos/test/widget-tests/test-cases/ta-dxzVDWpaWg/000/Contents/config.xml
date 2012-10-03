@@ -1,0 +1,4 @@
+<!-- This file should never be loaded -->
+<widget id="bg:" xmlns="http://www.w3.org/ns/widgets">
+<content src="fail.html" />
+</widget>

@@ -1,0 +1,7 @@
+<widget id="zc:" 
+        xmlns="http://www.w3.org/ns/widgets">
+<name>zc</name>
+<icon src="locales/en/custom.png"/>
+<icon src="custom.png"/>
+<icon src="custom.png" height="123" width="123"/>
+</widget>

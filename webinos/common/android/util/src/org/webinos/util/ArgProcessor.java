@@ -101,7 +101,7 @@ public class ArgProcessor {
 			/* download each asset */
 			for(String key : uriMap.keySet()) {
 				try {
-					ModuleUtils.getResource(uriMap.get(key), filenameMap.get(key));
+					ModuleUtils.downloadResource(uriMap.get(key), filenameMap.get(key));
 				} catch(IOException e) {
 					Log.v(TAG, "process exception: aborting; exception: " + e + "; resource = " + uriMap.get(key).toString());
 					return null;

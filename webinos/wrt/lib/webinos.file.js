@@ -217,10 +217,6 @@ if (typeof webinos.file === "undefined")
 	exports.FileReader.prototype.error = undefined;
 
 	exports.FileReader.prototype.readAsArrayBuffer = function (blob) {
-		var eventListener = new RPCWebinosService({
-			api: Math.floor(Math.random() * 100)
-		});
-
 		var eventCallback = function (attributeFun) {
 			return function (params, successCallback, errorCallback) {
 				this.readyState = params[0].readyState;
@@ -230,6 +226,8 @@ if (typeof webinos.file === "undefined")
 				attributeFun.call(this)(dom.ProgressEvent.deserialize(params[1], this));
 			};
 		};
+
+		var eventListener = {};
 
 		eventListener.onloadstart = webinos.utils.bind(eventCallback(function () {
 			return webinos.utils.callback(this.onloadstart, this);
@@ -260,10 +258,6 @@ if (typeof webinos.file === "undefined")
 	};
 
 	exports.FileReader.prototype.readAsText = function (blob, encoding) {
-		var eventListener = new RPCWebinosService({
-			api: Math.floor(Math.random() * 100)
-		});
-
 		var eventCallback = function (attributeFun) {
 			return function (params, successCallback, errorCallback) {
 				this.readyState = params[0].readyState;
@@ -273,6 +267,8 @@ if (typeof webinos.file === "undefined")
 				attributeFun.call(this)(dom.ProgressEvent.deserialize(params[1], this));
 			};
 		};
+
+		var eventListener = {};
 
 		eventListener.onloadstart = webinos.utils.bind(eventCallback(function () {
 			return webinos.utils.callback(this.onloadstart, this);
@@ -387,10 +383,6 @@ if (typeof webinos.file === "undefined")
 	exports.FileWriter.prototype.length = 0;
 
 	exports.FileWriter.prototype.write = function (data) {
-		var eventListener = new RPCWebinosService({
-			api: Math.floor(Math.random() * 100)
-		});
-
 		var eventCallback = function (attributeFun) {
 			return function (params, successCallback, errorCallback) {
 				this.readyState = params[0].readyState;
@@ -402,6 +394,8 @@ if (typeof webinos.file === "undefined")
 				attributeFun.call(this)(dom.ProgressEvent.deserialize(params[1], this));
 			};
 		};
+
+		var eventListener = {};
 
 		eventListener.onwritestart = webinos.utils.bind(eventCallback(function () {
 			return webinos.utils.callback(this.onwritestart, this);
@@ -442,10 +436,6 @@ if (typeof webinos.file === "undefined")
 	};
 
 	exports.FileWriter.prototype.truncate = function (size) {
-		var eventListener = new RPCWebinosService({
-			api: Math.floor(Math.random() * 100)
-		});
-
 		var eventCallback = function (attributeFun) {
 			return function (params, successCallback, errorCallback) {
 				this.readyState = params[0].readyState;
@@ -457,6 +447,8 @@ if (typeof webinos.file === "undefined")
 				attributeFun.call(this)(dom.ProgressEvent.deserialize(params[1], this));
 			};
 		};
+
+		var eventListener = {};
 
 		eventListener.onwritestart = webinos.utils.bind(eventCallback(function () {
 			return webinos.utils.callback(this.onwritestart, this);

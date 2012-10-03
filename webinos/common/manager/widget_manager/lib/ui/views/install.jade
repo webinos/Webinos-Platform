@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	- if (success)
+		div The widget installation was successful, you can 
+				//a(target="_blank", href="wgt://#{installId}") launch the widget now
+				a(target="_blank", href="/widget/#{installId}") launch the widget now
+				.
+				br
+				br
+				br
+		div Alternatively, 
+			a(href="/") go to installed applications
+			.
+	- else
+		div Failed to install widget #{id}.

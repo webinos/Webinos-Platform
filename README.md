@@ -20,3 +20,7 @@ Resources for Newcomers
   - [webinos.org](https://www.webinos.org)
   - [developer portal](https://developer.webinos.org/)
   - [issue tracker](http://jira.webinos.org/)
+  
+## License
+
+The webinos platform is licensed under the Apache 2.0 license. See the LICENSE file for more datails.

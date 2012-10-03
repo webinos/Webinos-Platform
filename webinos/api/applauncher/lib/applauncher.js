@@ -21,6 +21,7 @@
 	/**
 	 * Webinos AppLauncher service constructor (server side).
 	 * @constructor
+	 * @alias WebinosAppLauncherModule
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
 	 */
 	var WebinosAppLauncherModule = function(rpcHandler, params) {
@@ -60,9 +61,8 @@
 	 * @param params Params.
 	 * @param successCB Success callback.
 	 * @param errorCB Error callback.
-	 * @param objectRef RPC object reference.
 	 */
-	WebinosAppLauncherModule.prototype.launchApplication = function (params, successCB, errorCB, objectRef){
+	WebinosAppLauncherModule.prototype.launchApplication = function (params, successCB, errorCB){
 		console.log("launchApplication was invoked. AppID: " +  params.applicationID + " Parameters: " + params.params);
 		
 		if (!/^http[s]?:\/{2}/.test(params.applicationID) || !this.browserExecPath) {
@@ -93,7 +93,7 @@
 	 * 
 	 * [not yet implemented.]
 	 */
-	WebinosAppLauncherModule.prototype.appInstalled = function (params, successCB, errorCB, objectRef){
+	WebinosAppLauncherModule.prototype.appInstalled = function (params, successCB, errorCB){
 		console.log("appInstalled was invoked");
 		errorCB();
 	};

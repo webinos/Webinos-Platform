@@ -1,0 +1,4 @@
+<widget id="i18nrtl11:" xmlns="http://www.w3.org/ns/widgets">
+    <name>i18nrtl11</name>
+    <description dir="rtl">The arrow should point right <span dir="ltr">--&gt;</span></description>
+</widget>

@@ -79,15 +79,8 @@
 			channelchangeeventhandler, useCapture) {
 		var rpc = webinos.rpcHandler.createRPC(that, "display.addEventListener",
 				arguments);
-		rpc.fromObjectRef = Math.floor(Math.random() + (new Date().getTime())); // random
-		// object
-		// ID
 
-		// create the result callback
-		var callback = new RPCWebinosService({
-			api : rpc.fromObjectRef
-		});
-		callback.onchannelchangeeventhandler = function(params,
+		rpc.onchannelchangeeventhandler = function(params,
 				successCallback, errorCallback) {
 
 			channelchangeeventhandler(params);
@@ -95,7 +88,7 @@
 		};
 
 		// register the object as being remotely accessible
-		webinos.rpcHandler.registerCallbackObject(callback);
+		webinos.rpcHandler.registerCallbackObject(rpc);
 
 		webinos.rpcHandler.executeRPC(rpc);
 		return;
