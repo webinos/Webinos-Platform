@@ -159,7 +159,7 @@ Connection.prototype.invokeFeature = function(feature, callback, method, params)
 	//TODO do something with optional params.	
 	var xmppInvoke = new xmpp.Element('iq', { 'to': feature.device, 'type': 'get', 'id': id }).
 		c('query', {'xmlns': feature.ns}).
-		c('payload', {'xmlns': 'webinos:rpc#invoke', 'id': feature.id }).t(JSON.stringify(payload));
+		c('payload', {'xmlns': 'webinos:rpc#invoke', 'id': feature.remoteId }).t(JSON.stringify(payload));
 		
 	logger.trace('Sending RPC message via XMPP: ' + xmppInvoke.tree());
 	connection.client.send(xmppInvoke);
@@ -216,28 +216,32 @@ Connection.prototype.onStanza = function(stanza) {
 				delete connection.pendingRequests[stanza.attrs.id];
 				
 				logger.debug("Received RPC answer via XMPP: " + stanza);
-				
-				var payload = query.getChild('payload');
-				
-				callback(stanza.attrs.type, JSON.parse(payload.getText()));
+
+				if (query) {
+    				var payload = query.getChild('payload');
+    				callback(stanza.attrs.type, JSON.parse(payload.getText()));
+				} else {
+				    callback(stanza.attrs.type, { 'code': 32601, 'message': 'service is unavailable' });
+				}
 			}
 		} else if (stanza.attrs.type == 'get' || stanza.attrs.type == 'set') {
 			var query = stanza.getChild('query');
 			var found = false;
 			
 			if (query != null && query.attrs.xmlns != null) {
-    			var payload = JSON.parse(query.getChild('payload').getText());
-				var feature = connection.sharedFeatures[payload.attr.id];
+			    var payload = query.getChild('payload');
+				var feature = connection.sharedFeatures[payload.attrs.id];
 
 				if (feature != null) {
-					feature.invokedFromRemote(stanza, payload.method, payload.params, payload.id);
+				    var call = JSON.parse(query.getChild('payload').getText());
+					feature.invokedFromRemote(stanza, call.method, call.params, call.id);
 				} else {
 					// default respond with an error
-					this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'result', 'to': stanza.attrs.from }).c('service-unavailable'));
+					this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).c('service-unavailable'));
 				}
 			} else {
 				// default respond with an error
-				this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'result', 'to': stanza.attrs.from }).c('service-unavailable'));
+				this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).c('service-unavailable'));
 			}
 		}
 	}

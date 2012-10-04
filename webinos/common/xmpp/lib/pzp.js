@@ -25,7 +25,7 @@
 
 var xmpp = require('./xmpp');
 var ws = require('./webserver');
-var featureManager = require('./LocalFeatureManager.js');
+var featureManager = require('./FeatureManager.js');
 
 var path = require('path');
 var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));

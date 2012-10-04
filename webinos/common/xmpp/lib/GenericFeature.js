@@ -144,7 +144,7 @@ function GenericFeature() {
             conn.error(stanza, id, result);
         }
 
-		this.service[method].apply(this, params, success, error);
+		this.service[method].apply(this.service, [params, success, error]);
 
 		logger.verbose('ending on(invoked-from-remote)');
     }
