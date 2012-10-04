@@ -135,6 +135,7 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
                 } else { // else trusted list
                   return callback(status, value);
                 }
+
               });
             } else { //else crl
               return callback(status, value);

@@ -449,6 +449,7 @@ var Pzp = function () {
             logger.log("pzp server - " + clientSessionId + " connected") ;
           }
 
+
           conn.on("data", function (buffer) {
             handleData(buffer);
           });
@@ -461,6 +462,7 @@ var Pzp = function () {
           conn.on("error", function(err) {
             logger.log("pzp server -"+ err.message);
           });
+
         });
         tlsServer.on("error", function (err) {
           if (err.code === "EADDRINUSE") {// not starting on next available port as pzp local discovery will not work
