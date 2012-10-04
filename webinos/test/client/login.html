@@ -30,7 +30,7 @@
     }
     webinos.session.addListener('login', displayLogin);
     function authenticate(msg){
-     window.location.href=msg.payload.url;
+     window.location.href=msg.payload.message;
     }
     webinos.session.addListener('authenticate', authenticate);
 

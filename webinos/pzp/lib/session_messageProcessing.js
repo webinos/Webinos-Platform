@@ -13,20 +13,17 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
-*******************************************************************************/
-
-var dns = require("dns");
-var net = require("net");
-var path = require("path");
-var fs = require("fs");
-var os = require("os");
-
-var session_common = exports;
+* Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+ *******************************************************************************/
 var validation    = require("./session_schema");
 var webinos       = require("webinos")(__dirname);
-var log           = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var logger        = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
+
+var ProcessWebinosMsg = exports;
+
+var instanceMap = {};
+
 /**
  * Converts a JSON string to Buffer.
  *
@@ -36,13 +33,13 @@ var log           = webinos.global.require(webinos.global.util.location, "lib/lo
  * @param jsonString JSON string to be converted.
  * @returns byte lenght prefixed buffer.
  */
-session_common.jsonStr2Buffer = function(jsonString) {
+ProcessWebinosMsg.jsonStr2Buffer = function(jsonString) {
   var strByteLen = Buffer.byteLength(jsonString, 'utf8');
   var buf = new Buffer(4 + strByteLen, 'utf8');
   buf.writeUInt32LE(strByteLen, 0);
   buf.write(jsonString, 4);
   return buf;
-}
+};
 
 /**
 * Read in JSON objects from buffer and call objectHandler for each parsed
@@ -51,15 +48,14 @@ session_common.jsonStr2Buffer = function(jsonString) {
 * @param buffer Buffer instance containing JSON serialized objects.
 * @param objectHandler Callback for parsed object.s
 */
-var instanceMap = {};
-session_common.readJson = function(instance, buffer, objectHandler) {
-  var jsonStr;
-  var len;
-  var offset = 0;
+ProcessWebinosMsg.readJson = function(instance, buffer, objectHandler) {
+var jsonStr;
+var len;
+var offset = 0;
 
-  for (;;) {
-    var readByteLen;
-    if (instanceMap[instance]) {
+for (;;) {
+  var readByteLen;
+  if (instanceMap[instance]) {
       // we already read from a previous buffer, read the rest
       len = instanceMap[instance].restLen;
       var jsonStrTmp = buffer.toString('utf8', offset, offset + len);
@@ -80,7 +76,7 @@ session_common.readJson = function(instance, buffer, objectHandler) {
       instanceMap[instance] = {
           restLen: len - readByteLen,
           part: jsonStr
-      }
+      };
       return;
     }
 
@@ -95,30 +91,27 @@ session_common.readJson = function(instance, buffer, objectHandler) {
 };
 
 /**
- * Read in JSON objects from buffer and call objectHandler for each parsed
- * object.
- * @param buffer Buffer instance containing JSON serialized objects.
- * @param objectHandler Callback for parsed object.s
+* Read in JSON objects from buffer and call objectHandler for each parsed
+* object.
+* @param buffer Buffer instance containing JSON serialized objects.
+* @param objectHandler Callback for parsed object.s
  */
-session_common.processedMsg = function(self, msgObj, callback) {
-  "use strict";
+ProcessWebinosMsg.processedMsg = function(self, msgObj, callback) {
   // BEGIN OF POLITO MODIFICATIONS
   var valError = validation.checkSchema(msgObj);
   if(valError === false) { // validation error is false, so validation is ok
-    //log.info('received recognized packet ' + JSON.stringify(msgObj));
+    //logger.info('received recognized packet ' + JSON.stringify(msgObj));
   } else if (valError === true) {
     // for debug purposes, we only print a message about unrecognized packet
     // in the final version we should throw an error
     // Currently there is no a formal list of allowed packages and throw errors
     // would prevent the PZH from working
-    log.info("received unrecognized packet " + JSON.stringify(msgObj));
+    logger.log("received unrecognized packet " + JSON.stringify(msgObj));
   } else if (valError === 'failed') {
-    log.error('failed');
+    logger.error('failed');
   } else {
-    log.error('invalid response ' + valError);
+    logger.error('invalid response ' + valError);
   }
   callback.call(self, msgObj);
 };
-
-
 

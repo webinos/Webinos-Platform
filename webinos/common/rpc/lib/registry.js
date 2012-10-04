@@ -17,9 +17,11 @@
  ******************************************************************************/
 
 (function () {
-
-  var webinos       = require("webinos")(__dirname);
-  var log           = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+  var logger = console;
+  if (typeof module !== "undefined") {
+    var webinos_= require("webinos")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 
 	/**
 	 * Registry for service objects. Used by RPC.
@@ -43,7 +45,7 @@
 		if (!callback) {
 			return;
 		}
-		log.info("Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -70,7 +72,7 @@
 	Registry.prototype.registerObject = function (callback) {
 		_registerObject.call(this, callback);
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
@@ -83,7 +85,7 @@
 		if (!callback) {
 			return;
 		}
-		log.info("Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -101,7 +103,7 @@
 		if (!callback) {
 			return;
 		}
-		log.info("Removing: " + callback.api);
+		logger.log("Removing: " + callback.api);
 		var receiverObjs = this.objects[callback.api];
 
 		if (!receiverObjs)
@@ -116,7 +118,7 @@
 			delete this.objects[callback.api];
 		}
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
@@ -135,8 +137,8 @@
 			this.registerObject(new Service(rpcHandler, module.params));
 		}
 		catch (error) {
-			console.log('INFO: [Registry] '+error);
-			console.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
+			logger.log('INFO: [Registry] '+error);
+			logger.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
 		}
 	};
 

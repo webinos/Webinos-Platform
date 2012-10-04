@@ -45,7 +45,6 @@
   }
   function connectPzh(){
     var id =  document.getElementById('connectPzhId').value + "/";
-     alert(id);
     webinosPZH.commands.connectPzh(id, function(result){
       if (result === true) {
         setArticle("Success", "<p>Pzh in now connected!</p>");
@@ -74,7 +73,7 @@
       }
       text += '</table> </p>';
       setArticle("Revoke certificate", text);
-  };
+  }
   function listAllServices(payload){
       var text = " <h3 align=center> Configure services</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
       for (var i = 0; i < payload.pzEntityList.length; i += 1 ) {
@@ -165,19 +164,11 @@
     $("#serviceConfig").click(function(){
       webinosPZH.commands.listAllServices(listAllServices);
     });
-
-
     $('.column').equalHeight(); // Fix height
     });
-
-
     </script>
-
 </head>
-
-
 <body>
-
   <header id="header">
     <hgroup>
       <h1 class="site_title"><img src="./images/webinosWithBorder.png">PZH Admin</h1>
@@ -232,8 +223,5 @@
     </article><!-- end of styles article -->
     <div class="spacer"></div>
   </section>
-
-
 </body>
-
 </html>

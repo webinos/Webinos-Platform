@@ -21,16 +21,17 @@
 (function () {
 	if (typeof webinos === 'undefined')
 		webinos = {};
+		var logger = console;
 
 	if (typeof module === 'undefined') {
 		var exports = {};
 		var utils = webinos.utils || (webinos.utils = {});
 	} else {
-		var utils = require('./webinos.utils.js');
+		var utils   = require('./webinos.utils.js');
 		var exports = module.exports = {};
-	}
-  var webinos       = require("webinos")(__dirname);
-  var log           = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+    var webinos_= require("webinos")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 
 	var idCount = 0;
 	//Code to enable Context from settings file
@@ -73,7 +74,7 @@
 
 		this.messageHandler = {
 				write: function() {
-					log.info("could not execute RPC, messageHandler was not set.");
+					logger.log("could not execute RPC, messageHandler was not set.");
 				}
 		};
 	}
@@ -193,16 +194,16 @@
 		//TODO send back error if service and method is not webinos style
 
 		if (service.length === 0) {
-			log.info("Cannot handle request because of missing service in request");
+			logger.log("Cannot handle request because of missing service in request");
 			return;
 		}
 
-		log.info("Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
+		logger.log("Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
 
 		var includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
 
 		if (typeof includingObject === 'undefined'){
-			log.info("No service found with id/type " + service);
+			logger.log("No service found with id/type " + service);
 			return;
 		}
 
@@ -260,7 +261,7 @@
 		//if no id is provided we cannot invoke a callback
 		if (typeof response.id === 'undefined' || response.id == null) return;
 
-		log.info("Received a response that is registered for " + response.id);
+		logger.log("Received a response that is registered for " + response.id);
 
 		//invoking linked error / success callback
 		if (typeof this.awaitingResponse[response.id] !== 'undefined'){
@@ -269,12 +270,12 @@
 				if (typeof this.awaitingResponse[response.id].onResult === 'function' && typeof response.result !== 'undefined'){
 
 					this.awaitingResponse[response.id].onResult(response.result);
-					log.info("called SCB");
+					logger.log("called SCB");
 				}
 
 				if (typeof this.awaitingResponse[response.id].onError === 'function' && typeof response.error !== 'undefined'){
 					if (typeof response.error.data !== 'undefined'){
-						log.info("Propagating error to application");
+						logger.log("Propagating error to application");
 						this.awaitingResponse[response.id].onError(response.error.data);
 					}
 					else this.awaitingResponse[response.id].onError();
@@ -292,8 +293,8 @@
 	 * @param msgid An id.
 	 */
 	_RPCHandler.prototype.handleMessage = function (jsonRPC, from, msgid){
-		log.info("New packet from messaging");
-		log.info("Response to " + from);
+		logger.log("New packet from messaging");
+		logger.log("Response to " + from);
 
 		if (typeof jsonRPC.method !== 'undefined' && jsonRPC.method != null) {
 			// received message is RPC request
@@ -313,32 +314,27 @@
 	 * @param from Sender.
 	 */
 	_RPCHandler.prototype.executeRPC = function (preRpc, callback, errorCB, from) {
-		var rpc = toJSONRPC(preRpc);
+    var rpc = toJSONRPC(preRpc);
 
-		if (typeof callback === 'function'){
-			var cb = {};
-			cb.onResult = callback;
-			if (typeof errorCB === 'function') cb.onError = errorCB;
-			if (typeof rpc.id !== 'undefined') this.awaitingResponse[rpc.id] = cb;
+    if (typeof callback === 'function'){
+      var cb = {};
+      cb.onResult = callback;
+      if (typeof errorCB === 'function') cb.onError = errorCB;
+      if (typeof rpc.id !== 'undefined') this.awaitingResponse[rpc.id] = cb;
+    }
 
-			if (rpc.method && rpc.method.indexOf('@') === -1) {
-				var objectRef = rpc.method.split('.')[0];
-				if (typeof this.objRefCacheTable[objectRef] !== 'undefined') {
-					from = this.objRefCacheTable[objectRef].from;
+    // service invocation case
+    if (typeof preRpc.serviceAddress !== 'undefined') {
+      from = preRpc.serviceAddress;
+    }
 
-				}
-				log.info('RPC MESSAGE' + " to " + from + " for callback " + objectRef);
-			}
-
-		}
-
-		if (typeof module !== 'undefined') {
-			this.messageHandler.write(rpc, from);
-		} else {
-			// this only happens in the web browser
-			webinos.session.message_send(rpc, from);// TODO move the whole mmessage_send function here?
-		}
-	};
+    if (typeof module !== 'undefined') {
+      this.messageHandler.write(rpc, from);
+    } else {
+      // this only happens in the web browser
+      webinos.session.message_send(rpc, from);// TODO move the whole mmessage_send function here?
+    }
+  };
 
 	/**
 	 * Creates a JSON RPC 2.0 compliant object.

@@ -33,7 +33,7 @@ var util    = require("util");
 
 var webinos = require("webinos")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var log     = new webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 
 // Main interface: remove a PZP here.
 function revoke(instance, pzpCert, callback) {
@@ -56,7 +56,7 @@ function revoke(instance, pzpCert, callback) {
         });
 
       } else {
-        log.error("failed to revoke client certificate [" + pzpCert + "]");
+        logger.error("failed to revoke client certificate [" + pzpCert + "]");
         callback(false);
       }
     });
@@ -73,7 +73,7 @@ function removeRevokedCert(instance, pzpid, config, callback) {
       callback(true);
     });
   } catch (err) {
-    log.error("unable to rename certificate " + err);
+    logger.error("unable to rename certificate " + err);
     callback(false);
   }
 }
@@ -84,17 +84,17 @@ revoker.revokePzp = function (pzpid, pzh, callback ) {
   if (typeof pzpcert !== "undefined" ) {
     revoke(pzh, pzpcert, function(result) {
       if (result) {
-        log.info("revocation success! " + pzpid + " should not be able to connect anymore ");
+        logger.log("revocation success! " + pzpid + " should not be able to connect anymore ");
 
         removeRevokedCert(pzh, pzpid, pzh.config, function(status2) {
           if (!status2) {
-            log.error("could not rename certificate");
+            logger.error("could not rename certificate");
           }
           callback({cmd:"revokePzp", pzpid: pzpid});
           return;
         });
       } else {
-        log.error("revocation failed! ");
+        logger.error("revocation failed! ");
         callback("failed to update CRL");
       }
     });

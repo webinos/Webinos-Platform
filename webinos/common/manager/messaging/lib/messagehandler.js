@@ -17,12 +17,16 @@
 ******************************************************************************/
 (function ()	{
 "use strict";
-
+  var logger = console;
+  if (typeof module !== "undefined") {
+    var webinos_= require("webinos")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 	function logObj(obj, name)	{
 		for (var myKey in obj)	{
 			if (typeof obj[myKey] === 'object')
 			{
-				log.info(name + "["+myKey +"] = "+obj[myKey]);
+				logger.log(name + "["+myKey +"] = "+obj[myKey]);
 				logObj(obj[myKey], name + "." + myKey);
 			}
 		}
@@ -59,14 +63,11 @@
 	 * other_user@her_domain.com/laptop/urn:services-webinos-org:calender/
 	 * @param rpcHandler RPC handler manager.
 	 */
-
-	 /**
+  /**
 	 * MessageHandler constructor
 	 *  @constructor
 	 *  @param rpcHandler RPC handler manager.
 	 */
-var webinos = require('webinos')(__dirname);
-var log    = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 	var MessageHandler = function (rpcHandler) {
 		this.sendMsg = null;
 		this.objectRef = null;
@@ -237,7 +238,7 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 
 			if ((!this.clients[session1]) && (!this.clients[session2]))  // not registered either way
 			{
-				log.info("session not set up");
+				logger.log("session not set up");
 				var occurences = (message.to.split(this.separator).length - 1);
 
 				var data = message.to.split(this.separator);
@@ -253,7 +254,7 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 
 					if (this.clients[new_session1] || this.clients[new_session2]) {
 						forwardto = id;
-						log.info("forwardto ", forwardto);
+						logger.log("forwardto ", forwardto);
 					}
 				}
 				if (forwardto === data[0]) {
@@ -275,11 +276,11 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 				this.sendMsg(message, forwardto, this.objectRef);
 			}
 			else if (this.clients[session2]) {
-				log.info("clients[session2]:" + this.clients[session2]);
+				logger.log("clients[session2]:" + this.clients[session2]);
 				this.sendMsg(message, this.clients[session2], this.objectRef);
 			}
 			else if (this.clients[session1]) {
-				log.info("clients[session1]:" + this.clients[session1]);
+				logger.log("clients[session1]:" + this.clients[session1]);
 				this.sendMsg(message, this.clients[session1], this.objectRef);
 			}
 		}
@@ -318,7 +319,7 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 					this.clients[regid] = sessionid;
 				}
 
-				log.info("register Message");
+				logger.log("register Message");
 			}
 			return;
 		}
@@ -328,7 +329,7 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 
 			//check if a session with destination has been stored
 			if(message.to !== this.self) {
-				log.info("forward Message");
+				logger.log("forward Message");
 
 				//if no session is available for the destination, forward to the hop nearest,
 				//i.e A->D, if session for D is not reachable, check C, then check B if C is not reachable
@@ -377,7 +378,7 @@ var log    = webinos.global.require(webinos.global.util.location, "lib/logging.j
 							}
 						}
 					}
-					log.info("message forward to:" + forwardto);
+					logger.log("message forward to:" + forwardto);
 					this.sendMsg(message, forwardto, this.objectRef);
 				}
 				else if (this.clients[session2]) {

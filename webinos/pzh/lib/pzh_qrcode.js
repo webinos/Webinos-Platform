@@ -23,6 +23,8 @@
 var crypto  = require("crypto");
 var path    = require("path");
 
+var pzh_api = require("./pzh_internal_apis.js");
+
 var pzh_qrcode = exports;
 
 function create(url, code, cb) {
@@ -93,7 +95,7 @@ pzh_qrcode.addPzpQRAgain = function(pzh, next) {
   var code = generateRandomCode();
 
   pzh.expecting.setExpectedCode(code,function() {
-    pzh.getMyUrl(function(url) {
+    pzh_api.getMyUrl(pzh, function(url) {
       create(url, code, function(err, qrimg) {
         next({to: url, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
       });

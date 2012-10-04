@@ -18,7 +18,7 @@ var webinosPZH = {
         msg = JSON.parse(msg);
 
         if(msg.payload.status=== "authenticate") {
-          window.location.href=msg.payload.url;
+          window.location.href=msg.payload.message;
         }
         switch(msg.cmd){
           case 'listDevices':
@@ -62,9 +62,9 @@ var webinosPZH = {
     webinosPZH.channel = new XMLHttpRequest();
     webinosPZH.channel.onreadystatechange = webinosPZH.messageRecieved;
     if (typeof location.port !== "undefined") {
-      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS");
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS&status="+payload.payload.status);
     } else {
-      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS");
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS&status="+payload.payload.status);
     }
     webinosPZH.channel.setRequestHeader("Content-Type","application/json");
     webinosPZH.channel.send(JSON.stringify(payload));
@@ -90,7 +90,7 @@ var webinosPZH = {
       }
     },
     logout: function(){
-      webinosPZH.send("logout");
+      webinosPZH.send({payload:{status:"logout"}});
       if ( window.location.search && window.location.search.split("?") &&
         window.location.search.split("?")[1].split('=')[1].split("&")[0] === 'google') {
         window.open('https://www.google.com/accounts/Logout');
@@ -121,20 +121,19 @@ var webinosPZH = {
     },
     listAllServices: function(callback){
         webinosPZH.callbacks.listAllServices = callback;
-        webinosPZH.send({cmd:"listAllServices"});
+        webinosPZH.send({payload: {status:"listAllServices"}});
     },
     listUnregServices: function(at, callback){
         webinosPZH.callbacks.listUnregServices = callback;
-        webinosPZH.send({cmd:"listUnregServices", "at":at});
+        webinosPZH.send({payload: {status:"listUnregServices", "at":at}});
     },
     registerService: function(at, name, callback){
         webinosPZH.callbacks.registerService = callback;
-        console.log("hi");
-        webinosPZH.send({cmd:"registerService", "at":at, "name":name});
+        webinosPZH.send({payload: {status:"registerService", "at":at, "name":name}});
     },
     unregisterService: function(svAddress, svId, svAPI, callback){
         webinosPZH.callbacks.unregisterService = callback;
-        webinosPZH.send({cmd:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI});
+        webinosPZH.send({payload: {status:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI}});
     },
     crashLog: function(callback){
       webinosPZH.callbacks.crashLog = callback;

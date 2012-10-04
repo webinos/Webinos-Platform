@@ -18,6 +18,7 @@
 *******************************************************************************/
 var fs   = require("fs");
 var pzh  = require("./webinos/pzh/lib/pzh_provider.js");
+
 var host = null, name = null;
 
 function help() {
@@ -59,9 +60,9 @@ if ( name === null) {
 var provider = new pzh(host, name);
 provider.start(function(result, details) {
   if (result) {
-    console.log("PZH PROVIDER STARTED " + details);
+    console.log("ZONE PROVIDER STARTED");
   } else {
-    console.log("PZH PROVIDER FAILED STARTING " + details);
+    console.log("ZONE PROVIDER FAILED STARTING");
   }
 });
 

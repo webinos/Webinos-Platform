@@ -15,9 +15,6 @@
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-/**
-* @description: Starts PZH farm and handles adding of new PZH
-*/
 
 var tls         = require("tls");
 var path        = require("path");
@@ -27,219 +24,223 @@ var net         = require("net");
 var crypto      = require("crypto");
 
 var webinos     = require("webinos")(__dirname);
-var log         = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
 var session     = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var pzhWI       = webinos.global.require(webinos.global.pzh.location, "web/pzh_webserver");
 
 var pzh_session = require("./pzh_sessionHandling.js");
+
 /**
- *
- * @param input_hostname
- * @param input_friendlyName
+ * Defines the constructor for the provider  and initializes the provider functions
+ * @param _hostname : hostname is specified if the pzh provider
+ * @param _friendlyName : friendly name of the provider
  * @constructor
  */
-var Provider = function(input_hostname, input_friendlyName) {
+var Provider = function(_hostname, _friendlyName) {
+  "use strict";
   pzhWI.call(this);
-  this.address       = "0.0.0.0";
-  var server         = [];
-  var pzhs          = [];
-  this.config       = [];
-  this.friendlyName = input_friendlyName;
-  this.hostname     = input_hostname;
-  var self = this;
+  var server       = []; // TLS server socket on which provider listens
+  var pzhs         = []; // instances of the pzh currently loaded
+  var address      = "0.0.0.0";
+  var config       = [];
+  var friendlyName = _friendlyName;
+  var hostname     = _hostname;
+  var self         = this;
+
 
   /**
-   *
-   * @param callback
+   * Fetches the public IP address if hostname is not specified
+   * @param callback :
    */
   function setHostName(callback) {
-    "use strict";
-    var socket = net.createConnection(80, "www.google.com");
-    socket.on('connect', function() {
-      socket.end();
-      return callback(socket.address().address);
-    });
-    socket.on('error', function() { // Assuming this will happen as internet is not reachable
-      return callback("0.0.0.0");
-    });
-  }
-
-  /**
-   *
-   * @param instance
-   * @param conn
-   * @return {*}
-   */
-  function removeClient(instance, conn) {
-    "use strict";
-    var id;
-    for (id in instance.connectedPzp){
-      if (instance.connectedPzp.hasOwnProperty(id) && instance.connectedPzp[id].socket === conn) {
-        log.info("removed pzp instance details -" + id);
-        delete instance.connectedPzp[id];
-        return id;
-      }
-    }
-
-    for (id in instance.connectedPzh) {
-      if (instance.connectedPzh.hasOwnProperty(id) && instance.connectedPzh[id].socket === conn) {
-        log.info("removed pzh instance details -" + id);
-        delete instance.connectedPzh[id];
-        return id;
-      }
-    }
-  }
-
-  /**
-   *
-   * @param conn
-   */
-  function handleConnection(conn) {
-    "use strict";
-    // if server name exists in conn and pzh_provider.pzhs has details about pzh instance,
-    // message will be routed to respective PZH authorization function
-    if (conn.servername && pzhs[conn.servername]) {
-      pzhs[conn.servername].handleConnectionAuthorization(conn);
+    if (hostname === "") {
+      var socket = net.createConnection(80, "www.google.com");
+      socket.on('connect', function() {
+        socket.end();
+        hostname =  socket.address().address;
+        return callback();
+      });
+      socket.on('error', function() { // Assuming this will happen as internet is not reachable
+        hostname =  "0.0.0.0";
+        return callback();
+      });
     } else {
-      conn.socket.end();
-      log.error("server is not registered in "+conn.servername);
+      return callback();
     }
-    // In case data is received at pzh_provider
-    conn.on("data", function(data){
-      // forward message to respective PZH handleData function
-      if(conn.servername && pzhs[conn.servername]) {
-        pzhs[conn.servername].handleData(conn, data);
-      } else {
-        log.info("("+conn.servername+") is not registered in the provider");
-      }
-    });
-    // In case of error
-    conn.on("end", function(err) {
-      log.info("("+conn.servername+") client ended connection");
-    });
-
-    // It calls removeClient to remove PZH from list.
-    conn.on("close", function() {
-      try {
-        log.info("("+conn.servername+") Pzh/Pzp  closed");
-        if(conn.servername && pzhs[conn.servername]) {
-          var cl      = pzhs[conn.servername];
-          var removed = removeClient(cl, conn);
-          if (removed !== null && typeof removed !== "undefined"){
-            cl.messageHandler.removeRoute(removed, conn.servername);
-            cl.discovery.removeRemoteServiceObjects(removed);
-          }
-        }
-      } catch (err) {
-        log.error("("+conn.servername+") remove client from connectedPzp/connectedPzh failed" + err);
-      }
-    });
-
-    conn.on("error", function(err) {
-      log.error("("+conn.servername+") general error " + err);
-    });
   }
 
+
   /**
-   *
-   * @param pzhs
-   * @param server
-   * @param trustedPzh
+   *  PZH already registered, are reloaded in case Provider is restarted
    */
-  function loadPzhs(pzhs, server, trustedPzh) {
-    "use strict";
-    var myKey, key;
-    for (myKey = 0 ; myKey < trustedPzh.length; myKey=myKey+1) {
-      key = trustedPzh[myKey];
+  function loadPzhs() {
+    var myKey, key, pzh;
+    for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
+      key = config.trustedList.pzh[myKey];
       pzhs[key] = new pzh_session();
       pzhs[key].addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
         if (status) {
-          console.log(pzhId);
-          console.log(value);
           server.addContext(pzhId, value);
-          log.info("started pzh " + pzhId);
-          pzhs[key].connectOtherPzh();
+          logger.log("started zone hub " + pzhId);
         } else {
-          log.error("failed starting pzh " + value);
+          logger.error("failed starting zone hub" + value);
         }
       });
     }
   }
 
-
-
   /**
-   *
-   * @param callback
+   * Sets TLS server connection parameters
+   * @return {Object}: object with set TLS server connection parameter
    */
-  function loadSession (callback) {
-    "use strict";
-    self.config  = new session.configuration();
-    self.config.setConfiguration(self.friendlyName, "PzhP", self.hostname, function (status, value) {
-      if (!status) {
-        return callback(status, value);
-      } else {
-        // Connection parameters for PZH pzh_provider TLS server.
-        // Note this is the main server, pzh started are stored as SNIContext to this server
-        var options = {
+  function setParam (type, callback) {
+    var key_id;
+    if (type === "conn") { key_id =config.cert.internal.conn.key_id; } else { key_id = config.cert.internal.web.key_id;}
+    config.fetchKey(key_id, function(status, value) {
+      if(status) {
+        callback(true, {
           key  : value,
-          cert : self.config.cert.internal.conn.cert,
-          ca   : self.config.cert.internal.master.cert,
+          cert : (type === "conn"? config.cert.internal.conn.cert: config.cert.internal.web.cert),
+          ca   : config.cert.internal.master.cert,
           requestCert       : true,
           rejectUnauthorised: false
-        };
-        // Main pzh_provider TLS server
-        server = tls.createServer (options, function (conn) {
-          handleConnection(conn);
         });
-
-        server.on("error", function(error) {
-          if(error && error.code ==="EACCES") {
-            if (callback !== "undefined") {
-              callback("error", "starting pzh_provider failed, try running with sudo");
-            }
-          }
-          log.error(error);
-        });
-
-        server.on("listening", function(){
-          log.info("initialized at " + self.address +" and port " +self.config.userPref.ports.provider);
-          // Load PZH"s that we already have registered ...
-          loadPzhs(pzhs, server, self.config.trustedList.pzh);
-          // Start web interface, this web interface will adapt depending on user who logins
-          callback(true);
-        });
-        server.listen(self.config.userPref.ports.provider, self.address);
+      } else {
+        callback(false)
       }
     });
   }
 
   /**
-   *
-   * @param pzh
-   * @param pzhId
-   * @param options
+   * Loads provider session/certificate details and starts the TLS server
+   * @param callback: If successful returns true or false uf server fails to start
    */
-  function storeServerDetails(pzh, pzhId, options){
-    log.info(options);
-    server.addContext(pzhId, options);
-    pzhs[pzhId] = pzh;
+  function loadSession (callback) {
+    config  = new session.configuration();
+    config.setConfiguration(friendlyName, "PzhP", hostname, function (status, value) {
+      if (!status) {
+        logger.error("setting configuration for the zone provider failed, needs deletion of the .webinos directory")
+        return callback(status, value);
+      } else {
+        setParam("conn", function(status, options) {
+          if(status) {
+            server = tls.createServer (options, function (conn) {   // This is the main TLS server, pzh started are stored as SNIContext to this server
+              handleConnection(conn);
+            });
+            server.on("error", function(error) {
+              logger.error(error.message);
+              if(error && error.code ==="EACCES") {
+                callback(false, "could not start zone provider due to access restrictions, check your access rights or change your configuration");
+              }
+            });
+
+            server.on("listening", function(){
+              logger.log("initialized at " + address +" and port " +config.userPref.ports.provider);
+              loadPzhs();
+              return callback(true);
+            });
+            server.listen(config.userPref.ports.provider, address);
+          }
+        });
+      }
+    });
   }
 
   /**
-   *
-   * @param currentPzh
+   *  Server name matches with pzhId in the pzhs object, message will be routed to respective authorization function
+   * @param conn
    */
-  this.fetchPzh = function(currentPzh){
-    return pzhs[currentPzh];
+  function handleConnectionAuthorization(conn){
+    if (conn.servername && pzhs[conn.servername]) {
+      pzhs[conn.servername].handleConnectionAuthorization(conn);
+    } else {
+      conn.socket.end();
+      logger.error("pzh  -  " + conn.servername +" is not registered in this provider");
+    }
+  }
+  /**
+   * Handle connection coming from pzh or pzp and forwards request to respective pzh.
+   * The mechanism relies on "servername" received from the client.
+   * @param conn : Socket information of the client connecting
+   */
+  function handleConnection(conn) {
+    handleConnectionAuthorization(conn); // This is called only when new client connects
+
+    conn.on("data", function(data){
+      if(conn.servername && pzhs[conn.servername]) { // forward message to respective PZH handleData function
+        pzhs[conn.servername].handleData(conn,data);
+      } else {
+        logger.log("pzh "+conn.servername+" is not registered in the provider");
+      }
+    });
+
+    conn.on("end", function(err) {
+      logger.log(conn.servername+" ended connection");
+    });
+
+    conn.on("close", function() {
+      if(conn.servername && pzhs[conn.servername]) {
+        pzhs[conn.servername].removeRoute(conn.id);
+      } else {
+        logger.log("not registered entity ended connection");
+      }
+    });
+
+    conn.on("error", function(err) {
+      logger.error(conn.servername+" general error " + err.message);
+    });
+  }
+
+  function loadWebServerCertificates(callback) {
+    if (!config.cert.internal.web.cert) {
+      var cn = "PzhWS" + ":"+ config.metaData.serverName;
+      config.generateSelfSignedCertificate("PzhWS", cn, function(status, value, key ) {
+        if (status) {
+          config.generateSignedCertificate(value, 2, function(status, value) {
+            if(status) {
+              config.cert.internal.web.cert = value;
+              config.storeCertificate(config.cert.internal, "internal");
+              setParam("web", function(status, wss){
+                if (status) { return callback(true,  wss);}
+                else { return callback(false);}
+              });
+            } else {
+              return callback(false, value);
+            }
+          });
+        } else {
+          return callback(false, value);
+        }
+      });
+    } else {
+      setParam("web", function(status, wss){
+        if(status) { return callback(true, wss);}
+        else { return callback(false);}
+      });
+    }
+  }
+
+  // Webinos provider APIs exposed to the Zone Web Server
+
+  /**
+   * FetchPzh is called from the WebServer to fetch information about Pzh instance
+   * @param pzhId: pzhId of the entity connecting to the pzh web server
+   * @return {*}: returns pzh instance
+   */
+  this.fetchPzh = function(pzhId){
+    return pzhs[pzhId];
   };
-
-
+  /**
+   * Refreshes the SNI context of the running PZH. Used during pzh-pzh connection and revoke certificate
+   * @param serverName
+   * @param options
+   */
   this.refreshCert = function (serverName, options) {
     server._contexts.some(function(elem) {
       if (serverName.match(elem[0]) !== null) {
-        elem[1] =  crypto.createCredentials(options).context;
+        if (options === "undefined") { elem[1] =  crypto.createCredentials(elem[1]).context;}
+        else { elem[1] =  crypto.createCredentials(options).context; }
       }
     });
   };
@@ -249,27 +250,18 @@ var Provider = function(input_hostname, input_friendlyName) {
    * @param callback
    */
   this.createPzh = function(user, callback) {
-    var self = this;
-    var name = user.username;
-    var pzhId = self.hostname+"/"+name+"/";
-    if (self.config.trustedList.pzh.indexOf(pzhId) !== -1 || user.username === self.friendlyName)  {
-      callback(false, "pzh exists, with same id");
+    var name = user.email;
+    var pzhId = hostname+"/"+name+"/";
+    if (config.trustedList.pzh.indexOf(pzhId) !== -1 )  {
+      callback(true, pzhId);
     } else {
-      log.info("adding new PZH - " + pzhId);
-      var pzh = new pzh_session();
-      pzh.addPzh(name, pzhId, user, function(status, options, uri){
+      logger.log("adding new zone hub - " + pzhId);
+      pzhs[pzhId] = new pzh_session();
+      pzhs[pzhId].addPzh(name, pzhId, user, function(status, options, uri){
         if (status) {
-          // This adds SNI context to existing running PZH server
-          storeServerDetails(pzh, uri, options);
-          self.config.trustedList.pzh.push(uri);
-
-          self.config.storeTrustedList(self.config.trustedList, function(status, value) {
-            if (status) {
-              log.info("added " + pzhId + " in the provider trusted list");
-            } else {
-              log.error("failed adding " + pzhId + " in the trusted list");
-            }
-          });
+          server.addContext(uri, options);
+          config.trustedList.pzh.push(uri);
+          config.storeTrustedList(config.trustedList);
           return callback(true, pzhId);
         } else {
           return callback(false, "failed adding pzh");
@@ -283,46 +275,35 @@ var Provider = function(input_hostname, input_friendlyName) {
    */
   this.start = function (callback) {
     "use strict";
-    if (self.hostname === "") { // Configuration setting for pzh, returns set values and connection key
-      setHostName(function(hostname) {
-        self.hostname = hostname;//self.pzhs, self.server, self.config, self.friendlyName, self.hostname,
-        loadSession(function(status, config){
-          if (status) { // loaded session data
-            self.startWebServer(function (status, value) {
+    setHostName(function() {
+      loadSession(function(status, value){
+        if (status) { // pzh provider TLS server started
+          logger.log("zone provider tls server started");
+          loadWebServerCertificates(function(status, connParam){
+            self.startWebServer(hostname, address, config.userPref.ports.provider_webServer, connParam, function (status, value) {
               if(status) {
-                return callback(status, "pzh provider and pzh web server initialized");
+                logger.log("zone provider web server started");
+                return callback(true);
               } else{
-                return callback(status, "pzh web server failed initializing "+value);
+                logger.log("zone provider web server failed to start " + value);
+                return callback(false, value);
               }
             });
-          } else {
-            return callback(status, "failed starting pzh provider " + value);
-          }
-        });
-      });
-    } else {
-      loadSession(function(status, config){
-        if (status) { // loaded session data
-          self.startServer(function (status, value) {
-            if(status) {
-              return callback(status, "pzh provider and pzh web server initialized");
-            } else{
-              return callback(status, "pzh web server failed initializing "+value);
-            }
           });
         } else {
-          return callback(status, "failed starting pzh provider " + value);
+          logger.error("zone provider tls server failed to start " + value);
+          return callback(false, value);
         }
       });
-    }
+    });
   };
 };
 util.inherits(Provider, pzhWI);
-/*
-// This keeps pzh running but you cannot find where error occurred
+
+/*// This keeps pzh running but you cannot find where error occurred
 process.on("uncaughtException", function(err) {
-  log.error("uncaught exception " + err);
-});
-*/
+  logger.error("uncaught exception " + err.message);
+});*/
+
 
 module.exports = Provider;

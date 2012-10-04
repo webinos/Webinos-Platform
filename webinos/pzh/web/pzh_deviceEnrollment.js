@@ -1,28 +1,86 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+ *******************************************************************************/
 
 var utils = require("util");
 var fs    = require("fs");
 var path  = require("path");
 
-var pzhP        = require("../lib/pzh_provider.js");
-var pzh_openid  = require("./pzh_openid.js");
-var qrcode      = require("../lib/pzh_qrcode.js")
+var qrcode = require("../lib/pzh_qrcode.js");
 
 var webinos = require('webinos')(__dirname);
-var log    = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
-var content= webinos.global.require(webinos.global.util.location, "lib/content.js");
+var logger   = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
+var content = webinos.global.require(webinos.global.util.location, "lib/content.js");
 
+var openid = require("./pzh_openid.js");
+/**
+ *
+ * @constructor
+ */
 var Pzh_DeviceEnrollment = function() {
-  pzh_openid.call(this);
-  var storeDetails = [];
-  var self = this;
-  function prepErrorMsg(value){
-    var msgSend = {"type":"prop","payload":{
-      "status":"error",
-      "message": value
-    }
-    }
+  var storeTempDetails = [];//Used by the register pzh function, value is entered in verify function
+  var parent = this;
+
+  /**
+   *
+   * @param res
+   * @param from
+   * @param to
+   * @param cmd
+   * @param payload
+   */
+  function prepMsg(res, from, to, cmd, payload){
+    var msgSend = {"type":"prop",
+      "from":from,
+      "to":to,
+      "payload":{
+        "status" :cmd,
+        "message": payload
+      }
+    };
+    res.write(JSON.stringify(msgSend));
+    res.end();
   }
 
+  /**
+   *
+   * @param query
+   * @return {Object}
+   */
+  function createEnrollMsg(query) {
+    return { "type":"prop",
+      "from": query.from,
+      "to": query.to,
+      "payload":
+      { "status":"clientCert",
+        "message":
+        {
+          "code": query.payload.message.authCode,
+          "csr" : query.payload.message.csr
+        }
+      }
+    };
+  }
+
+  /**
+   *
+   * @param res
+   * @param query
+   */
   function login(res, query) {
     var filename = path.join(__dirname, "index.html");
     fs.readFile(filename, "binary", function(err, file) {
@@ -31,109 +89,121 @@ var Pzh_DeviceEnrollment = function() {
         res.write(err + "\n");
         res.end();
       } else {
-        res.writeHeader(200, content.getContentType(filename));
-        var msg = {"type" : "prop",
-          "to"   : query.from,
-          "from" : query.to,
-          "payload":{"status":query.payload.status,
-            "message":file}};
-        res.write(JSON.stringify(msg));
-        res.end();
+        //res.writeHeader(200, content.getContentType(filename));
+        prepMsg(res, query.to, query.from, "login", file);
       }
     });
   }
+  /**
+   *
+   * @param res
+   * @param query
+   */
+  function authenticate(address, port, res, query){
+    var provider;
+    if(query.payload.message.provider === "google") {
+      provider = 'http://www.google.com/accounts/o8/id'
+    } else {
+      provider  = 'http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds';
+    }
 
+    openid.authenticate(address, port, provider, query.payload.message.returnPath, function(status, url){
+      if(status){
+        prepMsg(res, query.to, query.from, "authenticate", url);
+      } else {
+        prepMsg(res, query.to, query.from, "error", url);
+      }
+    });
+  }
+  /**
+   *
+   * @param res
+   * @param query
+   */
   function registerPzh(res, query) {
-    if (storeDetails[query.from.split("/")[0]]) {
-      self.createPzh(storeDetails[query.from.split("/")[0]], function(status, value) {
-        var msgSend;
+    if (storeTempDetails[query.to]) {
+      parent.createPzh(storeTempDetails[query.to], function(status, value) {
         if (status) {
-          msgSend = {"type":"prop","from":value, "to": query.from,
-            "payload":
-            {
-              "status":"authStatus",
-              "message": {
-                "connected": "true",
-                "authCode":""
-              }
-            }
-          };
-          var pzhInstance = self.fetchPzh(value);
+          var pzhInstance = parent.fetchPzh(value);
           qrcode.addPzpQRAgain(pzhInstance, function(result) {
-            msgSend.payload.message.authCode = result.payload.code;
-            res.write(JSON.stringify(msgSend));
-            res.end();
+            prepMsg(res, value, query.from, "authStatus", {connected:"true", authCode: encodeURIComponent(result.payload.code)});
           });
         } else {
-          msgSend = {"type":"prop","payload":{"status":"error",   "message": "request for the creating pzh failed " + value}};
-          res.write(JSON.stringify(msgSend));
-          res.end();
+          prepMsg(res, query.to, query.from, "error",  "request for the creating pzh failed " + value);
         }
       });
     }
   }
-
+  /**
+   *
+   * @param res
+   * @param query
+   */
   function enrollPzp(res, query) {
-    var pzhInstance = self.fetchPzh(query.to);
+    var pzhInstance = parent.fetchPzh(query.to);
     pzhInstance.expecting.isExpected(function(expected) {
-      var msgSend;
       if (!expected){
-        msgSend = {"type":"prop","payload":{"status":"error",   "message": "not expecting new pzp"}};
-        res.write(msgSend);
-        res.end();
+        prepMsg(res, query.to, query.from, "error", "not expecting new pzp");
       } else {
-        var validMsgObj = { "type":"prop", "from": query.from, "to": query.to, "payload":
-        { "status":"clientCert",
-          "message":
-          {
-            "code": query.payload.message.authCode,
-            "csr" : query.payload.message.csr
-          }
-        }
-        };
-        pzhInstance.addNewPZPCert(validMsgObj, function(err, msgSend) {
-          if (!err) {
-            msgSend = {"type":"prop","payload":{"status":"error", "message": "creating new pzp failed, due to " + msgSend }};
-            res.write(msgSend);
-            res.end();
-          } else {
-            res.write(JSON.stringify(msgSend));
-            res.end();
-          }
+        var msg = createEnrollMsg(query);
+        pzhInstance.addNewPZPCert(msg, function(err, msgSend) {
+          res.write(JSON.stringify(msgSend));
+          res.end();
         });
       }
     });
   }
-
+  /**
+   *
+   * @param res
+   * @param query
+   */
   function enrollPzh (res, query){
-    var instance = self.fetchPzh(query.to);
+    var instance = parent.fetchPzh(query.to);
     if(!instance) {
-      res.write(JSON.stringify({to: query.from, payload: {status: 'error', message: "pzh "+ query.to + " does not exist with this provider"}}));
-      res.end();
+      prepMsg(res, query.to, query.from, "error", "pzh "+ query.to + " does not exist with this provider");
     } else {
-      instance.addExternalCert(query.to, query, res, function(serverName, options){
-        self.refreshCert(serverName, options);
+      instance.addExternalCert(query, function(serverName, options, masterCert, masterCrl){
+        prepMsg(res, serverName, query.from, "receiveCert", {cert: masterCert,crl: masterCrl});
+        parent.refreshCert(serverName, options);
       });
     }
   }
-
-  this.handleEnrollmentReq = function(res, query) {
-    log.info("device/pzh enrollment msg: " + JSON.stringify(query));
-    if (query.from) {
-
+  /**
+   *
+   * @param res
+   * @param id
+   * @param query
+   * @param details
+   */
+  this.verifyPzpHandling = function(res, id, query, details) {
+    if (parent.fetchPzh(id)) {
+      var instance = parent.fetchPzh(id);
+      qrcode.addPzpQRAgain(instance, function(result) {
+        res.writeHeader(200, {'Content-Type':'application/x-javascript; charset=UTF-8'});
+        res.writeHead(302, {Location: "http://"+query.returnPath + "?cmd=authStatus&connected=true&pzhid="+id+"&authCode="+encodeURIComponent(result.payload.code)});
+        res.end();
+      });
+    } else {
+      storeTempDetails[id]=details;
+      res.writeHeader(200, {'Content-Type':'application/x-javascript; charset=UTF-8'});
+      res.writeHead(302, {Location: "http://"+query.returnPath + "?cmd=authStatus&connected=false&pzhid="+id});
+      res.end();
     }
+  };
+  /**
+   *
+   * @param res
+   * @param query
+   */
+  this.handleEnrollmentReq = function(hostname, port, res, query) {
+    logger.log("device/pzh enrollment msg: " + JSON.stringify(query));
     switch(query.payload.status) {
       case "login":
         login(res, query);
         break;
       case 'authenticate':
-        if(query.payload.message.provider === "google") {
-          storeDetails[query.from] = query;
-          this.authenticate( 'http://www.google.com/accounts/o8/id', res, query);
-        } else {
-          storeDetails[query.from] = query;
-          this.authenticate('http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds', res, query);
-        }
+        authenticate(hostname, port, res, query);
         break;
       case "registerPzh":
         registerPzh(res, query);
@@ -144,18 +214,9 @@ var Pzh_DeviceEnrollment = function() {
       case "sendCert": // This is pzh enrollment
         enrollPzh(res, query);
         break;
-
     }
-  };
-
-  this.getStoreInfo = function(id) {
-    return storeDetails[id];
-  };
-  this.setStoreInfo = function(id, value) {
-    storeDetails[id] = value;
-  };
+ };
 };
 
-utils.inherits(Pzh_DeviceEnrollment, pzh_openid);
 
 module.exports = Pzh_DeviceEnrollment;

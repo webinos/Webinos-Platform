@@ -25,8 +25,7 @@
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
 var webinos = require("webinos")(__dirname);
-var wlog    = webinos.global.require(webinos.global.util.location, "lib/logging.js")
-var log     = new wlog("pzh_authCode");
+var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 var tokenAuth = exports;
 
 /** @description: This creates an auth code object which can be used to set a new
@@ -46,7 +45,7 @@ tokenAuth.createAuthCounter = function(callback) {
     */
   authCounter.setExpectedCode = function(code, cb) {
     var self = this;
-    log.info("new PZP expected, code: " + code);
+    logger.log("new PZP expected, code: " + code);
     self.status = true;
     self.code = code;
     var d = new Date();
@@ -61,7 +60,7 @@ tokenAuth.createAuthCounter = function(callback) {
      */
   authCounter.unsetExpected = function(cb) {
     var self = this;
-    log.info("no longer expecting PZP with code " + self.code);
+    logger.log("no longer expecting PZP with code " + self.code);
     self.status = false;
     self.code = null;
     self.timeout = null;
@@ -74,12 +73,12 @@ tokenAuth.createAuthCounter = function(callback) {
     var self = this;
 
     if (!self.status) {
-      log.info("not expecting a new PZP");
+      logger.log("not expecting a new PZP");
       cb(false);
       return;
     }
     if (self.timeout < new Date()) {
-      log.info("was expecting a new PZP, timed out.");
+      logger.log("was expecting a new PZP, timed out.");
       self.unsetExpected( function() {
         cb(false);
       });
@@ -96,19 +95,19 @@ tokenAuth.createAuthCounter = function(callback) {
   authCounter.isExpectedCode = function(newcode, cb) {
     var self = this;
 
-    log.info("trying to add a PZP, code: " + newcode);
+    logger.log("trying to add a PZP, code: " + newcode);
 
     if (!self.status) {
-      log.info("not expecting a new PZP");
+      logger.log("not expecting a new PZP");
       cb(false);
       return;
     }
     if (self.code !== newcode) {
-      log.info("was expecting a new PZP, but code wrong");
+      logger.log("was expecting a new PZP, but code wrong");
       self.guesses = self.guesses - 1;
       if (self.guesses <= 0) {
         //no more guesses
-        log.info("too many guesses, deleting code");
+        logger.log("too many guesses, deleting code");
         self.unsetExpected( function() {
           cb(false);
         });
@@ -118,7 +117,7 @@ tokenAuth.createAuthCounter = function(callback) {
     }
 
     if (self.timeout < new Date()) {
-      log.info("was expecting a new PZP, code is right, but timed out.");
+      logger.log("was expecting a new PZP, code is right, but timed out.");
       self.unsetExpected( function() {
         cb(false);
       });

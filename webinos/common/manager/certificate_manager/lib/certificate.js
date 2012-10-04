@@ -17,6 +17,7 @@
 var util = require('util');
 var webinos = require("webinos")(__dirname);
 var keystore = webinos.global.require(webinos.global.manager.keystore.location);
+var log      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
 /** @description Create private key, certificate request, self signed certificate and empty crl. This is crypto sensitive function
  * @param {Object} self is currect object of Pzh/Pzp
@@ -35,7 +36,7 @@ function Certificate() {
 util.inherits(Certificate, keystore);
 
 Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callback) {
-  var certman, obj = {}, key_id, cert_type;
+  var certman, obj = {}, key_id, cert_type, conn_key;
   var self = this;
   try {
     certman = require("certificate_manager");
@@ -66,9 +67,11 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
 
   self.generateKey(type, key_id, function(status, value) {
      if (!status) {
+      log.error("failed generating key");
        return callback(false, value);
     } else {
       try {
+        conn_key = value;
         obj.csr = certman.createCertificateRequest(value,
           self.userData.country,
           self.userData.state, // state
@@ -83,36 +86,37 @@ Certificate.prototype.generateSelfSignedCertificate = function(type, cn, callbac
 
       try {
         var server = "DNS:"+self.metaData.serverName;
-        obj.cert = certman.selfSignRequest(obj.csr, 3600, value, cert_type, server);
+        obj.cert = certman.selfSignRequest(obj.csr, 3600, conn_key, cert_type, server);
       } catch (e1) {
         return callback(false, e1);
       }
       try {
-        obj.crl = certman.createEmptyCRL(value, obj.cert, 3600, 0);
+        obj.crl = certman.createEmptyCRL(conn_key, obj.cert, 3600, 0);
       } catch (e2) {
         return callback(false, e2);
       }
 
       if (type === "PzhPCA" || type === "PzhCA") {
         self.cert.internal.master.cert = obj.cert;
-        self.crl              = obj.crl;
+        self.crl                       = obj.crl;
         self.generateSignedCertificate(self.cert.internal.conn.csr, 1, function(status, value) {
           if (status) {
             self.cert.internal.conn.cert = value;
+            return callback(true, conn_key);
           } else {
             return callback(status, value);
           }
-        });
+        });        
       } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
         self.cert.internal.conn.cert = obj.cert;
         self.cert.internal.conn.csr  = obj.csr;
         if (type === "Pzp") {
           self.crl                     = obj.crl;
         }
+        return callback(true, conn_key);
       } else if (type === "PzhWS") {
-        return callback(true, obj.csr, value);
+        return callback(true, obj.csr, conn_key);
       }
-      return callback(true, value);
     }
   });
 };

@@ -12,7 +12,9 @@
 <script type="text/javascript" src="./webinos.js"></script>
  <script>
     var test = {}, recentService;
+
     $(document).ready(function() {
+
       function setPage(type, page){
         var port = window.location.port;
         if (typeof port === "undefined") {
@@ -177,30 +179,21 @@
       });
       // This is added here as we intend to get response back here
       function authStatus(msg) {
-        if (msg.payload.connected === "true") {
-          var existPzh = confirm(" Enroll PZP at "+msg.payload.pzhId) ;
+        if (msg.payload.message.connected === "true") {
+          var existPzh = confirm(" Enroll PZP at "+msg.payload.message.pzhId) ;
           if (existPzh === true) {
-            var options = {"type": 'prop',
-                            "payload": {
-                              "status": "enrollPzp", message: msg.payload.authCode
-                            }
-                          };
-            webinos.session.message_send(options, msg.payload.pzhId);
+            var options = {"type": 'prop', "payload": { "status": "enrollPzp", message: msg.payload.message.authCode }};
+            webinos.session.message_send(options, msg.payload.message.pzhId);
           } else {
             alert ("connection with PZH aborted");
           }
         } else {
-          var createPzh = confirm(" Create PZH - " + msg.payload.pzhId ) ;
+          var createPzh = confirm(" Create PZH - " + msg.payload.message.pzhId ) ;
           if (createPzh === true) {
-             var options ={"type": 'prop',
-                           "payload": {
-                              "status": "registerPzh"
-                            }
-                          };
-             webinos.session.message_send(options, msg.payload.pzhId);
+             var options ={"type": 'prop', "payload": { "status": "registerPzh" }};
+             webinos.session.message_send(options, msg.payload.message.pzhId);
           } else  {
             alert ("connection with PZH aborted");
-
           }
         }
       };

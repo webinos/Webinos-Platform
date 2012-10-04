@@ -16,7 +16,11 @@
  * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
  ******************************************************************************/
 (function () {
-
+  var logger = logger;
+  if (module) {
+    var webinos_= require("webinos")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 	var idCount = 0;
 
 	/**
@@ -75,7 +79,7 @@
 				var callback = that.remoteServicesFoundCallbacks[payload.id];
 
 				if (!callback) {
-					console.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
+					logger.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
 					return;
 				}
 
@@ -107,7 +111,7 @@
 				services = services.map(stripFuncs);
 
 				for (var i = 0; i < services.length; i++) {
-					console.log('findServices: calling found callback for ' + services[i].id);
+					logger.log('findServices: calling found callback for ' + services[i].id);
 					var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', services[i]);
 					rpcHandler.executeRPC(rpc);
 				}
@@ -124,7 +128,7 @@
 		 * @function
 		 */
 		var search = function (serviceType, callback, options, filter) {
-			console.log('INFO: [Discovery] '+"search: searching for ServiceType: " + serviceType.api);
+			logger.log('INFO: [Discovery] '+"search: searching for ServiceType: " + serviceType.api);
 			var results = [];
 			var cstar = serviceType.api.indexOf("*");
 			if(cstar !== -1){
@@ -197,7 +201,7 @@
 
 				for (var i in this.registry.getRegisteredObjectsMap()) {
 					if (i === serviceType.api) {
-						console.log('INFO: [Discovery] '+"search: found matching service(s) for ServiceType: " + serviceType.api);
+						logger.log('INFO: [Discovery] '+"search: found matching service(s) for ServiceType: " + serviceType.api);
 						results = this.registry.getRegisteredObjectsMap()[i];
 					}
 				}
@@ -208,9 +212,7 @@
 				}
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var connectedPzhIds = [], connectedPzpIds = [];
-				this.rpcHandler.parent.connectInfo(connectedPzpIds, connectedPzhIds);
-				var entityRefCount = connectedPzhIds.length + connectedPzpIds.length;
+				var entityRefCount =  this.rpcHandler.parent.getConnectedPzh().length + this.rpcHandler.parent.getConnectedPzp().length;
 
 				// no connection to a PZH & other connected Peers, don't ask for remote services
 				if (!this.rpcHandler.parent || entityRefCount === 0) {
@@ -259,7 +261,7 @@
 	 */
 	Discovery.prototype.addRemoteServiceObjects = function(msg) {
 		var services = msg.services;
-		console.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
+		logger.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
 		this.remoteServiceObjects[msg.from] = services;
 	};
 
@@ -270,7 +272,7 @@
 	Discovery.prototype.removeRemoteServiceObjects = function(address) {
 		var count = this.remoteServiceObjects[address].length;
 		delete this.remoteServiceObjects[address];
-		console.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
+		logger.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
 	};
 
 	/**

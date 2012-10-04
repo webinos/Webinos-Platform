@@ -21,7 +21,7 @@ var os          = require("os");
 var util        = require("util");
 
 var webinos     = require("webinos")(__dirname);
-var log         = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 var wPath       = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
 var wId         = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
 
@@ -34,16 +34,49 @@ function Config() {
   this.trustedList    = {pzh:[], pzp:[]};
   this.crl            = "";
   this.policies       = {};//todo: integrate policy in the configuration
-  this.userData       = {};
+  this.userData       = {name: ""};
   this.userPref       = {};
   this.serviceCache   = [];
 }
 
 util.inherits(Config, certificate);
+
+function createNewConfiguration(self, webinosType, callback){
+  var cn;
+  try {
+    cn = self.metaData.webinosType + ":"+self.metaData.webinosName ;
+    self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
+      if(!status) {
+        logger.error("failed generating self signed certificate");
+        return callback(status, value);
+      } else {
+        if (self.metaData.webinosType !== "Pzp") {
+          cn = self.metaData.webinosType + "CA:" + self.metaData.webinosName ;
+          self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn, function(status, value){ // Master Certificate
+            if (status) {
+              logger.log("connection and master certificate generated");
+              self.storeAll();
+              return callback(true);
+            } else {
+              logger.error("failed generating master certificate")
+              callback(false, value);
+            }
+          });
+        } else {
+          self.storeAll();
+          return callback(true);
+        }
+      }
+    });
+  } catch (err) {
+    return callback(false, err);
+  }
+}
 /**
-* @descripton Checks for master certificate, if certificate is not found
+* Checks if metaData exists, if not creates a range of certificates
 * it calls generating certificate function defined in certificate manager.
 * This function is crypto sensitive.
+*
 * @param {function} callback It is callback function that is invoked after
 * checking/creating certificates
 */
@@ -52,83 +85,45 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
   var deviceName = wId.fetchDeviceName(webinosType, friendlyName);
   var webinosRoot  =  path.join(wPath.webinosPath(), deviceName);
 
-  log.addType(deviceName); // per instance this should be only set once..
+  logger.addType(deviceName); // per instance this should be only set once..
 
   if (typeof callback !== "function") {
-    log.error("callback missing");
+    logger.error("callback missing");
     return;
   }
 
-
-  self.fetchMetaData(webinosRoot, deviceName, friendlyName, webinosType, sessionIdentity,
-  function(status, value){
-    if (status && value && value.code=== "ENOENT") {//meta data
-      try {
-        if (webinosType === "Pzh" || webinosType === "PzhCA") {
-          cn = self.metaData.webinosType + ":"+ self.metaData.serverName  ;
-        } else {
-          cn = self.metaData.webinosType + ":"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
-        }
-        self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
-          if(!status) {
-            return callback(status, value);
-          } else {
-            conn_key = value;
-            if (self.metaData.webinosType !== "Pzp") {
-              var cn = self.metaData.webinosType + "CA:"+ self.metaData.serverName + ":" + self.metaData.webinosName ;
-              self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn,
-              function(status, value){ // Master Certificate
-                if (status) {
-                  self.storeAll(function(status, value) {
-                    if (status) {
-                      callback(true, conn_key);
-                    }  else {
-                      callack(false, value);
-                    }
-                  });
-                } else {
-                  return callback(status, value);
-                }
-              });
-            } else {
-              self.storeAll(function(status, value) {
-                if (status){
-                  callback(status, conn_key);
-                } else {
-                  callback(false, value);
-                }
-              });
-            }
-          }
-        });
-      } catch (err) {
-        return callback(false, err);
-      }
+  self.fetchMetaData(webinosRoot, deviceName, friendlyName, webinosType, sessionIdentity,function(status, value){
+    if (status && value && value.code=== "ENOENT") {//meta data does not exist
+      createNewConfiguration(self, webinosType, callback);
     } else { //metaData
       self.metaData = value;
       self.fetchCertificate("internal", function(status, value) {
         if (status) {  // certificate
-          self.cert.internal = value;
+          if (value === {}) { createNewConfiguration(self,webinosType, callback); } else { self.cert.internal = value; }
           self.fetchCertificate("external", function(status, value){
             if(status){
-              self.cert.external = value;
+              if (value === {}) { createNewConfiguration(self,webinosType, callback);} else { self.cert.external = value;}
+            }
+          });
+          self.fetchServiceCache(function(status, value){
+            if(status){
+              if (value === {}) { createNewConfiguration(self,webinosType, callback);} else { self.serviceCache = value;}
             }
           });
           self.fetchCrl(function(status, value) {
             if(status ){ // crl
-              self.crl = value;
+              if (value === "") { createNewConfiguration(self,webinosType, callback); } else { self.crl = value; }
               self.fetchUserData(function(status, value) {
                 if (status) { //user data
-                  self.userData = value;
+                  if (value === {}) { createNewConfiguration(self, webinosType, callback); } else { self.userData = value; }
                   self.fetchUserPref(function(status,value)   {
                     if (status) { // user pref
-                      self.userPref =value;
+                      if (value === {}) { createNewConfiguration(self,webinosType, callback); } else { self.userPref = value; }
                       self.fetchTrustedList(function(status,value) {
                         if (status) { // trusted list
-                          self.trustedList = value;
-                          self.fetchKey(self.cert.internal.conn.key_id, function(status, value) {
+                          if (value === {}){ createNewConfiguration(self, webinosType, callback); } else { self.trustedList = value;
                             return callback(status, value);
-                          });
+                          }
                         } else {
                           callback(status, value);
                         }
@@ -153,39 +148,30 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
   });
 };
 
-Config.prototype.storeAll = function(callback) {
+Config.prototype.storeAll = function() {
   var self = this;
-  self.storeCertificate(self.cert.internal, "internal", function(status, value){
-    if (status) {
-      self.storeCrl(self.crl, function(status, value){
-        if (status){
-          self.storeTrustedList(self.trustedList, function(status, value){
-            if (status) {
-              return callback(status);
-            } else {
-              return callback(status, value);
-            }
-          });
-        } else {
-          return callback(status, value);
-        }
-      });
-    } else {
-      return callback(status, value);
-
-    }
-  });
+  self.storeCertificate(self.cert.internal, "internal");
+  self.storeCrl(self.crl);
+  self.storeTrustedList(self.trustedList);
 };
 
-Config.prototype.storeCertificate = function (certificate, ext_int, callback) {
+function processData(data, callback){
+  var dataString = data.toString();
+  if (dataString !== "") {
+    var JSONData = JSON.parse(dataString);
+    return callback(true, JSONData);
+  } else {
+    return callback(true,{});
+  }
+}
+Config.prototype.storeCertificate = function (certificate, ext_int) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(certificate, null, " "), function(err) {
     if(err) {
-      return callback(false, err);
-    }
-    else {
-      return callback(true);
+      logger.error("failed saving " + ext_int +" certificate");
+    } else {
+      logger.log("saved " + ext_int +" certificate");
     }
   });
 };
@@ -195,22 +181,21 @@ Config.prototype.fetchCertificate = function(ext_int, callback) {
   var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
   fs.readFile(path.resolve(filePath), function(err, data) {
     if (!err) {
-      var certData = JSON.parse(data.toString());
-      callback(true, certData);
+     processData(data,callback);
     } else {
       callback(false, err);
     }
   });
 };
 
-Config.prototype.storeMetaData = function(data, callback) {
+Config.prototype.storeMetaData = function(data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, self.metaData.webinosName+".json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
     if(err) {
-      callback(false, err);
+      logger.error("failed saving pzp/pzh metadata");
     } else {
-      callback(true);
+      logger.log("stored pzp/pzh metadata");
     }
   });
 };
@@ -227,20 +212,18 @@ Config.prototype.fetchMetaData = function(webinosRoot, webinosName, friendlyName
           }
         });
       } else {
-        var metadata = JSON.parse(data.toString());
-        callback(true, metadata);
+       processData(data,callback);
       }
     });
 };
-Config.prototype.storeCrl = function (data, callback) {
+Config.prototype.storeCrl = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"crl.pem");
   fs.writeFile(path.resolve(filePath), data, function(err) {
     if(err) {
-      return callback(false, err);
-    }
-    else {
-      return callback(true);
+      logger.error("failed saving crl");
+    } else {
+      logger.log("saved crl");
     }
   });
 };
@@ -250,21 +233,19 @@ Config.prototype.fetchCrl = function (callback) {
   fs.readFile(path.resolve(filePath), function(err, data) {
     if(err) {
       return callback(false, err);
-    }
-    else {
+    } else {
       return callback(true, data.toString());
     }
   });
 };
-Config.prototype.storeTrustedList = function (data, callback) {
+Config.prototype.storeTrustedList = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"trustedList.json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
     if(err) {
-      return callback(false, err);
-    }
-    else {
-      return callback(true);
+      logger.error("failed saving pzh/pzp in the trusted list");
+    } else {
+      logger.log("saved pzp/pzh in the trusted list");
     }
   });
 };
@@ -274,22 +255,25 @@ Config.prototype.fetchTrustedList = function (callback) {
   fs.readFile(path.resolve(filePath), function(err, data) {
     if(err) {
       return callback(false, err);
-    }
-    else {
-      var JSONData = JSON.parse(data.toString());
-      return callback(true, JSONData);
+    } else {
+      var dataString = data.toString();
+      if (dataString !== "") {
+        var JSONData = JSON.parse(dataString);
+        return callback(true, JSONData);
+      } else {
+        return callback(true, {pzh:[], pzp:[]});
+      }
     }
   });
 };
-Config.prototype.storeUserData = function (data, callback) {
+Config.prototype.storeUserData = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+".json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
     if(err) {
-      return callback(false, err);
-    }
-    else {
-      return callback(true);
+      logger.error("failed saving user details");
+    } else {
+      logger.log("saved user details");
     }
   });
 };
@@ -299,22 +283,41 @@ Config.prototype.fetchUserData = function (callback) {
   fs.readFile(path.resolve(filePath), function(err, data) {
     if(err) {
       return callback(false, err);
-    }
-    else {
-      var JSONData = JSON.parse(data.toString());
-      return callback(true, JSONData);
+    } else {
+     processData(data,callback);
     }
   });
 };
-Config.prototype.storeUserPref = function (data, callback) {
+Config.prototype.storeServiceCache = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving service cache");
+    } else {
+      logger.log("saved service cache");
+    }
+  });
+};
+Config.prototype.fetchServiceCache = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      return callback(false, err);
+    } else {
+      processData(data, callback);
+    }
+  });
+};
+Config.prototype.storeUserPref = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_pref.json");
   fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
     if(err) {
-      return callback(false, err);
-    }
-    else {
-      return callback(true);
+      logger.error("failed saving user preferences");
+    } else {
+      logger.log("saved user preferences");
     }
   });
 };
@@ -324,10 +327,8 @@ Config.prototype.fetchUserPref = function (callback) {
   fs.readFile(path.resolve(filePath), function(err, data) {
     if(err) {
       return callback(false, err);
-    }
-    else {
-      var JSONData = JSON.parse(data.toString());
-      return callback(true, JSONData);
+    } else {
+     processData(data, callback);
     }
   });
 };
@@ -348,11 +349,11 @@ Config.prototype.createDirectories = function(callback) {
             if ( err && err.code === "ENOENT" ) {
               fs.mkdirSync(self.metaData.webinosRoot,"0700");
             }
-            fs.readdir ( self.metaData.webinosRoot+"/wrt", function(err) {
+            fs.readdir (path.resolve(path.join(self.metaData.webinosRoot, "wrt")), function(err) {
               if ( err && err.code=== "ENOENT" ) {
-                fs.mkdirSync( webinosDemo +"/wrt","0700");
+                fs.mkdirSync( self.metaData.webinosRoot +"/wrt","0700");
               }
-              fs.readdir ( path.resolve(path.join(self.metaData.webinosRoot, "policies")), function(err) {
+              fs.readdir (path.resolve(path.join(self.metaData.webinosRoot, "policies")), function(err) {
                 if ( err && err.code=== "ENOENT" ) {
                   fs.mkdirSync( self.metaData.webinosRoot+"/policies","0700");
                 }
@@ -406,17 +407,19 @@ Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessio
       self.userPref.ports.pzp_tlsServer      = userPref.ports.pzp_tlsServer;
       self.userPref.ports.pzp_zeroConf       = userPref.ports.pzp_zeroConf;
 
-      self.userData.country         = userPref.certConfiguration.country;
+      if (self.userData.name === "") {
+        self.userData.country         = userPref.certConfiguration.country;
+        self.userData.email           = userPref.certConfiguration.email;
+      }
       self.userData.state           = userPref.certConfiguration.state;
       self.userData.city            = userPref.certConfiguration.city;
       self.userData.orgName         = userPref.certConfiguration.orgname;
       self.userData.orgUnit         = userPref.certConfiguration.orgunit;
       self.userData.cn              = userPref.certConfiguration.cn;
-      self.userData.email           = userPref.certConfiguration.email;
 
       for (key in userPref.pzhDefaultServices) {
         self.serviceCache.push({"name": userPref.pzhDefaultServices[key], "params":{}});
-      };
+      }
     } else { // We failed in reading configuration file, assign defaults
       self.userPref.ports ={};
       self.userPref.ports.provider               = 80;
@@ -433,21 +436,13 @@ Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessio
     self.metaData.webinosRoot  = wPath.webinosPath() + "/"+ self.metaData.webinosName;
     self.createDirectories(function(status){
       if (status){
-        self.storeMetaData(self.metaData, function(status, value){
-          if(status) { //metadata
-            self.storeUserData(self.userData, function(status, value){
-              if (status) { //userdata
-                self.storeUserPref(self.userPref, function(status, value){ //userpref
-                  return callback(status, value);
-                });
-              } else {// else userdata
-                return callback(status, value);
-              }
-            });
-          } else{//else metadata
-           return callback(status, value);
-          }
-        });
+        self.storeMetaData(self.metaData);
+        self.storeUserData(self.userData);
+        self.storeUserPref(self.userPref);
+        self.storeServiceCache(self.serviceCache);
+       callback(true);
+      } else {
+        callback(false, "failed creating directories");
       }
     });
   });
