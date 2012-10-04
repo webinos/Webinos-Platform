@@ -307,7 +307,14 @@ session_configuration.createDirectoryStructure = function (callback) {
         // policy file
         fs.readFile ( webinosDemo+"/policy.xml", function(err) {
           if ( err && err.code=== "ENOENT" ) {
-	    var data = fs.readFileSync("./webinos/common/manager/policy_manager/defaultpolicy.xml");
+	    var data;
+	    try {
+	      data = fs.readFileSync("./webinos/common/manager/policy_manager/defaultpolicy.xml");
+	    }
+	    catch(e) {
+	      console.log("Default policy non found");
+	      data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
+	    }
 	    fs.writeFileSync(webinosDemo+"/policy.xml", data);
           }
         });
