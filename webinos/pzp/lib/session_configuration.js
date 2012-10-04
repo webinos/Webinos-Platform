@@ -304,6 +304,20 @@ session_configuration.createDirectoryStructure = function (callback) {
             fs.mkdirSync( webinosDemo +"/wrt","0700");
           }
         });
+        // policy file
+        fs.readFile ( webinosDemo+"/policy.xml", function(err) {
+          if ( err && err.code=== "ENOENT" ) {
+	    var data;
+	    try {
+	      data = fs.readFileSync("./webinos/common/manager/policy_manager/defaultpolicy.xml");
+	    }
+	    catch(e) {
+	      console.log("Default policy non found");
+	      data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
+	    }
+	    fs.writeFileSync(webinosDemo+"/policy.xml", data);
+          }
+        });
         callback(true);
       }, 100);
     });
