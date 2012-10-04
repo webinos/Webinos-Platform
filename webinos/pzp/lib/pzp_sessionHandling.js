@@ -399,6 +399,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
         } else if (self.mode === global.modes[1] ) { //hub mode
             self.state = global.states[0]; // not connected
             //Zeroconf - start
+            self.mode = global.modes[2]; // Enter peer mode
             switch(os.type().toLowerCase()){
               case "linux":
                 //get pzp TLS port number    
