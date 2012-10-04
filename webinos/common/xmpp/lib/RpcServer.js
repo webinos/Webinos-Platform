@@ -74,7 +74,7 @@
                     
                     //TODO add support for these
                 } else if (msg.type === 'JSONRPC' && msg.payload) {
-        	        rpcHandler.handleMessage(msg.payload, this, Math.round(Math.random() * 10000));
+        	        rpcHandler.handleMessage(msg.payload, msg.from, Math.round(Math.random() * 10000));
         			logger.verbose('rpc called.');
                 } else {
                     logger.debug('Don not know what to do with this message: ' + JSON.stringify(msg));

@@ -59,7 +59,7 @@
 			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.api + ' to browser');
 
             //TODO onservicebound is not according to spec but it is according to implementation
-			var rpc = rpcHandler.createRPC(objectRef.rpcId, 'onservicefound', feature.getInformation());
+			var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', feature.getInformation());
 			rpcHandler.executeRPC(rpc);
 
     		// keep track of the feature.
