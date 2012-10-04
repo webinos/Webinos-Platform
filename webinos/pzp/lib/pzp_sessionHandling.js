@@ -405,12 +405,12 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                 //get pzp TLS port number    
                 var pzp_tlsServer = 8040;
                 var filename;
-  		        if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
+  		       /* if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
                 {
                   //TODO: the full file path has to be given - check if any alternative way
                   filename = "/data/data/org.webinos.app/node_modules/webinos/wp4/webinos_config.json";
                 }
-                else
+                else */
                 {
                   filename = "webinos_config.json";
                 }
@@ -423,7 +423,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
               
                 switch(os.platform().toLowerCase()){
                   case "android":
-                  {
+                 /* {
                     function onFound(service){
                       console.log("Android-Mdns onFound callback: found service."); 
 
@@ -479,7 +479,7 @@ Pzp.prototype.connect = function (conn_key, conn_csr, code, address, callback) {
                     catch(e){
                       console.log("error: "+e.message);
                     }
-                  }
+                  }*/
                     break;
                   case "linux":
                     if (typeof mdns !== "undefined") {
