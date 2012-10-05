@@ -108,7 +108,7 @@ var Pzp = function () {
   function setSessionId() {
     sessionId = config.metaData.webinosName;
     if(config.metaData.pzhId) {
-      sessionId = config.metaData.pzhId + '/' + config.metaData.webinosName;
+      sessionId = config.metaData.pzhId + "/" +  config.metaData.webinosName;
     }
   }
 
@@ -272,16 +272,15 @@ var Pzp = function () {
   /**
    * PZH connected details are stored in this function
    * @param conn - connection object of the tls client
-   * @param pzhId - connected pzhId
    * @param callback - returns true or false depending on the PZH connected status
    */
-  function authenticated(conn, pzhId, callback) {
+  function authenticated(conn, callback) {
     if(!connectedPzh.hasOwnProperty(sessionId)) {
       setSessionId();
       connectedPzh[config.metaData.pzhId] = {socket: conn, state: states[2]};
       conn.id = sessionId;
       startOtherManagers();
-      callback(true, "pzp " + sessionId+ " connected to "+ pzhId);
+      callback(true, "pzp " + sessionId+ " connected to "+ config.metaData.pzhId);
     } else {
       callback(false, "pzh already connected");
     }
@@ -291,19 +290,18 @@ var Pzp = function () {
    * TODO: remove this support of adding PZP via tls server
    * Sends PZP CSR and AuthCode to the PZH TLS server
    * @param conn - Socket connection object of the PZH
-   * @param pzhId - PZH Id that we want to connect in the PZH
    * @param code  - Authorization code of the PZP
-   * @param callback: returns back true or false depending on the error
+   * @param callback-  returns back true or false depending on the error
    * @return {*} callback function if not successful
    */
-  function unauthenticated( conn, pzhId, code, callback) {
+  function unauthenticated( conn, code, callback) {
     try{
       logger.log("not authenticated " +conn.authorizationError);
       if(conn.authorizationError === 'CERT_NOT_YET_VALID') {
         return callback(false,"possible clock difference between PZH and your PZP, try updating time and try again" )
       }
       if (code && conn) {
-        var msg = {"type" : "prop", "from" : sessionId, "to": pzhId,
+        var msg = {"type" : "prop", "from" : sessionId, "to": config.metaData.serverName,
           "payload": {"status": "clientCert",
             "message": {csr: config.cert.internal.conn.csr, code: code}
           }
@@ -327,13 +325,10 @@ var Pzp = function () {
    */
   function handleAuthorization(pzpClient, code, callback) {
     logger.log("connection to pzh status: " + pzpClient.authorized );
-    var pzhId = decodeURIComponent(pzpClient.getPeerCertificate().subject.CN);
-    pzhId = pzhId.split(":")[1];
-
     if(pzpClient.authorized) {
-      authenticated( pzpClient, pzhId, callback);
+      authenticated( pzpClient, callback);
     } else {
-      unauthenticated(pzpClient, pzhId, code, callback);
+      unauthenticated(pzpClient, code, callback);
     }
   }
 
@@ -442,7 +437,7 @@ var Pzp = function () {
           var cn, clientSessionId;
           if (conn.authorized) {
             var text = decodeURIComponent(conn.getPeerCertificate().subject.CN);
-            clientSessionId = text.split(":")[1] + "/"+ text.split(":")[2]+"/"; //self.pzhId + "/" +cn;
+            clientSessionId = text.split(":")[1] + "/"+ text.split(":")[2]; //self.pzhId + "/" +cn;
             connectedPzp[clientSessionId]= {state: states[2], socket: conn};
             conn.id  = clientSessionId;
             registerMessaging();
@@ -513,8 +508,8 @@ var Pzp = function () {
     config.cert.internal.conn.cert   = clientCert;
     config.cert.internal.master.cert = masterCert;
     config.crl                       = masterCrl;
-    config.metaData.pzhId            = from.split("/")[1];
-    config.metaData.serverName       = from;
+    config.metaData.pzhId            = from;
+    config.metaData.serverName       = from;//both pzhId and serverName are same to solve cross farm service discovery and to maintain consistency
 
 
     if(config.trustedList.pzh.indexOf(config.metaData.pzhId) === -1) {

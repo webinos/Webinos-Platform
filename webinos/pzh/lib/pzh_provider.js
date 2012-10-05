@@ -40,10 +40,10 @@ var pzh_session = require("./pzh_sessionHandling.js");
 var Provider = function(_hostname, _friendlyName) {
   "use strict";
   pzhWI.call(this);
-  var server       = []; // TLS server socket on which provider listens
-  var pzhs         = []; // instances of the pzh currently loaded
+  var server       = {}; // TLS server socket on which provider listens
+  var pzhs         = {}; // instances of the pzh currently loaded
   var address      = "0.0.0.0";
-  var config       = [];
+  var config       = {};
   var friendlyName = _friendlyName;
   var hostname     = _hostname;
   var self         = this;
@@ -75,11 +75,12 @@ var Provider = function(_hostname, _friendlyName) {
    *  PZH already registered, are reloaded in case Provider is restarted
    */
   function loadPzhs() {
-    var myKey, key, pzh;
+    var myKey, key, email;
     for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
       key = config.trustedList.pzh[myKey];
       pzhs[key] = new pzh_session();
-      pzhs[key].addPzh(key.split("/")[1], key, "", function(status, value, pzhId) {
+      email = key.split("_")[1].split("/")[0];
+      pzhs[key].addPzh(email, key, "", function(status, value, pzhId) {
         if (status) {
           server.addContext(pzhId, value);
           logger.log("started zone hub " + pzhId);
@@ -250,14 +251,13 @@ var Provider = function(_hostname, _friendlyName) {
    * @param callback
    */
   this.createPzh = function(user, callback) {
-    var name = user.email;
-    var pzhId = hostname+"/"+name+"/";
+    var pzhId = hostname + "_" + user.email;
     if (config.trustedList.pzh.indexOf(pzhId) !== -1 )  {
       callback(true, pzhId);
     } else {
       logger.log("adding new zone hub - " + pzhId);
       pzhs[pzhId] = new pzh_session();
-      pzhs[pzhId].addPzh(name, pzhId, user, function(status, options, uri){
+      pzhs[pzhId].addPzh(user.email, pzhId, user, function(status, options, uri){
         if (status) {
           server.addContext(uri, options);
           config.trustedList.pzh.push(uri);

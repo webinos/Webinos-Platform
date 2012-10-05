@@ -242,8 +242,8 @@ var PzpWSS = function() {
     var from = query.from;
     var value = query.payload.message;
 
-    if (to && to.split('/')) {
-      sendAdd = to.split('/')[0];
+    if (to && to.split('_')) {
+      sendAdd = to.split('_')[0];
     } else {
       sendAdd = to;
     }

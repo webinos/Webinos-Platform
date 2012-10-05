@@ -124,7 +124,7 @@ var PZH_WebServer = function() {
   function verifyConnection(res, req, query) {
     openid.fetchOpenIdDetails(req, function(value, details) {
       if(value) {
-        var id = hostname+'/'+details.email+"/";
+        var id = hostname+'_'+details.email;
         if (query.returnPath === "undefined") {
           verifyPzhHandling(res, id, details);//If from pzh web interface
         } else {
@@ -215,14 +215,14 @@ var PZH_WebServer = function() {
     }
   }
 
-  this.sendCertificate = function(to, serverName, webServerPort, masterCert, masterCrl, callback) {
+  this.sendCertificate = function(to, serverName, webServerPort, providerPort, masterCert, masterCrl, callback) {
     var payload = {
         to  : to, from: serverName,
         payload: {
           status: "sendCert", message:{cert: masterCert, crl : masterCrl}}
       },
       options= {
-        host: to.split('/')[0],
+        host: to.split('_')[0],
         port: webServerPort,
         path: "/main.html?cmd=transferCert",
         method:"POST",
@@ -238,7 +238,7 @@ var PZH_WebServer = function() {
           if(instance) {
             instance.addExternalCert(parse, function(serverName, options){
               parent.refreshCert(serverName, options);
-              instance.connectOtherPZH(to, options, webServerPort, callback);
+              instance.connectOtherPZH(to, options, providerPort, callback);
             });
           } else {
             callback({to: parse.to, cmd: 'pzhPzh', payload: "Pzh does not exist in this farm"});

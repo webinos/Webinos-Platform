@@ -26,7 +26,7 @@
 		for (var myKey in obj)	{
 			if (typeof obj[myKey] === 'object')
 			{
-				logger.log(name + "["+myKey +"] = "+obj[myKey]);
+				logger.log(name + "["+myKey +"] = "+JSON.stringify(obj[myKey]));
 				logObj(obj[myKey], name + "." + myKey);
 			}
 		}

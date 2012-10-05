@@ -33,7 +33,6 @@
       $('.column').equalHeight(); // Fix height
   }
   function displayQRCode(payload){
-      "use strict";
       var text = "<center>";
       text += "<p> <img src=" + payload.img + "> </img> </p> ";
       text += "<p> <h2>" +payload.code +"</p> </h2>";
@@ -44,7 +43,9 @@
     $('.column').equalHeight(); // Fix height
   }
   function connectPzh(){
-    var id =  document.getElementById('connectPzhId').value + "/";
+    var id =  document.getElementById('connectPzhId').value;
+    id = id.split("/");
+    id = id[0] + "_" + id[1];
     webinosPZH.commands.connectPzh(id, function(result){
       if (result === true) {
         setArticle("Success", "<p>Pzh in now connected!</p>");
@@ -129,14 +130,12 @@
       webinosPZH.commands.listDevices(DisplayListOfDevices);
   }
   $(document).ready(function() {
-
     webinosPZH.init(function(){
       webinosPZH.commands.userDetails(listUserDetails);
       setInterval(function() {
         webinosPZH.commands.listDevices(DisplayListOfDevices);
       }, 60000); // every 60 seconds pull the list device information
     });
-
     $("#addPzp").click(function(){
       webinosPZH.commands.addPzp(displayQRCode);
     });

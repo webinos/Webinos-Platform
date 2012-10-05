@@ -211,7 +211,7 @@ var Pzh = function () {
           ca   : caList,
           crl  : crlList,
           requestCert: true,
-          rejectUnauthorized: false
+          rejectUnauthorized: true
         });
       } else {
         callback(false, {});
@@ -225,7 +225,7 @@ var Pzh = function () {
    */
   function handlePzpAuthorization(pzpId, conn) {
     var err, msg;
-    pzpId = sessionId+"/"+pzpId;
+    pzpId = config.metaData.serverName + "/" + pzpId;
     logger.log("pzp "+pzpId+"  connected");
     connectedPzp[pzpId] = {"socket": conn,  "address": conn.socket.remoteAddress};
     msg = messageHandler.registerSender(sessionId, pzpId);
@@ -276,7 +276,7 @@ var Pzh = function () {
         logger.log("receiving details from pzp...");
         sendPzpUpdate(validMsgObj.from, conn, validMsgObj.payload.message);
       } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "registerServices") {
-        logger.log("receiving Webinos services from pzp..."); // information sent by connecting PZP about services it supports. These details are then used by findServices
+        logger.log("receiving Webinos services from pzh/pzp..."); // information sent by connecting PZP about services it supports. These details are then used by findServices
         discovery.addRemoteServiceObjects(validMsgObj.payload.message);
       } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
         logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
@@ -320,7 +320,7 @@ var Pzh = function () {
 
   this.connectOtherPZH = function (to, options, port, callback) {
     try {
-      var connPzh, serverName = to.split("/")[0];
+      var connPzh, serverName = to.split("_")[0];
       options.servername = to;
       connPzh = tls.connect(port, serverName, options, function() {
         logger.log("connection status : "+connPzh.authorized);
@@ -329,7 +329,7 @@ var Pzh = function () {
           handlePzhAuthorization(to, connPzh);
           if (callback) {callback({cmd:'pzhPzh', to: config.metaData.serverName, payload:connPzh.authorized});}
         } else {
-          logger.error("connection authorization Failed");
+          logger.error("connection authorization Failed - "+connPzh.authorizationError);
           if (callback) {callback({cmd:'pzhPzh', to: config.metaData.serverName, payload:connPzh.authorized});}
         }
       });
@@ -493,7 +493,7 @@ var Pzh = function () {
   this.addNewPZPCert = function(parse, callback) {
     try {
       var msg;
-      var pzpId = sessionId + "/"+parse.from;
+      var pzpId = sessionId +"/"+ parse.from;
       self.expecting.isExpectedCode(parse.payload.message.code, function(expected) { // Check QRCode if it is valid ..
         if (expected) {
           config.generateSignedCertificate(parse.payload.message.csr, 2, function(status, value) { // Sign certificate based on received csr from client.// pzp = 2
@@ -541,7 +541,7 @@ var Pzh = function () {
     storeUserData(user);
     config.setConfiguration(friendlyName, "Pzh", uri, function (status, value) {
       if (status) {
-        sessionId = uri.split("/")[1];
+        sessionId = uri;
         logger.addId(sessionId);
         setMessageHandler_RPC();
         connectOtherPzh();
@@ -575,7 +575,7 @@ var Pzh = function () {
     } else if (from === config.metaData.serverName) {
       callback({to: config.metaData.serverName, cmd: 'pzhPzh', payload: "Trying to connect own PZH"})
     } else {
-      sendCertificate(from, config.metaData.serverName, config.userPref.ports.provider_webServer, config.cert.internal.master.cert, config.crl, callback);
+      sendCertificate(from, config.metaData.serverName, config.userPref.ports.provider_webServer, config.userPref.ports.provider, config.cert.internal.master.cert, config.crl, callback);
     }
   };
   /**
