@@ -25,7 +25,7 @@ describe('common.RPC', function() {
 	var rpcHandler;
 
 	beforeEach(function() {
-		registry = new Registry();
+		registry = new Registry({});
 		rpcHandler = new RPCHandler(undefined, registry);
 	});
 
@@ -126,12 +126,29 @@ describe('common.RPC', function() {
 			registry.registerObject(service);
 			expect(Object.keys(registry.objects).length).toEqual(1);
 		});
-
+		
 		it('has no registered services after unregistering', function() {
 			registry.registerObject(service);
 			registry.unregisterObject(service);
 			expect(Object.keys(registry.objects).length).toEqual(0);
 		});
+
+		it ('can create 2 instance of the same services', function() {
+		    secondService = new RPCWebinosService();
+			secondService.api = service.api;
+			secondService.displayName = service.displayName;
+			secondService.description = service.description;
+		    
+			registry.registerObject(service);
+			expect(Object.keys(registry.objects['prop-api']).length).toEqual(1);
+
+			registry.registerObject(secondService);
+			expect(Object.keys(registry.objects['prop-api']).length).toEqual(2);
+			
+			registry.unregisterObject(service);
+			registry.unregisterObject(secondService);
+		});
+
 	});
 
 	describe('RPC service request and response', function() {
