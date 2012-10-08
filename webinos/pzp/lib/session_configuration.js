@@ -422,6 +422,7 @@ function createConfigStructure (name, type) {
   config.type        = type;
   config.name        = '';
   config.serverName  = '';
+  config.rejectUnauthorized = false; //TODO: Add configuration property for this
   return config;
 }
 

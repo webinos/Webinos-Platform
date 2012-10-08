@@ -361,7 +361,8 @@ function createWebInterfaceCertificate (config, callback) {
                 var wss = {
                         key : ws_key,
                         cert: config.webServer.cert,
-                        ca  : config.master.cert
+                        ca  : config.master.cert,
+                        rejectUnauthorized: false //TODO: Add configuration property for this
                 };
                 callback(wss);
               });

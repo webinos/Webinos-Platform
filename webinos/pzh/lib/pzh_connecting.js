@@ -181,6 +181,7 @@ PzhConnecting.prototype.sendCertificate = function(to, callback) {
   options.path   = "/main.html?cmd=transferCert";
   options.method = "POST";
   options.headers = { 'Content-Length': JSON.stringify(payload).length  };
+  options.rejectUnauthorized = false; //TODO: Add configuration property for this
   
   var req = https.request(options, function(res) {
     res.on('data', function(data) {
