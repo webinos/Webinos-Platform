@@ -26,6 +26,7 @@
 	var os = require('os');
 	var bridge = null;
 	var promptMan = null;
+	var common = require("../../../../pzp/lib/session_common");
 
 	policyManager = function() {
 		// Load the native module
@@ -45,7 +46,10 @@
 				this.promptMan = require('promptMan');
 			}
 		}
-		this.pmCore = new this.pmNativeLib.PolicyManagerInt();
+		//Policy file location
+		var policyFile = common.webinosConfigPath()+"/policy.xml"; 
+		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
+		//this.pmCore = new this.pmNativeLib.PolicyManagerInt();
 	};
 
 	policyManager.prototype.enforceRequest = function(request, errorCallback, successCallback /*, successCallbackParams*/ ) {
