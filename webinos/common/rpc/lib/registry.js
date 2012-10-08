@@ -17,6 +17,8 @@
  ******************************************************************************/
 
 (function () {
+    var uuid = require('node-uuid');
+    
 	/**
 	 * Registry for service objects. Used by RPC.
 	 * @constructor
@@ -47,14 +49,13 @@
 			receiverObjs = [];
 
 		// generate id
-		var md5sum = crypto.createHash('md5');
-		callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
+		callback.id = uuid.v1();
 		// verify id isn't existing already
 		var filteredRO = receiverObjs.filter(function(el, idx, array) {
 			return el.id === callback.id;
 		});
 		if (filteredRO.length > 0)
-			throw new Error('cannot register, already got object with same id. try changing your service desc.');
+			throw new Error('Cannot register, already got object with same id.');
 
 		receiverObjs.push(callback);
 		this.objects[callback.api] = receiverObjs;
