@@ -42,25 +42,25 @@ Condition::Condition(TiXmlElement* condition){
 			string tmp = (child->Attribute("match")!=NULL) ? child->Attribute ("match") : "";
 			if (tmp.length() == 0)
 				tmp = (child->GetText() != NULL) ? child->GetText() : "";
-			unsigned int nextPos, pos = 0;
+			int nextPos, pos = 0;
 		
 			//LOG("[Policy]  : match value: id"<<++iii);	
-			while(pos < tmp.length())
+			while(pos < (int)tmp.length())
 			{
 			//LOG("[Policy]  : match value: id"<<iii);	
 					
 				nextPos = tmp.find(" ",pos);
-				if (nextPos == string::npos)
+				if (nextPos == (int)string::npos)
 					nextPos = tmp.length();			
 				if(pos != nextPos){
 					string attr = child->Attribute("attr");
-					unsigned int dot_pos = attr.find(".");
-					string key = (dot_pos != string::npos) ? attr.substr(0, dot_pos) : attr;
+					int dot_pos = attr.find(".");
+					string key = (dot_pos != (int)string::npos) ? attr.substr(0, dot_pos) : attr;
 					
 					match_info_str * tmp_info = new match_info_str();
 					tmp_info->equal_func = (child->Attribute("func")!=NULL) ? child->Attribute("func") : "glob";	
 					tmp_info->value = tmp.substr(pos, nextPos-pos);
-					tmp_info->mod_func = (dot_pos != string::npos) ? attr.substr(dot_pos+1) : "";
+					tmp_info->mod_func = (dot_pos != (int)string::npos) ? attr.substr(dot_pos+1) : "";
 					
 //					LOGD("Adding %s",tmp_info->value.data());
 					
@@ -134,6 +134,7 @@ ConditionResponse Condition::evaluate(Request * req){
 	}
 	else if (combine==OR)
 	{
+		LOGD("Condition.evaluate() - 04");
 		for (unsigned int i=0; i<conditions.size(); i++)
 		{
 			tmpCR = conditions[i]->evaluate(req);
@@ -143,7 +144,9 @@ ConditionResponse Condition::evaluate(Request * req){
 			else if (tmpCR == NOT_DETERMINED)
 				anyUndetermined = true;
 		}
+		LOGD("Condition.evaluate() - 043");
 		tmpCR = evaluateFeatures(req);
+		LOGD("Condition.evaluate() - 044");
 		LOGD("[FEAT EVAL OR] %d", tmpCR);
 		if (tmpCR == MATCH)
 			return MATCH;
@@ -234,7 +237,9 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 	bool anyUndetermined = resource_attrs.find(API_FEATURE)!= resource_attrs.end() 
 			&& requestResource_attrs.find(API_FEATURE) == requestResource_attrs.end();	
 
+	LOGD("Condition.evaluateFeatures - 03");
 	if(combine == AND){
+		LOGD("Condition.evaluateFeatures - 04");
 		// find any No Match
 		for(unsigned int j=0; req_features && j<my_features.size(); j++){
 			found = false;
@@ -258,6 +263,7 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 			return MATCH;
 	}
 	else if(combine == OR){
+		LOGD("Condition.evaluateFeatures - 05");
 		// find any Match
 		for(unsigned int j=0; req_features && j<my_features.size(); j++){
 			for(unsigned int i=0; i<req_features->size(); i++){
@@ -275,6 +281,7 @@ ConditionResponse Condition::evaluateFeatures(Request* req){
 			return NO_MATCH;
 	}
 	// TODO: is that right? What should happen if policy is invalid?
+	LOGD("Condition.evaluateFeatures - 09");
 	return NOT_DETERMINED;
 }
 
