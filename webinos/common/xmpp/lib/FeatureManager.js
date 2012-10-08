@@ -24,7 +24,7 @@
 var sys = require('util');
 var webinosFeatures = require('./WebinosFeatures');
 var http = require("http");
-var logger = require('./Logger').getLogger('LocalFeatureManager', 'trace');
+var logger = require('./Logger').getLogger('FeatureManager', 'trace');
 
 var features = {};
 
