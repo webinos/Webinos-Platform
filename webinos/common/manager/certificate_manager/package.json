@@ -9,9 +9,4 @@
   { "email": "john.lyle@cs.ox.ac.uk"
   , "url": "http://www.cs.ox.ac.uk/people/john.lyle"
   }
-, "licenses":
-  [ { "type": "MIT +no-false-attribs"
-    , "url": "http://github.com/isaacs/npm/raw/master/LICENSE"
-    }
-  ]
 }

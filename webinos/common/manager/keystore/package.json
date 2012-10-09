@@ -9,11 +9,6 @@
   { "email": "shamal.faily@cs.ox.ac.uk, habib.virji@samsung.com"
   , "url": "http://www.cs.ox.ac.uk/people/shamal.faily"
   }
-, "licenses":
-  [ { "type": "MIT +no-false-attribs"
-    , "url": "http://github.com/isaacs/npm/raw/master/LICENSE"
-    }
-  ]
 , "repositories": 
   [ { "type" : "git",
       "url"  : "http://dev.webinos.org/git/wp4.git"
