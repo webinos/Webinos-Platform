@@ -32,19 +32,19 @@ var connection;
 
 var client;
 
-function initialize(pzhConnection, jid, rpcHandler) {
+function initialize(pzhConnection, rpcHandler) {
 	connection = pzhConnection;
 	
 	//TODO the instantiation of service objects (or API proxies) should be refactored. Connection is now a property of a service object
 	//but this is the connection to the XMPP server. There can also be local connections.
 	
 	var geoLocationFeature = webinosFeatures.factory[webinosFeatures.NS.GEOLOCATION](rpcHandler, 'geoip');
-	geoLocationFeature.setConnection(jid, connection);
+	geoLocationFeature.setConnection(connection);
     rpcHandler.registry.registerObject(geoLocationFeature);
 	connection.shareFeature(geoLocationFeature);
 
 	var get42Feature = webinosFeatures.factory[webinosFeatures.NS.GET42](rpcHandler);
-	get42Feature.setConnection(jid, connection);
+	get42Feature.setConnection(connection);
     rpcHandler.registry.registerObject(get42Feature);
 	connection.shareFeature(get42Feature);
 	
@@ -53,7 +53,7 @@ function initialize(pzhConnection, jid, rpcHandler) {
 
 	// we do not add the service discovery feature. This special kind of feature is not discoverable.
 	var serviceDiscoveryFeature = webinosFeatures.factory[webinosFeatures.NS.SERVICE_DISCOVERY](rpcHandler, features);
-	serviceDiscoveryFeature.setConnection(jid, pzhConnection);
+	serviceDiscoveryFeature.setConnection(pzhConnection);
     rpcHandler.registry.registerObject(serviceDiscoveryFeature);
     
     connection.on('newFeature', function(feature) {

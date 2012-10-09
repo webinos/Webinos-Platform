@@ -87,13 +87,6 @@ var rpcRegistry = new registry.Registry();
 var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
 var connection = new xmpp.Connection(rpcHandler);
 
-logger.verbose("Starting servers...");
-ws.start(port, port+1, rpcHandler, jid);
-
-featureManager.initialize(connection, jid, rpcHandler);
-
-logger.verbose("Done starting servers.");
-
 logger.verbose("Initialising connection to xmpp server.");
 connection.connect({ jid: argv[3], password: argv[4], bosh: argv[5] }, function() {
 	logger.info("Connected to the XMPP server.");
@@ -114,3 +107,11 @@ connection.on('newFeature', function(feature) {
 		logger.verbose("The feature " + feature.ns + " on " + feature.device + " became unavailable.");
 	});
 });
+
+logger.verbose("Starting servers...");
+ws.start(port, port+1, rpcHandler, connection);
+
+featureManager.initialize(connection, rpcHandler);
+
+logger.verbose("Done starting servers.");
+

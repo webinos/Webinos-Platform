@@ -67,6 +67,7 @@ Connection.prototype.connect = function(params, onOnline) {
 	this.pendingRequests = new Array;
 	
 	var self = this;
+	this.jid = params['jid'];
 
 	if (params['bosh'] === undefined) {
 		xmpp = require('node-xmpp');
@@ -92,6 +93,10 @@ Connection.prototype.connect = function(params, onOnline) {
 	this.client.on('stanza', this.onStanza);
 
 	this.client.on('error', this.onError);
+}
+
+Connection.prototype.getJID = function() {
+    return this.jid;
 }
 
 Connection.prototype.disconnect = function() {
@@ -144,7 +149,7 @@ Connection.prototype.updatePresence = function() {
 /**
  * Called to invoke a remote feature. Params is optional.
  */
-Connection.prototype.invokeFeature = function(feature, callback, method, params) {
+Connection.prototype.invokeFeature = function(feature, objectRef, callback, method, params) {
 	logger.trace('Invoking feature ' + feature.ns + ' on ' + feature.device);
 
 	var id = connection.getUniqueId('feature');
@@ -153,10 +158,10 @@ Connection.prototype.invokeFeature = function(feature, callback, method, params)
 	var payload = {
 	    'method': method,
 	    'params': params,
-	    'id': id
+	    'id': objectRef.rpcId,
+	    'callbackId': objectRef.from
 	}
 	
-	//TODO do something with optional params.	
 	var xmppInvoke = new xmpp.Element('iq', { 'to': feature.device, 'type': 'get', 'id': id }).
 		c('query', {'xmlns': feature.ns}).
 		c('payload', {'xmlns': 'webinos:rpc#invoke', 'id': feature.remoteId }).t(JSON.stringify(payload));
@@ -196,9 +201,7 @@ Connection.prototype.onStanza = function(stanza) {
 		} else if (stanza.attrs.type == 'result' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
 			connection.onPresenceDisco(stanza);
 		}
-	}
-	
-	if (stanza.is('iq')) { //&& stanza.attrs.type !== 'error') {
+	} else if (stanza.is('iq')) { //&& stanza.attrs.type !== 'error') {
 		if (stanza.attrs.type == 'get' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
 			connection.onDiscoInfo(stanza);
 		} else if (stanza.attrs.type == 'result' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
@@ -208,9 +211,7 @@ Connection.prototype.onStanza = function(stanza) {
 			
 			var callback = connection.pendingRequests[stanza.attrs.id];
 			
-			if (callback == null) {
-				logger.warn("Received a result for an unknown request id: " + stanza.attrs.id);
-			} else {
+			if (callback) {
 				// dispatch the result to the 
 				var query = stanza.getChild('query');
 				delete connection.pendingRequests[stanza.attrs.id];
@@ -223,6 +224,8 @@ Connection.prototype.onStanza = function(stanza) {
 				} else {
 				    callback(stanza.attrs.type, { 'code': 32601, 'message': 'service is unavailable' });
 				}
+			} else{
+		    	logger.info("Received a result for an unknown request id: " + stanza.attrs.id + ". Maybe it has no callback?");
 			}
 		} else if (stanza.attrs.type == 'get' || stanza.attrs.type == 'set') {
 			var query = stanza.getChild('query');
@@ -234,7 +237,7 @@ Connection.prototype.onStanza = function(stanza) {
 
 				if (feature != null) {
 				    var call = JSON.parse(query.getChild('payload').getText());
-					feature.invokedFromRemote(stanza, call.method, call.params, call.id);
+					feature.invokedFromRemote(stanza, call);
 				} else {
 					// default respond with an error
 					this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).c('service-unavailable'));
@@ -244,7 +247,42 @@ Connection.prototype.onStanza = function(stanza) {
 				this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).c('service-unavailable'));
 			}
 		}
+	} else if (stanza.is('message')) {
+	    if (stanza.getChild('payload', 'webinos:rpc#event')) {
+	        var payload = stanza.getChild('payload', 'webinos:rpc#event');
+
+	        logger.trace('throwing event to the other side: ' + payload.attrs.id);
+
+	        var event = payload.getText();
+	        this.emit(payload.attrs.id, event);
+	    }
 	}
+}
+
+/**
+ * Send the result in a message stanza
+ */
+Connection.prototype.eventMessage = function(to, rpc) {
+    logger.trace('sending event to <' + to + '>: ' + JSON.stringify(rpc));
+    var methodCallStrings = rpc.method.split('@');
+    var applicationId = methodCallStrings[0];
+    var methodCall = methodCallStrings[1].split('.');
+    var serviceId = methodCall[0];
+    var methodName = methodCall[1];
+    
+    var payload = {
+        'event': rpc.params,
+        // 'applicationId': applicationId,
+        'serviceId': serviceId,
+        'methodName': methodName 
+    }
+    
+    var xmppResult = new xmpp.Element('message', { 'id': connection.getUniqueId('event'), 'to': to }).
+		c('payload', { 'xmlns': 'webinos:rpc#event', 'id': applicationId }).t(JSON.stringify(payload));
+	
+	logger.debug("Answering RPC with this XMPP message: " + xmppResult.tree());
+
+	this.client.send(xmppResult);
 }
 
 /**

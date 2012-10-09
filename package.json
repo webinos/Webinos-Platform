@@ -18,6 +18,7 @@
     "mdns": "0.x.x",
     "jsormdb": "0.1.x",
     "now": "0.8.1",
+	"node-uuid": "0.3.x",
     "webinos": "0.x.x"
   },
   "engines" : {

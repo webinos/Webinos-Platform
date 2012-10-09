@@ -21,44 +21,92 @@
  * Author: Eelco Cramer, TNO
  */
 
- (function() {
+(function() {
  	"use strict";
     var http = require("http");
     var url = require("url");
     var path = require("path");
     var fs = require("fs");
+    var uuid = require('node-uuid');
     var logger = require('./Logger').getLogger('RpcServer', 'verbose');
     var rpcHandler;
 
     //RPC server initialization
-    function configure(wss, rpcHandler, jid) {
-    	wss.on("connect", function(connection) {
+    function configure(wss, rpcHandler, pzhConnection) {
+    	wss.on("connect", function(wsConnection) {
             logger.info("connection accepted.");
       
-            var pzh = jid.split("/")[0];
+            var pzh = pzhConnection.getJID().split("/")[0];
+            var applicationId = uuid.v1();
       
-            connection.sendUTF('{ "type": "prop", "from": "' + jid + '", "to": "application", "payload": { "status": "registeredBrowser", "message": {"connectedPzp": [], "connectedPzh": ["' + pzh + '"] }}}');
+            // send register result to browser
+            // TODO react to register message as well
+            var register = {
+                "type": "prop",
+                "from": pzhConnection.getJID(),
+                "to": applicationId, //random value for application id
+                "payload": {
+                    "status": "registeredBrowser",
+                    "message": {
+                        "connectedPzp": [],
+                        "connectedPzh": [ pzh ]
+                    }
+                }
+            }
+            
+            wsConnection.sendUTF(JSON.stringify(register));
+
+            // listen to events for this application
+            
+            var callbackToApplication = function (event) {
+                logger.trace('event catched. Forwarding to application');
+                
+                var message = {
+    			    "type": "JSONRPC",
+    			    "payload": {
+    			        "jsonrpc": "2.0",
+    			        "id": 0,
+    			        "method": event.serviceId + "." + event.method,
+    			        "params": event.params
+    			    },
+    			    "id": 0,
+    			    "from": pzhConnection.getJID(),
+    			    "to": applicationId
+                }
+                
+                wsConnection.sendUTF(JSON.stringify(message));
+            };
       
-            connection.on("message", function(message) { wsMessage(message.utf8Data); });
-            connection.on("close", function(reason, description) { wsClose(description) });
+            logger.trace('listening for events for application: ' + applicationId);
+            pzhConnection.on(applicationId, callbackToApplication);
+            
+            wsConnection.on("message", function(message) { wsMessage(message.utf8Data); });
+            wsConnection.on("close", function(reason, description) { 
+                pzhConnection.removeListener(applicationId, callbackToApplication)
+                wsClose(description) 
+            });
             
             //RPC writer for this connection
         	var messageHandler = {
         		write: function(result, respto, msgid)	{
         			logger.verbose('Sending result <' + JSON.stringify(result) + '> to <' + respto + '> for message id <' + msgid + '>');
         			
-        			// first wrap result in message manager format for legacy compatibility
-        			//TODO this should be removed and optimized in the future
-        			
-        			var message = {
-        			    type: 'JSONRPC',
-        			    payload: result,
-        			    id: 0,
-        			    from: jid,
-        			    to: 'application'
-        			};
-        			
-        			connection.sendUTF(JSON.stringify(message));
+        			// check if the message should be send locally or remotely
+        			if (respto != applicationId && respto != pzhConnection.getJID()) {
+        			    pzhConnection.eventMessage(respto, result);
+        			} else {
+            			// first wrap result in message manager format for legacy compatibility
+            			//TODO this should be removed and optimized in the future
+            			var message = {
+            			    "type": "JSONRPC",
+            			    "payload": result,
+            			    "id": 0,
+            			    "from": pzhConnection.getJID(),
+            			    "to": applicationId
+            			};
+
+            			wsConnection.sendUTF(JSON.stringify(message));
+        			}
         		}
         	}
 

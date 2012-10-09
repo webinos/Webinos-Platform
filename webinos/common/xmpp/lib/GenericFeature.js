@@ -14,142 +14,191 @@
 * limitations under the License.
 *
 *******************************************************************************/
+(function() {
+ 	"use strict";
 
-/**
- * Base class for features / services.
- * 
- * Reused and updated the orginal XmppDemo code of Victor Klos
- * Author: Eelco Cramer, TNO
- */
+    /**
+     * Base class for features / services.
+     * 
+     * Reused and updated the orginal XmppDemo code of Victor Klos
+     * Author: Eelco Cramer, TNO
+     */
 
-var sys = require('util');
-var EventEmitter = require('events').EventEmitter;
-var uniqueId = Math.round(Math.random() * 10000);
-var logger = require('./Logger').getLogger('GenericFeature', 'verbose');
+    global.unansweredGenericFeatureCalls = {};
 
-var path = require('path');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+    var sys =require('util');
+    var timers = require('timers');
+    var EventEmitter = require('events').EventEmitter;
+    var uniqueId = Math.round(Math.random() * 10000);
+    var logger = require('./Logger').getLogger('GenericFeature', 'verbose');
 
-var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
+    var path = require('path');
+    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-/*
- * 'Class' definition of generic webinos feature
- *
- * inspiration for subclassing methodology comes from http://www.webreference.com/js/column79/4.html
- */
-function GenericFeature() {
-	EventEmitter.call(this);
+    var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
 
-    //this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
-    this.owner = null;                                          // person that owns the device the service is running on
-    this.device = null;                                         // (addressable) id of device the service is running on
-    this.name = "(you shouldn't see this!)";                    // friendly name, to be overridden
-    this.ns = null;                                             // name space that (globally) uniquely defines the service type
-	this.local = true; // defaults to true
-	this.shared = false; // only used for local features
+    /*
+     * 'Class' definition of generic webinos feature
+     *
+     * inspiration for subclassing methodology comes from http://www.webreference.com/js/column79/4.html
+     */
+    function GenericFeature() {
+    	EventEmitter.call(this);
+
+        //this.id = ++uniqueId;                                       // (app level) unique id, e.g. for use in html user interface
+        this.owner = null;                                          // person that owns the device the service is running on
+        this.device = null;                                         // (addressable) id of device the service is running on
+        this.name = "(you shouldn't see this!)";                    // friendly name, to be overridden
+        this.ns = null;                                             // name space that (globally) uniquely defines the service type
+    	this.local = true; // defaults to true
+    	this.shared = false; // only used for local features
 	
-    this.remove = function() {                                  // call this when this feature is removed.
-		this.emit('remove', this);
-	}
+        this.remove = function() {                                  // call this when this feature is removed.
+    		this.emit('remove', this);
+    	}
 	
-    this.isLocal = function() {                                 // returns true is the feature is running on the local device
-	    return (this.device == webinos.device);
-	}
+        this.isLocal = function() {                                 // returns true is the feature is running on the local device
+    	    return (this.device == webinos.device);
+    	}
 	
-    this.isMine = function() {                                  // returns true if the feature runs on a device of same owner
-	    return (this.owner == webinos.owner);
-	}
+        this.isMine = function() {                                  // returns true if the feature runs on a device of same owner
+    	    return (this.owner == webinos.owner);
+    	}
 
-    this.setConnection = function(jid, connection) {
-    	this.device = jid;
-        this.owner = jid.split("/")[0];
-    	this.uplink = connection;
-    	this.service.serviceAddress = this.device;
-    }
+        this.setConnection = function(connection) {
+        	this.device = connection.getJID();
+            this.owner = this.device.split("/")[0];
+        	this.uplink = connection;
+        	this.service.serviceAddress = this.device;
+        }
     
-    this.embedService = function(service) {
-        this.service = service;
-        this.api = service.api;
-        this.ns = service.api;
-        this.displayName = service.displayName;
-        this.description = service.description;
+        this.embedService = function(service) {
+            this.service = service;
+            this.api = service.api;
+            this.ns = service.api;
+            this.displayName = service.displayName;
+            this.description = service.description;
         
-        logger.verbose('service api: ' + service.api);
-        logger.verbose('this.api: ' + this.api);
+            logger.verbose('service api: ' + service.api);
+            logger.verbose('this.api: ' + this.api);
         
-        for (i in this.service) {
-            if (typeof this.service[i] === 'function') {
-                if (!this[i]) { // add to proxy object if the method does not exist yet
-                    logger.debug('Adding to proxy object: ' + i);
-                    this[i] = new Function("this.invoke('" + i + "', arguments);");            
-                    
-                    //TODO it would be better to only add RPC methods 
+            for (var i in this.service) {
+                if (typeof this.service[i] === 'function') {
+                    if (!this[i]) { // add to proxy object if the method does not exist yet
+                        logger.debug('Adding to proxy object: ' + i);
+                        this[i] = new Function("this.invoke('" + i + "', arguments);");            
+                        //TODO it would be better to only add RPC methods 
+                    }
+                } else if (i == 'listenAttr') {
+                    //TODO check if this is an actual pattern?
+                    for (var j in this.service[i]) {
+                        if (typeof this.service[i][j] === 'function') {
+                            if (!this[j]) {
+                                logger.debug('Adding to proxy object: ' + j);
+                                this[j] = new Function("this.invoke('" + j + "', arguments);");            
+                                //TODO it would be better to only add RPC methods 
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
     
-    /**
-	 * Get an information object from the service.
-	 * @returns Object including id, api, displayName, serviceAddress.
-	 */
-	this.getInformation = function () {
-		return {
-			id: this.id,
-			api: this.api,
-			displayName: this.displayName,
-			description: this.description,
-			serviceAddress: this.device
-		};
-	};
+        /**
+    	 * Get an information object from the service.
+    	 * @returns Object including id, api, displayName, serviceAddress.
+    	 */
+    	this.getInformation = function () {
+    		return {
+    			id: this.id,
+    			api: this.api,
+    			displayName: this.displayName,
+    			description: this.description,
+    			serviceAddress: this.device
+    		};
+    	};
 	
-	this.invoke = function(method, parameters) {
-		logger.verbose('invoked');
+    	this.invoke = function(method, parameters) {
+    		logger.verbose('invoked');
+    		logger.trace('calling emit(invoked-from-remote)');
+    		this.emit('invoked-from-remote', this, parameters);
 		
-		if (this.local) {
-    		this.service[method].apply(this.service, parameters);
-		} else {
-		    logger.verbose('invoking remove service');
+    		if (this.local) {
+        		this.service[method].apply(this.service, parameters);
+                if (this.service[method]) {
+            		this.service[method].apply(this.service, parameters);
+                } else if (this.service.listenAttr[method]) {
+            		this.service.listenAttr[method].apply(this.service, parameters);
+                }
+    		} else {
+    		    logger.verbose('invoking remove service');
 		    
-		    var callback = function(type, payload) {
-		        if (type != 'error') {
-		            parameters[1](payload.result);
-		        } else {
-		            parameters[2](payload.error);
-		        }
-		    }
+    		    var callback = function(type, payload) {
+    		        if (type != 'error') {
+    		            parameters[1](payload.result);
+    		        } else {
+    		            parameters[2](payload.error);
+    		        }
+    		    }
 		    
-		    // footprint is (params, successCB, errorCB, objectRef): only send params
-		    this.emit('invoke-via-xmpp', this, callback, method, parameters[0])
-		}
+		        var objectRef = parameters[3];
+    		    this.emit('invoke-via-xmpp', this, objectRef, callback, method, parameters[0]);
+    		}
 		
-		logger.verbose('ending (invoke');
-    }
+    		logger.verbose('ending (invoke');
+        }
     
-    this.invokedFromRemote = function(stanza, method, params, id) {
-		logger.verbose('on(invoked-from-remote)');
-		logger.debug('Received the following XMPP stanza: ' + stanza);
+        this.invokedFromRemote = function(stanza, call) {
+    		logger.verbose('on(invoked-from-remote)');
+    		logger.debug('Received the following XMPP stanza: ' + stanza);
 		
-		var conn = this.uplink;
+    		var conn = this.uplink;
+            var success, error;
+            
+            //TODO dirty hack for answering iq messages that call a method that does not call the callback
+            // this is needed because on runtime it is not known if a RPC calls expects a callback or not. 
+            // for now we are assuming that a callback will occur within 5 seconds (meh).
+            global.unansweredGenericFeatureCalls[call.id] = stanza;
+            
+            timers.setTimeout(function (id) {
+                if (global.unansweredGenericFeatureCalls[call.id]) {
+                    logger.info('Assuming a call to a function without a callback. Clearing the info query message.');
+                    conn.answer(global.unansweredGenericFeatureCalls[call.id], call.id);
+                    delete global.unansweredGenericFeatureCalls[call.id];
+                }
+            }, 5000, call.id);
+            
+            success = function(result) {
+    			logger.debug("The answer is: " + JSON.stringify(result));
+    			logger.debug("Sending it back via XMPP...");
+                delete global.unansweredGenericFeatureCalls[call.id];
+    			conn.answer(stanza, call.id, result);
+            }
 
-        var success = function(result) {
-			logger.debug("The answer is: " + JSON.stringify(result));
-			logger.debug("Sending it back via XMPP...");
-			conn.answer(stanza, id, result);
+            error = function(error) {
+                delete global.unansweredGenericFeatureCalls[call.id];
+                conn.error(stanza, call.id, result);
+            }
+
+            var objectRef = {
+                "api": call.callbackId,
+                "id": call.id,
+                "from": stanza.attrs.from
+            };
+
+            if (this.service[call.method]) {
+        		this.service[call.method].apply(this.service, [call.params, success, error, objectRef]);
+            } else if (this.service.listenAttr[call.method]) {
+        		this.service.listenAttr[call.method].apply(this.service, [call.params, success, error, objectRef]);
+            }
+
+    		logger.verbose('ending on(invoked-from-remote)');
         }
-        
-        var error = function(error) {
-            conn.error(stanza, id, result);
-        }
-
-		this.service[method].apply(this.service, [params, success, error]);
-
-		logger.verbose('ending on(invoked-from-remote)');
     }
-}
 
-sys.inherits(GenericFeature, RPCWebinosService);
-sys.inherits(GenericFeature, EventEmitter);
-exports.GenericFeature = GenericFeature;
+    sys.inherits(GenericFeature, RPCWebinosService);
+    sys.inherits(GenericFeature, EventEmitter);
+    exports.GenericFeature = GenericFeature;
+})();

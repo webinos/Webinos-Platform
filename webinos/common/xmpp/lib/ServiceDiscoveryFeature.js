@@ -55,26 +55,6 @@
 
         RPCWebinosService.call(this.base);
 
-    	var publisher = function(feature, objectRef) {
-			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.api + ' to browser');
-
-            //TODO onservicebound is not according to spec but it is according to implementation
-			var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', feature.getInformation());
-			rpcHandler.executeRPC(rpc);
-
-    		// keep track of the feature.
-    		//TODO this does not seem part of the current implementation yet.
-            // feature.once('remove', function(feature) {
-            //  // unpublish when the feature is removed.
-            //  logger.verbose("onRemove: the feature " + feature.ns + " on " + feature.device + " became unavailable. Id=" + feature.id);
-            //          
-            //  socket.emit(feature.id + '-removed', { id: feature.id });
-            //          
-            //  logger.verbose('onRemove: and is removed: ' + feature.id + '-removed');
-            // });
-            logger.verbose('Finnished publishing');
-    	}
-
 		/**
 		 * Find services and call a listener for each found service.
 		 * @param params Array, first item being the service type to search.
@@ -89,7 +69,26 @@
 			var options = params[1];
 			var filter = params[2];
 
-            //TODO check if this is still correct
+            var publisher = function(feature) {
+    			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.api + ' to browser');
+
+                //TODO onservicebound is not according to spec but it is according to implementation
+    			var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', feature.getInformation());
+    			rpcHandler.executeRPC(rpc);
+
+        		// keep track of the feature.
+        		//TODO this does not seem part of the current implementation yet.
+                // feature.once('remove', function(feature) {
+                //  // unpublish when the feature is removed.
+                //  logger.verbose("onRemove: the feature " + feature.ns + " on " + feature.device + " became unavailable. Id=" + feature.id);
+                //          
+                //  socket.emit(feature.id + '-removed', { id: feature.id });
+                //          
+                //  logger.verbose('onRemove: and is removed: ' + feature.id + '-removed');
+                // });
+                logger.verbose('Finnished publishing');
+        	};
+            
 			this.uplink.removeListener(serviceType, publisher);
 
             // publish matching local features
@@ -111,9 +110,7 @@
 			}
 
 			// subscribe to future messages
-			this.uplink.on(serviceType.api, function(feature) {
-			    publisher(feature, objectRef)
-			});
+			this.uplink.on(serviceType.api, publisher);
 		};
 		
     	logger.verbose("Leaving constructor()");
