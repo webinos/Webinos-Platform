@@ -20,7 +20,7 @@
 // there is an x509 module somewhere I need to use...
 
 var certman = require("../../src/build/Release/certificate_manager");
-
+var util = require("util");
 var rsakey;
 var certReq;
 var ssCert;
@@ -69,7 +69,7 @@ describe("generate certificate requests", function() {
 
 describe("sign certificate requests", function() {
     it("can self-sign a certificate request", function() {
-        ssCert = certman.selfSignRequest(certReq, 30, rsakey, 1, "pzh.webinos.org");
+        ssCert = certman.selfSignRequest(certReq, 30, rsakey, 1, "URI:pzh.webinos.org");
         expect(ssCert).not.toBeNull();
         expect(ssCert).toContain(CERT_START);
         expect(ssCert).toContain(CERT_END);
@@ -80,7 +80,7 @@ describe("sign certificate requests", function() {
         childKey = certman.genRsaKey(1024);
         childReq = certReq = certman.createCertificateRequest(rsakey, 
     "UK","OX","Oxford","Univ. Oxford","Computer Science", "Client Key", "john.lyle@cs.ox.ac.uk");
-        childCert = certman.signRequest(childReq, 30, rsakey, ssCert, 1, "pzh.webinos.org");
+        childCert = certman.signRequest(childReq, 30, rsakey, ssCert, 1, "URI:pzh.webinos.org");
         expect(childCert).not.toBeNull();
         expect(childCert).toContain(CERT_START);
         expect(childCert).toContain(CERT_END);
@@ -106,6 +106,20 @@ describe("create certificate revocation lists", function() {
     });
 });
     
-    
+describe("Proper error handling", function() {
+    it("will error given a bad altname", function() {
+        childKey = certman.genRsaKey(1024);
+        childReq = certReq = certman.createCertificateRequest(rsakey, 
+        "UK","OX","Oxford","Univ. Oxford","Computer Science", "Client Key", "john.lyle@cs.ox.ac.uk");
+        try {
+            childCert = certman.signRequest(childReq, 30, rsakey, ssCert, 1, "foo://bar");
+            expect(childCert).toBeNull(); //shouldn't get here.
+        } catch (err) {
+            expect(err).not.toBeGreaterThan(0);
+            expect(err.toString()).toEqual("Error: Failed to sign a certificate");
+        }
+        
+    });
+});    
     
 
