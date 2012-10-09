@@ -1,0 +1,23 @@
+body {
+	font-family: sans-serif;
+}
+
+td {
+	width: 100px;
+}
+
+.PERMIT {
+	background-color: green;
+}
+
+.DENY {
+	background-color: red;
+}
+
+.PROMPT {
+	background-color: yellow;
+}
+
+.UNDETERMINED {
+	background-color: grey;
+}
