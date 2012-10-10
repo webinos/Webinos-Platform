@@ -16,8 +16,6 @@
 *******************************************************************************/
 
 /**
- * service_discovery.js
- * handles service discovery request from the browser.
  * author: Eelco Cramer (TNO)
  */
 
@@ -37,10 +35,20 @@
 
     var WebinosFeatures = require('./WebinosFeatures.js');
 
+    /**
+     * The namespace of this feature
+     * @constant
+     * @name ServiceDiscoveryFeature#NS
+     */
     var NS = "http://webinos.org/api/discovery";
 
-    // start(io, pzhConnection, jid, rpcHandler) {
-
+    /**
+     * Constructor for the service discovery feature.
+     * @constructor
+     * @name ServiceDiscoveryFeature
+     * @param rpcHandler The rpc handler instance.
+     * @param features List of local features that are available.
+     */
     function ServiceDiscoveryFeature(rpcHandler, features) {
         GenericFeature.GenericFeature.call(this);
 
@@ -57,6 +65,7 @@
 
 		/**
 		 * Find services and call a listener for each found service.
+		 * @name ServiceDiscoveryFeature#findServices
 		 * @param params Array, first item being the service type to search.
 		 * @param successCB Success callback.
 		 * @param errorCB Error callback.
@@ -69,6 +78,12 @@
 			var options = params[1];
 			var filter = params[2];
 
+            /**
+             * Publishes found features to the application
+             * @function
+             * @private
+             * @param The feature to publish.
+             */
             var publisher = function(feature) {
     			logger.verbose('Publish feature on ' + feature.device + ' of type ' + feature.api + ' to browser');
 

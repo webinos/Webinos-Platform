@@ -15,11 +15,21 @@
 *
 *******************************************************************************/
 
-/* Logger wrapper: currently using log4js */
+/**
+ * Author: Eelco Cramer, TNO
+ */
 
 (function() {
+  	"use strict";
+
     var log4js = require('log4js');
 
+    /**
+     * Constructs a logger. Currently wraps log4js.
+     * @function
+     * @param {string} name The name of the logger.
+     * @param {string} [level="info"] The level that is displayed by this logger. 
+     */
     function getLogger(name, level) {
         var defaultLevel = 'info';
 

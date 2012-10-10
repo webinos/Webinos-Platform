@@ -15,7 +15,9 @@
 *
 *******************************************************************************/
 
-// author: Victor Klos & Eelco Cramer
+/**
+ * Author: Eelco Cramer
+ */
 
 (function() {
 	"use strict";
@@ -42,6 +44,12 @@
     
     var wss;
 
+    /**
+     * Handles incoming requests from connected WRTs
+     * @function
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     */
     function handler(request, response) {
     	logger.verbose("Entering request callback");
         var pathname = url.parse(request.url).pathname;
@@ -76,6 +84,14 @@
         });
     }
 
+    /**
+     * Starts the webserver webinos clients can connect to.
+     * @function
+     * @param httpPort Port for HTTP connections.
+     * @param wssPort Port for websocket connections.
+     * @param rpcHandler The RPC handler.
+     * @param jid The jid of PZP.
+     */
     function start(httpPort, wssPort, rpcHandler, jid) {
     	logger.verbose("Entering start()");
     	logger.debug("Creating web server on port " + httpPort);
@@ -110,6 +126,12 @@
     mimeTypes[".js"]   = "application/x-javascript";
     mimeTypes[".css"]  = "text/css";
 
+    /**
+     * Gets the MIME type for a file.
+     * @private
+     * @function
+     * @param {string} file The filename.
+     */
     function mimeType(file) {
     	logger.verbose("Entering mimeType function");
     	var ext = path.extname(file);

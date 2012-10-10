@@ -16,8 +16,6 @@
 *******************************************************************************/
 
 /**
- * RPC server. Binds socket.io to the Webinos RPC scripts.
- * 
  * Author: Eelco Cramer, TNO
  */
 
@@ -31,33 +29,49 @@
     var logger = require('./Logger').getLogger('RpcServer', 'verbose');
     var rpcHandler;
 
-    //RPC server initialization
+    /**
+     * Configures the RPC server
+     * @function
+     * @param wss The web socket server that is used to connect to the RPC server.
+     * @param rpcHandler The rpc handler instance.
+     * @param pzhConnection The connection to the PZH
+     */
     function configure(wss, rpcHandler, pzhConnection) {
     	wss.on("connect", function(wsConnection) {
             logger.info("connection accepted.");
       
             var pzh = pzhConnection.getJID().split("/")[0];
             var applicationId = uuid.v1();
-      
-            // send register result to browser
-            // TODO react to register message as well
-            var register = {
-                "type": "prop",
-                "from": pzhConnection.getJID(),
-                "to": applicationId, //random value for application id
-                "payload": {
-                    "status": "registeredBrowser",
-                    "message": {
-                        "connectedPzp": [],
-                        "connectedPzh": [ pzh ]
+
+            /**
+             * Returns register message
+             * @function
+             * @private
+             * @returns the message
+             */
+            var register = function () {
+                return {
+                    "type": "prop",
+                    "from": pzhConnection.getJID(),
+                    "to": applicationId, //random value for application id
+                    "payload": {
+                        "status": "registeredBrowser",
+                        "message": {
+                            "connectedPzp": [],
+                            "connectedPzh": [ pzh ]
+                        }
                     }
-                }
+                };
             }
             
-            wsConnection.sendUTF(JSON.stringify(register));
+            wsConnection.sendUTF(JSON.stringify(register()));
 
-            // listen to events for this application
-            
+            /**
+             * Performs a callback to the connected application.
+             * @private
+             * @function
+             * @param event The event to send to the browser
+             */
             var callbackToApplication = function (event) {
                 logger.trace('event catched. Forwarding to application');
                 
@@ -86,8 +100,16 @@
                 wsClose(description) 
             });
             
-            //RPC writer for this connection
+            // The RPC writer for this connection
         	var messageHandler = {
+        	    /**
+        	     * Writes RPC data to the web socket connection.
+        	     * @private
+        	     * @function
+        	     * @param result The result object.
+        	     * @param {string} respto Address the response should go to.
+        	     * @param {string} [msgid="not used"] The message id.
+        	     */
         		write: function(result, respto, msgid)	{
         			logger.verbose('Sending result <' + JSON.stringify(result) + '> to <' + respto + '> for message id <' + msgid + '>');
         			
@@ -110,6 +132,12 @@
         		}
         	}
 
+            /**
+             * Message hanler for incomming message from web socket.
+             * @function
+             * @private
+             * @params {string} utf8Data UTF-8 encoded string containing the message
+             */
         	function wsMessage(utf8Data) {
                 var msg = JSON.parse(utf8Data);
 
@@ -118,7 +146,11 @@
                 if(msg.type === "prop" ) {
                     // Legacy from initial implementation. Do we need to register the browser?
                     // ignoring these for now
-                    logger.verbose('Ignoring legacy messages: ' + JSON.stringify(msg));
+                    if (msg.payload && msg.payload.status == 'registerBrowser') {
+                        wsConnection.sendUTF(JSON.stringify(register()));
+                    } else {
+                        logger.verbose('Ignoring legacy messages: ' + JSON.stringify(msg));
+                    }
                     
                     //TODO add support for these
                 } else if (msg.type === 'JSONRPC' && msg.payload) {
@@ -129,6 +161,12 @@
                 }
             }
 
+            /**
+             * Called when the web socket connection is closed.
+             * @function
+             * @private
+             * @params {string} reason String containing the reason the connection was closed.
+             */
             function wsClose(reason) {
                 logger.info(reason);
                 logger.debug('user disconnected');

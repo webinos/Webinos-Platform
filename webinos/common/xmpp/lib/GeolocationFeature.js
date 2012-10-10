@@ -16,45 +16,49 @@
 *******************************************************************************/
 
 /**
- * The geolocation feature wrapper.
  * Author: Eelco Cramer, TNO
  */
 
-var GenericFeature = require('./GenericFeature.js');
-var sys = require('util');
-var logger = require('./Logger').getLogger('GeolocationFeature', 'info');
+(function() {
+ 	"use strict";
 
-var path = require('path');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+    var GenericFeature = require('./GenericFeature.js');
+    var sys = require('util');
+    var logger = require('./Logger').getLogger('GeolocationFeature', 'info');
 
-var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.location));
+    var path = require('path');
+    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
+    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-/*
- * Geolocation feature, defined as subclass of GenericFeature
- *
- * When an app invokes this service, a query request is sent to the 
- * service (address). The result is passed back through a callback.
- *
- * See the XMPP logging for the details.
- */
+    var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.location));
 
-var NS = "http://webinos.org/api/w3c/geolocation";
+    /**
+     * The namespace of this feature
+     * @constant
+     * @name GeolocationFeature#NS
+     */
+    var NS = "http://webinos.org/api/w3c/geolocation";
 
-function GeolocationFeature(rpcHandler, connector) {
-	GenericFeature.GenericFeature.call(this);
+    /**
+     * Geolocation feature, defined as subclass of GenericFeature
+     * @constructor
+     * @name GeolocationFeature
+     * @param rpcHandler The rpc handler instance.
+     * @param connector The geolocation connector scheme that is used.
+     */
+    function GeolocationFeature(rpcHandler, connector) {
+    	GenericFeature.GenericFeature.call(this);
 
-    if (connector === undefined) {
-        this.embedService(new geolocation.Service(rpcHandler, { 'connector': 'geoip'}));
-    } else {
-	    this.embedService(new geolocation.Service(rpcHandler, { 'connector': connector}));
+        if (connector === undefined) {
+            this.embedService(new geolocation.Service(rpcHandler, { 'connector': 'geoip'}));
+        } else {
+    	    this.embedService(new geolocation.Service(rpcHandler, { 'connector': connector}));
+        }
     }
-}
 
-sys.inherits(GeolocationFeature, GenericFeature.GenericFeature);
-exports.Service = GeolocationFeature;
-exports.NS = NS;
-
-////////////////////////// END Geolocation Feature //////////////////////////
+    sys.inherits(GeolocationFeature, GenericFeature.GenericFeature);
+    exports.Service = GeolocationFeature;
+    exports.NS = NS;
+})();
 

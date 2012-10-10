@@ -14,16 +14,15 @@
 * limitations under the License.
 *
 *******************************************************************************/
+
+/**
+ * Author: Eelco Cramer, TNO
+ */
+
 (function() {
  	"use strict";
 
-    /**
-     * Base class for features / services.
-     * 
-     * Reused and updated the orginal XmppDemo code of Victor Klos
-     * Author: Eelco Cramer, TNO
-     */
-
+    // save unanswered calls to remote features globally
     global.unansweredGenericFeatureCalls = {};
 
     var sys =require('util');
@@ -39,10 +38,10 @@
 
     var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
 
-    /*
-     * 'Class' definition of generic webinos feature
-     *
-     * inspiration for subclassing methodology comes from http://www.webreference.com/js/column79/4.html
+    /**
+     * The base class for webinos features.
+     * @name GenericFeature
+     * @constructor
      */
     function GenericFeature() {
     	EventEmitter.call(this);
@@ -54,19 +53,36 @@
         this.ns = null;                                             // name space that (globally) uniquely defines the service type
     	this.local = true; // defaults to true
     	this.shared = false; // only used for local features
-	
-        this.remove = function() {                                  // call this when this feature is removed.
-    		this.emit('remove', this);
-    	}
-	
+
+	    /**
+	     * Determine if the feature is local or not
+	     * @name GenericFeature#isLocal
+	     * @function
+	     * @returns {boolean} result
+	     * @public
+	     */
         this.isLocal = function() {                                 // returns true is the feature is running on the local device
     	    return (this.device == webinos.device);
     	}
 	
+	    /**
+	     * Determine if the feature is owned by the user or not
+	     * @name GenericFeature#isMine
+	     * @function
+	     * @returns {boolean} result
+	     * @public
+	     */
         this.isMine = function() {                                  // returns true if the feature runs on a device of same owner
     	    return (this.owner == webinos.owner);
     	}
 
+	    /**
+	     * Sets the connection with the PZH that is used to communicate with foreign users.
+	     * @name GenericFeature#setConnection
+	     * @function
+	     * @param connection The connection instance used
+	     * @public
+	     */
         this.setConnection = function(connection) {
         	this.device = connection.getJID();
             this.owner = this.device.split("/")[0];
@@ -74,6 +90,13 @@
         	this.service.serviceAddress = this.device;
         }
     
+	    /**
+	     * Embeds a local API implementation instance into the feature. Adds the methods of the embeded service object to the current object.
+	     * @name GenericFeature#embedService
+	     * @function
+	     * @param service RPCWebinosService} The service instance
+	     * @private
+	     */
         this.embedService = function(service) {
             this.service = service;
             this.api = service.api;
@@ -106,10 +129,14 @@
             }
         }
     
-        /**
-    	 * Get an information object from the service.
-    	 * @returns Object including id, api, displayName, serviceAddress.
-    	 */
+	    /**
+	     * Gets an information object describing this service.
+	     * @see RPCWebinosService#getInformation
+	     * @name GenericFeature#getInformation
+	     * @function
+	     * @public
+	     * @returns the result
+	     */
     	this.getInformation = function () {
     		return {
     			id: this.id,
@@ -120,13 +147,20 @@
     		};
     	};
 	
+	    /**
+	     * Invokes a method on this feature.
+	     * @name GenericFeature#invoke
+	     * @function
+	     * @public
+	     * @param method {string} The method to invoke.
+	     * @param parameters List with all the parameters to invoke. Can have as much parameters as needed, these are all put into this list.
+	     */
     	this.invoke = function(method, parameters) {
     		logger.verbose('invoked');
     		logger.trace('calling emit(invoked-from-remote)');
     		this.emit('invoked-from-remote', this, parameters);
 		
     		if (this.local) {
-        		this.service[method].apply(this.service, parameters);
                 if (this.service[method]) {
             		this.service[method].apply(this.service, parameters);
                 } else if (this.service.listenAttr[method]) {
@@ -150,9 +184,19 @@
     		logger.verbose('ending (invoke');
         }
     
+	    /**
+	     * Is called when a feature is invoked remotely.
+	     * @name GenericFeature#invokedFromRemote
+	     * @function
+	     * @public
+	     * @param stanza The XMPP stanza object that triggerd the invocation.
+	     * @param call Object instance describing the remote procedure call.
+	     */
         this.invokedFromRemote = function(stanza, call) {
     		logger.verbose('on(invoked-from-remote)');
     		logger.debug('Received the following XMPP stanza: ' + stanza);
+		
+		    //TODO extract the needed values from the XMPP stanza in the calling code and pass these so there is no dependency of XMPP here.
 		
     		var conn = this.uplink;
             var success, error;

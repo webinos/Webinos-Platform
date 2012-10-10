@@ -16,35 +16,41 @@
 *******************************************************************************/
 
 /**
- * Remote alert feature.
- * 
- * Reused and updated the orginal XmppDemo code of Victor Klos
  * Author: Eelco Cramer, TNO
  */
-var sys = require('util');
-var GenericFeature = require('./GenericFeature.js');
-var logger = require('./Logger').getLogger('Get42Feature', 'verbose');
 
-var NS = "http://webinos.org/api/test";
+(function() {
+  	"use strict";
 
-var moduleRoot = require('../dependencies.json');
-var dependencies = require('../' + moduleRoot.root.location + '/dependencies.json');
-var webinosRoot = '../' + moduleRoot.root.location;
+    var sys = require('util');
+    var GenericFeature = require('./GenericFeature.js');
+    var logger = require('./Logger').getLogger('Get42Feature', 'verbose');
 
-var get42 = require(webinosRoot + dependencies.api.get42.location);
+    /**
+     * The namespace of this feature
+     * @constant
+     * @name Get42Feature#NS
+     */
+    var NS = "http://webinos.org/api/test";
 
-/*
- * Remote-alert Feature, defines as subclass of GenericFeature
- */
-function Get42Feature(rpcHandler) {
-	GenericFeature.GenericFeature.call(this);
-	this.embedService(new get42.Service(rpcHandler));
-}
+    var moduleRoot = require('../dependencies.json');
+    var dependencies = require('../' + moduleRoot.root.location + '/dependencies.json');
+    var webinosRoot = '../' + moduleRoot.root.location;
 
-//sys.inherits(Get42Feature, get42.testModule);
-sys.inherits(Get42Feature, GenericFeature.GenericFeature);
-exports.Service = Get42Feature;
-exports.NS = NS;
+    var get42 = require(webinosRoot + dependencies.api.get42.location);
 
-///////////////////////// END Remote Alering Service /////////////////////////
+    /**
+     * Testing feature with life answer.
+     * @constructor
+     * @name Get42Feature
+     * @param rpcHandler The rpc handler instance.
+     */
+    function Get42Feature(rpcHandler) {
+    	GenericFeature.GenericFeature.call(this);
+    	this.embedService(new get42.Service(rpcHandler));
+    }
 
+    sys.inherits(Get42Feature, GenericFeature.GenericFeature);
+    exports.Service = Get42Feature;
+    exports.NS = NS;
+})();
