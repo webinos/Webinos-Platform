@@ -167,27 +167,19 @@ LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
       })
     }
 
-    switch (error.code) {
-      case "EISDIR":
-      case "EROFS":
-      case "EEXIST":
-        fs.stat(realize(self, path), function (error2, stats) {
-          if (error2) return callback(map(error))
+    fs.stat(realize(self, path), function (error2, stats) {
+      if (error2) return callback(map(error))
 
-          if (exclusive) {
-            return callback(new util.CustomError("PathExistsError"))
-          }
+      if (exclusive) {
+        return callback(new util.CustomError("PathExistsError"))
+      }
 
-          if (!stats.isFile()) {
-            return callback(new util.CustomError("TypeMismatchError"))
-          }
+      if (!stats.isFile()) {
+        return callback(new util.CustomError("TypeMismatchError"))
+      }
 
-          callback(null)
-        })
-        break
-      default:
-        callback(map(error))
-    }
+      callback(null)
+    })
   })
 }
 
@@ -378,10 +370,7 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
           })
         } else callback(map(error))
         break
-      case "EISDIR":
-      case "EPERM":
-      case "EROFS":
-      case "EEXIST":
+      default:
         fs.stat(realize(self, path), function (error2, stats) {
           if (error2) return callback(map(error))
 
@@ -395,9 +384,6 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
 
           callback(null)
         })
-        break
-      default:
-        callback(map(error))
     }
   })
 }
