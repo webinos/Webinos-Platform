@@ -100,12 +100,11 @@
 	 * Creates a new unique identifier to be used for RPC requests and responses.
 	 * @function
 	 * @private
+	 * @param used for recursion
 	 */
-	var getNextID = function() {
-		function s4() {
-			return ((1 + Math.random()) * 0x10000|0).toString(16).substr(1);
-		}
-		return s4() + s4() + s4();
+	var getNextID = function(a) {
+	    // implementation taken from here: https://gist.github.com/982883
+        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,getNextID);
 	}
 
 	/**

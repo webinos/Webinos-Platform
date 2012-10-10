@@ -36,6 +36,17 @@
 		this.objects = {};
 	};
 
+	/**
+	 * Creates a new unique identifier to be used for RPC requests and responses.
+	 * @function
+	 * @private
+	 * @param used for recursion
+	 */
+	var _getNextID = function(a) {
+	    // implementation taken from here: https://gist.github.com/982883
+        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,_getNextID);
+	}
+
 	var _registerObject = function (callback) {
 		if (!callback) {
 			return;
@@ -47,14 +58,14 @@
 			receiverObjs = [];
 
 		// generate id
-		var md5sum = crypto.createHash('md5');
-		callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
+		callback.id = _getNextID();
+		
 		// verify id isn't existing already
 		var filteredRO = receiverObjs.filter(function(el, idx, array) {
 			return el.id === callback.id;
 		});
 		if (filteredRO.length > 0)
-			throw new Error('cannot register, already got object with same id. try changing your service desc.');
+			throw new Error('Cannot register, already got object with same id.');
 
 		receiverObjs.push(callback);
 		this.objects[callback.api] = receiverObjs;
