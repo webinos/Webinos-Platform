@@ -16,6 +16,9 @@
 *******************************************************************************/
 
 /**
+ * The feature manager creates all local and proxied features and registers them at the RPC registry.
+ * It also keeps reference to all features and make them discoverable on the XMPP overlay network.
+ *
  * Author: Eelco Cramer, TNO
  */
 
