@@ -207,53 +207,9 @@ exports.createWriteStream = function (entry, options, callback) {
   })
 }
 
-// inherits(AsyncWriteRef, util.AsyncOpRef)
-// function AsyncWriteRef() {
-//   AsyncWriteRef.super.call(this)
-// }
-
-// AsyncWriteRef.prototype._abort = AsyncWriteRef.super.prototype.abort
-// AsyncWriteRef.prototype.abort = function () {
-//   if (!this._abort.call(this)) return false
-//   this._emit("abort")
-//   this._emit("writeend")
-//   return true
-// }
-
 exports.write = function (entry, data, options) {
   // Not yet implemented.
 }
-
-// exports.truncate = function (entry, size) {
-//   readFileSystem(entry.filesystem, function (error, fileSystem) {
-//     if (error) {
-//       ref.emit("error", error)
-//       ref.emit("writeend")
-//       return
-//     }
-
-//     // According to the specification, the "writestart" event is to be fired
-//     // synchronously, which is impossible with the current concept of returning
-//     // a reference without any functionality related to the operation. Anyway,
-//     // it may still be useful.
-//     ref.emit("writestart")
-
-//     if (ref.aborted) return;
-//     ref.abortable = false
-
-//     fileSystem.truncate(entry.fullPath, size, function (error) {
-//       if (error) {
-//         ref.emit("error", error)
-//       } else {
-//         ref.emit("write")
-//       }
-//       ref.emit("writeend")
-//     })
-//   })
-
-//   var ref = new AsyncWriteRef()
-//   return ref
-// }
 
 exports.truncate = function (entry, size, callback) {
   readFileSystem(entry.filesystem, function (error, fileSystem) {

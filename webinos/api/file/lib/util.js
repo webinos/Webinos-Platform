@@ -18,8 +18,6 @@
 
 var inherits = require("inherits")
 
-// var EventEmitter = require("events").EventEmitter
-
 exports.CustomError = CustomError
 
 inherits(CustomError, Error)
@@ -52,28 +50,6 @@ exports.async = function (callback) {
     })
   }
 }
-
-// exports.AsyncOpRef = AsyncOpRef
-
-// inherits(AsyncOpRef, EventEmitter)
-// function AsyncOpRef() {
-//   AsyncOpRef.super.call(this)
-// }
-
-// AsyncOpRef.prototype.abortable = true
-// AsyncOpRef.prototype.aborted = false
-// AsyncOpRef.prototype.abort = function () {
-//   if (!this.abortable) return false
-//   this.abortable = false
-//   this.aborted = true
-//   return true
-// }
-
-// AsyncOpRef.prototype._emit = AsyncOpRef.super.prototype.emit
-// AsyncOpRef.prototype.emit = function () {
-//   if (this.aborted) return false
-//   return this._emit.apply(this, arguments)
-// }
 
 // Combines two separate callbacks for success and error into a single
 // Node.js-style callback.
