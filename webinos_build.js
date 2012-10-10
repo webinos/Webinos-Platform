@@ -10,14 +10,14 @@ var nPathV = parseFloat(process.versions.node);
 if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 var fileList =
+    " --js ./webinos/wrt/lib/webinos.util.js" +
     " --js ./webinos/common/rpc/lib/registry.js" +
     " --js ./webinos/common/rpc/lib/rpc.js" +
     " --js ./webinos/common/manager/messaging/lib/messagehandler.js" +
     " --js ./webinos/wrt/lib/webinos.session.js" +
     " --js ./webinos/wrt/lib/webinos.servicedisco.js" +
     " --js ./webinos/wrt/lib/webinos.js" +
-    " --js ./webinos/api/file/lib/webinos.path.js" +
-    " --js ./webinos/common/rpc/lib/webinos.utils.js" +
+    " --js ./webinos/api/file/lib/virtual-path.js" +
     " --js ./webinos/wrt/lib/webinos.file.js" +
     " --js ./webinos/wrt/lib/webinos.tv.js" +
     " --js ./webinos/wrt/lib/webinos.oauth.js" +
@@ -33,7 +33,7 @@ var fileList =
     " --js ./webinos/wrt/lib/webinos.contacts.js" +
     " --js ./webinos/wrt/lib/webinos.discovery.js" +
     " --js ./webinos/wrt/lib/webinos.authentication.js";
-                    
+
 if (typeof cmd === "undefined") {
   help();
 }
@@ -62,9 +62,9 @@ function exec(list) {
          console.log(err);
          process.exit(1);
        }
-       
+
     });
-  } 
+  }
 }
 
 if (typeof prefixPath !== "undefined") {
@@ -80,7 +80,7 @@ if (cmd === "install") {
       fs.mkdirSync(filePath[key]);
     }
   }
-  
+
   child("node-gyp configure", function(err, stdout, stderr) {
     console.log(stderr)
     if (err) {
@@ -89,18 +89,18 @@ if (cmd === "install") {
     else {
       child("node-gyp build", function(err, stdout, stderr) {
         console.log(stderr);
-        if (!err ) { 
-          
+        if (!err ) {
+
           //list.push("cp -r webinos/* " + prefix + "/lib/node_modules/webinos_platform/ ")
           //list.push("cp -r node_modules/*      "+prefix+"/lib/node_modules/");
-                    
+
           list.push("ln -sf "+__dirname+"/webinos_pzh.js "+prefix+"/bin/webinos_pzh")
           list.push("ln -sf "+__dirname+"/webinos_pzp.js "+prefix+"/bin/webinos_pzp")
-          
+
           list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
-  
+
           exec(list);
-        }  
+        }
       });
     }
   });

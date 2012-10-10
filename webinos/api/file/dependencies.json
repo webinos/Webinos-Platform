@@ -1,4 +1,2 @@
-{ "root": {
-    "location": "../../" 
-  }
+{ "root" : { "location" : "../../" }
 }
