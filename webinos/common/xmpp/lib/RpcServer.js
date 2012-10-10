@@ -66,7 +66,7 @@
     			    "payload": {
     			        "jsonrpc": "2.0",
     			        "id": 0,
-    			        "method": event.serviceId + "." + event.method,
+    			        "method": event.serviceId + "." + event.methodName,
     			        "params": event.params
     			    },
     			    "id": 0,

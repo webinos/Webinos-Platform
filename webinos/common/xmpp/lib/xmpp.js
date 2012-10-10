@@ -254,7 +254,7 @@ Connection.prototype.onStanza = function(stanza) {
 	        logger.trace('throwing event to the other side: ' + payload.attrs.id);
 
 	        var event = payload.getText();
-	        this.emit(payload.attrs.id, event);
+	        connection.emit(payload.attrs.id, JSON.parse(event));
 	    }
 	}
 }
@@ -271,7 +271,7 @@ Connection.prototype.eventMessage = function(to, rpc) {
     var methodName = methodCall[1];
     
     var payload = {
-        'event': rpc.params,
+        'params': rpc.params,
         // 'applicationId': applicationId,
         'serviceId': serviceId,
         'methodName': methodName 
