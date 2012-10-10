@@ -14,14 +14,14 @@
 * limitations under the License.
 *
 * Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
-* 
-******************************************************************************/ 	
+*
+******************************************************************************/
 
 if (typeof webinos === "undefined") { webinos = {}; }
 if (!webinos.discovery) { webinos.discovery = {}; }
 
 var localdisc = require('bluetooth');
-	
+
 //Enforce Policy in
 /**
  * Ask policy manager for permission
@@ -29,9 +29,9 @@ var localdisc = require('bluetooth');
 checkPolicyManager = function(module, params, callback)
 {
   console.log("discovery Linux - check Policy");
-  
+
   // TODO CHANGE
-  var webinos = require('webinos')(__dirname);
+  var webinos = require("find-dependencies")(__dirname);
   var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js');
   exec = require('child_process').exec;
   var policyManager = new pmlib.policyManager();
@@ -58,7 +58,7 @@ checkPolicyManager = function(module, params, callback)
     case 2:
     case 3:
     case 4:
-	  /*var child =*/ 
+	  /*var child =*/
       exec("xmessage -buttons allow,deny -print 'Access request to " + resourceInfo.apiFeature + "'",
       function(error, stdout, stderr)
       {
@@ -80,18 +80,18 @@ checkPolicyManager = function(module, params, callback)
     break;
   }
 }
-//end of Policy enforcement	
-	
+//end of Policy enforcement
+
   //Add authenticate function based on policy enforcement
-	
+
   //BTauthenticate = function(params,callback)
   /*BTauthenticate = function(callback)
   {
     checkPolicyManager(localdisc, callback);
   } */
-	
+
 	// end of authentication
-	
+
 /**
  * Find devices that support specific service type
  * @param serviceType Service type.
@@ -102,12 +102,12 @@ BTfindservice = function(serviceType, success){
   var arg = [];
   arg =  ArgumentHandler(serviceType);
   result = n.scan_device(arg);
-  success(result); 
+  success(result);
 };
-  
+
 /**
  * Connect with selected device and obtain folder list from the device
- * @param service The device to connect. 
+ * @param service The device to connect.
  * @param success Success callback.
  */
 BTbindservice = function(service, success){
@@ -123,15 +123,15 @@ BTbindservice = function(service, success){
 };
 
 /**
- * Obtain file list of the selected folder  
+ * Obtain file list of the selected folder
  * @param data Folder
  * @param success Success callback.
  */
 BTlistfile = function(data,success){
   n = new localdisc.bluetooth();
- 
+
   arg = ArgumentHandler(data);
-  //insert "file" 		
+  //insert "file"
   var args = [];
   args[0] = arg[0];
   args[1] = "file";
@@ -141,7 +141,7 @@ BTlistfile = function(data,success){
 };
 
 /**
- * Transfer selected file from connected device   
+ * Transfer selected file from connected device
  * @param data file name
  * @param success Success callback.
  */
@@ -150,17 +150,17 @@ BTtransferfile = function(data,success){
   n = new localdisc.bluetooth();
 
   arg = ArgumentHandler(data);
-  //insert "transfer"	
+  //insert "transfer"
   var args = [];
   args[0] = arg[0];
   args[1] = "transfer";
   args[2] = arg[1];
   args[3] = arg[2];
-		
+
   result = n.file_transfer(args[0], args[1], args[2], args[3]);
   success(result);
 };
-  
+
 function ArgumentHandler(data)
 {
   var args = [];
@@ -192,8 +192,8 @@ function ArgumentHandler(data)
     return arg;
   }
 }
-  
+
 exports.BTfindservice = BTfindservice;
 exports.BTbindservice = BTbindservice;
 exports.BTlistfile = BTlistfile;
-exports.BTtransferfile = BTtransferfile;  
+exports.BTtransferfile = BTtransferfile;

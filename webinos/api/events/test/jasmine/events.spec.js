@@ -1,7 +1,7 @@
 describe('api.applauncher', function() {
 
-	var webinos = require('webinos')(__dirname);
-	
+	var webinos = require("find-dependencies")(__dirname);
+
 	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
 	var service = webinos.global.require(webinos.global.api.events.location).Service;
 	var events = new service(RPCHandler);
@@ -21,33 +21,33 @@ describe('api.applauncher', function() {
 			}
 		});
 	});
-	
+
 	it('Events API has funtion createWebinosEvent', function() {
 		expect(events.createWebinosEvent).toBeFunction();
 	});
-	
+
 	it('Events API has funtion addWebinosEventListener', function() {
 		expect(events.addWebinosEventListener).toBeFunction();
 	});
-	
+
 	it('Events API has funtion removeWebinosEventListener', function() {
 		expect(events.removeWebinosEventListener).toBeFunction();
 	});
-	
+
 	it('Events API has funtion dispatchWebinosEvent', function() {
 		expect(events.WebinosEvent.dispatchWebinosEvent).toBeFunction();
 	});
-	
+
 	it('Events API equals http://webinos.org/api/events', function() {
 		expect(events.api).toEqual('http://webinos.org/api/events');
 	});
-	
+
 	it('Events API displayName is string', function() {
 		expect(events.displayName).toBeString();
 	});
-	
+
 	it('Events API description is string', function() {
 		expect(events.description).toBeString();
 	});
-	
+
 });

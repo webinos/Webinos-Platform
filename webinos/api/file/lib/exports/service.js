@@ -28,7 +28,7 @@ var api = require("../api.js")
 var inherits = require("inherits")
 var util = require("../util.js")
 
-var webinos = require("webinos")(__dirname)
+var webinos = require("find-dependencies")(__dirname)
 var rpcModule =
   webinos.global.require(webinos.global.rpc.location, "lib/rpc.js")
 

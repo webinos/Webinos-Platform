@@ -18,7 +18,7 @@
   , "url" : "http://github.com/webinos/Webinos-Platform.git"
   }
 , "dependencies" :
-  { "webinos" : ">=0.7.0"
+  { "find-dependencies" : ">=0.0.1"
   , "inherits" : ">=1.0.0"
   , "mkdirp" : ">=0.3.3"
   }

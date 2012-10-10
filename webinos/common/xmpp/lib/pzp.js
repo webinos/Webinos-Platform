@@ -19,7 +19,7 @@
 
 /**
  * Main script for the XMPP PZP.
- * Authors: Eelco Cramer 
+ * Authors: Eelco Cramer
  */
 
 (function() {
@@ -34,7 +34,7 @@
     var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
     var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-    var webinos       = require("webinos")(__dirname);
+    var webinos       = require("find-dependencies")(__dirname);
     var rpc           = webinos.global.require(webinos.global.rpc.location);
     var registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry");
 
@@ -62,7 +62,7 @@
     		} else {
     			logger.error("*** " + argv[3] + " is not a valid full jid\r\n");
     		}
-		
+
     		bosh = argv[5];
     	}
     }

@@ -25,7 +25,7 @@ var https     = require("https");
 var tls       = require("tls");
 var crypto    = require("crypto");
 
-var webinos = require("webinos")(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var farm    = require('./pzh_farm');
 
@@ -46,7 +46,7 @@ PzhConnecting.prototype.connectOtherPZH = function(to, callback) {
   } else {
     serverName = to;
   }
-  
+
   self.log.info("connecting other pzh "+to);
 
   session.configuration.fetchKey(self.parent.config.own.key_id, function(key_id) {
@@ -181,7 +181,7 @@ PzhConnecting.prototype.sendCertificate = function(to, callback) {
   options.path   = "/main.html?cmd=transferCert";
   options.method = "POST";
   options.headers = { 'Content-Length': JSON.stringify(payload).length  };
-  
+
   var req = https.request(options, function(res) {
     res.on('data', function(data) {
       var parse = JSON.parse(data);
