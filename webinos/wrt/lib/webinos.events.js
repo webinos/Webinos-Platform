@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 AndrÃ© Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 
@@ -23,7 +23,7 @@
 	var registeredDispatchListeners = {};
 	
 	var eventService = null;
-	
+
 	/**
 	 * Webinos Event service constructor (client side).
 	 * @constructor
@@ -35,14 +35,14 @@
 		eventService = this;
 		this.idCount = 0;
 		//this.myAppID = "TestApp" + webinos.messageHandler.getOwnId();
-		
+
 		//TODO, this is the actuall messaging/session app id but should be replaced with the Apps unique ID (config.xml)
 		this.myAppID = webinos.messageHandler.getOwnId();
 		console.log("MyAppID: " + this.myAppID);
 	};
-	
+
 	EventsModule.prototype = new WebinosService;
-	
+
 	/**
 	 * To bind the service.
 	 * @param bindCB BindCallback object.
@@ -53,8 +53,8 @@
 			bindCB.onBind(this);
 		};
 		
-	}
-	
+	};
+
 	/**
 	 * Creates a webinos Event.
 	 * @param type Event type identifier.
@@ -75,22 +75,13 @@
 		anEvent.timeStamp = new Date().getTime();
 		anEvent.expiryTimeStamp = expiryTimeStamp;
 		anEvent.addressingSensitive = addressingSensitive;
-		
-		
-		return anEvent;
-		/*
-		var rpc = webinos.rpcHandler.createRPC(this, "createWebinosEvent",  arguments);
-		webinos.rpcHandler.executeRPC(rpc,
-				function (params){
-					successCB(params);
-				},
-				function (error){}
-		);*/	
-		
+
+
+		//  raises(WebinosEventException);
 		//	returns WebinosEvent
-        //  raises(WebinosEventException);
-	}
-    
+		return anEvent;
+	};
+
 	/**
 	 * Registers an event listener.
 	 * @param listener The event listener.
@@ -99,62 +90,52 @@
 	 * @param destination Specific event recipient (whether primary or not) or null for any destination (undefined is considered as null).
 	 * @returns Listener identifier.
 	 */
-	EventsModule.prototype.addWebinosEventListener = function(listener, type, source, destination){
-		
-		
-		if (this.idCount == Number.MAX_VALUE) this.idCount = 0;
+	EventsModule.prototype.addWebinosEventListener = function(listener, type, source, destination) {
+
+		if (this.idCount === Number.MAX_VALUE) this.idCount = 0;
 		this.idCount++;
-				
-		var listenerID = this.myAppID + ":" + this.idCount;
-		
-		
-		var req = {};
-		req.type = type;
-		req.source = source;
-		
-		if (typeof req.source === 'undefined' || req.source == null) req.source = this.myAppID;
-		
-		
-		req.destination = destination;
-		
-		
-		
-		var rpc = webinos.rpcHandler.createRPC(this, "addWebinosEventListener",  req);
-		
-		rpc.handleEvent = function (params,scb,ecb) {
+
+		var listenerId = this.myAppID + ":" + this.idCount;
+
+		var reqParams = {
+			type: type,
+			source: source,
+			destination: destination
+		};
+		if (!source) reqParams.source = this.myAppID;
+
+		var rpc = webinos.rpcHandler.createRPC(this, "addWebinosEventListener",  reqParams);
+
+		rpc.handleEvent = function(params, scb, ecb) {
 			console.log("Received a new WebinosEvent");
 			listener(params.webinosevent);
 			scb();
 		};
-		
+
 		webinos.rpcHandler.registerCallbackObject(rpc);
 		
 		
 		
 		webinos.rpcHandler.executeRPC(rpc,
-				function (params){
-					console.log("New WebinosEvent listener registered. Mapping remote ID", params, " localID ", listenerID);
-					
-					registeredListeners[listenerID] = params;
-					
-				},
-				function (error){
-					console.log("Error while registering new WebinosEvent listener");
-				}
+			function(remoteId) {
+				console.log("New WebinosEvent listener registered. Mapping remote ID", remoteId, " localID ", listenerId);
+
+				registeredListeners[listenerId] = remoteId;
+			},
+			function(error) {
+				console.log("Error while registering new WebinosEvent listener");
+			}
 		);
-		
-		// returns DOMString id
+
 		// raises(WebinosEventException);
-		
-		return listenerID;
-	}
-                         
-    /**
+		return listenerId;
+	};
+
+	/**
      * Unregisters an event listener.
      * @param listenerId Listener identifier as returned by addWebinosEventListener().
      */
-	EventsModule.prototype.removeWebinosEventListener = function(listenerId){
-	 
+	EventsModule.prototype.removeWebinosEventListener = function(listenerId) {
 		var rpc = webinos.rpcHandler.createRPC(this, "removeWebinosEventListener",  registeredListeners[listenerId]);
 		webinos.rpcHandler.executeRPC(rpc,
 				function (params){
@@ -165,11 +146,7 @@
 	 
 		// raises(WebinosEventException);
 		// returns void
-	}
-	
-	
-	// WebinosEvent functionalities
-	
+	};
 	/**
 	 * Webinos Event constructor.
 	 * @constructor
@@ -250,31 +227,24 @@
 			//params.event, params.recipient, params.error
 				if (typeof callbacks.onError !== "undefined") {callbacks.onError(params.event, params.recipient, params.error);}
 			};
-	
-		
+
 			webinos.rpcHandler.registerCallbackObject(rpc);
 		}
-		
+
 		webinos.rpcHandler.executeRPC(rpc);
-		
-		
-		//rpc.serviceAddress = webinos.session.getPZHId();
-		//webinos.rpcHandler.executeRPC(rpc);
-    	
-		
+
+		//raises(WebinosEventException);
 		//returns void
-    	//raises(WebinosEventException);
-         
-    }
-    
+    };
+
 	/**
 	 * Forwards an event.
 	 * [not yet implemented]
 	 */
 	WebinosEvent.prototype.forwardWebinosEvent = function(forwarding, withTimeStamp, callbacks, referenceTimeout, sync){
-    	
+
     	//returns void
     	//raises(WebinosEventException);
     };
-	
+
 }());

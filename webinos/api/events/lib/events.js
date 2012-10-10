@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 AndrÃ© Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 
@@ -41,7 +41,7 @@
 		 * @param errorCB Error callback.
 		 * @param objectRef RPC object reference.
 		 */
-		this.WebinosEvent.dispatchWebinosEvent = function (params, successCB, errorCB, objectRef){
+		this.WebinosEvent.dispatchWebinosEvent = function(params, successCB, errorCB, objectRef) {
 			//callbacks, referenceTimeout, sync
 			console.log("dispatchWebinosEvent was invoked: Payload: " + params.webinosevent.payload + " Type: " + params.webinosevent.type + " from: " + params.webinosevent.addressing.source.id);
 
@@ -82,24 +82,20 @@
 					}
 				}
 				
-				console.log("1");
 				//checking for recipient
 				if (typeof params.webinosevent.addressing.to !== 'undefined' && params.webinosevent.addressing.to.length > 0){
-					console.log("2");
 					for (j = 0; j < params.webinosevent.addressing.to.length; j++){
 						console.log("Listener Source: " + registeredListener[i].source + " addressing id: " + params.webinosevent.addressing.to[j].id);
 						
 						
 						if (registeredListener[i].source === params.webinosevent.addressing.to[j].id){
 							//	forward event
-								console.log("4");
 								foundDestination = true;
 								forwardEventMessage(registeredListener[i],params.webinosevent, params, useCB, rpcHandler, objectRef);
 						}
 						
 						if (!foundDestination && j != params.webinosevent.addressing.to.length-1){
 							foundDestination = true;
-							console.log("5");
 							var outCBParams = {};
 							outCBParams.event = params.webinosevent;
 							outCBParams.recipient = params.webinosevent.addressing.to[j].id
@@ -211,7 +207,7 @@
 	 * 
 	 * [not yet implemented]
 	 */
-	WebinosEventsModule.prototype.createWebinosEvent = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.createWebinosEvent = function(params, successCB, errorCB, objectRef) {
 		console.log("createWebinosEvent was invoked");
 	};
 
@@ -220,7 +216,7 @@
 	 * @param params Object expecting type field.
 	 * @param ref Object expecting destination field.
 	 */
-	WebinosEventsModule.prototype.addWebinosEventListener = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.addWebinosEventListener = function(params, successCB, errorCB, objectRef) {
 		
 		
 		console.log("addWebinosEventListener was invoked with params type: " + params.type + " source: " + params.source + " dest: " + params.destination);
@@ -248,7 +244,7 @@
 	 * 
 	 * [not yet implemented]
 	 */
-	WebinosEventsModule.prototype.removeWebinosEventListener = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.removeWebinosEventListener = function(params, successCB, errorCB, objectRef) {
 		console.log("removeWebinosEventListener was invoked: " + params);
 		var idx = -1;
 		for (i = 0; i < registeredListener.length; i++){
