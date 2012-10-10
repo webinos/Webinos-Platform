@@ -229,6 +229,7 @@
 					throw new WebinosEventException(WebinosEventException.INVALID_ARGUMENT_ERROR, "cb is not a function");
 				}
 			}
+			params.withCallbacks = true;
 		}
 
 		var rpc = webinos.rpcHandler.createRPC(eventService, "WebinosEvent.dispatchWebinosEvent", params);

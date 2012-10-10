@@ -45,14 +45,8 @@
 			//callbacks, referenceTimeout, sync
 			console.log("dispatchWebinosEvent was invoked: Payload: " + params.webinosevent.payload + " Type: " + params.webinosevent.type + " from: " + params.webinosevent.addressing.source.id);
 
-			var useCB = false;
-			if (typeof objectRef !== "undefined"){ // TODO objectRef will always be there...
-				useCB = true;
-				console.log("Delivery callback was defined.");
-			}
-			else{
-				console.log("No delivery callback defined");
-			}
+			var useEventCallbacks = params.withCallbacks ? true : false;
+			console.log("WebinosEventCallbacks was defined: " + useEventCallbacks);
 
 			var i,j;
 			var foundDestination = false;
@@ -91,7 +85,7 @@
 						if (registeredListener[i].source === params.webinosevent.addressing.to[j].id){
 							//	forward event
 								foundDestination = true;
-								forwardEventMessage(registeredListener[i],params.webinosevent, params, useCB, rpcHandler, objectRef);
+								forwardEventMessage(registeredListener[i],params.webinosevent, params, useEventCallbacks, rpcHandler, objectRef);
 						}
 						
 						if (!foundDestination && j != params.webinosevent.addressing.to.length-1){
@@ -108,13 +102,13 @@
 				}
 				else{
 					foundDestination = true;
-					forwardEventMessage(registeredListener[i],params.webinosevent, params, useCB, rpcHandler, objectRef);
+					forwardEventMessage(registeredListener[i],params.webinosevent, params, useEventCallbacks, rpcHandler, objectRef);
 				}
 			}
 
 
 			//if delivery notification is requested (callback is defined) and no recipient could be identified then send onError notification
-			if (!foundDestination && useCB){
+			if (!foundDestination && useEventCallbacks){
 				var outCBParams = {};
 				outCBParams.event = params.webinosevent;
 				outCBParams.error = "An ERROR occured: No listeners at all";
@@ -124,12 +118,12 @@
 		};
 	};
 	
-	function forwardEventMessage(listenerToInvoke, webinosevent, params, useCB, rpcHandler, objectRef){
+	function forwardEventMessage(listenerToInvoke, webinosevent, params, useEventCallbacks, rpcHandler, objectRef) {
 		console.log("Sending to LISTENER: " + listenerToInvoke.source);
 
 
 		//if delivery notification is requested (callback is defined) then send onSending notification
-		if (useCB){
+		if (useEventCallbacks){
 			var outCBParams = {};
 			outCBParams.event = webinosevent;
 			outCBParams.recipient = listenerToInvoke.source;
@@ -146,8 +140,8 @@
 		outParams.event = webinosevent;
 		outParams.recipient = listenerToInvoke.source;
 		rpcHandler.executeRPC(json, 
-				getSuccessCB(rpcHandler,objectRef, outParams, useCB),
-				getErrorCB(rpcHandler,objectRef, outParams, useCB)
+				getSuccessCB(rpcHandler,objectRef, outParams, useEventCallbacks),
+				getErrorCB(rpcHandler,objectRef, outParams, useEventCallbacks)
 		);
 	}
 	
@@ -156,15 +150,15 @@
 	 * @param rpcHandler The RPC handler.
 	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
-	 * @param useCB Boolean indicating whether this callback shall be used.
+	 * @param useEventCallbacks Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getSuccessCB(rpcHandler, objectRef, params, useCB) {
+	function getSuccessCB(rpcHandler, objectRef, params, useEventCallbacks) {
 		var cbParams = params;
 		function successCB() {  
 			//	event was successfully delivered, so send delivery notification if requested
 			console.log("Delivered Event successfully");
-			if (useCB){
+			if (useEventCallbacks){
 				console.log("Sending onDelivery to " + objectRef.rpcId);
 				var cbjson = rpcHandler.createRPC(objectRef, "onDelivery", cbParams);
 				rpcHandler.executeRPC(cbjson);
@@ -179,15 +173,15 @@
 	 * @param rpcHandler The RPC handler.
 	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
-	 * @param useCB Boolean indicating whether this callback shall be used.
+	 * @param useEventCallbacks Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getErrorCB(rpcHandler, objectRef, params, useCB) {
+	function getErrorCB(rpcHandler, objectRef, params, useEventCallbacks) {
 		var cbParams = params;
 		function errorCB() {  
 			//event was not successfully delivered, so send error notification if requested
 			console.log("Delivering Event not successful");
-			if (useCB){
+			if (useEventCallbacks){
 				outCBParams.error = "Some ERROR";
 				var cbjson = rpcHandler.createRPC(objectRef, "onError", outCBParams);
 				rpcHandler.executeRPC(cbjson);
