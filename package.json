@@ -23,16 +23,15 @@
   , "websocket" : "1.0.2"
   , "vows" : "0.x.x"
   , "ansi" : "0.0.x"
-  , "connect" : "2.x.x"
   , "mdns" : "0.x.x"
   , "jsormdb" : "0.1.x"
   , "now" : "0.8.1"
-  , "find-dependencies" : ">=0.0.1"
-  , "inherits" : ">=1.0.0"
-  , "mkdirp" : ">=0.3.3"
+  , "find-dependencies" : "0.0.x"
+  , "inherits" : "1.0.0"
+  , "mkdirp" : "0.3.x"
   }
 , "engines" :
-  { "node" : ">= 0.6.18"
+  { "node" : ">= 0.8.0"
   , "npm" : ">= 1.1.17"
   }
 , "preferGlobal": true
