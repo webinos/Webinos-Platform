@@ -26,7 +26,7 @@ var http = require("http"),
   fs = require("fs"),
   WebSocketServer = require("websocket").server;
 
-var webinos        = require("webinos")(__dirname);
+var webinos        = require("find-dependencies")(__dirname);
 var session        = require("./session");
 var log            = new session.common.debug("pzp_websocket");
 var rpc            = webinos.global.require(webinos.global.rpc.location, "lib/rpc");
@@ -156,7 +156,7 @@ exports.startPzpWebSocketServer = function(pzp, config, callback) {
     log.info("listening on port "+session.configuration.port.pzp_webSocket + " and hostname "+pzp.address);
     callback("startedWebSocketServer");
   });
-  
+
   httpserver.listen(session.configuration.port.pzp_webSocket, pzp.address);
 
   function wsMessage(connection, utf8Data) {

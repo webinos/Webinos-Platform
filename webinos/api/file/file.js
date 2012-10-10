@@ -20,7 +20,7 @@ var pathModule = require("path")
 
 var LocalFileSystem = require("./lib/engine/local-file-system.js")
 
-var webinos = require("webinos")(__dirname)
+var webinos = require("find-dependencies")(__dirname)
 var common = webinos.global.require(webinos.global.pzp.location,
     "lib/session_common.js")
 

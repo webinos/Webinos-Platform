@@ -27,7 +27,7 @@
   , "mdns" : "0.x.x"
   , "jsormdb" : "0.1.x"
   , "now" : "0.8.1"
-  , "webinos" : ">=0.7.0"
+  , "find-dependencies" : ">=0.0.1"
   , "inherits" : ">=1.0.0"
   , "mkdirp" : ">=0.3.3"
   }
