@@ -42,11 +42,24 @@
 		<!-- Events -->
 		<file name="api/events/lib/events.js"/>
 		<!-- File -->
-		<file name="api/file/lib/webinos.dom.js"/>
-		<file name="api/file/lib/webinos.dom.rpc.js"/>
-		<file name="api/file/lib/webinos.file.js"/>
-		<file name="api/file/lib/webinos.file.rpc.js"/>
-		<file name="api/file/lib/webinos.path.js"/>
+		<file name="api/file/file.js"/>
+		<file name="api/file/lib/api.js"/>
+		<file name="api/file/lib/util.js"/>
+		<file name="api/file/lib/virtual-path.js"/>
+		<file name="api/file/lib/common/blob.js"/>
+		<file name="api/file/lib/common/directory-entry.js"/>
+		<file name="api/file/lib/common/directory-reader.js"/>
+		<file name="api/file/lib/common/entry.js"/>
+		<file name="api/file/lib/common/file-entry.js"/>
+		<file name="api/file/lib/common/file-reader.js"/>
+		<file name="api/file/lib/common/file-saver.js"/>
+		<file name="api/file/lib/common/file-system.js"/>
+		<file name="api/file/lib/common/file-writer.js"/>
+		<file name="api/file/lib/common/file.js"/>
+		<file name="api/file/lib/common/metadata.js"/>
+		<file name="api/file/lib/common/progress-event.js"/>
+		<file name="api/file/lib/engine/local-file-system.js"/>
+		<file name="api/file/lib/exports/service.js"/>
 		<!-- GeoLocation -->
 		<file name="api/geolocation/lib/webinos.geolocation.geoip.js"/>
 		<file name="api/geolocation/lib/webinos.geolocation.rpc.js"/>
@@ -75,7 +88,7 @@
 		<file name="api/vehicle/lib/webinos.vehicle.fake.js"/>
 		<file name="api/vehicle/lib/webinos.vehicle.rpc.js"/>
 		<file name="api/vehicle/lib/webinos.vehicle.sim.js"/>
-		
+
 		<!-- Manager -->
 
 		<!-- PZH -->
@@ -87,7 +100,7 @@
 		<file name="pzh/lib/pzh_revoke.js"/>
 		<file name="pzh/lib/pzh_sessionHandling.js"/>
 		<file name="pzh/web/pzh_webserver.js"/>
-		
+
 		<!-- PZP -->
 		<file name="pzp/lib/pzp_server.js"/>
 		<file name="pzp/lib/pzp_sessionHandling.js"/>
@@ -107,10 +120,10 @@
 		<file name="common/manager/context_manager/lib/contextInterception.js" />
 		<file name="common/manager/context_manager/lib/contextQueryDB.js" />
 		<file name="common/manager/context_manager/lib/storageCheck.js" />
-	
+
 		<!-- Messaging manager -->
 		<file name="common/manager/messaging/lib/messagehandler.js" />
-		
+
 		<!-- Policy manager -->
 		<file name="common/manager/policy_manager/lib/policymanager.js" />
 
@@ -158,9 +171,8 @@
 		<file name="common/manager/widget_manager/lib/widgetmanager/widgetstorage.js"/>
 
 		<file name="common/rpc/lib/rpc.js"/>
-		<file name="common/rpc/lib/webinos.utils.js"/>
 
-            </sources>	    
+            </sources>
         </jscompiler>
     </target>
 </project>
