@@ -27,33 +27,39 @@
 	var bridge = null;
 	var promptMan = null;
 	var common = require("../../../../pzp/lib/session_common");
+	var promptLib = require("../src/promptMan/promptMan.js");
 
 	policyManager = function() {
 		// Load the native module
+		try {
+			this.pmNativeLib = require('pm');
+		} catch (err) {
+			console.log("Warning! Policy manager could not be loaded");
+		}
+		// Load the prompt manager
 		if (os.platform()==='android') {
-			this.pmNativeLib = require('pm'); 
 			this.bridge = require('bridge');
 			this.promptMan = this.bridge.load('org.webinos.impl.PromptImpl', this);
 		}
+		else if (os.platform()==='win32') {
+			this.promptMan = require('promptMan');
+		}
 		else {
-			//this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
-			try {
-				this.pmNativeLib = require('pm');
-			} catch (err) {
-				console.log("policy manager could not be loaded");
-			}
-			if (os.platform()==='win32'){
-				this.promptMan = require('promptMan');
-			}
+			//this.promptMan = new promptLib.promptMan();
 		}
 		//Policy file location
 		var policyFile = common.webinosConfigPath()+"/policy.xml"; 
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
-		//this.pmCore = new this.pmNativeLib.PolicyManagerInt();
 	};
 
-	policyManager.prototype.enforceRequest = function(request, errorCallback, successCallback /*, successCallbackParams*/ ) {
+	policyManager.prototype.enforceRequest = function(request, noprompt) {
 		var res = this.pmCore.enforceRequest(request);
+		var promptcheck = true;
+		if (arguments.length == 2) {
+			if (noprompt == true)
+				promptcheck = false;
+		}
+/*
 		if (arguments.length > 1) {
 
 			var successCallbackParams = Array.prototype.slice.call(arguments).splice(3);
@@ -82,8 +88,9 @@
 			}
 		}
 		else {
+*/
 			if(res>1 && res<5) {
-				if (this.promptMan) { // if there is a promptMan then show a message
+				if (this.promptMan && promptcheck) { // if there is a promptMan then show a message
 					var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
 					var choices = new Array();
 					choices[0] = "Allow";
@@ -91,7 +98,7 @@
 					res = this.promptMan.display(message, choices);
 				}
 			}
-		}
+//		}
 		return (res);
 	};
 
@@ -103,3 +110,4 @@
 	exports.policyManager = policyManager;
 
 }());
+
