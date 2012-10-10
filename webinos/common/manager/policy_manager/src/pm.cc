@@ -98,6 +98,8 @@ public:
 		(*subject_attrs)["user-key-root-cn"] = new vector<string>();
 		(*subject_attrs)["user-key-root-fingerprint"] = new vector<string>();
 		
+		(*subject_attrs)["id"] = new vector<string>();
+		
 		(*subject_attrs)["distributor-key-cn"] = new vector<string>();
 		(*subject_attrs)["distributor-key-fingerprint"] = new vector<string>();
 		(*subject_attrs)["distributor-key-root-cn"] = new vector<string>();
@@ -163,6 +165,11 @@ public:
 
 		if (args[0]->ToObject()->Has(String::New("widgetInfo"))) {
 			v8::Local<Value> wiTmp = args[0]->ToObject()->Get(String::New("widgetInfo"));
+			if (wiTmp->ToObject()->Has(String::New("id"))) {
+				v8::String::AsciiValue id(wiTmp->ToObject()->Get(String::New("id")));
+				(*subject_attrs)["id"]->push_back(*id);
+				LOGD("Parameter id : %s", *id);
+			}
 			if (wiTmp->ToObject()->Has(String::New("distributorKeyCn"))) {
 				v8::String::AsciiValue distributorKeyCn(wiTmp->ToObject()->Get(String::New("distributorKeyCn")));
 				(*subject_attrs)["distributor-key-cn"]->push_back(*distributorKeyCn);
