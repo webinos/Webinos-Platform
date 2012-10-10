@@ -54,59 +54,52 @@ http.createServer(function(request, response){
 	if (path=="/writePolicy") {
 		// Writes the current policy to policy file and saves settings (in json files)
 		writePolicyFile();
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end("");
+		sendResponse(response, "");
 	}
 	else if (path=="/getPolicyTable") {
 		readFeaturesArray();
 		readSubjectArray();
 		writePolicyFile();
 		// Builds the policy table and returns it as a json object
-		var string = getPolicyTable();
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end(string);
+		sendResponse(response, getPolicyTable());
 	}
 	else if (path=="/getSubjectData") {
-		var string = JSON.stringify(subjectListTmp);
-		//console.log(string);
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end(string);
+		sendResponse(response, JSON.stringify(subjectListTmp));
 	}
 	else if (path=="/postSubjectData") {
 		console.log(subjectData);
 		fs.writeFileSync(subjectsFile, subjectData);
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end("");
+		sendResponse(response, "");
 	}
 	else if (path=="/getFeatureData") {
-		var string = JSON.stringify(featureListTmp);
-		//console.log(string);
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end(string);
+		sendResponse(response, JSON.stringify(featureListTmp));
 	}
 	else if (path=="/postFeatureData") {
 		console.log(subjectData);
 		fs.writeFileSync(featuresFile, featureData);
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end("");
+		sendResponse(response, "");
 	}
 	else {
-		var filename = "."+path;
+		var filename = "../../../../test/client/policy"+path;
 		fs.readFile(filename, function(err, file) {
 			if(err) {
 				console.log("Error: file "+filename+" not found");
-				response.writeHead(200, { 'Content-Type': 'text/html' });
-				response.end("Not found error", "utf-8");
+				sendResponse(response, "Not found error");
 				return;
 			}
-			response.writeHead(200, { 'Content-Type': 'text/html' });
-			response.end(file, "utf-8");
+			sendResponse(response, file);
 		});
 	};
 	
 }).listen(7777);
 
 console.log("server initialized"); 
+
+
+function sendResponse(response, data) {
+	response.writeHead(200, { 'Content-Type': 'text/html' });
+	response.end(data, "utf-8");
+}
 
 
 function getPolicyTable() {
