@@ -21,19 +21,17 @@
   , "openid" : "0.x.x"
   , "qrcode" : "0.x.x"
   , "websocket" : "1.0.2"
-  , "vows" : "0.x.x"
   , "ansi" : "0.0.x"
   , "mdns" : "0.x.x"
-  , "jsormdb" : "0.1.x"
   , "now" : "0.8.1"
-  , "node-uuid" : "0.3.x"
+  , "node-uuid" : "x.x.x"
   , "find-dependencies" : "0.0.x"
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
   }
 , "engines" :
-  { "node" : ">= 0.8.0"
+  { "node" : ">= 0.6.0"
   , "npm" : ">= 1.1.17"
   }
 , "preferGlobal": true
