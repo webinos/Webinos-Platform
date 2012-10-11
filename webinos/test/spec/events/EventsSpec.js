@@ -27,17 +27,23 @@ describe("Events API", function() {
 		});
 
 		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/events"), {
-			onFound: function (service) {
-				eventsService = service;
+			onFound: function (unboundService) {
+				unboundService.bindService({onBind: function(service) {
+					eventsService = service;
+				}});
 			}
 		});
 
 		waitsFor(function() {
 			return !!eventsService;
-		}, "The discovery didn't find an Events service", 5000);
+		}, "Could not find or bind Events service", 5000);
 	});
 
-	it("should be available from the discovery", function() {
+	afterEach(function() {
+		eventsService = undefined;
+	});
+
+	it("could be found and be bound", function() {
 		expect(eventsService).toBeDefined();
 	});
 
@@ -49,23 +55,6 @@ describe("Events API", function() {
 		expect(eventsService.description).toEqual(jasmine.any(String));
 		expect(eventsService.icon).toEqual(jasmine.any(String));
 		expect(eventsService.bindService).toEqual(jasmine.any(Function));
-	});
-
-	it("can be bound", function() {
-		var bound = false;
-
-		eventsService.bindService({onBind: function(service) {
-			eventsService = service;
-			bound = true;
-		}});
-
-		waitsFor(function() {
-			return bound;
-		}, "The service couldn't be bound", 500);
-
-		runs(function() {
-			expect(bound).toEqual(true);
-		});
 	});
 
 	it("has the necessary properties and functions as Events API service", function() {
@@ -131,11 +120,12 @@ describe("Events API", function() {
 		}, "onDelivery callback to be called.", 3000);
 
 		runs(function() {
+			eventsService.removeWebinosEventListener(listenerId);
+
 			expect(sent).toEqual(true);
 			expect(delivered).toEqual(true);
 		});
 
-		eventsService.removeWebinosEventListener(listenerId);
 	});
 
 	it("can receive an event", function() {
@@ -156,10 +146,10 @@ describe("Events API", function() {
 		}, "event listener to be called.", 3000);
 
 		runs(function() {
+			eventsService.removeWebinosEventListener(listenerId);
+
 			expect(received).toEqual(true);
 		});
-
-		eventsService.removeWebinosEventListener(listenerId);
 	});
 
 });
