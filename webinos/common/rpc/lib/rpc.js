@@ -21,12 +21,15 @@
 (function () {
 	if (typeof webinos === 'undefined')
 		webinos = {};
+		var logger = console;
 
 	if (typeof module === 'undefined') {
 		var exports = {};
 	} else {
 		var exports = module.exports = {};
-	}
+		var webinos_= require("find-dependencies")(__dirname);
+		logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+	}	
 
 	var idCount = 0;
 	//Code to enable Context from settings file
@@ -69,7 +72,7 @@
 
 		this.messageHandler = {
 				write: function() {
-					console.log('INFO: [RPC] could not execute RPC, messageHandler was not set.');
+					logger.log("could not execute RPC, messageHandler was not set.");
 				}
 		};
 	}
@@ -188,16 +191,16 @@
 		//TODO send back error if service and method is not webinos style
 
 		if (service.length === 0) {
-			console.log('ERROR: [RPC] Cannot handle request because of missing service in request');
+			logger.log("Cannot handle request because of missing service in request");
 			return;
 		}
 
-		console.log('INFO: [RPC] '+"Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
+		logger.log("Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
 
 		var includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
 
 		if (typeof includingObject === 'undefined'){
-			console.log('INFO: [RPC] '+"No service found with id/type " + service);
+			logger.log("No service found with id/type " + service);
 			return;
 		}
 
@@ -255,7 +258,7 @@
 		//if no id is provided we cannot invoke a callback
 		if (typeof response.id === 'undefined' || response.id == null) return;
 
-		console.log('INFO: [RPC] '+"Received a response that is registered for " + response.id);
+		logger.log("Received a response that is registered for " + response.id);
 
 		//invoking linked error / success callback
 		if (typeof this.awaitingResponse[response.id] !== 'undefined'){
@@ -264,12 +267,12 @@
 				if (typeof this.awaitingResponse[response.id].onResult === 'function' && typeof response.result !== 'undefined'){
 
 					this.awaitingResponse[response.id].onResult(response.result);
-					console.log('INFO: [RPC] '+"called SCB");
+					logger.log("called SCB");
 				}
 
 				if (typeof this.awaitingResponse[response.id].onError === 'function' && typeof response.error !== 'undefined'){
 					if (typeof response.error.data !== 'undefined'){
-						console.log('INFO: [RPC] '+"Propagating error to application");
+						logger.log("Propagating error to application");
 						this.awaitingResponse[response.id].onError(response.error.data);
 					}
 					else this.awaitingResponse[response.id].onError();
@@ -287,8 +290,8 @@
 	 * @param msgid An id.
 	 */
 	_RPCHandler.prototype.handleMessage = function (jsonRPC, from, msgid){
-		console.log('INFO: [RPC] '+"New packet from messaging");
-		console.log('INFO: [RPC] '+"Response to " + from);
+		logger.log("New packet from messaging");
+		logger.log("Response to " + from);
 
 		if (typeof jsonRPC.method !== 'undefined' && jsonRPC.method != null) {
 			// received message is RPC request
@@ -329,6 +332,7 @@
 			webinos.session.message_send(rpc, from);// TODO move the whole mmessage_send function here?
 		}
 	};
+
 
 	/**
 	 * Creates a JSON RPC 2.0 compliant object.
