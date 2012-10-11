@@ -40,9 +40,9 @@ Service.prototype.getAddress = function (params, successCallback,
   successCallback(this.params.pzpHost + ":" + port)
 }
 
-var common = dependencies.global.require(dependencies.global.pzp.location,
-    "lib/session_common.js")
-var basePath = pathModule.join(common.webinosConfigPath(), "file", "default")
+var pzp = dependencies.global.require(dependencies.global.pzp.location,
+    "lib/pzp.js")
+var basePath = pathModule.join(pzp.session.getWebinosPath(), "file", "default")
 
 var port = 6789
 var server = http.createServer(connect().use(connect.static(basePath)))

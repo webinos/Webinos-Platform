@@ -26,7 +26,8 @@
 	var os = require('os');
 	var bridge = null;
 	var promptMan = null;
-	var common = require("../../../../pzp/lib/session_common");
+	var path = require("path");
+	var pzp = require("../../../../pzp/lib/pzp.js");
 	var promptLib = require("../src/promptMan/promptMan.js");
 
 	policyManager = function() {
@@ -45,10 +46,10 @@
 			this.promptMan = require('promptMan');
 		}
 		else {
-			//this.promptMan = new promptLib.promptMan();
+			this.promptMan = new promptLib.promptMan();
 		}
 		//Policy file location
-		var policyFile = common.webinosConfigPath()+"/policy.xml"; 
+		var policyFile = path.join(pzp.session.getWebinosPath(), policy, policy.xml);
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 	};
 
