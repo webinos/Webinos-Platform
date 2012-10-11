@@ -249,7 +249,9 @@ if (typeof webinos.file === "undefined") webinos.file = {}
 
       var remote
       var port = self.rpc.createRPC(self.service, "read",
-         { entry : self, options : { bufferSize : 1024, autopause : true } })
+         { entry : self
+         , options : { bufferSize : 16 * 1024, autopause : true }
+         })
       port.ref = function (params, successCallback, errorCallback, ref) {
         remote = ref
       }
@@ -334,7 +336,7 @@ if (typeof webinos.file === "undefined") webinos.file = {}
   BlobIterator.prototype.next = function () {
     if (!this.hasNext()) throw new webinos.util.CustomError("InvalidStateError")
 
-    var end = Math.min(this.position + 1024, this.blob.size)
+    var end = Math.min(this.position + 16 * 1024, this.blob.size)
     var chunk
     if (this.blob.slice) {
       chunk = this.blob.slice(this.position, end)
