@@ -20,7 +20,7 @@ var openid   = require('openid');
 var url      = require('url');
 var querystr = require('querystring');
 
-var webinos = require('webinos')(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
 var log     = new session.common.debug("pzh_openid");
 

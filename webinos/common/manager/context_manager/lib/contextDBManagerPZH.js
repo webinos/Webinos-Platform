@@ -1,18 +1,18 @@
 /*******************************************************************************
 *  Code contributed to the webinos project
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-*  
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-*  
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 * Copyright 2012 EPU-National Technical University of Athens
 ******************************************************************************/
 (function() {
@@ -28,7 +28,7 @@
 
   var path = require('path');
   var moduleRoot = path.resolve(__dirname, '../') + '/';
-  var webinos_ = require('webinos')(__dirname);
+  var webinos_ = require("find-dependencies")(__dirname);
 
   require('./AsciiArt')
 
@@ -70,9 +70,9 @@
       var that=this;
       var contextItem = contextData[contextItemID];
       inContextRAW.run(contextItem.API, contextItem.device, contextItem.application, contextItem.session, contextItem.contextObject, contextItem.method, contextItem.timestamp, function(err1) {
-        if (err1){ 
+        if (err1){
           throw err1;
-          fail();  
+          fail();
         }
 
         var fldcontextrawID = this.lastID;
@@ -82,7 +82,7 @@
           incontextrawvalues.run(fldcontextrawID, input.ObjectRef, input.IsObject, 1, input.objectName, input.type, input.value, function(err) {
             if (err) {
               throw err;
-              fail(); 
+              fail();
             }
           });
         }
@@ -105,7 +105,7 @@
         "SELECT fldcontextrawID AS ContextRawID,  " +
         "fldcontextrawvalueID AS ContextRawValueID,  fldAPI AS API, fldDevice AS Device, fldApplication AS Application, " +
         "fldSession AS Session, fldContextObject AS ContextObject, fldMethod AS Method, fldTimestamp AS Timestamp, " +
-        "fldDescription AS ValueType, fldValueName AS ValueName, fldValueType AS ValueType, fldValue AS Value FROM vwcontextraw", 
+        "fldDescription AS ValueType, fldValueName AS ValueName, fldValueType AS ValueType, fldValue AS Value FROM vwcontextraw",
         function (err,row){
           result.data[result.data.length] = row;
         },

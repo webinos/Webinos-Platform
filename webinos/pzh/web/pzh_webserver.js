@@ -25,7 +25,7 @@ var path     = require('path');
 var fs       = require('fs');
 var crypto    = require('crypto');
 
-var webinos = require('webinos')(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
 var log     = new session.common.debug("pzh_webserver");
 
@@ -37,7 +37,7 @@ var storeInfo = [];
 
 function receiveCertificate(instance, payload) {
   // TODO: Do not just add perform some security check
-  
+
   if (instance && payload &&
     payload.name && payload.cert && payload.crl && instance.options.ca &&
     instance.options.crl) {

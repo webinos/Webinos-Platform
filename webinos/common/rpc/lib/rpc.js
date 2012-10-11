@@ -24,9 +24,7 @@
 
 	if (typeof module === 'undefined') {
 		var exports = {};
-		var utils = webinos.utils || (webinos.utils = {});
 	} else {
-		var utils = require('./webinos.utils.js');
 		var exports = module.exports = {};
 	}
 
@@ -399,6 +397,26 @@
 		this.registry.unregisterObject(callback);
 	};
 
+	// _RPCHandler.prototype.invoke = function (service, method, params) {
+	// 	var call = createRPC(service, method, params)
+	// 	executeRPC(call, function () {
+	// 		if (typeof ref.onsuccess === "function") {
+	// 			ref.onsuccess.apply(null, arguments)
+	// 		}
+	// 	}, function () {
+	// 		if (typeof ref.onerror === "function") {
+	// 			ref.onerror.apply(null, arguments)
+	// 		}
+	// 	})
+
+	// 	var ref = function (successCallback, errorCallback) {
+	// 		ref.onsuccess = successCallback
+	// 		ref.onerror = errorCallback
+	// 	}
+
+	// 	return ref
+	// }
+
 	/**
 	 * Utility method that combines createRPC and executeRPC.
 	 * @param service The service (e.g., the file reader or the
@@ -412,6 +430,13 @@
 	_RPCHandler.prototype.request = function (service, method, objectRef, successCallback, errorCallback) {
 		var self = this; // TODO Bind returned function to "this", i.e., an instance of RPCHandler?
 
+	  function callback(maybeCallback) {
+	    if (typeof maybeCallback !== "function") {
+	      return function () {};
+	    }
+	    return maybeCallback;
+	  }
+
 		return function () {
 			var params = Array.prototype.slice.call(arguments);
 			var message = self.createRPC(service, method, params);
@@ -421,7 +446,7 @@
 			else if (objectRef)
 				message.id = objectRef;
 
-			self.executeRPC(message, utils.callback(successCallback, this), utils.callback(errorCallback, this));
+			self.executeRPC(message, callback(successCallback), callback(errorCallback));
 		};
 	};
 

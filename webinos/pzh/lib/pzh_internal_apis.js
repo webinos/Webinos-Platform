@@ -31,7 +31,7 @@ var fs          = require("fs");
 var util        = require("util");
 var crypto      = require("crypto");
 
-var webinos = require("webinos")(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var qrcode  = require("./pzh_qrcode.js");
 var revoke  = require("./pzh_revoke.js");

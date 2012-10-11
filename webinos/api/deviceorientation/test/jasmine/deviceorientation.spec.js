@@ -12,12 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Copyright 2012 EPU NTUA
  *****************************************************************************/
- 
-// Setup 
-var webinos = require('webinos')(__dirname);
+
+// Setup
+var webinos = require("find-dependencies")(__dirname);
 var rpc = webinos.global.require(webinos.global.rpc.location).RPCHandler;
 
 // A test PZP with a messageHandler in order to capture the events and log them for testing
@@ -71,27 +71,27 @@ describe('deviceorientation follows specs', function(){
 			}
 		});
 	});
-	
+
 	it('has funtion addEventListener', function() {
 		expect(testService.addEventListener).toBeFunction();
 	});
-	
+
 	it('has funtion removeEventListener', function() {
 		expect(testService.removeEventListener).toBeFunction();
 	});
-	
+
 	it('api equals to "http://webinos.org/api/deviceorientation"', function() {
 		expect(testService.api).toEqual('http://webinos.org/api/deviceorientation');
 	});
-	
+
 	it('displayName is string', function() {
 		expect(testService.displayName).toBeString();
 	});
-	
+
 	it('description is string', function() {
 		expect(testService.description).toBeString();
 	});
-	
+
 });
 
 // A fake object reference
@@ -135,7 +135,7 @@ describe('deviceorientation remove event listeners work', function(){
 
 var testEventThrown = function (eventName, expected){
 	it('should have ' + (expected ? '' : 'not ') + 'throw event ' + eventName, function(){
-		if (expected) 
+		if (expected)
 			expect(TestPZP.messagesRecieved[eventName]).toBeTruthy();
 		else
 			expect(TestPZP.messagesRecieved[eventName]).toBeUndefined();

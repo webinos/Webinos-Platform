@@ -33,7 +33,7 @@ util = require("util");
 
 if (typeof exports !== "undefined") {
   try {
-    var webinos        = require("webinos")(__dirname);
+    var webinos        = require("find-dependencies")(__dirname);
     var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
     var rpc            = webinos.global.require(webinos.global.rpc.location);
     var Registry       = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
@@ -64,7 +64,7 @@ var Pzh = function () {
 };
 
 /**
- * 
+ *
  */
 Pzh.prototype.addMsgListener = function (callback) {
   var id = (parseInt((1 + Math.random()) * 0x10000)).toString(16).substr(1);
@@ -491,7 +491,7 @@ Pzh.prototype.addPzh = function ( uri, modules, callback) {
         self.rpcHandler.setSessionId(self.sessionId);
         self.setMessageHandler();
         var pzh_connecting = require('./pzh_connecting.js');
-        
+
 
         if (typeof farm.server === "undefined" || farm.server === null) {
           self.log.error("farm is not running, please run webinos_pzh");

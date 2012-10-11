@@ -31,7 +31,7 @@ var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
 var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-var webinos       = require("webinos")(__dirname);
+var webinos       = require("find-dependencies")(__dirname);
 var rpc           = webinos.global.require(webinos.global.rpc.location);
 var registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry");
 
@@ -58,7 +58,7 @@ if (argv.length == 5 || argv.length == 6) {
 		} else {
 			console.error("*** " + argv[3] + " is not a valid full jid\r\n");
 		}
-		
+
 		bosh = argv[5];
 	}
 }
@@ -106,7 +106,7 @@ connection.on('end', function () {
 // installing a listerner for all features, just informational and for debugging purposes.
 connection.on('newFeature', function(feature) {
 	logger.trace("The feature " + feature.ns + " on " + feature.device + " became available.");
-	
+
 	// do something with the feature.
 	feature.once('remove', function(feature) {
 		// do something when the feature is removed.

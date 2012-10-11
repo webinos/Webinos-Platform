@@ -4,9 +4,9 @@
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,7 +17,7 @@
 *******************************************************************************/
 
 describe("test context api", function() {
-    var webinos = require('webinos')(__dirname);
+    var webinos = require("find-dependencies")(__dirname);
 
     var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
     var service = webinos.global.require(webinos.global.api.context.location).Service;
@@ -38,10 +38,10 @@ describe("test context api", function() {
             }
         });
     });
-    
+
     it("context api has registerAppContextObject function", function() {
         expect(contextAPI.registerAppContextObject).toBeFunction();
-    });    
+    });
 
     it("context api has executeQuery function", function() {
         expect(contextAPI.executeQuery).toBeFunction();
