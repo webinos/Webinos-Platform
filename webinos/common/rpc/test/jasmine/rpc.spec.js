@@ -17,7 +17,7 @@
  ******************************************************************************/
 
 describe('common.RPC', function() {
-	var webinos = require('webinos')(__dirname);
+	var webinos = require("find-dependencies")(__dirname);
 
 	var Registry = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
 	var registry;

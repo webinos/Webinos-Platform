@@ -4,9 +4,9 @@
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-* 
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-* 
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,13 +18,13 @@
 
 /** @description: This module can be used for authentication a new PZP to the personal zone hub
  * The PZH creates an "authCounter" which creates and validates authentication
- * codes that are given to new devices.  
+ * codes that are given to new devices.
  *
- * One implementation scenario is the QR Code: a user visits the PZH web 
- * interface, logs in, and is shown a QR Code, which contains an authCode, 
+ * One implementation scenario is the QR Code: a user visits the PZH web
+ * interface, logs in, and is shown a QR Code, which contains an authCode,
  * which is then presented to the PZH as proof that the PZP should be trusted.
  */
-var webinos = require("webinos")(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var log = new session.common.debug("pzh_authcode");
 var tokenAuth = exports;
@@ -34,10 +34,10 @@ var tokenAuth = exports;
  */
 tokenAuth.createAuthCounter = function(callback) {
   "use strict";
-  var authCounter = { 
-    status  : false, 
-    code    : "", 
-    timeout : "", 
+  var authCounter = {
+    status  : false,
+    code    : "",
+    timeout : "",
     guesses :0
   };
 
@@ -89,7 +89,7 @@ tokenAuth.createAuthCounter = function(callback) {
     cb ( self.status &&
       (self.timeout > new Date()) );
   };
-  
+
   /** @description: query interface: are we expecting a new PZP any time soon?  and if so,
      * does it have this code?  if not, increment the number of guesses.
      */

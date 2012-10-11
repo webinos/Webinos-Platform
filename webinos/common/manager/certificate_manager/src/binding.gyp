@@ -19,7 +19,7 @@
           'libraries': ['-l<(openssl_Root)/lib/libeay32.lib' ],
           'include_dirs': ['<(openssl_Root)/include'],
         }],
-        [ 'OS=="freebsd" or OS=="openbsd" or OS=="solaris" or (OS=="linux")', {
+        [ 'OS=="freebsd" or OS=="openbsd" or OS=="mac" or OS=="solaris" or OS=="linux"', {
           'libraries': ['-lssl', '-lcrypto'],
         }],
       ],  

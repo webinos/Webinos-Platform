@@ -27,7 +27,7 @@
 
     var path = require('path');
     var moduleRoot = path.resolve(__dirname, '../') + '/';
-    var webinos_ = require('webinos')(__dirname);
+    var webinos_ = require("find-dependencies")(__dirname);
 
     require('./AsciiArt');
 

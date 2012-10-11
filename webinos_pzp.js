@@ -84,6 +84,7 @@ process.argv.forEach(function (arg) {
 var fileParams = {},
   pzpModules = [
   {name: "get42", params: {num: "21"}},
+  {name: "zap-and-shake", params: {}},
   {name: "file", params: fileParams},
   {name: "geolocation", params: {connector : "geoip"}},
   {name: "applauncher", params: {}},
@@ -167,7 +168,7 @@ function initializeWidgetServer() {
           } else {
             log.info('saved configuration runtime file');
           }
-        });            
+        });
       } else {
             log.error('error starting wrt server: ' + msg);
       }

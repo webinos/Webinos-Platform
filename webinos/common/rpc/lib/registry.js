@@ -130,7 +130,7 @@
 	};
 
 	var load = function(modules) {
-		var webinos = require('webinos')(__dirname);
+		var webinos = require("find-dependencies")(__dirname);
 
 		return modules.map(function(m) {
 			return webinos.global.require(webinos.global.api[m.name].location).Service;
@@ -172,7 +172,7 @@
 
 	/**
 	 * Get all registered objects.
-	 * 
+	 *
 	 * Objects are returned in a key-value map whith service type as key and
 	 * value being an array of objects for that service type.
 	 */
@@ -194,7 +194,7 @@
 			return el.id === serviceId;
 		});
 
-		if (typeof filteredRO[0] === 'undefined') 
+		if (typeof filteredRO[0] === 'undefined')
 			return receiverObjs[0];
 
 		return filteredRO[0];

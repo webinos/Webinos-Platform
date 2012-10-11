@@ -1,18 +1,18 @@
 /*******************************************************************************
 *  Code contributed to the webinos project
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-*  
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-*  
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 * Copyright 2012 EPU-National Technical University of Athens
 ******************************************************************************/
 if (typeof webinos === 'undefined') {
@@ -34,7 +34,7 @@ catch (err) {
 var Fs = require('fs');
 var path = require('path');
 var moduleRoot = path.resolve(__dirname, '../') + '/';
-var webinos_ = require('webinos')(__dirname);
+var webinos_ = require("find-dependencies")(__dirname);
 
 var vocdbpath = path.resolve(moduleRoot +'/data/contextVocabulary.json');
 webinos.context.DB = require('./contextDBManagerPZP')
@@ -51,7 +51,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
   var contextVocJSON = JSON.parse(Fs.readFileSync(vocdbpath, 'utf-8'));
   var contextItem = {};
   contextItem.API = {};
-  contextItem.device = {}; 
+  contextItem.device = {};
   contextItem.application = {};
   contextItem.session = {};
   contextItem.contextObject = {};
@@ -59,7 +59,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
   contextItem.timestamp = {};
   contextItem.paramstolog = [];
   contextItem.resultstolog = [];
-  
+
   var myTypeOf = function(input){
 	  return (input instanceof Array)?"array":((input===null)?"null":(typeof input));
   }
@@ -87,7 +87,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
       data.value = objRef + ".";
       data.type = myTypeOf(callList);
       arrayToFill[arrayToFill.length] = data;
-      for (var arID=0; arID < callList.length; arID++){        
+      for (var arID=0; arID < callList.length; arID++){
         findObjectsToStore(vocList[0].values, callList[arID],arrayToFill, data.value + arID);
       }
     }
@@ -120,7 +120,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
                   for (var arID=0; arID < callList[callItem].length; arID++){
                     findObjectsToStore(vocList[vocItem].values, callList[callItem][arID],arrayToFill,data.value + arID);
                   }
-                  break;            
+                  break;
                 }
                 else{
                   var data = {};
@@ -142,7 +142,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
   //Find API
   for(APIIndex in contextVocJSON){
     if(contextVocJSON[APIIndex].URI == dataIn.api){
-      API = contextVocJSON[APIIndex]      
+      API = contextVocJSON[APIIndex]
       //API found
 
       //Look for Context Objects with the method
@@ -174,7 +174,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
               if (expectedInputsLength == inputsCount){
 
                 contextItem.API = API.APIname;
-                contextItem.device = {}; 
+                contextItem.device = {};
                 contextItem.application = {};
                 contextItem.session = current.PzpId;
                 contextItem.contextObject = cObject.objectName;
@@ -205,7 +205,7 @@ webinos.context.saveContext = function(dataIn, success, fail) {
             }
             else{
               contextItem.API = API.APIname;
-              contextItem.device = {}; 
+              contextItem.device = {};
               contextItem.application = {};
               contextItem.session = current.PzpId;
               contextItem.contextObject = cObject.objectName;
