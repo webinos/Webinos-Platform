@@ -30,6 +30,7 @@
   , "find-dependencies" : "0.0.x"
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
+  , "connect" : "2.6.x"
   }
 , "engines" :
   { "node" : ">= 0.8.0"

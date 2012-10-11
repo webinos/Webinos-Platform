@@ -41,6 +41,8 @@
 		<file name="api/discovery/lib/webinos.discovery.rpc.js"/>
 		<!-- Events -->
 		<file name="api/events/lib/events.js"/>
+		<!-- Zap and Shake (hack) -->
+		<file name="api/zap-and-shake/zap-and-shake.js"/>
 		<!-- File -->
 		<file name="api/file/file.js"/>
 		<file name="api/file/lib/api.js"/>

@@ -1,0 +1,25 @@
+{ "name" : "zap-and-shake"
+, "version" : "0.7.0"
+, "description" : "Zap and Shake (hack)"
+, "keywords" :
+  [ "webinos"
+  , "zap"
+  , "shake"
+  ]
+, "homepage" : "http://www.webinos.org"
+, "bugs" : "http://jira.webinos.org"
+, "author" :
+  { "name" : "Felix-Johannes Jendrusch"
+  , "email" : "felixjendrusch@googlemail.com"
+  }
+, "main" : "./zap-and-shake.js"
+, "repository" :
+  { "type" : "git"
+  , "url" : "http://github.com/webinos/Webinos-Platform.git"
+  }
+, "dependencies" :
+  { "find-dependencies" : "0.0.x"
+  , "inherits" : "1.0.0"
+  , "connect" : "2.6.x"
+  }
+}
