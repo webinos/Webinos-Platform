@@ -20,6 +20,10 @@
       "name": "Events API",
       "location": "api/events/"
     },
+    "zap-and-shake": {
+      "name": "Zap and Shake (hack)",
+      "location": "api/zap-and-shake/"
+    },
     "file": {
       "name": "File API",
       "location": "api/file/"
