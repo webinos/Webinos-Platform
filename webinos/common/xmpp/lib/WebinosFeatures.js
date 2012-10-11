@@ -16,25 +16,32 @@
 *******************************************************************************/
 
 /**
- * Place holder for all webinos features. This class hold all the namespaces and factories that create
+ * Place holder for all webinos features. This class holds all the namespaces and factories that create
  * feature classes.
  * 
  * Author: Eelco Cramer, TNO
  */
 
-var sys = require('util');
-var GeolocationFeature = require('./GeolocationFeature.js');
-var Get42Feature = require('./Get42Feature.js');
+ (function() {
+ 	"use strict";
 
-var NS = {
-	GEOLOCATION: GeolocationFeature.NS,
-	GET42: Get42Feature.NS
-}
+    var sys = require('util');
+    var GeolocationFeature = require('./GeolocationFeature.js');
+    var Get42Feature = require('./Get42Feature.js');
+    var ServiceDiscoveryFeature = require('./ServiceDiscoveryFeature.js');
 
-var factory = {
-	'urn:services-webinos-org:geolocation': function (rpcHandler, connector) { return new GeolocationFeature.GeolocationFeature(rpcHandler, connector) },
-	'urn:services-webinos-org:get42': function (rpcHandler) { return new Get42Feature.Get42Feature(rpcHandler) }
-}
+    var NS = {
+    	GEOLOCATION: GeolocationFeature.NS,
+    	GET42: Get42Feature.NS,
+    	SERVICE_DISCOVERY: ServiceDiscoveryFeature.NS
+    }
 
-exports.factory = factory;
-exports.NS = NS;
+    var factory = {
+    	'http://webinos.org/api/w3c/geolocation': function (rpcHandler, connector) { return new GeolocationFeature.Service(rpcHandler, connector) },
+    	'http://webinos.org/api/test': function (rpcHandler) { return new Get42Feature.Service(rpcHandler) },
+    	'http://webinos.org/api/discovery': function (rpcHandler, features) { return new ServiceDiscoveryFeature.Service(rpcHandler, features)}
+    }
+
+    exports.factory = factory;
+    exports.NS = NS;
+})();
