@@ -34,7 +34,7 @@
 	 * Webinos ServiceDiscovery service constructor (server side).
 	 * @constructor
 	 * @alias Discovery
-	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
+	 * @param rpcHandler A handler for functions that use RPC to deliver their result.
 	 */
 	var Discovery = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
@@ -102,7 +102,7 @@
 				services = services || [];
 
 				function stripFuncs(el) {
-					return typeof el.getInformation === 'function' ? el.getInformation() : el; 
+					return typeof el.getInformation === 'function' ? el.getInformation() : el;
 				}
 				services = services.map(stripFuncs);
 
@@ -206,12 +206,12 @@
 				for (var i=0; i<results.length; i++) {
 					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source addres, it is used by messaging for returning back
 				}
-				var webinos_ = require('webinos')(__dirname);
+				var webinos_ = require("find-dependencies")(__dirname);
 				var global = webinos_.global.require(webinos_.global.pzp.location,'lib/session').configuration;
 
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var entityRefCount = (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0; 
+				var entityRefCount = (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0;
 				// Fetch from peers that are connected
 				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
 					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) && this.rpcHandler.parent.state === global.states[2]) {

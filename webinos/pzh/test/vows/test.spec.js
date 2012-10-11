@@ -17,7 +17,7 @@
 *******************************************************************************/
 var vows  = require('vows'),
   assert  = require('assert'),
-  webinos = require('webinos')(__dirname),
+  webinos = require("find-dependencies")(__dirname),
   os      = require('os'),
   fs      = require('fs');
 

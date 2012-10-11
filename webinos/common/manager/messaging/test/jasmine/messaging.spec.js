@@ -1,6 +1,6 @@
 describe('common.manager.messaging', function() {
 
-	var webinos = require('webinos')(__dirname);
+	var webinos = require("find-dependencies")(__dirname);
 
 	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
 	var rpcHandler = new RPCHandler();
@@ -22,7 +22,7 @@ describe('common.manager.messaging', function() {
 	it('MessageHandler object instantiated', function() {
 		expect(messageHandler).toBeDefined();
 	});
-	
+
 	it('has setSendMessage function', function() {
 		expect(messageHandler.setSendMessage).toBeFunction();
 	});
@@ -44,15 +44,15 @@ describe('common.manager.messaging', function() {
 	});
 
 	it('has createMessage function', function() {
-	
+
 		var options = {
-		register: false    
-	 	,type: "JSONRPC"    
-	 	,id: 36            
-	 	,from: "sender"       
-	 	,to: "receiver"     
-	 	,resp_to:"sender"    
-	 	}; 
+		register: false
+	 	,type: "JSONRPC"
+	 	,id: 36
+	 	,from: "sender"
+	 	,to: "receiver"
+	 	,resp_to:"sender"
+	 	};
 
 		var message = {};
 		message = messageHandler.createMessage(options);
@@ -76,10 +76,10 @@ describe('common.manager.messaging', function() {
 		message=messageHandler.registerSender(from,to);
 		expect(message.register).toEqual(true);
 		expect(message.from).toEqual("sender");
-		expect(message.to).toEqual("receiver");	
+		expect(message.to).toEqual("receiver");
 		expect(message.type).toEqual("JSONRPC");
 		expect(message.payload).toEqual(null);
-				
+
 	});
 	it('has removeRoute function', function() {
 		expect(messageHandler.removeRoute).toBeFunction();

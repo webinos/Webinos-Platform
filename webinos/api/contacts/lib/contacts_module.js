@@ -1,25 +1,25 @@
 /*******************************************************************************
 *  Code contributed to the webinos project
-* 
+*
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
-*  
+*
 *     http://www.apache.org/licenses/LICENSE-2.0
-*  
+*
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 * Copyright 2011 Istituto Superiore Mario Boella (ISMB)
 ******************************************************************************/
 
 //var webinosRoot=process.env.WEBINOS_PATH; //TODO a try/catch block?
 //var moduleRoot=webinosRoot+'/api/contacts/lib';
 
-var webinos = require('webinos')(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 
 var local_contacts = '';
 try {
@@ -161,7 +161,7 @@ var askPolicyManager = function(module,params,callback)
     {
 //      //TODO Access to device address book always granted until P.M. get fixed
 //      //callback(true);
-//      
+//
       console.log("---contacts.askPolicyManager: Asking Policy Manager for contacts access");
 //      // TODO CHANGE
       var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager; // this line should be moved in the policy manager
@@ -178,12 +178,12 @@ var askPolicyManager = function(module,params,callback)
       res = policyManager.enforceRequest(request);
       if(res == 0) {
     	  console.log("Policy Allow:" + res);
-    	  callback(true);  	
+    	  callback(true);
       }
       else {
     	  console.log("Policy Deny:" + res);
     	  callback(false);
-      }  
+      }
     	console.log("==========================>>>>>>>>>>>>>>>>DEBUG!!!!!");
     }
     else //on other platforms

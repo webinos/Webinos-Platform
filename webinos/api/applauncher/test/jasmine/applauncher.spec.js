@@ -1,6 +1,6 @@
 describe('api.applauncher', function() {
 
-	var webinos = require('webinos')(__dirname);
+	var webinos = require("find-dependencies")(__dirname);
 
 	// make sure RPCWebinosService is defined as it is needed by applauncher.js
 	webinos.global.require(webinos.global.rpc.location).RPCHandler;
