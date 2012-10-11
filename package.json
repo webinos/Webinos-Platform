@@ -26,7 +26,7 @@
   , "mdns" : "0.x.x"
   , "jsormdb" : "0.1.x"
   , "now" : "0.8.1"
-  , "node-uuid" : "0.3.x"
+  , "node-uuid" : "1.3.x"
   , "find-dependencies" : "0.0.x"
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
@@ -37,4 +37,9 @@
   , "npm" : ">= 1.1.17"
   }
 , "preferGlobal": true
+, "bin":
+  { "webinos_pzh": "webinos_pzh.js"
+  , "webinos_pzp": "webinos_pzp.js"
+  , "webinos_build": "webinos_build.js"
+  }
 }
