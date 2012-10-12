@@ -689,11 +689,11 @@ exports.initializePzp= function(config, pzpModules, callback) {
 };
 
 exports.getSessionId = function() {
-  pzpInstance.getSessionId();
+  return pzpInstance.getSessionId();
 };
 
 exports.getWebinosPath = function() {
-  pzpInstance.getPath();
+  return pzpInstance.getPath();
 };
 
 
