@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="webinos-script" default="gen-webinos-js">
-	
+
     <!-- Task for the Google Closure Compiler for JavaScript minification -->
     <taskdef name="jscompiler" classname="com.google.javascript.jscomp.ant.CompileTask"
         classpath="../../tools/closure-compiler/compiler.jar"/>
-	
+
     <!-- Use closure compiler to minify all JavaScript files -->
     <target name="gen-webinos-js">
     	<!-- Available compilation levels: advanced, simple, whitespace -->
         <jscompiler compilationlevel="whitespace" prettyPrint="true" output="${basedir}/client/webinos.js">
             <sources dir="${basedir}/../">
+                <file name="wrt/lib/webinos.util.js"/>
                 <file name="common/rpc/lib/registry.js"/>
                 <file name="common/rpc/lib/rpc.js"/>
             	<file name="common/manager/messaging/lib/messagehandler.js"/>
    		<file name="wrt/lib/webinos.session.js"/>
     		<file name="wrt/lib/webinos.servicedisco.js"/>
     		<file name="wrt/lib/webinos.js"/>
-            	<file name="common/rpc/lib/webinos.utils.js"/>
-		<file name="api/file/lib/webinos.path.js"/>
+		<file name="api/file/lib/virtual-path.js"/>
 		<file name="wrt/lib/webinos.file.js"/>
             	<file name="wrt/lib/webinos.tv.js"/>
             	<file name="wrt/lib/webinos.oauth.js"/>
@@ -36,5 +36,5 @@
 		<file name="wrt/lib/webinos.payment.js"/>
             </sources>
         </jscompiler>
-    </target>	
+    </target>
 </project>
