@@ -25,7 +25,7 @@
   , "mdns" : "0.x.x"
   , "now" : "0.8.1"
   , "node-uuid" : "x.x.x"
-  , "find-dependencies" : "0.0.x"
+  , "find-dependencies" : ">= 0.0.2"
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
