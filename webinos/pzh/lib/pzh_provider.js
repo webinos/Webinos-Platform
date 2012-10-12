@@ -196,9 +196,7 @@ var Provider = function(_hostname, _friendlyName) {
   function loadWebServerCertificates(callback) {
     if (!config.cert.internal.web.cert) {
       var cn = "PzhWS" + ":"+ config.metaData.serverName;
-      console.log(cn);
       config.generateSelfSignedCertificate("PzhWS", cn, function(status, value ) {
-        console.log(status);
         if (status) {
           config.generateSignedCertificate(value, 2, function(status, value) {
             if(status) {

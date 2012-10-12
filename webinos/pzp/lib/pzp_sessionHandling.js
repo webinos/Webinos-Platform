@@ -56,7 +56,7 @@ var Pzp = function () {
   var registry;
   var rpcHandler;
   var discovery;
-  var messageHandler;
+  this.messageHandler;
   var localDiscovery;
 
   // Helper functions
@@ -70,7 +70,7 @@ var Pzp = function () {
     logger.log("authorized & connected to PZP: "+ peerSessionId);
     connectedPzp[msg.name] = {state: states[2], socket: client};
     client.id = msg.name;
-    var msg1 = messageHandler.registerSender(sessionId, msg.name);
+    var msg1 = self.messageHandler.registerSender(sessionId, msg.name);
     sendMessage(msg1, msg.name);
     self.updateApp();
   }
@@ -123,7 +123,7 @@ var Pzp = function () {
     discovery      = new Discovery(rpcHandler, [registry]);
     registry.registerObject(discovery);
     registry.loadModules(loadModules, rpcHandler); // load specified modules
-    messageHandler = new MessageHandler(rpcHandler); // handler for all things message
+    self.messageHandler = new MessageHandler(rpcHandler); // handler for all things message
   }
 
   /**
@@ -131,7 +131,7 @@ var Pzp = function () {
    */
   function registerMessaging() {
     if (config.metaData.pzhId && connectedPzh[config.metaData.pzhId]) {
-      var msg = messageHandler.registerSender(sessionId, config.metaData.pzhId);
+      var msg = self.messageHandler.registerSender(sessionId, config.metaData.pzhId);
       sendMessage(msg, config.metaData.pzhId);
     }
   }
@@ -153,10 +153,10 @@ var Pzp = function () {
       sendMessage(message, address);
     };
     rpcHandler.setSessionId(sessionId);
-    messageHandler.setGetOwnId(sessionId);
-    messageHandler.setObjectRef(self);
-    messageHandler.setSendMessage(send);
-    messageHandler.setSeparator("/");
+    self.messageHandler.setGetOwnId(sessionId);
+    self.messageHandler.setObjectRef(self);
+    self.messageHandler.setSendMessage(send);
+    self.messageHandler.setSeparator("/");
   }
 
   /**
@@ -182,7 +182,7 @@ var Pzp = function () {
   function cleanUp(id){
     var key;
     if (id) {
-      messageHandler.removeRoute(id, sessionId);
+      self.messageHandler.removeRoute(id, sessionId);
       for (key in connectedPzh) {
         if (connectedPzh.hasOwnProperty(key) && key === id){
           delete connectedPzh[key];
@@ -300,7 +300,7 @@ var Pzp = function () {
     if(!connectedPzh.hasOwnProperty(sessionId)) {
       setSessionId();
       connectedPzh[config.metaData.pzhId] = {socket: conn, state: states[2]};
-      conn.id = sessionId;
+      conn.id = config.metaData.pzhId;
       startOtherManagers();
       callback(true, "pzp " + sessionId+ " connected to "+ config.metaData.pzhId);
     } else {
@@ -380,7 +380,7 @@ var Pzp = function () {
           break;
         }
       } else {
-        messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
+        self.messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
       }
     });
   }
@@ -420,8 +420,8 @@ var Pzp = function () {
 
         pzpClient.on("end", function () {
           cleanUp(pzpClient.id);
+          retryConnecting();
         });
-
 
         pzpClient.on("error", function (err) {
           startOtherManagers();
@@ -456,7 +456,7 @@ var Pzp = function () {
             clientSessionId = config.metaData.pzhId + "/"+ text.split(":")[1]; // Assuming in 1 zone;
             connectedPzp[clientSessionId]= {state: states[2], socket: conn};
             conn.id  = clientSessionId;
-            var msg = messageHandler.registerSender(sessionId, clientSessionId);
+            var msg = self.messageHandler.registerSender(sessionId, clientSessionId);
             sendMessage(msg, clientSessionId);
             logger.log("pzp server - " + clientSessionId + " connected") ;
           }
@@ -635,16 +635,16 @@ var Pzp = function () {
    * @param callback - true or false depending on startup status
    */
   this.initializePzp = function(inputConfig, modules, callback) {
-    initializeRPC_Message(modules); // Initializes RPC
     config = new session.configuration();// sets configuration
     config.setConfiguration(inputConfig.friendlyName, "Pzp", inputConfig.hostname, function (status, value) {
       if(status){
         checkMode();   //virgin or hub mode
         setSessionId();//sets pzp sessionId
         try {
-          self.startWebSocketServer(config.metaData.pzhId, sessionId, address, config.userPref.ports, config.cert.internal.conn.csr,  messageHandler,
+          self.startWebSocketServer(config.metaData.pzhId, sessionId, address, config.userPref.ports, config.cert.internal.conn.csr,
           function(status, value){
             if (status) {
+              initializeRPC_Message(modules); // Initializes RPC
               logger.log("successfully started pzp websocket server ");
               if (mode === modes[1]) {
                 connectHub(function(status, value) {  // connects hub
