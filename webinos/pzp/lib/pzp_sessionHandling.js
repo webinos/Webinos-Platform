@@ -654,6 +654,8 @@ var Pzp = function () {
                     logger.error("connection to PZH failed ");
                   }
                 });
+              } else{
+                setupMessage_RPCHandler();
               }
               return callback(true, sessionId, config.cert.internal.conn.csr);// retruning csr to make test work
             } else {
