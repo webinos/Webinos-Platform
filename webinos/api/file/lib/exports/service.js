@@ -16,9 +16,6 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Mid-term issues:
-// [WP-?] Implement resolveLocalFileSystemURL.
-
 module.exports = Service
 
 var api = require("../api.js")
@@ -48,7 +45,8 @@ Service.prototype.requestFileSystem = function (params, successCallback,
 
 Service.prototype.resolveLocalFileSystemURL = function (params, successCallback,
     errorCallback) {
-  // Not yet implemented.
+  api.resolveLocalFileSystemURL(params.url,
+      util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.getMetadata = function (params, successCallback,
