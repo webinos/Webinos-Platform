@@ -29,7 +29,6 @@ var logger        = webinos.global.require(webinos.global.util.location, "lib/lo
 var rpc           = webinos.global.require(webinos.global.rpc.location);
 var Registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
 var Discovery     = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
-var context_manager= webinos.global.require(webinos.global.manager.context_manager.location);
 var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
 var RPCHandler     = rpc.RPCHandler;
 
@@ -124,6 +123,7 @@ var Pzp = function () {
     registry.registerObject(discovery);
     registry.loadModules(loadModules, rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(rpcHandler); // handler for all things message
+    webinos.global.require(webinos.global.manager.context_manager.location);//initializes context manager
   }
 
   /**
@@ -208,6 +208,7 @@ var Pzp = function () {
       for (i in msg) {
         if (msg.hasOwnProperty(i) && sessionId !== msg[i].name && !connectedPzp.hasOwnProperty(msg[i].name)) {
           if(msg[i].newPzp )  {
+            logger.log("Attempting to connect peer pzp " + msg[i].name);
             self.connectPeer(msg[i]);
           }
         }
@@ -260,7 +261,7 @@ var Pzp = function () {
             logger.log("retrying to connect back to the PZH " + (status ? "successful": "failed"));
           });
         });
-      }, 10000);
+      }, 60000);//increase time limit to suggest when it should retry connecting back to the PZH
     }
   }
   /**
@@ -426,14 +427,14 @@ var Pzp = function () {
         pzpClient.on("error", function (err) {
           startOtherManagers();
           if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
-            logger.error("If your DEVICE is not enrolled to any ZONE then seeing this error is okay.  ");
+            logger.error("Connect  attempt to YOUR PZH "+ config.metaData.pzhId+" failed.");
             if(mode === modes[1]){
               localDiscovery.findLocalPzp(self, config.userPref.ports.pzp_tlsServer, config.metaData.pzhId);
             }
           } else {
             logger.error(err);
           }
-          retryConnecting();
+          //retryConnecting();
         });
       });
     } catch (err) {

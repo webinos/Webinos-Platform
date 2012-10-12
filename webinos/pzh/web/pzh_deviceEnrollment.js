@@ -132,6 +132,8 @@ var Pzh_DeviceEnrollment = function() {
           prepMsg(res, query.to, query.from, "error",  "request for the creating pzh failed " + value);
         }
       });
+    } else {
+      prepMsg(res, query.to, query.from, "error",  "not authenticated");
     }
   }
   /**
@@ -139,19 +141,24 @@ var Pzh_DeviceEnrollment = function() {
    * @param res
    * @param query
    */
-  function enrollPzp(res, query) {
-    var pzhInstance = parent.fetchPzh(query.to);
-    pzhInstance.expecting.isExpected(function(expected) {
-      if (!expected){
-        prepMsg(res, query.to, query.from, "error", "not expecting new pzp");
-      } else {
-        var msg = createEnrollMsg(query);
-        pzhInstance.addNewPZPCert(msg, function(err, msgSend) {
-          res.write(JSON.stringify(msgSend));
-          res.end();
-        });
-      }
-    });
+  function enrollPzp(res,  query) {
+    if (storeTempDetails[query.to]) {
+      var pzhInstance = parent.fetchPzh(query.to);
+      pzhInstance.expecting.isExpected(function(expected) {
+        if (!expected){
+          prepMsg(res, query.to, query.from, "error", "not expecting new pzp");
+        } else {
+          var msg = createEnrollMsg(query);
+          pzhInstance.addNewPZPCert(msg, function(err, msgSend) {
+            res.write(JSON.stringify(msgSend));
+            res.end();
+          });
+        }
+      });
+      delete storeTempDetails[query.to];
+    } else {
+      prepMsg(res, query.to, query.from, "error",  "not authenticated");
+    }
   }
   /**
    *
@@ -170,13 +177,14 @@ var Pzh_DeviceEnrollment = function() {
     }
   }
   /**
-   *
+   * This is part of session handling function
    * @param res
    * @param id
    * @param query
    * @param details
    */
   this.verifyPzpHandling = function(res, id, query, details) {
+    storeTempDetails[id]=details;
     if (parent.fetchPzh(id)) {
       var instance = parent.fetchPzh(id);
       qrcode.addPzpQRAgain(instance, function(result) {
@@ -185,7 +193,6 @@ var Pzh_DeviceEnrollment = function() {
         res.end();
       });
     } else {
-      storeTempDetails[id]=details;
       res.writeHeader(200, {'Content-Type':'application/x-javascript; charset=UTF-8'});
       res.writeHead(302, {Location: "http://"+query.returnPath + "?cmd=authStatus&connected=false&pzhid="+id});
       res.end();

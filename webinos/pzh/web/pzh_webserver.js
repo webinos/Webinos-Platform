@@ -102,6 +102,7 @@ var PZH_WebServer = function() {
       });
     });
   }
+
   function authenticateUser(id, provider, res) {
     if (!authenticatedUser.hasOwnProperty(id)){
       authenticatedUser[id] = {id: crypto.randomBytes(24).toString("base64"), expiry: (new Date().getTime()) + 60*60*1000};//
