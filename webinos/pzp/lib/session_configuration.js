@@ -329,10 +329,11 @@ Config.prototype.createDirectories = function(callback) {
       });
       setTimeout(function(){ // to wait for above list of files to be created
         fs.mkdir(path.join(self.metaData.webinosRoot, "certificates", "external"), permission, function(err){
-           if(err) {logger.error(err);} else {
+           if(err) logger.error(err);
            fs.mkdir(path.join(self.metaData.webinosRoot,"certificates","internal"), permission, function(err){
-              if(err) {logger.error(err);}else {  callback(true);}
-           })}
+              if(err) logger.error(err);
+                callback(true);
+           });
         });
       }, 100)
      }, 50);
