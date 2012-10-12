@@ -22,5 +22,4 @@
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
   }
-, "engines" : { "node" : ">= 0.8.0" }
 }
