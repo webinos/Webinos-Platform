@@ -49,7 +49,6 @@ var PzpWSS = function() {
   var address;
   var csr;
   var self            = this;
-  var messageHandler;
 
   function prepMsg(from, to, status, message) {
     return {"type" : "prop",
@@ -94,7 +93,7 @@ var PzpWSS = function() {
         autoEnrollment(msg);
       }
     } else {
-      messageHandler.onMessageReceived(msg, msg.to);
+      self.messageHandler.onMessageReceived(msg, msg.to);
     }
   }
   function wsClose(connection, reason) {
@@ -291,13 +290,12 @@ var PzpWSS = function() {
       }
     }
   }
-  this.startWebSocketServer = function(_pzhId, _sessionId, _address, _ports, _csr, _messageHandler, callback) {
+  this.startWebSocketServer = function(_pzhId, _sessionId, _address, _ports, _csr, callback) {
     address   = _address;
     pzhId     = _pzhId;
     sessionId = _sessionId;
     ports     = _ports;
     csr       = _csr;
-    messageHandler = _messageHandler;
 
     startWebSocket(function(status, value) {
       if (status) {
