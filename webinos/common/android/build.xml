@@ -25,6 +25,7 @@
 				node_modules/expat2.js,
 				node_modules/xmldigsig.js,
 				node_modules/inherits/,
+				node_modules/mkdirp/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
