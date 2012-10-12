@@ -16,9 +16,6 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Short-term issues:
-// [WP-?] Monitor read/write channels.
-
 // Mid-term issues:
 // [WP-?] Implement resolveLocalFileSystemURL.
 

@@ -16,14 +16,9 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Short-term issues:
-// [WP-?] Monitor read/write channels.
-
 // Mid-term issues:
 // [WP-?] Implement resolveLocalFileSystemURL (and toURL!).
 // [WP-?] Support write/truncate abortion.
-
-// Long-term issues:
 // [WP-?] Add extension to mime type mapping.
 
 if (typeof webinos === "undefined") webinos = {}
