@@ -310,8 +310,10 @@ Config.prototype.createDirectories = function(callback) {
   try {
     fs.mkdir(wPath.webinosPath(),permission,function(err){});
     if (os.platform().toLowerCase() !== "android"){
-      fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
-      fs.chmod(wPath.webinosPath(),permission);
+      if (process.getuid) {
+        fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
+        fs.chmod(wPath.webinosPath(), permission);
+      }
     }
     setTimeout(function(){ // to wait for .webinos creation
      fs.mkdir(self.metaData.webinosRoot, permission, function(err){

@@ -84,8 +84,10 @@ var Log = function(filename) {
     var self = this;
     if (instanceName !== "" && (this.writeError === "" || this.writeInfo === "")){
       if (os.platform().toLowerCase() !== "android"){
-        fs.chown(wPath.webinosPath()+"/logs/", process.getuid(), process.getgid());
-        fs.chmod(wPath.webinosPath()+"/logs/",0777);
+        if (process.getuid) {
+          fs.chown(wPath.webinosPath()+"/logs/", process.getuid(), process.getgid());
+          fs.chmod(wPath.webinosPath()+"/logs/", 0777);
+        }
       }
       var filename = path.join(wPath.webinosPath()+"/logs/", instanceName+"_"+type+".json");
       try{
