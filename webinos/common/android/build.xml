@@ -24,6 +24,7 @@
 				node_modules/xml2js/,
 				node_modules/expat2.js,
 				node_modules/xmldigsig.js,
+				node_modules/inherits/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
