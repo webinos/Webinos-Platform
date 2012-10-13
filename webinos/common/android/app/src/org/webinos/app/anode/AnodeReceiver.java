@@ -78,6 +78,8 @@ public class AnodeReceiver extends BroadcastReceiver {
 				}
 				stopInstance(isolate);
 			}
+			/* temporary ... Kill the process */
+			System.exit(0); // This was added for the review meeting to free up the ports
 			return;
 		}
 		
