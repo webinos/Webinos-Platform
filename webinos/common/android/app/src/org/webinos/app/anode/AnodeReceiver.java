@@ -57,6 +57,8 @@ public class AnodeReceiver extends BroadcastReceiver {
 				for(Isolate isolate : AnodeService.getAll())
 					stopInstance(isolate);
 			}
+			/* temporary ... kill the process */
+			System.exit(0);
 			return;
 		}
 		if(ACTION_STOP.equals(action)) {
