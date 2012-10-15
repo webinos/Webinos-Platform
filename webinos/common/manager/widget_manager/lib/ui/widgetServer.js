@@ -5,8 +5,8 @@
     var http = require('http');
     var fs = require('fs');
     var path = require('path');
-    var common = require('../../../../../pzp/lib/session_common');
-    var log = new common.debug("widgetServer");
+    var logger = require('../../../../util/lib/logging.js')(__filename);
+
 
     // Default port
     var runtimeServerPort = 53510;
@@ -61,17 +61,17 @@
     
     // Write port to config file on successful connection
     server.on('listening', function () {
-      log.info('server started on port ' + runtimeServerPort);
+      logger.log('server started on port ' + runtimeServerPort);
       settings.setWRTPort(runtimeServerPort);
       callback("startedWRT",runtimeServerPort);
     });
 
     // Intercept port-in-use errors and try connecting on different port
     server.on('error', function (err) {
-      log.info(err);
+      logger.log(err);
       if (err.code === "EADDRINUSE") {
         runtimeServerPort++;
-        log.info("runtimeWebServer address in use, now trying port " + runtimeServerPort);
+        logger.log("runtimeWebServer address in use, now trying port " + runtimeServerPort);
         app.listen(runtimeServerPort, "localhost");
       }
     });

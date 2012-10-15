@@ -5,13 +5,12 @@ var webinosPZH = {
   commands: {
     authenticate: {
       google: function() {
-        console.log("authenticate google");
-        var options = {type: 'prop', payload: {status:'authenticate-google', to: to}};
-        webinos.session.message_send(options);
+        var options = {type: 'prop', payload: {status:'authenticate', message: "google"}};
+        webinos.session.message_send(options, to);
       },
       yahoo: function() {
-        var options = {type: 'prop', payload: {status:'authenticate-yahoo', to: to}};
-        webinos.session.message_send(options);
+        var options = {type: 'prop', payload: {status:'authenticate', message: "yahoo"}};
+        webinos.session.message_send(options, to);
       }
     }
   }
