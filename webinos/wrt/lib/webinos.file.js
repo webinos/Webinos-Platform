@@ -39,23 +39,23 @@ if (typeof webinos.file === "undefined") webinos.file = {}
     var request = self.rpc.createRPC(self, "requestFileSystem",
         { type : type, size : size })
     self.rpc.executeRPC(request, function (filesystem) {
-      successCallback(new FileSystem(self, filesystem.name))
+      successCallback(new FileSystem(self, filesystem.name));
     }, errorCallback)
   }
 
   Service.prototype.resolveLocalFileSystemURL = function (url, successCallback,
       errorCallback) {
-    var self = this
+    var self = this;
     var request = self.rpc.createRPC(self, "resolveLocalFileSystemURL",
-        { url : url })
+        { url : url });
     self.rpc.executeRPC(request, function (entry) {
-      var filesystem = new FileSystem(self, entry.filesystem.name)
+      var filesystem = new FileSystem(self, entry.filesystem.name);
       if (entry.isDirectory) {
-        successCallback(new DirectoryEntry(filesystem, entry.fullPath))
+        successCallback(new DirectoryEntry(filesystem, entry.fullPath));
       } else {
-        successCallback(new FileEntry(filesystem, entry.fullPath))
+        successCallback(new FileEntry(filesystem, entry.fullPath));
       }
-    }, errorCallback)
+    }, errorCallback);
   }
 
   function FileSystem(service, name) {
@@ -119,7 +119,7 @@ if (typeof webinos.file === "undefined") webinos.file = {}
   }
 
   Entry.prototype.toURL = function () {
-    return "webinos:" + this.filesystem.name + this.fullPath
+    return "webinos:" + this.filesystem.name + this.fullPath;
   }
 
   Entry.prototype.remove = function (successCallback, errorCallback) {
