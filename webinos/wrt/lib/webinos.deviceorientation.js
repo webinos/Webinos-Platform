@@ -27,8 +27,8 @@ WebinosDeviceOrientation.prototype.bindService = function (bindCB, serviceId) {
     
 	if (typeof bindCB.onBind === 'function') {
 		bindCB.onBind(this);
-	};
-}
+	}
+};
 
 function addEventListener(type, listener, useCapture) {
     
@@ -49,12 +49,12 @@ function addEventListener(type, listener, useCapture) {
 		}else{
 			console.log(type + ' not found');	
 		}
-};
+}
 
 //DEFINITION BASE EVENT
-WDomEvent = function(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp){
-	this.initEvent(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp);
-}
+WDomEvent = function (type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp) {
+    this.initEvent(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp);
+};
 
 WDomEvent.prototype.speed = 0;
 
@@ -66,12 +66,12 @@ WDomEvent.prototype.initEvent = function(type, target, currentTarget, eventPhase
     this.bubbles = bubbles;
     this.cancelable  = cancelable;
     this.timestamp = timestamp; 
-}
+};
 
 
 DeviceOrientationEvent = function(alpha, beta, gamma){
 	this.initDeviceOrientationEvent(alpha, beta, gamma);
-}
+};
 
 DeviceOrientationEvent.prototype = new WDomEvent();
 DeviceOrientationEvent.prototype.constructor = DeviceOrientationEvent;
@@ -84,23 +84,23 @@ DeviceOrientationEvent.prototype.initDeviceOrientationEvent = function(alpha, be
     
     var d = new Date();
     var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
-    var stamp = stamp + d.getUTCMilliseconds();
+    stamp = stamp + d.getUTCMilliseconds();
     
 	DeviceOrientationEvent.parent.initEvent.call(this,'deviceorientation', null, null, null, false, false, stamp);
-}
+};
 Acceleration = function(x,y,z){
 	this.x = x;
 	this.y = y;
 	this.z = z;
-}
+};
 RotationRate = function(alpha, beta, gamma){
 	this.alpha = alpha;
 	this.beta = beta;
 	this.gamma = gamma;
-}
+};
 DeviceMotionEvent = function(acceleration, accelerationIncludingGravity, rotationRate, interval){
 	this.initDeviceMotionEvent(acceleration, accelerationIncludingGravity, rotationRate, interval);
-}
+};
 DeviceMotionEvent.prototype = new WDomEvent();
 DeviceMotionEvent.prototype.constructor = DeviceOrientationEvent;
 DeviceMotionEvent.parent = WDomEvent.prototype; // our "super" property
@@ -112,11 +112,11 @@ DeviceMotionEvent.prototype.initDeviceMotionEvent = function(acceleration, accel
 	this.interval = interval;
     var d = new Date();
     var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
-    var stamp = stamp + d.getUTCMilliseconds();
+    stamp = stamp + d.getUTCMilliseconds();
 	DeviceOrientationEvent.parent.initEvent.call(this,'devicemotion', null, null, null, false, false, stamp);
-}
+};
 
-function removeEventListener(type, listener, useCapture) {
+function removeEventListener(type, listener, useCapture,callOnSuccess,callOnError) {
         console.log("LISTENER"+ listener);
         var refToBeDeleted = null;
 		for(var i = 0; i < _referenceMappingDo.length; i++){
@@ -139,10 +139,8 @@ function removeEventListener(type, listener, useCapture) {
 					break;			
 			}	
     }
-};
-
-function dispatchEvent(event) {
+}
+    function dispatchEvent(event) {
     //TODO
-};
-
+    }
 })();

@@ -18,30 +18,30 @@
 (function() {
 
 Vehicle = function (obj) {
-	this.base = WebinosService;
-	this.base(obj);
-}
+    this.base = WebinosService;
+    this.base(obj);
+};
 
 Vehicle.prototype = new WebinosService;
 Vehicle.prototype.bindService = function (bindCB, serviceId) {
-	// actually there should be an auth check here or whatever, but we just always bind
-    
+    // actually there should be an auth check here or whatever, but we just always bind
+
     //METHODS
-	this.get = get;
-	this.addEventListener = addEventListener;
-	this.removeEventListener = removeEventListener;
+    this.get = get;
+    this.addEventListener = addEventListener;
+    this.removeEventListener = removeEventListener;
     this.requestGuidance = requestGuidance;
     this.findDestination = findDestination;
-	
+
     //OBJECTS (in case someone needs them)
     this.POI = POI;
     this.Address = Address;
     this.LatLng = LatLng;
-    
-	if (typeof bindCB.onBind === 'function') {
-		bindCB.onBind(this);
-	};
-}
+
+    if (typeof bindCB.onBind === 'function') {
+        bindCB.onBind(this);
+    }
+};
 
 
 var _referenceMapping = new Array();
@@ -72,8 +72,8 @@ function addEventListener(vehicleDataId, eventHandler, capture) {
 			console.log('# of references' + _referenceMapping.length);
 			
 			rpc.onEvent = function (vehicleEvent) {
-				eventHandler(vehicleEvent);
-			}
+                eventHandler(vehicleEvent);
+            };
 			webinos.rpcHandler.registerCallbackObject(rpc);
 			
 			webinos.rpcHandler.executeRPC(rpc);
@@ -83,7 +83,7 @@ function addEventListener(vehicleDataId, eventHandler, capture) {
 	
 }
 		
-function removeEventListener(vehicleDataId, eventHandler, capture){
+function removeEventListener(vehicleDataId, eventHandler, capture,callOnSuccess,callOnError){
 	var refToBeDeleted = null;
 	for(var i = 0; i < _referenceMapping.length; i++){
 		console.log("Reference" + i + ": " + _referenceMapping[i][0]);
@@ -96,10 +96,10 @@ function removeEventListener(vehicleDataId, eventHandler, capture){
 				var rpc = webinos.rpcHandler.createRPC(this, "removeEventListener", arguments);
 				webinos.rpcHandler.executeRPC(rpc,
 					function(result){
-						callOnSuccess(result);
+						if (callOnSuccess) callOnSuccess(result);
 					},
 					function(error){
-						callOnError(error);
+						if (callOnError) callOnError(error);
 					}
 				);
 				break;			

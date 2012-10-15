@@ -16,15 +16,14 @@
 
 		if (typeof bindCB.onBind === 'function') {
 			bindCB.onBind(this);
-		};
-	}
+		}
+	};
 
 	function getComponents (aspect, successCallback, errorCallback)	{
 		var rpc = webinos.rpcHandler.createRPC(this, "devicestatus.getComponents", [aspect]);
 		webinos.rpcHandler.executeRPC(rpc,
 			function (params) { successCallback(params); }
 		);
-		return;
 	}
 
 	function isSupported (aspect, property, successCallback)
@@ -34,7 +33,6 @@
 			rpc, 
 			function (res) { successCallback(res); }
 		);
-		return;
 	}
 
 	function getPropertyValue (successCallback, errorCallback, prop) {
@@ -44,19 +42,18 @@
 			function (params) { successCallback(params); },
 			function (err) { errorCallback(err); }
 		);
-		return;
-	};
+	}
 
 	PropertyValueSuccessCallback = function () {};
 
 	PropertyValueSuccessCallback.prototype.onSuccess = function (prop) {
-		return;
+
 	};
 
 	ErrorCallback = function () {};
 
 	ErrorCallback.prototype.onError = function (error) {
-		return;
+
 	};
 
 	DeviceAPIError = function () {

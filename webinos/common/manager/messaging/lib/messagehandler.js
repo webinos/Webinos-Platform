@@ -127,7 +127,6 @@
 
 	/**
 	 * Function to get own identity.
-	 * @param
 	 */
 	MessageHandler.prototype.getOwnId = function () {
 		return this.ownId;
@@ -267,7 +266,7 @@
 					else
 					{
 						var own_addr = this.self.split(this.separator);
-						var own_pzh = own_addr[0]
+						var own_pzh = own_addr[0];
 						if (forwardto !== own_pzh) {
 							forwardto = own_pzh;
 						}
@@ -372,7 +371,7 @@
 						else
 						{
 							var own_addr = this.self.split(this.separator);
-							var own_pzh = own_addr[0]
+							var own_pzh = own_addr[0];
 							if (forwardto !== own_pzh) {
 								forwardto = own_pzh;
 							}

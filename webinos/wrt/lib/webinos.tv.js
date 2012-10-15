@@ -44,7 +44,7 @@
 		}, function(error) {
 			if(errorCallback) errorCallback();
 		});
-		return;
+
 	};
 	
 	//TODO: only internal temporarily use!
@@ -57,7 +57,7 @@
 		}, function(error) {
 			if(errorCallback) errorCallback();
 		});
-		return;
+
 	};
 
 	/**
@@ -71,7 +71,7 @@
 	TVDisplaySuccessCB.prototype.onSuccess = function(channel) {
 		// TODO: Add your application logic here!
 
-		return;
+
 	};
 
 	// TODO: does not conform API Spec, but needs to be added!
@@ -91,7 +91,7 @@
 		webinos.rpcHandler.registerCallbackObject(rpc);
 
 		webinos.rpcHandler.executeRPC(rpc);
-		return;
+
 	};
 
 	/**
@@ -111,7 +111,7 @@
 			successCallback(params);
 		}, function(error) {
 		});
-		return;
+
 	};
 
 	/**
@@ -130,7 +130,7 @@
 	TVSuccessCB.prototype.onSuccess = function(sources) {
 		// TODO: Add your application logic here!
 
-		return;
+
 	};
 
 	/**
@@ -149,7 +149,7 @@
 	TVErrorCB.prototype.onError = function(error) {
 		// TODO: Add your application logic here!
 
-		return;
+
 	};
 
 	/**
@@ -312,7 +312,7 @@
 			bubbles, cancelable, channel) {
 		// TODO: Add your application logic here!
 
-		return;
+
 	};
 	
 	/**

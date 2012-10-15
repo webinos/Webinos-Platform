@@ -41,7 +41,7 @@
                         webinos.discovery.findServices(caller.serviceType, caller.callback, caller.options, caller.filter);
                 }
                 callerCache = [];
-        }
+        };
 
     ServiceDiscovery.prototype.findServices = function (serviceType, callback, options, filter) {
         var that = this;
@@ -95,8 +95,9 @@
                 var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
                 var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
 
-                var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
-                typeMap['http://webinos.org/api/context'] = Context;
+                // TODO: Get the proper context when ready
+                //var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
+                //typeMap['http://webinos.org/api/context'] = Context;
             }
 
             var ServiceConstructor = typeMap[baseServiceObj.api];
@@ -133,7 +134,7 @@
         rpc.serviceAddress = serviceAddress;
         this.rpcHandler.executeRPC(rpc);
 
-        return;
+
     };
 
     var DiscoveryError = function(code, message) {

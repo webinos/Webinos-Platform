@@ -29,16 +29,16 @@
   Contacts.prototype = new WebinosService;
 
   Contacts.prototype.bindService = function (bindCB, serviceId) {
-	  // actually there should be an auth check here or whatever, but we just always bind
-	  this.authenticate = authenticate;
-	  this.isAlreadyAuthenticated = isAlreadyAuthenticated;
-	  this.getAllContacts = getAllContacts;
-	  this.find = find;
+      // actually there should be an auth check here or whatever, but we just always bind
+      this.authenticate = authenticate;
+      this.isAlreadyAuthenticated = isAlreadyAuthenticated;
+      this.getAllContacts = getAllContacts;
+      this.find = find;
 
-	  if (typeof bindCB.onBind === 'function') {
-		  bindCB.onBind(this);
-	  };
-  }
+      if (typeof bindCB.onBind === 'function') {
+          bindCB.onBind(this);
+      }
+  };
 
   
 
@@ -58,10 +58,8 @@
     {
       errorCB(error);
     });
-  };
-  
-  
-  /**
+  }
+    /**
    * returns true if contacts service is already authenticated with GMail
    * or a valid address book file is aready open
    * TODO this method has to be removed when user profile will handle this
@@ -77,9 +75,8 @@
     {
       errorCB(error);
     });
-  };
-
-  /**
+  }
+    /**
    * returns a list of all contact
    * TODO remove once debugging and testing are successfull
    * */
@@ -95,12 +92,8 @@
      {
        errorCB(error);
      });
-   };
-
-  
-
-
-  /**
+   }
+    /**
    * return a list of contacts matching some search criteria
    * 
    * TODO full W3C specs
@@ -117,6 +110,5 @@
     {
       errorCB(error);
     });
-  };
-
+  }
 }());

@@ -41,15 +41,15 @@
 	};
 
 	/**
-	 * Creates a new unique identifier to be used for RPC requests and responses.
-	 * @function
-	 * @private
-	 * @param used for recursion
-	 */
-	var _getNextID = function(a) {
-	    // implementation taken from here: https://gist.github.com/982883
-        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,_getNextID);
-	}
+     * Creates a new unique identifier to be used for RPC requests and responses.
+     * @function
+     * @private
+     * @param used for recursion
+     */
+    var _getNextID = function (a) {
+        // implementation taken from here: https://gist.github.com/982883
+        return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, _getNextID);
+    };
 
 	var _registerObject = function (callback) {
 		if (!callback) {
@@ -173,34 +173,34 @@
 	};
 
 	/**
-	 * Get all registered objects.
-	 *
-	 * Objects are returned in a key-value map whith service type as key and
-	 * value being an array of objects for that service type.
-	 */
-	Registry.prototype.getRegisteredObjectsMap = function() {
-		return this.objects;
-	}
+     * Get all registered objects.
+     *
+     * Objects are returned in a key-value map whith service type as key and
+     * value being an array of objects for that service type.
+     */
+    Registry.prototype.getRegisteredObjectsMap = function () {
+        return this.objects;
+    };
 
 	/**
-	 * Get service matching type and id.
-	 * @param serviceTyp Service type as string.
-	 * @param serviceId Service id as string.
-	 */
-	Registry.prototype.getServiceWithTypeAndId = function(serviceTyp, serviceId) {
-		var receiverObjs = this.objects[serviceTyp];
-		if (!receiverObjs)
-			receiverObjs = [];
+     * Get service matching type and id.
+     * @param serviceTyp Service type as string.
+     * @param serviceId Service id as string.
+     */
+    Registry.prototype.getServiceWithTypeAndId = function (serviceTyp, serviceId) {
+        var receiverObjs = this.objects[serviceTyp];
+        if (!receiverObjs)
+            receiverObjs = [];
 
-		var filteredRO = receiverObjs.filter(function(el, idx, array) {
-			return el.id === serviceId;
-		});
+        var filteredRO = receiverObjs.filter(function (el, idx, array) {
+            return el.id === serviceId;
+        });
 
-		if (typeof filteredRO[0] === 'undefined')
-			return receiverObjs[0];
+        if (typeof filteredRO[0] === 'undefined')
+            return receiverObjs[0];
 
-		return filteredRO[0];
-	}
+        return filteredRO[0];
+    };
 
 	// Export definitions for node.js
 	if (typeof module !== 'undefined'){

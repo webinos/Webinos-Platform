@@ -38,7 +38,7 @@
 	 * Requests user authentication
 	 * @name authenticate
 	 * @function
-	 * @param usename Username
+	 * @param username Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
 	 */
@@ -61,7 +61,7 @@
 	 * Reports if user is authenticated
 	 * @name isAuthenticated
 	 * @function
-	 * @param usename Username
+	 * @param username Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
 	 */
@@ -84,7 +84,7 @@
 	 * Retrieves user authentication status (when and how he or she was last authenticated)
 	 * @name getAuthenticationStatus
 	 * @function
-	 * @param usename Username
+	 * @param username Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
 	 */
