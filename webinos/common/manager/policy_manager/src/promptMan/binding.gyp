@@ -20,7 +20,7 @@
 			}],
 			[ 'OS=="linux"', {
 			  'sources': [            
-				'promptMan_Linux.cpp',
+				'promptMan.cc',
 			  ],
 			}],
 		],
