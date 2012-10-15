@@ -94,11 +94,9 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
       return;
     }
     self.fetchMetaData(webinosRoot, deviceName, function(status, value){
-      if (status && value && value.code=== "ENOENT") {//meta data does not exist
+      if (status && value && (value.code=== "ENOENT" || value.code=== "EACCES")) {//meta data does not exist
         createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);
       } else { //metaData not found
-        fs.chmod(wPath.webinosPath(), "0700");
-        fs.chmod(wPath.webinosPath()+"/logs", "0700");
         self.metaData= value;
         self.fetchCertificate("external", function(status, value) { if (status) { self.cert.external = value;} });
         self.fetchCertificate("internal", function(status, value) { if (status) { self.cert.internal = value;
@@ -107,7 +105,7 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
               self.fetchUserData(function(status, value) { if (status) { self.userData = value;
                 self.fetchUserPref(function(status, value) { if (status) { self.userPref = value;
                   self.fetchTrustedList(function(status, value) { if (status) { self.trustedList = value; return callback(true);
-                    }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+                  }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
                 }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
               }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
             }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
@@ -115,6 +113,8 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
         }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
       }
     });
+
+    //});
   });
 };
 
@@ -161,6 +161,7 @@ Config.prototype.fetchCertificate = function(ext_int, callback) {
       processData(data,callback);
     }
   });
+
 };
 
 Config.prototype.storeMetaData = function(data) {
@@ -305,38 +306,39 @@ Config.prototype.fetchUserPref = function (callback) {
 };
 
 Config.prototype.createDirectories = function(callback) {
-  var self = this, dirPath;
+  var self = this, dirPath, permission = 0777;
   try {
-    fs.readdir( wPath.webinosPath(), function(err) {
-      if ( err && err.code === "ENOENT" ) {
-        fs.mkdirSync(wPath.webinosPath(),"0700");
+    fs.mkdir(wPath.webinosPath(),permission,function(err){});
+    if (os.platform().toLowerCase() !== "android"){
+      if (process.getuid) {
+        fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
+        fs.chmod(wPath.webinosPath(), permission);
       }
-      fs.chmod(wPath.webinosPath(), "0700");
-      setTimeout(function(){
-        fs.readdir(  self.metaData.webinosRoot, function(err) {
-          if ( err && err.code === "ENOENT" ) {
-            fs.mkdirSync(self.metaData.webinosRoot,"0700");
-          }
-
-          fs.chmod(self.metaData.webinosRoot, "0700");
-          setTimeout(function(){
-            var list =[ path.join(wPath.webinosPath(),"logs"),  path.join(self.metaData.webinosRoot, "wrt"),path.join(self.metaData.webinosRoot, "policies"),
-              path.join(self.metaData.webinosRoot, "certificates"),  path.join(self.metaData.webinosRoot,"userData"), path.join(self.metaData.webinosRoot, "keys"),
-              path.join(self.metaData.webinosRoot, "certificates", "external"), path.join(self.metaData.webinosRoot,"certificates","internal")];
-
-            list.forEach(function(name){
-              fs.readdir(name, function(err) {
-                if ( err && err.code === "ENOENT" ) {
-                  fs.mkdirSync(name,"0700");
-                }
-                fs.chmod(name, "0700");
-              });
-            });
-            setTimeout(function(){callback(true);}, 300);
-          }, 50);
+    }
+    setTimeout(function(){ // to wait for .webinos creation
+     fs.mkdir(self.metaData.webinosRoot, permission, function(err){
+       if(err) logger.error(err);
+     });
+     setTimeout(function(){  // to wait for webinos root to be created
+      var list =[ path.join(wPath.webinosPath(),"logs"),  path.join(self.metaData.webinosRoot, "wrt"),path.join(self.metaData.webinosRoot, "policies"),
+        path.join(self.metaData.webinosRoot, "certificates"),  path.join(self.metaData.webinosRoot,"userData"), path.join(self.metaData.webinosRoot, "keys")];
+      list.forEach(function(name){
+        fs.mkdir(name, permission,function(err){
+          if(err && name !==  path.join(wPath.webinosPath(),"logs")) logger.error(err)
         });
-      }, 50);
-    });
+      });
+      setTimeout(function(){ // to wait for above list of files to be created
+        fs.mkdir(path.join(self.metaData.webinosRoot, "certificates", "external"), permission, function(err){
+           if(err) logger.error(err);
+           fs.mkdir(path.join(self.metaData.webinosRoot,"certificates","internal"), permission, function(err){
+              if(err) logger.error(err);
+                callback(true);
+           });
+        });
+      }, 100)
+     }, 50);
+    }, 50);
+
   } catch (err){
     return callback(false, err.code);
   }

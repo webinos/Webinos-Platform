@@ -34,7 +34,8 @@ try {
   wPath       = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
   wId         = webinos.local.require(webinos.local.util.location, "lib/webinosId.js");
 }
-var instanceName="";
+var writeInfo, writeError;
+
 var Log = function(filename) {
   function getLineNumber () {
     var error = new Error();
@@ -46,17 +47,13 @@ var Log = function(filename) {
 
   var logging = {
     name:filename,
-    id:"",
-    writeError:"" ,
-    writeInfo: ""
+    id:""
   };
-
   logging.addId   = function(id) {
     this.id = id;
   };
-
-  logging.addType = function(name) {
-    instanceName = name;
+  logging.addType = function(name ){
+     new LogInstance(name);
   };
   logging.error = function(msg) {
     var date = new Date(), name;
@@ -81,42 +78,10 @@ var Log = function(filename) {
     this.writeLog("info", "<p>"+formattedMsg+"</p>");
   };
   logging.writeLog = function(type, msg) {
-    var self = this;
-    if (instanceName !== "" && (this.writeError === "" || this.writeInfo === "")){
-      var filename = path.join(wPath.webinosPath()+"/logs/", instanceName+"_"+type+".json");
-      try{
-        var split = (process.version.split(".") && process.version.split(".")[1]) || "'0.6";
-        var nodeVersionResolve = (parseInt(split) >= 8)? fs: path;
-        nodeVersionResolve.exists(filename, function(status){
-          // If file does not exist, we create it , create write stream does not create file directly :) ..
-          if (!status) {
-            fs.writeFile(filename, msg, function(err){
-              if (type === "error") {
-                self.writeError = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
-              } else {
-                self.writeInfo  = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
-              }
-            });
-          } else {
-            if (type === "error") {
-              self.writeError = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
-              self.writeError.write(msg);
-            } else {
-              self.writeInfo  = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
-              self.writeInfo.write(msg);
-            }
-          }
-        });
-      } catch (err){
-        console.log("Error Initializing logs" + err);
-      }
-    } else {
-      if(self.writeError && type === "error") {
-        self.writeError.write(msg);
-      } else if (self.writeIfo && type === "info"){
-        self.writeInfo.write(msg);
-      }
-
+    if(writeError && type === "error") {
+      writeError.write(msg);
+    } else if (writeInfo && type === "info"){
+      writeInfo.write(msg);
     }
   };
   logging.fetchLog = function (logType, webinosType, friendlyName, callback){
@@ -137,5 +102,43 @@ var Log = function(filename) {
   return logging;
 };
 
-
+var LogInstance = function(name) {
+  if (os.platform().toLowerCase() !== "android"){
+    if (process.getuid) {
+      fs.chown(wPath.webinosPath()+"/logs/", process.getuid(), process.getgid());
+      fs.chmod(wPath.webinosPath()+"/logs/", 0777);
+    }
+  }
+  try{
+    var split = (process.version.split(".") && process.version.split(".")[1]) || "6";
+    var nodeVersionResolve = (parseInt(split) >= 8)? fs: path;
+    var filename = path.join(wPath.webinosPath()+"/logs/", name+"_error.json");
+    nodeVersionResolve.exists(filename, function(err){
+      if(!err){
+        fs.writeFile(filename, function(err){
+          if(!err) {
+            writeError = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+          }
+        });
+      } else{
+        writeError = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+      }
+    });
+    filename = path.join(wPath.webinosPath()+"/logs/", name+"_info.json");
+    nodeVersionResolve.exists(filename, function(err){
+      if(!err){
+        console.log(err),
+        fs.writeFile(filename, function(err){
+          if(!err) {
+            writeInfo = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+          }
+        });
+      } else{
+        writeInfo = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});
+      }
+    });
+  } catch (err){
+    console.log("Error Initializing logs" + err);
+  }
+};
 module.exports = Log;
