@@ -628,6 +628,9 @@ var Pzp = function () {
   this.getPath = function(){
     return config.metaData.webinosRoot;
   };
+  this.getConfig = function(){
+	return config;
+  };
   /**
    * Initializes PZP WebSocket Server and then tries connecting with the PZH hub
    * Starting PZP means starting web socket server
@@ -696,7 +699,6 @@ exports.getWebinosPath = function() {
   return pzpInstance.getPath();
 };
 
-
-
-
-
+exports.getWebinosConfig = function() {
+  return pzpInstance.getConfig();
+};
