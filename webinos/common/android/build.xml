@@ -25,6 +25,7 @@
 				node_modules/webinos/,
 				node_modules/expat2.js,
 				node_modules/xmldigsig.js,
+				node_modules/node-uuid/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
