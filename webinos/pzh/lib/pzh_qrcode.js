@@ -42,7 +42,7 @@ function create(url, code, cb) {
 
 function generateRandomCode() {
   "use strict";
-  return crypto.randomBytes(8).toString("base64");
+  return crypto.randomBytes(3).toString("hex").toUpperCase();
 }
 
 // Generate me a random code.  I do hope this is secure...
