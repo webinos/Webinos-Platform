@@ -41,6 +41,9 @@
     var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
     var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
+
+    var webinos = require("find-dependencies")(__dirname);
+    var content = webinos.global.require(webinos.global.util.location, "lib/content.js");
     
     var wss;
 
@@ -116,27 +119,15 @@
     exports.start = start;
     exports.wss = wss;
 
-    var mimeTypes = [];
-    mimeTypes[".png"]  = "image/png";
-    mimeTypes[".gif"]  = "image/gif";
-    mimeTypes[".htm"]  = "text/html";
-    mimeTypes[".html"] = "text/html";
-    mimeTypes[".txt"]  = "text/plain";
-    mimeTypes[".png"]  = "image/png";
-    mimeTypes[".js"]   = "application/x-javascript";
-    mimeTypes[".css"]  = "text/css";
-
     /**
      * Gets the MIME type for a file.
      * @private
      * @function
-     * @param {string} file The filename.
+     * @param {string} filename The filename.
      */
-    function mimeType(file) {
+    function mimeType(filename) {
     	logger.verbose("Entering mimeType function");
-    	var ext = path.extname(file);
-    	var type = mimeTypes[ext] || "text/plain";
-    	logger.debug("Determined mime type of ext " + ext + " to be " + type)
+        content.getContentType(filename);
     	logger.verbose("Leaving mimeType function");
     }
 })();
