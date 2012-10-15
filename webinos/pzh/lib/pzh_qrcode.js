@@ -23,6 +23,8 @@
 var crypto  = require("crypto");
 var path    = require("path");
 
+var pzh_api = require("./pzh_internal_apis.js");
+
 var pzh_qrcode = exports;
 
 function create(url, code, cb) {
@@ -61,7 +63,7 @@ pzh_qrcode.addPzpQR = function(pzh, connection) {
       create(url, code, function(err, qrimg) {
         if (err === null) {
           var message = {
-            name: pzh.sessionId, 
+            name: pzh.getSessionId(),
             img: qrimg,
             result: "success"
             };
@@ -93,9 +95,9 @@ pzh_qrcode.addPzpQRAgain = function(pzh, next) {
   var code = generateRandomCode();
 
   pzh.expecting.setExpectedCode(code,function() {
-    pzh.getMyUrl(function(url) {
+    pzh_api.getMyUrl(pzh, function(url) {
       create(url, code, function(err, qrimg) {
-        next({to: pzh.config.serverName, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
+        next({to: url, cmd: "addPzpQR", payload:{err: err, img: qrimg, code: code}});
       });
     });
   }); 

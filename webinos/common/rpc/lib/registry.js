@@ -17,6 +17,11 @@
  ******************************************************************************/
 
 (function () {
+  var logger = console;
+  if (typeof module !== "undefined") {
+    var webinos_= require("find-dependencies")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 	/**
 	 * Registry for service objects. Used by RPC.
 	 * @constructor
@@ -24,7 +29,6 @@
 	 * @param parent PZH (optional).
 	 */
 	var Registry = function(parent) {
-
 		this.parent = parent;
 
 		/**
@@ -51,7 +55,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -91,7 +95,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -109,7 +113,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Removing: " + callback.api);
+		logger.log("Removing: " + callback.api);
 		var receiverObjs = this.objects[callback.api];
 
 		if (!receiverObjs)
@@ -143,8 +147,8 @@
 			this.registerObject(new Service(rpcHandler, module.params));
 		}
 		catch (error) {
-			console.log('INFO: [Registry] '+error);
-			console.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
+			logger.log('INFO: [Registry] '+error);
+			logger.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
 		}
 	};
 
@@ -157,15 +161,13 @@
 		if (!modules) return;
 
 		var services = load(modules);
-
 		for (var i = 0; i < services.length; i++){
 			try {
 				var Service = services[i];
 				_registerObject.call(this, new Service(rpcHandler, modules[i].params));
-			}
-			catch (error) {
-				console.log('INFO: [Registry] '+error);
-				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error);
+			}catch (error){
+				logger.error(error);
+				logger.error("Could not load module " + modules[i].name + " with message: " + error );
 			}
 		}
 	};
