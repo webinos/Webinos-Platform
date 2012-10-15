@@ -18,8 +18,14 @@
  *******************************************************************************/
 var os = require('os');
 exports.fetchDeviceName = function(type, name, callback) {
-  //Get Android devices identity
-  if(type === "Pzp" && (os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android")){
+  if (toString.call(name) === '[object String]' && name.length) {
+    // give back friendly name if it exists
+    callback(name);
+    return;
+  }
+
+  if (type === "Pzp" && (os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android")){
+    // Get Android devices identity
     var bridge = require("bridge");
     /* If WiFi Mac address is prefered
      * var prop = {
@@ -33,7 +39,7 @@ exports.fetchDeviceName = function(type, name, callback) {
     };
 
     function onsuccess(prop_value, prop){
-      callback (prop_value + "_"+ type); //devicename_type
+      callback (prop_value + "_"+ type);
     }
 
     function onerror(){
@@ -43,9 +49,9 @@ exports.fetchDeviceName = function(type, name, callback) {
 
     var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
     devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-  } else  if ((type === "Pzp" || type === "PzhP")){
-    callback (os.hostname() + "_"+ type); //devicename_type
-  } else {
-    callback( name);
+
+  } else if ((type === "Pzp" || type === "PzhP")){
+    // create a default name
+    callback (os.hostname() + "_"+ type);
   }
 };
