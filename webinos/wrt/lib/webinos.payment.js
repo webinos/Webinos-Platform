@@ -37,28 +37,30 @@
                 
                 if (typeof bindCB.onBind === 'function') {
                         bindCB.onBind(this);
-                };
-        }
+                }
+        };
 
 
     PaymentModule.prototype.createShoppingBasket = function (successCallback, errorCallback, serviceProviderID, customerID, shopID) {
-                rpcServiceProviderID=serviceProviderID;
-                rpcCustomerID=customerID;
-                rpcShopID=shopID;
-                
-                var arguments = new Array();
-                arguments[0]=rpcServiceProviderID;
-                arguments[1]=rpcCustomerID;
-                arguments[2]=rpcShopID;
-                var self = this;
-                var rpc = webinos.rpcHandler.createRPC(this, "createShoppingBasket", arguments);
-                webinos.rpcHandler.executeRPC(rpc,
-                                function (params){
-                                        successCallback(new ShoppingBasket(self));
-                                },
-                                function (error){errorCallback(error);}
-                );
-        }
+        rpcServiceProviderID = serviceProviderID;
+        rpcCustomerID = customerID;
+        rpcShopID = shopID;
+
+        var arguments = new Array();
+        arguments[0] = rpcServiceProviderID;
+        arguments[1] = rpcCustomerID;
+        arguments[2] = rpcShopID;
+        var self = this;
+        var rpc = webinos.rpcHandler.createRPC(this, "createShoppingBasket", arguments);
+        webinos.rpcHandler.executeRPC(rpc,
+            function (params) {
+                successCallback(new ShoppingBasket(self));
+            },
+            function (error) {
+                errorCallback(error);
+            }
+        );
+    };
     /**
      * The ShoppingItem captures the attributes of a single shopping product
      *
@@ -83,11 +85,11 @@
     /**
      * An id that allows the shop to identify the purchased item
      *
-     * 
+     *
      * No exceptions
-     * 
+     *
      */
-    ShoppingItem.prototype.productID = ""
+    ShoppingItem.prototype.productID = "";
 
     /**
      * A human-readable text to appear on the bill, so the user can easily see what they bought.
@@ -281,6 +283,8 @@
                 arguments[2]=rpcShopID;
                 arguments[3]=this;
                 var self = this;
+
+                var errorCallback = function(){};//TODO Modify signature to accept errorcb
     
                  // now call thr release on the server, in case it needs to do some clean-up there                       
                 var rpc = webinos.rpcHandler.createRPC(this, "release", arguments);

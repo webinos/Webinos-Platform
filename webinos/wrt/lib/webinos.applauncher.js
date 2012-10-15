@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 Andrï¿½ Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 
@@ -38,8 +38,8 @@
 	AppLauncherModule.prototype.bind = function(bindCB) {
 		if (typeof bindCB.onBind === 'function') {
 			bindCB.onBind(this);
-		};
-	};
+        }
+    };
 	
 	/**
 	 * Launches an application.
@@ -74,7 +74,7 @@
 	 * @returns Boolean whether application is installed.
 	 */
 	AppLauncherModule.prototype.appInstalled = function(applicationID){
-
+        return false; //TEMP FIX to pass jslint
 		//returns bool
 	};
 	

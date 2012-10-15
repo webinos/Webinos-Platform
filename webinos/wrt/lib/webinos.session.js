@@ -19,6 +19,7 @@
  webinos.session = {};
   var sessionid = null;
   var pzpId, pzhId;
+  var otherpzp;
   var serviceLocation;
   var listenerMap = {};
   var channel;
@@ -74,7 +75,7 @@
     return pzhId
   };
   webinos.session.getOtherPZP = function() {
-    return otherpzp
+      return otherpzp
   };
   webinos.session.addListener = function(statusType, listener) {
     var listeners = listenerMap[statusType] || [];
@@ -113,14 +114,10 @@
           callListenerForMsg(data)
         }
         break;
-      case "info":
-      ;
+      case "info": // TODO: Check if break is needed here!
       case "listPzh":
-      ;
       case "listAllPzps":
-      ;
       case "crashLog":
-      ;
       case "addPzpQR":
         callListenerForMsg(data);
         break;

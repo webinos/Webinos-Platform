@@ -52,7 +52,7 @@
 
 		if (typeof bindCB.onBind === 'function') {
 			bindCB.onBind(this);
-		};
+		}
 		
 	};
 

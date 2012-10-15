@@ -26,9 +26,9 @@
      * messaging/eventing system will be used
      */
     function createCommChannel(successCB) {
-        try {
+        /* try { //Commenting out as we don't have that yet...
             channel = new WebinosSocket();
-        } catch(e1) {
+        } catch(e1) {*/
 	        try {
 	            var port = parseInt(location.port) + 1;
 	            if (isNaN(port)) {
@@ -39,11 +39,13 @@
 	            	host = 'localhost';
 	            	port = 8081;
 	            }
+                // Fix port for windows WRT (d.kateros suggestion to include the webinos file) TODO: Remove this.
+                if (port == 53511) port = 8081;
 	            channel = new WebSocket("ws://" + host + ":" + port);
 	        } catch(e2) {
 	            channel  = new MozWebSocket('ws://'+window.location.hostname+':'+port);
 	        }
-        }
+       /* }  //From the exception*/
         webinos.session.setChannel(channel);
 
         channel.onmessage = function(ev) {

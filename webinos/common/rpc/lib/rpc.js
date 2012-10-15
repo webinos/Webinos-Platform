@@ -43,39 +43,39 @@
 //  }
 
 	/**
-	 * RPCHandler constructor
-	 *  @constructor
-	 *  @param parent The PZP object or optional else.
-	 */
-	_RPCHandler = function(parent, registry) {
-		/**
-		 * Parent is the PZP. The parameter is not used/optional on PZH and the
-		 * web browser.
-		 */
-		this.parent = parent;
+     * RPCHandler constructor
+     *  @constructor
+     *  @param parent The PZP object or optional else.
+     */
+    _RPCHandler = function (parent, registry) {
+        /**
+         * Parent is the PZP. The parameter is not used/optional on PZH and the
+         * web browser.
+         */
+        this.parent = parent;
 
-		/**
-		 * Registry of registered RPC objects.
-		 */
-		this.registry = registry;
+        /**
+         * Registry of registered RPC objects.
+         */
+        this.registry = registry;
 
-		/**
-		 * session id
-		 */
-		this.sessionId = '';
+        /**
+         * session id
+         */
+        this.sessionId = '';
 
-		/**
-		 * Used on the client side by executeRPC to store callbacks that are
-		 * invoked once the RPC finished.
-		 */
-		this.awaitingResponse = {};
+        /**
+         * Used on the client side by executeRPC to store callbacks that are
+         * invoked once the RPC finished.
+         */
+        this.awaitingResponse = {};
 
-		this.messageHandler = {
-				write: function() {
-					logger.log("could not execute RPC, messageHandler was not set.");
-				}
-		};
-	}
+        this.messageHandler = {
+            write:function () {
+                logger.log("could not execute RPC, messageHandler was not set.");
+            }
+        };
+    };
 
 	/**
 	 * Sets the writer that should be used to write the stringified JSON RPC request.
@@ -98,15 +98,15 @@
 	};
 
 	/**
-	 * Creates a new unique identifier to be used for RPC requests and responses.
-	 * @function
-	 * @private
-	 * @param used for recursion
-	 */
-	var getNextID = function(a) {
-	    // implementation taken from here: https://gist.github.com/982883
-        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,getNextID);
-	}
+     * Creates a new unique identifier to be used for RPC requests and responses.
+     * @function
+     * @private
+     * @param used for recursion
+     */
+    var getNextID = function (a) {
+        // implementation taken from here: https://gist.github.com/982883
+        return a ? (a ^ Math.random() * 16 >> a / 4).toString(16) : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, getNextID);
+    };
 
 	/**
 	 * Preliminary object to hold information to create JSONRPC request object.

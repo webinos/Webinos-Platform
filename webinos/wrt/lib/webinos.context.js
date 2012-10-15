@@ -22,18 +22,18 @@
 		this.base(obj);
     	this.rpcHandler = rpcHandler;
 	};
-	
+
 	Context.prototype = new WebinosService;
 	
 	Context.prototype.bindService = function (bindCB, serviceId) {
-		// actually there should be an auth check here or whatever, but we just always bind
-		this.find = find.bind(this);
-		this.executeQuery = executeQuery.bind(this);
-		
-		if (typeof bindCB.onBind === 'function') {
-			bindCB.onBind(this);
-		};
-	}
+        // actually there should be an auth check here or whatever, but we just always bind
+        this.find = find.bind(this);
+        this.executeQuery = executeQuery.bind(this);
+
+        if (typeof bindCB.onBind === 'function') {
+            bindCB.onBind(this);
+        }
+    };
 	
 	function find(params, successCB,errorCB) {
 		var rpc = this.rpcHandler.createRPC(this, "find",  params);

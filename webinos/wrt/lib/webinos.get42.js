@@ -46,8 +46,8 @@
 		
 		if (typeof bindCB.onBind === 'function') {
 			bindCB.onBind(this);
-		};
-	}
+		}
+	};
 	
 	/**
 	 * Get 42.
