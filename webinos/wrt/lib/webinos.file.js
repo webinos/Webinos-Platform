@@ -484,7 +484,6 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }, function (error) {
       self.error = error;
       self.readyState = FileWriter.DONE;
-      s
       self.dispatchEvent(new webinos.util.ProgressEvent("error"));
       self.dispatchEvent(new webinos.util.ProgressEvent("writeend"));
     });
