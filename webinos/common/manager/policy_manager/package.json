@@ -18,7 +18,7 @@
                  , "lib": "./lib"
                  , "src": "./src"
                  }
-, "main": "./lib/webinos.rpc.devicestatus.js"
+, "main": "./lib/policymanager.js"
 , "dependencies":
   {
   }
