@@ -65,7 +65,7 @@ var PzpWSS = function() {
       }
     }
   }
-  function wsMessage(connection, utf8Data) {
+  function wsMessage(connection, origin, utf8Data) {
     //schema validation
     var msg = JSON.parse(utf8Data);
     var invalidSchemaCheck = true;
@@ -90,7 +90,7 @@ var PzpWSS = function() {
       if(msg.payload.status === "registerBrowser") {
         connectedApp(connection);
       } else {
-        autoEnrollment(msg);
+        autoEnrollment(msg, origin);
       }
     } else {
       self.messageHandler.onMessageReceived(msg, msg.to);
@@ -190,7 +190,7 @@ var PzpWSS = function() {
         connectedApp(connection);
 
         connection.listener = {
-          onMessage: function(ev)   { wsMessage(connection, ev.data); },
+          onMessage: function(ev)   { wsMessage(connection, "android", ev.data); },
           onClose: function()       { wsClose(connection); },
           onError: function(reason) { logger.error(reason); }
         };
@@ -236,12 +236,21 @@ var PzpWSS = function() {
       connectedWebApp[msg.to].sendUTF(JSON.stringify(msg));
     }
   }
-  function autoEnrollment(query) {
+  function autoEnrollment(query, origin) {
     var msg, sendAdd;
     var cmd = query.payload.status;
     var to = query.to;
     var from = query.from;
     var value = query.payload.message;
+
+    var originUrl = url.parse(origin);
+    if (originUrl.hostname !== "localhost" && 
+            originUrl.hostname !== "127.0.0.1") {
+            
+        logger.error("Autoenrolment request from non-local origin: " 
+            + originUrl.hostname);
+        return;
+    }
 
     if (to && to.split('_')) {
       sendAdd = to.split('_')[0];
@@ -283,6 +292,11 @@ var PzpWSS = function() {
     req.end();
   }
 
+ function approveRequest(request) {
+    var requestor = request.host.split(":")[0]; // don't care about port.
+    return (requestor === "localhost" || requestor === "127.0.0.1");
+ }
+
  function sendAuthStatusToApp(to, value, status ) {
     var appId, msg = prepMsg(sessionId, "", "authStatus", {connected: status, pzhId: to, authCode: decodeURIComponent(value)});
     for (appId in connectedWebApp) {
@@ -308,15 +322,31 @@ var PzpWSS = function() {
             }
             wsServer = new WebSocketServer({
               httpServer: value,
-              autoAcceptConnections: true
+              autoAcceptConnections: false
             });
+            
+            wsServer.on("request", function(request) {
+                logger.log("Request for a websocket, origin: " + request.origin
+                    + ", host: " + request.host);
+                if (approveRequest(request)) {
+                    var connection = request.accept();
+                    logger.log("Request accepted");
+                    connectedApp(connection);
+                    connection.on("message", function(message) { 
+                        wsMessage(connection, request.origin, message.utf8Data); 
+                    });
+                    connection.on("close", function(reason, description) { 
+                        wsClose(connection, description) 
+                    });
+                } else {
+                    logger.error("Failed to accept websocket connection: " +
+                        "wrong host or origin");
+                }
+            });
+                
+            
 
-            wsServer.on("connect", function(connection) {
-              logger.log("connection accepted.");
-              connectedApp(connection);
-              connection.on("message", function(message) { wsMessage(connection, message.utf8Data); });
-              connection.on("close", function(reason, description) { wsClose(connection, description) });
-            });
+            
 
             return callback(true);
           } else {
@@ -328,6 +358,8 @@ var PzpWSS = function() {
       }
     });
   };
+
+  
 
   this.sendConnectedApp= function(address, message) {
     if (connectedWebApp.hasOwnProperty(address)){
