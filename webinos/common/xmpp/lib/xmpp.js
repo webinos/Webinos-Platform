@@ -675,7 +675,7 @@
     	    feature.device = from;
     	    feature.owner = this.getBareJidFromJid(from);
     	    feature.local = false;
-    	    feature.displayName = displayName + "#" + id;
+            feature.displayName = displayName + "@" + from + "#" + id;
     	    feature.description = description;
     	    feature.remoteId = id;
     	    //feature.id = this.jid2Id(from) + '-' + name;
