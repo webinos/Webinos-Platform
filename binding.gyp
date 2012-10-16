@@ -18,6 +18,12 @@
           ],
         },
       ],
+      [ 'OS=="linux"', {
+        'dependencies': [ # Prompt man for Linux
+            'webinos/common/manager/policy_manager/src/promptMan/binding.gyp:promptMan',
+          ],
+      }],
+
     ],
    },
    {
@@ -46,6 +52,14 @@
             }],
         },
         ],
+        [ 'OS=="linux"', {
+            'copies': [{
+                'files': [
+                    'build/Release/promptMan.node',
+            ],
+            'destination': 'node_modules/',
+            }],
+        }],
     ],
     }, # end webinos_wrt
   ], 

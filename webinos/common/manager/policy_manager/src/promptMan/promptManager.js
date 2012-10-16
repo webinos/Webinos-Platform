@@ -21,14 +21,14 @@
 (function () {
 	"use strict";
 
-	var promptMan;
+	var promptManager;
 	var os = require('os');
 
-	promptMan = function() {
-	};
-
-	promptMan.prototype.display = function(message, choices ) {
+	promptManager = function() {
 		if(os.platform() === 'linux') {
+			//this.promptMan = require('./build/Release/promptMan.node');
+			this.promptMan = require('promptMan');
+			this.promptCore = new this.promptMan.PromptManInt();
 		}
 		else if(os.platform() === 'win32') {
 		}
@@ -36,7 +36,17 @@
 		}
 	};
 
-	exports.promptMan = promptMan;
+	promptManager.prototype.display = function(message, choices ) {
+		if(os.platform() === 'linux') {
+			return(this.promptCore.display(message, choices));
+		}
+		else if(os.platform() === 'win32') {
+		}
+		else if(os.platform() === 'android') {
+		}
+	};
+
+	exports.promptManager = promptManager;
 
 }());
 
