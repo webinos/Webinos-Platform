@@ -37,6 +37,9 @@ exports.getContentType = function(uri) {
 		case ".gif":
 			contentType = "image/gif";
 			break;
+		case ".svg":
+			contentType = "image/svg+xml";
+			break;
 	}
 	return {"Content-Type": contentType};
 }
