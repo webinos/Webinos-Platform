@@ -10,13 +10,16 @@ var fs = require('fs');
 var os = require('os');
 var url = require('url');
 var util = require('util');
-var common = require('../../../../pzp/lib/session_common');
 var pmlib = require('../lib/policymanager.js');
 var pm;
 var rootPath;
+var path = require("path");
+var webPath = require("../../../util/lib/webinosPath.js");
+
 
 // FILE NAMES DEFINITIONS
-var policyFile = common.webinosConfigPath()+"/policy.xml";
+var policyFile = path.join(webPath.webinosPath(), "policy.xml");
+
 var subjectsFile = "./subjects.json";
 var subjectsFileBackup = "./subjects.json.bak";
 var featuresFile = "./features.json";

@@ -27,8 +27,8 @@
 	var bridge = null;
 	var promptMan = null;
 	var path = require("path");
-	var pzp = require("../../../../pzp/lib/pzp.js");
-	var promptLib = require("../src/promptMan/promptMan.js");
+	var webPath = require("../../../util/lib/webinosPath.js");
+	var promptLib = require("../src/promptMan/promptManager.js");
 
 	policyManager = function() {
 		// Load the native module
@@ -46,10 +46,10 @@
 			this.promptMan = require('promptMan');
 		}
 		else {
-			this.promptMan = new promptLib.promptMan();
+			this.promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-		var policyFile = path.join(pzp.session.getWebinosPath(), policy, policy.xml);
+		var policyFile = path.join(webPath.webinosPath(), "policy.xml");
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 	};
 
@@ -60,46 +60,15 @@
 			if (noprompt == true)
 				promptcheck = false;
 		}
-/*
-		if (arguments.length > 1) {
-
-			var successCallbackParams = Array.prototype.slice.call(arguments).splice(3);
-
-			switch(res) {
-				case 0:		successCallback.apply(this, successCallbackParams);
-						break;
-
-				case 1:		errorCallback("SECURITY_ERR: " + res);
-						break;
-
-				case 2:
-				case 3:
-				case 4:		var child = exec("xmessage -buttons allow,deny -print 'Access request to " + request.resourceInfo.apiFeature  + "'",
-							function (error, stdout, stderr) {	
-								if (stdout === "allow\n") {
-									successCallback.apply(this, successCallbackParams);
-								}
-								else {
-									errorCallback("SECURITY_ERR: " + res);
-								}
-							});
-						break;
-
-				default:	errorCallback("SECURITY_ERR: " + res);
+		if(res>1 && res<5) {
+			if (this.promptMan && promptcheck) { // if there is a promptMan then show a message
+				var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
+				var choices = new Array();
+				choices[0] = "Allow";
+				choices[1] = "Deny";
+				res = this.promptMan.display(message, choices);
 			}
 		}
-		else {
-*/
-			if(res>1 && res<5) {
-				if (this.promptMan && promptcheck) { // if there is a promptMan then show a message
-					var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
-					var choices = new Array();
-					choices[0] = "Allow";
-					choices[1] = "Deny";
-					res = this.promptMan.display(message, choices);
-				}
-			}
-//		}
 		return (res);
 	};
 
