@@ -173,10 +173,12 @@ var PzpWSS = function() {
       }
     });
 
-    httpserver.listen(ports.pzp_webSocket, address, function() {
-      logger.log("httpServer listening at port "+ports.pzp_webSocket + " and hostname "+address);
+	httpserver.on("listening",function() {
+      logger.log("httpServer listening at port " + ports.pzp_webSocket + " and hostname " + address);
       return callback(true, httpserver);
-    });
+	});
+	
+    httpserver.listen(ports.pzp_webSocket, address);
   }
   function startAndroidWRT() {
     if(wrtServer) {

@@ -5,7 +5,7 @@
     var fs = require('fs');
     var path = require('path');
     var wm = require('../../../index.js');
-    var common = require('../../../../../../pzp/lib/session_common');
+    var pzp = require('../../../../../../pzp/lib/pzp');
     
     // ToDo - is there a 3rd party library we can use for this?
     var mimeTypes = {
@@ -34,7 +34,7 @@
       // Create and execute request for the file.
       var clientReq = http.get(options, function (clientResponse) {
           // Download to temporary folder.
-          var targetFilePath = common.webinosConfigPath() + '/widgetDownloads';
+          var targetFilePath = path.join(pzp.session.getWebinosPath(), '../widgetDownloads');
 
           try {
             // Create the target path if it doesn't already exist.
