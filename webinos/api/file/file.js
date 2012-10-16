@@ -24,6 +24,7 @@ var dependencies = require("find-dependencies")(__dirname)
 var pzp = dependencies.global.require(dependencies.global.pzp.location,
     "lib/pzp.js")
 
-LocalFileSystem.init(pathModule.join(pzp.session.getWebinosPath(), "userData","file"))
+LocalFileSystem.init(pathModule.join(pzp.session.getWebinosPath(),
+    "userData", "file"))
 
 exports.Service = require("./lib/exports/service.js")

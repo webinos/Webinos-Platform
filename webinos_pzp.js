@@ -158,16 +158,16 @@ function initializeWidgetServer() {
         // Write the websocket and widget server ports to file so the renderer can pick them up.
         var wrtConfig = {};
         wrtConfig.runtimeWebServerPort = wrtPort;
-        wrtConfig.pzpWebSocketPort = session.configuration.port.pzp_webSocket;
-        fs.writeFile((pzp.session.getWebinosPath()+'/wrt/webinos_runtime.json'), JSON.stringify(wrtConfig, null, ' '), function (err) {
+        wrtConfig.pzpWebSocketPort = pzp.session.getWebinosPorts().pzp_webSocket;
+        fs.writeFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
           if (err) {
-            log.error('error saving runtime configuration file: ' + err);
+            console.log('error saving runtime configuration file: ' + err);
           } else {
-            log.info('saved configuration runtime file');
+            console.log('saved configuration runtime file');
           }
         });
       } else {
-            log.error('error starting wrt server: ' + msg);
+            console.log('error starting wrt server: ' + msg);
       }
     });
   }

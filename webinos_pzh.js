@@ -61,7 +61,7 @@ _pzh_provider.startProvider(function(result, details) {
   if (result) {
     console.log("ZONE PROVIDER STARTED");
   } else {
-    console.log("ZONE PROVIDER FAILED STARTING "+ details);
+    console.log("ZONE PROVIDER FAILED TO START "+ details);
   }
 });
 
