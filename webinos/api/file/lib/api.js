@@ -19,9 +19,6 @@
 // Short-term issues:
 // [WP-?] Check non-absolute virtual path vulnerability.
 
-// Mid-term issues:
-// [WP-?] Implement resolveLocalFileSystemURL (and toURL?).
-
 // Long-term issues:
 // [WP-?] Add file system origin-specificity.
 // [WP-?] Support inter file system entry moving and copying?
@@ -51,7 +48,29 @@ exports.requestFileSystem = function (type, size, callback) {
 }
 
 exports.resolveLocalFileSystemURL = function (url, callback) {
-  // Not yet implemented.
+  var colon = url.indexOf(":")
+    , slash = url.indexOf("/")
+  var protocol = url.substr(0, colon)
+    , filesystem = url.substr(colon + 1, slash)
+    , fullPath = url.substr(slash)
+
+  if (protocol !== "webinos") {
+    return util.async(callback)(new util.CustomError("EncodingError"))
+  }
+
+  LocalFileSystem.readFileSystem("default", function (error, fileSystem) {
+    if (error) return callback(error)
+    fileSystem.readMetadata(fullPath, function (error, metadata) {
+      if (error) return callback(error)
+
+      var filesystem = new FileSystem(fileSystem.name)
+      if (metadata.isDirectory) {
+        callback(null, new DirectoryEntry(filesystem, fullPath))
+      } else {
+        callback(null, new FileEntry(filesystem, fullPath))
+      }
+    })
+  })
 }
 
 exports.getMetadata = function (entry, callback) {
@@ -135,10 +154,6 @@ exports.copyTo = function (source, parent, newName, callback) {
       }
     })
   })
-}
-
-exports.toURL = function (entry) {
-  // Not yet implemented.
 }
 
 exports.remove = function (entry, callback) {

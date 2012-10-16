@@ -16,14 +16,8 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Short-term issues:
-// [WP-?] Monitor read/write channels.
-
 // Mid-term issues:
-// [WP-?] Implement resolveLocalFileSystemURL (and toURL!).
 // [WP-?] Support write/truncate abortion.
-
-// Long-term issues:
 // [WP-?] Add extension to mime type mapping.
 
 if (typeof webinos === "undefined") webinos = {}
@@ -44,14 +38,24 @@ if (typeof webinos.file === "undefined") webinos.file = {}
     var self = this
     var request = self.rpc.createRPC(self, "requestFileSystem",
         { type : type, size : size })
-    self.rpc.executeRPC(request, function (fileSystem) {
-      successCallback(new FileSystem(self, fileSystem.name))
+    self.rpc.executeRPC(request, function (filesystem) {
+      successCallback(new FileSystem(self, filesystem.name));
     }, errorCallback)
   }
 
   Service.prototype.resolveLocalFileSystemURL = function (url, successCallback,
       errorCallback) {
-    // Not yet implemented.
+    var self = this;
+    var request = self.rpc.createRPC(self, "resolveLocalFileSystemURL",
+        { url : url });
+    self.rpc.executeRPC(request, function (entry) {
+      var filesystem = new FileSystem(self, entry.filesystem.name);
+      if (entry.isDirectory) {
+        successCallback(new DirectoryEntry(filesystem, entry.fullPath));
+      } else {
+        successCallback(new FileEntry(filesystem, entry.fullPath));
+      }
+    }, errorCallback);
   }
 
   function FileSystem(service, name) {
@@ -115,7 +119,7 @@ if (typeof webinos.file === "undefined") webinos.file = {}
   }
 
   Entry.prototype.toURL = function () {
-    // Not yet implemented.
+    return "webinos:" + this.filesystem.name + this.fullPath;
   }
 
   Entry.prototype.remove = function (successCallback, errorCallback) {

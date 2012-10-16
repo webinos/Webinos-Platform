@@ -67,7 +67,7 @@ http.createServer(function(request, response){
 		sendResponse(response, JSON.stringify(subjectListTmp));
 	}
 	else if (path=="/postSubjectData") {
-		console.log(subjectData);
+		//console.log(subjectData);
 		fs.writeFileSync(subjectsFile, subjectData);
 		sendResponse(response, "");
 	}
@@ -75,7 +75,7 @@ http.createServer(function(request, response){
 		sendResponse(response, JSON.stringify(featureListTmp));
 	}
 	else if (path=="/postFeatureData") {
-		console.log(subjectData);
+		//console.log(featureData);
 		fs.writeFileSync(featuresFile, featureData);
 		sendResponse(response, "");
 	}
@@ -106,6 +106,8 @@ function getPolicyTable() {
 	//console.log("getPolicyTable");
 	var policyTable = {};
 	var users = new Array();
+
+	pm.reloadPolicy();
 
 	for(var i=0; i<subjectList.subjects.length; i++) {
 		var userTmp = getUserTable(subjectList.subjects[i].userid, subjectList.subjects[i].apps);
@@ -156,7 +158,6 @@ function checkFeature(featureName, userId, appId) {
 	req.subjectInfo.userId = userId;
 	req.widgetInfo.id = appId;
 	req.resourceInfo.apiFeature = featureName;
-	res = pm.reloadPolicy();
 	res = pm.enforceRequest(req, true);
 	return(ruleEffectDescription(res));
 	//return(res);

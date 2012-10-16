@@ -121,7 +121,7 @@ var Provider = function(_hostname, _friendlyName) {
     config  = new session.configuration();
     config.setConfiguration(friendlyName, "PzhP", hostname, function (status, value) {
       if (!status) {
-        logger.error("setting configuration for the zone provider failed, needs deletion of the .webinos directory")
+        logger.error("setting configuration for the zone provider failed, the .webinos directory needs to be deleted.")
         return callback(status, value);
       } else {
         setParam("conn", function(status, options) {
@@ -132,7 +132,14 @@ var Provider = function(_hostname, _friendlyName) {
             server.on("error", function(error) {
               logger.error(error.message);
               if(error && error.code ==="EACCES") {
-                callback(false, "could not start zone provider due to access restrictions, check your access rights or change your configuration");
+                callback(false, "The personal zone provider service was " + 
+                "denied permission to use port " + config.userPref.ports.provider + " or port " + config.userPref.ports.provider_webServer +  "." +
+                "\nThis is usually because you either do not have super-user " + 
+                "access rights (on Linux, run using 'sudo') or another " + 
+                "process is using the same port.\n" + 
+                "Make sure that no other web servers are running and you " +
+                "have super-user privileges and try again.");
+                //could not start zone provider due to access restrictions, check your access rights or change your configuration");
               }
             });
 
@@ -281,16 +288,16 @@ var Provider = function(_hostname, _friendlyName) {
           loadWebServerCertificates(function(status, connParam){
             self.startWebServer(hostname, address, config.userPref.ports.provider_webServer, connParam, function (status, value) {
               if(status) {
-                logger.log("zone provider web server started");
+                logger.log("Personal zone provider web server started");
                 return callback(true);
               } else{
-                logger.log("zone provider web server failed to start " + value);
+                logger.log("Personal zone provider web server failed to start on port " + config.userPref.ports.provider_webServer + ", " + value);
                 return callback(false, value);
               }
             });
           });
         } else {
-          logger.error("zone provider tls server failed to start " + value);
+          logger.error("The personal zone provider TLS server failed to start.  Reason: " + value);
           return callback(false, value);
         }
       });
