@@ -40,6 +40,8 @@
 , "bin":
   { "webinos_pzh": "webinos_pzh.js"
   , "webinos_pzp": "webinos_pzp.js"
-  , "webinos_build": "webinos_build.js"
+  }
+, "scripts":
+  { "install": "node webinos_build.js"
   }
 }
