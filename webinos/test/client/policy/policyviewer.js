@@ -4,9 +4,11 @@ var policyData;
 var modifiedSubject;
 var modifiedUser;
 var modifiedApp;
+
 var modifiedFeature;
 var modifiedFeatureList;
 
+var selectedFeature = -1;
 
 $(document).ready(function() {
    
@@ -20,7 +22,7 @@ $(document).ready(function() {
 				editSubject();
 			}
 			else if(ui.index == 2) {
-				editFeature();
+				editFeature(-1);
 			}
 		}
 	});
@@ -84,7 +86,8 @@ function displayPolicyTable(userIndex) {
 		}
 		htmlPolicyTable += "</tr>";
 		for (var i=0; i<policyData.users[userIndex].apps[0].features.length; i++) {
-			htmlPolicyTable += "<tr><td>"+policyData.users[userIndex].apps[0].features[i].name+"</td>";
+			//htmlPolicyTable += "<tr><td>"+policyData.users[userIndex].apps[0].features[i].name+"</td>";
+			htmlPolicyTable += "<tr><td><a href=\"javascript:move2editFeature("+i+")\">"+policyData.users[userIndex].apps[0].features[i].name+"</a></td>";
 			for (var j=0; j<policyData.users[userIndex].apps.length; j++) {
 				htmlPolicyTable += "<td class=\""+policyData.users[userIndex].apps[j].features[i].res+"\"></td>";
 			}
@@ -97,9 +100,18 @@ function displayPolicyTable(userIndex) {
 }
 
 
+function move2editFeature(num) {
+	$('#tabs').tabs('select', 2);
+	editFeature(num);
+}
+
+
 function editSubject() {
 	$("#es-userSelection").html("Loading data...");
 	$("#es-editUser").html("");
+	modifiedSubject = null;
+	modifiedUser = null;
+	modifiedApp = null;
 	getSubjectData();
 }
 
@@ -136,6 +148,9 @@ function showEditUser() {
 
 
 function addUserUi(num) {
+	if(modifiedUser != null) {
+		saveUser();
+	}
 	if(num == -1) {
 		modifiedUser = {};
 		modifiedUser.userid = "";
@@ -167,7 +182,7 @@ function addUserUi(num) {
 	htmlAddUser += "</table>";
 	htmlAddUser += "<div id=\"showApps\"/>";
 	htmlAddUser += "";
-	htmlAddUser += "<button type=\"button\" id=\"ok\" onclick=\"javascript:saveUser();\">Save user</button>";
+	//htmlAddUser += "<button type=\"button\" id=\"ok\" onclick=\"javascript:saveUser();\">Save user</button>";
 	htmlAddUser += "<br><br>WARNING: if the user already exists it will be replaced!";
 	htmlAddUser += "<div id=\"editApps\"/>";
 	$("#es-editUser").html(htmlAddUser);
@@ -240,11 +255,14 @@ function saveUser() {
 		modifiedSubject.subjects.push(modifiedUser);
 	}
 	$("#es-editUser").html("");
-	showEditUser();
+	//showEditUser();
 }
 
 
 function saveSubject() {
+	if(modifiedUser != null) {
+		saveUser();
+	}
 	var reqUrl = "http://"+window.location.hostname+":7777/postSubjectData?subject="+JSON.stringify(modifiedSubject);
 	$.ajax({
 		url: reqUrl,
@@ -260,9 +278,12 @@ function saveSubjectSuccess() {
 }
 
 
-function editFeature() {
+function editFeature(num) {
 	$("#ef-featureSelection").html("Loading data...");
 	$("#ef-editFeature").html("");
+	selectedFeature = num;
+	modifiedFeature = null;
+	modifiedFeatureList = null;
 	getFeatureData();
 }
 
@@ -285,16 +306,25 @@ function featureDataReceived(data) {
 
 
 function showEditFeature() {
+	var displayEditFeature = false;
 	var htmlFeatureSelection = "Select feature: <select id=\"featureSelect\" onChange=\"addFeatureUi(this.options[this.selectedIndex].value)\">";
 	htmlFeatureSelection += "<option value=\"-2\">select...</option>";
 	htmlFeatureSelection += "<option value=\"-1\">new feature</option>";
 	for (var i=0; i<modifiedFeatureList.features.length; i++) {
-		htmlFeatureSelection += "<option value=\""+i+"\">"+modifiedFeatureList.features[i].name+"</option>";
+		htmlFeatureSelection += "<option value=\""+i+"\"";
+		if(i == selectedFeature) {
+			htmlFeatureSelection += " selected=\"selected\"";
+			displayEditFeature = true;
+		}
+		htmlFeatureSelection += ">"+modifiedFeatureList.features[i].name+"</option>";
 	}
 	htmlFeatureSelection += "</select><br>";
 	htmlFeatureSelection += "<br><button type=\"button\" id=\"saveFeatureList\" onclick=\"javascript:saveFeatureList();\">Save</button>";
 	htmlFeatureSelection += " (note: if you change tab without saving, your modifications will be lost)";
 	$("#ef-featureSelection").html(htmlFeatureSelection);
+	if(displayEditFeature) {
+		addFeatureUi(selectedFeature);
+	}
 }
 
 
