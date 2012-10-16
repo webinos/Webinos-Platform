@@ -57,6 +57,8 @@ public class AnodeReceiver extends BroadcastReceiver {
 				for(Isolate isolate : AnodeService.getAll())
 					stopInstance(isolate);
 			}
+			/* temporary ... kill the process */
+			System.exit(0);
 			return;
 		}
 		if(ACTION_STOP.equals(action)) {
@@ -76,6 +78,8 @@ public class AnodeReceiver extends BroadcastReceiver {
 				}
 				stopInstance(isolate);
 			}
+			/* temporary ... Kill the process */
+			System.exit(0); // This was added for the review meeting to free up the ports
 			return;
 		}
 		
