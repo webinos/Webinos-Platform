@@ -458,9 +458,14 @@ var Pzp = function () {
             clientSessionId = config.metaData.pzhId + "/"+ text.split(":")[1]; // Assuming in 1 zone;
             connectedPzp[clientSessionId]= {state: states[2], socket: conn};
             conn.id  = clientSessionId;
-            var msg = self.messageHandler.registerSender(sessionId, clientSessionId);
-            sendMessage(msg, clientSessionId);
-            logger.log("pzp server - " + clientSessionId + " connected") ;
+            try {
+              var msg = self.messageHandler.registerSender(sessionId, clientSessionId);
+              sendMessage(msg, clientSessionId);
+              logger.log("pzp server - " + clientSessionId + " connected");
+            } catch (e) {
+              logger.log("error: " + e.message);
+              conn.end();
+            }
           }
 
 
