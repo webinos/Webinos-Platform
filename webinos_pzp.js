@@ -22,6 +22,7 @@ var fs = require("fs"),
 var options = {};
 var pzpInstance;
 var pzp   = require("./webinos/pzp/lib/pzp");
+__EnablePolicyEditor = false;
 
 function help() {
   console.log("Usage: webinos_pzp [options]");
@@ -32,6 +33,7 @@ function help() {
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
   console.log("--preference=[option]    preference option (default hub, other option peer)");
   console.log("--widgetServer           start widget server");
+  console.log("--policyEditor           start policy editor server");
   process.exit();
 }
 
@@ -68,6 +70,9 @@ process.argv.forEach(function (arg) {
           break;
         case "--widgetServer":
           options.startWidgetServer = true;
+          break;
+        case "--policyEditor":
+          __EnablePolicyEditor = true;
           break;
       }
     }

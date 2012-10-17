@@ -19,8 +19,10 @@ _RPCHandler.prototype.handleMessage = function(){
         if (!pm) {
             var pmlib = require('./policymanager.js');
             pm = new pmlib.policyManager();
-	    var pvlib = require('../viewer/policyviewerserver.js');
-	    policyViewer = new pvlib.policyViewer(pm);
+	    if(__EnablePolicyEditor) {
+	        var pvlib = require('../viewer/policyviewerserver.js');
+	        policyViewer = new pvlib.policyViewer(pm);
+	    }
         }
 
         var rpcRequest = arguments[0];
