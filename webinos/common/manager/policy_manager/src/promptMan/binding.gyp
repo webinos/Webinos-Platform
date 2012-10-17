@@ -7,20 +7,22 @@
 	    # Needed declarations for the target
 	    'target_name': '<(module_name)',
 	    'product_name':'<(module_name)',
-		'conditions': [
-			[ 'OS=="darwin"', {
-			  'sources': [            
-				'promptMan_Darwin.cpp',
-			  ],
-			}],
-			[ 'OS=="win"', {
-			  'sources': [            
-				'promptMan_Win.cpp',
-			  ],
-			}],
+	    'conditions': [
 			[ 'OS=="linux"', {
 			  'sources': [            
 				'promptMan.cc',
+			  ],
+			}],
+
+			[ 'OS=="mac"', {
+			  'sources': [            
+				'promptMan_Darwin.cc',
+			  ],
+			}],
+
+			[ 'OS=="win"', {
+			  'sources': [            
+				'promptMan_Win.cpp',
 			  ],
 			}],
 		],

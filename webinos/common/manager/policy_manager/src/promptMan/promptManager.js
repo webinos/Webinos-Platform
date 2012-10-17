@@ -25,7 +25,7 @@
 	var os = require('os');
 
 	promptManager = function() {
-		if(os.platform() === 'linux') {
+		if(os.platform() === 'linux' || os.platform() === 'darwin') {
 			//this.promptMan = require('./build/Release/promptMan.node');
 			this.promptMan = require('promptMan');
 			this.promptCore = new this.promptMan.PromptManInt();
@@ -37,7 +37,7 @@
 	};
 
 	promptManager.prototype.display = function(message, choices ) {
-		if(os.platform() === 'linux') {
+		if(os.platform() === 'linux' || os.platform() === 'darwin' ) {
 			return(this.promptCore.display(message, choices));
 		}
 		else if(os.platform() === 'win32') {
