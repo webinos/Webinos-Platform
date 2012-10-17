@@ -31,6 +31,7 @@
     var pmCore = null;
     var pmNativeLib = null;
     var promptMan = null;
+    var policyFile = null;
 
 
 	var policyManager = function() {
@@ -52,9 +53,13 @@
 			this.promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-        var policyFile = path.join(webinosPath,"policies", "policy.xml");
+        	policyFile = path.join(webinosPath,"policies", "policy.xml");
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 	};
+
+	policyManager.prototype.getPolicyFilePath = function() {
+		return policyFile;
+	}
 
 	policyManager.prototype.enforceRequest = function(request, noprompt) {
 		var res = this.pmCore.enforceRequest(request);

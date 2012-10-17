@@ -1,3 +1,24 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2012 Telecom Italia SpA
+ *
+ ******************************************************************************/
+
+(function() {
+        "use strict";
 
 var featureList;
 var subjectList;
@@ -8,19 +29,21 @@ var subjectListTmp;
 var http = require('http');
 var fs = require('fs');
 var os = require('os');
+var path = require('path');
 var url = require('url');
 var util = require('util');
-var common = require('../../../../pzp/lib/session_common');
-var pmlib = require('../lib/policymanager.js');
 var pm;
 var rootPath;
 
+
 // FILE NAMES DEFINITIONS
-var policyFile = common.webinosConfigPath()+"/policy.xml";
-var subjectsFile = "./subjects.json";
-var subjectsFileBackup = "./subjects.json.bak";
-var featuresFile = "./features.json";
-var featuresFileBackup = "./features.json.bak";
+var policyFile = null;
+var subjectsFile = path.join(__dirname, "subjects.json");
+var subjectsFileBackup = path.join(__dirname, "subjects.json.bak");
+var featuresFile = path.join(__dirname, "features.json");
+var featuresFileBackup = path.join(__dirname, "features.json.bak");
+
+var policyViewer = null;
 
 /*
 // Console.log redefinition
@@ -33,54 +56,48 @@ if (os.platform()=='android') {
 }
 */
 
+	policyViewer = function(pmInstance) {
 
-try {
-	// TODO: add a parameter to start policyManager without prompt
-	pm = new pmlib.policyManager();
-	console.log("Policy manager: load success...");
-}
-catch(e) {
-	console.log("Policy manager: load error: "+e.message);
-	return;
-}
+	pm = pmInstance;
+	policyFile = pm.getPolicyFilePath();
 
 http.createServer(function(request, response){
 
 	var parsedUrl = url.parse(request.url, true);
-	var path = parsedUrl.pathname;
+	var reqpath = parsedUrl.pathname;
 	var subjectData = parsedUrl.query.subject;
 	var featureData = parsedUrl.query.feature;
-	console.log("Request received for path "+path);
-	if (path=="/writePolicy") {
+	console.log("Request received for path "+reqpath);
+	if (reqpath=="/writePolicy") {
 		// Writes the current policy to policy file and saves settings (in json files)
 		writePolicyFile();
 		sendResponse(response, "");
 	}
-	else if (path=="/getPolicyTable") {
+	else if (reqpath=="/getPolicyTable") {
 		readFeaturesArray();
 		readSubjectArray();
 		writePolicyFile();
 		// Builds the policy table and returns it as a json object
 		sendResponse(response, getPolicyTable());
 	}
-	else if (path=="/getSubjectData") {
+	else if (reqpath=="/getSubjectData") {
 		sendResponse(response, JSON.stringify(subjectListTmp));
 	}
-	else if (path=="/postSubjectData") {
+	else if (reqpath=="/postSubjectData") {
 		//console.log(subjectData);
 		fs.writeFileSync(subjectsFile, subjectData);
 		sendResponse(response, "");
 	}
-	else if (path=="/getFeatureData") {
+	else if (reqpath=="/getFeatureData") {
 		sendResponse(response, JSON.stringify(featureListTmp));
 	}
-	else if (path=="/postFeatureData") {
+	else if (reqpath=="/postFeatureData") {
 		//console.log(featureData);
 		fs.writeFileSync(featuresFile, featureData);
 		sendResponse(response, "");
 	}
 	else {
-		var filename = "../../../../test/client/policy"+path;
+		var filename = path.join(__dirname, "../../../../test/client/policy", reqpath);
 		fs.readFile(filename, function(err, file) {
 			if(err) {
 				console.log("Error: file "+filename+" not found");
@@ -301,4 +318,10 @@ function copyFile(source, destination) {
         fs.writeFileSync(destination, fs.readFileSync(source));
 }
 
+
+	};
+
+	exports.policyViewer = policyViewer;
+
+}());
 
