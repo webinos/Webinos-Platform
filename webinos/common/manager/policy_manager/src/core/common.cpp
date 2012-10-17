@@ -37,7 +37,7 @@ using namespace std;
  * Perl-like style of regular expression, like the same ECMAScript is.
  * */
 
-const bool compare_regexp(const string& target,const string& expression) {
+bool compare_regexp(const string& target,const string& expression) {
     struct slre slre;
     struct cap  captures[MAX_CAPTURES];
 
@@ -78,13 +78,13 @@ string glob2regexp (const string& glob) {
     return result;
 }
 
-const bool compare_globbing (const string& target,const string& expression) {
+bool compare_globbing (const string& target,const string& expression) {
     // TODO: implementation
    
     return compare_regexp(target,glob2regexp(expression));
 }
 
-const bool equals(const string& s1, const string& s2, const int mode) { 
+bool equals(const string& s1, const string& s2, const int mode) { 
     // TODO: string bag (remove spaces)
     // check regular expression according to BONDI spec
     switch (mode)
@@ -100,14 +100,14 @@ const bool equals(const string& s1, const string& s2, const int mode) {
     }
 }
 
-const bool contains(const strings& container, const strings& contained) {
+bool contains(const strings& container, const strings& contained) {
   for(strings::const_iterator it=contained.begin(); it!=contained.end(); it++) {
     if(!contains(container, *it)) return false;
   }
   return true;
 }
 
-const int string2strcmp_mode(const string& s){
+int string2strcmp_mode(const string& s){
 	if(s == "glob")
 		return STRCMP_GLOBBING;
 	if(s == "equal")
