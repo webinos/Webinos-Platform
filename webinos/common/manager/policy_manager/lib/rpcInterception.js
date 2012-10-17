@@ -2,6 +2,7 @@
     "use strict";
 
     var pm = null;
+    var policyViewer = null;
 
     var getNextID = function(a) {
     // implementation taken from here: https://gist.github.com/982883
@@ -18,6 +19,8 @@ _RPCHandler.prototype.handleMessage = function(){
         if (!pm) {
             var pmlib = require('./policymanager.js');
             pm = new pmlib.policyManager();
+	    var pvlib = require('../viewer/policyviewerserver.js');
+	    policyViewer = new pvlib.policyViewer(pm);
         }
 
         var rpcRequest = arguments[0];
