@@ -123,6 +123,7 @@ var Pzp = function () {
     registry.registerObject(discovery);
     registry.loadModules(loadModules, rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(rpcHandler); // handler for all things message
+    webinos.global.require(webinos.global.manager.policy_manager.location); //initializes the policy manager
     webinos.global.require(webinos.global.manager.context_manager.location);//initializes context manager
   }
 

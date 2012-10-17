@@ -24,18 +24,14 @@
     var exec = require('child_process').exec;
     var os = require('os');
     var path = require('path');
-    var webinos_= require('find-dependencies')(__dirname);
-    var webinosPath = webinos_.local.require(webinos_.local.util.location, "lib/webinosPath.js").webinosPath();
-    var promptLib = webinos_.local.require(webinos_.local.manager.policy_manager.location,'src/promptMan/promptManager.js');
+    var dependencies= require('find-dependencies')(__dirname);
+    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
+    var promptLib = dependencies.local.require(dependencies.local.manager.policy_manager.location,'src/promptMan/promptManager.js');
     var bridge = null;
     var pmCore = null;
     var pmNativeLib = null;
     var promptMan = null;
 
-    var getNextID = function(a) {
-        // implementation taken from here: https://gist.github.com/982883
-        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,getNextID);
-    }
 
 	var policyManager = function() {
 		// Load the native module
@@ -56,51 +52,9 @@
 			this.promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-        var policyFile = path.join(webinosPath, "policy.xml");
+        var policyFile = path.join(webinosPath,"policies", "policy.xml");
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 	};
-
-    policyManager.prototype.enforceRPCRequest = function(rpcHandler, rpcRequest, from, msgid, requestHandler) {
-        var id = rpcRequest.id;
-        if (typeof id === 'undefined') return;
-
-        var apiFeatureID, apiFeature, apiFeaturesMap = {'ServiceDiscovery':'http://webinos.org/api/discovery'};
-
-        var idx = rpcRequest.method.lastIndexOf('@');
-
-        if (idx == -1) {
-            idx = rpcRequest.method.lastIndexOf('.');
-            apiFeatureID = rpcRequest.method.substring(0, idx);
-            apiFeature = apiFeaturesMap[apiFeatureID];
-        } else {
-            apiFeature = rpcRequest.method.substring(0, idx);
-        }
-
-        var request = {};
-        var requestInfo = {};
-        var subjectInfo = {};
-        subjectInfo.userId = "userId";
-        request.subjectInfo = subjectInfo;
-
-        requestInfo.apiFeature = apiFeature;
-        request.resourceInfo = requestInfo;
-
-        if (this.enforceRequest(request) == 0) {
-            requestHandler.call(rpcHandler, rpcRequest, from, msgid);
-        } else {
-            var rpc = {
-                jsonrpc: '2.0',
-                id: rpcRequest.id || getNextID(),
-                result: "SECURITY_ERROR",
-                error: {
-                    data: "SECURITY_ERROR",
-                    code: -31000,
-                    message: 'Method Invocation returned with a security error'
-                }
-            }
-            rpcHandler.executeRPC(rpc, undefined, undefined, from, msgid);
-        }
-    };
 
 	policyManager.prototype.enforceRequest = function(request, noprompt) {
 		var res = this.pmCore.enforceRequest(request);
@@ -128,7 +82,8 @@
 		return;
 	};
 
-	exports.policyManager = new policyManager;
+    require('./rpcInterception.js');
+	exports.policyManager = policyManager;
 
 }());
 
