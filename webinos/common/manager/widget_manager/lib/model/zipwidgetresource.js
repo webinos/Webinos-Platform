@@ -64,7 +64,12 @@ this.ZipWidgetResource = (function() {
   };
 
   ZipWidgetResource.prototype.dispose = function() {
-    this.zipfile.destroy();
+    try {
+      this.zipfile.destroy();
+    } catch (e) {
+      console.log("ZipWidgetResource.dispose - " + e.message);
+    }
+    this.zipfile = null;
   };
 
   return ZipWidgetResource;
