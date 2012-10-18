@@ -54,3 +54,6 @@ server.on("error", function (error) {
   this.listen(port)
 })
 server.listen(port)
+
+//Expose an empty service to avoid the error
+exports.Service = function(){};

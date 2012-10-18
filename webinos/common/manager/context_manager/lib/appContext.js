@@ -40,7 +40,8 @@ else {
         var databasehelper = require('jsormdb');
     }
     catch (err) {
-        console.log('[ERROR] jsormdb node module is missing.', 'yellow+black_bg');
+        // Jsorm DB module was removed as it provided a JSON implement which conflicted with pzh
+		//console.log('[ERROR] jsormdb node module is missing.', 'yellow+black_bg');
     }
     var appVocDBpath = path.resolve(commonPaths.storage + '/pzp/appContextVocabulary.json');
     try {
