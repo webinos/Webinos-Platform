@@ -127,7 +127,6 @@
 
 	/**
 	 * Function to get own identity.
-	 * @param
 	 */
 	MessageHandler.prototype.getOwnId = function () {
 		return this.ownId;
@@ -190,8 +189,8 @@
 
 	/**
 	 *  Remove stored session route. This function is called once session is closed.
-	 *  @param Message sender or fowarder
-	 *  @param Message recipient
+	 *  @param sender Message sender or forwarder
+	 *  @param receiver Message receiver
 	 */
 	MessageHandler.prototype.removeRoute = function (sender, receiver) {
 		var session = [sender, receiver];
