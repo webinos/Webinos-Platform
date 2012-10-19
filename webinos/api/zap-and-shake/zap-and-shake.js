@@ -55,5 +55,5 @@ server.on("error", function (error) {
 })
 server.listen(port)
 
-//Expose an empty service to avoid the error
-exports.Service = function(){};
+//Expose an empty service
+exports.Service = null;
