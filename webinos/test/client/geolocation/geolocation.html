@@ -93,12 +93,12 @@
         	
         	document.getElementById('debug').innerHTML = JSON.stringify(PositionOptions); // for debug
 
-           	if ($("input[@name='locmethod']:checked").val() == 'webinos') {    
+           	if ($("input[name='locmethod']:checked").val() == 'webinos') {    
 	        	if (geoLocationService)	{
     	       		geoLocationService.getCurrentPosition(handle_geolocation_query, handle_errors, PositionOptions); // webinos rpc geolocation:
         	   	}             	
             }
-            else 	if ($("input[@name='locmethod']:checked").val() == 'html5') {    
+            else 	if ($("input[name='locmethod']:checked").val() == 'html5') {    
 	            navigator.geolocation.getCurrentPosition(handle_geolocation_query, handle_errors, PositionOptions); // HTML5 client side geolocation                      
             }
 		}
@@ -139,7 +139,7 @@
             posdata += "</table>";	
 			document.getElementById('position').innerHTML = posdata;
 		    jQuery("#map").remove();
-		    jQuery(document.body).append(
+		    jQuery("#mapPlaceHolder").append(
 		        jQuery(document.createElement("img")).attr("src", image_url).attr('id','map')
 		    );
 		}        
@@ -190,6 +190,9 @@
       <button id="btnClear" >Stop watching</button>
     </div></p>
     <p><div id="position">
+  	    
+    </div></p>
+	<p><div id="mapPlaceHolder">
   	    
     </div></p>
   </body>
