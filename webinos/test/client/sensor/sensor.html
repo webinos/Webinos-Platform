@@ -104,16 +104,20 @@
                     $('#register').bind('click', function() {
                     	sensorToUse.addEventListener('temperature', 
                     				function(event){
-                            			document.getElementById("sensorResult").innerHTML = "";
-                        				$('#sensorResult').append('<li> Sensor Event from: ' + sensorToUse.api + '</li>');
-                          				$('#sensorResult').append('<li> Sensor Type: ' + event.sensorType + '</li>');
-                        				$('#sensorResult').append('<li> Sensor Id: ' + event.sensorId + '</li>');
-                        				$('#sensorResult').append('<li> Accuracy: ' + event.accuracy + '</li>');
-                        				$('#sensorResult').append('<li> Rate: ' + event.rate + '</li>');
-                        				$('#sensorResult').append('<li> Interrupt: ' + event.interrupt + '</li>');
-                        				
-                        				$('#sensorResult').append('<li> Absolute Temp: ' + event.sensorValues[0] + '</li>');
-                        				$('#sensorResult').append('<li> Normalized Temp: ' + event.sensorValues[1] + '</li>');
+										if ($("#sensorResult")!=null) {//If there is the element
+											$("#sensorResult").innerHTML = "";
+											$('#sensorResult').append('<li> Sensor Event from: ' + sensorToUse.api + '</li>');
+											$('#sensorResult').append('<li> Sensor Type: ' + event.sensorType + '</li>');
+											$('#sensorResult').append('<li> Sensor Id: ' + event.sensorId + '</li>');
+											$('#sensorResult').append('<li> Accuracy: ' + event.accuracy + '</li>');
+											$('#sensorResult').append('<li> Rate: ' + event.rate + '</li>');
+											$('#sensorResult').append('<li> Interrupt: ' + event.interrupt + '</li>');
+											
+											$('#sensorResult').append('<li> Absolute Temp: ' + event.sensorValues[0] + '</li>');
+											$('#sensorResult').append('<li> Normalized Temp: ' + event.sensorValues[1] + '</li>');
+										}else{
+											
+										}
                         		
                         			}
                     				, false);

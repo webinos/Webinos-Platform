@@ -109,7 +109,7 @@
     if(recentService) //(contactsService[0])
     {
       parameters = {};
-      if ($("input[@name='contactType']:checked").val() == 'remote')
+      if ($("input[name='contactType']:checked").val() == 'remote')
       {
         usr = $('#usernameText').val();
         pwd = $('#passwordText').val();
@@ -118,7 +118,7 @@
         parameters.type = "remote";
 
       }
-      else if ($("input[@name='contactType']:checked").val() == 'local')
+      else if ($("input[name='contactType']:checked").val() == 'local')
       {
         addressBookName = $('#addressBookNameText').val();
         parameters.addressBookName = addressBookName;
@@ -142,7 +142,7 @@
     var result = false;
     if (recentService) //(contactsService[0])
     {
-      if ($("input[@name='contactType']:checked").val() == 'remote')
+      if ($("input[name='contactType']:checked").val() == 'remote')
       {
         parameters.type = "remote";
         //contactsService[0].
@@ -152,7 +152,7 @@
           recentService.getAllContacts(parameters, print_contact_list);
         });
       }
-      else if ($("input[@name='contactType']:checked").val() == 'local')
+      else if ($("input[name='contactType']:checked").val() == 'local')
       {
         parameters.type = "local";
         //contactsService[0].
@@ -182,7 +182,7 @@
         if ($('#findContactPhone').val() != "")
           parameters.fields["phoneNumbers"] = $('#findContactPhone').val();
           
-      if ($("input[@name='contactType']:checked").val() == 'remote')
+      if ($("input[name='contactType']:checked").val() == 'remote')
       {
         parameters.type = "remote";
 
@@ -193,7 +193,7 @@
 	  recentService.find(parameters, print_contact_list);
         });
       }
-      else if ($("input[@name='contactType']:checked").val() == 'local')
+      else if ($("input[name='contactType']:checked").val() == 'local')
       {
         parameters.type = "local";
         
@@ -212,9 +212,9 @@
     console.log('------------------handle_auth : '+status);
     if (status)
     {
-      if ($("input[@name='contactType']:checked").val() == 'remote')
+      if ($("input[name='contactType']:checked").val() == 'remote')
         $('#authStatus').html("<font color='#00CC00'>Logged in GMail</font>");
-      else if ($("input[@name='contactType']:checked").val() == 'local')
+      else if ($("input[name='contactType']:checked").val() == 'local')
         $('#authStatus').html("<font color='#AACC00'>Address Book Open</font>");
     }
     else
