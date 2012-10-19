@@ -3,11 +3,6 @@ var child = require('child_process').exec
 var list = [];
 var fs = require('fs');
 var path = require('path');
-var prefix;
-var cmd = process.argv[2];
-var prefixPath = process.argv[4];
-var nPathV = parseFloat(process.versions.node);
-if (nPathV >= 0.7) { nPathV = fs;} else { nPathV = path;}
 
 var fileList =
     " --js ./webinos/wrt/lib/webinos.util.js" +
@@ -34,25 +29,6 @@ var fileList =
     " --js ./webinos/wrt/lib/webinos.discovery.js" +
     " --js ./webinos/wrt/lib/webinos.authentication.js";
 
-if (typeof cmd === "undefined") {
-  help();
-}
-
-if (cmd ==="--help") {
-  help();
-}
-
-function help() {
-  console.log("*** This script currently only works for LINUX ****");
-  console.log("To compile & install webinos please run");
-  console.log("\t node webinos_build.js install");
-  console.log("\t node webinos_build.js uninstall/clean");
-  console.log("\t (Be default installs in /usr/local to install in different location) ");
-  console.log("\t node webinos_build.js install --prefix ");
-  process.exit();
-}
-
-
 function exec(list) {
   var key =0;
   for (key =0; key < list.length; key += 1) {
@@ -67,50 +43,5 @@ function exec(list) {
   }
 }
 
-if (typeof prefixPath !== "undefined") {
-  prefix = prefixPath;
-} else {
-  prefix = '/usr/local';
-}
-
-if (cmd === "install") {
-  var filePath = [prefix+"/bin", prefix+"/lib", prefix+"/lib/node_modules", prefix+"/lib/node_modules/webinos_platform" ];
-  for ( var key = 0; key < filePath.length; key += 1) {
-    if (!nPathV.existsSync(filePath[key])) {
-      fs.mkdirSync(filePath[key]);
-    }
-  }
-
-  child("node-gyp configure", function(err, stdout, stderr) {
-    console.log(stderr)
-    if (err) {
-      console.log(" Error running, please run manually node-gyp configure");
-    }
-    else {
-      child("node-gyp build", function(err, stdout, stderr) {
-        console.log(stderr);
-        if (!err ) {
-
-          //list.push("cp -r webinos/* " + prefix + "/lib/node_modules/webinos_platform/ ")
-          //list.push("cp -r node_modules/*      "+prefix+"/lib/node_modules/");
-
-          list.push("ln -sf "+__dirname+"/webinos_pzh.js "+prefix+"/bin/webinos_pzh")
-          list.push("ln -sf "+__dirname+"/webinos_pzp.js "+prefix+"/bin/webinos_pzp")
-
-          list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
-
-          exec(list);
-        }
-      });
-    }
-  });
-} else if (cmd === "wrt") {
-    list.push("java -jar ./tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file ./webinos/test/client/webinos.js");
-
-    exec(list);
-} else {
-  list.push("rm -rf " + prefix+ "/bin/webinos_pzh");
-  list.push("rm -rf " + prefix+ "/bin/webinos_pzp");
-  list.push("rm -rf build/");
-  exec(list);
-}
+list.push("java -jar tools/closure-compiler/compiler.jar --compilation_level WHITESPACE_ONLY --warning_level VERBOSE "+ fileList +" --js_output_file webinos/test/client/webinos.js");
+exec(list);
