@@ -11,15 +11,21 @@ including mobile, PC, home media (TV) and in-car units.
 
 See [the developer portal](https://developer.webinos.org)
 
+### Short version of the building process
+
+* Install all dependencies (libraries, toolset etc)
+* Clone this repository
+* npm install
+
 ### Report a bug:
 
-[Issue tracker](http://jira.webinos.org)
+[Issue tracker](http://jira.webinos.org/browse/WP)
 
 Resources for Newcomers
 ---
   - [webinos.org](https://www.webinos.org)
   - [developer portal](https://developer.webinos.org/)
-  - [issue tracker](http://jira.webinos.org/)
+  - [issue tracker](http://jira.webinos.org/browse/WP)
   
 ## License
 
