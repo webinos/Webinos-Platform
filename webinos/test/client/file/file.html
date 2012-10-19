@@ -9,8 +9,11 @@
 <script>
 	var init = function () {
 		$("button#init").attr("disabled", "disabled");
-		$("table#left").css("visibility", "visible");
-		$("table#right").css("visibility", "visible");
+		if (checkwidth()) {
+			$("table#left, table#right").css("display", "block");
+		} else {
+			$("table#left, table#right").css("visibility", "visible")
+		}
 
 		var left = new webinos.file.demo.Explorer("table#left");
 		var right = new webinos.file.demo.Explorer("table#right");
@@ -35,6 +38,8 @@
 	}
 
 	$(document).ready(function () {
+		fileMobileImprove();
+
 		$("button#init").click(init);
 
         function fillPZAddrs(data) {

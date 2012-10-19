@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
 <script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
 <script type="text/javascript" src="js/hideshow.js"></script>
+<script type="text/javascript" src="js/mobile.js"></script>
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="./webinos.js"></script>
  <script>
@@ -62,7 +63,10 @@
         if (pzpId && typeof pzpId.split('/')[1] === "undefined") {
           $('#enableLogin').html("<a href='#login' id='login'> Connect to Your PZH </a>");
           $("#login").click(function(){
-           setPage("Login to your PZH", "login.html");
+            setPage("Login to your PZH", "login.html");
+		if (checkwidth()) {
+			$('#sidebar').slideUp('slow');
+		}
           });
         } else {
           $('#enableLogin').html("Connected to " + data.from.split('/')[0]);
@@ -215,12 +219,14 @@
   <header id="header">
     <hgroup>
       <h1 class="site_title"><img src="images/webinosWithBorder.png">PZP TestBed</h1>
-      <h2 class="section_title">Dashboard</h2><div class="btn_view_site"><a href="#logout">Disconnect</a></div>
+      <h2 class="section_title">Dashboard</h2>
+	  <div class="btn_view_site"><a id="btn_discon" href="#logout">Disconnect</a><a id="img_discon" href="#logout"><img src="images/light_active.png"></a></div>
     </hgroup>
   </header> <!-- end of header bar -->
   <section id="secondary_bar">
     <div class="user">
-      <p id="userId">Not Connected</p>
+      <div><p id="userId">Not Connected</p></div>
+	  <div id="foldingMenu"><a id="foldingBtn">Menu</a></div>
     </div>
     <div class="breadcrumbs_container">
       <article class="breadcrumbs"><a href="client.html">Webinos Pzp</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
@@ -268,43 +274,26 @@
       <header><h3>Webinos PZP</h3></header>
         <div class="module_content">
           <p>Please select one of the actions on the left menu</p>
-          <table>
-          <tr>
-            <td>Use "Register Browser" if you do not see anything in drop
-              down</td>
-            <td>
-              <button id="registerBrowser" class="button">Register
-                Browser</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Use "Find Services" to search for available get42-Services.<br/>
+          <div class="note">Use "Register Browser" if you do not see anything in drop down</div>
+          <div class="btn">
+              <button id="registerBrowser" class="button">Register Browser</button>
+          </div>
+          <div class="note">Use "Find Services" to search for available get42-Services.<br/>
               Select one, then bind and use. Select another and bind again and use.
-            </td>
-            <td>
+          </div>
+          <div class="btn">
               <button id="findService" class="button">Find Services</button>
-              <br />
               <select id="get42Services" size="5"></select>
-            </td>
-          </tr>
-          <tr>
-            <td><p>
-                <i> The selected address means the Service at that address
-                  will be used.</i>
-              </p></td>
-          </tr>
-          <tr>
-            <td>
+          </div>
+          <p class="note">The selected address means the Service at that address
+                  will be used.</p>
+          <div class="note">
               <button id="bind" class="button">Bind</button>
-            </td>
-            <td>
+          </div>
+          <div class="btn">
               <button id="get42" class="button">Get 42</button>
-            </td>
-            <td>
               <button id="listen42" class="button">Listener for 42</button>
-            </td>
-          </tr>
-        </table>
+          </div>
       </div>
     </article><!-- end of styles article -->
     <div class="spacer"></div>

@@ -194,4 +194,10 @@
 				
 				}
 				#info p{font-size: 14px; margin: 0; padding 0;}
+
+			@media screen and (max-width: 1200px) {
+				html {
+					background: none;
+				}	
+			}
 			
