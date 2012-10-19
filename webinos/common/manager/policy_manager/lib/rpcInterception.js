@@ -41,14 +41,15 @@ _RPCHandler.prototype.handleMessage = function(){
             apiFeature = rpcRequest.method.substring(0, idx);
         }
 
-        var request = {};
-        var requestInfo = {};
-        var subjectInfo = {};
-        subjectInfo.userId = "userId";
-        request.subjectInfo = subjectInfo;
 
-        requestInfo.apiFeature = apiFeature;
-        request.resourceInfo = requestInfo;
+        var userAndRequestor = arguments[1].split("_")[1].split("/");
+
+        var request = {
+            'subjectInfo' : { 'userId' : userAndRequestor[0] },
+            'deviceInfo'  : { 'requestorId' : userAndRequestor[1] },
+            'resourceInfo' : { 'apiFeature': apiFeature }
+        };
+
 
         if (pm.enforceRequest(request) == 0) {
             //request is allowed by policy manager
