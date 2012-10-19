@@ -22,22 +22,6 @@ html, body{
 	float: left;
 		/* fallback */
   background-color: #1f1f1f;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
-
-	box-shadow: #000000 0px 0px 10px;
 	z-index: 150;
 }
 
@@ -46,94 +30,43 @@ html, body{
 	width: 40%;
 	height: 90%;
 	float: left;
-	box-shadow: #000000 0px 0px 10px;
+	background-color:  #585E59;
 	z-index: 100;
 	
 	overflow: hidden;
 	
 	/* fallback */
   background-color: #1f1f1f;
-  background-image: url(rauschen.png);
+  background-image: url(../general/rauschen.png);
   
   /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
-	
-
-}
-
-#logo{
-	z-index: 200;
-	position: fixed;
-	top: -5px;
-	left: 20px;
-	width: 200px;
-	height: 45px;
-	background-color: #fff;
-	box-shadow: #000000 0px 0px 10px;
-	-moz-border-radius:4px; /* Firefox */
-	-webkit-border-radius:4px; /* Safari, Chrome */
-	-khtml-border-radius:4px; /* Konqueror */
-	border-radius:4px; /* CSS3 */
 }
 
 
-#loading-bg{
+#loading{
 	z-index: 300;
 	position: fixed;
 	height: 50px;
-	width: 60%;
+	width: 400px;
 	
-	
+	background-color: #000;
 	-moz-border-radius:4px; /* Firefox */
 	-webkit-border-radius:4px; /* Safari, Chrome */
 	-khtml-border-radius:4px; /* Konqueror */
 	border-radius:4px; /* CSS3 */
 	
 	left: 50%;
-	margin-left: -30%;
+	margin-left: -200px;
 	
 	top: 50%;
 	margin-top: -25px;
 	
-	
-	background-color: #000;
 	opacity: 0.8;
 }
 
-
-
-#loading-message{
-	z-index: 300;
-	position: fixed;
-	height: 50px;
-	width: 60%;
-	
-	
-	
-	left: 50%;
-	margin-left: -30%;
-	
-	top: 50%;
-	margin-top: -25px;
-	opacity: 1;
-}
-
-
 #loadingimage{
 	opacity: 1;
-	padding-top: 8px;
-	padding-left: 7px;
-	padding-right: 7px;
+	padding-top: 7px;
 	float: left;
 }
 
@@ -142,7 +75,6 @@ html, body{
 	padding-top: 10px;
 	opacity: 1;
 	color: #fff;
-	text-align: center;
 }
 
 #debug{
@@ -162,7 +94,6 @@ html, body{
 	border-bottom: 1px #CCC  dotted;
 	height: 20%;
 	color: #fff;
-	text-shadow: #313131 1px 1px 2px;
 	opacity: 1;
 	color: #fff;
 	
@@ -185,8 +116,6 @@ html, body{
 	outline:0;
 	color: #fff;
 	background-color: #616161;
-	box-shadow: inset 0 0 15px #313131;
-	 	
 }
 
 #bc-full ul li ul{
@@ -195,23 +124,6 @@ html, body{
 	list-style: none;
 	margin: 0px;
 	padding: 0px;
-	box-shadow: inset 0 0 15px #313131;
-	background-color: #fff;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#ddd), to(#fff));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #ddd, #fff);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #ddd, #fff);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #ddd, #fff);
-
 }
 
 #bc-full ul li li{
@@ -277,7 +189,6 @@ html, body{
 	text-align: center;
 	position: relative;
 	font-weight: normal;
-	text-shadow: #313131 1px 1px 2px;
 }
 #bc-nav ul li a, #bc-nav ul li a:link, #bc-nav ul li a:visited{
 	position: relative;
@@ -292,15 +203,13 @@ html, body{
 
 #bc-nav ul li a:hover,
 #bc-nav ul li a:focus {
-	color:#fff;
+	background-color: #616161;
 	text-decoration:none;
 	height: 100%;
 	width: 100%;
 	outline: 0;
-	box-shadow: 0 0 10px #000000;
 	font-weight: bold;
 	color: #deff00;
-		background-color: #616161
 }
 
 .toplevellink{
@@ -315,12 +224,12 @@ html, body{
 
 .active{
 	font-weight: bold;
-	box-shadow: inset 0 0 20px #212121;
-
+	background-color: #383838;
 	
 }
 #selection{
 }
+
 #selection-overlay{
 	position: fixed;
 	top: 0;
@@ -341,24 +250,7 @@ html, body{
 	padding: 2%;
 	z-index: 401;
 	opacity: 1;
-	box-shadow: 0 0 20px #000000;
-	/* fallback */
-  background-color: #1f1f1f;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
-
+	background-color: #1f1f1f;
 }
 
 #selection-content h1{
@@ -392,6 +284,7 @@ html, body{
 	text-align: center;
 	position: relative;
 	font-weight: normal;
+	text-shadow: #313131 1px 1px 2px;
 	
 }
 
@@ -406,13 +299,12 @@ html, body{
 	display: block;
 	font-size: 18px;
 	border: 1px solid #fff;
-	opacity: 0.8;	
-	
+	opacity: 0.3;	
 
 }
 
 #selection-content ul li a.selected{
-	opacity: 1;
+	opacity: 0.6;
 	font-weight: bold;
 }
 
@@ -425,9 +317,8 @@ html, body{
 	outline: 0;
 	border: 1px solid #fff;
 	font-weight: bold;
-	color: #1f1f1f;
 	opacity: 1;
-	background-color: #fff;
+	background-color: none;
 }
 
 #pdc{
