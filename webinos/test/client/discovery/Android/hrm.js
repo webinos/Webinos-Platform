@@ -39,9 +39,11 @@ $(document).ready(function() {
 
 //TEMP. (updateHTML() could be useful though)
 function generatePoints() {
-	graphData.id += 1;
-	var pulse = document.getElementById('nmbrmainspan');
-	graphData.pulse = pulse.innerHTML;
+    if (typeof pulse != "undefined"){ //Temp hack to prevent event from causing exception on not loaded
+	    graphData.id += 1;
+	    var pulse = document.getElementById('nmbrmainspan');
+	    graphData.pulse = pulse.innerHTML;
+    }
 };
 
 function updateHTML() {

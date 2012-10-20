@@ -34,9 +34,10 @@
             $(document).ready(function() {
                 function fillPZAddrs(data) {
                     var pzpId = data.from;
-                    var pzhId, connectedPzp, connectedPzh;   
-                    if (pzpId !== "virgin_pzp") {
-                       pzhId = data.payload.message.pzhId;                    
+                    var pzhId, connectedPzp, connectedPzh;
+                    //If there is a pzh available
+                    if(typeof webinos.session.getPZHId()!="undefined") {
+                        pzhId = webinos.session.getPZHId();
                        connectedPzp = data.payload.message.connectedPzp;
                        connectedPzh = data.payload.message.connectedPzh;
                     }
@@ -62,6 +63,10 @@
                    $("</optgroup>").appendTo("#pzh_pzp_list");
                 }
                 webinos.session.addListener('registeredBrowser', fillPZAddrs);
+                //TODO: Perhaps we should be reading the info from the already loaded webinos.
+                if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+                    webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+                }
                 
                 function updatePZAddrs(data) {
                     if(typeof data.payload.message.pzp !== "undefined") {

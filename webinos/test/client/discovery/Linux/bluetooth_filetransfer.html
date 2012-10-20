@@ -19,9 +19,9 @@
 <html dir="ltr" lang="en-US">
   <head>
     <title>Webinos Local Discovery Prototype</title>
-    <script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
+    <script type="text/javascript" src="/client/jquery-1.8.2.min.js" ></script>
     <link rel="stylesheet" type="text/css" href="css/style.css" media="screen" />
-    <script type="text/javascript" src="./webinos.js"></script>
+    <script type="text/javascript" src="/client/webinos.js"></script>
     </head>
     <body>	
       <div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
@@ -73,8 +73,9 @@
   jQuery(window).ready(function() {
     function fillPZAddrs(data) {
       var pzhId, connectedPzp, connectedPzh;
-      if(data.from !== "virgin_pzp") {
-        pzhId = data.payload.message.pzhId;
+        //If there is a pzh available
+        if(typeof webinos.session.getPZHId()!="undefined") {
+            pzhId = webinos.session.getPZHId();
         connectedPzp = data.payload.message.connectedPzp;
         connectedPzh = data.payload.message.connectedPzh;
 	  }
@@ -100,6 +101,10 @@
       $("</optgroup>").appendTo("#pzh_pzp_list");
     }
     webinos.session.addListener('registeredBrowser', fillPZAddrs);
+      //TODO: Perhaps we should be reading the info from the already loaded webinos.
+      if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+      }
             
     function updatePZAddrs(data) {
       if(typeof data.payload.message.pzp !== "undefined") {

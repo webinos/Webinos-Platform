@@ -4,28 +4,38 @@ $(document).ready(
 	function () {
 
         function fillPZAddrs(data) {
-            var pzhId = data.payload.message.pzhId;
+            var pzhId, connectedPzp, connectedPzh;
             var pzpId = data.from;
-            var connectedPzp = data.payload.message.connectedPzp;
-            var connectedPzh = data.payload.message.connectedPzh;
+            //If there is a pzh available
+            if(typeof webinos.session.getPZHId()!="undefined") {
+                pzhId = webinos.session.getPZHId();
+                connectedPzp = data.payload.message.connectedPzp;
+                connectedPzh = data.payload.message.connectedPzh;
+            }
             
             if(document.getElementById('pzh_pzp_list'))
                 document.getElementById('pzh_pzp_list').innerHTML="";
     
             $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
             var i;
+            if (typeof connectedPzp!= "undefined") //If we have some pzps
             for(i =0; i < connectedPzp.length; i++) {
                 $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
             }
             $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
             $("</optgroup>").appendTo("#pzh_pzp_list");
             $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
+            if (typeof connectedPzh !="undefined")
             for(i =0; i < connectedPzh.length; i++) {
                 $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
             }
             $("</optgroup>").appendTo("#pzh_pzp_list");
         }
         webinos.session.addListener('registeredBrowser', fillPZAddrs);
+        //TODO: Perhaps we should be reading the info from the already loaded webinos.
+        if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+            webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+        }
         
         function updatePZAddrs(data) {
             if(typeof data.payload.message.pzp !== "undefined") {
@@ -53,7 +63,8 @@ $(document).ready(
 		}
 		
 		function loadComponents(components) {
-			components_list.options[components_list.options.length] = new Option(components);
+            for (var i = 0; i <components.length; i++)
+			components_list.options[components_list.options.length] = new Option(components[i]);
 		}
 
 		function loadProperties(aspect) {
