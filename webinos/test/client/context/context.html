@@ -86,7 +86,7 @@
   	$(this).parent().attr("recent", $(this).val());
   });
   $('#bindContext').bind('click', function() {
-    recentContextService = contextService[$('#ContexServices').attr('recent')];
+    recentContextService = contextService[$('#ContexServices option:selected').val()];
     recentContextService.bindService({onBind:function(service) {
   	  	$('#message', window.parent.document).append('<li> Context API ' + service.api + ' bound.</li>');
       }});
