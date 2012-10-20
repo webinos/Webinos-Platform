@@ -246,16 +246,23 @@ public class ModuleUtils {
 		if(src.isDirectory()) {
 			result = copyDir(src, dest);
 		} else {
+			FileInputStream fis = null;
+			FileOutputStream fos = null;
 			try {
 				int count;
 				byte[] buf = new byte[1024];
-				FileInputStream fis = new FileInputStream(src);             
-				FileOutputStream fos = new FileOutputStream(dest);             
+				fis = new FileInputStream(src);             
+				fos = new FileOutputStream(dest);             
 				while ((count = fis.read(buf, 0, 1024)) != -1)
 					fos.write(buf, 0, count);
 			} catch(IOException e) {
 				Log.v(TAG, "moveFile exception: aborting; exception: " + e + "; src = " + src.toString() + "; dest = " + dest.toString());
 				return false;
+			} finally {
+				try {
+					if(fis != null) fis.close();
+					if(fos != null) fos.close();
+				} catch(IOException ieo) {}
 			}
 		}
 		return result;
