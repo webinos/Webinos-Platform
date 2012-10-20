@@ -33,11 +33,8 @@
                             $('#get42Services').append($('<option>' + service.serviceAddress + '</option>'));
                         }});
             });
-            $("#get42Services option").live('click', function (event) {
-                $(this).parent().attr("recent", $(this).val());
-            });
             $('#bind').bind('click', function () {
-                recentService = test[$('#get42Services').attr('recent')];
+                recentService = test[$('#get42Services option:selected').val()];
                 recentService.bindService({onBind:function (service) {
                     logMessage('TEST API ' + service.api + ' bound.');
                 }});
