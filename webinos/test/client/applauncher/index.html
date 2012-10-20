@@ -14,19 +14,6 @@
 	
 	
             $(document).ready(function() {
-                function fillPZAddrs(data) {
-                    var pzhId, connectedPzp, connectedPzh;
-			        if(data.from !== "virgin_pzp") {
-			            pzhId = data.payload.message.pzhId;
-			            connectedPzp = data.payload.message.connectedPzp;
-		                connectedPzh = data.payload.message.connectedPzh;
-			        }
-		            var pzpId = data.from;		           
-		            
-		            if(document.getElementById('pzh_pzp_list'))
-		                document.getElementById('pzh_pzp_list').innerHTML="";
-                }
-                webinos.session.addListener('registeredBrowser', fillPZAddrs);
 
                 function printInfo(data) {
                     $('#message').append('<li>'+data.payload.message+'</li>');
@@ -88,7 +75,9 @@
                      $('#isInstalled').bind('click', function() {
                     	 appLauncherToUse.appInstalled();
                      });
-                     
+
+
+
                     
             });
         </script>
@@ -98,7 +87,7 @@
 	<div >
 		<div >
 			<p>
-				<div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+				<div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
 				<button id="cls">Clear</button><button id="findService">Find AppLauncher Service</button>
 				<button id="bind">Bind</button>
 		    	<button id="launchApp">Launch Application</button>

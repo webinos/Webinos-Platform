@@ -16,28 +16,6 @@
 	                                    $('#message').append('<li>' + msg + '</li>');
                                 	}
                                 }
-
-                                function fillPZAddrs(data) {
-                                    var pzpId = data.from;
-                                    var pzhId, connectedPzh , connectedPzp;
-                                    if (pzpId !== "virgin_pzp") {
-                                      pzhId = data.payload.message.pzhId;                                     
-                                      connectedPzp = data.payload.message.connectedPzp; // all connected pzp
-                                      connectedPzh = data.payload.message.connectedPzh; // all connected pzh
-                                      
-                                      logMessage('registeredBrowser msg from ' + pzpId);
-                                    }
-                                }
-                                webinos.session.addListener('registeredBrowser', fillPZAddrs);
-                                
-                                function updatePZAddrs(data) {
-                                    if(typeof data.payload.message.pzp !== "undefined") {
-                                        logMessage('new pzp ' + data.payload.message.pzp);
-                                    } else {
-                                        logMessage('new pzh ' + data.payload.message.pzh);
-                                    }
-                                }
-                                webinos.session.addListener('update', updatePZAddrs);
                                 
                                 function printInfo(data) {
                                 	logMessage(data.payload.message);
@@ -73,10 +51,6 @@
                         var options = {type: 'prop', payload: {status:'disconnectPzp'}};
                         webinos.session.message_send(options);
                 
-                });             
-                $('#registerBrowser').bind('click', function() {
-                        var options = {type: 'prop', payload: {status:'registerBrowser'}};
-                        webinos.session.message_send(options);                
                 });
                 
                 var test = {};
@@ -124,14 +98,6 @@
         <div id = "get42_example" style="background-color:#0879a9">
 				<table
 					style="background-color: lightgray; border: 3px solid #0879a9">
-					<tr>
-						<td>Use "Register Browser" if you do not see anything in drop
-							down</td>
-						<td>
-							<button id="registerBrowser" class="button">Register
-								Browser</button>
-						</td>
-					</tr>
 					<tr>
 						<td>Use "Find Services" to search for available get42-Services.<br/>
 							Select one, then bind and use. Select another and bind again and use.

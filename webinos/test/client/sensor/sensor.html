@@ -13,38 +13,6 @@
 	}
 	
             $(document).ready(function() {
-                function fillPZAddrs(data) {
-                	var pzhId, connectedPzh, connectedPzh;
-                	if(data.from !== "virgin_pzp"){
-	                    pzhId = data.payload.message.pzhId;
-	                    connectedPzp = data.payload.message.connectedPzp;
-                   		connectedPzh = data.payload.message.connectedPzh;
-	                }
-                    var pzpId = data.from;
-                   
-                    
-                    if(document.getElementById('pzh_pzp_list'))
-                        document.getElementById('pzh_pzp_list').innerHTML="";
-            
-//                    $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
-                    var i;
-                    if(typeof connectedPzp !== "undefined") {
-		                for(i =0; i < connectedPzp.length; i++) {
-	//	                    $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		                }
-		            }
-      //              $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
-        //            $("</optgroup>").appendTo("#pzh_pzp_list");
-          //          $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
-                    if(typeof connectedPzh !== "undefined") {
-		                for(i =0; i < connectedPzh.length; i++) {
-		    //                $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		                }
-		            }
-              //      $("</optgroup>").appendTo("#pzh_pzp_list");
-                }
-                webinos.session.addListener('registeredBrowser', fillPZAddrs);
-
                 
                 function printInfo(data) {
                     $('#message').append('<li>'+data.payload.message+'</li>');
@@ -132,7 +100,7 @@
 	<div >
 		<div >
 			<p>
-				<div> Found Sensor APIs @ <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+				<div> Found Sensor APIs @ <select id="pzh_pzp_list"> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
 				<button id="findService">Find Sensors</button>
 				<button id="cls">Clear</button>
 				<button id="bind">Bind Sensor</button>

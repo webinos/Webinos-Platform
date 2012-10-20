@@ -32,30 +32,6 @@
       }
     }
 
-    function fillPZAddrs(data) {
-      var pzpId = data.from;
-      var pzhId, connectedPzh , connectedPzp;
-      if (pzpId !== "virgin_pzp") {
-        pzhId = data.payload.message.pzhId;
-        connectedPzp = data.payload.message.connectedPzp; // all connected pzp
-        connectedPzh = data.payload.message.connectedPzh; // all connected pzh
-
-        logMessage('registeredBrowser msg from ' + pzpId);
-        console.log('++registeredBrowser msg from ' + pzpId);
-      }
-    }
-    webinos.session.addListener('registeredBrowser', fillPZAddrs);
-
-    function updatePZAddrs(data) {
-        if(typeof data.payload.message.pzp !== "undefined") {
-      logMessage('new pzp ' + data.payload.message.pzp);
-        } else {
-      logMessage('new pzh ' + data.payload.message.pzh);
-        }
-    }
-    webinos.session.addListener('update', updatePZAddrs);
-
-
     function printInfo(data) {
       logMessage(data.payload.message);
     }
@@ -96,12 +72,6 @@
       $('#html_contacts').html("<i><b>Contacts</b></i> webinos rpc service found!<br>Please select contacts type, fill the text areas then press <i>Authenticate</i> button above.");
         }});
     });
-
-    $('#registerBrowser').bind('click', function() {
-      var options = {type: 'prop', payload: {status:'registerBrowser'}};
-      webinos.session.message_send(options);
-    });
-
 
 //  function authenticate_cb()
   $('#btnAuthenticate').bind('click', function()
@@ -325,8 +295,6 @@
       <td width="50%">
         <div>
           <div style="background-color:lightgray; border:1px solid black">
-          <button id="registerBrowser" class="button">Register Browser</button>
-          <br>
           <button id="btnFindService" class="button">Find Contacts Service</button>
           <br>
           <select id="getContactsServices" size="5"></select>
