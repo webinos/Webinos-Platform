@@ -305,43 +305,32 @@ Config.prototype.fetchUserPref = function (callback) {
   });
 };
 
-Config.prototype.createDirectories = function(callback) {
-  var self = this, dirPath, permission = 0777;
-  try {
-    fs.mkdir(wPath.webinosPath(),permission,function(err){});
-    if (os.platform().toLowerCase() !== "android"){
-      if (process.getuid) {
-        fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
-        fs.chmod(wPath.webinosPath(), permission);
-      }
+Config.prototype.createDirectories = function (callback) {
+    var self = this, dirPath, permission = 0777;
+    try {
+        fs.mkdirSync(wPath.webinosPath(), permission);
+        if (os.platform().toLowerCase() !== "android") {
+            if (process.getuid) {
+                fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
+                fs.chmod(wPath.webinosPath(), permission);
+            }
+        }
+        fs.mkdirSync(self.metaData.webinosRoot, permission);
+        // webinos root was created, we need the following 1st level dirs
+        var list = [ path.join(wPath.webinosPath(), "logs"), path.join(self.metaData.webinosRoot, "wrt"), path.join(self.metaData.webinosRoot, "policies"),
+            path.join(self.metaData.webinosRoot, "certificates"), path.join(self.metaData.webinosRoot, "userData"), path.join(self.metaData.webinosRoot, "keys")];
+        list.forEach(function (name) {
+            fs.mkdirSync(name, permission);
+        });
+        // And this 2nd level dirs
+        fs.mkdirSync(path.join(self.metaData.webinosRoot, "certificates", "external"), permission);
+        fs.mkdirSync(path.join(self.metaData.webinosRoot, "certificates", "internal"), permission);
+        // Notify that we are done
+        callback(true);
+    } catch (err) {
+        //Notify that something went wrong
+        return callback(false, err.code);
     }
-    setTimeout(function(){ // to wait for .webinos creation
-     fs.mkdir(self.metaData.webinosRoot, permission, function(err){
-       if(err) logger.error(err);
-     });
-     setTimeout(function(){  // to wait for webinos root to be created
-      var list =[ path.join(wPath.webinosPath(),"logs"),  path.join(self.metaData.webinosRoot, "wrt"),path.join(self.metaData.webinosRoot, "policies"),
-        path.join(self.metaData.webinosRoot, "certificates"),  path.join(self.metaData.webinosRoot,"userData"), path.join(self.metaData.webinosRoot, "keys")];
-      list.forEach(function(name){
-        fs.mkdir(name, permission,function(err){
-          if(err && name !==  path.join(wPath.webinosPath(),"logs")) logger.error(err)
-        });
-      });
-      setTimeout(function(){ // to wait for above list of files to be created
-        fs.mkdir(path.join(self.metaData.webinosRoot, "certificates", "external"), permission, function(err){
-           if(err) logger.error(err);
-           fs.mkdir(path.join(self.metaData.webinosRoot,"certificates","internal"), permission, function(err){
-              if(err) logger.error(err);
-                callback(true);
-           });
-        });
-      }, 100)
-     }, 50);
-    }, 50);
-
-  } catch (err){
-    return callback(false, err.code);
-  }
 };
 
 Config.prototype.createPolicyFile = function(self) {
