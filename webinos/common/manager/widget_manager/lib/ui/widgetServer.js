@@ -31,6 +31,13 @@
     var settings = require('./routes/settings');
     var widgetTests = require('./routes/widgetTests');
 
+      /**
+       * Expose the current communication channel websocket port using this virtual file.
+       * This code must have the same result with the handleRequest on the pzp_websocket.js
+       * webinos\pzp\lib\pzp_websocket.js
+       */
+      app.get('/webinosConfig.json', settings.getWebinosConfig);
+
     // apps routing
     app.get('/', apps.installed);
     app.get('/apps', apps.installed);
