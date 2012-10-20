@@ -3,8 +3,9 @@ $(document).ready(function() {
 	
     function fillPZAddrs(data) {
 		var pzhId, connectedPzp, connectedPzh;
-		if(data.from !== "virgin_pzp") {
-			pzhId = data.payload.message.pzhId;
+        //If there is a pzh available
+        if(typeof webinos.session.getPZHId()!="undefined") {
+            pzhId = webinos.session.getPZHId();
 			connectedPzp = data.payload.message.connectedPzp;
 			connectedPzh = data.payload.message.connectedPzh;
 		}
@@ -33,7 +34,11 @@ $(document).ready(function() {
 		$("</optgroup>").appendTo("#pzh_pzp_list");
     }
     webinos.session.addListener('registeredBrowser', fillPZAddrs);
-    
+    //TODO: Perhaps we should be reading the info from the already loaded webinos.
+    if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+        webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+    }
+
     function updatePZAddrs(data) {
         if(typeof data.payload.message.pzp !== "undefined") {
             $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
@@ -87,9 +92,9 @@ $(document).ready(function() {
 					oauthService.get("http://api.twitter.com/1/statuses/home_timeline.json", access_token, access_token_secret, function(data){
 						log('<li>Recieved data from timeline!</li>');
 						for(var i=0; i<data.length; i++) {
-							log('<li>Dato from : ' + data[i].user.screen_name + ' said: ' + data[i].text + '</li>');
+							log('<li>Data from : ' + data[i].user.screen_name + ' said: ' + data[i].text + '</li>');
 						}
-					}, function(errorcode){
+					}, function(errorCode){
 						log('<li>Error retrieving timeline: ' + errorCode + '</li>');
 					});
 				}

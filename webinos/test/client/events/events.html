@@ -39,20 +39,6 @@
 	
 	
             $(document).ready(function() {
-                function fillPZAddrs(data) {
-                    var pzpId = data.from;
-                    var pzhId, connectedPzp, connectedPzh;
-                    if(data.from !== "virgin_pzp") {
-                        pzhId = data.payload.message.pzhId;
-                        connectedPzp = data.payload.message.connectedPzp;
-                        connectedPzh = data.payload.message.connectedPzh;
-                    }
-                   
-		            if(document.getElementById('pzh_pzp_list'))
-		                document.getElementById('pzh_pzp_list').innerHTML="";
-                }
-                webinos.session.addListener('registeredBrowser', fillPZAddrs);
-                
                 function printInfo(data) {
                     $('#message').append('<li>'+data.payload.message+'</li>');
                 }
@@ -63,10 +49,9 @@
                     var eventAPIS = [];
                     var listenerID = null;
                     $('#findService').bind('click', function() {
+                        $('#message').append('<li>Searching for services</li>');
                         webinos.discovery.findServices(new ServiceType('http://webinos.org/api/events'), 
                         {onFound: function (service) {
-
-							
 							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
 							eventAPIS[service.serviceAddress] = service;
 							
@@ -149,7 +134,7 @@
 	<div >
 		<div >
 			<p>
-				<div> Found Services @: <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+				<div> Found Services @: <select id="pzh_pzp_list"> <option> </option> </select> <span>Click find to fill this</span><br> </div>
 				<button id="cls">Clear</button><button id="findService">Find Eventing Service</button>
 				
 				<button id="bind">Bind</button>
@@ -160,7 +145,7 @@
 		    	<br><button id="registertype">Register to type: </button><textarea id="servicetypelistener" rows="1" cols="40"></textarea>
 		    	<br>Restrict recipients to (add APP IDs, separate by comma): <textarea id="recipients" rows="1" cols="40"></textarea>
 			</p>
-			<p><div style="color:#ffffff;">
+			<div style="color:#ffffff;"><p>
 				1. Press "Find Eventing Service" Button
 			to get the Eventing Service<br>2. Press "Bind" button to bind the found service. This also makes the running App (this demo page) known to the eventing serivce<br>3. Press "Register Event Listener" Button to register for incoming events (currently all events will be received, filters and options are to do)<br>4. Type in a message in the left box and press "send" button. The message will be send to the PZP, the PZP propagates the message to subscribers and then the message will be displayed in the right box. You may open this demo page several times (including find, bind, and register) to do chatting between multiple applications<br></p>
 			</div><p>

@@ -3,50 +3,9 @@
   <head>
     <script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
     <script type="text/javascript" src="./webinos.js"></script>
-    <script>
-    $('#serviceList').empty();
-        jQuery(window).ready(function(){
-            function fillPZAddrs(data) {
-               var pzhId, connectedPzp, connectedPzh;
-	            if(data.from !== "virgin_pzp") {
-	                pzhId = data.payload.message.pzhId;
-	                connectedPzp = data.payload.message.connectedPzp;
-                    connectedPzh = data.payload.message.connectedPzh;
-	            }
-                var pzpId = data.from;
-               
-                
-                if(document.getElementById('pzh_pzp_list'))
-                    document.getElementById('pzh_pzp_list').innerHTML="";
-        
-                $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
-                
-                var i;
-                if(typeof connectedPzp !== "undefined") {
-		            for(i =0; i < connectedPzp.length; i++) {
-		                $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		            }
-		        }
-                $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
-                $("</optgroup>").appendTo("#pzh_pzp_list");
-                $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
-                if(typeof connectedPzh !== "undefined") {
-		            for(i =0; i < connectedPzh.length; i++) {
-		                $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
-		            }
-		        }
-                $("</optgroup>").appendTo("#pzh_pzp_list");
-            }
-            webinos.session.addListener('registeredBrowser', fillPZAddrs);
-            
-            function updatePZAddrs(data) {
-                if(typeof data.payload.message.pzp !== "undefined") {
-                    $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
-                } else {
-                    $("<option value=" + data.payload.message.pzh + " >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
-                }
-            }
-            webinos.session.addListener('update', updatePZAddrs);
+    <script type="text/javascript">
+        $('#serviceList').empty();
+        $(document).ready(function(){
             
             function printInfo(data) {
                 $('#message').append('<li>'+data.payload.message+'</li>');
@@ -166,7 +125,7 @@
   </head>
   <body>
   	<p><div style="background-color:lightgray; border:1px solid black">
-		PZH PZP LIST : <select id="serviceList"> <option> </option> </select> <br>
+		PZH PZP LIST : <select id="serviceList"> <option> </option> </select> <span>Click find to fill this</span> <br>
   		<input type="radio" name="locmethod" value="webinos" id="loc_webinos" checked="checked">webinos RPC geolocation</input> <br>
 		<input type="radio" name="locmethod" value="html5" id="loc_html5">HTML5 client-side navigator.geolocation</input>
   	</div></p>

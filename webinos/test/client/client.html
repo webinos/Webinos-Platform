@@ -11,7 +11,6 @@
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="./webinos.js"></script>
  <script>
-    var test = {}, recentService;
 
     $(document).ready(function() {
 
@@ -84,6 +83,9 @@
       webinos.session.addListener('info', printInfo);
 
 
+      $("#testapi").click(function(){
+        setPage("Test API Demo", "client42.html");
+      });
       $("#events").click(function(){
         setPage("Events Demo", "events/events.html");
       });
@@ -135,42 +137,6 @@
       $('#logout').bind('click', function() {
         var options = {type: 'prop', payload: {status:'disconnectPzp'}};
         webinos.session.message_send(options);
-      });
-      $('#registerBrowser').bind('click', function() {
-        var options = {type: 'prop', payload: {status:'registerBrowser'}};
-        webinos.session.message_send(options);
-      });
-      $('#findService').bind('click', function() {
-        test = {};
-        recentService = null;
-        $('#get42Services').empty();
-        webinos.discovery.findServices(new ServiceType('http://webinos.org/api/test'),
-          {onFound: function (service) {
-            test[service.serviceAddress] = service;
-            $('#get42Services').append($('<option>' + service.serviceAddress + '</option>'));
-          }});
-      });
-      $("#get42Services option").live('click', function(event) {
-        $(this).parent().attr("recent", $(this).val());
-      });
-      $('#bind').bind('click', function() {
-        recentService = test[$('#get42Services').attr('recent')];
-        recentService.bindService({onBind:function(service) {
-          logMessage('TEST API ' + service.api + ' bound.');
-        }});
-      });
-      $('#get42').bind('click', function() {
-        recentService.get42('foo', function(result) {
-          alert(result);
-        },
-        function(error){
-          alert(error.code + " " + error.message);
-        });
-      });
-      $('#listen42').bind('click', function() {
-        recentService.listenerFor42(function(result) {
-          alert(result.msg);
-        }, {opts: "unused"});
       });
       $('#status').mouseenter(function(){
         var that = $(this);
@@ -241,6 +207,7 @@
     </ul>
     <h3>APIs</h3>
       <ul class="toggle" style="">
+        <li> <a href="#testapi" id="testapi"> Test API </a> </li>
         <li> <a href="#events" id="events"> Events </a> </li>
         <li> <a href="#file" id="file">  File </a> </li>
         <li> <a href="#geo" id="geo">  Geolocation </a> </li>
@@ -267,44 +234,9 @@
     <article class="module width_full">
       <header><h3>Webinos PZP</h3></header>
         <div class="module_content">
-          <p>Please select one of the actions on the left menu</p>
-          <table>
-          <tr>
-            <td>Use "Register Browser" if you do not see anything in drop
-              down</td>
-            <td>
-              <button id="registerBrowser" class="button">Register
-                Browser</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Use "Find Services" to search for available get42-Services.<br/>
-              Select one, then bind and use. Select another and bind again and use.
-            </td>
-            <td>
-              <button id="findService" class="button">Find Services</button>
-              <br />
-              <select id="get42Services" size="5"></select>
-            </td>
-          </tr>
-          <tr>
-            <td><p>
-                <i> The selected address means the Service at that address
-                  will be used.</i>
-              </p></td>
-          </tr>
-          <tr>
-            <td>
-              <button id="bind" class="button">Bind</button>
-            </td>
-            <td>
-              <button id="get42" class="button">Get 42</button>
-            </td>
-            <td>
-              <button id="listen42" class="button">Listener for 42</button>
-            </td>
-          </tr>
-        </table>
+          <h1>Welcome to your PZP</h1>
+          <p>This is the main test page for you pzp. You can also enroll you pzp to your pzh through this page if you have not already connected to one.</p>
+          <p><b>Please select one of the actions on the left menu</b></p>
       </div>
     </article><!-- end of styles article -->
     <div class="spacer"></div>
