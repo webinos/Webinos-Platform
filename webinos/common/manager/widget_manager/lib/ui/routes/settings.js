@@ -47,6 +47,24 @@
       });
     }
 
+    /**
+     * Expose the current communication channel websocket port.
+     * Check the usage in widgetServer.js for more info.
+     *
+     * @param req
+     * @param res
+     */
+    exports.getWebinosConfig = function (req, res) {
+        readWRTConfig(function(cnf){
+            var jsonReply = {
+                websocketPort : cnf.pzpWebSocketPort
+            };
+            res.writeHead(200, {"Content-Type": "application/json"});
+            res.write(JSON.stringify(jsonReply));
+            res.end();
+        });
+    };
+
     exports.setWRTPort = function (port) {
         wrtPort = port;
     };
