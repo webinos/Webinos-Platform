@@ -308,6 +308,8 @@ Config.prototype.fetchUserPref = function (callback) {
 Config.prototype.createDirectories = function (callback) {
     var self = this, dirPath, permission = 0777;
     try {
+        //In case of node 0.6, define the fs existsSync
+        if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
         if (!fs.existsSync(wPath.webinosPath()))//If the folder doesn't exist
             fs.mkdirSync(wPath.webinosPath(), permission);//Create it
         //Set permissions for android
