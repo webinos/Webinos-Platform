@@ -59,9 +59,14 @@
       });
     });
 
+    $("#getContactsServices option").live('click', function(event) {
+      $(this).parent().attr("recent", $(this).val());
+    });
+
+
     $('#btnBindService').bind('click', function() {
       console.log("**Bind button clicked**")
-      recentService = contactsService[$('#getContactsServices option:selected').val()];
+      recentService = contactsService[$('#getContactsServices').attr('recent')];
       recentService.bindService({onBind:function(service) {
       logMessage('CONTACTS API ' + service.api + ' bound.');
       $('#html_contacts').html("<i><b>Contacts</b></i> webinos rpc service found!<br>Please select contacts type, fill the text areas then press <i>Authenticate</i> button above.");
@@ -91,7 +96,7 @@
       }
      
       //contactsService[0]
-      recentService.authenticate(parameters, handle_authentication_query)
+      recentService.authenticate(parameters, auth_SuccessCB, auth_ErrorCB)
 
     }
     else
@@ -172,21 +177,16 @@
     }
   });
 
-  function handle_authentication_query(status) // see function
-  {
-    console.log('------------------handle_auth : '+status);
-    if (status)
-    {
-      if ($("input[name='contactType']:checked").val() == 'remote')
-        $('#authStatus').html("<font color='#00CC00'>Logged in GMail</font>");
-      else if ($("input[name='contactType']:checked").val() == 'local')
-        $('#authStatus').html("<font color='#AACC00'>Address Book Open</font>");
-    }
-    else
-//       document.getElementById('authStatus').innerHTML = "<font color='#FF0000'><b><u>" + "CANNOT" + "</u>"
-//         + "Authenticate: check GMail username and password or address book file name" + "</b></font>";
-      $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
-  }
+     function auth_SuccessCB() {
+          if ($("input[name='contactType']:checked").val() == 'remote')
+              $('#authStatus').html("<font color='#00CC00'>Logged in GMail</font>");
+          else if ($("input[name='contactType']:checked").val() == 'local')
+              $('#authStatus').html("<font color='#AACC00'>Address Book Open</font>");
+      }
+
+      function auth_ErrorCB() {
+          $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
+      }
 
   // Print a contact list to HTML document
   function print_contact_list(list)
@@ -296,9 +296,9 @@
           <br><button id="btnBindService" class="button">Bind Service</button>
             <p>
               <input type="radio" name="contactType" value="remote"
-                id="cnt_remote" checked="checked">Remote
+                id="cnt_remote" checked="checked"">Remote
               Contacts (GMail) <br> <input type="radio"
-                name="contactType" value="local" id="cnt_local">Local
+                name="contactType" value="local" id="cnt_local"">Local
               Contacts (Address Book) <br>
               <label
                 for="addressBookNameText">Local Address Book: </label>
@@ -327,7 +327,7 @@
           <div id="authStatus" style="background-color:lightgray; border:1px solid black">
 	    <script> document.getElementById('authStatus').innerHTML = "NOT AUTHENTICATED, YET";</script>
 	  </div>
-</div>
+
       </td>
 
       <!--Right part of the table-->
@@ -342,7 +342,7 @@
               <label for="findContactEmail">Email: </label> <input
                 type="text" id="findContactEmail"
                 placeholder="Email Address" /><br> <label
-                for="findContactPhone">Phone: </label> <input
+                for="findContactPhone:">Phone: </label> <input
                 type="text" id="findContactPhone" placeholder="Phone" /><br>
               <label for="findContactEmail">Address: </label> <input
                 type="text" id="findContactAddress"

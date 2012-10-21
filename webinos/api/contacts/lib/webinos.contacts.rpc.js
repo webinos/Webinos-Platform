@@ -51,7 +51,7 @@
 Contacts.prototype.authenticate = function (params, successCB, errorCB)
 {
   "use strict";
-  contacts_module.authenticate(params,successCB);
+  contacts_module.authenticate(params, successCB, errorCB);
 }
 
 /**
@@ -62,7 +62,7 @@ Contacts.prototype.authenticate = function (params, successCB, errorCB)
 Contacts.prototype.isAlreadyAuthenticated = function (params, successCB, errorCB)
 {
   "use strict";
-  contacts_module.isAlreadyAuthenticated(params,successCB);
+  contacts_module.isAlreadyAuthenticated(params, successCB, errorCB);
 }
 
 /**
@@ -72,7 +72,7 @@ Contacts.prototype.isAlreadyAuthenticated = function (params, successCB, errorCB
 Contacts.prototype.getAllContacts = function (params, successCB, errorCB)
 {
   "use strict";
-  contacts_module.getAllContacts(params,successCB);
+  contacts_module.getAllContacts(params, successCB, errorCB);
 }
 
 /**
@@ -82,7 +82,7 @@ Contacts.prototype.find = function (params, successCB, errorCB)
 {
   "use strict";
   //TODO should type be handled by this module?
-  contacts_module.find(params[0]['type'],params[0]['fields'],successCB,errorCB);
+  contacts_module.find(params[0]['type'], params[0]['fields'], successCB, errorCB);
   //contacts_module.findContacts(params,successCB);
   //contacts_module.find(params,successCB); //TODO use contacts_module.find() directly once switching remote/local contacts happens in a different way
 }
