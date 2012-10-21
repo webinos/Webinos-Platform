@@ -63,6 +63,7 @@ function newContact(i, item, picture, callback)
 {
 	"use strict";
 	var id = item.id;
+    var contactIndex = i;
 	var displayName = item.title;
 	var j;
 	var num, type, pref,addr;
@@ -316,8 +317,9 @@ function newContact(i, item, picture, callback)
 	var timezone = "";
 
 	//FINALLY
-	callback(null, new Contact(id, displayName, name, nickname, phonenumbers, emails, addrs, ims, orgs, rev, birthday,
+	callback(contactIndex, new Contact(id, displayName, name, nickname, phonenumbers, emails, addrs, ims, orgs, rev, birthday,
 		gender, note, photos, catgories, urls, timezone));
+
 }
 
 /**
@@ -368,6 +370,8 @@ this.logIn = function(username, password, callback)
 this.isLoggedIn = function(successCB, errorCB)
 {
 	"use strict";
+    //TODO: It should be like this:
+    //successCB(TOKEN !== "");
 	if (TOKEN !== "")
         successCB();
     else
@@ -380,124 +384,137 @@ this.isLoggedIn = function(successCB, errorCB)
 this.getContacts = function(successCB, errorCB)
 {
 	"use strict";
-	var seqObj = require('seq');
-	seqObj([ TOKEN, USERNAME ]).seq(function(token, username)
-	{
-		//TODO if username not empty
-		var contactsGet =
-		{
-			host : "www.google.com",
-			path : '/m8/feeds/contacts/' + encodeURI(username) + '/full?max-results=9999&v=3.0',//'http://www.google.com/calendar/feeds/default/owncalendars/full?alt=jsonc',
-			port : 443,
-			method : "GET",
-			headers :
-			{
-				'Authorization' : 'GoogleLogin auth=' + token
-			}
-		};
+    // Keep the context of this function for asynchronous calls.
+    var that = this;
 
-		var get_contacts_req = https.request(contactsGet, this.ok);
-		get_contacts_req.end();
+    // Get the contact list
+    var contactsGet = {
+        host:"www.google.com",
+        //This is how to use it with json format.
+        //path:'/m8/feeds/contacts/' + encodeURI(USERNAME) + '/full?v=3.0&max-results=9999&alt=json',
+        //This is how to use it with xml format.
+        path:'/m8/feeds/contacts/' + encodeURI(USERNAME) + '/full?v=3.0&max-results=9999',
+        port:443,
+        method:"GET",
+        headers:{
+            'Authorization':'GoogleLogin auth=' + TOKEN
+        }
+    };
+    var get_contacts_req = https.request(contactsGet, function (res) {
+        // console.log("statusCode: ", res.statusCode);
+        // console.log("headers: ", res.headers);
+        // TODO: Properly handle error codes from google. 401 pops some times...
+        if (res.statusCode === 200) {
+            var buffer = "";
+            res.on('data',
+                function (d) {
+                    buffer += d;
+                }
+            );
+            res.on('end', function () {
+                //This is how to use it with json format.
+                //buffer = JSON.parse(buffer);
+                //processRawContacts(buffer.feed.entry);
+                //This is how to use it with xml format.
+                xmlParser.parseString(buffer, function(err, result){
+                    that.processRawContacts(result.entry);
+                });
+            });
+        }else{
+            console.log("Error getting contact list from Google. Error Code:"+ res.statusCode);
+        }
+    });
+    get_contacts_req.end();
+    get_contacts_req.on('error', function (e) {
+        console.error(e);
+    });
 
-	}).seq(function(response)
-	{
-		var emitter = new EventEmitter();
-		if (response.statusCode === 302)
-		{
-			var path = url.parse(response.headers.location).pathname + "?" + url.parse(response.headers.location).query;
-			console.log("<DBG>" + response.statusCode,path);
-		 // getContactFeed();
-		}
-		else
-		{
-			emitter.on('done', this.ok);
-			
-			
-			var buffer = "";
-			response.on("data", function(data)
-			{
-				buffer += data;
-			});
+    /**
+     * This function takes the google contact list in a raw json format.
+     * It will fetch the images for them if they have one.
+     * @param contacts
+     */
+    that.processRawContacts = function(contacts) {
+        var self = this;
+        self.contacts = contacts;
+        self.totalContacts = contacts.length;
+        // make a returning contact list with the size of the fetched contacts list. We need it in order to retain the order.
+        self.contact_list = new Array(contacts.length);
 
-			response.on("end", function()
-			{
-				
-				xmlParser.parseString(buffer, function(err, result)
-				{
-					//var utils = require("util")
-					//console.log(utils.inspect(result, true, 10));
-					emitter.emit('done', result.entry);
-				});
-
-			});
-
-			response.on("close", function()
-			{
-
-			});
-
-		}
-	}).flatten().parEach( function(raw_contact, i)
-	{
-		//IF raw_contact HAS PHOTO
-		if (raw_contact.link[0]['@']) //contact photo exists
-		{
-			//TODO investigate on why some contact photo is not readable
-			//var photo_url = raw_contact['link'][1]['@']['href']; //Get picture data from the given contact 
-			var googleName = "https://www.google.com";
-			var photo_url = raw_contact.link[0]['@'].href.substr(googleName.length);
-
-			var photoGet =
-			{
-				host : "www.google.com",
-				path : photo_url,
-				port : 443,
-				method : "GET",
-				headers :
-				{
-					'Authorization' : 'GoogleLogin auth=' + TOKEN
-				}
-			};
-
-			var self = this;
-			var get_photo = https.request(photoGet, function(response)
-			{
-				response.setEncoding('base64');
-
-				var photo = "";
-				response.on("data", function(data)
-				{
-					photo += data;
-				});
-
-				response.on("end", function()
-				{
-					newContact(i, raw_contact, photo, self.into("" + i));
-				});
-
-				response.on("close", function()
-				{
-				});
-
-			});
-			get_photo.end();
-		}
-		//ELSE
-		else
-		{
-			newContact(i, raw_contact, "", this.into("" + i));
-		}
-
-	}).seq( //FINALLY JOIN ALL CONTACTS AND CALL callback
-	function()
-	{
-		var contact_list = new Array(Object.keys(this.vars).length);
-		for ( var i = 0; i < contact_list.length; i++)
-		{
-			contact_list[i] = this.vars[i + ""];
-		}
-		successCB(contact_list);
-	});
+        /**
+         * It will get the image for the give contact index id. will retry if it fails due to restriction of the service
+         * More about this issue: https://groups.google.com/d/topic/google-contacts-api/qTjcz_wo68k/discussion
+         * @param contactId
+         */
+        self.safelyGetImages = function (contactId) {
+            var contact = self.contacts[contactId];
+            //This is how to use it with json format.
+            //if (contact.link[0] && contact.link[0]['gd$etag']) {
+            //This is how to use it with xml format.
+            if (contact.link[0]['@'] && contact.link[0]['@']['gd:etag']) { // Check if the contact has photo
+                var googleName = "https://www.google.com";
+                //This is how to use it with json format.
+                //var photo_url = contact.link[0].href.substr(googleName.length);
+                //This is how to use it with xml format.
+                var photo_url = contact.link[0]['@'].href.substr(googleName.length);
+                var photoGet =
+                {
+                    host:"www.google.com",
+                    path:photo_url,
+                    port:443,
+                    method:"GET",
+                    headers:{
+                        'Authorization':'GoogleLogin auth=' + TOKEN
+                    }
+                };
+                var get_photo = https.request(photoGet, function (response) {
+                    if (response.statusCode === 200) { // Check if it is ok or we have to backoff.
+                        // We need the entire image in binary in order to correctly convert it to base64.
+                        response.setEncoding('binary');
+                        var buffer = "";
+                        response.on("data", function (data) {
+                            buffer += data;
+                        });
+                        response.on("end", function () {
+                            // convert the binary image into base64 in order to place it inline
+                            var photo = new Buffer(buffer, 'binary').toString('base64');
+                            //Pass the contact for further processing.
+                            newContact(contactId, contact, photo, self.getWebinosContact);
+                        });
+                        response.on("close", function () {
+                        });
+                    } else { // We need to backoff due to service restriction.
+                        // Give some time to retry.
+                        // This should work like this: http://googleappsdeveloper.blogspot.gr/2011/12/documents-list-api-best-practices.html
+                        setTimeout(function () {self.safelyGetImages(contactId);}, 1000);
+                    }
+                });
+                get_photo.end();
+            }else{ // Contact doesn't have a photo.
+                //Pass it on for further processing.
+                newContact(contactId, contact, "", self.getWebinosContact);
+            }
+        };
+        // This is used in  order to check when we have finished processing all the contacts so that we can return them
+        var processedContacts = 0;
+        /**
+         * It will collect all the processed contacts and store them in the right order (the one we recieved them.
+         * It will return the processed contact list to the seccussCB when all contacts are done.
+         * @param contactIndex
+         * @param contact
+         */
+        self.getWebinosContact = function(contactIndex, contact){
+            self.contact_list[contactIndex] = contact;
+            processedContacts++;
+            if (processedContacts == self.totalContacts){ // if we collected everything, return the list to the successCB.
+                successCB(self.contact_list);
+            }
+        };
+        // Asynchronously get all the contacts' images.
+        for (var k = 0; k < contacts.length; k++) {
+            self.safelyGetImages(k);
+        }
+    };
 };
 
 
