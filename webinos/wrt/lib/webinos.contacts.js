@@ -56,7 +56,8 @@
       successCB(params);
     }, function(error)
     {
-      errorCB(error);
+      if (typeof(errorCB) !== 'undefined')
+	errorCB(error);
     });
   };
   
@@ -75,7 +76,8 @@
       successCB(params);
     }, function(error)
     {
-      errorCB(error);
+      if (typeof(errorCB) !== 'undefined')
+        errorCB(error);
     });
   };
 
@@ -93,7 +95,8 @@
      successCB(params);
      }, function(error)
      {
-       errorCB(error);
+       if (typeof(errorCB) !== 'undefined')
+         errorCB(error);
      });
    };
 
@@ -115,7 +118,8 @@
     successCB(params);
     }, function(error)
     {
-      errorCB(error);
+      if (typeof(errorCB) !== 'undefined')
+        errorCB(error);
     });
   };
 

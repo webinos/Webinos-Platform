@@ -91,7 +91,7 @@
       }
      
       //contactsService[0]
-      recentService.authenticate(parameters, handle_authentication_query)
+      recentService.authenticate(parameters, auth_SuccessCB, auth_ErrorCB)
 
     }
     else
@@ -172,21 +172,16 @@
     }
   });
 
-  function handle_authentication_query(status) // see function
-  {
-    console.log('------------------handle_auth : '+status);
-    if (status)
-    {
-      if ($("input[name='contactType']:checked").val() == 'remote')
-        $('#authStatus').html("<font color='#00CC00'>Logged in GMail</font>");
-      else if ($("input[name='contactType']:checked").val() == 'local')
-        $('#authStatus').html("<font color='#AACC00'>Address Book Open</font>");
-    }
-    else
-//       document.getElementById('authStatus').innerHTML = "<font color='#FF0000'><b><u>" + "CANNOT" + "</u>"
-//         + "Authenticate: check GMail username and password or address book file name" + "</b></font>";
-      $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
-  }
+     function auth_SuccessCB() {
+          if ($("input[name='contactType']:checked").val() == 'remote')
+              $('#authStatus').html("<font color='#00CC00'>Logged in GMail</font>");
+          else if ($("input[name='contactType']:checked").val() == 'local')
+              $('#authStatus').html("<font color='#AACC00'>Address Book Open</font>");
+      }
+
+      function auth_ErrorCB() {
+          $('#authStatus').html("<font color='#FF0000'><b><u> CANNOT </u>Authenticate: check GMail username and password or address book file name</b></font>");
+      }
 
   // Print a contact list to HTML document
   function print_contact_list(list)

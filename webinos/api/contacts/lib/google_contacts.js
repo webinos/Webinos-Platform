@@ -365,16 +365,19 @@ this.logIn = function(username, password, callback)
 /**
  * return true if logged in (token not empty)
  */
-this.isLoggedIn = function(callback)
+this.isLoggedIn = function(successCB, errorCB)
 {
 	"use strict";
-	callback(TOKEN !== "");
+	if (TOKEN !== "")
+        successCB();
+    else
+        errorCB();
 };
 
 /**
  * return list of all contacts through callback
  */
-this.getContacts = function(callback)
+this.getContacts = function(successCB, errorCB)
 {
 	"use strict";
 	var seqObj = require('seq');
@@ -493,7 +496,7 @@ this.getContacts = function(callback)
 		{
 			contact_list[i] = this.vars[i + ""];
 		}
-		callback(contact_list);
+		successCB(contact_list);
 	});
 };
 
