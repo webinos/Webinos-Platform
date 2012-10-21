@@ -63,6 +63,7 @@ function newContact(i, item, picture, callback)
 {
 	"use strict";
 	var id = item.id;
+    var contactIndex = i;
 	var displayName = item.title;
 	var j;
 	var num, type, pref,addr;
@@ -316,8 +317,9 @@ function newContact(i, item, picture, callback)
 	var timezone = "";
 
 	//FINALLY
-	callback(null, new Contact(id, displayName, name, nickname, phonenumbers, emails, addrs, ims, orgs, rev, birthday,
+	callback(contactIndex, new Contact(id, displayName, name, nickname, phonenumbers, emails, addrs, ims, orgs, rev, birthday,
 		gender, note, photos, catgories, urls, timezone));
+
 }
 
 /**
@@ -466,7 +468,6 @@ this.getContacts = function(successCB, errorCB)
                     }
                 };
                 var get_photo = https.request(photoGet, function (response) {
-                    console.log("statusCode: "+ response.statusCode);
                     if (response.statusCode === 200) { // Check if it is ok or we have to backoff.
                         // We need the entire image in binary in order to correctly convert it to base64.
                         response.setEncoding('binary');
