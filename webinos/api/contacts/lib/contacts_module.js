@@ -283,7 +283,6 @@ ContactFindOptions.prototype.updatedSince = ""; //is a Date
  * callback used to internally retrieve some data
  *
  * @param par
- * @returns
  */
 function simpleCallback(par)
 {
@@ -310,13 +309,14 @@ function simpleCallback(par)
  */
 this.find = function(type, fields, successCB, errorCB, options)
 {
+	var cb = successCB;
+	if (cb == null || cb == undefined)
+		throw TypeError("Please provide a success callback");
+
+	var eb = errorCB;
+
 	if( process.platform !== 'android')
 	{
-		var cb = successCB;
-		if (cb == null || cb == undefined)
-			throw TypeError("Please provide a success callback");
-
-		var eb = errorCB;
 		/*
 		* TODO how to do the following? If there is a task from the device task
 		* source in one of the task queues (e.g. an existing find() operation is
