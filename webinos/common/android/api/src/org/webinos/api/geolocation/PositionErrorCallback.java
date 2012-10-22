@@ -19,6 +19,8 @@
 
 package org.webinos.api.geolocation;
 
-public interface PositionErrorCallback {
+import org.meshpoint.anode.idl.Callback;
+
+public interface PositionErrorCallback extends Callback {
 	public void handleEvent(PositionError error);
 }
