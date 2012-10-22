@@ -79,17 +79,26 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	public void getCurrentPosition(PositionCallback successCallback,
 			PositionErrorCallback errorCallback, PositionOptions options) {
 
-		if(successCallback == null) throw new DeviceAPIError(DeviceAPIError.TYPE_MISMATCH_ERR);
+		Log.v(TAG, "getCurrentPosition(): ent");
+		if(successCallback == null) {
+			Log.e(TAG, "getCurrentPosition(): no successCallback; aborting");
+			throw new DeviceAPIError(DeviceAPIError.TYPE_MISMATCH_ERR);
+		}
 		Request req = new Request(successCallback, errorCallback, options);
-		if(req.inError)
+		if(req.inError) {
+			Log.e(TAG, "getCurrentPosition(): request inError; aborting");
 			return;
+		}
 
 		Criteria criteria = (req.enableHighAccuracy && highAccuracyCriteria != null) ? highAccuracyCriteria : lowAccuracyCriteria;
 		String provider = locationManager.getBestProvider(criteria, true);
-		if(req.tryLastKnownPosition(provider))
+		if(req.tryLastKnownPosition(provider)) {
+			Log.v(TAG, "getCurrentPosition(): responding with last known position");
 			return;
+		}
 
 		if(provider == null) {
+			Log.e(TAG, "getCurrentPosition(): no available provider; responding with position unavailable");
 			PositionError error = new PositionError();
 			error.code = PositionError.POSITION_UNAVAILABLE;
 			req.dispatch(error);
@@ -97,6 +106,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 		}
 
 		synchronized(this) {
+			Log.v(TAG, "getCurrentPosition(): scheduling request");
 			req.schedule();
 			locationManager.requestSingleUpdate(criteria, req, androidContext.getMainLooper());
 		}
@@ -106,13 +116,23 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	public long watchPosition(PositionCallback successCallback,
 			PositionErrorCallback errorCallback, PositionOptions options) {
 
-		if(successCallback == null) throw new DeviceAPIError(DeviceAPIError.TYPE_MISMATCH_ERR);
+		Log.v(TAG, "watchPosition(): ent");
+		if(successCallback == null) {
+			Log.e(TAG, "watchPosition(): no successCallback; aborting");
+			throw new DeviceAPIError(DeviceAPIError.TYPE_MISMATCH_ERR);
+		}
 		Watch watch = new Watch(successCallback, errorCallback, options);
-		return watch.inError ? 0 : watch.id;
+		if(watch.inError) {
+			Log.e(TAG, "watchPosition(): request inError; returning 0");
+			return 0;
+		}
+		Log.v(TAG, "watchPosition(): ret " + watch.id);
+		return watch.id;
 	}
 
 	@Override
 	public void clearWatch(long id) {
+		Log.v(TAG, "clearWatch(): ent id = " + id);
 		getWatch(id).deschedule();
 	}
 
@@ -121,6 +141,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	 *****************************/
 	@Override
 	public Object startModule(IModuleContext ctx) {
+		Log.v(TAG, "startModule(): ent");
 		try {
 			androidContext = ((AndroidContext)ctx).getAndroidContext();
 			timerHandler = new Handler(androidContext.getMainLooper());
@@ -136,6 +157,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 				hasFinePermission |= (perm.equals(Manifest.permission.ACCESS_FINE_LOCATION));
 				if(hasCoarsePermission & hasFinePermission) break;
 			}
+			Log.v(TAG, "startModule(): hasCoarsePermission = " + hasCoarsePermission + "; hasFinePermission = " + hasFinePermission);
 			if(hasCoarsePermission | hasFinePermission) {
 				lowAccuracyCriteria = new Criteria();
 				lowAccuracyCriteria.setAccuracy(Criteria.ACCURACY_COARSE);
@@ -144,17 +166,21 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 					highAccuracyCriteria = new Criteria();
 					highAccuracyCriteria.setAccuracy(Criteria.ACCURACY_FINE);
 				}
+				Log.v(TAG, "startModule(): ret (success)");
 				return this;
 			}
+			Log.e(TAG, "startModule(): no permission");
 		} catch (NameNotFoundException e) {
 			/* Internal error - should not happen */
-			Log.v(TAG, "Package manager exception: ", e);
+			Log.e(TAG, "Package manager exception: ", e);
 		}
+		Log.v(TAG, "startModule(): ret (failed)");
 		return null;
 	}
 
 	@Override
 	public void stopModule() {
+		Log.v(TAG, "stopModule(): ent");
 		PositionError error = new PositionError();
 		error.code = PositionError.POSITION_UNAVAILABLE;
 		for(Request req : pendingRequests) {
@@ -163,6 +189,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 		for(Watch req : watches.values()) {
 			req.dispatch(error);
 		}
+		Log.v(TAG, "stopModule(): ret");
 	}
 
 	/*****************************
@@ -170,9 +197,11 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	 *****************************/
 
 	private synchronized void resetProvider() {
+		Log.v(TAG, "resetProvider(): ent");
 		if(watchCount == 0) {
 			locationManager.removeUpdates(this);
 			currentWatchProvider = null;
+			Log.v(TAG, "resetProvider(): ret (no watches)");
 			return;
 		}
 
@@ -183,17 +212,21 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 			PositionError error = new PositionError();
 			error.code = PositionError.POSITION_UNAVAILABLE;
 			for(Watch watch : watches.values()) {
+				Log.e(TAG, "resetProvider(): cancelling watch id " + watch.id + " (no provider)");
 				watch.dispatch(error);
 				watch.deschedule();
 			}
+			Log.v(TAG, "resetProvider(): ret (no provider)");
 			return;
 		}
 
 		if(!provider.equals(currentWatchProvider)) {
+			Log.v(TAG, "resetProvider(): changing provider to: " + provider);
 			locationManager.removeUpdates(this);
 			currentWatchProvider = provider;
 			locationManager.requestLocationUpdates(provider, minTimeChange, minDistanceChange, this);
 		}
+		Log.v(TAG, "resetProvider(): ret");
 	}
 
 	/*****************************
@@ -345,7 +378,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 		}
 
 		protected synchronized void dispatch(Position position) {
-			if(distance(lastUpdatedPosition.coords, position.coords) > minDistanceChange) {
+			if(lastUpdatedPosition == null || distance(lastUpdatedPosition.coords, position.coords) > minDistanceChange) {
 				lastUpdatedPosition = position;
 				super.dispatch(position);
 			}
