@@ -19,6 +19,8 @@
 
 package org.webinos.api.geolocation;
 
-public interface PositionCallback {
+import org.meshpoint.anode.idl.Callback;
+
+public interface PositionCallback extends Callback {
 	public void handleEvent(Position position);
 }
