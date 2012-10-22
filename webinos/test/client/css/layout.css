@@ -116,20 +116,25 @@ width: 23%;
 height: 38px;
 }
 
+.user div#userData {
+height: 35px;
+background: url(../images/icn_user_padding.png) no-repeat center left;
+display: table-cell;
+vertical-align: middle;
+width: 100%;
+}
+
 .user p {
 margin: 0;
-padding: 0;
+padding: 0 0 0 30px;
+width: 85%;
+line-height: normal;
+background-image: none;
+text-indent: 0px;
+word-wrap: break-word;
 color: #666666;
 font-weight: bold;
-display: block;
-float: left;
-width: 85%;
-height: 35px;
-line-height: 35px;
-text-indent: 25px;
 text-shadow: 0 1px 0 #fff;
-background: url(../images/icn_user.png) no-repeat center left;
-margin-left: 6%;
 }
 
 .user div#foldingMenu {
@@ -452,19 +457,30 @@ float: left;
 	}
 
 	.user div {
-		width: 80%;
+		margin: 0;
+		width: 78%;
 		height: 31px;
 		line-height: 35px;
 		float: left;
 	}
 
-	.user p {
+	.user div#userData {
 		margin: 0 0 0 5px;
-		padding: 0;
-		width: 85%;
-		height: 31px;
-		line-height: 35px;
+		padding-top: 3px;
 		background: url(../images/icn_user.png) no-repeat center left;
+		display: block;
+		width: 78%;
+	}
+
+	.user p {
+		margin: 0;
+		padding: 5px 0 0 25px;
+		width: 85%;
+		height: auto;
+		line-height: normal;
+		background-image: none;
+		text-indent: 0px;
+		word-wrap: break-word;
 	}
 
 	.user div#foldingMenu {
@@ -632,5 +648,10 @@ float: left;
 	
 	button#release {
 		margin-bottom: 5px;
+	}
+
+	div#mapPlaceHolder img {
+		width: 100%;
+		max-width: 400px;
 	}
 }
