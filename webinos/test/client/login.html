@@ -9,6 +9,8 @@
 <script type="text/javascript" src="./webinos.js"></script>
 <script>
   $(document).ready(function() {
+	loginMobileImprove();
+
     $("#connectPzh").click( function() {
       if (document.getElementById("own_pzh") && document.getElementById("own_pzh").value !== "undefined" && document.getElementById("own_pzh").value !== "") {
         value = document.getElementById("own_pzh").value;
@@ -27,6 +29,7 @@
     function displayLogin(html_input) {
       $('#main').html('<article class="module width_full"><header><h3> Login to your personal zone hub </h3></header><div class="module_content">'+ html_input.payload.message +
      '</div></article><div class="spacer"></div>');
+	  loginMobileImprove();
     }
     webinos.session.addListener('login', displayLogin);
     function authenticate(msg){

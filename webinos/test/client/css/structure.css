@@ -161,3 +161,24 @@ footer#main{
 	font:normal 11px/16px Arial, Helvetica, sans-serif;
 	width:100%;
 }
+
+@media screen and (max-width: 1200px) {
+	.box.login {
+		height:100%;
+		width:100%;
+		position:relative;
+		left:auto;
+		top:auto;
+		margin: 0 0 5px;
+		border-width: 0px;
+	}
+
+	.box header {
+		border-width:0px;
+		background-color: #fff;
+	}
+
+	.box header,.boxBody {
+		border-width:0px;
+	}
+}
