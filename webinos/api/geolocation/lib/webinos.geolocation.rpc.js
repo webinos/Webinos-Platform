@@ -28,7 +28,7 @@
 var GeolocationModule = function(rpcHandler, params) {
     var implFile;
     var car = null;
-    var conncector = null;
+    var connector = null;
     
     if(typeof params.connector === 'undefined' ){
         connector = 'simulator';
@@ -37,8 +37,10 @@ var GeolocationModule = function(rpcHandler, params) {
     }
         
 
-    
-    if(connector == 'most'){
+    if(process.platform == 'android') {
+      implFile = 'android';
+      console.log('************** android platform *************');
+    } else if(connector == 'most'){
         try{
             var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
             vehicleBusAvailable = vehicleSystem.available;

@@ -74,6 +74,10 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
 		positionCB(position);
 	};
 
+	rpc.onError = function (err) {
+		positionErrorCB(err);
+	};
+
 	webinos.rpcHandler.registerCallbackObject(rpc);
 	webinos.rpcHandler.executeRPC(rpc);
 
