@@ -59,11 +59,11 @@ _RPCHandler.prototype.handleMessage = function(){
             var rpc = {
                 jsonrpc: '2.0',
                 id: rpcRequest.id || getNextID(),
-                result: "SECURITY_ERROR",
+//                result: "SECURITY_ERROR",
                 error: {
-                    data: "SECURITY_ERROR",
+                    data: { code: 0, message: "Security error: Access to " + apiFeature + " has been denied."},
                     code: -31000,
-                    message: 'Method Invocation returned with a security error'
+                    message: 'Method Invocation returned with error'
                 }
             }
             this.executeRPC(rpc, undefined, undefined, arguments[1], arguments[2]);
