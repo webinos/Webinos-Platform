@@ -610,8 +610,11 @@ float: left;
 	.module_content .button, .module_content select, .module_content textarea, .module_content input {
 		margin: 0 0 5px;
 		width: 100%;
-		max-width: 260px;
 		font-size: 12px;
+	}
+
+	.module_content .button, .module_content input {
+		max-width: 260px;
 	}
 
 	.module_content input[type=radio] {

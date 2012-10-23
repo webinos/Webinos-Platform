@@ -12,6 +12,9 @@ function loginMobileImprove() {
 	if(checkwidth()) {
 		$("div.module_content").css('margin','0');
 		$("body").css('background','url(images/testbed_bg2.png) no-repeat');
+		$(".btnlogin").css('float','none');
+		$(".btnlogin").css('display','block');
+		$(".btnlogin").css('margin-top','5px');
 	}
 }
 
