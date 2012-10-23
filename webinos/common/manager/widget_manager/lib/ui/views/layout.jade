@@ -8,7 +8,13 @@ html(lang="en")
 		link(rel="icon",href="/images/favicon.ico",type="image/x-icon")
 		script(src='/js/jquery-1.7.2.min.js')
 		script(src="/js/jquery.corner.js")
-		script(src="/client/webinos.js")
+		script(type="text/javascript")
+			if (typeof webinos=="undefined"){
+				var script = document.createElement( 'script' );
+				script.type = 'text/javascript';
+				script.src = '/client/webinos.js';
+				$("head").append( script );
+			}
 		script(type='text/javascript')
 			$(function() {				
 				$(".page").corner("keep");
