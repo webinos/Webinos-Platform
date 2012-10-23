@@ -67,42 +67,6 @@ var PZH_WebServer = function() {
     res.end();
   }
 
-  /**
-   *
-   * @param res
-   * @param filename
-   */
-  function sendFile(res, filename) {
-    fs.stat(filename, function(err, stats) {
-      if(err) {
-        res.writeHeader(404, {"Content-Type": "text/plain"});
-        res.write("404 Not Found\n");
-        res.end();
-        return;
-      }
-      if (stats.isDirectory()) {
-        if (authenticatedUser[pzhId]) {
-          filename = path.join(__dirname, "main.html");
-        } else {
-          filename = path.join(__dirname, "index.html");
-        }
-      }
-
-      // Security check, if not logged in, we redirect to index.html
-      fs.readFile(filename, "binary", function(err, file) {
-        if(err) {
-          res.writeHeader(500, {"Content-Type": "text/plain"});
-          res.write(err + "\n");
-          res.end();
-          return;
-        }
-        res.writeHeader(200, content.getContentType(filename));
-        res.write(file, "binary");
-        res.end();
-      });
-    });
-  }
-
   function authenticateUser(id, provider, res) {
     if (!authenticatedUser.hasOwnProperty(id)){
       authenticatedUser[id] = {id: crypto.randomBytes(24).toString("base64"), expiry: (new Date().getTime()) + 60*60*1000};//
@@ -276,12 +240,13 @@ var PZH_WebServer = function() {
     server.on('request', function(req, res) {
       var parsed = url.parse(req.url, true);
       if (parsed.query && parsed.query.cmd ) {
-        if(parsed.query.cmd === "verify") {
+        if (parsed.query.cmd === "verify") {
           verifyConnection(res, req, parsed.query);
         }
       } else {
         var filename = path.join(__dirname, parsed.pathname);
-        sendFile(res, filename);
+        var indexFile = authenticatedUser[pzhId] ? "main.html" : "index.html";
+        content.sendFile(res, __dirname, filename, indexFile);
       }
     });
 
