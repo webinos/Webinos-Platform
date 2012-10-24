@@ -86,8 +86,6 @@ describe('common.RPC', function() {
 			expect(rpc.method).toBeDefined();
 			expect(rpc.method).toEqual(jasmine.any(String));
 
-			expect(rpc.serviceAddress).toBeDefined();
-
 			expect(rpc.params).toBeDefined();
 			expect(rpc.params).toEqual(jasmine.any(Object));
 		});
@@ -99,10 +97,11 @@ describe('common.RPC', function() {
 		var rpc;
 
 		beforeEach(function() {
-			service = new RPCWebinosService();
-			service.api = 'prop-api';
-			service.displayName = 'prop-displayName';
-			service.description = 'prop-description';
+			service = new RPCWebinosService({
+				api: 'prop-api',
+				displayName: 'prop-displayName',
+				description: 'prop-description'
+			});
 			rpc = rpcHandler.createRPC(service, 'functionName', [1]);
 		});
 
@@ -156,14 +155,17 @@ describe('common.RPC', function() {
 
 		beforeEach(function() {
 			// create and register mock service
-			var MockService = function(privRpcHandler, params) {
+			var MockService = function() {
 				this.base = RPCWebinosService;
 				this.base({
 					api: 'prop-api',
+					id: 'prop-id',
 					displayName: 'prop-displayName',
 					description: 'prop-description'
 				});
 				this.testListen = function(params, success, error, objRef) {
+					objRef.from = "fake"; // from is expected, fake it
+
 					var rpc = rpcHandler.createRPC(objRef, 'onEvent', {testProp: 42});
 					rpcHandler.executeRPC(rpc);
 				};
@@ -235,13 +237,11 @@ describe('common.RPC', function() {
 			spyOn(rpcHandler, 'executeRPC').andCallThrough();
 
 			var rpc = rpcHandler.createRPC(service, 'testListen', [1]);
-			rpc.fromObjectRef = 2342; // this is totally a unique id
 
 			// create a temporary webinos service for our callback onEvent
-			var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-			callback.onEvent = function (){}; // empty, using spyOn instead
-			spyOn(callback, 'onEvent');
-			rpcHandler.registerCallbackObject(callback);
+			rpc.onEvent = function (){}; // empty, using spyOn instead
+			spyOn(rpc, 'onEvent');
+			rpcHandler.registerCallbackObject(rpc);
 			rpcHandler.executeRPC(rpc);
 
 			// response
@@ -251,8 +251,8 @@ describe('common.RPC', function() {
 			// called once for request and once for response
 			expect(rpcHandler.executeRPC.calls.length).toEqual(2);
 
-			expect(callback.onEvent).toHaveBeenCalled();
-			expect(callback.onEvent.calls[0].args[0].testProp).toEqual(42);
+			expect(rpc.onEvent).toHaveBeenCalled();
+			expect(rpc.onEvent.calls[0].args[0].testProp).toEqual(42);
 		});
 	});
 });
