@@ -29,7 +29,7 @@ function help() {
   console.log("Options:");
   console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
   console.log("--pzh-name=[name]        name of the pzh (default \"\")");
-  console.log("--pzp-name=[name]        name of the pzp (default \"\")");
+  console.log("--friendly-name=[name]   name of the pzp (default \"\")");
   console.log("--auth-code=[code]       context debug flag (default DEBUG)");
   console.log("--preference=[option]    preference option (default hub, other option peer)");
   console.log("--widgetServer           start widget server");
