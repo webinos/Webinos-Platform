@@ -67,7 +67,7 @@ if (typeof webinos.util === "undefined") webinos.util = {};
     }
   };
 
-  EventTarget.prototype.removeAllListeners = function(type) {
+  EventTarget.prototype.removeAllListeners = function (type) {
     if (arguments.length === 0) {
       this.events = {};
     } else if (typeof this.events !== "undefined" &&
