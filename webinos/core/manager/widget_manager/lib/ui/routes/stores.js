@@ -3,7 +3,7 @@
     var http = require('http');
     var fs = require('fs');
 	var path = require('path');
-	var pzp   = require("../../../../../../pzp/lib/pzp");
+	var pzp   = require("../../../../../pzp/lib/pzp");
 
 	exports.stores = function (req, res) {
 		fs.readFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_stores.json')), function (err, data) {

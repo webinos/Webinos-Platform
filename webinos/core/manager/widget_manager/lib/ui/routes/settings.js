@@ -1,7 +1,7 @@
 (function (exports) {
     var fs = require('fs');
 	var path = require('path');
-    var pzp = require('../../../../../../pzp/lib/pzp');
+    var pzp = require('../../../../../pzp/lib/pzp');
     var wrtPort = 0;
 
     function extractKey(line, key) {

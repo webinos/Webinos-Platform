@@ -5,7 +5,7 @@
     var fs = require('fs');
     var path = require('path');
     var wm = require('../../../index.js');
-    var pzp = require('../../../../../../pzp/lib/pzp');
+    var pzp = require('../../../../../pzp/lib/pzp');
     
     // ToDo - is there a 3rd party library we can use for this?
     var mimeTypes = {

@@ -8,15 +8,14 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <name>Common</name>
+  <name>core</name>
   <url>http://www.webinos.org</url>
 
-  <artifactId>common</artifactId>
+  <artifactId>core</artifactId>
   <packaging>pom</packaging>
 
   <modules>
     <!-- One module tag per child module -->
-    <module>android</module>
     <module>rpc</module>
     <module>manager</module>
     <module>xmpp</module>

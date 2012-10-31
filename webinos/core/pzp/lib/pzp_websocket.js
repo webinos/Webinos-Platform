@@ -106,7 +106,7 @@ var PzpWSS = function() {
       /**
        * Expose the current communication channel websocket port using this virtual file.
        * This code must have the same result with the widgetServer.js used by wrt
-       * webinos\common\manager\widget_manager\lib\ui\widgetServer.js
+       * webinos\core\manager\widget_manager\lib\ui\widgetServer.js
        */
       if (uri == "/webinosConfig.json"){
           var jsonReply = {
@@ -121,7 +121,7 @@ var PzpWSS = function() {
       //TODO: Fix this. This is exploitable...
       // telenet the localhost 8080 and write GET /../../webinos_config.json
       // you will get the contents in plain text
-    var filename = path.join(__dirname, "../../test/", uri);
+    var filename = path.join(__dirname, "../../../web_root/", uri);
 
     fs.stat(filename, function(err, stats) {
       if(err) {
@@ -131,7 +131,7 @@ var PzpWSS = function() {
         return;
       }
       if (stats.isDirectory()) {
-        filename = path.join(filename, "/client/client.html");
+        filename = path.join(filename, "/testbed/client.html");
       }
       fs.readFile(filename, "binary", function(err, file) {
         if(err) {
