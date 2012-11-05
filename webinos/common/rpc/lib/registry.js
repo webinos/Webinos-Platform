@@ -78,24 +78,6 @@
 	};
 
 	/**
-	 * Registers an object as RPC request receiver.
-	 * @param callback The callback object that contains the methods available via RPC.
-	 */
-	Registry.prototype.registerCallbackObject = function (callback) {
-		if (!callback) {
-			return;
-		}
-		logger.log("Adding: " + callback.api);
-
-		var receiverObjs = this.objects[callback.api];
-		if (!receiverObjs)
-			receiverObjs = [];
-
-		receiverObjs.push(callback);
-		this.objects[callback.api] = receiverObjs;
-	};
-
-	/**
 	 * Unregisters an object, so it can no longer receives requests.
 	 * @param callback The callback object to unregister.
 	 */
