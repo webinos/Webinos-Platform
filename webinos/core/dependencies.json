@@ -116,10 +116,6 @@
     "name":"Webinos utility",
     "location": "util/"
   },
-  "rpc": {
-    "name": "RPC",
-    "location": "rpc/"
-  },
   "xmpppzp": {
     "name": "xmpp-pzp",
     "location": "xmpp-pzp/"

@@ -1,7 +1,0 @@
-{ "name": "rpc",
-  "version": "0.0.1",
-  "main": "./lib/rpc.js",
-  "directories": {
-    "lib": "./lib"
-  }
-}
