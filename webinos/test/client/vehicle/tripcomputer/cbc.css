@@ -20,23 +20,12 @@ html, body{
 	width: 40%;
 	height: 10%;
 	float: left;
-		/* fallback */
-  background-color: #1f1f1f;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
-
+	background-color: #1f1f1f;
+	background-image: url(/client/vehicle/general/rauschen.png);
+	background: url(/client/vehicle/general/rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
+	background: url(/client/vehicle/general/rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
+	background: url(/client/vehicle/general/rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
+	background: url(/client/vehicle/general/rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
 	box-shadow: #000000 0px 0px 10px;
 	z-index: 150;
 }
@@ -50,25 +39,12 @@ html, body{
 	z-index: 100;
 	
 	overflow: hidden;
-	
-	/* fallback */
-  background-color: #1f1f1f;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
-	
-
+	background-color: #1f1f1f;
+	background-image: url(rauschen.png);
+	background: url(/client/vehicle/general/rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#585E59), to(#1f1f1f));
+	background: url(/client/vehicle/general/rauschen.png), -webkit-radial-gradient(circle, #585E59, #1f1f1f);
+	background: url(/client/vehicle/general/rauschen.png), -moz-radial-gradient(circle, #585E59, #1f1f1f);
+	background: url(/client/vehicle/general/rauschen.png), -ms-radial-gradient(circle, #585E59, #1f1f1f);
 }
 
 #logo{
@@ -80,10 +56,10 @@ html, body{
 	height: 45px;
 	background-color: #fff;
 	box-shadow: #000000 0px 0px 10px;
-	-moz-border-radius:4px; /* Firefox */
-	-webkit-border-radius:4px; /* Safari, Chrome */
-	-khtml-border-radius:4px; /* Konqueror */
-	border-radius:4px; /* CSS3 */
+	-moz-border-radius:4px; 
+	-webkit-border-radius:4px; 
+	-khtml-border-radius:4px; 
+	border-radius:4px; 
 }
 
 
@@ -92,20 +68,14 @@ html, body{
 	position: fixed;
 	height: 50px;
 	width: 60%;
-	
-	
-	-moz-border-radius:4px; /* Firefox */
-	-webkit-border-radius:4px; /* Safari, Chrome */
-	-khtml-border-radius:4px; /* Konqueror */
-	border-radius:4px; /* CSS3 */
-	
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px; 
+	-khtml-border-radius:4px; 
+	border-radius:4px;
 	left: 50%;
 	margin-left: -30%;
-	
 	top: 50%;
 	margin-top: -25px;
-	
-	
 	background-color: #000;
 	opacity: 0.8;
 }
@@ -197,21 +167,11 @@ html, body{
 	padding: 0px;
 	box-shadow: inset 0 0 15px #313131;
 	background-color: #fff;
-  background-image: url(rauschen.png);
-  
-  /* Safari 4-5, Chrome 1-9 */
-  /* Can't specify a percentage size? Laaaaaame. */
-  background: url(rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#ddd), to(#fff));
-  
-  /* Safari 5.1+, Chrome 10+ */
-  background: url(rauschen.png), -webkit-radial-gradient(circle, #ddd, #fff);
-  
-  /* Firefox 3.6+ */ 
-  background: url(rauschen.png), -moz-radial-gradient(circle, #ddd, #fff);
-  
-  /* IE 10 */ 
-  background: url(rauschen.png), -ms-radial-gradient(circle, #ddd, #fff);
-
+	background-image: url(/client/vehicle/general/rauschen.png);
+	background: url(/client/vehicle/general/rauschen.png), -webkit-gradient(radial, center center, 0, center center, 460, from(#ddd), to(#fff));
+	background: url(/client/vehicle/general/rauschen.png), -webkit-radial-gradient(circle, #ddd, #fff);
+	background: url(/client/vehicle/general/rauschen.png), -moz-radial-gradient(circle, #ddd, #fff);
+ 	background: url(/client/vehicle/general/rauschen.png), -ms-radial-gradient(circle, #ddd, #fff);
 }
 
 #bc-full ul li li{
