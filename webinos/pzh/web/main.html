@@ -35,7 +35,7 @@
   function displayQRCode(payload){
       var text = "<center>";
       text += "<p> <img src=" + payload.img + "> </img> </p> ";
-      text += "<p> <h2>" +payload.code +"</h2> </p>";
+      text += "<p> <h2 class='authCode'>" +payload.code +"</h2> </p>";
       text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
       setArticle("Temporary access code",text);
   }
