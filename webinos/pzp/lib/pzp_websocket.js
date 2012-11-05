@@ -103,48 +103,25 @@ var PzpWSS = function() {
     }
   }
   function handleRequest(uri, req, res) {
-      /**
-       * Expose the current communication channel websocket port using this virtual file.
-       * This code must have the same result with the widgetServer.js used by wrt
-       * webinos\common\manager\widget_manager\lib\ui\widgetServer.js
-       */
-      if (uri == "/webinosConfig.json"){
-          var jsonReply = {
-              websocketPort : ports.pzp_webSocket
-          };
-          res.writeHead(200, {"Content-Type": "application/json"});
-          res.write(JSON.stringify(jsonReply));
-          res.end();
-          return;
-      }
+    /**
+     * Expose the current communication channel websocket port using this virtual file.
+     * This code must have the same result with the widgetServer.js used by wrt
+     * webinos\common\manager\widget_manager\lib\ui\widgetServer.js
+     */
+    if (uri == "/webinosConfig.json"){
+      var jsonReply = {
+        websocketPort : ports.pzp_webSocket
+      };
+      res.writeHead(200, {"Content-Type": "application/json"});
+      res.write(JSON.stringify(jsonReply));
+      res.end();
+      return;
+    }
 
-      //TODO: Fix this. This is exploitable...
-      // telenet the localhost 8080 and write GET /../../webinos_config.json
-      // you will get the contents in plain text
-    var filename = path.join(__dirname, "../../test/", uri);
+    var documentRoot = path.join(__dirname, "../../test/");
+    var filename = path.join(documentRoot, uri);
 
-    fs.stat(filename, function(err, stats) {
-      if(err) {
-        res.writeHead(404, {"Content-Type": "text/plain"});
-        res.write("404 Not Found\n");
-        res.end();
-        return;
-      }
-      if (stats.isDirectory()) {
-        filename = path.join(filename, "/client/client.html");
-      }
-      fs.readFile(filename, "binary", function(err, file) {
-        if(err) {
-          res.writeHead(500, {"Content-Type": "text/plain"});
-          res.write(err + "\n");
-          res.end();
-          return;
-        }
-        res.writeHead(200, content.getContentType(filename));
-        res.write(file, "binary");
-        res.end();
-      });
-    });
+    content.sendFile(res, documentRoot, filename, "client/client.html");
   }
   function startWebSocket(callback){
     var self = this;
