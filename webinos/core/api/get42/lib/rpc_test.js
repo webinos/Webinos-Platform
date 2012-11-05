@@ -16,6 +16,7 @@
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
+var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
 var TestApiModule = function(rpcHandler, params) {
 	this.rpcHandler = rpcHandler;

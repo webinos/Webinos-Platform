@@ -22,6 +22,7 @@ var PORT = "80";
 
 var http = require('http');
 var url = require('url')
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 	
 /**
  * Webinos Actuator service constructor (server side).

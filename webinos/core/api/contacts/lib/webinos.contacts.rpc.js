@@ -22,6 +22,7 @@
 	var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
 	var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
 	var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 	
 	var contacts_module = require(path.resolve(__dirname,'contacts_module.js'));
 	

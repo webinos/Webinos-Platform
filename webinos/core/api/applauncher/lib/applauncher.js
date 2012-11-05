@@ -16,6 +16,7 @@
 * Copyright 2012 Andre Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
+  var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
   var androidLauncher = null;
   var widgetLibrary; 
   try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
