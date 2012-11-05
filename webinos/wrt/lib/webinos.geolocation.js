@@ -60,6 +60,8 @@ function getCurrentPosition(positionCB, positionErrorCB, positionOptions) {
 	});
 };
 
+var watchIdTable = {};
+
 /**
  * Register a listener for position updates.
  * @param positionCB Callback for position updates.
@@ -81,7 +83,10 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
 	webinos.rpcHandler.registerCallbackObject(rpc);
 	webinos.rpcHandler.executeRPC(rpc);
 
-	return parseInt(rpc.id, 16);
+	var watchId = parseInt(rpc.id, 16);
+	watchIdTable[watchId] = rpc.id;
+
+	return watchId;
 };
 
 /**
@@ -89,12 +94,14 @@ function watchPosition(positionCB, positionErrorCB, positionOptions) {
  * @param watchId The id as returned by watchPosition to clear.
  */
 function clearWatch(watchId) {
-	var watchIdStr = (watchId).toString(16);
+	var _watchId = watchIdTable[watchId];
+	if (!_watchId) return;
 
-	var rpc = webinos.rpcHandler.createRPC(this, "clearWatch", [watchIdStr]);
+	var rpc = webinos.rpcHandler.createRPC(this, "clearWatch", [_watchId]);
 	webinos.rpcHandler.executeRPC(rpc);
 
-	webinos.rpcHandler.unregisterCallbackObject({api:watchIdStr});
+	delete watchIdTable[watchId];
+	webinos.rpcHandler.unregisterCallbackObject({api:_watchId});
 };
 
 })();
