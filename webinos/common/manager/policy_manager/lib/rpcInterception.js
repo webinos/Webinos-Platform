@@ -61,7 +61,7 @@ _RPCHandler.prototype.handleMessage = function(){
                 id: rpcRequest.id || getNextID(),
 //                result: "SECURITY_ERROR",
                 error: {
-                    data: { code: 0, message: "Security error: Access to " + apiFeature + " has been denied."},
+                    data: { name: "SecurityError", code: 18, message: "Access to " + apiFeature + " has been denied."},
                     code: -31000,
                     message: 'Method Invocation returned with error'
                 }
