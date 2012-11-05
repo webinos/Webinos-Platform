@@ -66,6 +66,12 @@
 		this.sessionId = '';
 
 		/**
+		 * Map to store callback objects on which methods can be invoked.
+		 * Used by one request to many replies pattern.
+		 */
+		this.callbackObjects = {};
+
+		/**
 		 * Used on the client side by executeRPC to store callbacks that are
 		 * invoked once the RPC finished.
 		 */
@@ -173,13 +179,15 @@
 	 * @private
 	 */
 	var handleRequest = function (request, from, msgid) {
+		var isCallbackObject;
+
 		var idx = request.method.lastIndexOf('.');
 		var service = request.method.substring(0, idx);
 		var method = request.method.substring(idx + 1);
 		var serviceId = undefined;
 		idx = service.indexOf('@');
 		if (idx !== -1) {
-			// uses old format without md5 hash, see createRPC
+			// extract service type and id, e.g. service@id
 			var serviceIdRest = service.substring(idx + 1);
 			service = service.substring(0, idx);
 			var idx2 = serviceIdRest.indexOf('.');
@@ -188,6 +196,9 @@
 			} else {
 				serviceId = serviceIdRest;
 			}
+		} else if (service !== "ServiceDiscovery") {
+			// request to object registered with registerCallbackObject
+			isCallbackObject = true;
 		}
 		//TODO send back error if service and method is not webinos style
 
@@ -198,9 +209,14 @@
 
 		logger.log("Got request to invoke " + method + " on " + service + (serviceId ? "@" + serviceId : "") +" with params: " + request.params );
 
-		var includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
+		var includingObject;
+		if (isCallbackObject) {
+			includingObject = this.callbackObjects[service];
+		} else {
+			includingObject = this.registry.getServiceWithTypeAndId(service, serviceId);
+		}
 
-		if (typeof includingObject === 'undefined'){
+		if (!includingObject) {
 			logger.log("No service found with id/type " + service);
 			return;
 		}
@@ -217,7 +233,7 @@
 			}
 		}
 
-		if (typeof includingObject === 'object'){
+		if (typeof includingObject === 'object') {
 			var id = request.id;
 			var that = this;
 
@@ -384,9 +400,8 @@
 			callback.id = getNextID();
 		}
 
-		// api property must exist, since that is used to register an object
-		callback.api = callback.id;
-		this.registry.registerCallbackObject(callback);
+		// register
+		this.callbackObjects[callback.id] = callback;
 	};
 
 	/**
@@ -394,33 +409,8 @@
 	 * @param callback The callback object to unregister.
 	 */
 	_RPCHandler.prototype.unregisterCallbackObject = function (callback) {
-		if (typeof callback.id === 'undefined') {
-			// id property is needed. in case of listener rpc calls it's usually
-			// the same as api property
-			callback.id = callback.api;
-		}
-		this.registry.unregisterObject(callback);
+		delete this.callbackObjects[callback.id];
 	};
-
-	// _RPCHandler.prototype.invoke = function (service, method, params) {
-	// 	var call = createRPC(service, method, params)
-	// 	executeRPC(call, function () {
-	// 		if (typeof ref.onsuccess === "function") {
-	// 			ref.onsuccess.apply(null, arguments)
-	// 		}
-	// 	}, function () {
-	// 		if (typeof ref.onerror === "function") {
-	// 			ref.onerror.apply(null, arguments)
-	// 		}
-	// 	})
-
-	// 	var ref = function (successCallback, errorCallback) {
-	// 		ref.onsuccess = successCallback
-	// 		ref.onerror = errorCallback
-	// 	}
-
-	// 	return ref
-	// }
 
 	/**
 	 * Utility method that combines createRPC and executeRPC.
