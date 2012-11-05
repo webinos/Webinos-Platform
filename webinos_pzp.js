@@ -54,7 +54,7 @@ process.argv.forEach(function (arg) {
         options.preference = parts[1];
         break;
       case "--auth-code":
-        options.code = parts[1]+"="; // added as last letter in qrcode is = but above "split" removes this info
+        options.code = parts[1];
         break;
       default:
         console.log("unknown option: " + parts[0]);

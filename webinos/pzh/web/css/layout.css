@@ -367,3 +367,9 @@ width: 66%;
 margin-right: 0;
 float: left;
 }
+
+.authCode {
+    font-family: "Lucida Console", Monaco, "Courier New", Courier, monospace;
+    font-size: 18px;
+}
+
