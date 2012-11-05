@@ -94,6 +94,7 @@ tokenAuth.createAuthCounter = function(callback) {
      */
   authCounter.isExpectedCode = function(newcode, cb) {
     var self = this;
+    newcode = newcode.toUpperCase();
 
     logger.log("trying to add a PZP, code: " + newcode);
 
