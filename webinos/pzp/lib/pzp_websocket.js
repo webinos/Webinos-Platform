@@ -103,20 +103,7 @@ var PzpWSS = function() {
     }
   }
   function handleRequest(uri, req, res) {
-    /**
-     * Expose the current communication channel websocket port using this virtual file.
-     * This code must have the same result with the widgetServer.js used by wrt
-     * webinos\common\manager\widget_manager\lib\ui\widgetServer.js
-     */
-    if (uri == "/webinosConfig.json"){
-      var jsonReply = {
-        websocketPort : ports.pzp_webSocket
-      };
-      res.writeHead(200, {"Content-Type": "application/json"});
-      res.write(JSON.stringify(jsonReply));
-      res.end();
-      return;
-    }
+    var filename = path.join(__dirname, "../../test/", uri);
 
     var documentRoot = path.join(__dirname, "../../test/");
     var filename = path.join(documentRoot, uri);
