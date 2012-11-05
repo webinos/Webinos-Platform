@@ -25,15 +25,17 @@ var vs;
 
 
 
-function ShiftEvent(value){
+
+
+function gearEvent(value){
 	this.gear = value;
 }
 
 function TripComputerEvent(avgCon1, avgCon2, avgSpeed1, avgSpeed2, tripDistance, mileage, range){
-	this.averageConsumption1 = avgCon1;
-	this.averageConsumption2 = avgCon2;
-	this.averageSpeed1 = avgSpeed1;
-	this.averageSpeed2 = avgSpeed2;
+	this.averageConsumption = avgCon1;
+	this.tripConsumption = avgCon2;
+	this.averageSpeed = avgSpeed1;
+	this.tripSpeed = avgSpeed2;
 	this.tripDistance = tripDistance;
 	this.mileage = mileage;
 	this.range = range;
@@ -88,98 +90,78 @@ function VehicleError(message){
 
 
 function get(vehicleDataId, vehicleDataHandler, errorCB){
-	switch(vehicleDataId[0])
-	{
-    case "shift":
-      vehicleDataHandler(vs.get('gear'));
-	  break;
-	case "tripcomputer":
-		vehicleDataHandler(vs.get('tripcomputer'));
-	  break;
-	case "parksensors-front":
-		vehicleDataHandler(vs.get('parksensors-front'));
-		break;
-	case "parksensors-rear":
-		vehicleDataHandler(vs.get('parksensors-rear'));
-		break;	
-	case "destination-reached":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-	  break;
-	case "destination-changed":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-	  break;
-    case "destination-cancelled":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-	  break;
-    case "climate-all":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-	case "climate-driver":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;		 
-    case "climate-passenger-front":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-	case "climate-passenger-rear-left":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-    case "climate-passenger-rear-right":
-        errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-        break;	
-    case "lights-fog-front":
-    	vehicleDataHandler(vs.get(vehicleDataId[0]));
-        break;
-    case "lights-fog-rear":
-    	vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;	
-    case "lights-signal-left":
-    	vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;		
-    case "lights-signal-right":
-    	vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;
-	case "lights-signal-warn":
-		vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;
-	case "lights-parking":
-		vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;
-	case "lights-hibeam":
-		vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;
-	case "lights-head":
-		vehicleDataHandler(vs.get(vehicleDataId[0]));
-		break;
-    case "wiper-front-wash":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-    case "wiper-rear-wash":
-        errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;	
-    case "wiper-automatic":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-        break;		
-    case "wiper-front-once":
-        errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-	case "wiper-rear-once":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-        break;
-	case "wiper-front-level1":
-		errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-	case "wiper-front-level2":
-        errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-		break;
-	default:
-	  errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
-	}
-
+	switch(vehicleDataId[0]){
+		case "gear":
+      			vehicleDataHandler(vs.get('gear'));
+	  		break;
+		case "tripcomputer":
+			vehicleDataHandler(vs.get('tripcomputer'));
+	  		break;
+		case "parksensors-front":
+			vehicleDataHandler(vs.get('parksensors-front'));
+			break;
+		case "parksensors-rear":
+			vehicleDataHandler(vs.get('parksensors-rear'));
+			break;	
+	   	 case "climate-all":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+		case "climate-driver":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;		 
+    		case "climate-passenger-front":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+		case "climate-passenger-rear-left":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+    		case "climate-passenger-rear-right":
+       			 errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+       			 break;	
+    		case "lights-fog-front":
+    			vehicleDataHandler(vs.get(vehicleDataId[0]));
+        		break;
+    		case "lights-fog-rear":
+    			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;	
+    		case "lights-signal-left":
+    			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;		
+    		case "lights-signal-right":
+    			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;
+		case "lights-signal-warn":
+			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;
+		case "lights-parking":
+			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;
+		case "lights-hibeam":
+			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;
+		case "lights-head":
+			vehicleDataHandler(vs.get(vehicleDataId[0]));
+			break;
+    		case "wipers":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+    		case "doors":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+    		case "windows":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+    		case "engineoil":
+			errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+			break;
+ 		default:
+			errorCB(new VehicleError(vehicleDataId[0] + ' not supported on this service implementation.'));
+		}
 }
 
 //Objects references for handling EventListeners
 var objectRefs = new Array();
-
+var listeners = [];
 
 //BOOLs for handling listeners (are there active listeners)
 var listeningToGear = false;
@@ -204,480 +186,261 @@ var listeningToLightsParking = false;
 var listeningToLightsHibeam = false;
 var listeningToLightsHead = false;
 
-var listeningToWiperFront = false;
-var listeningToWiperRear = false;
-var listeningToWiperAutomatic = false;
-var listeningToWiperFrontOnce = false;
-var listeningToWiperFrontOnce = false;
-var listeningToWiperFrontLevel1 = false;
-var listeningToWiperFrontLevel2 = false;
+var listeningToWipers = false;
+var listeningToDoors = false;
+var listeningToWindows = false;
+var listeningToEngineOil = false;
+
 
 /*AddEventListener*/
 addEventListener = function (vehicleDataId, successHandler, errorHandler, objectRef){
-	console.log("vehicleDataId " + vehicleDataId);	
-		switch(vehicleDataId){
-			case "shift":
-				objectRefs.push([objectRef.rpcId, 'shift']);
-				if(!listeningToGear){ //Listener for gears not yet registered
-					listeningToGear = true;
-				}			
-				break;
-			case "tripcomputer":
-				objectRefs.push([objectRef.rpcId, 'tripcomputer']);
-				if(!listeningToTripComputer){
-					listeningToTripComputer = true;
-				}
-				break;
-			case "parksensors-front":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToParkSensorsFront){
-					listeningToParkSensorsFront = true;
-				}
-				break;
-			case "parksensors-rear":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToParkSensorsRear){
-					listeningToParkSensorsRear = true;
-				}
-				break;
-            case "destination-reached":
-				objectRefs.push([objectRef.rpcId, 'destination-reached']);
-				if(!listeningToDestinationReached){
-					listeningToDestinationReached = true;
-				}
-				break;
-			case "destination-changed":
-				objectRefs.push([objectRef.rpcId, 'destination-changed']);
-				if(!listeningToDestinationChanged){
-					listeningToDestinationChanged = true;
-				}
-				break;
-			case "destination-cancelled":
-				objectRefs.push([objectRef.rpcId, 'destination-cancelled']);
-				if(!listeningToDestinationCancelled){
-					listeningToDestinationCancelled = true;
-				}
-				break;	
-			case "climate-all":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToClimateControlAll){
-					listeningToClimateControlAll = true;
-				}
-				break;
-			case "climate-driver":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToClimateControlDriver){
-					listeningToClimateControlDriver = true;
-				}
-				break;
-			case "climate-passenger-front":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToClimateControlPassFront){
-					listeningToClimateControlPassFront = true;
-				}
-				break;
-			case "climate-passenger-rear-left":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToClimateControlPassRearLeft){
-					listeningToClimateControlPassRearLeft = true;
-				}
-				break;
-			case "climate-passenger-rear-right":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToClimateControlPassRearRight){
-					listeningToClimateControlPassRearRight = true;
-				}
-				break;
-			case "lights-fog-front":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsFogFront){
-					listeningToLightsFogFront = true;
-				}
-				
-				
-				break;
-			case "lights-fog-rear":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsFogRear){
-					listeningToLightsFogRear = true;
-				}
-				break;
-			case "lights-signal-left":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsSignalLeft){
-					listeningToLightsSignalLeft = true;
-				}
-				break;
-			case "lights-signal-right":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsSignalRight){
-					listeningToLightsSignalRight = true;
-				}
-				break;
-			case "lights-signal-warn":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsSignalWarn){
-					listeningToLightsSignalWarn = true;
-				}
-				break;
-			case "lights-parking":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsParking){
-					listeningToLightsParking = true;
-				}
-				break;
-			case "lights-hibeam":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsHibeam){
-					listeningToLightsHibeam = true;
-				}
-			
-				break;
-			case "lights-head":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToLightsHead){
-					listeningToLightsHead = true;
-				}
-				break;
-			case "wiper-front-wash":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperFront){
-					listeningToWiperFront = true;
-				}
-				break;
-			case "wiper-rear-wash":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperRear){
-					listeningToWiperRear = true;
-				}
-				break;
-			case "wiper-automatic":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperAutomatic){
-					listeningToWiperAutomatic = true;
-				}
-				break;
-			case "wiper-front-once":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperFrontOnce){
-					listeningToWiperFrontOnce = true;
-				}
-				break;
-			case "wiper-rear-once":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperRearOnce){
-					listeningToWiperRearOnce = true;
-				}
-				break;
-			case "wiper-front-level1":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperFrontLevel1){
-					listeningToWiperFrontLevel1 = true;
-				}
-				break;
-			case "wiper-front-level2":
-				objectRefs.push([objectRef.rpcId, vehicleDataId]);
-				if(!listeningToWiperFrontLevel2){
-					listeningToWiperFrontLevel2 = true;
-				}
-				break;
-			default:
-				console.log('nothing to do: Errors...');
-			
-			}	
+	var supported = false;	
+	switch(vehicleDataId){
+		case "gear":
+			supported = true;
+			if(!listeningToGear){ //Listener for gears not yet registered
+				listeningToGear = true;	
+				console.log('now listening');
+			}			
+			break;
+		case "tripcomputer":
+			supported = true;
+			if(!listeningToTripComputer){
+				listeningToTripComputer = true;
+			}
+			break;
+		case "parksensors-front":
+			supported = true;		
+			if(!listeningToParkSensorsFront){
+				listeningToParkSensorsFront = true;
+			}
+			break;
+		case "parksensors-rear":
+			supported = true;
+			if(!listeningToParkSensorsRear){
+				listeningToParkSensorsRear = true;
+			}
+			break;
+		case "destination-reached":
+			supported = false;			
+			break;
+		case "destination-changed":
+			supported = false;				
+			break;
+		case "destination-cancelled":
+			supported = false;
+			break;	
+		case "climate-all":
+			supported = false;
+			break;
+		case "climate-driver":
+			supported = false;
+			break;
+		case "climate-passenger-front":
+			supported = false;
+			break;
+		case "climate-passenger-rear-left":
+			supported = false;
+			break;
+		case "climate-passenger-rear-right":
+			supported = false;
+			break;
+		case "lights-fog-front":
+			supported = false;
+			break;
+		case "lights-fog-rear":
+			supported = false;
+			break;
+		case "lights-signal-left":
+			supported = false;
+			break;
+		case "lights-signal-right":
+			supported = false;
+			break;
+		case "lights-signal-warn":
+			supported = false;
+			break;
+		case "lights-parking":
+			supported = false;
+			break;
+		case "lights-hibeam":
+			supported = false;
+			break;
+		case "lights-head":
+			supported = false;
+			break;
+		case "wipers":
+			supported = false;
+			break;
+		case "engineoil":
+			supported = false;
+			break;
+		case "doors":
+			supported = false;
+			break;
+		case "windows":
+			supported = false;
+			break;
+		default:
+			supported = false;
+	}
+	if(supported){
+		listeners.push([successHandler, errorHandler, objectRef, vehicleDataId]);	
+	}else{
+		errorHandler(new VehicleError('Listener on ' + vehicleDataId + ' not supported.'));
+	}
 }
 
 
 /*RemoveEventListener*/
 removeEventListener = function(arguments){
 	
-	// arguments[1] = objectReference, arguments[1] = vehicleDataId
-	
-	console.log('Removing object# from listener ' + arguments[0] + " vehicleDataId: " + arguments[1]);
+	// arguments[0] = objectReference, arguments[1] = vehicleDataId
+	/*
+	* this is inside a listener array:
+	* [0]successHandler, [1]errorHandler, [2]objectRef, [3]vehicleDataId
+	*/
 	var registeredListeners = 0;
-	for(i = 0; i < objectRefs.length; i++ ){
-		if(objectRefs[i][1] == arguments[1]){
+	for(i = 0; i < listeners.length; i++ ){
+		if(listeners[i][2][0] == arguments[1]){
 			registeredListeners++;
 		}
-		if(objectRefs[i][0] == arguments[0]){
-			objectRefs.splice(i,1);
+		if(listeners[i][0] == arguments[0]){
+			listeners.splice(i,1);
 			console.log('object# ' + arguments[1] + " removed.");
 		}
-
 	}
 	
-	console.log(registeredListeners);
 	if(registeredListeners  <= 1){
-        console.log('disabling listening to ' + arguments[1] + " Events");
+	        console.log('disabling listening to ' + arguments[1] + " Events");
 		switch(arguments[1]){
-			case "shift":
-				listeningToGear = false;
-								break;
-			case "tripcomputer":
-				listeningToTripComputer = false;
-				break;
-			case "parksensors-front":
-				listeningToParkSensorsFront = false;
-				break;
-			case "parksensors-rear":
-				listeningToParkSensorsFront = false;
-				break;	
-            case "destination-reached":
-				listeningToDestinationReached = false;
-				break;
-			case "destination-changed":
-				listeningToDestinationChanged = false;
-				break;
-            case "destination-cancelled":
-				listeningToDestinationCancelled = false;
-				break;
-			case "climate-all":
-				listeningToClimateControlAll = false;
-				break;
-			case "climate-driver":
-				listeningToClimateControlDriver = false;
-				break;
-			case "climate-passenger-front":
-				listeningToClimateControlPassFront = false;
-				break;	
-            case "climate-passenger-rear-left":
-				listeningToClimateControlPassRearLeft = false;
-				break;	
-            case "climate-passenger-rear-right":
-				listeningToClimateControlPassRearRight = false;
-				break;		
-            case "lights-fog-front":
-				listeningToLightsFogFront = false;
-				break;
-			case "lights-fog-rear":
-				listeningToLightsFogRear = false;
-				break;
-			case "lights-signal-left":
-				listeningToLightsSignalLeft = false;
-				break;	
-			case "lights-signal-right":
-				listeningToLightsSignalRight = false;
-				break;	
-            case "lights-signal-warn":
-				listeningToLightsSignalWarn = false;
-				break;	
-            case "lights-parking":
-				listeningToLightsParking = false;
-				break;
-			case "lights-hibeam":
-				listeningToLightsHibeam = false;
-				break;
-            case "lights-head":
-				listeningToLightsHead = false;
-				break;
-            case "wiper-front-wash":
-				listeningToWiperFront = false;
-				break;
-			case "wiper-rear-wash":
-				listeningToWiperRear = false;
-				break;
-			case "wiper-automatic":
-				listeningToWiperAutomatic = false;
-				break;	
-			case "wiper-front-once":
-				listeningToWiperFront = false;
-				break;	
-            case "wiper-rear-once":
-				listeningToWiperRear = false;
-				break;	
-            case "wiper-front-level1":
-				listeningToWiperFrontLevel1 = false;
-				break;
-			case "wiper-front-level2":
-				listeningToWiperFrontLevel2 = false;
-				break;				
-			default:
-				console.log("nothing found");
+		case "gear":
+			listeningToGear = false;
+			break;
+		case "tripcomputer":
+			listeningToTripComputer = false;
+			break;
+		case "parksensors-front":
+			listeningToParkSensorsFront = false;
+			break;
+		case "parksensors-rear":
+			listeningToParkSensorsFront = false;
+			break;	
+		case "destination-reached":
+			listeningToDestinationReached = false;
+			break;
+		case "destination-changed":
+			listeningToDestinationChanged = false;
+			break;
+		case "destination-cancelled":
+			listeningToDestinationCancelled = false;
+			break;
+		case "climate-all":
+			listeningToClimateControlAll = false;
+			break;
+		case "climate-driver":
+			listeningToClimateControlDriver = false;
+			break;
+		case "climate-passenger-front":
+			listeningToClimateControlPassFront = false;
+			break;	
+            	case "climate-passenger-rear-left":
+			listeningToClimateControlPassRearLeft = false;
+			break;	
+		case "climate-passenger-rear-right":
+			listeningToClimateControlPassRearRight = false;
+			break;		
+		case "lights-fog-front":
+			listeningToLightsFogFront = false;
+			break;
+		case "lights-fog-rear":
+			listeningToLightsFogRear = false;
+			break;
+		case "lights-signal-left":
+			listeningToLightsSignalLeft = false;
+			break;	
+		case "lights-signal-right":
+			listeningToLightsSignalRight = false;
+			break;	
+            	case "lights-signal-warn":
+			listeningToLightsSignalWarn = false;
+			break;	
+            	case "lights-parking":
+			listeningToLightsParking = false;
+			break;
+		case "lights-hibeam":
+			listeningToLightsHibeam = false;
+			break;
+            	case "lights-head":
+			listeningToLightsHead = false;
+			break;
+            	case "wipers":
+			listeningToWipers = false;
+			break;
+            	case "doors":
+			listeningToWipers = false;
+			break;
+            	case "windows":
+			listeningToWipers = false;
+			break;
+            	case "engineoil":
+			listeningToWipers = false;
+			break;
+		default:
+			console.log("nothing found");
 		
 		}
 	}
 }
 
 
-/*handleShiftEvents*/
-function handleShiftEvents(shiftE){
+/*handlegearEvents*/
+function handleGearEvents(gearE){
 	if(listeningToGear){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "shift"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", shiftE);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
+		for(var i = 0; i < listeners.length; i++){
+			if(listeners[i][3] == 'gear'){
+				returnData(gearE, function(gearE) {var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', gearE); rpcHandler.executeRPC(rpc);}, listeners[i][1], listeners[i][2]);
+			}
+		}
+	}
+}
+
+function returnData(data, successCB, errorCB){
+	if(data === undefined){
+		errorCB('Position could not be retrieved');		
+	}else{
+		successCB(data);
 	}
 }
 
 
 
 /*handleTripComputerEvents*/
-function handleTripComputerEvents(tcEvent){
-    if(listeningToTripComputer){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "tripcomputer"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", tcEvent);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-    }
+function handleTripComputerEvents(data){
+	if(listeningToTripComputer){
+		for(var i = 0; i < listeners.length; i++){
+			if(listeners[i][3] == 'tripcomputer'){
+				returnData(data, function(data) {var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data); rpcHandler.executeRPC(rpc);}, listeners[i][1], listeners[i][2]);
+			}
+		}
+    	}
 }
 
 /*handleParkSensorsEvent*/
-function handleParkSensorsEvents(psEvent){
+function handleParkSensorsEvents(data){
+	console.log('handle ps data');
 	if(listeningToParkSensorsFront || listeningToParkSensorsRear){
-        for(i = 0; i < objectRefs.length; i++){
-			if(objectRefs[i][1] == "parksensors-front"){
-   				json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", psEvent);
-                rpcHandler.executeRPC(json);
-			}
-			if(objectRefs[i][1] == "parksensors-rear"){
-                    json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", psEvent);
-                 	rpcHandler.executeRPC(json);
-			}
-        }
+		for(var i = 0; i < listeners.length; i++){
+			if(listeners[i][3] == 'parksensors-front'){
+				returnData(data, function(data) {var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data); rpcHandler.executeRPC(rpc);}, listeners[i][1], listeners[i][2]);
+			} 
+			if(listeners[i][3] == 'parksensors-rear'){
+				returnData(data, function(data) {var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data); rpcHandler.executeRPC(rpc);}, listeners[i][1], listeners[i][2]);
+			} 
+		}	
 	}
 }
 
-function handleDestinationReached(psEvent){
-	if(listeningToDestinationReached){
-        for(i = 0; i < objectRefs.length; i++){
-			if(objectRefs[i][1] == "destination-reached"){
-   				json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", psEvent);
-                rpcHandler.executeRPC(json);
-			}
-
-        }
-	}
-}
-function handleDestinationCancelled(psEvent){
-	if(listeningToDestinationCancelled){
-        for(i = 0; i < objectRefs.length; i++){
-			if(objectRefs[i][1] == "destination-cancelled"){
-   				json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", psEvent);
-                rpcHandler.executeRPC(json);
-			}
-
-        }
-	}
-}
-
-function handleDestinationChanged(psEvent){
-	if(listeningToDestinationChanged){
-        for(i = 0; i < objectRefs.length; i++){
-			if(objectRefs[i][1] == "destination-changed"){
-   				json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", psEvent);
-                rpcHandler.executeRPC(json);
-			}
-
-        }
-	}
-}
-
-function requestGuidance(pois,successCb, errorCb){
-	if(setDestination(pois[0])){
-		successCb();
-	}else{
-		errorCb(new VehicleError('Destination could not be changed'));
-	}
-}
-
-
-function findDestination(search, successCb, errorCb){
-	
-
-}
-
-
-function handleLightsFogFront(event){
-	if(listeningToLightsFogFront){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-fog-front"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-
-
-
-function handleLightsFogRear(event){
-	if(listeningToLightsFogRear){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-fog-rear"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-function handleLightsHibeam(event){
-	if(listeningToLightsHibeam){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-hibeam"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-function handleLightsParking(event){
-	if(listeningToLightsParking){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-parking"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-
-function handleLightsHead(event){
-	if(listeningToLightsHead){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-head"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-
-function handleLightsSignalLeft(event){
-	if(listeningToLightsSignalLeft){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-signal-left"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-
-function handleLightsSignalRight(event){
-	if(listeningToLightsSignalRight){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-signal-right"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
-
-function handleLightsSignalWarn(event){
-	if(listeningToLightsSignalWarn){
-        for(i = 0; i < objectRefs.length; i++){
-				if(objectRefs[i][1] == "lights-signal-warn"){
-                	json = rpcHandler.createRPC(objectRefs[i][0], "onEvent", event);
-                 	rpcHandler.executeRPC(json);
-				}
-        }
-	}
-}
 
 function setRPCHandler(rpcHdlr) {
 	rpcHandler = rpcHdlr;
@@ -685,21 +448,10 @@ function setRPCHandler(rpcHdlr) {
 
 function setRequired(obj) {
 	vs = obj;
-    vs.addListener('gear', handleShiftEvents);
-    vs.addListener('tripcomputer', handleTripComputerEvents);
-    vs.addListener('parksensors-rear', handleParkSensorsEvents);
-    vs.addListener('parksensors-front', handleParkSensorsEvents);
-    vs.addListener('destination-reached', handleDestinationReached);
-    vs.addListener('destination-changed', handleDestinationChanged);
-    vs.addListener('destination-cancelled', handleDestinationCancelled);
-    vs.addListener('lights-fog-front', handleLightsFogFront);
-    vs.addListener('lights-fog-rear', handleLightsFogRear);
-    vs.addListener('lights-hibeam', handleLightsHibeam);
-    vs.addListener('lights-parking', handleLightsParking);
-    vs.addListener('lights-head', handleLightsHead);
-    vs.addListener('lights-signal-left', handleLightsSignalLeft);
-    vs.addListener('lights-signal-right', handleLightsSignalRight);
-    vs.addListener('lights-signal-warn', handleLightsSignalWarn);
+	vs.addListener('gear', handleGearEvents);
+	vs.addListener('tripcomputer', handleTripComputerEvents);
+	vs.addListener('parksensors-rear', handleParkSensorsEvents);
+	vs.addListener('parksensors-front', handleParkSensorsEvents);
 }
 
 
@@ -707,8 +459,6 @@ exports.addEventListener = addEventListener;
 exports.removeEventListener = removeEventListener;
 exports.get = get;
 
-exports.findDestination = findDestination;
-exports.requestGuidance = requestGuidance;
 exports.setRPCHandler = setRPCHandler;
 exports.setRequired = setRequired;
 

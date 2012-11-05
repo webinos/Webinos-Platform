@@ -1,0 +1,244 @@
+<html>
+<head>
+	<title>webinos | vehicle testbed</title>
+	<link rel="icon" href="webinos.ico" type="image/x-icon">
+	<link rel="stylesheet" type="text/css" href="cbc-lite.css" media="screen"/>
+	<script type="text/javascript" src="/client/jquery-1.8.2.min.js"></script>
+	<script type="text/javascript" src="jcanvas.min.js"></script>
+	<script type="text/javascript" src="/client/webinos.js"></script>
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="cbc-lite.js"></script>
+</head>
+
+
+<body>
+	
+	<div id='map'>
+	
+	</div>
+	<div id='bc-nav'>
+		<a  tabindex='1' id='n-start'/></a>
+		<ul>
+			<li><a href='#drive' tabindex='2' id='nav1' class='active'><div class='toplevellink'>Drive</div></a></li>
+			<li><a href='#travel' tabindex='3' id='nav2'><div class='toplevellink'>Travel</div></a></li>
+			<li><a href='#check' tabindex='4' id='nav3'><div class='toplevellink'>Location</div></a></li>
+			<li><a href='#geek' tabindex='5' id='nav4'><div class='toplevellink'>MyView</div></a></li>
+		</ul>
+		<a  tabindex='6' id='n-end'/></a>
+	</div>
+	<div id='bc-full'>
+		
+		<ul id='drive'>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Speed</div>
+						<div class='value' id='v-speed'>0.0</div>
+						<div class='unit'>kmph</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Gear</div>
+						<div class='value' id='v-gear'>N</div>
+						<div class='unit'></div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Heading</div>
+						<div class='value' id='v-heading'>90.0</div>
+						<div class='unit'>&deg;</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Latitudinal Accelartion</div>
+						<div class='value' id='v-lat-acc'>0.0</div>
+						<div class='unit'>m/s<sup>2</sup></div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Longitudinal Acceleration</div>
+						<div class='value' id='v-lng-acc'>0.0</div>
+						<div class='unit'>m/s<sup>2</sup></div>
+					</div>
+			</li>
+
+		</ul>
+		<ul id='travel' class='disabled'>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Average Speed</div>
+						<div class='value' id='v-avg-speed'>48.5</div>
+						<div class='unit'>kmph</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Average Consumption</div>
+						<div class='value' id='v-consumption'>5.7</div>
+						<div class='unit'>l/100km</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Trip distance</div>
+						<div class='value' id='v-distance'>33.3</div>
+						<div class='unit'>km</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Range</div>
+						<div class='value' id='v-range'>547</div>
+						<div class='unit'>km</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Mileage</div>
+						<div class='value' id='v-mileage'>11298</div>
+						<div class='unit'>km</div>
+					</div>
+			</li>
+		</ul>
+		<ul id='check' class='disabled'>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Latitude</div>
+						<div class='value' id='v-lat'>41.387659</div>
+						<div class='unit'>&deg;</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Longitude</div>
+						<div class='value' id='v-lng'>2.169468</div>
+						<div class='unit'>&deg;</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Altitude</div>
+						<div class='value' id='v-alt'>12</div>
+						<div class='unit'>m</div>
+					</div>
+			</li>
+			<li>
+					<div class='propertybox'>
+						<div class='description'>Heading</div>
+						<div class='value' id='v-heading2'>90</div>
+						<div class='unit'>&deg;</div>
+					</div>
+			</li>
+						<li>
+					<div class='propertybox'>
+						<div class='description'>Speed</div>
+						<div class='value' id='v-speed2'>0.0</div>
+						<div class='unit'>kmph</div>
+					</div>
+			</li>
+		</ul>
+
+
+		<ul id='geek' class='disabled'>
+			<li>
+				<a href='#selecter' tabindex='30' id='customfield1'>
+					<div class='propertybox'>
+						<div class='description'>Gear</div>
+						<div class='value' ></div>
+						<div class='unit'></div>
+					</div>
+				</a>
+			</li>
+			<li>
+				<a href='#selecter' tabindex='31' id='customfield2'>
+					<div class='propertybox'>
+						<div class='description'>Speed</div>
+						<div class='value'></div>
+						<div class='unit'>kmph</div>
+					</div>
+				</a>
+			</li>
+			<li>
+				<a href='#selecter' tabindex='32' id='customfield3'>
+					<div class='propertybox'>
+						<div class='description'>Latitude</div>
+						<div class='value'></div>
+						<div class='unit'>&deg;</div>
+					</div>
+				</a>
+			</li>
+			<li>
+				<a href='#selecter' tabindex='33' id='customfield4'>
+					<div class='propertybox'>
+						<div class='description'>Longitude</div>
+						<div class='value'></div>
+						<div class='unit'>&deg;</div>
+					</div>
+				</a>
+			</li>
+			<li>
+				<a href='#selecter' tabindex='34' id='customfield5'>
+					<div class='propertybox'>
+						<div class='description'>Altitude</div>
+						<div class='value'></div>
+						<div class='unit'>m</div>
+					</div>
+				</a>
+			</li>
+		</ul>
+		<a id='geek-end' tabindex='35'/></a>
+	</div>
+	<!--
+	<div id='debug'>
+			<input type='button' id='registerBrowser' value='Register Browser' tabindex='100'><br>
+	<button id="findService" class="button" tabindex='101'>Find Services</button><br>
+	<select id="vehicles" size="5" tabindex='102'></select><br>
+	<button id="bind" class="button" tabindex='103'>Bind</button>
+	<button id='getGear' value='getGear' tabindex='104'>Get Gear</button>
+	<div id='message'></div>
+
+	</div>
+	
+	<div id='logo'>
+		logo...
+	
+	</div>
+	-->
+	<div id='loading'>
+		<div id='loadingimage'><img src='cbcloader.gif'></div>
+		<div id='loadingstatus'>Loading...</div>
+	</div>
+	<div id='selection' class='disabled'>
+		<div id='selection-overlay'></div>
+		<div id='selection-content'>
+			<h1>Please select a property</h1>
+			<a tabindex='09' id='selection-start'/></a>
+			<ul>
+				<li><a href='#geek' id='selecter-speed' tabindex='10'>Speed</a></li>
+				<li><a href='#geek' id='selecter-gear' tabindex='11'>Gear</a></li>
+				<li><a href='#geek' id='selecter-heading' tabindex='12'>Heading</a></li>
+				<li><a href='#geek' id='selecter-lateral' tabindex='13'>Lateral<br/> Acceleration</a></li>
+				<li><a href='#geek' id='selecter-longitudinal' tabindex='14'>Longitudinal<br/> Acceleration</a></li>
+				<li><a href='#geek' id='selecter-lat' tabindex='15'>Latitude</a></li>
+				<li><a href='#geek' id='selecter-lng' tabindex='16'>Longitude</a></li>
+				<li><a href='#geek' id='selecter-alt'tabindex='17'>Altitude</a></li>
+				<li><a href='#geek' id='selecter-consumption' tabindex='18'>Average<br/> Consumption</a></li>
+				<li><a href='#geek' id='selecter-avg-speed' tabindex='19'>Average Speed</a></li>
+				<li><a href='#geek' id='selecter-mileage' tabindex='20'>Mileage</a></li>
+				<li><a href='#geek' id='selecter-distance' tabindex='21'>Trip distance</a></li>
+				<li><a href='#geek' id='selecter-range' tabindex='22'>Range</a></li>
+			</ul>
+			<a tabindex='24' id='selection-end'/></a>
+		</div>
+	</div>
+	<div id='pdc'>
+		<div id="pdcApp" >
+			<canvas id="pdcFront" width="100" height="150"></canvas>
+			<canvas id="pdcRear" width="100" height="150"></canvas>
+		</div>
+	</div>
+</body>
+</html>

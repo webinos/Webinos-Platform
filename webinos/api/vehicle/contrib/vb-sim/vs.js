@@ -330,7 +330,7 @@ var cnData = new Object();
 
 	everyone.now.setGear = function(val){
         gear = val;
-        console.log(gear);
+        console.log('GEAR DATE GENERATED:' + gear);
         if(typeof _listeners.gear != 'undefined'){
             _listeners.gear(new ShiftEvent(val));
         }
