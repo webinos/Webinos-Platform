@@ -13,7 +13,6 @@
 
     // Create the express app
     var app = express();
-    app.use(app.router);
     app.set('view engine', 'jade');
     app.set('views', path.join(__dirname,'/views'));
     app.use(express.static(path.join(__dirname,'/static')));
@@ -24,6 +23,8 @@
       app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
       app.use(express.logger());
     });
+
+    app.use(app.router);
 
     // Load routing
     var stores = require('./routes/stores');
