@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <title>webinos tripcomputer</title>
+        <link rel="icon" href="/client/vehicle/general/webinos.ico"
+        type="image/x-icon">
+        <script type="text/javascript" src="/client/jquery-1.8.2.min.js"></script>
+        <script type="text/javascript">
+		function switchView(width, height, url) {
+		var halfHeight = height / 2;
+		var halfWidth = width / 2;
+		$('#diver').removeAttr('style');
+		$('#diver').attr('style', 'position: fixed; width:' + width + 'px; heigth:' + height + 'px; left:0px; top:0px');
+		$('#iframer').removeAttr('style');
+		$('#iframer').attr('style', 'outline: 0; border: 0; height: ' + height + 'px; width: ' + width + 'px;');
+		$('#iframer').attr('src', url);
+		}
+        </script>
+    </head>
+    
+    <body style='font-family: Helvetica, Arial; font-size: 12px; color: #313131;'>
+        <div id='diver' style='width:1280px; height:480px; top: 0px;  left: 0px;  position: fixed;'>
+            <iframe id='iframer' src='cbc.html' scrolling='none' style='outline: 0; border: 0; height: 480px; width: 1280px;'>not supported</iframe>
+        </div>
+        <div style='bottom: 0px; width: 400px; height: 120px; left: 0px; position: fixed;'>
+            <p><b>Vehicle (Trip computer):</b>  <a href='javascript:switchView(1280,480,"cbc.html");'>IVI System (1280x480)</a> |
+                <a
+                href='javascript:switchView(800,480,"cbc.html");'>RSE (800x480)</a>
+            </p>
+    </body>
+
+</html>
