@@ -57,7 +57,7 @@
         logger.debug("Received request for " + pathname);
 
         // simulate a fully configured web server
-        if (pathname == "/") pathname = "client.html";
+        if (pathname == "/") pathname = "index.html";
     
         // determine file to serve
         var filename = path.join(documentRoot, pathname);

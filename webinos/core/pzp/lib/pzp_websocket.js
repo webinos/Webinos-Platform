@@ -131,7 +131,7 @@ var PzpWSS = function() {
         return;
       }
       if (stats.isDirectory()) {
-        filename = path.join(filename, "/testbed/client.html");
+        filename = path.join(filename, "/testbed/index.html");
       }
       fs.readFile(filename, "binary", function(err, file) {
         if(err) {
@@ -270,7 +270,7 @@ var PzpWSS = function() {
     if(cmd === "authStatus") {
       sendAuthStatusToApp(from, value.authCode, value.connected);
     } else if (cmd === "authenticate") {
-      msg = prepMsg(from, to, "authenticate", {"provider": value, "returnPath": "localhost:"+ ports.pzp_web_webSocket+"/client/client.html"});
+      msg = prepMsg(from, to, "authenticate", {"provider": value, "returnPath": "localhost:"+ ports.pzp_web_webSocket+"/testbed/index.html"});
     } else if (cmd === "login" || cmd === "registerPzh") {
       msg = prepMsg(from, to, cmd );
     } else if (cmd === "enrollPzp") {
