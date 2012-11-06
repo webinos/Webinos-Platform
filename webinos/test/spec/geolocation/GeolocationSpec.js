@@ -16,29 +16,36 @@
  * Copyright 2012 Alexander Futasz, Fraunhofer FOKUS
  ******************************************************************************/
 
+function checkPosition(position) {
+	expect(position.timestamp).toEqual(jasmine.any(Number));
+	expect(position.coords).toEqual(jasmine.any(Object));
+	var coords = position.coords;
+	expect(coords.latitude).toEqual(jasmine.any(Number));
+	expect(coords.longitude).toEqual(jasmine.any(Number));
+	expect(coords.accuracy).toEqual(jasmine.any(Number));
+}
+
+beforeEach(function() {
+	this.addMatchers({
+		toHaveProp: function(expected) {
+			return typeof this.actual[expected] !== "undefined";
+		}
+	});
+});
+
 describe("Geolocation API", function() {
 	var geolocationService;
 
-	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://www.w3.org/ns/api-perms/geolocation"), {
-			onFound: function (service) {
-				geolocationService = service;
-			}
-		});
-
-		waitsFor(function() {
-			return !!geolocationService;
-		}, "The discovery didn't find a Geolocation service", 5000);
+	webinos.discovery.findServices(new ServiceType("http://www.w3.org/ns/api-perms/geolocation"), {
+		onFound: function (service) {
+			geolocationService = service;
+		}
 	});
 
-	afterEach(function() {
-		geolocationService = undefined;
+	beforeEach(function() {
+		waitsFor(function() {
+			return !!geolocationService;
+		}, "found service", 5000);
 	});
 
 	it("should be available from the discovery", function() {
@@ -55,64 +62,51 @@ describe("Geolocation API", function() {
 		expect(geolocationService.bindService).toEqual(jasmine.any(Function));
 	});
 
-	it("can be bound", function() {
-		var bound = false;
-
-		geolocationService.bindService({onBind: function(service) {
-			geolocationService = service;
-			bound = true;
-		}});
-
-		waitsFor(function() {
-			return bound;
-		}, "The service couldn't be bound", 500);
-
-		runs(function() {
-			expect(bound).toEqual(true);
-		});
-	});
-
 	describe("with bound service", function() {
+		var geolocationServiceBound;
+
 		beforeEach(function() {
-			var bound = false;
+			if (!geolocationService) {
+				waitsFor(function() {
+					return !!geolocationService;
+				}, "found service", 5000);
+			}
+			if (!geolocationServiceBound) {
+				geolocationService.bindService({onBind: function(service) {
+					geolocationServiceBound = service;
+				}});
+				waitsFor(function() {
+					return !!geolocationServiceBound;
+				}, "the service to be bound", 500);
+			}
+		});
 
-			geolocationService.bindService({onBind: function(service) {
-				geolocationService = service;
-				bound = true;
-			}});
-
-			waitsFor(function() {
-				return bound;
-			}, "The service couldn't be bound", 500);
+		it("can be bound", function() {
+			expect(geolocationServiceBound).toBeDefined();
 		});
 
 		it("has the necessary properties and functions as Geolocation API service", function() {
-			expect(geolocationService.getCurrentPosition).toEqual(jasmine.any(Function));
-			expect(geolocationService.watchPosition).toEqual(jasmine.any(Function));
-			expect(geolocationService.clearWatch).toEqual(jasmine.any(Function));
+			expect(geolocationServiceBound.getCurrentPosition).toEqual(jasmine.any(Function));
+			expect(geolocationServiceBound.watchPosition).toEqual(jasmine.any(Function));
+			expect(geolocationServiceBound.clearWatch).toEqual(jasmine.any(Function));
 		});
 
 		it("can return a valid position object, using getCurrentPosition", function() {
 			var success;
 			var position;
 
-			geolocationService.getCurrentPosition(function(p) {
+			geolocationServiceBound.getCurrentPosition(function(p) {
 				success = true;
 				position = p;
 			});
 
 			waitsFor(function() {
 				return success;
-			}, "getCurrentPosition failed", 500);
+			}, "getCurrentPosition success callback", 1000);
 
 			runs(function() {
 				expect(success).toEqual(true);
-				expect(position.coords).toEqual(jasmine.any(Object));
-				expect(position.timestamp).toEqual(jasmine.any(Number));
-				var coords = position.coords;
-				expect(coords.latitude).toEqual(jasmine.any(Number));
-				expect(coords.longitude).toEqual(jasmine.any(Number));
-				expect(coords.accuracy).toEqual(jasmine.any(Number));
+				checkPosition(position);
 			});
 		});
 
@@ -120,29 +114,69 @@ describe("Geolocation API", function() {
 			var counter = 0;
 			var position;
 
-			var watchId = geolocationService.watchPosition(function(p) {
+			var watchId = geolocationServiceBound.watchPosition(function(p) {
 				counter++;
 				position = p;
 			});
 
 			waitsFor(function() {
 				return counter > 1;
-			}, "watchPosition failed", 6000);
+			}, "watchPosition being called multiple times", 6000);
 
 			runs(function() {
 				expect(counter).toBeGreaterThan(1);
 				expect(watchId).toEqual(jasmine.any(Number));
-				geolocationService.clearWatch(watchId);
+				geolocationServiceBound.clearWatch(watchId);
 				var tmpCounter = counter;
 
-				expect(position.coords).toEqual(jasmine.any(Object));
-				expect(position.timestamp).toEqual(jasmine.any(Number));
-				var coords = position.coords;
-				expect(coords.latitude).toEqual(jasmine.any(Number));
-				expect(coords.longitude).toEqual(jasmine.any(Number));
-				expect(coords.accuracy).toEqual(jasmine.any(Number));
-
+				checkPosition(position);
 				expect(tmpCounter).toEqual(counter);
+			});
+		});
+
+		it("can clear a watchPosition listener", function() {
+			var counter = 0;
+
+			var watchId = geolocationServiceBound.watchPosition(function() {
+				counter++;
+				geolocationServiceBound.clearWatch(watchId);
+			});
+
+			waitsFor(function() {
+				return counter > 0;
+			}, "watchPosition being called", 5000);
+
+			waits(3000); // wait some more to see if watchPosition is called again
+
+			runs(function() {
+				expect(watchId).toEqual(jasmine.any(Number));
+				expect(counter).toEqual(1);
+			});
+		});
+
+		it("can support multiple watchPosition listeners", function() {
+			var position1, position2;
+			var watchId1 = geolocationServiceBound.watchPosition(function(p) {
+				position1 = p;
+			});
+			var watchId2 = geolocationServiceBound.watchPosition(function(p) {
+				position2 = p;
+			});
+
+			waitsFor(function() {
+				return !!position1 & !!position2;
+			}, "all listeners being called", 5000);
+
+			runs(function() {
+				expect(watchId1).not.toEqual(watchId2);
+				expect(watchId1).toEqual(jasmine.any(Number));
+				expect(watchId2).toEqual(jasmine.any(Number));
+				geolocationServiceBound.clearWatch(watchId1);
+				geolocationServiceBound.clearWatch(watchId2);
+
+				expect(position1).not.toEqual(position2);
+				checkPosition(position1);
+				checkPosition(position2);
 			});
 		});
 	});
