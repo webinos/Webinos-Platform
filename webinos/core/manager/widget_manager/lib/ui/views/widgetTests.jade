@@ -8,6 +8,6 @@ block content
 		- widgets.forEach(function(testWidget) {
 			div.listItem
 				//a(target="_blank", href="/sideLoad/#{testWidget.src}") #{testWidget.forAttr}/#{testWidget.id}
-				a(href="/widget_tests/#{testWidget.src}") #{testWidget.forAttr}/#{testWidget.id}
+				a(href="/tests/widget_tests/#{testWidget.src}") #{testWidget.forAttr}/#{testWidget.id}
 				div= testWidget.text
 		- })
