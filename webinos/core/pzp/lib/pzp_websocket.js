@@ -121,7 +121,7 @@ var PzpWSS = function() {
       //TODO: Fix this. This is exploitable...
       // telenet the localhost 8080 and write GET /../../webinos_config.json
       // you will get the contents in plain text
-    var filename = path.join(__dirname, "../../../web_root/", uri);
+    var filename = path.join(__dirname, "../../../testbed_root/", uri);
 
     fs.stat(filename, function(err, stats) {
       if(err) {
