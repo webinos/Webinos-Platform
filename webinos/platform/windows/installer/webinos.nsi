@@ -179,7 +179,7 @@ SectionIn RO
   File "${SRCROOT}\webinos_config.json"
   
   SetOutPath "$INSTDIR\webinos"
-  File /r /x *.ipch /x .gitignore /x android /x test /x pom.xml /x wscript /x *.gyp /x obj /x *.sln /x *.vcxproj* /x *.sdf /x *.suo /x *.cpp /x *.h /x *.c /x *.cc /x *.exp /x *.ilk /x *.pdb /x *.lib /x .git /x common\manager\context_manager\data\contextSettings.json "${SRCROOT}\webinos\*.*"
+  File /r /x *.ipch /x .gitignore /x android /x test /x pom.xml /x wscript /x *.gyp /x obj /x *.sln /x *.vcxproj* /x *.sdf /x *.suo /x *.cpp /x *.h /x *.c /x *.cc /x *.exp /x *.ilk /x *.pdb /x *.lib /x .git /x common\manager\context_manager\data\contextSettings.json /x platform "${SRCROOT}\webinos\*.*"
   
   SetOutPath "$INSTDIR\node_modules" 
   File /r /x deps /x *.ipch /x .gitignore /x android /x test /x pom.xml /x wrt /x wscript /x *.gyp /x obj /x *.sln /x *.vcxproj* /x *.sdf /x *.suo /x *.cpp /x *.h /x *.c /x *.cc /x *.exp /x *.ilk /x *.pdb /x *.lib /x .git /x socket.io\node_modules\socket.io-client\node_modules\active-x-obfuscator\node_modules\zeparser\benchmark.html "${SRCROOT}\node_modules\*.*"
@@ -193,8 +193,8 @@ SectionIn RO
 	File "${RedistPath}\Openssl\libeay32.dll"
   File "${RedistPath}\Openssl\ssleay32.dll"
 
-  SetOutPath "$INSTDIR\webinos\web_root"  
-  File /r /x certificates /x *.txt /x tools /x build.xml "${SRCROOT}\webinos\web_root\*.*"
+  SetOutPath "$INSTDIR\webinos\testbed_root"  
+  File /r /x certificates /x *.txt /x tools /x apps /x build.xml "${SRCROOT}\webinos\testbed_root\*.*"
   
 ;  SetOutPath "$INSTDIR\storage"
   
