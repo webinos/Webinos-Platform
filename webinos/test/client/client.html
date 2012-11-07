@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
 <script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
 <script type="text/javascript" src="js/hideshow.js"></script>
+<script type="text/javascript" src="js/mobile.js"></script>
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="./webinos.js"></script>
  <script>
@@ -61,7 +62,10 @@
         if (pzpId && typeof pzpId.split('/')[1] === "undefined") {
           $('#enableLogin').html("<a href='#login' id='login'> Connect to Your PZH </a>");
           $("#login").click(function(){
-           setPage("Login to your PZH", "login.html");
+            setPage("Login to your PZH", "login.html");
+		if (checkwidth()) {
+			$('#sidebar').slideUp('slow');
+		}
           });
         } else {
           $('#enableLogin').html("Connected to " + data.from.split('/')[0]);
@@ -184,12 +188,14 @@
   <header id="header">
     <hgroup>
       <h1 class="site_title"><img src="images/webinosWithBorder.png">PZP TestBed</h1>
-      <h2 class="section_title">Dashboard</h2><div class="btn_view_site"><a href="#logout">Disconnect</a></div>
+      <h2 class="section_title">Dashboard</h2>
+	  <div class="btn_view_site"><a id="btn_discon" href="#logout">Disconnect</a><a id="img_discon" href="#logout"><img src="images/light_active.png"></a></div>
     </hgroup>
   </header> <!-- end of header bar -->
   <section id="secondary_bar">
     <div class="user">
-      <p id="userId">Not Connected</p>
+      <div id="userData"><p id="userId">Not Connected</p></div>
+	  <div id="foldingMenu"><a id="foldingBtn">Menu</a></div>
     </div>
     <div class="breadcrumbs_container">
       <article class="breadcrumbs"><a href="client.html">Webinos Pzp</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
@@ -240,7 +246,7 @@
         <div class="module_content">
           <h1>Welcome to your PZP</h1>
           <p>This is the main test page for you pzp. You can also enroll you pzp to your pzh through this page if you have not already connected to one.</p>
-          <p><b>Please select one of the actions on the left menu</b></p>
+          <p class="guide" id="mainPageGuide">Please select one of the actions on the left menu</p>
       </div>
     </article><!-- end of styles article -->
     <div class="spacer"></div>

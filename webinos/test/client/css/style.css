@@ -85,8 +85,8 @@
 				border: 1px solid #a0a0a0;
 				
 				background: url(../images/rauschen.png), -moz-linear-gradient(top, #626262, #959595); /* Firefox */
-				 background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(../images/rauschen.png); /* Safari, Chrome*/
-				 background: url(../images/rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
+				background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#626262), to(#959595)), url(../images/rauschen.png); /* Safari, Chrome*/
+				background: url(../images/rauschen.png), -webkit-linear-gradient(top, #626262, #959595); /* Safari, Chrome - neue Syntax! */
 				background:  url(../images/rauschen.png), -o-linear-gradient(top, #626262, #959595); /* Opera */
 				background:  url(../images/rauschen.png), -ms-linear-gradient(top, #626262, #959595); /* IE */
 				
@@ -172,7 +172,7 @@
 			
 			
 			#status.error{
-        background:  url(../images/rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
+        		        background:  url(../images/rauschen.png), -moz-linear-gradient(top, #ffb500, #ffff00); /* Firefox */
 				background:  url(../images/rauschen.png), -webkit-gradient(linear, left top, left bottom, from(#ffb500), to(#ffff00)), url(../images/rauschen.png); /* Safari, Chrome*/
 				background:  url(../images/rauschen.png), -webkit-linear-gradient(top, #ffb500, #ffff00); /* Safari, Chrome - neue Syntax! */
 				background:  url(../images/rauschen.png), -o-linear-gradient(top, #ffb500, #ffff00); /* Opera */
@@ -194,4 +194,10 @@
 				
 				}
 				#info p{font-size: 14px; margin: 0; padding 0;}
+
+			@media screen and (max-width: 1200px) {
+				html {
+					background: none;
+				}	
+			}
 			
