@@ -29,9 +29,7 @@ function help() {
   console.log("Options:");
   console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
   console.log("--pzh-name=[name]        name of the pzh (default \"\")");
-  console.log("--friendly-name=[name]   name of the pzp (default \"\")");
-  console.log("--auth-code=[code]       context debug flag (default DEBUG)");
-  console.log("--preference=[option]    preference option (default hub, other option peer)");
+  console.log("--friendly-name=[name]   friendly name (currently unused)");
   console.log("--widgetServer           start widget server");
   console.log("--policyEditor           start policy editor server");
   process.exit();
@@ -52,11 +50,8 @@ process.argv.forEach(function (arg) {
       case "--friendly-name":
         options.friendlyName = parts[1];
         break;
-      case "--preference":
-        options.preference = parts[1];
-        break;
-      case "--auth-code":
-        options.code = parts[1];
+      case "--force-device-name":
+        options.forcedDeviceName = parts[1];
         break;
       default:
         console.log("unknown option: " + parts[0]);
@@ -115,35 +110,20 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (!config.pzhName) {
       config.pzhName = "";
     }
-    if (!config.pzpHost) {
-      config.pzpHost="localhost";
-    }
     if (!config.friendlyName) {
       config.friendlyName = "";
-    }
-    if (!config.code) {
-      config.code = "DEBUG";
-    }
-    if (!config.preference) {
-      config.prefence = "hub";
     }
     if (options.pzhHost) {
       config.pzhHost = options.pzhHost;
     }
     if (options.pzhName) {
-  config.pzhName = options.pzhName;
-    }
-    if (options.pzpHost) {
-      config.pzpHost = options.pzpHost;
+      config.pzhName = options.pzhName;
     }
     if (options.friendlyName) {
       config.friendlyName = options.friendlyName;
     }
-    if (options.code) {
-      config.code = options.code;
-    }
-    if (options.preference) {
-      config.preference = options.preference;
+    if (options.forcedDeviceName) {
+      config.forcedDeviceName = options.forcedDeviceName;
     }
     if (config.pzhName !== "") {
       config.hostname = config.pzhHost+'/'+config.pzhName;

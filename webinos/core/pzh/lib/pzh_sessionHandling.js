@@ -258,9 +258,12 @@ var Pzh = function () {
     auth_code.createAuthCounter(function (res) {
       self.pzh_state.expecting = res;
     });
-
+    var inputConfig = {
+      "friendlyName": _friendlyName,
+      "sessionIdentity": _uri
+    };
     self.config  = new session.configuration();
-    self.config.setConfiguration(_friendlyName, "Pzh", _uri, function (status, value) {
+    self.config.setConfiguration("Pzh", inputConfig, function (status, value) {
       if (status) {
         self.config.storeUserDetails(_user);
         self.pzh_state.sessionId = _uri;
