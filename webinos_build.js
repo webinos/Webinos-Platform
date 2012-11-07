@@ -63,7 +63,7 @@ var closureCompilerCmd = 'java -jar tools/closure-compiler/compiler.jar'
                        + ' --formatting PRETTY_PRINT'
                        + ' --warning_level VERBOSE'
                        + ' --output_wrapper \"if(typeof webinos === \'undefined\'){%output%}\"'
-                       + ' --js_output_file webinos/testbed_root/webinos.js'
+                       + ' --js_output_file webinos/web_root/webinos.js'
                        + fileList;
 list.push(closureCompilerCmd);
 

@@ -17,7 +17,7 @@
     app.set('view engine', 'jade');
     app.set('views', path.join(__dirname,'/views'));
     app.use(express.static(path.join(__dirname,'/static')));
-    app.use(express.static(path.join(__dirname,'../../../../../testbed_root')));
+    app.use(express.static(path.join(__dirname,'../../../../../web_root')));
     app.use(express.bodyParser());
 
     app.configure(function () {

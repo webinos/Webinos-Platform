@@ -38,7 +38,7 @@
 		parser.on('text', text);
 
 		try {
-			var buffer = fs.readFileSync(path.join(__dirname,"../../../../../../testbed_root/tests/widget_tests/test-suite.xml"),"UTF-8");			
+			var buffer = fs.readFileSync(path.join(__dirname,"../../../../../../web_root/tests/widget_tests/test-suite.xml"),"UTF-8");			
 			console.log("listTestWidgets - about to parse: ");				
 			parser.parse(buffer, {isFinal:true});
 		} catch(e) {
