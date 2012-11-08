@@ -33,13 +33,13 @@
 				webinos/core/pzh/,
 				webinos/core/wrt/,
 				
-                webinos/testbed_root/test_frameworks/,
-				webinos/testbed_root/api_test_specs/,
-				webinos/testbed_root/apps/,
-				webinos/testbed_root/*.html,
-				webinos/testbed_root/*.xml,
-				webinos/testbed_root/*.json,
-				webinos/testbed_root/*.js,
+                webinos/web_root/test_frameworks/,
+				webinos/web_root/api_test_specs/,
+				webinos/web_root/apps/,
+				webinos/web_root/*.html,
+				webinos/web_root/*.xml,
+				webinos/web_root/*.json,
+				webinos/web_root/*.js,
 				
 				webinos/core/api/**/test/,
 				webinos/core/**/test/,
@@ -51,11 +51,11 @@
 				**/.gitignore" />
 		</zip>
 
-                <!-- Creates webinos/test/client/webinos.js -->
-                <ant dir="${basedir}/webinos/testbed_root" target="gen-webinos-js" />
+                <!-- Creates webinos/web_root/webinos.js -->
+                <ant dir="${basedir}/webinos/web_root" target="gen-webinos-js" />
 
-                <!-- Copies webinos/test/client/webinos.js to wrt/assets folder -->
-                <copy file="${basedir}/webinos/testbed_root/webinos.js" todir="${basedir}/webinos/platform/android/wrt/assets/js" />
+                <!-- Copies webinos/web_root/webinos.js to wrt/assets folder -->
+                <copy file="${basedir}/webinos/web_root/webinos.js" todir="${basedir}/webinos/platform/android/wrt/assets/js" />
 	</target>
 
 	<target name="gen-webinos-clean">
