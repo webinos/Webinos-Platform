@@ -345,7 +345,7 @@ Config.prototype.createPolicyFile = function(self) {
     if ( err && err.code=== "ENOENT" ) {
       var data;
       try {
-        data = fs.readFileSync(path.resolve(__dirname, "../../common/manager/policy_manager/defaultpolicy.xml"));
+        data = fs.readFileSync(path.resolve(__dirname, "../../manager/policy_manager/defaultpolicy.xml"));
       }
       catch(e) {
         logger.error("Default policy non found");
