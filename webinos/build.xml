@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="webinos-script" default="gen-webinos-js">
+    <!-- Use closure compiler to minify all JavaScript files -->
+    <target name="gen-webinos-js">
+        <!--
+          Available compilation arguments here:
+          http://code.google.com/p/closure-compiler/source/browse/trunk/src/com/google/javascript/jscomp/CommandLineRunner.java
+          -->
+        <java classpath="../tools/closure-compiler/compiler.jar" classname="com.google.javascript.jscomp.CommandLineRunner">
+            <arg line="--compilation_level WHITESPACE_ONLY"/>
+            <arg line="--formatting PRETTY_PRINT"/>
+            <arg line="--warning_level VERBOSE"/>
+            <!--
+            The ${line.separator} :
+            http://www.coderanch.com/t/107763/tools/new-line-character
+            -->
+            <arg line="--output_wrapper 'if(typeof webinos === &quot;undefined&quot;){${line.separator}%output%${line.separator}}'"/>
+            <arg line="--js_output_file ${basedir}/web_root/webinos.js"/>
+            <!--
+            This is the list of js files that build up the final webinos.js
+
+            !ATTENTION!
+            If you update this list, make sure you also update the webinos_build.js
+            located in root folder
+            -->
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.util.js"/>
+            <arg line="--js ${basedir}/core/rpc/lib/registry.js"/>
+            <arg line="--js ${basedir}/core/rpc/lib/rpc.js"/>
+            <arg line="--js ${basedir}/core/manager/messaging/lib/messagehandler.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.session.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.servicedisco.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.js"/>
+            <arg line="--js ${basedir}/core/api/file/lib/virtual-path.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.file.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.tv.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.oauth.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.get42.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.geolocation.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.sensors.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.events.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.applauncher.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.vehicle.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.deviceorientation.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.context.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.authentication.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.contacts.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.devicestatus.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.discovery.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.payment.js"/>
+        </java>
+    </target>
+</project>
