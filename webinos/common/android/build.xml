@@ -26,6 +26,7 @@
 				node_modules/xmldigsig.js,
 				node_modules/inherits/,
 				node_modules/mkdirp/,
+				node_modules/node-uuid/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
