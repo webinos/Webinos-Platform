@@ -52,7 +52,7 @@
 		</zip>
 
                 <!-- Creates webinos/web_root/webinos.js -->
-                <ant dir="${basedir}/webinos/web_root" target="gen-webinos-js" />
+                <ant dir="${basedir}/webinos" target="gen-webinos-js" />
 
                 <!-- Copies webinos/web_root/webinos.js to wrt/assets folder -->
                 <copy file="${basedir}/webinos/web_root/webinos.js" todir="${basedir}/webinos/platform/android/wrt/assets/js" />
