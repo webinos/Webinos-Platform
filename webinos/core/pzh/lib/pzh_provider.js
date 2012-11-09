@@ -30,6 +30,8 @@ var session     = webinos.global.require(webinos.global.pzp.location, "lib/sessi
 
 var pzh_session = require("./pzh_sessionHandling.js");
 
+var pzh_web_session = require("./pzh_webinterface_sessionHandling.js"); 
+
 /**
  * Defines the constructor for the provider  and initializes the provider functions
  * @param _hostname : hostname is specified if the pzh provider
@@ -46,7 +48,7 @@ var Provider = function(_hostname, _friendlyName) {
   var friendlyName = _friendlyName;
   var hostname     = _hostname;
   var self         = this;
-
+  var webInterface = null;
 
   /**
    * Fetches the public IP address if hostname is not specified
@@ -162,6 +164,14 @@ var Provider = function(_hostname, _friendlyName) {
     });
   }
 
+
+  function isWebInterface(conn, data) {
+    //TODO: Validate the certificate from the connection data.
+    
+    
+    return true;
+  }
+
   /**
    *  Server name matches with pzhId in the pzhs object, message will be routed to respective authorization function
    * @param conn
@@ -170,8 +180,16 @@ var Provider = function(_hostname, _friendlyName) {
     if (conn.servername && pzhs[conn.servername]) {
       pzhs[conn.servername].handleConnectionAuthorization(conn);
     } else {
-      conn.socket.end();
-      logger.error("pzh  -  " + conn.servername +" is not registered in this provider");
+        if (isWebInterface(conn)) {
+            if (webInterface === null) {
+                webInterface = new pzh_web_session(pzhs);
+            }
+            logger.log("web interface connected");
+            webInterface.handleAuthorization(conn);
+        } else { 
+            conn.socket.end();
+            logger.error("pzh "+conn.servername+" is not registered in the provider");
+        }
     }
   }
   /**
@@ -181,12 +199,18 @@ var Provider = function(_hostname, _friendlyName) {
    */
   function handleConnection(conn) {
     handleConnectionAuthorization(conn); // This is called only when new client connects
-
     conn.on("data", function(data){
+      logger.log("Received data on the TLS channel");
       if(conn.servername && pzhs[conn.servername]) { // forward message to respective PZH handleData function
         pzhs[conn.servername].handleData(conn,data);
       } else {
-        logger.log("pzh "+conn.servername+" is not registered in the provider");
+        
+        if (isWebInterface(conn,data)) {
+          logger.log("Sending it to the web interface...");
+          webInterface.handleData(conn, data);
+        } else { 
+            logger.error("pzh  -  " + conn.servername +" is not registered in this provider");
+        }
       }
     });
 
