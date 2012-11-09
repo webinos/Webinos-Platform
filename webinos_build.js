@@ -14,30 +14,30 @@ var path = require('path');
  * @type {String}
  */
 var fileList =
-    " --js ./webinos/wrt/lib/webinos.util.js" +
-    " --js ./webinos/common/rpc/lib/registry.js" +
-    " --js ./webinos/common/rpc/lib/rpc.js" +
-    " --js ./webinos/common/manager/messaging/lib/messagehandler.js" +
-    " --js ./webinos/wrt/lib/webinos.session.js" +
-    " --js ./webinos/wrt/lib/webinos.servicedisco.js" +
-    " --js ./webinos/wrt/lib/webinos.js" +
-    " --js ./webinos/api/file/lib/virtual-path.js" +
-    " --js ./webinos/wrt/lib/webinos.file.js" +
-    " --js ./webinos/wrt/lib/webinos.tv.js" +
-    " --js ./webinos/wrt/lib/webinos.oauth.js" +
-    " --js ./webinos/wrt/lib/webinos.get42.js" +
-    " --js ./webinos/wrt/lib/webinos.geolocation.js" +
-    " --js ./webinos/wrt/lib/webinos.sensors.js" +
-    " --js ./webinos/wrt/lib/webinos.events.js" +
-    " --js ./webinos/wrt/lib/webinos.applauncher.js" +
-    " --js ./webinos/wrt/lib/webinos.vehicle.js" +
-    " --js ./webinos/wrt/lib/webinos.deviceorientation.js" +
-    " --js ./webinos/wrt/lib/webinos.context.js" +
-    " --js ./webinos/wrt/lib/webinos.authentication.js" +
-    " --js ./webinos/wrt/lib/webinos.contacts.js" +
-    " --js ./webinos/wrt/lib/webinos.devicestatus.js" +
-    " --js ./webinos/wrt/lib/webinos.discovery.js" +
-    " --js ./webinos/wrt/lib/webinos.payment.js";
+    " --js ./webinos/core/wrt/lib/webinos.util.js" +
+    " --js ./webinos/core/rpc/lib/registry.js" +
+    " --js ./webinos/core/rpc/lib/rpc.js" +
+    " --js ./webinos/core/manager/messaging/lib/messagehandler.js" +
+    " --js ./webinos/core/wrt/lib/webinos.session.js" +
+    " --js ./webinos/core/wrt/lib/webinos.servicedisco.js" +
+    " --js ./webinos/core/wrt/lib/webinos.js" +
+    " --js ./webinos/core/api/file/lib/virtual-path.js" +
+    " --js ./webinos/core/wrt/lib/webinos.file.js" +
+    " --js ./webinos/core/wrt/lib/webinos.tv.js" +
+    " --js ./webinos/core/wrt/lib/webinos.oauth.js" +
+    " --js ./webinos/core/wrt/lib/webinos.get42.js" +
+    " --js ./webinos/core/wrt/lib/webinos.geolocation.js" +
+    " --js ./webinos/core/wrt/lib/webinos.sensors.js" +
+    " --js ./webinos/core/wrt/lib/webinos.events.js" +
+    " --js ./webinos/core/wrt/lib/webinos.applauncher.js" +
+    " --js ./webinos/core/wrt/lib/webinos.vehicle.js" +
+    " --js ./webinos/core/wrt/lib/webinos.deviceorientation.js" +
+    " --js ./webinos/core/wrt/lib/webinos.context.js" +
+    " --js ./webinos/core/wrt/lib/webinos.authentication.js" +
+    " --js ./webinos/core/wrt/lib/webinos.contacts.js" +
+    " --js ./webinos/core/wrt/lib/webinos.devicestatus.js" +
+    " --js ./webinos/core/wrt/lib/webinos.discovery.js" +
+    " --js ./webinos/core/wrt/lib/webinos.payment.js";
 
 function exec(list) {
   var key =0;
@@ -63,7 +63,7 @@ var closureCompilerCmd = 'java -jar tools/closure-compiler/compiler.jar'
                        + ' --formatting PRETTY_PRINT'
                        + ' --warning_level VERBOSE'
                        + ' --output_wrapper \"if(typeof webinos === \'undefined\'){%output%}\"'
-                       + ' --js_output_file webinos/test/client/webinos.js'
+                       + ' --js_output_file webinos/web_root/webinos.js'
                        + fileList;
 list.push(closureCompilerCmd);
 
