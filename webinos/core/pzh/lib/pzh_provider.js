@@ -27,7 +27,6 @@ var webinos     = require("find-dependencies")(__dirname);
 var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
 var session     = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var pzhWI       = webinos.global.require(webinos.global.pzh.location, "web/pzh_webserver");
 
 var pzh_session = require("./pzh_sessionHandling.js");
 
@@ -39,7 +38,7 @@ var pzh_session = require("./pzh_sessionHandling.js");
  */
 var Provider = function(_hostname, _friendlyName) {
   "use strict";
-  pzhWI.call(this);
+  //pzhWI.call(this);
   var server       = {}; // TLS server socket on which provider listens
   var pzhs         = {}; // instances of the pzh currently loaded
   var address      = "0.0.0.0";
@@ -208,35 +207,7 @@ var Provider = function(_hostname, _friendlyName) {
     });
   }
 
-  function loadWebServerCertificates(callback) {
-    if (!config.cert.internal.web.cert) {
-      var cn = "PzhWS" + ":"+ config.metaData.serverName;
-      config.generateSelfSignedCertificate("PzhWS", cn, function(status, value ) {
-        if (status) {
-          config.generateSignedCertificate(value, 2, function(status, value) {
-            if(status) {
-              config.cert.internal.web.cert = value;
-              config.storeCertificate(config.cert.internal, "internal");
-              setParam("web", function(status, wss){
-                if (status) { return callback(true,  wss);}
-                else { return callback(false);}
-              });
-            } else {
-              return callback(false, value);
-            }
-          });
-        } else {
-          return callback(false, value);
-        }
-      });
-    } else {
-      setParam("web", function(status, wss){
-        if(status) { return callback(true, wss);}
-        else { return callback(false);}
-      });
-    }
-  }
-
+  
   // Webinos provider APIs exposed to the Zone Web Server
 
   /**
@@ -293,17 +264,6 @@ var Provider = function(_hostname, _friendlyName) {
       loadSession(function(status, value){
         if (status) { // pzh provider TLS server started
           logger.log("zone provider tls server started");
-          loadWebServerCertificates(function(status, connParam){
-            self.startWebServer(hostname, address, config.userPref.ports.provider_webServer, connParam, function (status, value) {
-              if(status) {
-                logger.log("Personal zone provider web server started");
-                return callback(true);
-              } else{
-                logger.log("Personal zone provider web server failed to start on port " + config.userPref.ports.provider_webServer + ", " + value);
-                return callback(false, value);
-              }
-            });
-          });
         } else {
           logger.error("The personal zone provider TLS server failed to start.  Reason: " + value);
           return callback(false, value);
@@ -312,7 +272,6 @@ var Provider = function(_hostname, _friendlyName) {
     });
   };
 };
-util.inherits(Provider, pzhWI);
 
 // This keeps pzh running but you cannot find where error occurred
 process.on("uncaughtException", function(err) {
