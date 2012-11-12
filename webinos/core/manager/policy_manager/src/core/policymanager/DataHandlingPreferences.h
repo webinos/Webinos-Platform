@@ -24,8 +24,9 @@
 class DataHandlingPreferences{
 	
 private:
-	AuthorizationsSet	authorizationsset;
-	ObligationsSet		obligationsset;
+	string			PoliciId;
+	AuthorizationsSet*	authorizationsset;
+	ObligationsSet*		obligationsset;
 	
 public:
 	DataHandlingPreferences(TiXmlElement*);

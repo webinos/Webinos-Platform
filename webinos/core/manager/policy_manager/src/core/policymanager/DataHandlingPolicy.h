@@ -24,8 +24,9 @@
 class DataHandlingPolicy{
 	
 private:
-	AuthorizationsSet	authorizationsset;
-	ObligationsSet		obligationsset;
+	string			PoliciId;
+	AuthorizationsSet*	authorizationsset;
+	ObligationsSet*		obligationsset;
 	
 public:
 	DataHandlingPolicy(TiXmlElement*);
