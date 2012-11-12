@@ -100,7 +100,7 @@
       case "registeredBrowser":
         sessionid = data.to;
         pzpId = data.from;
-        if(typeof data.payload.message !== "undefined" && data.from !== "virgin_pzp") {
+        if(typeof data.payload.message !== "undefined") {
           pzhId = data.payload.message.pzhId
         }
         webinos.messageHandler.setGetOwnId(sessionid);
@@ -119,8 +119,6 @@
       ;
       case "listAllPzps":
       ;
-      case "crashLog":
-      ;
       case "addPzpQR":
         callListenerForMsg(data);
         break;
@@ -135,7 +133,10 @@
         break;
       case "error":
         callListenerForMsg(data);
-        break
+        break;
+      case "friendlyName":
+        callListenerForMsg(data);
+        break;
     }
   }
 }());

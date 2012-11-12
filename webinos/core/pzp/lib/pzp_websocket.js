@@ -98,6 +98,11 @@ var PzpWSS = function(_parent) {
     if (msg.type === "prop") {
       if (msg.payload.status === "registerBrowser") {
         connectedApp(connection);
+      } else if (msg.payload.status === "setFriendlyName") {
+        parent.changeFriendlyName(msg.payload.value);
+      } else if (msg.payload.status === "getFriendlyName") {
+        var msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
+        self.sendConnectedApp(msg.from, msg1);
       } else {
         autoEnrollment(msg, origin);
       }
@@ -262,29 +267,30 @@ var PzpWSS = function(_parent) {
     } else if (cmd === "enrollPzp") {
       msg = prepMsg(parent.pzp_state.sessionId, to, "enrollPzp", {"csr": parent.config.cert.internal.conn.csr, "authCode": value});
     }
+    if(msg) {
+      var options = {
+        host: sendAdd,
+        port: parent.config.userPref.ports.provider_webServer,
+        path: '/index.html?cmd=pzpEnroll',
+        method: 'POST',
+        headers: {
+          'Content-Length': JSON.stringify(msg).length
+        }
+      };
 
-    var options = {
-      host: sendAdd,
-      port: parent.config.userPref.ports.provider_webServer,
-      path: '/index.html?cmd=pzpEnroll',
-      method: 'POST',
-      headers: {
-        'Content-Length': JSON.stringify(msg).length
-      }
-    };
-
-    var req = https.request(options, function (res) {
-      res.on('data', function (data) {
-        handleData(data);
+      var req = https.request(options, function (res) {
+        res.on('data', function (data) {
+          handleData(data);
+        });
       });
-    });
 
-    req.on('error', function (err) {
-      logger.error(err);
-    });
+      req.on('error', function (err) {
+        logger.error(err);
+      });
 
-    req.write(JSON.stringify(msg));
-    req.end();
+      req.write(JSON.stringify(msg));
+      req.end();
+    }
   }
 
  function sendAuthStatusToApp(to, value, status ) {
