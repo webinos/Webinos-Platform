@@ -127,7 +127,6 @@ var LogInstance = function(name) {
     filename = path.join(wPath.webinosPath()+"/logs/", name+"_info.json");
     nodeVersionResolve.exists(filename, function(err){
       if(!err){
-        console.log(err),
         fs.writeFile(filename, function(err){
           if(!err) {
             writeInfo = fs.createWriteStream(filename, { flags: "a", encoding:"utf8"});

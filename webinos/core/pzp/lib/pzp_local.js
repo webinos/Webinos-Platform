@@ -26,7 +26,6 @@ var os      = require('os');
 var webinos = require("find-dependencies")(__dirname);
 var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
-
 function getelement(service, element){
   var srv = JSON.stringify(service);
   var ret = null;
@@ -52,24 +51,99 @@ function getelement(service, element){
   return ret;
 }
 
-var PzpLocal = function(){
-};
-/*
- * Zerconf: Advertise itself as a PZP service _tcp_pzp once authenticated by PZH. service type: _pzp._tcp
- */
-PzpLocal.prototype.startLocalAdvert = function(port) {
-  if(typeof mdns!=="undefined") {
+var PzpLocal = function(_parent){
+  /*
+   * Zerconf: Advertise itself as a PZP service _tcp_pzp once authenticated by PZH. service type: _pzp._tcp
+   */
+  this.startLocalAdvert = function() {
+    if(typeof mdns!=="undefined") {
+      switch(os.type().toLowerCase()){
+        case "linux":
+          switch(os.platform().toLowerCase()){
+            case "android":
+              break;
+            case "linux":
+              var ad = mdns.createAdvertisement(mdns.tcp('pzp'), _parent.config.userPref.ports.pzp_zeroConf);
+              ad.start();
+              ad.on('error', function(err) {
+                logger.error("zero conf advertisement  (" + err+")");
+              });
+              break;
+          }
+          break;
+        case "darwin":
+          break;
+        case "windows_nt":
+          break;
+      }
+    }
+  };
+
+  this.findLocalPzp = function() {
+    //Zeroconf - start
     switch(os.type().toLowerCase()){
       case "linux":
+        var filename;
         switch(os.platform().toLowerCase()){
           case "android":
+          {
+            function onFound(service){
+              logger.log("Android-Mdns onFound callback: found service.");
+              if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined")) {
+                var msg ={};
+                msg.name    = service.deviceNames[0];
+                msg.address = service.deviceAddresses[0];
+                msg.name    = pzhId + "/" + msg.name + "_Pzp";
+                msg.port    = tlsServerPort;
+                logger.log("found peer address:" + msg.address);
+                _parent.pzpClient.connectPeer(msg);
+              }
+            }
+
+            try{
+              var servicetype = {
+                api: "_pzp._tcp.local."
+              };
+              var bridge = require("bridge");
+              mdnsModule = bridge.load('org.webinos.impl.discovery.DiscoveryMdnsImpl', this);
+              logger.log("\n test msdndiscovery...");
+
+              try {
+                mdnsModule.findServices(servicetype, onFound);
+                logger.log("startDiscovery - END");
+              }
+              catch(e) {
+                logger.error("startDiscovery - error: "+e.message);
+              }
+            }
+            catch(e){
+              logger.error("error: "+e.message);
+            }
+          }
             break;
           case "linux":
-            var ad = mdns.createAdvertisement(mdns.tcp('pzp'), port);
-            ad.start();
-            ad.on('error', function(err) {
-              logger.error("zero conf advertisement  (" + err+")");
-            });
+            if (typeof mdns !== "undefined") {
+              var browser = mdns.createBrowser(mdns.tcp('pzp')), msg ={};
+              browser.on('error', function(err) {
+                logger.error("browser error: (" + err+")");
+              });
+              browser.start();
+              browser.on('serviceUp', function(service) {
+                logger.log("service up");
+                msg.name    = getelement(service, 'name');
+                msg.port    = getelement(service, 'port');
+                msg.address = getelement(service, 'addresses');
+
+                logger.log("check ZeroConf discovery list");
+                var hostname = os.hostname();
+                if(msg.name !== os.hostname()) {
+                  //Update connection - msg.name is machine name
+                  msg.name = _parent.config.metaData.pzhId + "/" + msg.name + "_Pzp";
+                  msg.port = _parent.config.userPref.ports.pzp_tlsServer;
+                  _parent.pzpClient.connectPeer(msg);
+                }
+              });
+            }
             break;
         }
         break;
@@ -78,83 +152,8 @@ PzpLocal.prototype.startLocalAdvert = function(port) {
       case "windows_nt":
         break;
     }
-  }
-};
-
-PzpLocal.prototype.findLocalPzp = function(parent, tlsServerPort, pzhId) {
-  //Zeroconf - start
-  switch(os.type().toLowerCase()){
-    case "linux":
-      var filename;
-      switch(os.platform().toLowerCase()){
-        case "android":
-        {
-          function onFound(service){
-            logger.log("Android-Mdns onFound callback: found service.");
-            if((service.deviceNames[0] != "undefined") && (service.deviceAddresses[0] != "undefined")) {
-              var msg ={};
-              msg.name    = service.deviceNames[0];
-              msg.address = service.deviceAddresses[0];
-              msg.name    = pzhId + "/" + msg.name + "_Pzp";
-              msg.port    = tlsServerPort;
-              logger.log("found peer address:" + msg.address);
-              parent.connectPeer(msg);
-            }
-          }
-
-          try{
-            var servicetype = {
-              api: "_pzp._tcp.local."
-            };
-            var bridge = require("bridge");
-            mdnsModule = bridge.load('org.webinos.impl.discovery.DiscoveryMdnsImpl', this);
-            logger.log("\n test msdndiscovery...");
-
-            try {
-              mdnsModule.findServices(servicetype, onFound);
-              logger.log("startDiscovery - END");
-            }
-            catch(e) {
-              logger.error("startDiscovery - error: "+e.message);
-            }
-          }
-          catch(e){
-            logger.error("error: "+e.message);
-          }
-        }
-          break;
-        case "linux":
-          if (typeof mdns !== "undefined") {
-            var browser = mdns.createBrowser(mdns.tcp('pzp')), msg ={};
-            browser.on('error', function(err) {
-              logger.error("browser error: (" + err+")");
-            });
-            browser.start();
-            browser.on('serviceUp', function(service) {
-              logger.log("service up");
-              msg.name    = getelement(service, 'name');
-              msg.port    = getelement(service, 'port');
-              msg.address = getelement(service, 'addresses');
-
-              logger.log("check ZeroConf discovery list");
-              var hostname = os.hostname();
-              if(msg.name !== os.hostname()) {
-                //Update connection - msg.name is machine name
-                msg.name = pzhId + "/" + msg.name + "_Pzp";
-                msg.port = tlsServerPort;
-                parent.connectPeer(msg);
-              }
-            });
-          }
-          break;
-      }
-      break;
-    case "darwin":
-      break;
-    case "windows_nt":
-      break;
-  }
   //end - zeroconf
+  };
 };
 
 module.exports = PzpLocal;
