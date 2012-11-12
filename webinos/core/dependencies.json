@@ -88,7 +88,7 @@
     },
     "synchronisation_manager": {
        "name": "Synchronisation Manager",
-       "location": "common/manager/synchronisation_manager/"
+       "location": "manager/synchronisation_manager/"
     },
     "policy_manager": {
       "name": "Policy Manager",
