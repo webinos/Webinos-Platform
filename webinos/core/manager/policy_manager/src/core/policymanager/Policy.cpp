@@ -31,6 +31,23 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 		}
 	}
 		
+	//init datahandlingpolicy
+	for(TiXmlNode * child = set->FirstChild("DataHandlingPolicy"); child;
+			child = (TiXmlElement*)child->NextSibling() ) {
+		datahandlingpolicy.push_back(new DataHandlingPolicy(child));
+	}
+
+	//init datahandlingpreference
+	for(TiXmlNode * child = set->FirstChild("DataHandlingPreference"); child;
+			child = (TiXmlElement*)child->NextSibling() ) {
+		datahandlingpreference.push_back(new DataHandlingPreference(child));
+	}
+
+	//init ProvisionalActions
+	for(TiXmlNode * child = set->FirstChild("ProvisionalActions"); child;
+			child = (TiXmlElement*)child->NextSibling() ) {
+		provisionalactions.push_back(new ProvisionalActions(child));
+	}
 	
 	// init rules
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("rule"); child;

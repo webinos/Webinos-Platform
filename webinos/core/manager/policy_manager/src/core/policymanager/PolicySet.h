@@ -37,6 +37,9 @@ private:
 	vector<PolicySet*>	policysets;
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
+	vector<DataHandlingPolicy*>		datahandlingpolicy;
+	vector<DataHandlingPreferences*>	datahandlingpreferences;
+	vector<ProvisionalActions*>		provisionalActions;
 	
 	bool matchSubject(Request*);
 	Effect evaluatePolicies(Request*);
