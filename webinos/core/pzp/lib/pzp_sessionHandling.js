@@ -62,6 +62,10 @@ var Pzp = function () {
     }
   }
 
+  this.changeFriendlyName = function(name) {
+    self.config.metaData.friendlyName = name;
+    self.config.storeMetaData(self.config.metaData);
+  };
 
   this.updateTrustedList = function() {
     self.config.fetchTrustedList(function(status, data){
