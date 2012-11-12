@@ -16,602 +16,447 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 *******************************************************************************/
+
+/**
+ *
+ * @type {*}
+ */
 var tls = require("tls"),
   fs = require("fs"),
   path = require("path"),
   crypto = require("crypto"),
   util = require("util");
 
-if (typeof exports !== "undefined") {
-  try {
-    var webinos        = require("find-dependencies")(__dirname);
-    var session        = webinos.global.require(webinos.global.pzp.location, "lib/session");
-    var rpc            = webinos.global.require(webinos.global.rpc.location);
-    var Registry       = webinos.global.require(webinos.global.rpc.location, "lib/registry").Registry;
-    var Discovery      = webinos.global.require(webinos.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
-    var MessageHandler = webinos.global.require(webinos.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
-    var RPCHandler     = rpc.RPCHandler;
-    var logging        = webinos.global.require(webinos.global.util.location, "lib/logging.js") || console;
-    var authcode       = require("./pzh_authcode");
-    var pzh_pzh        = require("../web/pzh_pzh_certificateExchange");
-  } catch (err) {
-    console.log("webinos modules missing, please check webinos installation" + err);
-    return;
-  }
+try {
+  var dependency = require("find-dependencies")(__dirname);
+  var logging = dependency.global.require(dependency.global.util.location, "lib/logging.js") || console;
+  var session = dependency.global.require(dependency.global.pzp.location, "lib/session.js");
+  var auth_code = require("./pzh_authcode");
+  var pzh_otherManager = require("./pzh_otherManager");
+} catch (err) {
+  console.log("webinos modules missing, please check webinos installation" + err);
+  return;
 }
+
 /**
-* @description Creates a new Pzh object
+* Creates a new Pzh object
 * @constructor
 */
 var Pzh = function () {
   "use strict";
-  var sessionId    = ""; // Holds PZH Session Id
-  var connectedPzp = {};// Holds connected PZP information such as IP address and socket connection
-  var logger;
-  var config      = {};// Holds PZH Configuration particularly certificates
-  var connectedPzh= {};
-  var messageHandler;
-  // TODO: REMOVE ALL THIS PUBLIC VARIABLES
-  this.listenerMap= {}; // holds listeners/callbacks, mostly for pzh internal api
-  this.discovery;
-  this.registry;
-  this.rpcHandler;
-  this.expecting;        // Set by authcode directly
-  this.modules;         // holds startup modules
-  var self = this;
+  var self              = this;
+  self.pzh_otherManager = "";
+  self.pzp_pzh          = {};
+  self.config           = {};// Holds PZH Configuration, it is persistent data
+  self.pzh_state = {
+    sessionId   : "", // Holds PZH Session Id
+    connectedPzp: {},// Holds connected PZP information such as IP address and socket connection
+    connectedPzh: {},
+    expecting   : "", // Set by auth-code directly
+    logger      : ""
+  };
 
   /**
-   * prepares prop message to send between entities in webinos framework
-   * @param from
-   * @param to
-   * @param status
-   * @param message
-   * @return {Object}
+   * PZP once authorized, following steps are involved:
+   * 1. Details are stored in connectedPZP
+   * 2. registering with message handler
+   * 3. Sending PZP and PZH update
+   * 4. Synchronization of files
+   * @param _pzpId
+   * @param _conn
    */
-  function prepMsg (from, to, status, message) {
-    return {"type"  : "prop",
-        "from" : from,
-        "to"   : to,
-        "payload" : {"status" : status, "message" : message}
-    };
+  function handlePzpAuthorization(_pzpId, _conn) {
+    var msg;
+    _pzpId = self.config.metaData.serverName + "/" + _pzpId;
+    self.pzh_state.logger.log("pzp " + _pzpId + "  connected");
+    self.pzh_state.connectedPzp[_pzpId] = {"socket": _conn,  "address": _conn.socket.remoteAddress};
+    _conn.id = _pzpId;
+    msg = self.pzh_otherManager.messageHandler.registerSender(self.pzh_state.sessionId, _pzpId);
+    self.sendMessage(msg, _pzpId);
+    self.pzh_otherManager.syncStart(_pzpId);
   }
+
+  /**
+   * This function is used both by PZH connecting and PZH acting as Server
+   * PZH once authorized, following functionality are done
+   * 1. Storing information in connectedPZH
+   * 2. Registering with the message handler
+   * 3. Sending connected PZH details across PZH
+   * @param _pzhId
+   * @param _conn
+   */
+  this.handlePzhAuthorization = function(_pzhId, _conn) {
+    var  otherPzh = [], msg, localServices;
+    if (!self.pzh_state.connectedPzh.hasOwnProperty(_pzhId)) {
+      self.pzh_state.logger.log("pzh " + _pzhId+" connected");
+      self.pzh_state.connectedPzh[_pzhId] = {"socket": _conn,  "address": _conn.socket.remoteAddress};
+      _conn.id = _pzhId;
+
+      msg = self.pzh_otherManager.messageHandler.registerSender(self.config.metaData.serverName, _pzhId);
+      self.sendMessage(msg, _pzhId);
+
+    } else {
+      self.pzh_state.logger.log("pzh -" + _pzhId + " already connected");
+    }
+  };
+  /**
+   * Responsible for handling authorized pzh and pzp. The main part of this function are processing if the connection
+   * is from a PZH or a PZP
+   * @param {Object} _conn - Connection object when any new connection is accepted.
+   */
+  this.handleConnectionAuthorization = function(_conn) {
+    if(_conn.authorized === false) {// Allows PZP to connect if it has proper QRCode
+      self.pzh_state.logger.log(" connection NOT authorised at pzh - " +  _conn.authorizationError);
+      _conn.socket.end();
+    }
+
+    if(_conn.authorized) {// PZP/PZH connecting with proper certificate at both ends
+      var cn;
+      self.pzh_state.logger.log("connection authorised at pzh");
+      try {
+        cn = decodeURIComponent(_conn.getPeerCertificate().subject.CN);// Get peer common name from the certificate
+        cn = cn.split(":");
+      } catch(err) {
+        self.pzh_state.logger.error("exception in reading common name of peer pzh certificate " + err);
+        return;
+      }
+
+      if(cn[0] === "Pzh" ) {
+        cn = _conn.getPeerCertificate().subjectaltname.split(":");
+        self.handlePzhAuthorization(cn[1], _conn);
+      } else if(cn[0] === "Pzp" ) {
+        handlePzpAuthorization(cn[1], _conn);
+      }
+    }
+  };
+
+  /**
+   * Helper function - prepares prop message to send between entities in webinos framework
+   * @param _from - Session Id of the entity sending message
+   * @param _to - Session id of the entity that message is destined to
+   * @param _status - Webinos command that other end can interpret
+   * @param _message - Message payload
+   * @return {Object} - Message represented in format other end can interpret
+   */
+  this.prepMsg = function(_from, _to, _status, _message) {
+    return {"type"  : "prop",
+        "from" : _from,
+        "to"   : _to,
+        "payload" : {"status" : _status, "message" : _message}
+    };
+  };
+
   /**
    * Sends the message over socket to connected endpoints
-   * @param message
-   * @param address
-   * @param conn
+   * @param _message [mandatory]- JSON-RPC message or PROP message send to the PZH/P
+   * @param _address [mandatory]- SessionId of the connected endpoints
    */
-  function sendMessage(message, address, conn) {
-    var jsonString = JSON.stringify(message);
-    var buf = session.common.jsonStr2Buffer(jsonString);
+  this.sendMessage = function(_message, _address) {
+    if (_message && _address){
+      var jsonString = JSON.stringify(_message);
+      var buf = session.common.jsonStr2Buffer(jsonString);
 
-    logger.log("send to "+ address + " message " + jsonString);
+      self.pzh_state.logger.log("send to "+ _address + " _message " + jsonString);
 
-    try {
-      if (connectedPzh.hasOwnProperty(address)) {// If it is connected to pzh it will land here
-        connectedPzh[address].socket.pause();
-        connectedPzh[address].socket.write(buf);
-        connectedPzh[address].socket.resume();
-      } else if (connectedPzp.hasOwnProperty(address)) {
-        connectedPzp[address].socket.pause();
-        connectedPzp[address].socket.write(buf);
-        connectedPzp[address].socket.resume();
-      } else if( typeof conn !== "undefined" ) {
-        conn.pause();
-        conn.write(buf);
-        conn.resume();
-      } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
-        logger.log("client " + address + " is not connected");
-      }
-    } catch(err) {
-      logger.error("exception in sending packet " + err);
-    }
-  }
-  function sendMsgAllPzp(_cmd, _msg){
-    var msg, i;
-    // Send message to all connected pzp"s about new pzp that has joined in
-    for(i in connectedPzp) {
-      if (connectedPzp.hasOwnProperty(i)) {
-        msg = prepMsg(sessionId, i, _cmd, _msg);
-        sendMessage(msg, i);
-      }
-    }
-  }
-
-   /**
-   *
-   */
-  function initializeRPC(){
-
-    self.registry     = new Registry();
-    self.rpcHandler   = new RPCHandler(undefined, self.registry); // Handler for remote method calls.
-    self.discovery    = new Discovery(self.rpcHandler, [self.registry]);
-    self.registry.registerObject(self.discovery);
-    self.registry.loadModules(config.serviceCache, self.rpcHandler); // load specified modules
-    self.rpcHandler.setSessionId(sessionId);
-  }
-  /**
-   *
-   */
-  function setMessageHandler_RPC() {
-    initializeRPC();
-    messageHandler = new MessageHandler(self.rpcHandler);// handler of all things message
-    var messageHandlerSend = function (message, address, object) {
-      "use strict";
-      sendMessage(message, address);
-    };
-    // Setting message handler to work with pzh instance
-    messageHandler.setGetOwnId(sessionId);
-    messageHandler.setObjectRef(this);
-    messageHandler.setSendMessage(messageHandlerSend);
-    messageHandler.setSeparator("/");
-  }
-  /**
-   * Send services to other connected pzh
-   * @param validMsgObj
-   */
-  function sendFoundServices(validMsgObj){
-    var services = self.discovery.getAllServices(validMsgObj.from);
-    var msg = prepMsg(sessionId, validMsgObj.from, "foundServices", services);
-    msg.payload.id = validMsgObj.payload.message.id;
-    sendMessage(msg, validMsgObj.from);
-    logger.log("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
-  }
-
-  /**
-   *
-   * @param user
-   */
-  function storeUserData(user) {
-    if (config.userData && config.userData.name !== user.username) {
-      config.userData.name     = user.username;
-      config.userData.email    = user.email;
-      config.userData.country  = user.country;
-      config.userData.image    = user.image;
-    }
-  }
-
-  /**
-   *
-   */
-  function sendPzhUpdate () {
-    var otherPzh = [], status, i, msg;
-    for(i in  connectedPzh) {
-      if (connectedPzh.hasOwnProperty(i)) {
-        otherPzh.push({name: i});
-      }
-    }
-    sendMsgAllPzp("pzhUpdate", otherPzh);
-  }
-  /**
-   * Fetch details about connected pzp"s.  Information to be sent includes address, id and indication which is a newPZP joining
-   * @param connSessionId
-   * @param port
-   */
-  function sendPzpUpdate (connSessionId, port) {
-    var otherPzp = [], i;
-    for(i in  connectedPzp) {
-      if (connectedPzp.hasOwnProperty(i)) {
-        if (i === connSessionId) {        // Special case for new pzp
-          connectedPzp[i].port = port;
-          otherPzp.push({name: i, address:connectedPzp[i].address, port: port, newPzp: true});
-        } else {
-          otherPzp.push({name: i, address:connectedPzp[i].address, port: connectedPzp[i].port, newPzp: false});
+      try {
+        if (self.pzh_state.connectedPzh.hasOwnProperty(_address)) {// If it is connected to pzh it will land here
+          self.pzh_state.connectedPzh[_address].socket.pause();
+          self.pzh_state.connectedPzh[_address].socket.write(buf);
+          self.pzh_state.connectedPzh[_address].socket.resume();
+        } else if (self.pzh_state.connectedPzp.hasOwnProperty(_address)) {
+          self.pzh_state.connectedPzp[_address].socket.pause();
+          self.pzh_state.connectedPzp[_address].socket.write(buf);
+          self.pzh_state.connectedPzp[_address].socket.resume();
+        } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
+          self.pzh_state.logger.log("client " + _address + " is not connected");
         }
+      } catch(err) {
+        self.pzh_state.logger.error("exception in sending packet " + err);
       }
+    } else {
+      self.pzh_state.logger.error("sendMessage called without proper parameters, message will not be sent");
     }
-    sendMsgAllPzp("pzpUpdate", otherPzp);
-  }
+  };
   /**
-   *
-   * @return {Object}
+   * Helper function is used by PZH connecting to other PZHs. It is also used
+   * the PZH Server to set TLS configuration
+   * It is very important function as TLS server is dictated via value set here
+   * 1. It includes CRL list of all Trusted PZH
+   * 2. It includes list of all CA certificates
+   * 3. Request certificate enables mutual authentication
+   * 4. Reject unauthorized disconnects any PZH which does not have proper certificate
+   * @return _callback - Callback with TLS configuration parameters
    */
-  function setOptions(callback) {
-    config.fetchKey(config.cert.internal.conn.key_id, function(status, value){
+  this.setConnParam = function(_callback) {
+    self.config.fetchKey(self.config.cert.internal.conn.key_id, function(status, value){
       if(status){
         var caList = [], crlList = [], key;
 
-        caList.push(config.cert.internal.master.cert);
-        crlList.push(config.crl);
+        caList.push(self.config.cert.internal.master.cert);
+        crlList.push(self.config.crl);
 
-        for ( key in config.cert.external) {
-          if(config.cert.external.hasOwnProperty(key)) {
-            caList.push(config.cert.external[key].cert);
-            crlList.push(config.cert.external[key].crl);
+        for ( key in self.config.cert.external) {
+          if(self.config.cert.external.hasOwnProperty(key)) {
+            caList.push(self.config.cert.external[key].cert);
+            crlList.push(self.config.cert.external[key].crl);
           }
         }
         // Certificate parameters that will be added in SNI context of farm
-        callback(true, {
+        _callback(true, {
           key  : value,
-          cert : config.cert.internal.conn.cert,
+          cert : self.config.cert.internal.conn.cert,
           ca   : caList,
           crl  : crlList,
           requestCert: true,
           rejectUnauthorized: true
         });
       } else {
-        callback(false, {});
+        _callback(false, {});
       }
     });
-  }
-  /**
-   *
-   * @param pzpId
-   * @param conn
-   */
-  function handlePzpAuthorization(pzpId, conn) {
-    var err, msg;
-    pzpId = config.metaData.serverName + "/" + pzpId;
-    logger.log("pzp "+pzpId+"  connected");
-    connectedPzp[pzpId] = {"socket": conn,  "address": conn.socket.remoteAddress};
-    conn.id = pzpId;
-    msg = messageHandler.registerSender(sessionId, pzpId);
-    sendMessage(msg, pzpId);
-    sendPzpUpdate(pzpId);
-  }
-  /**
-   *
-   * @param pzhId
-   * @param conn
-   */
-  function handlePzhAuthorization(pzhId, conn) {
-    var  otherPzh = [], msg, localServices;
-    if (!connectedPzh.hasOwnProperty(pzhId)) {
-      logger.log("pzh " + pzhId+" connected");
-      connectedPzh[pzhId] = {"socket": conn,  "address": conn.socket.remoteAddress};
-      conn.id = pzhId;
-
-      msg = messageHandler.registerSender(config.metaData.serverName, pzhId);
-      sendMessage(msg, pzhId);
-
-      localServices = self.discovery.getAllServices();
-      msg = prepMsg(config.metaData.serverName, pzhId, "registerServices", {services:localServices, from:config.metaData.serverName});
-      sendMessage(msg, pzhId);
-
-      logger.log("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
-      sendPzhUpdate();
-    } else {
-      logger.log("pzh -" + pzhId + " already connected");
-    }
-  }
-
-  /**
-   * Process incoming messages, message of type prop are only received while session is established. Rest of the time it
-   * is usually RPC messages
-   * @param {Object} conn: It is used in special scenarios, when PZP is not connected and we need to send response back
-   * @param {Object} msgObj: A message object received from other PZH or PZP.
-   */
-  function processMsg (conn, msgObj) {
-    session.common.processedMsg(this, msgObj, function(validMsgObj) {
-      logger.log("received message" + JSON.stringify(validMsgObj));
-      if(validMsgObj.type === "prop" && validMsgObj.payload.status === "clientCert" ) {
-        self.addNewPZPCert(validMsgObj, function(err, msg) { // Message sent by PZP connecting first time based on this message it generates client certificate
-          sendMessage(msg, validMsgObj.from, conn);
-          conn.socket.end();
-        });
-      } else if (validMsgObj.type === "prop" && validMsgObj.payload.status === "pzpDetails") {
-        logger.log("receiving details from pzp...");
-        sendPzpUpdate(validMsgObj.from, conn, validMsgObj.payload.message);
-      } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "registerServices") {
-        logger.log("receiving Webinos services from pzh/pzp..."); // information sent by connecting PZP about services it supports. These details are then used by findServices
-        self.discovery.addRemoteServiceObjects(validMsgObj.payload.message);
-      } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "findServices") {
-        logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
-        sendFoundServices(validMsgObj);
-      } else if(validMsgObj.type === "prop" && validMsgObj.payload.status === "unregServicesReply") {
-        logger.log("receiving initial modules from pzp...");
-        if (!validMsgObj.payload.id) {
-          logger.error("cannot find callback");
-          return;
-        }
-        self.listenerMap[validMsgObj.payload.id](validMsgObj.payload.message);
-        delete self.listenerMap[validMsgObj.payload.id];
-      } else { // Message is forwarded to Messaging manager
-        try {
-          messageHandler.onMessageReceived(validMsgObj, validMsgObj.to);
-        } catch (err2) {
-          logger.error("error message sending to messaging " + err2.message);
-        }
-      }
-    });
-  }
-  /**
-   *
-   */
-  function connectOtherPzh(){
-    var key;
-    setOptions(function(status, options) {
-      for (key = 0; key <  config.trustedList.pzh.length; key = key + 1) {
-        if (!connectedPzh.hasOwnProperty(config.trustedList.pzh[key])) {
-          connectOtherPZH(config.trustedList.pzh[key], options, config.userPref.ports.provider,
-          function(status, errorDetails) {
-            if (!status) {
-              logger.error("connecting to pzh failed - due to" + errorDetails);
-            }
-          });
-        }
-      }
-    });
-  }
-
-  function connectOtherPZH (to, options, port, callback) {
-    try {
-      var connPzh, serverName = to.split("_")[0];
-      options.servername = to;
-      connPzh = tls.connect(port, serverName, options, function() {
-        logger.log("connection status : "+connPzh.authorized);
-        if(connPzh.authorized) {
-          logger.log("connected to " + to);
-          handlePzhAuthorization(to, connPzh);
-         } else {
-          logger.error("connection authorization Failed - "+connPzh.authorizationError);
-        }
-        if (callback) {callback({cmd:'pzhPzh', to: config.metaData.serverName, payload:connPzh.authorized});}
-      });
-      connPzh.on("data", function(buffer) {
-        self.handleData(connPzh, buffer);
-      });
-      connPzh.on("error", function(err) {
-        logger.error(err.message);
-      });
-     connPzh.on("end", function() {
-        self.removeRoute(connPzh.id);
-     });
-  } catch (err) {
-     logger.error("connecting other pzh failed in setting configuration " + err);
-     callback(false, err);
-   }
- }
-
-  /**
-   * This is a function on receiving end in PZH - PZH certificate exchange.
-   * @param parse
-   * @param callback
-   */
-  this.addExternalCert = function(parse, callback) {
-    if (!config.cert.external.hasOwnProperty(parse.from)) {
-      config.cert.external[parse.from] = { cert: parse.payload.message.cert, crl: parse.payload.message.crl};
-      config.storeCertificate(config.cert.external,"external");
-    }
-    if (config.trustedList.pzh.indexOf(parse.from) === -1) {
-      config.trustedList.pzh.push(parse.from);
-      config.storeTrustedList(config.trustedList);
-    }
-    setOptions(function(status, options){
-      if (status) {
-        return callback (config.metaData.serverName, options, config.cert.internal.master.cert, config.crl);
-      } else {
-        return callback();
-      }
-    });
-  };
-
-  this.addOtherZoneCert = function(from, fetchPzh, refreshCert, callback) {
-    if(config.trustedList.pzh.indexOf(from) !== -1) {
-      callback({to: config.metaData.serverName, cmd: 'pzhPzh', payload: "PZH already connected"})
-    } else if (from === config.metaData.serverName) {
-      callback({to: config.metaData.serverName, cmd: 'pzhPzh', payload: "Trying to connect own PZH"})
-    } else {
-      pzh_pzh.sendCertificate(from, config.metaData.serverName, config.userPref.ports.provider_webServer, config.userPref.ports.provider,
-        config.cert.internal.master.cert, config.crl,fetchPzh, refreshCert, connectOtherPZH, callback);
-    }
   };
   /**
    * Calls processmsg to handle incoming message to PZH. This is called by PZH provider
-   * @param {Object} conn: Socket connection details of client socket ..
-   * @param {Buffer} buffer: Incoming data received from other PZH or PZP
+   * @param {Object} _conn - Socket connection details of client socket ..
+   * @param {Buffer} _buffer - Incoming data received from other PZH or PZP
    */
-  this.handleData=function(conn, buffer) {
+  this.handleData=function(_conn, _buffer) {
     try {
-      conn.pause();
-      session.common.readJson(this, buffer, function(obj) {
-        processMsg(conn, obj);
+      _conn.pause();
+      session.common.readJson(self, _buffer, function(obj) {
+        self.pzh_otherManager.processMsg(obj);
       });
     } catch (err) {
-      logger.error("exception in processing received message " + err);
+      self.pzh_state.logger.error("exception in processing received message " + err);
     } finally {
-      conn.resume();
+      _conn.resume();
     }
   };
   /**
-   * Responsible for adding PZH and PZP. It also is responsible for registering wit
-   * h message handler and disseminating information about connected PZP"s to other PZP
-   * @param {Object} conn: Connection object when any new connection is accepted.
+   * Removes PZH and PZP that has socket disconnect
+   * @param _id - sessionId
    */
-  this.handleConnectionAuthorization = function(conn) {
-    if(conn.authorized === false) {// Allows PZP to connect if it has proper QRCode
-      logger.log(" connection NOT authorised at pzh - " +  conn.authorizationError);
-      conn.socket.end();
+  this.removeRoute = function(_id) {
+    if (self.pzh_state.connectedPzp.hasOwnProperty(_id)) {
+      self.pzh_otherManager.messageHandler.removeRoute(_id, self.config.metaData.serverName);
+      delete self.pzh_state.connectedPzp[_id];
     }
-
-    if(conn.authorized) {// PZP/PZH connecting with proper certificate at both ends
-      var cn;
-      logger.log("connection authorised at pzh");
-      try {
-        cn = decodeURIComponent(conn.getPeerCertificate().subject.CN);// Get peer common name from the certificate
-        cn = cn.split(":");
-      } catch(err) {
-        logger.error("exception in reading common name of peer pzh certificate " + err);
-        return;
-      }
-
-      if(cn[0] === "Pzh" ) {
-        cn = conn.getPeerCertificate().subjectaltname.split(":");
-        handlePzhAuthorization(cn[1], conn);
-      } else if(cn[0] === "Pzp" ) {
-        handlePzpAuthorization(cn[1], conn);
-      }
-    }
-  };
-  this.revokeCert = function(pzpid, refreshCert, callback) {
-    var index, pzpCert = config.cert.internal.signedCert[pzpid];
-    config.revokeClientCert(pzpCert, function(status, crl) {
-      if (status) {
-        logger.log("revocation success! " + pzpid + " should not be able to connect anymore ");
-        config.crl = crl;
-        delete config.cert.internal.signedCert[pzpid] ;
-        index = config.trustedList.pzp.indexOf(pzpid) ;
-        config.trustedList.pzp.splice(index,1);
-        config.cert.internal.revokedCert[pzpid] = crl;
-        config.storeAll();
-        if (connectedPzp[pzpid]){
-          connectedPzp[pzpid].socket.end();
-          delete connectedPzp[pzpid];
-        }
-        setOptions(function(status, options){
-          if(status){
-            refreshCert(config.metaData.serverName, options);
-          }
-        });
-        callback({cmd:"revokePzp", to:config.metaData.serverName, payload: pzpid});
-      }
-    });
-  };
-
-  this.removeRoute = function(id) {
-    if (connectedPzp.hasOwnProperty(id)) {
-      messageHandler.removeRoute(id, config.metaData.serverName);
-      delete connectedPzp[id];
-    }
-    if (connectedPzh.hasOwnProperty(id)) {
-      messageHandler.removeRoute(id, config.metaData.serverName);
-      delete connectedPzh[id];
-    }
-  };
-  /**
-   * Adds new PZP certificate. This is triggered by client, which sends its csr certificate and PZH signs
-   * certificate and return backs.
-   * @param {Object} parse It its is an object holding received message.
-   */
-  this.addNewPZPCert = function(parse, callback) {
-    try {
-      var msg;
-      var pzpId = sessionId +"/"+ parse.from;
-      if (config.cert.internal.revokedCert[pzpId]) {
-        msg =prepMsg(config.metaData.serverName,pzpId, "error", "pzp was previously revoked");
-        callback(false, msg);
-        return
-      }
-      self.expecting.isExpectedCode(parse.payload.message.code, function(expected) { // Check QRCode if it is valid ..
-        if (expected) {
-          config.generateSignedCertificate(parse.payload.message.csr, 2, function(status, value) { // Sign certificate based on received csr from client.// pzp = 2
-            if (status) { // unset expected QRCode
-              config.cert.internal.signedCert[pzpId] = value;
-              self.expecting.unsetExpected(function() {
-                config.storeCertificate(config.cert.internal, "internal");
-                if(config.trustedList.pzp.indexOf(pzpId) === -1) {// update configuration with signed certificate details ..
-                  config.trustedList.pzp.push(pzpId);
-                  config.storeTrustedList(config.trustedList);
-                }
-                var payload = {"clientCert": config.cert.internal.signedCert[pzpId], "masterCert":config.cert.internal.master.cert, "masterCrl": config.crl};// Send signed certificate and master certificate to PZP
-                msg = prepMsg(config.metaData.serverName, pzpId, "signedCert", payload);
-                callback(true, msg);
-              });
-            } else {
-              msg =prepMsg(config.metaData.serverName, parse.from, "error", value);
-              callback(false, msg);
-            }
-          });
-        } else {
-          msg =prepMsg(config.metaData.serverName, parse.from, "error", "not expecting new pzp");
-          callback(false, msg);// Fail message
-        }
-      });
-    } catch (err) {
-      logger.error("error signing client certificate" + err);
-      msg =prepMsg(config.metaData.serverName, parse.from, "error", err.message);
-      callback(false, msg);
+    if (self.pzh_state.connectedPzh.hasOwnProperty(_id)) {
+      self.pzh_otherManager.messageHandler.removeRoute(_id, self.config.metaData.serverName);
+      delete self.pzh_state.connectedPzh[_id];
     }
   };
   /**
    * ADDs PZH in a provider
-   * @param friendlyName this name is used for creating configuration
-   * @param uri pzh url you want to add, assumption it is of form pzh.webinos.org/bob@webinos.org
-   * @param user details of the owner of the PZH
-   * @param callback returns instance of PZH
+   * @param _friendlyName this name is used for creating configuration
+   * @param _uri pzh url you want to add, assumption it is of form pzh.webinos.org/bob@webinos.org
+   * @param _user details of the owner of the PZH
+   * @param _callback returns instance of PZH
    */
-  this.addLoadPzh = function (friendlyName, uri, user, callback) {
-    var options;
-    logger = new logging(__filename); // log is initialized in order to show log as per sessions
-    authcode.createAuthCounter(function (res) {
-      self.expecting = res;
+  this.addLoadPzh = function (_friendlyName, _uri, _user, _callback) {
+    self.pzh_state.logger = new logging(__filename); // log is initialized in order to show log as per sessions
+    auth_code.createAuthCounter(function (res) {
+      self.pzh_state.expecting = res;
     });
-    config = new session.configuration();
-    storeUserData(user);
-    config.setConfiguration(friendlyName, "Pzh", uri, function (status, value) {
+
+    self.config  = new session.configuration();
+    self.config.setConfiguration(_friendlyName, "Pzh", _uri, function (status, value) {
       if (status) {
-        sessionId = uri;
-        logger.addId(sessionId);
-        setMessageHandler_RPC();
-        connectOtherPzh();
-        setOptions(function(status, options) {
-          if (status) {
-            return callback(true, options, uri);
-          }
+        self.config.storeUserDetails(_user);
+        self.pzh_state.sessionId = _uri;
+        self.pzh_state.logger.addId(self.pzh_state.sessionId);
+        self.pzh_otherManager = new pzh_otherManager(self);
+        self.pzh_pzh = new Pzh_Pzh(self);
+        self.revoke  = new RevokePzh(self);
+        self.enroll  = new AddPzp(self);
+        self.pzh_otherManager.setMessageHandler_RPC();
+        self.setConnParam(function(status, options){
+          self.pzh_pzh.connect_ConnectedPzh(options);
+          return _callback(true, options, _uri);
         });
       } else {
-        return callback(false, value);
+        return _callback(false, value);
+      }
+    });
+  };
+};
+module.exports = Pzh;
+
+var Pzh_Pzh = function(_parent){
+  var self    = this;
+  var pzh_pzh = require("../web/pzh_pzh_certificateExchange.js");
+
+  this.connect_ConnectedPzh = function(options) {
+    var key;
+    for (key = 0; key <  _parent.config.trustedList.pzh.length; key = key + 1) {
+      if (!_parent.pzh_state.connectedPzh.hasOwnProperty(_parent.config.trustedList.pzh[key])) {
+        self.connectOtherPZH(_parent.config.trustedList.pzh[key], options,
+        function(status, errorDetails) {
+          if (!status) {
+            _parent.pzh_state.logger.error("connecting to pzh failed - due to" + errorDetails);
+          }
+        });
+      }
+    }
+  };
+
+  /**
+   *
+   * @param to
+   * @param options
+   * @param port
+   * @param callback
+   */
+  this.connectOtherPZH = function(_to, _options, _callback) {
+    try {
+      var connPzh, serverName = _to.split("_")[0];
+      _options.servername = _to;
+      connPzh = tls.connect(_parent.config.userPref.ports.provider, serverName, _options, function() {
+        _parent.pzh_state.logger.log("connection status : "+connPzh.authorized);
+        if(connPzh.authorized) {
+          _parent.pzh_state.logger.log("connected to " + _to);
+          _parent.handlePzhAuthorization(_to, connPzh);
+        } else {
+          _parent.pzh_state.logger.error("connection authorization Failed - "+connPzh.authorizationError);
+        }
+        if (_callback) {_callback({cmd:'pzhPzh', to: _parent.config.metaData.serverName, payload:connPzh.authorized});}
+      });
+      connPzh.on("data", function(buffer) {
+        _parent.handleData(connPzh, buffer);
+      });
+      connPzh.on("error", function(err) {
+        _parent.pzh_state.logger.error(err.message);
+      });
+      connPzh.on("end", function() {
+        _parent.removeRoute(connPzh.id);
+      });
+    } catch (err) {
+      _parent.pzh_state.logger.error("connecting other pzh failed in setting configuration " + err);
+      _callback(false, err);
+    }
+  };
+
+  /**
+   * This is a function on receiving end in PZH - PZH certificate exchange.
+   * @param msg
+   * @param callback
+   */
+  this.addExternalCert = function(_msg, _callback) {
+    if (!_parent.config.cert.external.hasOwnProperty(_msg.from)) {
+      _parent.config.cert.external[_msg.from] = { cert: _msg.payload.message.cert, crl: _msg.payload.message.crl};
+      _parent.config.storeCertificate(_parent.config.cert.external,"external");
+    }
+    if (_parent.config.trustedList.pzh.indexOf(_msg.from) === -1) {
+      _parent.config.trustedList.pzh.push(_msg.from);
+      _parent.config.storeTrustedList(_parent.config.trustedList);
+    }
+    _parent.setConnParam(function(status, options){
+      if (status) {
+        return _callback (_parent.config.metaData.serverName, options, _parent.config.cert.internal.master.cert, _parent.config.crl);
+      } else {
+        return _callback();
       }
     });
   };
 
   /**
-   * TEMP Solution to get register/unregister working:
-   * @param data
-   * @param id
+   * This is function that triggers PZH - PZH certificate exchange
+   * @param from - PZH that we are trying to connect
+   * @param fetchPzh - function that sendCertificates uses to fetch PZH instance
+   * @param refreshCert - refreshes SNI context of the server
+   * @param callback - result callback invoked to inform client about the status
    */
-  this.sendMessage = function(data, id) {
-    sendMessage(data, id);
-  };
-  this.getInitModules = function() {
-    return config.serviceCache;
-  };
-  this.addMsgListener = function (callback) {
-    var id = (parseInt((1 + Math.random()) * 0x10000)).toString(16).substr(1);
-    this.listenerMap[id] = callback;
-    return id;
-  };
-  this.getConnectedPzp = function() {
-    var myKey, pzps = [];
-    for (myKey=0; myKey < config.trustedList.pzp.length; myKey = myKey + 1){
-      if (connectedPzp.hasOwnProperty(config.trustedList.pzp[myKey])){
-        pzps.push({id: config.trustedList.pzp[myKey].split("/")[1], url: config.trustedList.pzp[myKey], isConnected: true});
-      } else {
-        pzps.push({id: config.trustedList.pzp[myKey].split("/")[1], url: config.trustedList.pzp[myKey], isConnected: false});
-      }
+  this.addOtherZoneCert = function(_from, _fetchPzh, _refreshCert, _callback) {
+    if(_parent.config.trustedList.pzh.indexOf(_from) !== -1) {
+      _callback({to: _parent.config.metaData.serverName, cmd: 'pzhPzh', payload: "PZH already connected"})
+    } else if (_from === _parent.config.metaData.serverName) {
+      _callback({to: _parent.config.metaData.serverName, cmd: 'pzhPzh', payload: "Trying to connect own PZH"})
+    } else {
+      pzh_pzh.sendCertificate(_from, _parent.config, _fetchPzh, _refreshCert, _callback);
     }
-    return pzps;
-  };
-  this.getConnectedPzh = function() {
-    var pzhs = [], myKey;
-    for (myKey=0; myKey < config.trustedList.pzh.length; myKey = myKey + 1){
-      if (connectedPzh.hasOwnProperty(config.trustedList.pzh[myKey])){
-        pzhs.push({id: config.trustedList.pzh[myKey].split("_")[1], url: config.trustedList.pzh[myKey], isConnected: true});
-      } else {
-        pzhs.push({id: config.trustedList.pzh[myKey].split("_")[1], url: config.trustedList.pzh[myKey], isConnected: false});
-      }
-    }
-    pzhs.push({id: config.metaData.serverName.split("_")[1] + " (Your Pzh)", url: config.metaData.serverName, isConnected: true});
-    return pzhs;
-  };
-  this.getRevokedCert = function(){
-    var revokedCert = [], myKey;
-    for (myKey in config.cert.internal.revokedCert){
-      if (config.cert.internal.revokedCert.hasOwnProperty(myKey)){
-        revokedCert.push({id: myKey, url: myKey, isConnected: false});
-      }
-    }
-    return revokedCert;
-  };
-  this.getUserDetails = function(){
-    return config.userData;
-  };
-  this.getSessionId = function() {
-    return config.metaData.serverName;
-  };
-  this.getFriendlyName = function() {
-    return config.metaData.friendlyName;
   };
 };
 
-module.exports = Pzh;
+var RevokePzh = function(parent) {
+  /**
+   * Removes a PZP from the PZH
+   * @param pzpid
+   * @param refreshCert
+   * @param callback
+   */
+  this.revokeCert = function(_pzpid, _refreshCert, _callback) {
+    var index, pzpCert = _parent.config.cert.internal.signedCert[_pzpid];
+    _parent.config.revokeClientCert(pzpCert, function(status, crl) {
+      if (status) {
+        _parent.pzh_state.logger.log("revocation success! " + _pzpid + " should not be able to connect anymore ");
+        _parent.config.crl = crl;
+        delete _parent.config.cert.internal.signedCert[_pzpid] ;
+        index = parent.config.trustedList.pzp.indexOf(_pzpid) ;
+        _parent.config.trustedList.pzp.splice(index,1);
+        _parent.config.cert.internal.revokedCert[_pzpid] = crl;
+        _parent.config.storeAll();
+        if (_parent.pzh_state.connectedPzp[_pzpid]){
+          _parent.pzh_state.connectedPzp[_pzpid].socket.end();
+          delete _parent.pzh_state.connectedPzp[_pzpid];
+        }
+        _parent.setConnParam(function(status, options){
+          if(status){
+            _refreshCert(_parent.config.metaData.serverName, options);
+          }
+        });
+        _callback({cmd:"revokePzp", to: _parent.config.metaData.serverName, payload: _pzpid});
+      } else {
+        _callback({cmd:"revokePzp", to: _parent.config.metaData.serverName, payload: "failed"});
+      }
+    });
+  };
+};
+
+var AddPzp = function(_parent) {
+  /**
+   * Adds new PZP certificate. This is triggered by client, which sends its csr certificate and PZH signs
+   * certificate and return backs a signed PZP certificate.
+   * @param {Object} msgRcvd It its is an object holding received message.
+   */
+  this.addNewPZPCert = function(_msgRcvd, _callback) {
+    try {
+      var pzpId =_parent.pzh_state.sessionId +"/"+ _msgRcvd.from, msg;
+      if (_parent.config.cert.internal.revokedCert[pzpId]) {
+        msg = _parent.prepMsg(_parent.config.metaData.serverName, pzpId, "error", "pzp was previously revoked");
+        _callback(false, msg);
+        return;
+      }
+      _parent.pzh_state.expecting.isExpectedCode(_msgRcvd.payload.message.code, function(expected) { // Check QRCode if it is valid ..
+        if (expected) {
+          _parent.config.generateSignedCertificate(_msgRcvd.payload.message.csr, 2, function(status, value) { // Sign certificate based on received csr from client.// pzp = 2
+            if (status) { // unset expected QRCode
+              _parent.config.cert.internal.signedCert[pzpId] = value;
+              _parent.pzh_state.expecting.unsetExpected(function() {
+                _parent.config.storeCertificate(_parent.config.cert.internal, "internal");
+                if(_parent.config.trustedList.pzp.indexOf(pzpId) === -1) {// update configuration with signed certificate details ..
+                  _parent.config.trustedList.pzp.push(pzpId);
+                  _parent.config.storeTrustedList(_parent.config.trustedList);
+                }
+                var payload = {"clientCert": _parent.config.cert.internal.signedCert[pzpId], "masterCert": _parent.config.cert.internal.master.cert, "masterCrl": _parent.config.crl};// Send signed certificate and master certificate to PZP
+                msg = _parent.prepMsg(_parent.config.metaData.serverName, pzpId, "signedCert", payload);
+                _callback(true, msg);
+              });
+            } else {
+              msg = _parent.prepMsg(_parent.config.metaData.serverName, _msgRcvd.from, "error", value);
+              _callback(false, msg);
+            }
+          });
+        } else {
+          msg = _parent.prepMsg(_parent.config.metaData.serverName, _msgRcvd.from, "error", "not expecting new pzp");
+          _callback(false, msg);// Fail message
+        }
+      });
+    } catch (err) {
+      _parent.pzh_state.logger.error("error signing client certificate" + err);
+      msg = _parent.prepMsg(_parent.config.metaData.serverName, _msgRcvd.from, "error", err.message);
+      _callback(false, msg);
+    }
+  };
+};
+
+

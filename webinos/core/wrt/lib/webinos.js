@@ -32,7 +32,7 @@
         } else { // We are not in Android widget renderer so we can use a browser websocket.
             var port, hostname;
             var defaultHost = "localhost";
-            var defaultPort = "8081";
+            var defaultPort = "8080";
             var isWebServer = true;
             var useDefaultHost = false;
             var useDefaultPort = false;
