@@ -137,6 +137,9 @@
       case "friendlyName":
         callListenerForMsg(data);
         break;
+      case "webinosVersion":
+        callListenerForMsg(data);
+        break;
     }
   }
 }());
