@@ -79,11 +79,6 @@
         logMessage(data.payload.message);
       }
       webinos.session.addListener('info', printInfo);
-
-
-      $('#friendlyName').click(function() {
-         setPage("Add FriendlyName", "friendlyName.html");
-      });
       $("#testapi").click(function(){
         setPage("Test API Demo", "client42.html");
       });
@@ -147,6 +142,10 @@
         var right = that.css("right");
         that.css("right",(right==="0px")?"":"0px");
       });
+      $('#friendlyName').click(function() {
+        setPage("Add FriendlyName", "friendlyName.html");
+      });
+
       // This is added here as we intend to get response back here
       function authStatus(msg) {
         if (msg.payload.message.connected === "true") {
@@ -176,6 +175,16 @@
       }
       webinos.session.addListener('error', error);
       //$('.column').equalHeight(); // Fix height
+      function webinosVersion(msg){
+        var currentVersion =msg.payload.message.split("-")[0];
+        var sha1 = msg.payload.message.split("-")[2];
+        $("#webinosVersion").html("<ul align=\"right\"> Webinos Version-"+currentVersion + " (Commit ID-" + sha1 +") </ul>");
+      }
+      setTimeout(function(){
+          var options = {"type": 'prop', "payload":{"status": "webinosVersion"}};
+          webinos.session.message_send(options, webinos.session.getPZPId());
+          webinos.session.addListener('webinosVersion', webinosVersion);
+      }, 3000);
     });
     </script>
 </head>
@@ -192,6 +201,7 @@
     </div>
     <div class="breadcrumbs_container">
       <article class="breadcrumbs"><a href="client.html">Webinos Pzp</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
+       <div id="webinosVersion"></div>
     </div>
   </section><!-- end of secondary bar -->
 
