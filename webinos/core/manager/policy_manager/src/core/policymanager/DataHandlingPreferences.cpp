@@ -28,14 +28,14 @@ DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences){
 
 	// AuthorizationsSet Tag
 	if(dhpreferences->FirstChild("AuthorizationsSet")){
-		authorizationsset = new AuthorizationsSet((TiXmlElement*)rule->FirstChild("AuthorizationsSet"));
+		authorizationsset = new AuthorizationsSet((TiXmlElement*)dhpreferences->FirstChild("AuthorizationsSet"));
 	}
 	else
 		authorizationsset = NULL;
 
 	// ObligationsSet Tag
 	if(dhpreferences->FirstChild("ObligationsSet")){
-		obligationsset = new ObligationsSet((TiXmlElement*)rule->FirstChild("ObligationsSet"));
+		obligationsset = new ObligationsSet((TiXmlElement*)dhpreferences->FirstChild("ObligationsSet"));
 	}
 	else
 		obligationsset = NULL;

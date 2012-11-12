@@ -28,14 +28,14 @@ DataHandlingPolicy::DataHandlingPolicy(TiXmlElement* dhpolicy){
 
 	// AuthorizationsSet Tag
 	if(dhpolicy->FirstChild("AuthorizationsSet")){
-		authorizationsset = new AuthorizationsSet((TiXmlElement*)rule->FirstChild("AuthorizationsSet"));
+		authorizationsset = new AuthorizationsSet((TiXmlElement*)dhpolicy->FirstChild("AuthorizationsSet"));
 	}
 	else
 		authorizationsset = NULL;
 
 	// ObligationsSet Tag
 	if(dhpolicy->FirstChild("ObligationsSet")){
-		obligationsset = new ObligationsSet((TiXmlElement*)rule->FirstChild("ObligationsSet"));
+		obligationsset = new ObligationsSet((TiXmlElement*)dhpolicy->FirstChild("ObligationsSet"));
 	}
 	else
 		obligationsset = NULL;
