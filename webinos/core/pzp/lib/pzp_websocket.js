@@ -20,6 +20,8 @@ var http = require("http"),
   path = require("path"),
   util = require("util"),
   fs = require("fs"),
+  child_process= require("child_process").exec,
+  os = require("os"),
   https = require('https'),
   WebSocketServer = require("websocket").server,
   session = require("./session");
@@ -66,6 +68,22 @@ var PzpWSS = function(_parent) {
     return Object.keys(parent.pzp_state.connectedPzh);
   }
 
+  function getVersion(callback) {
+    var version;
+    if (os.platform().toLowerCase() !== "android") {
+      child_process("git describe", function(error, stderr, stdout){
+        if(!error){
+          callback(stderr);
+        } else {
+          callback("v0.7");
+        }
+      })
+    } else {
+      callback("v0.7");
+    }
+
+  }
+
   function wsServerMsg(message) {
     for (var key in connectedWebApp) {
       if (connectedWebApp.hasOwnProperty(key) && connectedWebApp[key].status === "") {
@@ -103,6 +121,11 @@ var PzpWSS = function(_parent) {
       } else if (msg.payload.status === "getFriendlyName") {
         var msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
         self.sendConnectedApp(msg.from, msg1);
+      } else if (msg.payload.status === "webinosVersion") {
+        getVersion(function(value){
+          var msg2 = prepMsg(parent.pzp_state.sessionId, msg.from, "webinosVersion", value);
+          self.sendConnectedApp(msg.from, msg2);
+        });
       } else {
         autoEnrollment(msg, origin);
       }
