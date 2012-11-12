@@ -10,10 +10,8 @@
 <script type="text/javascript" src="js/hideshow.js"></script>
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="../webinos.js"></script>
- <script>
-
+<script type="text/javascript">
     $(document).ready(function() {
-
       function setPage(type, page){
         var port = window.location.port;
         if (typeof port === "undefined") {
@@ -25,7 +23,7 @@
             '</h3></header><div class="module_content">'+ reply + '</div></article><div class="spacer"></div>');
           //$('.column').equalHeight(); // Fix height
         }, "html");
-      };
+      }
       function logMessage(msg) {
         if (msg) {
           $('#message').append('<li>' + msg + '</li>');
@@ -54,7 +52,7 @@
           var style = "connected";
           text+= "<li><a class='"+ style +"'>"+connectedPzp[i] + "</a></li>";
         }
-        text+= "<li><a class='"+ style +"'>"+data.from + " (Your PZP) </a></li>";
+        text+= "<li><a class='"+ style +"'>"+data.from + " (This DEVICE) </a></li>";
         $("#enumConnectedPzp").html(text);
         $("#userId").html(data.from);
           //$('.column').equalHeight(); // Fix height
@@ -83,6 +81,9 @@
       webinos.session.addListener('info', printInfo);
 
 
+      $('#friendlyName').click(function() {
+         setPage("Add FriendlyName", "friendlyName.html");
+      });
       $("#testapi").click(function(){
         setPage("Test API Demo", "client42.html");
       });
@@ -168,8 +169,7 @@
             alert ("connection with a personal zone hub cancelled");
           }
         }
-      };
-
+      }
       webinos.session.addListener('authStatus', authStatus);
       function error(msg) {
         alert(msg.error);
@@ -177,7 +177,6 @@
       webinos.session.addListener('error', error);
       //$('.column').equalHeight(); // Fix height
     });
-
     </script>
 </head>
 <body>
@@ -199,7 +198,7 @@
   <aside id="sidebar" class="column">
     <h3>
     <ul class="toggle" style="display: block;">
-    <div id="enableLogin"></div>
+        <div id="enableLogin"> </div>
     </ul>
     </h3>
     <h3>Connected PZH</h3>
@@ -226,8 +225,12 @@
         <li> <a href="#disco_ft" id="disco_ft">  Discovery FT </a> </li>
         <li> <a href="#disco_ui" id="disco_ui">  Discovery UI </a> </li>
         <li> <a href="#contacts" id="contacts">  Contacts </a> </li>
-	<li> <a href="#vehicle" id="vehicle">  Vehicle API </a> </li>
+        <li> <a href="#vehicle" id="vehicle">  Vehicle API </a> </li>
       </ul>
+      <h3> PZP Details</h3>
+      <ul class="toggle" style="">
+          <li><a href="#friendlyName" id="friendlyName"> PZP Friendly Name </a></li>
+       </ul>
     <footer>
       <hr />
       <p><strong>Powered by <a href="http://www.webinos.org">webinos</a></strong></p>
