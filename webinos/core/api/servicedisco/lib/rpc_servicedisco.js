@@ -75,8 +75,8 @@
 
 			// add listener to pzp object, to be called when remote services
 			// are returned by the pzh
-			this.rpcHandler.parent.addRemoteServiceListener(function (payload) {
-				var callback = that.remoteServicesFoundCallbacks[payload.id];
+			this.rpcHandler.parent.webinos_manager.addRemoteServiceListener(function (payload) {
+ 				var callback = that.remoteServicesFoundCallbacks[payload.id];
 
 				if (!callback) {
 					logger.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
@@ -212,8 +212,7 @@
 				}
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var entityRefCount =  this.rpcHandler.parent.getConnectedPzh().length + this.rpcHandler.parent.getConnectedPzp().length;
-
+				var entityRefCount =  Object.keys(this.rpcHandler.parent.pzp_state.connectedPzp).length + Object.keys(this.rpcHandler.parent.pzp_state.connectedPzh).length;
 				// no connection to a PZH & other connected Peers, don't ask for remote services
 				if (!this.rpcHandler.parent || entityRefCount === 0) {
 					deliverResults(results);
@@ -247,8 +246,7 @@
 						}
 					}
 				})(results, entityRefCount);
-
-				this.rpcHandler.parent.sendMsg('findServices', {id: callbackId});
+				this.rpcHandler.parent.sendMessageAll('findServices', {id: callbackId});
 			}
 		};
 	};

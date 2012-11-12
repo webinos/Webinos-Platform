@@ -51,7 +51,7 @@ var Provider = function(_hostname, _friendlyName) {
 
   /**
    * Fetches the public IP address if hostname is not specified
-   * @param callback :
+   * @param callback - empty callback to get async behavior
    */
   function setHostName(callback) {
     if (hostname === "") {
@@ -59,14 +59,14 @@ var Provider = function(_hostname, _friendlyName) {
       socket.on('connect', function() {
         socket.end();
         hostname =  socket.address().address;
-        return callback();
+        callback();
       });
       socket.on('error', function() { // Assuming this will happen as internet is not reachable
         hostname =  "0.0.0.0";
-        return callback();
+         callback();
       });
     } else {
-      return callback();
+      callback();
     }
   }
 
@@ -80,7 +80,7 @@ var Provider = function(_hostname, _friendlyName) {
       key = config.trustedList.pzh[myKey];
       pzhs[key] = new pzh_session();
       email = key.split("_")[1].split("/")[0];
-      pzhs[key].addLoadPzh(email, key, "", function(status, value, pzhId) {
+      pzhs[key].addLoadPzh(email, key, null, function(status, value, pzhId) {
         if (status) {
           server.addContext(pzhId, value);
           logger.log("started zone hub " + pzhId);
@@ -306,10 +306,10 @@ var Provider = function(_hostname, _friendlyName) {
 };
 util.inherits(Provider, pzhWI);
 
-/*// This keeps pzh running but you cannot find where error occurred
+// This keeps pzh running but you cannot find where error occurred
 process.on("uncaughtException", function(err) {
   logger.error("uncaught exception " + err.message);
-});*/
+});
 
 
 module.exports = Provider;

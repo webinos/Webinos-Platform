@@ -151,16 +151,16 @@ var PZH_WebServer = function() {
         pzh_api.fetchLogs(instance, "info", result);
         break;
       case 'restartPzh':
-        parent.refreshCert(instance.getSessionId());
+        parent.refreshCert(instance.pzh_state.sessionId);
         break;
       case 'pzhPzh':
-        instance.addOtherZoneCert(query.payload.message, parent.fetchPzh, parent.refreshCert, result);
+        instance.pzh_pzh.addOtherZoneCert(query.payload.message, parent.fetchPzh, parent.refreshCert, result);
         break;
       case 'listPzp':
         pzh_api.listPzp(instance,result);  // USED BEFORE REVOKE..
         break;
       case 'revokePzp':
-        instance.revokeCert(query.payload.pzpid, parent.refreshCert, result);
+        instance.revoke.revokeCert(query.payload.pzpid, parent.refreshCert, result);
         break;
       case 'addPzp':
         qrcode.addPzpQRAgain(instance, result);
