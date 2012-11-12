@@ -86,6 +86,10 @@
       "name": "Messaging Manager",
       "location": "manager/messaging/"
     },
+    "synchronisation_manager": {
+       "name": "Synchronisation Manager",
+       "location": "manager/synchronisation_manager/"
+    },
     "policy_manager": {
       "name": "Policy Manager",
       "location": "manager/policy_manager/"

@@ -1,0 +1,9 @@
+{ "name": "synchronisation_manager",
+  "version": "0.0.1",
+  "main": "./index.js",
+  "repositories": [
+    { "type": "git",
+      "url": "http://dev.webinos.org/git/wp4.git"
+    }
+  ]
+}
