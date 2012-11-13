@@ -79,7 +79,9 @@ var Provider = function(_hostname, _friendlyName) {
     for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
       key = config.trustedList.pzh[myKey];
       pzhs[key] = new pzh_session();
-      email = key.split("_")[1].split("/")[0];
+      var first = key.indexOf("_") +1;
+      var last  = key.length
+      email = key.slice(parseInt(first), parseInt(last));
       pzhs[key].addLoadPzh(email, key, null, function(status, value, pzhId) {
         if (status) {
           server.addContext(pzhId, value);
