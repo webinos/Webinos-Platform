@@ -322,7 +322,7 @@ Config.prototype.createDirectories = function (callback) {
         if (!fs.existsSync(self.metaData.webinosRoot))//If the folder doesn't exist
             fs.mkdirSync(self.metaData.webinosRoot, permission);
         // webinos root was created, we need the following 1st level dirs
-        var list = [ path.join(wPath.webinosPath(), "logs"), path.join(self.metaData.webinosRoot, "wrt"), path.join(self.metaData.webinosRoot, "policies"),
+        var list = [ path.join(wPath.webinosPath(), "logs"), path.join(self.metaData.webinosRoot, "wrt"), path.join(wPath.webinosPath(), "wrt"), path.join(self.metaData.webinosRoot, "policies"),
             path.join(self.metaData.webinosRoot, "certificates"), path.join(self.metaData.webinosRoot, "userData"), path.join(self.metaData.webinosRoot, "keys")];
         list.forEach(function (name) {
             if (!fs.existsSync(name))
