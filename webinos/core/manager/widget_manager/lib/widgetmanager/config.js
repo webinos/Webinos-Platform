@@ -55,16 +55,15 @@ this.Config = (function() {
   
   /* FIXME: remove nasty hack */
   var wrtHome;
-	  if(process.platform == 'android')
-		  wrtHome = '/data/data/org.webinos.app/wrt';
-  else if (process.platform == 'win32')
-	  wrtHome = process.env['AppData'] + '/webinos/wrt/widgetStore';
-  else if (process.platform == 'linux')
-	wrtHome = process.env['HOME'] + '/.webinos/wrt/widgetStore';
-	  else
-  {
+	if(process.platform == 'android')
+	  wrtHome = '/data/data/org.webinos.app/wrt';
+  else if (process.platform == 'win32' || process.platform == 'linux') {
+		var path = require('path');
+		var pzp_sessionHandling = require(path.resolve('./webinos/core/pzp/lib/pzp_sessionHandling.js'));
+		wrtHome = path.join(pzp_sessionHandling.getWebinosPath(),'wrt/widgetStore');
+	} else {
     wrtHome = process.env.WRT_HOME;
-    if(!wrtHome)
+    if (!wrtHome)
 		  throw new Error('widgetmanager.Config: FATAL ERROR: WRT_HOME not configured');
   }
 
