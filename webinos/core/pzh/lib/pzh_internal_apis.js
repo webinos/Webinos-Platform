@@ -34,13 +34,17 @@ function getConnectedPzp(_instance){
 function getConnectedPzh(_instance){
   var pzhs = [], myKey;
   for (myKey=0; myKey < _instance.config.trustedList.pzh.length; myKey = myKey + 1){
+    var id =  _instance.config.trustedList.pzh[myKey]
+    var first = id.indexOf("_") +1;
+    var last  = id.length
+    id = id.slice(parseInt(first), parseInt(last));
     if (_instance.pzh_state.connectedPzh.hasOwnProperty( _instance.config.trustedList.pzh[myKey])){
-      pzhs.push({id: _instance.config.trustedList.pzh[myKey].split("_")[1], url: _instance.config.trustedList.pzh[myKey], isConnected: true});
+      pzhs.push({id: id, url: _instance.config.trustedList.pzh[myKey], isConnected: true});
     } else {
-      pzhs.push({id: _instance.config.trustedList.pzh[myKey].split("_")[1], url: _instance.config.trustedList.pzh[myKey], isConnected: false});
+      pzhs.push({id: id, url: _instance.config.trustedList.pzh[myKey], isConnected: false});
     }
   }
-  pzhs.push({id: _instance.config.metaData.serverName.split("_")[1] + " (Your Pzh)", url: _instance.config.metaData.serverName, isConnected: true});
+  pzhs.push({id: _instance.config.userData.email + " (Your Pzh)", url: _instance.config.metaData.serverName, isConnected: true});
   return pzhs;
 }
 
