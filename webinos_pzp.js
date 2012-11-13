@@ -164,6 +164,7 @@ function initializeWidgetServer() {
         var wrtConfig = {};
         wrtConfig.runtimeWebServerPort = wrtPort;
         wrtConfig.pzpWebSocketPort = pzp.session.getWebinosPorts().pzp_webSocket;
+        wrtConfig.pzpPath = pzp.session.getWebinosPath();
         fs.writeFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
           if (err) {
             console.log('error saving runtime configuration file: ' + err);
