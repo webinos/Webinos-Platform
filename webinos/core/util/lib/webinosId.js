@@ -17,7 +17,20 @@
  * Copyright 2011 Ziran Sun, Samsung Electronics (UK) Ltd
  *******************************************************************************/
 var os = require('os');
-exports.fetchDeviceName = function(type, name, callback) {
+/**
+ * Determines the device name.
+ *
+ * @param type the type of PZ entity, string.
+ * @param config object with optional forcedDeviceName property, overrides device name.
+ * @param callback function which is called with device name as param.
+ */
+exports.fetchDeviceName = function(type, config, callback) {
+  // use user defined device name if given
+  if (config && config.forcedDeviceName) {
+    callback(config.forcedDeviceName + "_" + type);
+    return;
+  }
+
   //Get Android devices identity
   if(type === "Pzp" && (os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android")){
     var bridge = require("bridge");
@@ -33,19 +46,19 @@ exports.fetchDeviceName = function(type, name, callback) {
     };
 
     function onsuccess(prop_value, prop){
-      callback (prop_value + "_"+ type); //devicename_type
+      callback(prop_value + "_"+ type);
     }
 
     function onerror(){
       log.error("android get device name returns error");
-      callback ("android"+ "_"+ type);
+      callback("android"+ "_"+ type);
     }
 
     var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
     devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-  } else  if ((type === "Pzp" || type === "PzhP")){
-    callback (os.hostname() + "_"+ type); //devicename_type
-  } else {
-    callback( name);
+  } else if ((type === "Pzp" || type === "PzhP")){
+    callback(os.hostname() + "_"+ type);
+  } else if (type === "Pzh"){
+    callback(config.friendlyName);
   }
 };
