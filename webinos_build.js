@@ -23,6 +23,7 @@ var fileList =
     " --js ./webinos/core/wrt/lib/webinos.js" +
     " --js ./webinos/core/api/file/lib/virtual-path.js" +
     " --js ./webinos/core/wrt/lib/webinos.file.js" +
+    " --js ./webinos/core/wrt/lib/webinos.webnotification.js" +
     " --js ./webinos/core/wrt/lib/webinos.tv.js" +
     " --js ./webinos/core/wrt/lib/webinos.oauth.js" +
     " --js ./webinos/core/wrt/lib/webinos.get42.js" +
