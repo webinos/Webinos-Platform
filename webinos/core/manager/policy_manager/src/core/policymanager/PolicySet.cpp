@@ -33,12 +33,6 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 		}
 	}
 
-	//init datahandlingpolicy
-	for(TiXmlNode * child = set->FirstChild("DataHandlingPolicy"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpolicy.push_back(new DataHandlingPolicy(child));
-	}
-
 	//init datahandlingpreference
 	for(TiXmlNode * child = set->FirstChild("DataHandlingPreference"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {

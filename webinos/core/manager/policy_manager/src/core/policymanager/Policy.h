@@ -32,7 +32,6 @@ private:
 	string 				ruleCombiningAlgorithm;
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
-	vector<DataHandlingPolicy*>		datahandlingpolicy;
 	vector<DataHandlingPreferences*>	datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalActions;
 	

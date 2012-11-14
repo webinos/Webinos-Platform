@@ -29,7 +29,6 @@ class Rule
 private:
 	Effect 		effect;
 	Condition* 	condition;
-	vector<DataHandlingPolicy*>		datahandlingpolicy;
 	vector<DataHandlingPreferences*>	datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalActions;
 	
