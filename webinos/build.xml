@@ -34,6 +34,7 @@
             <arg line="--js ${basedir}/core/wrt/lib/webinos.file.js"/>
             <arg line="--js ${basedir}/core/wrt/lib/webinos.webnotification.js"/>
             <arg line="--js ${basedir}/core/wrt/lib/webinos.tv.js"/>
+            <arg line="--js ${basedir}/core/wrt/lib/webinos.actuator.js"/>
             <arg line="--js ${basedir}/core/wrt/lib/webinos.oauth.js"/>
             <arg line="--js ${basedir}/core/wrt/lib/webinos.get42.js"/>
             <arg line="--js ${basedir}/core/wrt/lib/webinos.geolocation.js"/>

@@ -4,6 +4,10 @@
       "name": "Applauncher module",
       "location": "api/applauncher/"
     },
+    "actuator": {
+      "name": "Actuator API",
+      "location": "api/actuator/"
+    },
     "webnotification": {
       "name": "WebNotification",
       "location": "api/webnotification/"
