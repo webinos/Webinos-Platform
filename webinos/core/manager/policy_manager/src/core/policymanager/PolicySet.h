@@ -40,7 +40,7 @@ private:
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
 	vector<DataHandlingPreferences*>	datahandlingpreferences;
-	vector<ProvisionalActions*>		provisionalActions;
+	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);
 	Effect evaluatePolicies(Request*);

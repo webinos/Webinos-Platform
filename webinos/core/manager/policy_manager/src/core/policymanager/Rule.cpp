@@ -28,14 +28,14 @@ Rule::Rule(TiXmlElement* rule){
 	else
 		condition = NULL;
 		
-	//init datahandlingpreference
-	for(TiXmlNode * child = set->FirstChild("DataHandlingPreference"); child;
+	//init datahandlingpreferences
+	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreference.push_back(new DataHandlingPreference(child));
+		datahandlingpreferences.push_back(new DataHandlingPreferences(child));
 	}
 
 	//init ProvisionalActions
-	for(TiXmlNode * child = set->FirstChild("ProvisionalActions"); child;
+	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("ProvisionalActions"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}

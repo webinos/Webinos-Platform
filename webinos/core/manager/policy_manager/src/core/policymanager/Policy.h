@@ -35,7 +35,7 @@ private:
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
 	vector<DataHandlingPreferences*>	datahandlingpreferences;
-	vector<ProvisionalActions*>		provisionalActions;
+	vector<ProvisionalActions*>		provisionalactions;
 	
 	
 public:

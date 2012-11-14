@@ -32,7 +32,7 @@ private:
 	Effect 		effect;
 	Condition* 	condition;
 	vector<DataHandlingPreferences*>	datahandlingpreferences;
-	vector<ProvisionalActions*>		provisionalActions;
+	vector<ProvisionalActions*>		provisionalactions;
 	
 public:
 	Rule(TiXmlElement*);
