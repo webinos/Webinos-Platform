@@ -78,6 +78,7 @@ var fileParams = {},
   pzpModules = [
   {name: "get42", params: {num: "21"}},
   {name: "zap-and-shake", params: {}},
+  {name: "actuator", params: {}},
   {name: "webnotification", params: {}},
   {name: "file", params: fileParams},
   {name: "geolocation", params: {connector : "geoip"}},

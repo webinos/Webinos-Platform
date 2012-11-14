@@ -18,6 +18,7 @@
     <module>authentication</module>
     <module>context</module>
     <module>devicestatus</module>
+    <module>actuator</module>
     <module>events</module>
     <module>applauncher</module>
     <module>webnotification</module>
