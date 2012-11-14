@@ -29,6 +29,7 @@
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
+  , "grunt-contrib-clean" : ">= 0.3.x"
   }
 , "engines" :
   { "node" : ">= 0.6.0"
@@ -40,6 +41,6 @@
   , "webinos_pzp": "webinos_pzp.js"
   }
 , "scripts":
-  { "install": "node-gyp configure build && node webinos_build.js"
+  { "install": "node-gyp configure build && cd webinos && grunt && cd .."
   }
 }
