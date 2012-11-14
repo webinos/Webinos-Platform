@@ -27,6 +27,7 @@ var fileList =
     " --js ./webinos/core/wrt/lib/webinos.tv.js" +
     " --js ./webinos/core/wrt/lib/webinos.oauth.js" +
     " --js ./webinos/core/wrt/lib/webinos.get42.js" +
+    " --js ./webinos/core/wrt/lib/webinos.actuator.js" +
     " --js ./webinos/core/wrt/lib/webinos.geolocation.js" +
     " --js ./webinos/core/wrt/lib/webinos.sensors.js" +
     " --js ./webinos/core/wrt/lib/webinos.events.js" +
