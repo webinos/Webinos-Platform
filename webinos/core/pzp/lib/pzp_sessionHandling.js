@@ -228,7 +228,7 @@ var Pzp = function () {
   this.initializePzp = function(inputConfig, modules, callback) {
     try {
     self.config = new Session.configuration();// sets configuration
-    self.config.setConfiguration(inputConfig.friendlyName, "Pzp", inputConfig.hostname, function (status) {
+    self.config.setConfiguration("Pzp", inputConfig, function (status) {
       if(status){
         checkMode();   //virgin or hub mode
         self.setSessionId();//sets pzp sessionId
