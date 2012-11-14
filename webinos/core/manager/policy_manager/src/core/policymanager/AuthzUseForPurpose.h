@@ -21,6 +21,8 @@
 #ifndef AUTHZUSEFORPURPOSE_H_
 #define AUTHZUSEFORPURPOSE_H_
 
+#include "IPolicyBase.h"
+
 class AuthzUseForPurpose{
 	
 public:

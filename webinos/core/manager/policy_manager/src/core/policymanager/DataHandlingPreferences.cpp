@@ -44,8 +44,8 @@ DataHandlingPreferences::~DataHandlingPreferences(){
 }
 
 string DataHandlingPreferences::GetId(){
-	return PolicyId
+	return PolicyId;
 }
 
-void DataHandlingPreferences::evaluate(){
+void DataHandlingPreferences::evaluate(Request *){
 }

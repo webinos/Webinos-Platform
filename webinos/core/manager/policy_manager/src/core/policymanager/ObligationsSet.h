@@ -22,6 +22,7 @@
 #define OBLIGATIONSSET_H_
 
 #include "Obligation.h"
+#include "IPolicyBase.h"
 
 class ObligationsSet{
 	

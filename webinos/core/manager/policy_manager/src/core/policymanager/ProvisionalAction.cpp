@@ -25,7 +25,7 @@ ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 	// AttributeValue Tags
 	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
 	value1 = child->GetText();
-	child = (TiXmlElement*)child->NextSibling("AttributeValue")) {
+	child = (TiXmlElement*)child->NextSibling("AttributeValue");
 	string value2 = child->GetText();
 
 	// DeveloperProvidedDescription Tags
@@ -44,8 +44,7 @@ string ProvisionalAction::evaluate(Request * req){
 
 	map<string, vector<string>* > resource_attrs = req->getResourceAttrs();
 
-	for(map<string, vector<match_info_str*> >::iterator it = resource_attrs.begin(); it!= resource_attrs.end(); it++)
-	{
+	for(map<string, vector<string>* >::iterator it = resource_attrs.begin(); it!= resource_attrs.end(); it++){
 		if (value1.compare(it->first.data()) == 0)
 			return value2;
 		if (value2.compare(it->first.data()) == 0)

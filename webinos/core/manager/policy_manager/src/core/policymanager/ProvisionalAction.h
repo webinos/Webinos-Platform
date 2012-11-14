@@ -21,6 +21,9 @@
 #ifndef PROVISIONALACTION_H_
 #define PROVISIONALACTION_H_
 
+#include "Subject.h"
+#include "IPolicyBase.h"
+
 class ProvisionalAction{
 
 private:

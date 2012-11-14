@@ -25,7 +25,7 @@ AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 	// AuthzUseForPurpose Tags
 	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
 			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
-		rules.push_back(new AuthzUseForPurpose(child));
+		authzuseforpurpose.push_back(new AuthzUseForPurpose(child));
 	}
 }
 

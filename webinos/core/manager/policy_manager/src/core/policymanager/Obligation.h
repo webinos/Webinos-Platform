@@ -21,6 +21,8 @@
 #ifndef OBLIGATION_H_
 #define OBLIGATION_H_
 
+#include "IPolicyBase.h"
+
 class Obligation{
 	
 private:

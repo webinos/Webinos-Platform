@@ -22,6 +22,7 @@
 #define AUTHORIZATIONSSET_H_
 
 #include "AuthzUseForPurpose.h"
+#include "IPolicyBase.h"
 
 class AuthorizationsSet{
 	

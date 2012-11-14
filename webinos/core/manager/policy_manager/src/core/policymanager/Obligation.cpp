@@ -23,11 +23,11 @@
 Obligation::Obligation(TiXmlElement* obligation){
 
 	// TriggerSet Tag
-	if(obligation->FirstChild("TriggersSet")){
+	/*if(obligation->FirstChild("TriggersSet")){
 		triggersset = new TriggersSet((TiXmlElement*)obligation->FirstChild("TriggersSet"));
 	}
 	else
-		triggersset = NULL;
+		triggersset = NULL;*/
 
 	// TODO Action Tag
 

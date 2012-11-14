@@ -25,7 +25,7 @@ ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 	// Obligation Tags
 	for(TiXmlElement * child = (TiXmlElement*)obligationsset->FirstChild("Obligation"); child;
 			child = (TiXmlElement*)child->NextSibling("Obligation")) {
-		rules.push_back(new Obligation(child));
+		obligation.push_back(new Obligation(child));
 	}
 }
 

@@ -23,6 +23,7 @@
 
 #include "AuthorizationsSet.h"
 #include "ObligationsSet.h"
+#include "Request.h"
 
 class DataHandlingPreferences{
 	
