@@ -4,6 +4,10 @@
       "name": "Applauncher module",
       "location": "api/applauncher/"
     },
+    "webnotification": {
+      "name": "WebNotification",
+      "location": "api/webnotification/"
+     },
     "authentication": {
       "name": "Authentication",
       "location": "api/authentication/"
