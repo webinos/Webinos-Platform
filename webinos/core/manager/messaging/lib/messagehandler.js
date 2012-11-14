@@ -435,7 +435,7 @@
 		exports.MessageHandler = MessageHandler;
 	} else {
 		// export for web browser
-		this.MessageHandler = MessageHandler;
+		window.MessageHandler = MessageHandler;
 	}
 
 }());
