@@ -22,10 +22,16 @@
 #define PROVISIONALACTION_H_
 
 class ProvisionalAction{
+
+private:
+	string	value1;
+	string	value2;
 	
 public:
 	ProvisionalAction(TiXmlElement*);
 	virtual ~ProvisionalAction();
+
+	string evaluate(Request *);
 };
 
 #endif /* PROVISIONALACTION_H_ */

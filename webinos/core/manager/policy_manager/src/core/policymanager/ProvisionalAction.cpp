@@ -23,11 +23,10 @@
 ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 
 	// AttributeValue Tags
-	for(TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue"); child;
-			child = (TiXmlElement*)child->NextSibling("AttributeValue")) {
-		// TODO use attribute values
-		//string value = child->GetText();
-	}
+	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
+	value1 = child->GetText();
+	child = (TiXmlElement*)child->NextSibling("AttributeValue")) {
+	string value2 = child->GetText();
 
 	// DeveloperProvidedDescription Tags
 	for(TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("DeveloperProvidedDescription"); child;
@@ -41,3 +40,16 @@ ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 ProvisionalAction::~ProvisionalAction(){
 }
 
+string ProvisionalAction::evaluate(Request * req){
+
+	map<string, vector<string>* > resource_attrs = req->getResourceAttrs();
+
+	for(map<string, vector<match_info_str*> >::iterator it = resource_attrs.begin(); it!= resource_attrs.end(); it++)
+	{
+		if (value1.compare(it->first.data()) == 0)
+			return value2;
+		if (value2.compare(it->first.data()) == 0)
+			return value1;
+		return NULL;
+	}
+}

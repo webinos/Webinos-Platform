@@ -25,7 +25,7 @@ ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 	// ProvisionalAction Tags
 	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild("ProvisionalAction"); child;
 			child = (TiXmlElement*)child->NextSibling("ProvisionalAction")) {
-		rules.push_back(new ProvisionalAction(child));
+		provisionalaction.push_back(new ProvisionalAction(child));
 	}
 }
 
@@ -33,4 +33,14 @@ ProvisionalActions::~ProvisionalActions(){
 }
 
 string ProvisionalActions::evaluate(Request * req){
+
+	string preferenceid;
+
+	// search for a provisional action with a resource matching the request
+	for(unsigned int i=0; i<provisionalaction.size(); i++){
+		preferenceid = provisionalaction[i]->evaluate(req);
+		if (preferenceid.compare(NULL) != 0)
+			return preferenceid;
+	}
+	return NULL;
 }

@@ -73,10 +73,12 @@ Effect Rule::evaluate(Request* req){
 	
 	// search for a dh preference with an id matching the string returned by
 	// the previous provisional action
-	for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-		if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-			datahandlingpreferences[i]->evaluate(req);
-			break;
+	if (preferenceid.compare(NULL)!= 0){
+		for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
+			if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
+				datahandlingpreferences[i]->evaluate(req);
+				break;
+			}
 		}
 	}
 	
