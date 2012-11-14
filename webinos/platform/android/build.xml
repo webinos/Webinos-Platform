@@ -28,6 +28,7 @@
 				node_modules/inherits/,
 				node_modules/mkdirp/,
 				node_modules/node-uuid/,
+				webinos/web_root/webinos.js,
 				webinos/" 
 			excludes="
 				webinos/platform/,
@@ -40,7 +41,7 @@
 				webinos/web_root/*.html,
 				webinos/web_root/*.xml,
 				webinos/web_root/*.json,
-				webinos/web_root/*.js,
+				
 				
 				webinos/core/api/**/test/,
 				webinos/core/**/test/,
