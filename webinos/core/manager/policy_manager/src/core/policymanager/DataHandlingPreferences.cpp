@@ -23,7 +23,6 @@
 DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences){
 
 	// PolicyId attribute
-	//PolicyId = (dhpreferences->Attribute("PolicyId")!=NULL) ? dhpreferences->Attribute("PolicyId") : NULL;
 	PolicyId = dhpreferences->Attribute("PolicyId");
 
 	// AuthorizationsSet Tag
@@ -42,4 +41,11 @@ DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences){
 }
 
 DataHandlingPreferences::~DataHandlingPreferences(){
+}
+
+string DataHandlingPreferences::GetId(){
+	return PolicyId
+}
+
+void DataHandlingPreferences::evaluate(){
 }

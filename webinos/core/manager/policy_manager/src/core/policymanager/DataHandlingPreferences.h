@@ -27,13 +27,16 @@
 class DataHandlingPreferences{
 	
 private:
-	string			PoliciId;
+	string			PolicyId;
 	AuthorizationsSet*	authorizationsset;
 	ObligationsSet*		obligationsset;
 	
 public:
 	DataHandlingPreferences(TiXmlElement*);
 	virtual ~DataHandlingPreferences();
+
+	string GetId();
+	void evaluate(Request *);
 };
 
 #endif /* DHPREFERENCES_H_ */

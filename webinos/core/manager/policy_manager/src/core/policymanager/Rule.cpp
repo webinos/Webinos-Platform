@@ -63,6 +63,22 @@ Effect Rule::string2effect(const string & effect_str){
 }
 
 Effect Rule::evaluate(Request* req){
+
+	string preferenceid;
+
+	// search for a provisional action with a resource matching the request
+	for(unsigned int i=0; i<provisionalactions.size(); i++){
+		preferenceid = provisionalactions[i]->evaluate(req);
+	}
+	
+	// search for a dh preference with an id matching the string returned by
+	// the previous provisional action
+	for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
+		if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
+			datahandlingpreferences[i]->evaluate(req);
+			break;
+		}
+	}
 	
 	if(condition){
 		ConditionResponse cr = condition->evaluate(req);

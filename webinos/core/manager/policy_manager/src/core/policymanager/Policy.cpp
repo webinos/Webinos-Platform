@@ -80,6 +80,22 @@ bool Policy::matchSubject(Request* req){
 
 //virtual
 Effect Policy::evaluate(Request* req){
+
+	string preferenceid;
+
+	// search for a provisional action with a resource matching the request
+	for(unsigned int i=0; i<provisionalactions.size(); i++){
+		preferenceid = provisionalactions[i]->evaluate(req);
+	}
+	
+	// search for a dh preference with an id matching the string returned by
+	// the previous provisional action
+	for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
+		if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
+			datahandlingpreferences[i]->evaluate(req);
+			break;
+		}
+	}
 /*	
 	if(req->getResourceAttrs().find("api-feature") != req->getResourceAttrs().end())
 		LOGD("[Policy::evaluate] api-feature size : %d",req->getResourceAttrs()["api-feature"]->size());

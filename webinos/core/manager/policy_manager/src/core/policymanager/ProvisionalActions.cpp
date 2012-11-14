@@ -32,3 +32,5 @@ ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 ProvisionalActions::~ProvisionalActions(){
 }
 
+string ProvisionalActions::evaluate(Request * req){
+}

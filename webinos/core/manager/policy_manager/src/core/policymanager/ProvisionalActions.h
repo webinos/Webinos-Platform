@@ -31,6 +31,8 @@ private:
 public:
 	ProvisionalActions(TiXmlElement*);
 	virtual ~ProvisionalActions();
+
+	string evaluate(Request *);
 };
 
 #endif /* PROVISIONALACTIONS_H_ */
