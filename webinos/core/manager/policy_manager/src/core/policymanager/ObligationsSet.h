@@ -21,6 +21,8 @@
 #ifndef OBLIGATIONSSET_H_
 #define OBLIGATIONSSET_H_
 
+#include "Obligation.h"
+
 class ObligationsSet{
 	
 private:

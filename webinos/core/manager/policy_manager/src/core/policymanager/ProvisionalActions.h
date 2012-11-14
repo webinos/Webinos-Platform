@@ -21,6 +21,8 @@
 #ifndef PROVISIONALACTIONS_H_
 #define PROVISIONALACTIONS_H_
 
+#include "ProvisionalAction.h"
+
 class ProvisionalActions{
 	
 private:

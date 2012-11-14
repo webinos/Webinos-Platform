@@ -22,6 +22,8 @@
 
 #include "Condition.h"
 #include "IPolicyBase.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
 
 class Rule
 	{

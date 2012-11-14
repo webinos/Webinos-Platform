@@ -24,7 +24,7 @@
 class Obligation{
 	
 private:
-	TriggersSet*	triggersset;
+	//TriggersSet*	triggersset;
 	//Action*		action;
 
 public:

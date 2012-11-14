@@ -21,6 +21,8 @@
 #ifndef AUTHORIZATIONSSET_H_
 #define AUTHORIZATIONSSET_H_
 
+#include "AuthzUseForPurpose.h"
+
 class AuthorizationsSet{
 	
 private:

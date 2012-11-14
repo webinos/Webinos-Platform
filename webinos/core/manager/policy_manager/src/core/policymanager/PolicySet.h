@@ -23,6 +23,8 @@
 #include "../../../contrib/xmltools/tinyxml.h"
 #include "Policy.h"
 #include "IPolicyBase.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
 
 #include <vector>
 using namespace std;

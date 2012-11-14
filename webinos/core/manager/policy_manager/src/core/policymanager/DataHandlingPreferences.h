@@ -21,6 +21,9 @@
 #ifndef DHPREFERENCES_H_
 #define DHPREFERENCES_H_
 
+#include "AuthorizationsSet.h"
+#include "ObligationsSet.h"
+
 class DataHandlingPreferences{
 	
 private:

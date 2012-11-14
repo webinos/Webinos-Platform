@@ -24,6 +24,8 @@
 #include "Rule.h"
 #include "Subject.h"
 #include "../../debug.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
 
 class Policy : public IPolicyBase
 	{
