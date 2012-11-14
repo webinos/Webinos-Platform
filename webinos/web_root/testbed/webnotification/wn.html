@@ -1,0 +1,49 @@
+<html>
+<head>
+	<title>webinos events</title>
+	<script type="text/javascript" src="../../webinos.js"></script>
+	<script type="text/javascript">
+
+	function logObj(obj, name){
+		for (var myKey in obj){
+			console.log(name + "["+myKey +"] = "+obj[myKey]);
+			if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + "." + myKey);
+		}
+	}
+	
+	var webn;
+	
+	function sendNoti(){
+		webinos.discovery.findServices(new ServiceType('http://webinos.org/api/webnotification'), 
+                {onFound: function (service) {
+                	 webn = service;
+	             	 service.bindService( 
+                             {onBind: function (service) {
+								new service.WebNotification("Example Title", {body: "This is an example body.", iconUrl: "webnotification/purple-web.png"});
+     							service.onClick = function (){document.getElementById("out").innerHTML += "onClick<br>"};
+     							service.onClose = function (){document.getElementById("out").innerHTML += "onClose<br>"};
+     							service.onShow = function (){document.getElementById("out").innerHTML += "onShow<br>"};
+     							service.onError = function (err){document.getElementById("out").innerHTML += "onError: " + err + " @ service " + service.serviceAddress + "<br>"};         
+                             }
+                	 	}
+                	 );
+                }
+			}
+		);
+	}
+	
+	
+          
+</script>
+     
+</head>
+<body>
+	Just press notify. When pressing each notification service available is searched using findService and executed. Since for Linux and Windows 
+	native code is needed it may be the case that notify not yet works on your device. For Android it should be fine since the native notification
+	service is used.
+	<br>
+	<br>
+	<input class="button" value="Notify" type="button" onclick='sendNoti()'>
+	<div id="out"></div>
+</body>
+</html>
