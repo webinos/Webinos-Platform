@@ -20,7 +20,6 @@
 			"core/policymanager/Rule.cpp",
 			"core/policymanager/Subject.cpp",
 			"core/policymanager/AuthorizationsSet.cpp",
-			"core/policymanager/AuthzUseForPurpose.cpp",
 			"core/policymanager/DataHandlingPreferences.cpp",
 			"core/policymanager/Obligation.cpp",
 			"core/policymanager/ObligationsSet.cpp",
