@@ -15,7 +15,20 @@
 * 
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
+
+var sensorEventManager = require('./sensor_event_manager.js');
+
 (function() {
+
+var DEF_MAXIMUM_RANGE = 0;
+var DEF_MIN_DELAY = 0;
+var DEF_POWER = 0;
+var DEF_RESOLUTION = 0;
+var DEF_VENDOR = 0;
+var DEF_VERSION = 0;
+var DEF_TIMEOUT = 0;
+var DEF_RATE = 1000;
+var DEF_EVENT_FIRE_MODE = "valuechange";
 
 /**
  * Webinos Sensor service constructor (server side).
@@ -23,56 +36,99 @@
  * @alias SensorModule
  * @param rpcHandler A handler for functions that use RPC to deliver their result.  
  */
-var SensorModule = function(rpcHandler) {
+var SensorModule = function(rpcHandler,params) {
+        sensorEventManager.setRpcHandler(rpcHandler);
+        
 	// inherit from RPCWebinosService
+        var eventFireMode;
 	this.base = RPCWebinosService;
 	this.base({
 		api:'http://webinos.org/api/sensors.temperature',
 		displayName:'Sensor',
 		description:'A Webinos temperature sensor.'
 	});
+        
+        this.maximumRange = DEF_MAXIMUM_RANGE;
+        this.minDelay = DEF_MIN_DELAY;
+        this.power = DEF_POWER;
+        this.resolution = DEF_RESOLUTION;
+        this.vendor = DEF_VENDOR;
+        this.version = DEF_VERSION;
+    
+        /*
+        ** PendingSensorConfigOp configureSensor(ConfigureSensorOptions options, VoidFunction successCB, SensorErrorCB errorCB)
+        */
+        this.configureSensor = function(options, successCB, errorCB){
+//            event.rate = (typeof(options.rate) != 'undefined') ? options.rate : DEF_RATE;
+//            event.timeout = (typeof(options.timeout) != 'undefined') ? options.timeout : DEF_TIMEOUT;
+//            event.eventFireMode = (typeof(options.eventFireMode) != 'undefined') ? options.eventFireMode : DEF_EVENT_FIRE_MODE;
+//            event.position = (typeof(options.position) != 'undefined') ? options.position : null;
+//            event.config = (typeof(options.config) != 'undefined') ? options.config : null;
+//            event.sensorType = "http://webinos.org/api/sensors.temperature";
+
+            var rate = (typeof(options.rate) != 'undefined') ? options.rate : DEF_RATE;
+            var timeout = (typeof(options.timeout) != 'undefined') ? options.timeout : DEF_TIMEOUT;
+            
+//            eventFireMode = (typeof(options.eventFireMode) != 'undefined') ? options.eventFireMode : DEF_EVENT_FIRE_MODE;
+            if(options.eventFireMode == "fixedinterval")
+                this.eventFireMode = "fixedinterval";
+            else
+                this.eventFireMode = "valuechange"; // is the default value
+                
+            var type = "sensor";
+            var sensorType = "http://webinos.org/api/sensors.temperature";
+            var sensorId = 1;
+            
+//            event.eventFireMode = "fixedinterval"; //for test only
+//            eventFireMode = "valuechanges"; //for test only
+            console.log("[GLT] firemode : " + this.eventFireMode);
+//            event.initSensorEvent(type, -1, -1, sensorType, sensorId, -1, rate, eventFireMode, sensorValues, -1);
+//            if(event.eventFireMode == "fixedinterval"){
+            if(this.eventFireMode == "fixedinterval"){
+                console.log("[GLT] Reading from sensor every " + this.rate + " seconds");
+                setInterval(function(){
+//                    console.log("Reading temperature : "+event.sensorValues[0]);
+//                    event.sensorValues[0] = 30; //TODO get sensor value
+//                    sensorEventManager.handlePeriodicEvent(event);
+                    sensorEventManager.handlePeriodicEvent();
+//                }, event.rate);
+                }, rate);
+            }
+            else{
+                console.log("[GLT] Reading from sensor when value changes");
+            }
+        
+            successCB();
+            
+//            void SensorErrorCB(DOMError error);
+//            error
+//            Optional: No.
+//            Nullable: No
+//            Type: DOMError
+//            Description: DOMError object detailing what went wrong in an unsuccessful configureSensor() asynchronous operation. The following error names cold be issued:
+//            - "SyntaxError": Input parameters did not match the expected pattern.
+//            - "NotSupportedError": Sensor configuration not supported.
+//            - "InvalidModificationError": Sensor can not be configured in this way.
+//            - "AbortError": Operation was aborted by the user.
+//            - "TimeoutError": The operation timed out.
+        };
 	
 	this.addEventListener = function (eventType, successHandler, errorHandler, objectRef){
-		console.log("eventType " + eventType);	
-		switch(eventType){
-		case "temperature":
-			simulatateTemp(objectRef);		
-			break;
-		default:
-			console.log('Requested EventType is ' + eventType + " but i am temprature");
-
-		}	
+            console.log("[GLT] addEventListener to "+eventType);
+            console.log("[GLT] eventFireMode : " + this.eventFireMode);
+            
+            if(eventType == "sensor"){
+                console.log("[GLT] Updated listeners");
+                if(this.eventFireMode == "valuechange")
+                    sensorEventManager.addValueChangesListener(eventType, successHandler, errorHandler, objectRef);
+                else if(this.eventFireMode == "fixedinterval")
+                    sensorEventManager.addFixedIntervalListener(eventType, successHandler, errorHandler, objectRef);
+            }
 	};
-
-	function simulatateTemp(objectRef) {
-		var tint = 2000;
-		var tempE = generateTempEvent();
-		
-		// first event
-		var rpc = rpcHandler.createRPC(objectRef, "onEvent", tempE);
-		rpcHandler.executeRPC(rpc);
-		
-		setInterval(function(){
-			tempE = generateTempEvent();
-			rpc = rpcHandler.createRPC(objectRef, "onEvent", tempE);
-			rpcHandler.executeRPC(rpc);
-		}, tint);        
-	}
 };
 
 SensorModule.prototype = new RPCWebinosService;
 
-/**
- * Configures a sensor.
- * @param params
- * @param successCB
- * @param errorCB
- */
-SensorModule.prototype.configureSensor = function (params, successCB, errorCB){
-	console.log("configuring temperature sensor");
-	
-	successCB();
-};
 
 /**
  * Get some initial static sensor data.
@@ -81,7 +137,8 @@ SensorModule.prototype.configureSensor = function (params, successCB, errorCB){
  * @param errorCB Issued if sensor configuration fails.
  */
 SensorModule.prototype.getStaticData = function (params, successCB, errorCB){
-	var tmp = {};
+	console.log("[GLT] getStaticData");
+        var tmp = {};
 	tmp.maximumRange = 100;
 	tmp.minDelay = 10;
 	tmp.power = 50;
@@ -89,31 +146,8 @@ SensorModule.prototype.getStaticData = function (params, successCB, errorCB){
 	tmp.vendor = "FhG";  
 	tmp.version = "0.1"; 
     successCB(tmp);
+    
 };
-
-function generateTempEvent(){
-    var temp = Math.floor(Math.random()*100);
-    return new TempEvent(temp);        
-}
-
-function TempEvent(value){
-	this.SENSOR_STATUS_ACCURACY_HIGH = 4;
-	this.SENSOR_STATUS_ACCURACY_MEDIUM = 3;
-	this.SENSOR_STATUS_ACCURACY_LOW = 2;
-	this.SENSOR_STATUS_UNRELIABLE = 1;
-	this.SENSOR_STATUS_UNAVAILABLE = 0;
-
-	this.sensorType = "temperature";
-    this.sensorId = "sensorId (could we use same id as the unique service id here?)";
-    this.accuracy = 4;
-    this.rate = 2;
-    this.interrupt = false;
-
-    this.sensorValues = new Array();
-    this.sensorValues[0] = value;
-    this.sensorValues[1] = value/100; //because max range is 100
-	
-}
 
 //export our object
 exports.Service = SensorModule;
