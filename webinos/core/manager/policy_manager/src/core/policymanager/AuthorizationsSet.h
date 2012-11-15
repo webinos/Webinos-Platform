@@ -21,17 +21,18 @@
 #ifndef AUTHORIZATIONSSET_H_
 #define AUTHORIZATIONSSET_H_
 
-#include "AuthzUseForPurpose.h"
 #include "IPolicyBase.h"
 
 class AuthorizationsSet{
 	
 private:
-	vector<AuthzUseForPurpose*>	authzuseforpurpose;
+	vector<string>	authzuseforpurpose;
 
 public:
 	AuthorizationsSet(TiXmlElement*);
 	virtual ~AuthorizationsSet();
+
+	bool evaluate(Request *);
 };
 
 #endif /* AUTHORIZATIONSSET_H_ */

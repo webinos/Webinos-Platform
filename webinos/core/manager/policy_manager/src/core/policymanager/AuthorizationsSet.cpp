@@ -22,13 +22,20 @@
 
 AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 
+	unsigned int i=0;
+
 	// AuthzUseForPurpose Tags
 	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
 			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
-		authzuseforpurpose.push_back(new AuthzUseForPurpose(child));
+		authzuseforpurpose[i] = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
 	}
 }
 
 AuthorizationsSet::~AuthorizationsSet(){
 }
 
+bool AuthorizationsSet::evaluate(Request * req){
+	for(unsigned int i=0; i<authzuseforpurpose.size(); i++){
+		// test authzuseforpurpose[i] and requested purpose
+	}
+}

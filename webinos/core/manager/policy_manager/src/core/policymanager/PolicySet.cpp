@@ -98,6 +98,7 @@ bool PolicySet::matchSubject(Request* req){
 Effect PolicySet::evaluatePolicies(Request * req){
 
 	string preferenceid;
+	bool dhpreference_evaluated = false;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
 			LOGD("policies[%d] = %s",i,policies[i]->description.data());
@@ -110,18 +111,21 @@ Effect PolicySet::evaluatePolicies(Request * req){
 	// search for a provisional action with a resource matching the request
 	for(unsigned int i=0; i<provisionalactions.size(); i++){
 		preferenceid = provisionalactions[i]->evaluate(req);
-	}
-	
-	// search for a dh preference with an id matching the string returned by
-	// the previous provisional action
-	if (preferenceid.compare(NULL) != 0){
-		for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-			if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-				datahandlingpreferences[i]->evaluate(req);
-				break;
+		// search for a dh preference with an id matching the string returned by
+		// the previous provisional action
+		if (preferenceid.compare(NULL) != 0){
+			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
+				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
+					datahandlingpreferences[i]->evaluate(req);
+					dhpreference_evaluated = true;
+					break;
+				}
 			}
+			if (dhpreference_evaluated == true)
+				break;
 		}
 	}
+	
 	
 	if(policyCombiningAlgorithm == deny_overrides_algorithm){
 		LOGD("[PolicySet] deny_overrides algorithm");
