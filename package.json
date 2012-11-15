@@ -28,6 +28,7 @@
   , "find-dependencies" : "~0.0.2"
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
+  , "express": "3.0.0rc4",
   , "connect" : "2.6.x"
   }
 , "engines" :
