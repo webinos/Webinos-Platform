@@ -1,0 +1,7 @@
+<widget xmlns="http://www.w3.org/ns/widgets"
+ id="test:40a">
+   <name>Test 40a</name>
+   <description>Tests whether the validator can locate all signature files in a widget package.
+To pass the validator must find "signature1.xml", "signature2.xml",
+"signature987654321.xml" and "author-signature.xml".</description>
+</widget>

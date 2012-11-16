@@ -1,0 +1,5 @@
+<widget xmlns="http://www.w3.org/ns/widgets"
+ id="test:changed_file">
+   <name>Test changed_file</name>
+   <description>this file has been changed after signing</description>
+</widget>

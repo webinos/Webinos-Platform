@@ -1,0 +1,4 @@
+<widget xmlns="http://www.w3.org/ns/widgets"
+ id="test:bad_signature">
+   <name>Test bad_signature</name>
+</widget>

@@ -1,0 +1,5 @@
+<widget xmlns="http://www.w3.org/ns/widgets"
+ id="test:16e">
+   <name>Test 16e</name>
+   <description>Testing assertion ta-16</description>
+</widget>
