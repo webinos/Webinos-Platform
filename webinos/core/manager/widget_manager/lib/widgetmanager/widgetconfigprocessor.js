@@ -193,6 +193,7 @@ this.WidgetConfigProcessor = (function () {
                 * widget package as an invalid widget package.
                 */
                 if (name != 'widget' || !isWidget) {
+                    processingResult.setError(new Artifact(WidgetConfig.STATUS_INVALID, Artifact.CODE_MALFORMED, "ta-ACCJfDGwDQ - root element not a widget element", null));
                     parser.emit('error', new Error('ta-ACCJfDGwDQ'));
                     return;
                 }
@@ -641,9 +642,8 @@ this.WidgetConfigProcessor = (function () {
                         Logger.logAction(Logger.LOG_MINOR, "ta-paIabGIIMC", "setting widgetStartFile and startFileContentType");
                         widgetConfig.startFile = { path: path, contentType: contentType };
                     } else {
-                        processingResult.setError(new Artifact(WidgetConfig.STATUS_CAPABILITY_ERROR, Artifact.CODE_INCOMPATIBLE_CONTENT, 'ta-paIabGIIMC', null));
+                        processingResult.setError(new Artifact(WidgetConfig.STATUS_CAPABILITY_ERROR, Artifact.CODE_INCOMPATIBLE_CONTENT, 'ta-paIabGIIMC - content type not supported', null));
                         parser.emit('error', new Error('ta-paIabGIIMC'));
-			
                         return;
                     }
                     /*
@@ -748,7 +748,7 @@ this.WidgetConfigProcessor = (function () {
                             processingResult.setError(new Artifact(
 									WidgetConfig.STATUS_CAPABILITY_ERROR,
 									Artifact.CODE_INCOMPATIBLE_FEATURE,
-									"ta-paWbGHyVrG, ta-vOBaOcWfll",
+									"ta-paWbGHyVrG, ta-vOBaOcWfll - feature invalid or not supported",
 									[feature]));
                             parser.emit('error', 'ta-paWbGHyVrG, ta-vOBaOcWfll');
                             return;

@@ -29,7 +29,7 @@ this.SignatureValidator = (function() {
 	function SignatureValidator(widgetValidator, signum, name) {
 		Validator.call(this);
 		this.widgetValidator = widgetValidator;
-		this.signum = signum;
+		this.signum = parseInt(signum);
 		this.name = name;
 
 	}
@@ -82,7 +82,7 @@ this.SignatureValidator = (function() {
 			 * that signature has a ds:Reference for the author signature.
 			 */
 			if(this.sigNum > 0 && 0 in this.widgetValidator.signatureNames)
-				expectedRefs = ['author.xml'].concat(expectedRefs);
+				expectedRefs = ['author-signature.xml'].concat(expectedRefs);
 			
 			var dereferencer = function(ref, hash) {
 				try {
