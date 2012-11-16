@@ -1,0 +1,6 @@
+<widget id="i18nltr31:" xmlns="http://www.w3.org/ns/widgets">
+    <feature name="feature:a9bb79c1">
+        <param name="The arrow should point right --&gt;" value="TEST" dir="ltr"/>
+    </feature>
+    <name>i18nltr31</name>
+</widget>

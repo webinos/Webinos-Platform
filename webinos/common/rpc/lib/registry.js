@@ -17,8 +17,18 @@
  ******************************************************************************/
 
 (function () {
+  var logger = console;
+  if (typeof module !== "undefined") {
+    var webinos_= require("find-dependencies")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
+	/**
+	 * Registry for service objects. Used by RPC.
+	 * @constructor
+	 * @alias Registry
+	 * @param parent PZH (optional).
+	 */
 	var Registry = function(parent) {
-
 		this.parent = parent;
 
 		/**
@@ -30,25 +40,36 @@
 		this.objects = {};
 	};
 
+	/**
+	 * Creates a new unique identifier to be used for RPC requests and responses.
+	 * @function
+	 * @private
+	 * @param used for recursion
+	 */
+	var _getNextID = function(a) {
+	    // implementation taken from here: https://gist.github.com/982883
+        return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,_getNextID);
+	}
+
 	var _registerObject = function (callback) {
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
 			receiverObjs = [];
 
 		// generate id
-		var md5sum = crypto.createHash('md5');
-		callback.id = md5sum.update(callback.api + callback.displayName + callback.description).digest('hex');
+		callback.id = _getNextID();
+		
 		// verify id isn't existing already
 		var filteredRO = receiverObjs.filter(function(el, idx, array) {
 			return el.id === callback.id;
 		});
 		if (filteredRO.length > 0)
-			throw new Error('cannot register, already got object with same id. try changing your service desc.');
+			throw new Error('Cannot register, already got object with same id.');
 
 		receiverObjs.push(callback);
 		this.objects[callback.api] = receiverObjs;
@@ -61,7 +82,7 @@
 	Registry.prototype.registerObject = function (callback) {
 		_registerObject.call(this, callback);
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
@@ -74,7 +95,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Adding: " + callback.api);
+		logger.log("Adding: " + callback.api);
 
 		var receiverObjs = this.objects[callback.api];
 		if (!receiverObjs)
@@ -92,7 +113,7 @@
 		if (!callback) {
 			return;
 		}
-		console.log('INFO: [Registry] '+"Removing: " + callback.api);
+		logger.log("Removing: " + callback.api);
 		var receiverObjs = this.objects[callback.api];
 
 		if (!receiverObjs)
@@ -107,13 +128,13 @@
 			delete this.objects[callback.api];
 		}
 
-		if (this.parent.registerServicesWithPzh) {
+		if (this.parent && this.parent.registerServicesWithPzh) {
 			this.parent.registerServicesWithPzh();
 		}
 	};
 
 	var load = function(modules) {
-		var webinos = require('webinos')(__dirname);
+		var webinos = require("find-dependencies")(__dirname);
 
 		return modules.map(function(m) {
 			return webinos.global.require(webinos.global.api[m.name].location).Service;
@@ -126,8 +147,8 @@
 			this.registerObject(new Service(rpcHandler, module.params));
 		}
 		catch (error) {
-			console.log('INFO: [Registry] '+error);
-			console.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
+			logger.log('INFO: [Registry] '+error);
+			logger.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
 		}
 	};
 
@@ -140,28 +161,31 @@
 		if (!modules) return;
 
 		var services = load(modules);
-
 		for (var i = 0; i < services.length; i++){
 			try {
 				var Service = services[i];
 				_registerObject.call(this, new Service(rpcHandler, modules[i].params));
-			}
-			catch (error) {
-				console.log('INFO: [Registry] '+error);
-				console.log('INFO: [Registry] '+"Could not load module " + modules[i].name + " with message: " + error);
+			}catch (error){
+				logger.error(error);
+				logger.error("Could not load module " + modules[i].name + " with message: " + error );
 			}
 		}
 	};
 
 	/**
-	 * 
+	 * Get all registered objects.
+	 *
+	 * Objects are returned in a key-value map whith service type as key and
+	 * value being an array of objects for that service type.
 	 */
 	Registry.prototype.getRegisteredObjectsMap = function() {
 		return this.objects;
 	}
 
 	/**
-	 * 
+	 * Get service matching type and id.
+	 * @param serviceTyp Service type as string.
+	 * @param serviceId Service id as string.
 	 */
 	Registry.prototype.getServiceWithTypeAndId = function(serviceTyp, serviceId) {
 		var receiverObjs = this.objects[serviceTyp];
@@ -172,7 +196,7 @@
 			return el.id === serviceId;
 		});
 
-		if (typeof filteredRO[0] === 'undefined') 
+		if (typeof filteredRO[0] === 'undefined')
 			return receiverObjs[0];
 
 		return filteredRO[0];

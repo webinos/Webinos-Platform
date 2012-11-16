@@ -1,14 +1,14 @@
 describe('api.vehicle', function() {
 
-	var webinos = require('webinos')(__dirname);
+	var webinos = require("find-dependencies")(__dirname);
 	var params = {};
 	params.connector = 'simulator';
-	
+
 	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
 	var service = webinos.global.require(webinos.global.api.vehicle.location).Service;
 	var vehicle = new service(RPCHandler, params);
-	
-	
+
+
 	beforeEach(function() {
 		this.addMatchers({
 			toBeFunction: function() {
@@ -37,15 +37,15 @@ describe('api.vehicle', function() {
 	it('Vehicle API description is string', function() {
 		expect(vehicle.description).toBeString();
 	});
-	
+
 	it('Vehicle API has function addEventListener', function() {
     	expect(vehicle.addEventListener).toBeFunction();
 	});
-	
+
 	it('Vehicle API has function removeEventListener', function() {
     	expect(vehicle.removeEventListener).toBeFunction();
 	});
-	
+
 	it('Vehicle API has function get', function() {
     	expect(vehicle.get).toBeFunction();
 	});
@@ -69,7 +69,7 @@ describe('api.vehicle', function() {
 		expect(event.range).toBeNumber();
 		expect(event.timestamp).toBeNumber();
       }, function(err){
-      
+
       });
     });
 
@@ -85,7 +85,7 @@ describe('api.vehicle', function() {
      	expect(event.right).toBeNumber();
      	expect(event.outRight).toBeNumber();
       }, function(err){
-      
+
       });
     });
 
@@ -101,7 +101,7 @@ describe('api.vehicle', function() {
      	expect(event.right).toBeNumber();
      	expect(event.outRight).toBeNumber();
       }, function(err){
-      
+
       });
     });
 
@@ -120,7 +120,7 @@ describe('api.vehicle', function() {
 
 	/*
 	Currently unimplemented methods
-	
+
 	it('Vehicle API requestGuidance', function() {
     	expect(vehicle.requestGuidance).toBeFunction();
 	});
@@ -128,30 +128,30 @@ describe('api.vehicle', function() {
 	it('Vehicle API findDestination', function() {
     	expect(vehicle.findDestination).toBeFunction();
 	});
-	
+
 	*/
 	/* Currently unimplemented attributes
-		
+
 	it('Vehicle has attribute brand ', function() {
     	expect(vehicle.brand).toBeString();
 	});
-	
+
 	it('Vehicle has attribute model ', function() {
     	expect(vehicle.brand).toBeString();
 	});
-	
+
 	it('Vehicle has attribute brand ', function() {
     	expect(vehicle.model).toBeString();
 	});
-	
+
 	it('Vehicle has attribute brand ', function() {
     	expect(vehicle.year).toBeString();
 	});
-	
+
 	it('Vehicle has attribute fuel ', function() {
     	expect(vehicle.fuel).toBeString();
 	});
-	
+
 	it('Vehicle has attribute transmission ', function() {
     	expect(vehicle.transmission).toBeString();
 	});

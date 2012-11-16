@@ -35,14 +35,14 @@ var objectRefsDo = new Array();
 function addEventListener(params, successCB, errorCB, objectRef){
     switch(params[0]){
         case "devicemotion":
-            objectRefsDo.push([objectRef, params[0]]);
+            objectRefsDo.push([objectRef.rpcId, params[0]]);
             console.log('listening to device motion');
             if(!listeningToDeviceMotion){
                 listeningToDeviceMotion = true;
             }
             break;
         case "deviceorientation":
-            objectRefsDo.push([objectRef, params[0]]);
+            objectRefsDo.push([objectRef.rpcId, params[0]]);
             if(!listeningToDeviceOrientation){
                 listeningToDeviceOrientation = true;
             }
@@ -50,7 +50,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             break;
             
         case "compassneedscalibration":
-            objectRefsDo.push([objectRef, params[0]]);
+            objectRefsDo.push([objectRef.rpcId, params[0]]);
             if(!listeningToCompassNeedsCalibration){
                 listeningToCompassNeedsCalibration = true;
             }
@@ -65,7 +65,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
 function removeEventListener(params, successCB, errorCB, objectRef){
     //params[0] => objectRef from Listener // params[1] => type of Event [70, 'devicemotion']
     console.log(params);
-    console.log(objectRef);
+    console.log(objectRef.rpcId);
     var registeredListeners = 0;
     for(i = 0; i < objectRefsDo.length; i++ ){
         if(objectRefsDo[i][1] == params[1]){ //CHECK IF THERE ARE OTHER LISTENERS FOR A CERTAIN EVENT TYPE

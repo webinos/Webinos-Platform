@@ -15,20 +15,24 @@
       } else {
         value = $("#pzh_list option:selected").val();
       }
+      var options = {"type": 'prop',
+          "payload": {
+              "status": "login"
+          }
+      };
       to = value;
-      var options = {type: 'prop', payload: {status: "login", to: value}};
-      webinos.session.message_send(options);
+      webinos.session.message_send(options, value);
     });
 
     function displayLogin(html_input) {
-      $('#main').html('<article class="module width_full"><header><h3> Login to Your PZH </h3></header><div class="module_content">'+ html_input.payload.message +
+      $('#main').html('<article class="module width_full"><header><h3> Login to your personal zone hub </h3></header><div class="module_content">'+ html_input.payload.message +
      '</div></article><div class="spacer"></div>');
     }
     webinos.session.addListener('login', displayLogin);
     function authenticate(msg){
-     window.location.href=msg.payload.url;
+     window.location.href=msg.payload.message;
     }
-    webinos.session.addListener('authenticate-google', authenticate);
+    webinos.session.addListener('authenticate', authenticate);
 
   });
 </script>
@@ -38,14 +42,14 @@
 <form class="box login">
   <header>
     <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png" width="100px">
-    <label>Connect to PZH </label>
+    <label>Connect your device to a personal zone hub (PZH) </label>
   </header>
   <fieldset class="boxBody">
-    <label>Select Your PZH Provider</label>
+    <label>Select your personal zone hub provider</label>
     <select value="pzh_list" id="pzh_list">
       <option value="pzh.webinos.org"> pzh.webinos.org </option>
     </select>
-    <label> (Or) Enter PZH Address</label>
+    <label> (Or) Enter the address</label>
       <input type="text" value="" id="own_pzh"> </input>
     <input type="button" class="btnLogin" id="connectPzh" value="Login to Your PZH!">
     <submit> </submit>

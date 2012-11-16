@@ -20,6 +20,7 @@
     <module>devicestatus</module>
     <module>events</module>
     <module>applauncher</module>
+    <module>zap-and-shake</module>
     <module>file</module>
     <module>gallery</module>
     <module>geolocation</module>
@@ -29,5 +30,6 @@
     <module>servicedisco</module>
     <module>tv</module>
     <module>contacts</module>
+    <module>vehicle</module>
   </modules>
 </project>

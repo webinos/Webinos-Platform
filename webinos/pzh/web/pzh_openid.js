@@ -16,20 +16,17 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 ********************************************************************************/
 var openid   = require('openid');
-
 var url      = require('url');
 var querystr = require('querystring');
 
-var webinos = require('webinos')(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
-var log     = new session.common.debug("pzh_openid");
+var webinos = require("find-dependencies")(__dirname);
+var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
-var farm    = require('../lib/pzh_farm');
-var ws      = require('./pzh_webserver.js');
+var rely   = "";
+var OpenId = exports;
 
-var rely;
-
-exports.authenticate = function(hostname, url, res, query) {
+OpenId.authenticate = function(hostname, port, url, returnPath, callback) {
+  "use strict";
   var exts= [];
   var attr = new openid.AttributeExchange({
     "http://axschema.org/contact/country/home":     "required",
@@ -43,37 +40,41 @@ exports.authenticate = function(hostname, url, res, query) {
     "http://axschema.org/person/gender/":           "required"
   });
   exts.push(attr);
-  rely = new openid.RelyingParty('https://'+hostname+':'+
-      session.configuration.port.farm_webServerPort+'/main.html?cmd=verify&id='+query.id,
-    null,
-    false,
-    false,
-    exts);
+
+  rely = new openid.RelyingParty('https://'+hostname+':'+port +'/main.html?cmd=verify&returnPath='+returnPath,
+        null,
+        false,
+        false,
+        exts);
+
   rely.authenticate(url, false, function(error, authUrl) {
     if(error){
-      log.error(error);
+      logger.error(error);
+      return callback(false, error);
     } else if (!authUrl) {
-      log.error('authentication failed as url to redirect after authentication is missing');
+      logger.error('redirection url is missing');
+      return callback(false,'redirection url is missing');
     } else {
-      res.writeHeader(200, 'application/x-javascript');
-      res.write(JSON.stringify({type:"prop", payload: {status:'authenticate-google', url: authUrl}}));
-      res.end();
+      return callback(true, authUrl);
     }
   });
-}
+};
 
-exports.fetchOpenIdDetails = function(req, res, query, callback){
-  if (typeof rely !== "undefined") {
+/**
+ *
+ * @param req
+ * @param callback
+ * @return {*}
+ */
+OpenId.fetchOpenIdDetails = function(req, callback){
+  "use strict";
+  if (rely) {
     rely.verifyAssertion(req, function(err, userDetails){
       if (err){
-        log.error("unable to login " + err.message);
-        address = req.connection.socket.remoteAddress;
-        res.writeHead(302, {Location: "http://"+query.returnPath+"?cmd=error&reason="+err.message});
-        res.end();
-      }
-      else if (userDetails.authenticated) {
-        var host;
-        var details = {country: '', username: '', email: '', image: ''};
+        logger.error("unable to fetch open id details " + err.message);
+        return callback(false, err.message);
+      } else if (userDetails.authenticated) {
+        var host, details = {country: '', username: '', email: '', image: ''};
         if(req.headers.host.split(':')){
           host = req.headers.host.split(':')[0];
         } else {
@@ -81,14 +82,13 @@ exports.fetchOpenIdDetails = function(req, res, query, callback){
         }
 
         if(userDetails.claimedIdentifier){
-          // google
           var parsed = url.parse(userDetails.claimedIdentifier);
           var query = querystr.parse(parsed.query);
-          if (query && query.id) {
-            details.id = query.id;
+          if (query) { // google
+            details.from = query["id"];
             details.provider = 'google';
           } else {
-            details.id =  parsed.path.split('/')[2];
+            details.from =  parsed.path.split('/')[2];
             details.provider = 'yahoo';
           }
         }
@@ -110,8 +110,10 @@ exports.fetchOpenIdDetails = function(req, res, query, callback){
         if(userDetails.image){
           details.image = userDetails.image;
         }
-        callback(host, details);
+        return callback(true, details);
       }
     });
+  } else {
+    return callback(false, "not authenticated");
   }
-}
+};

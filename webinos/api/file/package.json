@@ -1,22 +1,25 @@
-{
-  "name": "file",
-  "description": "File API (including Writer, and Directories and System) implementation.",
-  "version": "0.0.1",
-  "keywords": [ "blob", "file", "directory", "filereader", "filewriter", "directoryreader", "filesystem" ],
-  "author": {
-    "name": "Felix-Johannes Jendrusch",
-    "email": "felix-johannes.jendrusch@fokus.fraunhofer.de"
-  },
-  "main": "./lib/webinos.file.rpc.js",
-  "directories": {
-    "lib": "./lib"
-  },
-  "repositories": [ {
-    "type": "git",
-    "url": "http://dev.webinos.org/git/wp4.git",
-    "path": "webinos/api/file"
-  } ],
-  "dependencies": {
-    "connect": "*"
+{ "name" : "file"
+, "version" : "0.7.0"
+, "description" : "File API (incl. Writer, and Directories and System)"
+, "keywords" :
+  [ "webinos"
+  , "file"
+  ]
+, "homepage" : "http://www.webinos.org"
+, "bugs" : "http://jira.webinos.org"
+, "author" :
+  { "name" : "Felix-Johannes Jendrusch"
+  , "email" : "felixjendrusch@googlemail.com"
+  }
+, "main" : "./file.js"
+, "directories" : { "lib" : "./lib" }
+, "repository" :
+  { "type" : "git"
+  , "url" : "http://github.com/webinos/Webinos-Platform.git"
+  }
+, "dependencies" :
+  { "find-dependencies" : "0.0.x"
+  , "inherits" : "1.0.0"
+  , "mkdirp" : "0.3.x"
   }
 }

@@ -27,9 +27,9 @@ using namespace node;
 using namespace v8;
 
 #ifdef ANDROID
-	static const string policyFileName = "/sdcard/webinos/policy/policy.xml";
+	string policyFileName = "/sdcard/webinos/policy/policy.xml";
 #else
-	static const string policyFileName = "./policy.xml";
+	string policyFileName = "./policy.xml";
 #endif
 
 class PolicyManagerInt: ObjectWrap{
@@ -61,6 +61,17 @@ public:
 	static Handle<Value> New(const Arguments& args)  {
 		HandleScope scope;
 		PolicyManagerInt* pmtmp = new PolicyManagerInt();
+
+		if (args.Length() > 0) {
+			if (!args[0]->IsString()) {
+				LOGD("Wrong parameter type");
+				return ThrowException(Exception::TypeError(String::New("Bad type argument")));
+			}
+			v8::String::AsciiValue tmpFileName(args[0]->ToString());
+			LOGD("Parameter file: %s", *tmpFileName);
+			policyFileName = *tmpFileName;
+		}
+
 		pmtmp->pminst = new PolicyManager(policyFileName);
 		pmtmp->Wrap(args.This());
 		return args.This();
@@ -87,6 +98,8 @@ public:
 		(*subject_attrs)["user-key-root-cn"] = new vector<string>();
 		(*subject_attrs)["user-key-root-fingerprint"] = new vector<string>();
 		
+		(*subject_attrs)["id"] = new vector<string>();
+		
 		(*subject_attrs)["distributor-key-cn"] = new vector<string>();
 		(*subject_attrs)["distributor-key-fingerprint"] = new vector<string>();
 		(*subject_attrs)["distributor-key-root-cn"] = new vector<string>();
@@ -96,6 +109,12 @@ public:
 		(*subject_attrs)["author-key-fingerprint"] = new vector<string>();
 		(*subject_attrs)["author-key-root-cn"] = new vector<string>();
 		(*subject_attrs)["author-key-root-fingerprint"] = new vector<string>();
+
+		(*subject_attrs)["target-id"] = new vector<string>();
+		(*subject_attrs)["target-domain"] = new vector<string>();
+		(*subject_attrs)["requestor-id"] = new vector<string>();
+		(*subject_attrs)["requestor-domain"] = new vector<string>();
+		(*subject_attrs)["webinos-enabled"] = new vector<string>();
 
 		map<string, vector<string>*> * resource_attrs = new map<string, vector<string>*>();
 		(*resource_attrs)["api-feature"] = new vector<string>();
@@ -146,6 +165,11 @@ public:
 
 		if (args[0]->ToObject()->Has(String::New("widgetInfo"))) {
 			v8::Local<Value> wiTmp = args[0]->ToObject()->Get(String::New("widgetInfo"));
+			if (wiTmp->ToObject()->Has(String::New("id"))) {
+				v8::String::AsciiValue id(wiTmp->ToObject()->Get(String::New("id")));
+				(*subject_attrs)["id"]->push_back(*id);
+				LOGD("Parameter id : %s", *id);
+			}
 			if (wiTmp->ToObject()->Has(String::New("distributorKeyCn"))) {
 				v8::String::AsciiValue distributorKeyCn(wiTmp->ToObject()->Get(String::New("distributorKeyCn")));
 				(*subject_attrs)["distributor-key-cn"]->push_back(*distributorKeyCn);
@@ -185,6 +209,35 @@ public:
 				v8::String::AsciiValue authorKeyRootFingerprint(wiTmp->ToObject()->Get(String::New("authorKeyRootFingerprint")));
 				(*subject_attrs)["author-key-root-fingerprint"]->push_back(*authorKeyRootFingerprint);
 				LOGD("Parameter author-key-root-fingerprint : %s", *authorKeyRootFingerprint);
+			}
+		}
+
+		if (args[0]->ToObject()->Has(String::New("deviceInfo"))) {
+			v8::Local<Value> diTmp = args[0]->ToObject()->Get(String::New("deviceInfo"));
+			if (diTmp->ToObject()->Has(String::New("targetId"))) {
+				v8::String::AsciiValue targetId(diTmp->ToObject()->Get(String::New("targetId")));
+				(*subject_attrs)["target-id"]->push_back(*targetId);
+				LOGD("Parameter target-id : %s", *targetId);
+			}
+			if (diTmp->ToObject()->Has(String::New("targetDomain"))) {
+				v8::String::AsciiValue targetDomain(diTmp->ToObject()->Get(String::New("targetDomain")));
+				(*subject_attrs)["target-domain"]->push_back(*targetDomain);
+				LOGD("Parameter target-domain : %s", *targetDomain);
+			}
+			if (diTmp->ToObject()->Has(String::New("requestorId"))) {
+				v8::String::AsciiValue requestorId(diTmp->ToObject()->Get(String::New("requestorId")));
+				(*subject_attrs)["requestor-id"]->push_back(*requestorId);
+				LOGD("Parameter requestor-id : %s", *requestorId);
+			}
+			if (diTmp->ToObject()->Has(String::New("requestorDomain"))) {
+				v8::String::AsciiValue requestorDomain(diTmp->ToObject()->Get(String::New("requestorDomain")));
+				(*subject_attrs)["requestor-domain"]->push_back(*requestorDomain);
+				LOGD("Parameter requestor-domain : %s", *requestorDomain);
+			}
+			if (diTmp->ToObject()->Has(String::New("webinosEnabled"))) {
+				v8::String::AsciiValue webinosEnabled(diTmp->ToObject()->Get(String::New("webinosEnabled")));
+				(*subject_attrs)["webinos-enabled"]->push_back(*webinosEnabled);
+				LOGD("Parameter webinos-enabled : %s", *webinosEnabled);
 			}
 		}
 

@@ -14,360 +14,416 @@
 * limitations under the License.
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
-* Copyright 2011 Ziran Sun, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-var path          = require("path");
-var fs            = require("fs");
-var os            = require("os");
+var path        = require("path");
+var fs          = require("fs");
+var os          = require("os");
+var util        = require("util");
 
-var certificate = require("./session_certificate");
-var common      = require("./session_common");
-var log         = new common.debug("config");
+var webinos     = require("find-dependencies")(__dirname);
+var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
+var wPath       = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
+var wId         = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
 
-var session_configuration = exports;
+var certificate = webinos.global.require(webinos.global.manager.certificate_manager.location);
 
-// Default webinos services available when no configuration exists yet
-session_configuration.pzhDefaultServices = [
-  {name: "context", params: {}},
-  {name: "events", params: {}},
-  {name: "get42", params: {}}
-];
 
-session_configuration.states = ["NOT_CONNECTED", "CONNECTING", "CONNECTED", "DISCONNECTING"];
-session_configuration.modes  = ["VIRGIN", "HUB", "PEER", "HUB_PEER"];
-session_configuration.PZH_MSG = "0";
-session_configuration.PZP_MSG = "1";
-/**
-* @descripton Checks for master certificate, if certificate is not found
-* it calls generating certificate function defined in certificate manager.
-* This function is crypto sensitive.
-* @param {function} callback It is callback function that is invoked after
-* checking/creating certificates
-*/
-session_configuration.setConfiguration = function (name, type, host, pzhName, callback) {
-  var webinosDemo = common.webinosConfigPath();
+function Config() {
+  certificate.call(this);
+  this.metaData       = {};
+  this.trustedList    = {pzh:[], pzp:[]};
+  this.crl            = "";
+  this.policies       = {};//todo: integrate policy in the configuration
+  this.userData       = {name: ""};
+  this.userPref       = {};
+  this.serviceCache   = [];
+}
 
-  if (typeof callback !== "function") {
-    log.error("callback function is not defined");
-    callback("undefined");
-    return;
-  }
+util.inherits(Config, certificate);
 
-  if (type !== "PzhFarm" && type !== "Pzh" && type !== "Pzp") {
-    log.error("wrong type is mentioned");
-    callback("undefined");
-    return;
-  }
-
-  fetchDeviceName(name, type, function(name){
-    parsePortConfiguration(function() {
-      fs.readFile(( webinosDemo+"/config/"+ name +".json"), function(err, data) {
-          if(err && err.code ==="EACCES") {
-            log.error("configuration file read failed... try with sudo ");
-            process.exit();
-          }
-          if ( err && err.code=== "ENOENT" ) {
-          // CREATE NEW CONFIGURATION
-          var config = createConfigStructure(name, type);
-          config.name = name;
-
-          if (type === "Pzp" && typeof pzhName !== "undefined" && (pzhName !== '' || pzhName !== null )) {
-            config.serverName = host+'/'+pzhName;
+function createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback){
+  var cn;
+  try {
+    self.fetchConfigDetails(friendlyName, webinosType, sessionIdentity, function(status) {
+      if(status){
+        cn = self.metaData.webinosType + ":"+self.metaData.webinosName ;
+        self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
+          if(!status) {
+            logger.error("failed generating self signed certificate -"+ value);
+            if (callback) {return callback(status, value);}
           } else {
-            config.serverName = host;
-          }
-
-          // This self signed certificate is for getting connection certificate CSR.
-          try {  // From this certificate generated only csr is used
-            certificate.selfSigned(config, type, function(status, selfSignErr, conn_key, conn_cert, csr ) {
-              if(status === "certGenerated") {
-                session_configuration.storeKey(config.own.key_id, conn_key);
-                log.info("generated connection certificates");
-                if (type !== "Pzp") {
-                  // This self signed certificate is  master certificate / CA
-                  selfSignedMasterCert(config, function(config_master){
-                    // Sign connection certifcate
-                    session_configuration.signedCert(csr, config_master, null, 1, function(config_signed) { // PZH CONN CERT 1
-                      callback(config_signed, conn_key);
-                    });
-                  });
+            if (self.metaData.webinosType !== "Pzp") {
+              cn = self.metaData.webinosType + "CA:" + self.metaData.webinosName ;
+              self.generateSelfSignedCertificate(self.metaData.webinosType+"CA", cn, function(status, value){ // Master Certificate
+                if (status) {
+                  logger.log("connection and master certificate generated");
+                  self.storeAll();
+                  if (callback) {return callback(true);}
                 } else {
-                  // PZP will only generate only 1 certificate
-                  try{
-                      // Used for initial connection, will be replaced by cert received from PZH
-                    config.own.cert = conn_cert.cert;
-                    config.csr      = csr;
-                    session_configuration.storeConfig(config, function() {
-                      callback(config, conn_key, config.csr);
-                    });
-                  } catch (err) {
-                    log.error("storing configuration"+ err);
-                    return;
-                  }
+                  logger.error("failed generating master certificate -"+ value);
+                  if (callback) {callback(false, value);}
                 }
-              } else {
-                log.error("generating self signed cert: ");
-                callback("undefined");
-              }
-            });
-          } catch (err) {
-            log.error("generating certificates" + err);
-            callback("undefined");
-          }
-        } else { // When configuration already exists, just load configuration file
-            var configData = data.toString("utf8");
-            config = JSON.parse(configData);
-            if (config.serverName.split('/') === -1 && pzhName === "") {
-              log.error("Please specify pzh-name to connect to pzh, else you will be running in virgin mode");
-            } else if (pzhName !== "") {
-              if (config.serverName.split('/') === -1){
-                config.serverName = config.serverName + '/' + pzhName;
-              }
-            }
-            if (config.master.cert === "" ){
-              session_configuration.fetchKey(config.own.key_id, function(conn_key){
-                callback(config, conn_key, config.csr);
               });
             } else {
-              session_configuration.fetchKey(config.own.key_id, function(conn_key){
-                callback(config, conn_key);
-              });
+              self.storeAll();
+              if (callback) {return callback(true);}
             }
-        }
-      });
-    });
-  });
-};
-
-function parsePortConfiguration(callback) {
-
-  var filename;
-  if((os.type().toLowerCase() == "linux") && (os.platform().toLowerCase() == "android"))
-  {
-    //TODO: the full file path has to be given - check if any alternative way
-    filename = "/data/data/org.webinos.app/node_modules/webinos/wp4/webinos_config.json";
-  }
-  else
-  {
-    filename = "webinos_config.json";
-  }
-
-  fs.readFile(filename, function(err,data) {
-    if (!err) {
-      var port_data = JSON.parse(data.toString());
-      session_configuration.port = {};
-      session_configuration.port.farmPort           = port_data.ports.farm;
-      session_configuration.port.farm_webServerPort = port_data.ports.farm_webServer;
-      session_configuration.port.pzp_webSocket = port_data.ports.pzp_webSocket;
-      session_configuration.port.pzp_web_webSocket  = port_data.ports.pzp_web_webSocket;
-      session_configuration.port.pzp_tlsServer      = port_data.ports.pzp_tlsServer;
-      session_configuration.port.pzp_zeroConf       = port_data.ports.pzp_zeroConf;
-      callback();
-    }
-    else
-    {
-	//file read fails - add default port numbers
-      session_configuration.port = {};
-      session_configuration.port.farmPort           = 80;
-      session_configuration.port.farm_webServerPort = 443;
-      session_configuration.port.pzp_webSocket = 8081;
-      session_configuration.port.pzp_web_webSocket  = 8080;
-      session_configuration.port.pzp_tlsServer      = 8040;
-      session_configuration.port.pzp_zeroConf       = 4321;
-      callback();
-    }	
-  });
-}
-
-function fetchDeviceName(name, type, callback) {
-   //Get Android devices identity
-  if((os.type().toLowerCase() === "linux") && (os.platform().toLowerCase() === "android"))
-  {
-    var bridge = require("bridge");
-    /* If WiFi Mac address is prefered
-    * var prop = {
-    *	aspect: "WiFiNetwork",
-    *	property: "macAddress"
-    * }
-    */
-    var prop = {
-      aspect: "Device",
-      property: "identity"
-    }
-
-    function onsuccess(prop_value, prop)
-    {
-      name = prop_value + "_"+ type; //devicename_type
-      callback(name);
-    }
-
-    function onerror()
-    {
-      log.error("Android get device name returns error");
-    }
-
-    var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
-    devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-  } else  if (name === "" && (type === "Pzp" || type === "PzhFarm")){
-    name = os.hostname() + "_"+ type; //devicename_type
-    callback(name);
-  } else {
-    callback(name);
-  }
-};
-
-session_configuration.createDirectoryStructure = function (callback) {
-  var webinosDemo = common.webinosConfigPath();
-  try {
-    // Main webinos directory
-    fs.readdir( webinosDemo, function(err) {
-      if ( err && err.code === "ENOENT" ) {
-        fs.mkdirSync( webinosDemo,"0700");
-      }
-      setTimeout(function(){
-        // Configuration directory, which holds information about certificate, ports, openid details
-        fs.readdir ( webinosDemo+"/config", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/config","0700");
           }
         });
-        // logs
-        fs.readdir ( webinosDemo+"/logs", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/logs","0700");
-          }
-        });
-        // keys
-        fs.readdir ( webinosDemo+"/keys", function(err) {
-          if ( err && err.code=== "ENOENT" ) {
-            fs.mkdirSync( webinosDemo +"/keys","0700");
-          }
-        });
-        callback(true);
-      }, 100);
-    });
-  } catch (err){
-    log.error("error setting default Webinos Directories" + err.code);
-  }
-}
-
-session_configuration.storeConfig = function (config, callback) {
-  var webinosDemo = common.webinosConfigPath();
-  if (typeof config!== "undefined") {
-    fs.writeFile((webinosDemo+ "/config/"+config.name+".json"), JSON.stringify(config, null, " "), function(err) {
-      if(err) {
-        callback(false);
-        log.error("error saving configuration file - "+config.name);
-      } else {
-        callback(true);
-        log.info("saved configuration file - " + config.name);
-      }
-    });
-  }
-}
-// TODO: Put this keys in secure storage ..
-session_configuration.storeKey= function (key_id, value) {
-  var webinosDemo = common.webinosConfigPath();
-  fs.writeFile((webinosDemo+ "/keys/"+key_id), value, function(err) {
-    if(err) {
-      log.error("error saving key " + err);
-    } else {
-      log.info("saved key file @@ " +key_id);
-    }
-  });
-}
-
-session_configuration.fetchKey= function (key_id, callback) {
-  var webinosDemo = common.webinosConfigPath();
-  fs.readFile((webinosDemo+ "/keys/"+key_id), function(err, data) {
-    if(err) {
-      log.error("error saving key " + err);
-      callback(null);
-    } else {
-      log.info("fetched key file @@ "+ key_id);
-      callback(data.toString());
-    }
-  });
-}
-
-session_configuration.signedCert = function (csr, config, name, type, callback) {
-  try {
-    session_configuration.fetchKey(config.master.key_id, function(master_key){
-      // connection certificate signed by master certificate
-      certificate.signRequest(csr, master_key, config.master.cert, type, config.serverName, function(result, signed_cert) {
-        if(result === "certSigned") {
-          log.info("generated Signed Certificate by CA");
-          try {
-            if(type === 1 || type === 0) { // PZH
-              config.own.cert = signed_cert; // Signed connection certificate
-            } else {
-              config.signedCert[name] = signed_cert;
-            }
-
-            // Update with the signed certificate
-            session_configuration.storeConfig(config, function() {
-              callback(config);
-            });
-          } catch (err1) {
-            log.error("error setting paramerters" + err1) ;
-            callback("undefined");
-            return;
-          }
-        }
-      });
-    });
-  } catch (err){
-    log.error("error in generating signed certificate by CA" + err);
-    callback("undefined");
-  }
-};
-
-function createConfigStructure (name, type) {
-  var config = {};
-  if (type === "Pzh") {
-    config.own         = { key_id: name+"_conn_key",   cert:""};
-    config.master      = { key_id: name+"_master_key", cert:"", crl:"" };
-    config.signedCert  = {};
-    config.revokedCert = {};
-    config.otherCert   = {};
-    config.email       = "";
-    config.country     = "";
-    config.image       = "";
-  } else if (type === "PzhFarm") {
-    config.own         = { key_id: name+"_conn_key",   cert:""};
-    config.master      = { key_id: name+"_master_key", cert:""} ;
-    config.webServer   = { key_id: name+"_ws_key",     cert:""} ;
-    config.pzhs        = {}; //contents: "", modules:""
-  } else if (type === "Pzp" ) {
-    config.own         = { key_id: name+"_conn_key", cert:""};
-    config.csr         = "";
-    config.master      = { cert:"", crl:"" };
-    config.pzhId       = '';
-  };
-  config.type        = type;
-  config.name        = '';
-  config.serverName  = '';
-  return config;
-}
-
-function selfSignedMasterCert(config, callback){
-  try {
-    certificate.selfSigned(config, config.type+"CA", function(result, selfSignErr, master_key, master_cert) {
-      if(result === "certGenerated") {
-        log.info("generated CA Certificate");
-        // Store all master certificate information
-        config.master.cert = master_cert.cert;
-        config.master.crl  = master_cert.crl;
-        session_configuration.storeKey(config.master.key_id, master_key);
-        session_configuration.storeConfig(config, function() {
-          callback(config);
-        });
-      } else {
-        log.error("error in generting certificate");
       }
     });
   } catch (err) {
-    log.error("error in generating master self signed certificate " + err);
-    callback("undefined");
+    if (callback) {return callback(false, err);}
   }
 }
+/**
+* Checks if metaData exists, if not creates a range of certificates
+* it calls generating certificate function defined in certificate manager.
+* This function is crypto sensitive.
+*
+* @param {function} callback It is callback function that is invoked after
+* checking/creating certificates
+*/
+Config.prototype.setConfiguration = function (friendlyName, webinosType, sessionIdentity, callback) {
+  var self = this, conn_key, cn;
+  wId.fetchDeviceName(webinosType, friendlyName, function(deviceName){
+    var webinosRoot  =  path.join(wPath.webinosPath(), deviceName);
+    logger.addType(deviceName); // per instance this should be only set once..
+    if (typeof callback !== "function") {
+      logger.error("callback missing");
+      return;
+    }
+    self.fetchMetaData(webinosRoot, deviceName, function(status, value){
+      if (status && value && (value.code=== "ENOENT" || value.code=== "EACCES")) {//meta data does not exist
+        createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);
+      } else { //metaData not found
+        self.metaData= value;
+        self.fetchCertificate("external", function(status, value) { if (status) { self.cert.external = value;} });
+        self.fetchCertificate("internal", function(status, value) { if (status) { self.cert.internal = value;
+          self.fetchServiceCache(function(status, value) { if (status) { self.serviceCache = value;
+            self.fetchCrl(function(status, value) { if (status) { self.crl = value;
+              self.fetchUserData(function(status, value) { if (status) { self.userData = value;
+                self.fetchUserPref(function(status, value) { if (status) { self.userPref = value;
+                  self.fetchTrustedList(function(status, value) { if (status) { self.trustedList = value; return callback(true);
+                  }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+                }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+              }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+            }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+          }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+        }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+      }
+    });
+
+    //});
+  });
+};
+
+Config.prototype.storeAll = function() {
+  var self = this;
+  self.storeCertificate(self.cert.internal, "internal");
+  self.storeCrl(self.crl);
+  self.storeTrustedList(self.trustedList);
+};
+
+function processData(data,  callback){
+  var JSONData, dataString = data.toString();
+  if (dataString !== "") {
+    JSONData = JSON.parse(dataString);
+    callback(true, JSONData);
+  } else {
+    logger.error("configuration files are corrupted, retrying again to create fresh configuration");
+    callback(false);
+  }
+}
+
+Config.prototype.storeCertificate = function (certificate, ext_int) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(certificate, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving " + ext_int +" certificate");
+    } else {
+      logger.log("saved " + ext_int +" certificate");
+    }
+  });
+};
+
+Config.prototype.fetchCertificate = function(ext_int, callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if (err) {
+      if (ext_int !== "external"){
+        logger.error("configuration files for certificates are corrupted, retrying again to create fresh configuration");
+      }
+      callback(false);
+    } else {
+      processData(data,callback);
+    }
+  });
+
+};
+
+Config.prototype.storeMetaData = function(data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, self.metaData.webinosName+".json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving pzp/pzh metadata");
+    } else {
+      logger.log("stored pzp/pzh metadata");
+    }
+  });
+};
+
+Config.prototype.fetchMetaData = function(webinosRoot, webinosName, callback) {
+  var self = this;
+  var filePath = path.join(webinosRoot, webinosName+".json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      callback(true, err);// this is bit deceiving, we return  err as we want to trigger the certificate creation
+    } else {
+      processData(data, callback);
+    }
+  });
+};
+
+Config.prototype.storeCrl = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"crl.pem");
+  fs.writeFile(path.resolve(filePath), data, function(err) {
+    if(err) {
+      logger.error("failed saving crl");
+    } else {
+      logger.log("saved crl");
+    }
+  });
+};
+Config.prototype.fetchCrl = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "crl.pem");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      logger.error("configuration files for CRL are corrupted, retrying again to create fresh configuration");
+      callback(false);
+    } else {
+      value = data.toString();
+      callback(true, value);
+    }
+  });
+};
+Config.prototype.storeTrustedList = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"trustedList.json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving pzh/pzp in the trusted list");
+    } else {
+      logger.log("saved pzp/pzh in the trusted list");
+    }
+  });
+};
+Config.prototype.fetchTrustedList = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "trustedList.json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      logger.error("configuration files for trusted list are corrupted, retrying again to create fresh configuration");
+      callback(false);
+    } else {
+      processData(data,callback);
+    }
+  });
+};
+Config.prototype.storeUserData = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+".json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving user details");
+    } else {
+      logger.log("saved user details");
+    }
+  });
+};
+Config.prototype.fetchUserData = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+".json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      logger.error("configuration files for user data are corrupted, retrying again to create fresh configuration");
+      callback(false);
+    } else {
+      processData(data,callback);
+    }
+  });
+};
+Config.prototype.storeServiceCache = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving service cache");
+    } else {
+      logger.log("saved service cache");
+    }
+  });
+};
+Config.prototype.fetchServiceCache = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      logger.error("configuration files for service cache are corrupted, retrying again to create fresh configuration");
+      callback(false);
+    } else {
+      processData(data, callback);
+    }
+  });
+};
+Config.prototype.storeUserPref = function (data) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_pref.json");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving user preferences");
+    } else {
+      logger.log("saved user preferences");
+    }
+  });
+};
+Config.prototype.fetchUserPref = function (callback) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_pref.json");
+  fs.readFile(path.resolve(filePath), function(err, data) {
+    if(err) {
+      logger.error("configuration files for user pref are corrupted, retrying again to create fresh configuration");
+      callback(false);
+    } else {
+      processData(data,callback);
+    }
+  });
+};
+
+Config.prototype.createDirectories = function(callback) {
+  var self = this, dirPath, permission = 0777;
+  try {
+    fs.mkdir(wPath.webinosPath(),permission,function(err){});
+    if (os.platform().toLowerCase() !== "android"){
+      if (process.getuid) {
+        fs.chown(wPath.webinosPath(), process.getuid(), process.getgid());
+        fs.chmod(wPath.webinosPath(), permission);
+      }
+    }
+    setTimeout(function(){ // to wait for .webinos creation
+     fs.mkdir(self.metaData.webinosRoot, permission, function(err){
+       if(err) logger.error(err);
+     });
+     setTimeout(function(){  // to wait for webinos root to be created
+      var list =[ path.join(wPath.webinosPath(),"logs"),  path.join(self.metaData.webinosRoot, "wrt"),path.join(self.metaData.webinosRoot, "policies"),
+        path.join(self.metaData.webinosRoot, "certificates"),  path.join(self.metaData.webinosRoot,"userData"), path.join(self.metaData.webinosRoot, "keys")];
+      list.forEach(function(name){
+        fs.mkdir(name, permission,function(err){
+          if(err && name !==  path.join(wPath.webinosPath(),"logs")) logger.error(err)
+        });
+      });
+      setTimeout(function(){ // to wait for above list of files to be created
+        fs.mkdir(path.join(self.metaData.webinosRoot, "certificates", "external"), permission, function(err){
+           if(err) logger.error(err);
+           fs.mkdir(path.join(self.metaData.webinosRoot,"certificates","internal"), permission, function(err){
+              if(err) logger.error(err);
+                callback(true);
+           });
+        });
+      }, 100)
+     }, 50);
+    }, 50);
+
+  } catch (err){
+    return callback(false, err.code);
+  }
+};
+
+Config.prototype.createPolicyFile = function(self) {
+  // policy file
+  fs.readFile( path.join(self.metaData.webinosRoot, "policies", "policy.xml"), function(err) {
+    if ( err && err.code=== "ENOENT" ) {
+      var data;
+      try {
+        data = fs.readFileSync("./webinos/common/manager/policy_manager/defaultpolicy.xml");
+      }
+      catch(e) {
+        logger.error("Default policy non found");
+        data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
+      }
+      fs.writeFileSync(path.join(self.metaData.webinosRoot, "policies", "policy.xml"), data);
+    }
+  });
+};
+
+Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessionIdentity, callback) {
+  var self = this;
+  var filePath = path.resolve(__dirname, "../../../webinos_config.json");
+  fs.readFile(filePath, function(err,data) {
+    if (!err) {
+      var key, userPref = JSON.parse(data.toString());
+      self.userPref.ports={};
+      self.userPref.ports.provider           = userPref.ports.provider;
+      self.userPref.ports.provider_webServer = userPref.ports.provider_webServer;
+      self.userPref.ports.pzp_webSocket      = userPref.ports.pzp_webSocket;
+      self.userPref.ports.pzp_web_webSocket  = userPref.ports.pzp_web_webSocket;
+      self.userPref.ports.pzp_tlsServer      = userPref.ports.pzp_tlsServer;
+      self.userPref.ports.pzp_zeroConf       = userPref.ports.pzp_zeroConf;
+
+      if (self.userData.name === "") {
+        self.userData.country         = userPref.certConfiguration.country;
+        self.userData.email           = userPref.certConfiguration.email;
+      }
+      self.userData.state           = userPref.certConfiguration.state;
+      self.userData.city            = userPref.certConfiguration.city;
+      self.userData.orgName         = userPref.certConfiguration.orgname;
+      self.userData.orgUnit         = userPref.certConfiguration.orgunit;
+      self.userData.cn              = userPref.certConfiguration.cn;
+
+      for (key in userPref.pzhDefaultServices) {
+        self.serviceCache.push({"name": userPref.pzhDefaultServices[key], "params":{}});
+      }
+    } else { // We failed in reading configuration file, assign defaults
+      self.userPref.ports ={};
+      self.userPref.ports.provider               = 80;
+      self.userPref.ports.provider_webServer     = 443;
+      self.userPref.ports.pzp_webSocket          = 8081;
+      self.userPref.ports.pzp_web_webSocket      = 8080;
+      self.userPref.ports.pzp_tlsServer          = 8040;
+      self.userPref.ports.pzp_zeroConf           = 4321;
+      self.userData.country                      = "UK";
+      self.userData.email                        = "hello@webinos.org";
+      self.userData.state                        = "";
+      self.userData.city                         = "";
+      self.userData.orgName                      = "";
+      self.userData.orgUnit                      = "";
+      self.userData.cn                           = "";
+    }
+    self.metaData.friendlyName = friendlyName;
+    self.metaData.webinosType  = webinosType;
+    self.metaData.serverName   = sessionIdentity;
+    wId.fetchDeviceName(webinosType, friendlyName, function(deviceName) {
+      self.metaData.webinosName  = deviceName;
+      self.metaData.webinosRoot  = wPath.webinosPath() + "/"+ self.metaData.webinosName;
+      self.createDirectories(function(status){
+        if (status){
+          self.createPolicyFile(self);
+          self.storeMetaData(self.metaData);
+          self.storeUserData(self.userData);
+          self.storeUserPref(self.userPref);
+          self.storeServiceCache(self.serviceCache);
+          callback(true);
+        } else {
+          callback(false, "failed creating directories");
+        }
+      });
+    });
+  });
+};
+
+module.exports = Config;

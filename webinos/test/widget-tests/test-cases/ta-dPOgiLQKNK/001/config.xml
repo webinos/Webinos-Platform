@@ -1,0 +1,5 @@
+<widget width="500" height="500"
+id="e5:" xmlns="http://www.w3.org/ns/widgets">
+<name>e5</name>
+	<content src="index.htm" encoding="ISO-8859-1"/>  
+</widget>

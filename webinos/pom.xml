@@ -89,6 +89,7 @@
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
+              <version>1.1</version>
               <executions>
                 <!-- Builds C files to node modules with gyp. 
                     Requires the webinos.gyp file in location tools/gyp_tools/ -->         
@@ -96,11 +97,11 @@
                 <id>compile-node-module</id>
                 <phase>compile</phase>
                 <configuration>
-                  <executable>webinos-gyp</executable>
+                  <executable>node-gyp.cmd</executable>
                   <workingDirectory>${basedir}/src</workingDirectory>
                   <arguments>
-                    <argument>module.gyp</argument>
-                    <argument>make</argument>             
+                    <argument>configure</argument>
+                    <argument>build</argument>            
                   </arguments>
                   <successCodes>
                     <param>0</param>
@@ -141,7 +142,24 @@
                      <param>1</param>
                    </successCodes>
                   </configuration>
-               </execution>           
+               </execution> 
+               <!-- Runs vows node tests specified in file 'test.spec.js' in the vows test folder -->
+               <execution>
+                <id>vows-testing</id>
+                <phase>test</phase>
+                <configuration>
+                  <executable>vows</executable>
+                  <arguments>
+                    <argument>test/vows/test.spec.js</argument>
+                    <argument>--xunit</argument>
+                  </arguments>
+                  <outputFile>${basedir}/reports/TEST-vows.xml</outputFile>
+                  <successCodes>
+                    <param>0</param>
+                    <param>1</param>
+                  </successCodes>
+                </configuration>
+               </execution>
               </executions>
             </plugin>          
           </plugins>
@@ -188,14 +206,14 @@
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>exec-maven-plugin</artifactId>
-              <version>1.2.1</version>
+              <version>1.1</version>
               <executions>
                 <!-- Builds C files to node modules with node-waf --> 
                 <execution>
                   <id>compile-node-module</id>
                   <phase>compile</phase>
                   <configuration>
-                    <executable>node-waf</executable>
+                    <executable>node-gyp</executable>
                     <arguments>
                       <argument>configure</argument>
                       <argument>build</argument>
@@ -207,7 +225,7 @@
                     </successCodes>
                   </configuration>
                 </execution>
-                <!-- Runs Jslint validation on the javascript files -->
+                <!-- Runs jasmine node tests specified in .spec.js files in the jasmine test folder -->
                 <execution>
                   <id>jasmine-node-testing</id>
                   <phase>test</phase>
@@ -235,6 +253,23 @@
                       <argument>${basedir}/target/site/jsdoc</argument>
                       <argument>${basedir}/lib/</argument>
                     </arguments>
+                    <successCodes>
+                      <param>0</param>
+                      <param>1</param>
+                    </successCodes>
+                  </configuration>
+                </execution>  
+                <!-- Runs vows node tests specified in file 'test.spec.js' in the vows test folder -->
+                <execution>
+                  <id>vows-testing</id>
+                  <phase>test</phase>
+                  <configuration>
+                    <executable>vows</executable>
+                    <arguments>
+                      <argument>test/vows/test.spec.js</argument>
+                      <argument>--xunit</argument>
+                    </arguments>
+                    <outputFile>${basedir}/reports/TEST-vows.xml</outputFile>
                     <successCodes>
                       <param>0</param>
                       <param>1</param>

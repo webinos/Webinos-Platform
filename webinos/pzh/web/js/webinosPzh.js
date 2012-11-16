@@ -1,5 +1,6 @@
 var webinosPZH = {
   channel: null,
+  provider : null,
   userId: function() {
     if (window.location.pathname.split('/') !== -1) {
       return window.location.pathname.split('/')[1];
@@ -17,8 +18,8 @@ var webinosPZH = {
       if( typeof msg === 'string' && msg !== ""){
         msg = JSON.parse(msg);
 
-        if(msg.payload.status=== "authenticate-google") {
-          window.location.href=msg.payload.url;
+        if(msg.payload.status=== "authenticate") {
+          window.location.href=msg.payload.message;
         }
         switch(msg.cmd){
           case 'listDevices':
@@ -33,6 +34,9 @@ var webinosPZH = {
           case 'crashLog':
             if (typeof webinosPZH.callbacks.crashLog === 'function') webinosPZH.callbacks.crashLog(msg.payload);
             break;
+          case 'infoLog':
+            if (typeof webinosPZH.callbacks.infoLog === 'function') webinosPZH.callbacks.infoLog(msg.payload);
+            break;
           case 'pzhPzh':
             if (typeof webinosPZH.callbacks.pzhPzh === 'function') webinosPZH.callbacks.pzhPzh(msg.payload);
             break;
@@ -40,7 +44,13 @@ var webinosPZH = {
             if (typeof webinosPZH.callbacks.listPzp === 'function') webinosPZH.callbacks.listPzp(msg.payload);
             break;
           case 'revokePzp':
-            if (typeof webinosPZH.callbacks.revokePzp === 'function') webinosPZH.callbacks.revokePzp(msg.pzpid);
+            if (typeof webinosPZH.callbacks.revokePzp === 'function') webinosPZH.callbacks.revokePzp(msg.payload);
+            break;
+          case 'listAllServices':
+            if (typeof webinosPZH.callbacks.listAllServices === 'function') webinosPZH.callbacks.listAllServices(msg.payload);
+            break;
+          case 'listUnregServices':
+            if (typeof webinosPZH.callbacks.listUnregServices === 'function') webinosPZH.callbacks.listUnregServices(msg.payload);
             break;
           case 'listAllServices':
             if (typeof webinosPZH.callbacks.listAllServices === 'function') webinosPZH.callbacks.listAllServices(msg.payload);
@@ -59,9 +69,9 @@ var webinosPZH = {
     webinosPZH.channel = new XMLHttpRequest();
     webinosPZH.channel.onreadystatechange = webinosPZH.messageRecieved;
     if (typeof location.port !== "undefined") {
-      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS");
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS&status="+payload.payload.status);
     } else {
-      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS");
+      webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS&status="+payload.payload.status);
     }
     webinosPZH.channel.setRequestHeader("Content-Type","application/json");
     webinosPZH.channel.send(JSON.stringify(payload));
@@ -71,6 +81,7 @@ var webinosPZH = {
     userDetails: null,
     addPzpQR: null,
     crashLog: null,
+    infoLog:null,
     pzhPzh: null,
     listPzp: null,
     revokePzp: null,
@@ -79,16 +90,16 @@ var webinosPZH = {
   commands: {
     authenticate: {
       google: function(){
-        webinosPZH.send({cmd:"authenticate-google"});
+        webinosPZH.send({payload:{status:"authenticate","message": {"provider"  :"google"}}});
       },
       yahoo: function(){
-        webinosPZH.send({cmd:"authenticate-yahoo"});
+        webinosPZH.send({payload:{status:"authenticate","message": {"provider"  :"yahoo"}}});
       }
     },
     logout: function(){
-      webinosPZH.send("logout");
-      if ( window.location.search && window.location.search.split("?") &&
-        window.location.search.split("?")[1].split('=')[1].split("&")[0] === 'google') {
+      webinosPZH.send({payload:{status:"logout"}});
+      provider = document.cookie && document.cookie.split(",") && document.cookie.split(",")[2] && document.cookie.split(",")[2].split("=") && document.cookie.split(",")[2].split("=")[1] || "google";
+      if ( provider === 'google') {
         window.open('https://www.google.com/accounts/Logout');
       } else {
         window.open('https://login.yahoo.com/config/login?logout=1');
@@ -97,23 +108,39 @@ var webinosPZH = {
     },
     listDevices: function(callback){
       webinosPZH.callbacks.listDevices = callback;
-       webinosPZH.send({cmd:"listDevices"});
+       webinosPZH.send({payload:{status:"listDevices"}});
     },
     addPzp: function(callback){
       webinosPZH.callbacks.addPzpQR = callback;
-      webinosPZH.send({cmd:"addPzp"});
+      webinosPZH.send({payload:{status:"addPzp"}});
     },
     connectPzh: function(connectPzhId, callback){
       webinosPZH.callbacks.pzhPzh = callback;
-      webinosPZH.send({cmd:"pzhPzh", "to":connectPzhId});
+      webinosPZH.send({payload:{status:"pzhPzh", "message":connectPzhId}});
     },
     listPzp: function(callback){
       webinosPZH.callbacks.listPzp = callback;
-      webinosPZH.send({cmd:"listPzp"});
+      webinosPZH.send({payload:{status:"listPzp"}});
     },
     revokePzp: function(id, callback) {
       webinosPZH.callbacks.revokePzp = callback;
-      webinosPZH.send({cmd:"revokePzp","pzpid":id});
+      webinosPZH.send({payload:{status:"revokePzp","pzpid":id}});
+    },
+    listAllServices: function(callback){
+        webinosPZH.callbacks.listAllServices = callback;
+        webinosPZH.send({payload: {status:"listAllServices"}});
+    },
+    listUnregServices: function(at, callback){
+        webinosPZH.callbacks.listUnregServices = callback;
+        webinosPZH.send({payload: {status:"listUnregServices", "at":at}});
+    },
+    registerService: function(at, name, callback){
+        webinosPZH.callbacks.registerService = callback;
+        webinosPZH.send({payload: {status:"registerService", "at":at, "name":name}});
+    },
+    unregisterService: function(svAddress, svId, svAPI, callback){
+        webinosPZH.callbacks.unregisterService = callback;
+        webinosPZH.send({payload: {status:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI}});
     },
     listAllServices: function(callback){
         webinosPZH.callbacks.listAllServices = callback;
@@ -134,14 +161,18 @@ var webinosPZH = {
     },
     crashLog: function(callback){
       webinosPZH.callbacks.crashLog = callback;
-      webinosPZH.send({cmd:'crashLog'});
+      webinosPZH.send({payload:{status:'crashLog'}});
+    },
+    infoLog: function(callback){
+      webinosPZH.callbacks.infoLog = callback;
+      webinosPZH.send({payload:{status:'infoLog'}});
     },
     userDetails: function(callback){
       webinosPZH.callbacks.userDetails = callback;
-      webinosPZH.send({cmd:'userDetails'});
+      webinosPZH.send({payload:{status:'userDetails'}});
     },
     restartPzh: function(){
-      webinosPZH.send({cmd:'restartPzh'});
+      webinosPZH.send({payload:{status:'restartPzh'}});
     }
   }
 };

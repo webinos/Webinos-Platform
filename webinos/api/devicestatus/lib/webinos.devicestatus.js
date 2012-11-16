@@ -1,26 +1,12 @@
 (function () {
 	"use strict";
-	var webinos = require('webinos')(__dirname);
+	var webinos = require("find-dependencies")(__dirname);
 	var nativeDeviceStatus;
 	try{
       nativeDeviceStatus = require('nativedevicestatus');
     }catch(err){
 	}
-	var pmlib = webinos.global.require(webinos.global.manager.policy_manager.location, 'lib/policymanager.js'),
-	policyManager;
-	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation,
-	policyManager;
-
-//Regular policyManger lib loading.. the library currently is loaded inside the getPropertyValue method
-//to recognize real-time changes in the policy, (we need a method to sync the policy) 
-/*	try {
-		policyManager = new pmlib.policyManager();
-	}
-	catch(e) {
-		console.log("Load error: "+e.message);
-		return;
-	}
-*/
+	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation;
 
 	/*
 	 *	DeviceapisDeviceStatusManager Interface
@@ -41,27 +27,13 @@
 	DeviceStatusManager.prototype.getComponents = function (aspect, successCallback) {
 		successCallback(nativeDeviceStatus.getComponents(aspect));
 	};
-	
+
 	DeviceStatusManager.prototype.isSupported = function (aspect, property, successCallback) {
 		successCallback({'aspect':aspect, 'property':property, 'isSupported':nativeDeviceStatus.isSupported(aspect, property)});
 	};
 
 	DeviceStatusManager.prototype.getPropertyValue = function (successCallback, errorCallback, prop) {
-		//the following line will be removed
-		policyManager = new pmlib.policyManager();
-		
-		var res,
-		request = {},
-		subjectInfo = {},
-		resourceInfo = {};
-
-		subjectInfo.userId = "user1";
-		request.subjectInfo = subjectInfo;
-
-		resourceInfo.apiFeature = "http://wacapps.net/api/devicestatus";
-		request.resourceInfo = resourceInfo;
-
-		policyManager.enforceRequest(request, errorCallback, successCallback, nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component));
+        nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component);
 	};
 
 	DeviceStatusManager.prototype.watchPropertyChange = function (successCallback, errorCallback, prop, options) {
@@ -80,11 +52,11 @@
 		if (typeof component === 'string') {
 			this.component = component;
 		}
-		
+
 		if (typeof aspect === 'string') {
 			this.aspect = aspect;
 		}
-		
+
 		if (typeof property === 'string') {
 			this.property = property;
 		}
@@ -102,11 +74,11 @@
 		if (typeof minNotificationInterval === 'number') {
 			this.minNotificationInterval = minNotificationInterval;
 		}
-		
+
 		if (typeof maxNotificationInterval === 'number') {
 			this.maxNotificationInterval = maxNotificationInterval;
 		}
-		
+
 		if (typeof minChangePercent === 'number') {
 			this.minChangePercent = minChangePercent;
 		}
@@ -176,7 +148,7 @@
 	 */
 
 	ErrorCallback = function () {};
-	
+
 	ErrorCallback.prototype.onError = function (error) {
 		return;
 	};
@@ -186,7 +158,7 @@
 	 */
 
 	PendingOperation = function () {};
-	
+
 	PendingOperation.prototype.cancel = function () {
 		return;
 	};

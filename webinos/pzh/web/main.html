@@ -31,20 +31,23 @@
       }
       $("#enumConnectedPzp").html(text);
       $('.column').equalHeight(); // Fix height
-  };
+  }
   function displayQRCode(payload){
-      "use strict";
       var text = "<center>";
       text += "<p> <img src=" + payload.img + "> </img> </p> ";
-      text += "<p> <h2>" +payload.code +"</p> </h2>";
-      setArticle("PZP Authorization code",text);
-  };
+      text += "<p> <h2>" +payload.code +"</h2> </p>";
+      text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
+      setArticle("Temporary access code",text);
+  }
   function setArticle(header,body){
     $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
     $('.column').equalHeight(); // Fix height
-  };
+  }
   function connectPzh(){
-    webinosPZH.commands.connectPzh(document.getElementById('connectPzhId').value, function(result){
+    var id =  document.getElementById('connectPzhId').value;
+    id = id.split("/");
+    id = id[0] + "_" + id[1];
+    webinosPZH.commands.connectPzh(id, function(result){
       if (result === true) {
         setArticle("Success", "<p>Pzh in now connected!</p>");
         webinosPZH.commands.listDevices(DisplayListOfDevices);
@@ -52,27 +55,27 @@
         setArticle("Fail", "<p>Pzh did not connect, reason -  " + result + "</p>" );
       }
     });
-  };
+  }
   function pzpRevokeResult(payload){
-    setArticle("Certificate revoked", "<p>" + payload + " certificate revoked.</p>");
-  };
+    setArticle("Device removed from personal zone", "<p>" + payload + " device removed.</p>");
+  }
   function listPzpsToRevoke(payload){
       var i, id;
       var text = " <h3 align=center> Connected PZP's</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
       for (i = 0; i < payload.signedCert.length; i += 1 ) {
         id = payload.signedCert[i].id;
-        text += "<tr>  <td> " + payload.signedCert[i].cname + "</td> <td> "+
-        "<input id=\'"+id+"\' type=\'button\' onclick=\'webinosPZH.commands.revokePzp(pzpRevokeResult)\'; value =\'"+id+"\' />  </td> </tr>" ;
+        text += "<tr>  <td> " + payload.signedCert[i].url + "</td> <td> "+
+        "<input id=\'"+payload.signedCert[i].url+"\' type=\'button\' onclick=\'webinosPZH.commands.revokePzp(id,pzpRevokeResult)\'; value =\'"+id+"\' />  </td> </tr>" ;
       }
       text += '</table> </p>';
-      text += " <p> <h3 align=center> Revoked PZP's</h3> </p> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      text += " <p> <h3 align=center> Remove a device from your personal zone</h3> </p><p>This page will allow you to remove a device from your personal zone.</p> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
       for (i = 0; i < payload.revokedCert.length; i += 1 ) {
         id = payload.revokedCert[i].id;
-        text += "<tr>  <td> " + payload.revokedCert[i].cname + "</td> </td> </tr>" ;
+        text += "<tr>  <td> " + payload.revokedCert[i].url + "</td> </td> </tr>" ;
       }
       text += '</table> </p>';
-      setArticle("Revoke certificate", text);
-  };
+      setArticle("Remove device from personal zone", text);
+  }
   function listAllServices(payload){
       var text = " <h3 align=center> Configure services</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
       for (var i = 0; i < payload.pzEntityList.length; i += 1 ) {
@@ -100,8 +103,11 @@
       setArticle("unregistered Services", text);
   }
   function showCrashLog(payload){
-    setArticle("Crash Log", payload);
-  };
+      setArticle("Crash Log", payload);
+  }
+  function showInfoLog(payload){
+      setArticle("Info Log", payload);
+  }
   function listUserDetails(payload){
       var text = "";
       if (!payload) {
@@ -109,7 +115,7 @@
           name: "Connected",
           country: "Undefined",
           email: "Undefined",
-          servername: "Undefined",
+          servername: "Undefined"
         }
       }
       if (payload.image){
@@ -120,32 +126,36 @@
       text += "<p><h3> Email   :     "+ payload.email+"</h3></p>";
       text += "<p><h3> Connected to: "+ payload.servername+"</h3></p>";
 
-      setArticle("User details", text);
+      setArticle("About you", text);
       $("#userId").html(payload.name);
       webinosPZH.commands.listDevices(DisplayListOfDevices);
-  };
+  }
   $(document).ready(function() {
-
     webinosPZH.init(function(){
       webinosPZH.commands.userDetails(listUserDetails);
-      setInterval(function() {
+      setTimeout(function() {
         webinosPZH.commands.listDevices(DisplayListOfDevices);
-      }, 60000); // every 60 seconds pull the list device information
+      }, 100);
     });
-
     $("#addPzp").click(function(){
       webinosPZH.commands.addPzp(displayQRCode);
     });
     $("#connectPzh").click(function(){
-      var text = "Connect PZH: <input type='text' id='connectPzhId' value='localhost/WGuo'/>";
-      text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
-      setArticle("Connect to pzh",text);
+      var text = "Connect to zone:<br/> <input type='text' id='connectPzhId' value=''/>";
+      text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/> <p>The address should be of of form hostname/email eg: pzh.webinos.org/bob@gmail.com</p>";
+      setArticle("Connect to another personal zone",text);
     });
     $("#revokeCert").click(function(){
       webinosPZH.commands.listPzp(listPzpsToRevoke);
     });
+    $("#refresh").click(function(){
+       webinosPZH.commands.listDevices(DisplayListOfDevices);
+    });
     $("#crashLog").click(function(){
       webinosPZH.commands.crashLog(showCrashLog);
+    });
+    $("#infoLog").click(function(){
+      webinosPZH.commands.infoLog(showInfoLog);
     });
     $("#userDetails").click(function(){
       webinosPZH.commands.userDetails(listUserDetails);
@@ -157,22 +167,14 @@
     $("#serviceConfig").click(function(){
       webinosPZH.commands.listAllServices(listAllServices);
     });
-
-
     $('.column').equalHeight(); // Fix height
     });
-
-
     </script>
-
 </head>
-
-
 <body>
-
   <header id="header">
     <hgroup>
-      <h1 class="site_title"><img src="./images/webinosWithBorder.png">PZH Admin</h1>
+      <h1 class="site_title"><img src="./images/webinosWithBorder.png">Personal zone admin</h1>
       <h2 class="section_title">Dashboard</h2><div class="btn_view_site"><a href="#logout" onclick="webinosPZH.commands.logout()">Logout</a></div>
     </hgroup>
   </header> <!-- end of header bar -->
@@ -182,29 +184,35 @@
       <p id="userId">Connecting...</p>
     </div>
     <div class="breadcrumbs_container">
-      <article class="breadcrumbs"><a href="index.html">Webinos Pzh</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
+      <article class="breadcrumbs"><a href="index.html">webinos personal zone hub</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
     </div>
   </section><!-- end of secondary bar -->
 
   <aside id="sidebar" class="column">
-    <h3>Connected PZH</h3>
-      <ul class="toggle" style="display: block;" id="enumConnectedPzh">
+    <h3> <a href="#refresh" id="refresh" >Refresh list </a> </h3>
+    <h3>Connected personal zones</h3>
+      <ul class="" style="display: block;" id="enumConnectedPzh">
       </ul>
-      <h3>Connected PZP</h3>
-      <ul class="toggle" style="display: block;" id="enumConnectedPzp">
+      <ul class="" style="" id="connectToAnotherPZHLink">
+        <li> <a href="#connectPzh" id="connectPzh">Connect to another personal zone... </a> </li>
       </ul>
-      <h3>Connectivity commands</h3>
-      <ul class="toggle" style="">
-        <li> <a href="#addPzp" id="addPzp" >Add New PZP </a> </li>
-        <li> <a href="#connectPzh" id="connectPzh">Connect Other PZH </a> </li>
-        <li> <a href="#revokeCert" id='revokeCert'>Revoke Certificate </a> </li>
+      
+      
+      <h3>Connected devices</h3>
+      <ul class="" style="display: block;" id="enumConnectedPzp">
       </ul>
-      <h3>PZH Admin</h3>
-      <ul class="toggle" style="">
-        <li> <a href="#crashLog" id="crashLog">Crash Log </a> </li>
-        <li> <a href="#restartPzh" id="restartPzh">Restart PZH </a> </li>
-        <li> <a href="#userDetails" id="userDetails">User Details </a> </li>
-        <li> <a href="#serviceConfig" id="serviceConfig">Service Configuration </a> </li>
+      <ul class="" style="">
+        <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
+        <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>   
+      </ul>
+      
+      <h3>Personal zone admin</h3>
+      <ul class="" style="">
+        <li> <a href="#userDetails" id="userDetails">About you </a> </li>
+        <li> <a href="#serviceConfig" id="serviceConfig">Service configuration </a> </li>
+        <li> <a href="#restartPzh" id="restartPzh">Restart the personal zone hub </a> </li>
+        <li> <a href="#crashLog" id="crashLog">Crash log </a> </li>
+        <li> <a href="#infoLog" id="infoLog">Info log </a> </li>
       </ul>
 
     <footer>
@@ -216,15 +224,12 @@
   <section id="main" class="column">
 
     <article class="module width_full">
-      <header><h3>Webinos PZH</h3></header>
+      <header><h3>webinos personal zone hub</h3></header>
         <div class="module_content">
           <p>Please select one of the actions on the left menu</p>
         </div>
     </article><!-- end of styles article -->
     <div class="spacer"></div>
   </section>
-
-
 </body>
-
 </html>

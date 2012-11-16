@@ -254,9 +254,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.authenticate = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.authenticate = function (params, successCB, errorCB) {
 		"use strict";
 		var child, password, error = {};
 		var that = this;
@@ -553,9 +552,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.isAuthenticated = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.isAuthenticated = function (params, successCB, errorCB) {
 		"use strict";
 		var authenticated, authfile, authrow, error = {};
 		
@@ -599,9 +597,8 @@
 	 * @param usename Username
 	 * @param successCB Success callback
 	 * @param errorCB Error callback
-	 * @param objectRef RPC object reference
 	 */
-	AuthenticationModule.prototype.getAuthenticationStatus = function (params, successCB, errorCB, objectRef) {
+	AuthenticationModule.prototype.getAuthenticationStatus = function (params, successCB, errorCB) {
 		"use strict";
 		var authenticated, resp, authfile, authrow, auth_s = new AuthStatus(), error = {};
 		

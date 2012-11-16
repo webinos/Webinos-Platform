@@ -20,6 +20,10 @@
       "name": "Events API",
       "location": "api/events/"
     },
+    "zap-and-shake": {
+      "name": "Zap and Shake (hack)",
+      "location": "api/zap-and-shake/"
+    },
     "file": {
       "name": "File API",
       "location": "api/file/"
@@ -91,9 +95,9 @@
       "location": "common/manager/keystore/"
     }
   },
-  "uniqueID": {
-    "name":"uniqueID",
-    "location": "common/uniqueID/"
+  "util": {
+    "name":"Webinos utility",
+    "location": "common/util/"
   },
   "rpc": {
     "name": "RPC",

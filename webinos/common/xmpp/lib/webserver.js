@@ -15,110 +15,128 @@
 *
 *******************************************************************************/
 
-// webserver.js
-// simple webserver that serves the contents of the www/ directory
-// based on nodebeginner.org project
-// author: Victor Klos & Eelco Cramer
-var http = require('http');
-var server = http.createServer(handler);
-var url = require("url");
-var path = require("path");
-var fs = require("fs");
-var logger = require('nlogger').logger('webserver.js');
-var io = require('socket.io').listen(server);
+/**
+ * Author: Eelco Cramer
+ */
 
-var rpcServer = require("./RpcServer.js");
+(function() {
+	"use strict";
+	
+    var http = require('http');
+    var server = http.createServer(handler);
+    var wsServer = http.createServer(handler);
+    var url = require("url");
+    var path = require("path");
+    var fs = require("fs");
+    var logger = require('./Logger').getLogger('webserver', 'warn');
 
-var path = require('path');
-var documentRoot = path.resolve(__dirname, './www');
-var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-var dependencyPath = path.join(__dirname, '../', moduleRoot.root.location, '/dependencies.json')
-var dependencies = require(path.normalize(dependencyPath));
-var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
+    var WebSocketServer = require('websocket').server;
+    var rpcServer = require("./RpcServer.js");
 
-var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
+    var path = require('path');
+    var documentRoot = path.resolve(__dirname, '../../../test/client');
+    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
+    var dependencyPath = path.join(__dirname, '../', moduleRoot.root.location, '/dependencies.json')
+    var dependencies = require(path.normalize(dependencyPath));
+    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-function handler(request, response) {
-	logger.trace("Entering request callback");
-    var pathname = url.parse(request.url).pathname;
-
-    logger.debug("Received request for " + pathname);
-
-    // simulate a fully configured web server
-    if (pathname == "/") pathname = "index.html";
+    var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
     
-    // determine file to serve
-    var filename = path.join(documentRoot, pathname);
-    
-    // the rpc stuff is not in the www tree, so get around that
-	if (pathname == '/rpc/rpc.js') {
-    	filename = path.join(webinosRoot, dependencies.rpc.location, "lib/rpc.js");
-	}
-    
-	filename = path.normalize(filename);
+    var wss;
 
-    // now serve the file
-    fs.readFile(filename, function (err, data) {
-    	if (err) {
-    		// Can't read file. This is not an error or warning
-    		logger.debug("Can't read " + filename + " due to " + err);
+    /**
+     * Handles incoming requests from connected WRTs
+     * @function
+     * @param request The HTTP request.
+     * @param response The HTTP response.
+     */
+    function handler(request, response) {
+    	logger.verbose("Entering request callback");
+        var pathname = url.parse(request.url).pathname;
+
+        logger.debug("Received request for " + pathname);
+
+        // simulate a fully configured web server
+        if (pathname == "/") pathname = "client.html";
+    
+        // determine file to serve
+        var filename = path.join(documentRoot, pathname);
+    
+    	filename = path.normalize(filename);
+
+        // now serve the file
+        fs.readFile(filename, function (err, data) {
+        	if (err) {
+        		// Can't read file. This is not an error or warning
+        		logger.debug("Can't read " + filename + " due to " + err);
     		
-    		// create error response
-    		response.writeHead(404, {"Content-Type": "text/plain"});
-    		response.write("Error " + err + " when serving " + pathname);
-    		logger.info("404 NOT FOUND for " + filename);
-    	} else {
-    		response.writeHead(200, {"Content-Type": mimeType(filename)});
-    		response.write(data);
-    		logger.info("200 OK for " + filename);
-    	}
-    	response.end();
-    	logger.trace("Leaving request callback");
-    });
-}
+        		// create error response
+        		response.writeHead(404, {"Content-Type": "text/plain"});
+        		response.write("Error " + err + " when serving " + pathname);
+        		logger.info("404 NOT FOUND for " + filename);
+        	} else {
+        		response.writeHead(200, {"Content-Type": mimeType(filename)});
+        		response.write(data);
+        		logger.info("200 OK for " + filename);
+        	}
+        	response.end();
+        	logger.verbose("Leaving request callback");
+        });
+    }
 
-function start(ws_port, rpcHandler) {
-	logger.trace("Entering start()");
-	logger.debug("Creating web server on port " + ws_port);
+    /**
+     * Starts the webserver webinos clients can connect to.
+     * @function
+     * @param httpPort Port for HTTP connections.
+     * @param wssPort Port for websocket connections.
+     * @param rpcHandler The RPC handler.
+     * @param jid The jid of PZP.
+     */
+    function start(httpPort, wssPort, rpcHandler, jid) {
+    	logger.verbose("Entering start()");
+    	logger.debug("Creating web server on port " + httpPort);
 	
-	server.listen(ws_port);
+    	server.listen(httpPort);
+    	wsServer.listen(wssPort);
 	
-//	io.enable('browser client minification');  // send minified client
-//	io.enable('browser client etag');          // apply etag caching logic based on version number
-	io.set('log level', 1);                    // reduce logging
-	io.set('transports', [                     // enable all transports (optional if you want flashsocket)
-	    'websocket'
-	  , 'flashsocket'
-	  , 'htmlfile'
-	  , 'xhr-polling'
-	  , 'jsonp-polling'
-	]);
-	
-	logger.info("Webserver listening on port " + ws_port);
-	
-	// configure the RPC server
-	rpcServer.configure(io, rpcHandler);
-	
-	logger.trace("Leaving start()");
-}
+    	logger.info("Webserver listening on port " + httpPort);
 
-exports.start = start;
-exports.io = io;
+    	// configure the RPC server
+    	wss = new WebSocketServer({
+            httpServer: wsServer,
+            autoAcceptConnections: true
+        });
+    	
+    	//TODO fix this
+    	rpcServer.configure(wss, rpcHandler, jid);
+	
+    	logger.verbose("Leaving start()");
+    }
 
-var mimeTypes = [];
-mimeTypes[".png"]  = "image/png";
-mimeTypes[".gif"]  = "image/gif";
-mimeTypes[".htm"]  = "text/html";
-mimeTypes[".html"] = "text/html";
-mimeTypes[".txt"]  = "text/plain";
-mimeTypes[".png"]  = "image/png";
-mimeTypes[".js"]   = "application/x-javascript";
-mimeTypes[".css"]  = "text/css";
+    exports.start = start;
+    exports.wss = wss;
 
-function mimeType(file) {
-	logger.trace("Entering mimeType function");
-	var ext = path.extname(file);
-	var type = mimeTypes[ext] || "text/plain";
-	logger.debug("Determined mime type of ext " + ext + " to be " + type)
-	logger.trace("Leaving mimeType function");
-}
+    var mimeTypes = [];
+    mimeTypes[".png"]  = "image/png";
+    mimeTypes[".gif"]  = "image/gif";
+    mimeTypes[".htm"]  = "text/html";
+    mimeTypes[".html"] = "text/html";
+    mimeTypes[".txt"]  = "text/plain";
+    mimeTypes[".png"]  = "image/png";
+    mimeTypes[".js"]   = "application/x-javascript";
+    mimeTypes[".css"]  = "text/css";
+
+    /**
+     * Gets the MIME type for a file.
+     * @private
+     * @function
+     * @param {string} file The filename.
+     */
+    function mimeType(file) {
+    	logger.verbose("Entering mimeType function");
+    	var ext = path.extname(file);
+    	var type = mimeTypes[ext] || "text/plain";
+    	logger.debug("Determined mime type of ext " + ext + " to be " + type)
+    	logger.verbose("Leaving mimeType function");
+    }
+})();

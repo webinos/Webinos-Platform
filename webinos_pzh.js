@@ -16,16 +16,15 @@
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-var fs   = require("fs");
-var pzh  = require("./webinos/pzh/lib/pzh");
+var pzh_provider  = require("./webinos/pzh/lib/pzh_provider.js");
+
 var host = null, name = null;
 
-
 function help() {
-  console.log("Usage: node startPzh.js [options]");
+  console.log("Usage: node webinos_provider.js [options]");
   console.log("Options:");
-  console.log("--host=[host]            host of the pzh farm (default localhost)");
-  console.log("--farm-name=[identifier] farm name (default machine-name)");
+  console.log("--host = [host] host of the pzh provider (default \"\")");
+  console.log("--name = [name] friendly provider name (default \"\")");
   process.exit();
 }
 
@@ -38,7 +37,7 @@ process.argv.forEach(function (arg) {
       case "--host":
         host = parts[1];
         break;
-      case "--farm-name":
+      case "--name":
         name = parts[1];
         break;
       }
@@ -57,8 +56,13 @@ if ( name === null) {
   name = "";
 }
 
-pzh.farm.startFarm(host, name, function(result) {
-  console.log("******* PZH FARM STARTED *******");
+var _pzh_provider = new pzh_provider(host, name);
+_pzh_provider.startProvider(function(result, details) {
+  if (result) {
+    console.log("ZONE PROVIDER STARTED");
+  } else {
+    console.log("ZONE PROVIDER FAILED TO START "+ details);
+  }
 });
 
 

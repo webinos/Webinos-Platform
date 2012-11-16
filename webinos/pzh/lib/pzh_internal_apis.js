@@ -1,286 +1,165 @@
 /*******************************************************************************
-*  Code contributed to the webinos project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Copyright 2011 University of Oxford
-* Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
-********************************************************************************/
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+ *******************************************************************************/
 
-// This file is a wrapper / facade for all the functionality that the PZH
-// web interface is likely to need.
+var webinos = require('find-dependencies')(__dirname);
+var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 
-// Ideally, this would be accessed through the same messaging interface
-// as everything else, as these need some access control too.
-// In other words: due a refactor.
-
-var pzhapis     = exports;
-
-var path        = require("path");
-var fs          = require("fs");
-var util        = require("util");
-var crypto      = require("crypto");
-
-var webinos = require("webinos")(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
-var qrcode  = require("./pzh_qrcode.js");
-var revoke  = require("./pzh_revoke.js");
-
-var farm    = require("./pzh_farm.js");
-
-var pzh_internal_apis = exports;
-
-// Synchronous method for getting information about a PZP with a certain ID.
-function getPzpInfoSync(instance, pzpId) {
+var Pzh_Apis = exports;
+/**
+ *
+ * @param instance
+ * @param type
+ * @param callback
+ */
+Pzh_Apis.fetchLogs = function(instance, type, callback){
   "use strict";
-  //find out whether we have this PZP in a session somewhere.
-  var pzpConnected = false;
-  var pzpName = pzpId;
-  for (var i in instance.connectedPzp) {
-    if (instance.connectedPzp.hasOwnProperty(i)) {
-        //session IDs append the PZH to the front of the PZP ID.
-      var splitId = i.split("/");
-      if (splitId.length > 1 && splitId[1] !== null) {
-        if (splitId[1] === pzpId) {
-          pzpConnected = true;
-          pzpName = i;
-        }
-      }
-    }
-  }
-
-  return {
-    id          : pzpId,
-    cname       : pzpName,
-    isConnected : pzpConnected
-  };
-}
-
-// Synchronous method for getting information about a PZH with a certain ID.
-function getPzhInfoSync(instance, pzhId) {
-  "use strict";
-  if (pzhId && instance && instance.config && instance.config.name &&
-      pzhId.split("_")[0] === instance.config.name) {
-    //we know that this PZH is alive
-    return {
-      id : pzhId + " (Your PZH)",
-      url: pzhId,
-      isConnected: true
-    };
-  } else {
-    if(instance.connectedPzh) {
-      for (var i in instance.connectedPzh) {
-        if (instance.connectedPzh.hasOwnProperty(i)) {
-          //session IDs append the PZH to the front of the PZP ID.
-          if (i === pzhId.split('/')[1]) {
-            return {
-              id          : i,
-              url         : pzhId,
-              isConnected : true
-            };
-          }
-        }
-      }
-    }
-    // We did not find pzh connected
-     return {
-      id          : pzhId.split("/")[1],
-      url         : pzhId,
-      isConnected : false
-    };
-  }
-}
-
-// Wrapper for adding a new PZP to a personal zone through a short code
-pzh_internal_apis.addPzpQR = function (instance, callback) {
-  "use strict";
-  qrcode.addPzpQRAgain(instance, callback);
-};
-
-
-pzh_internal_apis.listPzp = function(instance, callback) {
-  "use strict";
-  var result = {signedCert: [], revokedCert: []};
-  if (instance && instance.config) {
-    if(instance.config.signedCert) {
-      for (var i in instance.config.signedCert){
-        if (instance.config.signedCert.hasOwnProperty(i)) {
-          result.signedCert.push(getPzpInfoSync(instance, i));
-        }
-      }
-    }
-    if (instance.config.revokedCert) {
-      for (var i in instance.config.revokedCert) {
-        if (instance.config.revokedCert.hasOwnProperty(i)) {
-          result.revokedCert.push(getPzpInfoSync(instance, i));
-        }
-      }
-    }
-    if (instance.config.serverName) {
-      var payload = {to: instance.config.serverName, cmd:"listPzp", payload:result};
-      callback(payload);
+  logger.fetchLog(type, "Pzh", instance.getFriendlyName(), function(data) {
+    var payload;
+    if (type === "error") {
+      payload = {to: instance.getSessionId(), cmd:"crashLog", payload:data};
     } else {
-      callback();
+      payload = {to: instance.getSessionId(), cmd:"infoLog", payload:data};
     }
+    callback(payload);
+  });
+};
+
+/**
+ * Sets PZH URL id for storing information about QRCode
+ * @param {function} cb: Callback to return result
+ */
+Pzh_Apis.getMyUrl = function(instance, callback) {
+  "use strict";
+  if(callback) { callback(instance.getSessionId());}
+};
+/**
+ *
+ * @param instance
+ * @param callback
+ */
+Pzh_Apis.listZoneDevices = function(instance, callback) {
+  "use strict";
+  var result = {pzps: [], pzhs: []}, pzhId = instance.getSessionId();
+  result.pzps = instance.getConnectedPzp();
+  result.pzhs = instance.getConnectedPzh();
+  if(callback) { callback({to: pzhId, cmd:"listDevices", payload:result});}
+};
+/**
+ *
+ * @param instance
+ * @param callback
+ */
+Pzh_Apis.listPzp = function(instance, callback) {
+  "use strict";
+  var result = {signedCert: [], revokedCert: []}, myKey;
+  result.signedCert  = instance.getConnectedPzp();
+  result.revokedCert = instance.getRevokedCert();
+  callback({to: instance.getSessionId(), cmd:"listPzp", payload:result});
+};
+
+/**
+ *
+ * @param instance
+ * @param callback
+ */
+Pzh_Apis.fetchUserData = function(instance, callback) {
+  "use strict";
+  if(callback) {
+    var userDetails = instance.getUserDetails();
+    callback( {to: instance.getSessionId(), cmd: "userDetails", payload: {email: userDetails.email, country: userDetails.country, image: userDetails.image, name: userDetails.name, servername: instance.getSessionId()}});
   }
 };
 
-pzh_internal_apis.listAllServices = function(instance, callback) {
+/**
+ *
+ * @param instance
+ * @param callback
+ */
+Pzh_Apis.listAllServices = function(instance, callback) {
   "use strict";
-  var result = {pzEntityList: []};
-  result.pzEntityList.push({pzId:instance.sessionId});
-  for (var i in instance.config.signedCert){
-    if (typeof instance.config.signedCert[i] !== "undefined") {
-      result.pzEntityList.push({pzId:getPzpInfoSync(instance, i).cname});
-    }
+  var result = { pzEntityList: [] }, connectedPzp = instance.getConnectedPzp(), key;
+  result.pzEntityList.push({pzId:instance.getSessionId()});
+  for (key = 0; key <  connectedPzp.length; key = key + 1) {
+    result.pzEntityList.push({pzId:connectedPzp[key]});
   }
-
   result.services = instance.discovery.getAllServices();
-
-  var payload = {to: instance.config.serverName, cmd:"listAllServices", payload:result};
-  callback(payload);
+  var payload = {to: instance.getSessionId(), cmd:"listAllServices", payload:result};
+  if (callback) {callback(payload);}
 };
-
-pzh_internal_apis.listUnregServices = function(instance, at, callback) {
+/**
+ *
+ * @param instance
+ * @param at
+ * @param callback
+ */
+Pzh_Apis.listUnregServices = function(instance, at, callback) {
   "use strict";
-
   function runCallback(pzEntityId, modules) {
-	  var result = {
-	    "pzEntityId": pzEntityId,
-	    "modules"   : modules
-	  };
-	  callback({to: instance.config.serverName, cmd:"listUnregServices", payload:result});
+    var result = {
+      "pzEntityId": pzEntityId,
+      "modules"   : modules
+    };
+    if(callback) {callback({to: instance.getSessionId(), cmd:"listUnregServices", payload:result});}
   }
 
-  if (instance.sessionId !== at) {
+  if (instance.getSessionId() !== at) {
     var id = instance.addMsgListener(function(modules) {
       runCallback(at, modules);
     });
-    var msg = instance.prepMsg(instance.sessionId, at, "listUnregServices", {listenerId:id});
+    var msg =  {"type"  : "prop", "from" : instance.getSessionId(), "to"   : at,
+      "payload" : {"status" : "listUnregServices", "message" : {listenerId:id}}};
     instance.sendMessage(msg, at);
   } else {
-    runCallback(instance.sessionId, instance.getInitModules());
+    runCallback(instance.getSessionId(), instance.getInitModules());
   }
 };
-
-pzh_internal_apis.registerService = function(instance, at, name, callback) {
+/**
+ *
+ * @param instance
+ * @param at
+ * @param name
+ * @param callback
+ */
+Pzh_Apis.registerService = function(instance, at, name, callback) {
   "use strict";
-
-  if (instance.sessionId !== at) {
-    var msg = instance.prepMsg(instance.sessionId, at, "registerService", {name:name, params:{}});
+  if (instance.getSessionId() !== at) {
+    var msg =  {"type"  : "prop", "from" : instance.getSessionId(), "to"   : at,
+      "payload" : {"status" : "registerService", "message" :  {name:name, params:{}}}};
     instance.sendMessage(msg, at);
   } else {
     instance.registry.loadModule({"name":name, "params":{}}, instance.rpcHandler);
   }
 };
-
-pzh_internal_apis.unregisterService = function(instance, at, svId, svAPI, callback) {
+/**
+ *
+ * @param instance
+ * @param at
+ * @param svId
+ * @param svAPI
+ * @param callback
+ */
+Pzh_Apis.unregisterService = function(instance, at, svId, svAPI, callback) {
   "use strict";
-
   if (instance.sessionId !== at) {
-    var msg = instance.prepMsg(instance.sessionId, at, "unregisterService", {svId:svId, svAPI:svAPI});
+    var msg =  {"type"  : "prop", "from" : instance.getSessionId(), "to"   : at,
+      "payload" : {"status" : "unregisterService", "message" : {svId:svId, svAPI:svAPI}}};
     instance.sendMessage(msg, at);
   } else {
     instance.registry.unregisterObject({"id":svId, "api":svAPI});
-  }
-};
-
-// Get a list of all Personal zone devices.
-pzh_internal_apis.listZoneDevices = function(instance, callback) {
-  "use strict";
-  var result = {pzps: [], pzhs: []};
-  if (instance && instance.config) {
-    if (instance.config.signedCert) {
-      for (var i in instance.config.signedCert){
-        if (instance.config.signedCert.hasOwnProperty(i)) {
-          result.pzps.push(getPzpInfoSync(instance, i));
-        }
-      }
-    }
-    if(instance.config.otherCert) {
-      for (var i in instance.config.otherCert) {
-        if (instance.config.otherCert.hasOwnProperty(i)
-        && instance.config.otherCert[i].cert !== "") {
-          result.pzhs.push(getPzhInfoSync(instance, i));
-        }
-      }
-    }
-    result.pzhs.push(getPzhInfoSync(instance, instance.sessionId));
-    if (instance.config.serverName) {
-      var payload = {to: instance.config.serverName, cmd:"listDevices", payload:result};
-      callback(payload);
-    } else {
-      callback();
-    }
-  }
-};
-
-// Return the crashlog of this PZH.
-pzh_internal_apis.crashLog = function(instance, callback){
-  "use strict";
-  if (instance && instance.sessionId) {
-    var filename = path.join(session.common.webinosConfigPath()+"/logs/", instance.sessionId+".json");
-    fs.readFile(filename, function(err, data){
-      if (instance.config && instance.config.serverName) {
-        var payload = {to: instance.config.serverName, cmd:"crashLog", payload:""};
-        if (data !== null && typeof data !== "undefined"){
-          payload.payload = data.toString("utf8");
-          callback(payload);
-        } else {
-          callback(payload);
-        }
-      }
-    });
-  }
-};
-
-pzh_internal_apis.revoke = function(instance, pzpid, callback) {
-  "use strict";
-  revoke.revokePzp(pzpid, instance, callback);
-};
-
-// This is sending side action on PZH end
-pzh_internal_apis.addPzhCertificate = function(instance, to, callback) {
-  // temp solution till we decide how to trigger
-  if (to && to.split('/')) {
-    if (instance && instance.config && instance.config.otherCert &&
-      instance.config.otherCert[to] && instance.config.serverName) {
-      callback({cmd:'pzhPzh', to: instance.config.serverName, payload: "already connected"});
-    } else {
-      var pzh_connecting = require('./pzh_connecting.js');
-      var pzhConnect = new pzh_connecting(instance);
-      if(typeof pzhConnect !== "undefined") {
-        pzhConnect.sendCertificate(to, callback);
-      }
-    }
-  } else {
-    callback({cmd:'pzhPzh', to: instance.config.serverName, payload: "connecting address is wrong"});
-  }
-};
-
-pzh_internal_apis.restartPzh = function(instance, callback) {
-  "use strict";
-  try {
-    // Reload contents
-    if (instance && instance.config && instance.config.serverName && farm.server) {
-      var id = instance.config.serverName;
-      farm.server._contexts.some(function(elem) {
-        if (id.match(elem[0]) !== null && farm.pzhs[id]) {
-          elem[1] = crypto.createCredentials(farm.pzhs[id].options).context;
-        }
-      });
-    }
-  } catch(err) {
-    callback.call(instance, err);
   }
 };

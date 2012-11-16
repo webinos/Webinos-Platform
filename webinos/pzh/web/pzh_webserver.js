@@ -16,372 +16,282 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 ********************************************************************************/
 
-var pzhWebInterface = exports;
-
+var util     = require("util");
 var https    = require('https');
 var url      = require('url');
-var querystr = require('querystring');
 var path     = require('path');
 var fs       = require('fs');
-var crypto    = require('crypto');
 
-var webinos = require('webinos')(__dirname);
-var session = webinos.global.require(webinos.global.pzp.location, 'lib/session');
-var log     = new session.common.debug("pzh_webserver");
+var webinos = require("find-dependencies")(__dirname);
+var crypto   = require('crypto');
+var logger   = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
+var content  = webinos.global.require(webinos.global.util.location, "lib/content.js");
+var session  = webinos.global.require(webinos.global.pzp.location, "lib/session.js");
 
-var pzhapis = require('../lib/pzh_internal_apis');
-var farm    = require('../lib/pzh_farm');
-var openid  = require('./pzh_openid.js');
+var openid     = require("./pzh_openid.js");
+var enrollment = require("./pzh_deviceEnrollment.js");
+var qrcode     = require("../lib/pzh_qrcode.js");
+var pzh_api    = require("../lib/pzh_internal_apis.js");
+var cert_exch  = require("./pzh_pzh_certificateExchange.js");
 
-var storeInfo = [];
-
-function receiveCertificate(instance, payload) {
-  // TODO: Do not just add perform some security check
-  if (typeof instance !== "undefined" && typeof payload !== "undefined" &&
-    payload.name && payload.cert && payload.crl && instance.options.ca &&
-    instance.options.crl && instance.config && instance.config.otherCert[payload.name]) {
-    instance.config.otherCert[payload.name] = { cert: payload.cert, crl: payload.crl};
-    instance.options.ca.push(instance.config.otherCert[payload.name].cert);
-    instance.options.crl.push(instance.config.otherCert[payload.name].crl);
-    farm.server._contexts.some(function(elem) {
-      if (instance.config.serverName.match(elem[0]) !== null) {
-        elem[1] =  crypto.createCredentials(instance.options).context;
-      }
-    });
-    session.configuration.storeConfig(instance.config, function() {
-      log.info("stored certificates of other pzh");
-    });
-  } else{
-    log.error("missing information in the certificate receive message");
-  }
-
-};
-
-// Create HTTPS Server
-pzhWebInterface.start = function(hostname, resolvedAddress, callback) {
-  if (typeof hostname === "undefined" || typeof resolvedAddress === "undefined" || typeof callback !== "function" ){
-    log.error("failed starting PZH web server, invalid parameters");
-    callback("failed");
-  } else {
-    createWebInterfaceCertificate(farm.config, function(webServer){
-      var server = https.createServer(webServer, function(req, res){
-        req.on('data', function(data){
-          var query = JSON.parse(data.toString());
-          switch(query.cmd) {
-            case "login":
-              var filename = path.join(__dirname, "index.html");
-              fs.readFile(filename, "binary", function(err, file) {
-                if(err) {
-                  res.writeHeader(500, {"Content-Type": "text/plain"});
-                  res.write(err + "\n");
-                  res.end();
-                  return;
-                }
-                res.writeHeader(200, getContentType(filename));
-                var msg = {"type" : "prop",
-                  "to"   : query.id,
-                  "payload":{"status":query.cmd,
-                            "message":file}};
-                res.write(JSON.stringify(msg));
-                res.end();
-              });
-              break;
-            case "sendCert":
-              if (farm.pzhs && farm.pzhs[query.to]) {
-                receiveCertificate(farm.pzhs[query.to], query);
-                if (farm.pzhs[query.to].config && farm.pzhs[query.to].config.master) {
-                  var payload = {cmd: "receiveCert",
-                    cert: farm.pzhs[query.to].config.master.cert,
-                    crl:  farm.pzhs[query.to].config.master.crl};
-                  res.write(JSON.stringify(payload));
-                  res.end();
-                }
-              }
-              break;
-             case 'authenticate-google':
-                storeInfo[query.id] = query;
-                openid.authenticate(hostname, 'http://www.google.com/accounts/o8/id', res, query);
-              break;
-             case 'authenticate-yahoo':
-                storeInfo[query.id] = query;
-                openid.authenticate(hostname, 'http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds', res, query);
-              break;
-            case "registerPzh":
-              if (storeInfo[query.to]) {
-                farm.createPzh(hostname, storeInfo[query.to], function(id) {
-                  var msgSend = {"type":"prop","from":query.to, "to": query.id, "payload":
-                    {
-                      "status":"auth-status", "message": "true", "pzhid":id
-                    }
-                  }
-                  if (farm.pzhs[id]) {
-                    pzhapis.addPzpQR(farm.pzhs[id], function(result) {
-                      msgSend.payload.authCode = result.payload.code;
-                      res.write(JSON.stringify(msgSend));
-                      res.end();
-                    });
-                  }
-                });
-              }
-              break;
-            case 'enrollPzp':
-              if (farm.pzhs[query.to]) {
-                var pzh = farm.pzhs[query.to];
-                pzh.expecting.isExpected(function(expected) {
-                  if (!expected){
-                  //we"re not expecting anything - disallow.
-                  //not expecting a pzp
-                  } else {
-                    var validMsgObj = { "type":"prop", "from": query.id, "to": query.to, "payload":
-                      { "status":"clientCert", "message":
-                        { "code": query.authCode, "csr": query.csr}
-                      }
-                    };
-                    pzh.addNewPZPCert(validMsgObj, function(err, msgSend) {
-                      if (err !== null) {
-                        pzh.log.error(err);
-                        return;
-                      } else {
-                        msgSend.payload.pzhid = query.to;
-                        res.write(JSON.stringify(msgSend));
-                        res.end();
-                      }
-                    });
-                  }
-                });
-              }
-            break;
-          }
-
-          if (query.from) {
-           var currentPzh = new Buffer(query.from, 'base64').toString('ascii');
-           if (farm.pzhs[currentPzh] && farm.pzhs[currentPzh].config) {
-            farm.pzhs[currentPzh].res = res;
-            switch(query.cmd) {
-              case 'listDevices':
-                pzhapis.listZoneDevices(farm.pzhs[currentPzh], result);
-                break;
-              case 'userDetails':
-                var payload = {email:  farm.pzhs[currentPzh].config.email,
-                  country: farm.pzhs[currentPzh].config.country,
-                  image:   farm.pzhs[currentPzh].config.image,
-                  name:    farm.pzhs[currentPzh].config.name,
-                  servername: farm.pzhs[currentPzh].config.serverName};
-                result({to: farm.pzhs[currentPzh].config.serverName, cmd:'userDetails', payload: payload});
-                break;
-              case 'pzhPzh':
-                var store = res;
-                pzhapis.addPzhCertificate(farm.pzhs[currentPzh], query.to, function(status) {
-                  store.writeHeader(200, {'Content-Type': 'application/x-javascript; charset=UTF-8', 'Connection': 'Keep-Alive'});
-                  log.info("sending response " + JSON.stringify(status));
-                  store.write(JSON.stringify(status));
-                  store.end();
-                });
-                break;
-              case 'crashLog':
-                pzhapis.crashLog(farm.pzhs[currentPzh], result);
-                break;
-              case 'addPzp':
-                pzhapis.addPzpQR(farm.pzhs[currentPzh], result);
-                break;
-              case 'logout':
-                farm.pzhs[currentPzh].res.socket.end()
-                break;
-              case 'restartPzh':
-                pzhapis.restartPzh(farm.pzhs[currentPzh], result);
-                break;
-              case 'revokePzp':
-                pzhapis.revoke(farm.pzhs[currentPzh], query.pzpid, result);
-                break;
-              case 'listPzp':
-                pzhapis.listPzp(farm.pzhs[currentPzh], result);
-                break;
-              case 'listAllServices':
-                pzhapis.listAllServices(farm.pzhs[currentPzh], result);
-                break;
-              case 'listUnregServices':
-                pzhapis.listUnregServices(farm.pzhs[currentPzh], query.at, result);
-                break;
-              case 'registerService':
-                pzhapis.registerService(farm.pzhs[currentPzh], query.at, query.name, result);
-                break;
-              case 'unregisterService':
-                pzhapis.unregisterService(farm.pzhs[currentPzh], query.at, query.svId, query.svAPI, result);
-                break;
-            }
-          }
-         }
-        });
-      });
-
-
-      server.on('error', function(err) {
-        log.error(err);
-      });
-
-      server.on('request', function(req, res) {
-        var parsed = url.parse(req.url, true), query = {};
-        var filename = path.join(__dirname, parsed.pathname);
-        if (parsed.query) {
-          query = parsed.query;
-        }
-
-        if (query && query.cmd){
-          if(query.cmd === "verify") {
-            openid.fetchOpenIdDetails(req, res, storeInfo[query.id], function(host, details) {
-              if (query.id === "undefined") {
-                if (!farm.pzhs[hostname +'/'+details.username+"/"]) {
-                  farm.createPzh(host, details, function(id, instance) {
-                    log.info("***** created pzh " + id+ " *****");
-                    var crypt = new Buffer(hostname + '/' +details.username+'/').toString('base64');
-                    res.writeHead(302, {Location: '/main.html?provider='+details.provider+'&id='+crypt});
-                    res.end();
-                  });
-                } else {
-                  var crypt = new Buffer(hostname + '/' +details.username+'/').toString('base64');
-                  res.writeHead(302, {Location: '/main.html?provider='+details.provider+'&id='+crypt});
-                  res.end();
-                }
-              } else {
-                var storeDetails = storeInfo[query.id], status, auth_code;
-                var id = hostname+'/'+details.username+"/";
-                if (farm.pzhs[id]) {
-                  status = true;
-                  pzhapis.addPzpQR(farm.pzhs[id], function(result) {
-                    auth_code = result.payload.code;
-                    res.writeHead(302, {Location: "http://"+storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id+"&auth_code="+auth_code});
-                    res.end();
-                  });
-                  delete storeInfo[query.id];
-                } else {
-                  status = false;
-                  storeInfo[id]=details;
-                  res.writeHead(302, {Location: "http://"+storeDetails.returnPath +"?cmd=auth-status&status="+status+"&pzhid="+id});
-                  res.end();
-                }
-              }
-            });
-          }
-        } else {
-          fs.stat(filename, function(err, stats) {
-            if(err) {
-              res.writeHeader(404, {"Content-Type": "text/plain"});
-              res.write("404 Not Found\n");
-              res.end();
-              return;
-            }
-            if (stats.isDirectory()) {
-              filename = path.join(__dirname, "index.html");
-            }
-            // Security check, if not logged in, we redirect to index.html
-            fs.readFile(filename, "binary", function(err, file) {
-              if(err) {
-                res.writeHeader(500, {"Content-Type": "text/plain"});
-                res.write(err + "\n");
-                res.end();
-                return;
-              }
-              res.writeHeader(200, getContentType(filename));
-              res.write(file, "binary");
-              res.end();
-            });
-          });
-        }
-      });
-
-
-      server.listen(session.configuration.port.farm_webServerPort, hostname, function() {
-        log.info('listening on '+ session.configuration.port.farm_webServerPort);
-        callback(true);
-      });
-    });
-  }
-};
-
-
-
-/*pzhWebInterface.updateList = function (self) {
-  if (farm.pzhs[self.config.serverName]  && connection[self.config.serverName]) {
-    pzhapis.listZoneDevices(self, result);
-  }
-}*/
-
-function getContentType(uri) {
-  var contentType = 'text/plain';
-  switch (uri.substr(uri.lastIndexOf('.'))) {
-    case '.js':
-      contentType = 'application/x-javascript';
-      break;
-    case '.html':
-      contentType = 'text/html';
-      break;
-    case '.css':
-      contentType = 'text/css';
-      break;
-    case '.jpg':
-      contentType = 'image/jpeg';
-      break;
-    case '.png':
-      contentType = 'image/png';
-      break;
-    case '.gif':
-      contentType = 'image/gif';
-      break;
-  }
-  return {'Content-Type': contentType, 'Connection': 'Keep-Alive'};
-}
-
-function result(response) {
-  if (response && farm.pzhs[response.to].res !== "undefined") {
-    farm.pzhs[response.to].res.writeHeader(200, {'Content-Type':
+var PZH_WebServer = function() {
+  "use strict";
+  enrollment.call(this);
+  var authenticatedUser = {};
+  var pzhId = "";
+  var parent = this;
+  var hostname;
+  /**
+   * A generic function to send response back to the User that sent request
+   * @param response
+   */
+  function result(response) {
+    if (response && response.to && authenticatedUser.hasOwnProperty(response.to)) {
+      authenticatedUser[response.to].res.writeHeader(200, {'Content-Type':
         'application/x-javascript; charset=UTF-8', 'Connection': 'Keep-Alive'});
-    log.info("sending response " + JSON.stringify(response));
-    farm.pzhs[response.to].res.write(JSON.stringify(response));
-    farm.pzhs[response.to].res.end();
-  }
-}
-
-/**
- * @description: Starts web interface for PZH farm
- * @param {config} certificate configuration parameters
- * */
-function createWebInterfaceCertificate (config, callback) {
-  if (config && config.webServer && config.webServer.cert === "") {
-    session.certificate.selfSigned(config, 'PzhWebServer',
-      function(status, selfSignErr, ws_key, ws_cert, csr ) {
-      if(status === 'certGenerated') {
-        session.configuration.fetchKey(config.master.key_id, function(master_key) {
-          session.certificate.signRequest(csr, master_key,  config.master.cert, 1, config.serverName,
-          function(result, signed_cert) {
-            if(result === 'certSigned') {
-              config.webServer.cert = signed_cert;
-              session.configuration.storeKey(config.webServer.key_id, ws_key);
-              session.configuration.storeConfig(config, function() {
-                var wss = {
-                        key : ws_key,
-                        cert: config.webServer.cert,
-                        ca  : config.master.cert
-                };
-                callback(wss);
-              });
-            }
-          });
-        });
-      } else {
-        log.error('certificate generation error')
-      }
-    });
-} else {
-    if (config.webServer.cert !== ""){
-      var wss = {
-        key : '',
-        cert: config.webServer.cert,
-        ca  : config.master.cert
-        };
-      session.configuration.fetchKey(config.webServer.key_id, function(ws_key){
-        wss.key = ws_key;
-        callback(wss);
-      });
+      logger.log("sending response " + JSON.stringify(response));
+      authenticatedUser[response.to].res.write(JSON.stringify(response));
+      authenticatedUser[response.to].res.end();
+      authenticatedUser[response.to].res = "";
     }
   }
-}
+
+  /**
+   * A redirection message after completing verification
+   * @param res
+   * @param path
+   * @param msg
+   */
+  function sendRedirectionMsg(res, path, msg) {
+    res.writeHead(302, {Location: path + "?" +msg});
+    res.end();
+  }
+
+  /**
+   *
+   * @param res
+   * @param filename
+   */
+  function sendFile(res, filename) {
+    fs.stat(filename, function(err, stats) {
+      if(err) {
+        res.writeHeader(404, {"Content-Type": "text/plain"});
+        res.write("404 Not Found\n");
+        res.end();
+        return;
+      }
+      if (stats.isDirectory()) {
+        if (authenticatedUser[pzhId]) {
+          filename = path.join(__dirname, "main.html");
+        } else {
+          filename = path.join(__dirname, "index.html");
+        }
+      }
+
+      // Security check, if not logged in, we redirect to index.html
+      fs.readFile(filename, "binary", function(err, file) {
+        if(err) {
+          res.writeHeader(500, {"Content-Type": "text/plain"});
+          res.write(err + "\n");
+          res.end();
+          return;
+        }
+        res.writeHeader(200, content.getContentType(filename));
+        res.write(file, "binary");
+        res.end();
+      });
+    });
+  }
+
+  function authenticateUser(id, provider, res) {
+    if (!authenticatedUser.hasOwnProperty(id)){
+      authenticatedUser[id] = {id: crypto.randomBytes(24).toString("base64"), expiry: (new Date().getTime()) + 60*60*1000};//
+      res.setHeader('Set-Cookie', "id="+authenticatedUser[id].id+",Expires="+authenticatedUser[id].expiry + ",Provider="+provider);
+      res.writeHead(302, {Location: "/main.html"});
+      res.end();
+    }
+  }
+  /**
+   *
+   * @param res
+   * @param id
+   * @param details
+   */
+  function verifyPzhHandling(res, id, details){
+    if (parent.fetchPzh(id) !== "undefined"){
+      parent.createPzh(details, function(status, value) {
+        if (status) {
+          authenticateUser(id, details.provider, res);
+        } else {
+          sendRedirectionMsg(res, "/index.html", 'cmd=error&reason='+value);
+        }
+      });
+    } else {
+      authenticateUser(id, details.provider, res);
+    }
+  }
+
+  /**
+   *
+   * @param res
+   * @param req
+   * @param query
+   */
+  function verifyConnection(res, req, query) {
+    openid.fetchOpenIdDetails(req, function(value, details) {
+      var id = hostname+'_'+details.email;
+      if(value) {
+        if (query.returnPath === "undefined") {
+          verifyPzhHandling(res, id, details);//If from pzh web interface
+        } else {
+          parent.verifyPzpHandling(res, id, query, details); // if from pzp
+        }
+      } else {
+        if(query.returnPath) {
+          sendRedirectionMsg(res,"http://"+query.returnPath, "cmd=error&reason="+details);
+        } else {
+          sendRedirectionMsg(res,"/index.html", "cmd=error&reason="+details);
+        }
+      }
+    });
+  }
+
+  /**
+   *
+   * @param parent
+   * @param res
+   * @param query
+   */
+  function handleAuthorizedConnection(res, pzhId, query ){
+    var instance;
+    instance = parent.fetchPzh(pzhId);
+    if(!instance) {
+      res.write(JSON.stringify({cmd:"error", message:"pzh requested does not exist"}));
+      res.end();
+      return;
+    }
+
+    authenticatedUser[pzhId].lastSeen = new Date().getTime();
+    authenticatedUser[pzhId].res = res;
+    switch(query.payload.status) {
+      case 'listDevices':
+        pzh_api.listZoneDevices(instance, result);
+        break;
+      case 'userDetails':
+        pzh_api.fetchUserData(instance, result);
+        break;
+      case 'crashLog':
+        pzh_api.fetchLogs(instance, "error", result);
+        break;
+      case 'infoLog':
+        pzh_api.fetchLogs(instance, "info", result);
+        break;
+      case 'restartPzh':
+        parent.refreshCert(instance.getSessionId());
+        break;
+      case 'pzhPzh':
+        instance.addOtherZoneCert(query.payload.message, parent.fetchPzh, parent.refreshCert, result);
+        break;
+      case 'listPzp':
+        pzh_api.listPzp(instance,result);  // USED BEFORE REVOKE..
+        break;
+      case 'revokePzp':
+        instance.revokeCert(query.payload.pzpid, parent.refreshCert, result);
+        break;
+      case 'addPzp':
+        qrcode.addPzpQRAgain(instance, result);
+        break;
+      case 'logout':
+        delete authenticatedUser[pzhId];
+        res.socket.end();
+        break;
+      case 'listAllServices':
+        pzh_api.listAllServices(instance, result);
+        break;
+      case 'listUnregServices':
+        pzh_api.listUnregServices(instance, query.at, result);
+        break;
+      case 'registerService':
+        pzh_api.registerService(instance, query.at, query.name, result);
+        break;
+      case 'unregisterService':
+        pzh_api.unregisterService(instance, query.at, query.svId, query.svAPI, result);
+        break;
+    }
+  }
+
+  function handleData(port, req,  res, data) {
+    var expiry, query;
+
+    if (req.headers.cookie) {
+      var id, authData = req.headers.cookie && req.headers.cookie.split(",");
+      pzhId = "";
+      id = authData[0] && authData[0].split("=") && authData[0].split("=")[1];
+      expiry = authData[1] && authData[1].split("=") && authData[1].split("=")[1];
+      expiry = parseInt(expiry);
+      id = decodeURIComponent(id);
+      for (var user in  authenticatedUser ) {
+        if (authenticatedUser[user].id === id && authenticatedUser[user].expiry === expiry) {
+          if(expiry < (new Date().getTime())) { // Time expired
+            delete authenticatedUser[pzhId];
+            pzhId = "";
+            sendRedirectionMsg(res,"/index.html", "cmd=error&reason=logged out");
+            return;
+          } else {
+            pzhId = user;
+          }
+        }
+      }
+    } else {
+      pzhId = "";
+    }
+    if (data.toString("utf8") !== "") {
+      query = JSON.parse(data.toString("utf8"));
+      logger.log(query);
+      if(pzhId !== "" && parent.fetchPzh(pzhId)) {
+        handleAuthorizedConnection(res, pzhId, query);
+      } else if (query.payload && query.payload.status) {
+        parent.handleEnrollmentReq(hostname, port, res, query);
+      }
+    }
+  }
+
+  this.startWebServer = function(_hostname, _address, _port, _webServerConfig, _callback) {
+    hostname = _hostname;
+    var tempData = "";
+    var server = https.createServer(_webServerConfig, function(req, res){
+
+      req.on('data', function(data){
+        tempData = tempData  + data;
+      });
+      req.on("end", function(data){
+        handleData(_port, req, res, tempData);
+        tempData = "";
+      });
+    });
+    server.on('error', function(error) {
+      if (_callback) _callback(false, error.message);
+    });
+
+    server.on('request', function(req, res) {
+      var parsed = url.parse(req.url, true);
+      if (parsed.query && parsed.query.cmd ) {
+        if(parsed.query.cmd === "verify") {
+          verifyConnection(res, req, parsed.query);
+        }
+      } else {
+        var filename = path.join(__dirname, parsed.pathname);
+        sendFile(res, filename);
+      }
+    });
+
+    server.listen(_port, _address, function() {
+      logger.log('listening at address ' + _address + " and port "+ _port);
+      return _callback(true);
+    });
+  };
+};
+
+util.inherits(PZH_WebServer, enrollment);
+
+module.exports = PZH_WebServer

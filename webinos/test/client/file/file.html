@@ -7,49 +7,21 @@
 <script type="text/javascript" src="./webinos.js"></script>
 <script type="text/javascript" src="file/webinos.file.demo.js"></script>
 <script>
-	var test = function (filesystem) {
-		filesystem.root.getFile("/test", {}, function (entry) {
-			entry.file(function (file) {
-				var reader = new webinos.file.FileReader(filesystem);
-				
-				reader.onload = function (event) {
-					var buffer = new webinos.file.Buffer(reader.result);
-					
-					var string = "";
-					var view = new Uint8Array(buffer.slice(0, 2)._buffer);
-					
-					for (var i = 0; i < view.length; i++)
-						string += String.fromCharCode(view[i]);
-					
-					console.log(string);
-				};
-
-				reader.readAsArrayBuffer(file.slice(0, 4));
-			}, function (error) {
-				console.log(error);
-			});
-		}, function (error) {
-			console.log(error);
-		});
-	};
-
 	var init = function () {
 		$("button#init").attr("disabled", "disabled");
 		$("table#left").css("visibility", "visible");
 		$("table#right").css("visibility", "visible");
-		
+
 		var left = new webinos.file.demo.Explorer("table#left");
 		var right = new webinos.file.demo.Explorer("table#right");
- 
+
 		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/file"), {
 			onFound: function (service) {
 				service.bindService({
 					onBind: function () {
-						service.requestFileSystem(webinos.file.LocalFileSystem.PERSISTENT, 1024, function (filesystem) {
+						service.requestFileSystem(1, 1024, function (filesystem) {
 							left.change(filesystem.root);
 							right.change(filesystem.root);
-							
-							test(filesystem);
 						}, function (error) {
 							alert("Error requesting filesystem (#" + error.code + ")");
 						});
@@ -61,10 +33,10 @@
 			}
 		});
 	}
- 
+
 	$(document).ready(function () {
 		$("button#init").click(init);
-		
+
         function fillPZAddrs(data) {
          	var pzhId, connectedPzp, connectedPzh;
             if(data.from !== "virgin_pzp") {
@@ -73,31 +45,31 @@
                 connectedPzh = data.payload.message.connectedPzh;
             }
             var pzpId = data.from;
-           
-            
+
+
             if(document.getElementById('pzh_pzp_list'))
                 document.getElementById('pzh_pzp_list').innerHTML="";
-    
+
             $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
-            
+
             var i;
             if(typeof connectedPzp !== "undefined") {
 	            for(i =0; i < connectedPzp.length; i++) {
-	                $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
+	                $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");
 	            }
 	        }
-            $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
+            $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");
             $("</optgroup>").appendTo("#pzh_pzp_list");
             $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
             if(typeof connectedPzh !== "undefined") {
 	            for(i =0; i < connectedPzh.length; i++) {
-	                $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
+	                $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");
 	            }
 	        }
             $("</optgroup>").appendTo("#pzh_pzp_list");
         }
         webinos.session.addListener('registeredBrowser', fillPZAddrs);
-        
+
         function updatePZAddrs(data) {
             if(typeof data.payload.message.pzp !== "undefined") {
                 $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
@@ -106,28 +78,28 @@
             }
         }
         webinos.session.addListener('update', updatePZAddrs);
-        
+
         function printInfo(data) {
             $('#message').append('<li>'+data.payload.message+'</li>');
         }
         webinos.session.addListener('info', printInfo);
 	});
 </script>
-<script id="parent" type="text/x-jquery-tmpl">
+<script id="parent-tmpl" type="text/x-jquery-tmpl">
 			<tr class="parent">
 				<td>Parent</td>
 				<td><a class="name link">${name}</a></td>
 				<td></td>
 			</tr>
 </script>
-<script id="directory" type="text/x-jquery-tmpl">
+<script id="directory-tmpl" type="text/x-jquery-tmpl">
 			<tr class="child directory">
 				<td>Directory</td>
 				<td><a class="name link">${name}</a></td>
 				<td><button type="button" class="remove">Remove (recursively)</button></td>
 			</tr>
 </script>
-<script id="file" type="text/x-jquery-tmpl">
+<script id="file-tmpl" type="text/x-jquery-tmpl">
 			<tr class="child file">
 				<td>File</td>
 				<td><a class="name link">${name}</a></td>
@@ -143,35 +115,35 @@ body {
 	font: 13px/1.4 "Trebuchet MS", Arial, Helvetica, sans-serif;
 	color: #595959;
 }
- 
+
 table#left {
 	width: 50%;
 	float: left;
 	visibility: hidden;
 }
- 
+
 table#right {
 	width: 50%;
 	float: right;
 	visibility: hidden;
 }
- 
+
 a, a:link, a:visited,
 .link, .link:link, .link:visited {
 	color: #006D9A;
 	cursor: pointer;
 }
- 
+
 a:hover, a:active,
 .link:hover, .link:active {
 	color: #DC5246;
 	cursor: pointer;
 }
- 
+
 .ui-dialog-titlebar-no-close .ui-dialog-titlebar-close {
 	display: none
 }
- 
+
 div#dialog-name, div#dialog-editor {
 	display: none;
 }

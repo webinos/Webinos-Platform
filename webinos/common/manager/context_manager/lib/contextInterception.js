@@ -1,18 +1,18 @@
 /*******************************************************************************
  *  Code contributed to the webinos project
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *  
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Copyright 2012 EPU-National Technical University of Athens
  ******************************************************************************/
 if (typeof webinos === 'undefined') {
@@ -23,7 +23,7 @@ if (typeof webinos.context === 'undefined')
   webinos.context = {};
 
 //console.log("CONTEXT MANAGER LOADED");
-var webinos_ = require('webinos')(__dirname);
+var webinos_ = require("find-dependencies")(__dirname);
 
 var path = require('path');
 var moduleRoot = path.resolve(__dirname, '../') + '/';
@@ -71,11 +71,11 @@ else
       if (arguments[0].jsonrpc) {
         var message = arguments[0];
         if (message.fromObjectRef){
-          if (typeof listeners.fromObjectRef[message.fromObjectRef] == "object") 
+          if (typeof listeners.fromObjectRef[message.fromObjectRef] == "object")
             console.log("######## fromObjectRef: " + message.fromObjectRef + " already inuse. Replacing existing one.");
           listeners.fromObjectRef[message.fromObjectRef] = message;
         }else{
-          if (typeof listeners.id[message.id] == "object") 
+          if (typeof listeners.id[message.id] == "object")
             console.log("######## id: " + message.id + " already inuse. Replacing existing one.");
           listeners.id[message.id] = message;
         }
@@ -110,7 +110,12 @@ else
     }
 
 //  Require the database class
-    var databasehelper = require('JSORMDB');
+      try {
+          var databasehelper = require('jsormdb');
+      }
+      catch (err) {
+          console.log('[ERROR] jsormdb node module is missing.', 'yellow+black_bg');
+      }
 
 //  Initialize helper classes
     var dbpath = path.resolve(commonPaths.storage + '/pzp/log.json');
@@ -127,7 +132,7 @@ else
 
     function saveContextData(_dataInLog, _dataIn)
     {
-      
+
       var pmlib = webinos_.global.require(webinos_.global.manager.policy_manager.location, 'lib/policymanager.js'), policyManager, exec = require('child_process').exec;
       policyManager = new pmlib.policyManager();
 

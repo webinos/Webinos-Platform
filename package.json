@@ -1,29 +1,38 @@
-{
-  "name": "webinos_platform",
-  "description": "Web runtime platform based on Webinos specification",
-  "version": "0.0.1",
-  "dependencies": {
-    "schema": "0.x.x",
-    "sax": "0.x.x", 
-    "seq": "0.x.x", 
-    "xml2js": "0.x.x",
-    "crypt": "0.0.x",
-    "ejs":"0.x.x",
-    "openid":"0.x.x",
-    "qrcode":"0.x.x",
-    "websocket":"1.0.2",
-    "vows":"0.x.x",
-    "ansi": "0.0.x",
-    "connect": "2.x.x",
-    "mdns": "0.x.x",
-    "jsormdb": "0.1.x",
-    "now": "0.8.1"
-  },
-  "engines" : {
-    "node" : ">=0.6.18",
-    "npm" : ">= 1.1.17"
-  },
-  "keywords": ["webinos", "api"],
-  "repository": "git://github.com/webinos/Webinos-Platform.git",
-  "preferGlobal": true 
+{ "name" : "webinos_platform"
+, "version" : "0.6.0"
+, "description" : "Web runtime platform based on webinos specification"
+, "keywords" :
+  [ "webinos"
+  , "api"
+  ]
+, "homepage" : "http://www.webinos.org"
+, "bugs" : "http://jira.webinos.org"
+, "repository" :
+  { "type" : "git"
+  , "url" : "http://github.com/webinos/Webinos-Platform.git"
+  }
+, "dependencies" :
+  { "schema" : "0.x.x"
+  , "sax" : "0.x.x"
+  , "seq" : "0.x.x"
+  , "xml2js" : "0.x.x"
+  , "crypt" : "0.0.x"
+  , "ejs" : "0.x.x"
+  , "openid" : "0.x.x"
+  , "qrcode" : "0.x.x"
+  , "websocket" : "1.0.2"
+  , "ansi" : "0.0.x"
+  , "mdns" : "0.x.x"
+  , "now" : "0.8.1"
+  , "node-uuid" : "x.x.x"
+  , "find-dependencies" : "~0.0.2"
+  , "inherits" : "1.0.0"
+  , "mkdirp" : "0.3.x"
+  , "connect" : "2.6.x"
+  }
+, "engines" :
+  { "node" : ">= 0.6.0"
+  , "npm" : ">= 1.1.17"
+  }
+, "preferGlobal": true
 }

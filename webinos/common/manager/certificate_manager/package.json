@@ -1,17 +1,12 @@
 { "name": "certificate_manager"
 , "description": "An interface to OpenSSL's certificate creation and revocation functions"
 , "version": "0.0.1"
-, "main": "build/Release/certificate_manager.node"
+, "main": "lib/certificate.js"
 , "keywords": ["OpenSSL","Crypto","Certificate","CRL"]
-, "maintainers": [{ "name": "John Lyle"}]
-, "contributors": [{ "name": "John Lyle"}]
+, "maintainers": [{ "name": "John Lyle"},{"name": "Habib Virji"}]
+, "contributors": [{ "name": "John Lyle"}, {"name": "Habib Virji"}]
 , "bugs":
-  { "email": "john.lyle@cs.ox.ac.uk"
+  { "email": ["john.lyle@cs.ox.ac.uk", "habib.virji@gmail.com"]
   , "url": "http://www.cs.ox.ac.uk/people/john.lyle"
   }
-, "licenses":
-  [ { "type": "MIT +no-false-attribs"
-    , "url": "http://github.com/isaacs/npm/raw/master/LICENSE"
-    }
-  ]
 }

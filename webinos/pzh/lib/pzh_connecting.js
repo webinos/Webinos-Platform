@@ -25,7 +25,7 @@ var https     = require("https");
 var tls       = require("tls");
 var crypto    = require("crypto");
 
-var webinos = require("webinos")(__dirname);
+var webinos = require("find-dependencies")(__dirname);
 var session = webinos.global.require(webinos.global.pzp.location, "lib/session");
 var farm    = require('./pzh_farm');
 
@@ -74,7 +74,7 @@ PzhConnecting.prototype.connectOtherPZH = function(to, callback) {
       return;
     }
 
-    var connPzh = tls.connect(session.configuration.pzhPort, serverName, options, function() {
+    var connPzh = tls.connect(session.configuration.port.farmPort, serverName, options, function() {
       self.log.info("connection status : "+connPzh.authorized);
       if(connPzh.authorized) {
         var connPzhId, msg;
@@ -166,9 +166,10 @@ PzhConnecting.prototype.connectOtherPZH = function(to, callback) {
 PzhConnecting.prototype.sendCertificate = function(to, callback) {
   "use strict";
   var self = this;
-  this.log       = new session.common.debug("pzh_connect");
+  this.log = new session.common.debug("pzh_connect");
+  to = to + "/";
   this.log.addId(this.sessionId);
-  self.log.info("pzh to pzh connection initiated");
+  self.log.info("pzh to pzh connection initiated towards " + self.parent.config.master.cert + " from " + self.parent.config.serverName);
   var payload = {cmd: "sendCert" ,
     name: self.parent.config.serverName,
     to: to,
@@ -176,18 +177,19 @@ PzhConnecting.prototype.sendCertificate = function(to, callback) {
     crl: self.parent.config.master.crl};
   var options = { };
   options.host   = to.split('/')[0];
-  options.port   = session.configuration.webServerPort;
+  options.port   = session.configuration.port.farm_webServerPort;
   options.path   = "/main.html?cmd=transferCert";
   options.method = "POST";
   options.headers = { 'Content-Length': JSON.stringify(payload).length  };
+
   var req = https.request(options, function(res) {
     res.on('data', function(data) {
       var parse = JSON.parse(data);
       if (parse.cmd === "receiveCert") {
         self.log.info("pzh to pzh receive certificate");
         self.parent.config.otherCert[to] = { cert: parse.cert, crl: parse.crl};
-        self.parent.options.ca.push(self.parent.config.otherCert[to].cert);
-        self.parent.options.crl.push(self.parent.config.otherCert[to].crl);
+        self.parent.options.ca.push(parse.cert);
+        self.parent.options.crl.push(parse.crl);
         farm.server._contexts.some(function(elem) {
           if (self.parent.config.serverName.match(elem[0]) !== null) {
             elem[1] =  crypto.createCredentials(self.parent.options).context;

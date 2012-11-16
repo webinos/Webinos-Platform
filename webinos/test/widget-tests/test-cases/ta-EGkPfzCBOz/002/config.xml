@@ -1,0 +1,7 @@
+<widget id="v9:" xmlns="http://www.w3.org/ns/widgets">
+<name>v9</name>
+<feature name="feature:a9bb79c1" required="true">
+<param name="PASS" value="value1"/>
+<param name="PASS" value="value2"/>
+</feature>
+</widget>

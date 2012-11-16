@@ -1,0 +1,7 @@
+<widget id="c8:" xmlns="http://www.w3.org/ns/widgets">
+	<description xml:lang="x-x-test">FAIL</description>
+	<description>FAIL</description>
+    <description xml:lang="en">PASS</description>	
+	<description xml:lang="en">FAIL</description>	
+	<name>c8</name>
+</widget>

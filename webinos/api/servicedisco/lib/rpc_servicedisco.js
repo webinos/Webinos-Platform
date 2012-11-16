@@ -16,7 +16,11 @@
  * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
  ******************************************************************************/
 (function () {
-
+  var logger = logger;
+  if (module) {
+    var webinos_= require("find-dependencies")(__dirname);
+    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+  }
 	var idCount = 0;
 
 	/**
@@ -33,9 +37,10 @@
 	/**
 	 * Webinos ServiceDiscovery service constructor (server side).
 	 * @constructor
-	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
+	 * @alias Discovery
+	 * @param rpcHandler A handler for functions that use RPC to deliver their result.
 	 */
-	function Discovery(rpcHandler, params) {
+	var Discovery = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -74,7 +79,7 @@
 				var callback = that.remoteServicesFoundCallbacks[payload.id];
 
 				if (!callback) {
-					console.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
+					logger.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
 					return;
 				}
 
@@ -101,12 +106,12 @@
 				services = services || [];
 
 				function stripFuncs(el) {
-					return typeof el.getInformation === 'function' ? el.getInformation() : el; 
+					return typeof el.getInformation === 'function' ? el.getInformation() : el;
 				}
 				services = services.map(stripFuncs);
 
 				for (var i = 0; i < services.length; i++) {
-					console.log('findServices: calling found callback for ' + services[i].id);
+					logger.log('findServices: calling found callback for ' + services[i].id);
 					var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', services[i]);
 					rpcHandler.executeRPC(rpc);
 				}
@@ -123,7 +128,7 @@
 		 * @function
 		 */
 		var search = function (serviceType, callback, options, filter) {
-			console.log('INFO: [Discovery] '+"search: searching for ServiceType: " + serviceType.api);
+			logger.log('INFO: [Discovery] '+"search: searching for ServiceType: " + serviceType.api);
 			var results = [];
 			var cstar = serviceType.api.indexOf("*");
 			if(cstar !== -1){
@@ -196,33 +201,19 @@
 
 				for (var i in this.registry.getRegisteredObjectsMap()) {
 					if (i === serviceType.api) {
-						console.log('INFO: [Discovery] '+"search: found matching service(s) for ServiceType: " + serviceType.api);
+						logger.log('INFO: [Discovery] '+"search: found matching service(s) for ServiceType: " + serviceType.api);
 						results = this.registry.getRegisteredObjectsMap()[i];
 					}
 				}
 
 				// add address where this service is available, namely this pzp/pzh sessionid
 				for (var i=0; i<results.length; i++) {
-					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source addres, it is used by messaging for returning back
+					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source address, it is used by messaging for returning back
 				}
-				var webinos_ = require('webinos')(__dirname);
-				var global = webinos_.global.require(webinos_.global.pzp.location,'lib/session').configuration;
-
 				// reference counter of all entities we expect services back from
 				// Not in peer mode and connected
-				var entityRefCount = (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2])? 1 : 0; 
-				// Fetch from peers that are connected
-				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
-					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) && this.rpcHandler.parent.state === global.states[2]) {
-						for (var key in this.rpcHandler.parent.connectedPzp) {
-							if (this.rpcHandler.parent.connectedPzp.hasOwnProperty(key)) {
-								if(this.rpcHandler.parent.connectedPzp[key].state === global.states[2]) {
-									entityRefCount += 1;
-								}
-							}
-						}
-					}
-				}
+				var entityRefCount =  this.rpcHandler.parent.getConnectedPzh().length + this.rpcHandler.parent.getConnectedPzp().length;
+
 				// no connection to a PZH & other connected Peers, don't ask for remote services
 				if (!this.rpcHandler.parent || entityRefCount === 0) {
 					deliverResults(results);
@@ -257,26 +248,10 @@
 					}
 				})(results, entityRefCount);
 
-				if (this.rpcHandler.parent && this.rpcHandler.parent.config.type === "Pzp") {
-					// ask for remote service objects
-					if (this.rpcHandler.parent.mode !== global.modes[2] && this.rpcHandler.parent.state === global.states[2]) { // Not in peer mode & connected
-						this.rpcHandler.parent.prepMsg(this.rpcHandler.sessionId, this.rpcHandler.parent.config.pzhId, 'findServices', {id: callbackId});
-					}
-
-					if ((this.rpcHandler.parent.mode === global.modes[3] || this.rpcHandler.parent.mode === global.modes[2]) &&
-							this.rpcHandler.parent.state === global.states[2]) {
-						for (var key in this.rpcHandler.parent.connectedPzp) { //
-							if (this.rpcHandler.parent.connectedPzp.hasOwnProperty(key) && key !== this.rpcHandler.sessionId) {
-								if(this.rpcHandler.parent.connectedPzp[key].state === global.states[2]) {
-									this.rpcHandler.parent.prepMsg(this.rpcHandler.sessionId, key, 'findServices', {id: callbackId});
-								}
-							}
-						}
-					}
-				}
+				this.rpcHandler.parent.sendMsg('findServices', {id: callbackId});
 			}
 		};
-	}
+	};
 
 	Discovery.prototype = new RPCWebinosService;
 
@@ -286,7 +261,7 @@
 	 */
 	Discovery.prototype.addRemoteServiceObjects = function(msg) {
 		var services = msg.services;
-		console.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
+		logger.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
 		this.remoteServiceObjects[msg.from] = services;
 	};
 
@@ -297,7 +272,7 @@
 	Discovery.prototype.removeRemoteServiceObjects = function(address) {
 		var count = this.remoteServiceObjects[address].length;
 		delete this.remoteServiceObjects[address];
-		console.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
+		logger.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
 	};
 
 	/**

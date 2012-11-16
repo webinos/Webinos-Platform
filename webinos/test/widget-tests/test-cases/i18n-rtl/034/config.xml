@@ -1,0 +1,4 @@
+<widget id="i18nrtl34:" xmlns="http://www.w3.org/ns/widgets">
+    <preference name="TEST" value="The arrow should point right --&gt;" dir="rtl"/>
+    <name>i18nrtl34</name>
+</widget>

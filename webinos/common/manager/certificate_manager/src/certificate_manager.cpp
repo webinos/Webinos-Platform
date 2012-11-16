@@ -163,7 +163,7 @@ v8::Handle<Value> _signRequest(const Arguments& args)
     int res = 0;
     res = ::signRequest(pemRequest.operator*(),days,pemCAKey.operator*(),pemCACert.operator*(),certType,uri.operator*(),pem);
     if (res != 0) {
-      return ThrowException(Exception::TypeError(String::New("Failed to sign a certificate")));
+      return ThrowException(Exception::Error(String::New("Failed to sign a certificate")));
     }
 
     //create composite remote object

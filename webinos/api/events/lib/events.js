@@ -13,13 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 AndrÃ© Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 
 	/**
 	 * Webinos Event service constructor (server side).
 	 * @constructor
+	 * @alias WebinosEventsModule
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
 	 */
 	var WebinosEventsModule = function(rpcHandler) {
@@ -38,22 +39,14 @@
 		 * @param params Event payload.
 		 * @param successCB Success callback.
 		 * @param errorCB Error callback.
-		 * @param ref RPC object reference.
+		 * @param objectRef RPC object reference.
 		 */
-		this.WebinosEvent.dispatchWebinosEvent = function (params, successCB, errorCB, ref){
+		this.WebinosEvent.dispatchWebinosEvent = function(params, successCB, errorCB, objectRef) {
 			//callbacks, referenceTimeout, sync
 			console.log("dispatchWebinosEvent was invoked: Payload: " + params.webinosevent.payload + " Type: " + params.webinosevent.type + " from: " + params.webinosevent.addressing.source.id);
 
-			var objectRef = ref;
-			var useCB = false;
-
-			if (typeof objectRef !== "undefined"){
-				useCB = true;
-				console.log("Delivery callback was defined.");
-			}
-			else{
-				console.log("No delivery callback defined");
-			}
+			var useEventCallbacks = params.withCallbacks ? true : false;
+			console.log("WebinosEventCallbacks was defined: " + useEventCallbacks);
 
 			var i,j;
 			var foundDestination = false;
@@ -83,24 +76,20 @@
 					}
 				}
 				
-				console.log("1");
 				//checking for recipient
 				if (typeof params.webinosevent.addressing.to !== 'undefined' && params.webinosevent.addressing.to.length > 0){
-					console.log("2");
 					for (j = 0; j < params.webinosevent.addressing.to.length; j++){
 						console.log("Listener Source: " + registeredListener[i].source + " addressing id: " + params.webinosevent.addressing.to[j].id);
 						
 						
 						if (registeredListener[i].source === params.webinosevent.addressing.to[j].id){
 							//	forward event
-								console.log("4");
 								foundDestination = true;
-								forwardEventMessage(registeredListener[i],params.webinosevent, params, useCB, rpcHandler, objectRef);
+								forwardEventMessage(registeredListener[i],params.webinosevent, params, useEventCallbacks, rpcHandler, objectRef);
 						}
 						
 						if (!foundDestination && j != params.webinosevent.addressing.to.length-1){
 							foundDestination = true;
-							console.log("5");
 							var outCBParams = {};
 							outCBParams.event = params.webinosevent;
 							outCBParams.recipient = params.webinosevent.addressing.to[j].id
@@ -113,13 +102,13 @@
 				}
 				else{
 					foundDestination = true;
-					forwardEventMessage(registeredListener[i],params.webinosevent, params, useCB, rpcHandler, objectRef);
+					forwardEventMessage(registeredListener[i],params.webinosevent, params, useEventCallbacks, rpcHandler, objectRef);
 				}
 			}
 
 
 			//if delivery notification is requested (callback is defined) and no recipient could be identified then send onError notification
-			if (!foundDestination && useCB){
+			if (!foundDestination && useEventCallbacks){
 				var outCBParams = {};
 				outCBParams.event = params.webinosevent;
 				outCBParams.error = "An ERROR occured: No listeners at all";
@@ -129,12 +118,12 @@
 		};
 	};
 	
-	function forwardEventMessage(listenerToInvoke, webinosevent, params, useCB, rpcHandler, objectRef){
+	function forwardEventMessage(listenerToInvoke, webinosevent, params, useEventCallbacks, rpcHandler, objectRef) {
 		console.log("Sending to LISTENER: " + listenerToInvoke.source);
 
 
 		//if delivery notification is requested (callback is defined) then send onSending notification
-		if (useCB){
+		if (useEventCallbacks){
 			var outCBParams = {};
 			outCBParams.event = webinosevent;
 			outCBParams.recipient = listenerToInvoke.source;
@@ -151,27 +140,26 @@
 		outParams.event = webinosevent;
 		outParams.recipient = listenerToInvoke.source;
 		rpcHandler.executeRPC(json, 
-				getSuccessCB(rpcHandler,objectRef, outParams, useCB),
-				getErrorCB(rpcHandler,objectRef, outParams, useCB)
+				getSuccessCB(rpcHandler,objectRef, outParams, useEventCallbacks),
+				getErrorCB(rpcHandler,objectRef, outParams, useEventCallbacks)
 		);
 	}
 	
 	/**
 	 * Create and return success calback for event delivery notification.
 	 * @param rpcHandler The RPC handler.
-	 * @param ref RPC object reference.
+	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
-	 * @param useCB Boolean indicating whether this callback shall be used.
+	 * @param useEventCallbacks Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getSuccessCB(rpcHandler, ref, params, useCB) {
-		var objectRef = ref;
+	function getSuccessCB(rpcHandler, objectRef, params, useEventCallbacks) {
 		var cbParams = params;
 		function successCB() {  
 			//	event was successfully delivered, so send delivery notification if requested
 			console.log("Delivered Event successfully");
-			if (useCB){
-				console.log("Sending onDelivery to " + objectRef);
+			if (useEventCallbacks){
+				console.log("Sending onDelivery to " + objectRef.rpcId);
 				var cbjson = rpcHandler.createRPC(objectRef, "onDelivery", cbParams);
 				rpcHandler.executeRPC(cbjson);
 			}
@@ -183,18 +171,17 @@
 	/**
 	 * Create and return error calback for event delivery notification.
 	 * @param rpcHandler The RPC handler.
-	 * @param ref RPC object reference.
+	 * @param objectRef RPC object reference.
 	 * @param params Callback params.
-	 * @param useCB Boolean indicating whether this callback shall be used.
+	 * @param useEventCallbacks Boolean indicating whether this callback shall be used.
 	 * @private
 	 */
-	function getErrorCB(rpcHandler, ref, params, useCB) {
-		var objectRef = ref;
+	function getErrorCB(rpcHandler, objectRef, params, useEventCallbacks) {
 		var cbParams = params;
 		function errorCB() {  
 			//event was not successfully delivered, so send error notification if requested
 			console.log("Delivering Event not successful");
-			if (useCB){
+			if (useEventCallbacks){
 				outCBParams.error = "Some ERROR";
 				var cbjson = rpcHandler.createRPC(objectRef, "onError", outCBParams);
 				rpcHandler.executeRPC(cbjson);
@@ -214,7 +201,7 @@
 	 * 
 	 * [not yet implemented]
 	 */
-	WebinosEventsModule.prototype.createWebinosEvent = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.createWebinosEvent = function(params, successCB, errorCB, objectRef) {
 		console.log("createWebinosEvent was invoked");
 	};
 
@@ -223,7 +210,7 @@
 	 * @param params Object expecting type field.
 	 * @param ref Object expecting destination field.
 	 */
-	WebinosEventsModule.prototype.addWebinosEventListener = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.addWebinosEventListener = function(params, successCB, errorCB, objectRef) {
 		
 		
 		console.log("addWebinosEventListener was invoked with params type: " + params.type + " source: " + params.source + " dest: " + params.destination);
@@ -251,7 +238,7 @@
 	 * 
 	 * [not yet implemented]
 	 */
-	WebinosEventsModule.prototype.removeWebinosEventListener = function (params, successCB, errorCB, objectRef){
+	WebinosEventsModule.prototype.removeWebinosEventListener = function(params, successCB, errorCB, objectRef) {
 		console.log("removeWebinosEventListener was invoked: " + params);
 		var idx = -1;
 		for (i = 0; i < registeredListener.length; i++){

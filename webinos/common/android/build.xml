@@ -19,19 +19,31 @@
 				node_modules/sax/,
 				node_modules/schema/,
 				node_modules/seq/,
-				node_modules/webinos/,
+				node_modules/find-dependencies/,
 				node_modules/websocket/,
 				node_modules/xml2js/,
-				node_modules/webinos/,
 				node_modules/expat2.js,
 				node_modules/xmldigsig.js,
+				node_modules/inherits/,
+				node_modules/mkdirp/,
 			webinos/" excludes="
 			webinos/common/android/,
 			webinos/pzh/,
 			webinos/wrt/,
-                        webinos/test/,
-
-			**/test/,
+                     
+			webinos/test/lib/,
+                        webinos/test/spec/,
+			webinos/test/default/,
+			webinos/test/*.html,
+			webinos/test/*.xml,
+			webinos/test/*.json,
+			webinos/test/*.js,
+			
+			webinos/api/**/test/,
+			webinos/common/**/test/,
+			webinos/pzp/test/,
+			webinos/pzh/test/,		        
+	
 			**/build/,
 			**/deps/,
 			**/.gitignore" />

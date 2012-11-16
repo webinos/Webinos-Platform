@@ -13,17 +13,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 AndrÃ© Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
 
-	//Event Module Functionality
-	
+	// Mapping of local listenerId to remote listenerId
 	var registeredListeners = {};
-	var registeredDispatchListeners = {};
-	
+
+	// Mapping of listenerId to RPC callback obj
+	var registeredRPCCallbacks = {};
+
 	var eventService = null;
-	
+
 	/**
 	 * Webinos Event service constructor (client side).
 	 * @constructor
@@ -35,14 +36,14 @@
 		eventService = this;
 		this.idCount = 0;
 		//this.myAppID = "TestApp" + webinos.messageHandler.getOwnId();
-		
+
 		//TODO, this is the actuall messaging/session app id but should be replaced with the Apps unique ID (config.xml)
 		this.myAppID = webinos.messageHandler.getOwnId();
 		console.log("MyAppID: " + this.myAppID);
 	};
-	
+
 	EventsModule.prototype = new WebinosService;
-	
+
 	/**
 	 * To bind the service.
 	 * @param bindCB BindCallback object.
@@ -53,8 +54,8 @@
 			bindCB.onBind(this);
 		};
 		
-	}
-	
+	};
+
 	/**
 	 * Creates a webinos Event.
 	 * @param type Event type identifier.
@@ -75,22 +76,13 @@
 		anEvent.timeStamp = new Date().getTime();
 		anEvent.expiryTimeStamp = expiryTimeStamp;
 		anEvent.addressingSensitive = addressingSensitive;
-		
-		
-		return anEvent;
-		/*
-		var rpc = webinos.rpcHandler.createRPC(this, "createWebinosEvent",  arguments);
-		webinos.rpcHandler.executeRPC(rpc,
-				function (params){
-					successCB(params);
-				},
-				function (error){}
-		);*/	
-		
+
+
+		//  raises(WebinosEventException);
 		//	returns WebinosEvent
-        //  raises(WebinosEventException);
-	}
-    
+		return anEvent;
+	};
+
 	/**
 	 * Registers an event listener.
 	 * @param listener The event listener.
@@ -99,79 +91,83 @@
 	 * @param destination Specific event recipient (whether primary or not) or null for any destination (undefined is considered as null).
 	 * @returns Listener identifier.
 	 */
-	EventsModule.prototype.addWebinosEventListener = function(listener, type, source, destination){
-		
-		
-		if (this.idCount == Number.MAX_VALUE) this.idCount = 0;
+	EventsModule.prototype.addWebinosEventListener = function(listener, type, source, destination) {
+
+		if (this.idCount === Number.MAX_VALUE) this.idCount = 0;
 		this.idCount++;
-				
-		var listenerID = this.myAppID + ":" + this.idCount;
-		
-		
-		var req = {};
-		req.type = type;
-		req.source = source;
-		
-		if (typeof req.source === 'undefined' || req.source == null) req.source = this.myAppID;
-		
-		
-		req.destination = destination;
-		
-		
-		
-		var rpc = webinos.rpcHandler.createRPC(this, "addWebinosEventListener",  req);
-		rpc.fromObjectRef =  Math.floor(Math.random()*1001);
-		
-		var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-		callback.handleEvent = function (params,scb,ecb) {
+
+		var listenerId = this.myAppID + ":" + this.idCount;
+
+		var reqParams = {
+			type: type,
+			source: source,
+			destination: destination
+		};
+		if (!source) reqParams.source = this.myAppID;
+
+		var rpc = webinos.rpcHandler.createRPC(this, "addWebinosEventListener",  reqParams);
+
+		rpc.handleEvent = function(params, scb, ecb) {
 			console.log("Received a new WebinosEvent");
 			listener(params.webinosevent);
 			scb();
 		};
-		
-		webinos.rpcHandler.registerCallbackObject(callback);
-		
-		
-		
+
+		webinos.rpcHandler.registerCallbackObject(rpc);
+
+		// store RPC callback obj to unregister it when removing event listener
+		registeredRPCCallbacks[listenerId] = rpc;
+
 		webinos.rpcHandler.executeRPC(rpc,
-				function (params){
-					console.log("New WebinosEvent listener registered. Mapping remote ID", params, " localID ", listenerID);
-					
-					registeredListeners[listenerID] = params;
-					
-				},
-				function (error){
-					console.log("Error while registering new WebinosEvent listener");
-				}
+			function(remoteId) {
+				console.log("New WebinosEvent listener registered. Mapping remote ID", remoteId, " localID ", listenerId);
+
+				registeredListeners[listenerId] = remoteId;
+			},
+			function(error) {
+				console.log("Error while registering new WebinosEvent listener");
+			}
 		);
-		
-		// returns DOMString id
+
 		// raises(WebinosEventException);
-		
-		return listenerID;
-	}
-                         
-    /**
+		return listenerId;
+	};
+
+	/**
      * Unregisters an event listener.
      * @param listenerId Listener identifier as returned by addWebinosEventListener().
      */
-	EventsModule.prototype.removeWebinosEventListener = function(listenerId){
-	 
+	EventsModule.prototype.removeWebinosEventListener = function(listenerId) {
+
+		if (!listenerId || typeof listenerId !== "string") {
+			throw new WebinosEventException(WebinosEventException.INVALID_ARGUMENT_ERROR, "listenerId must be string type");
+		}
+
 		var rpc = webinos.rpcHandler.createRPC(this, "removeWebinosEventListener",  registeredListeners[listenerId]);
-		webinos.rpcHandler.executeRPC(rpc,
-				function (params){
-					successCB(params);
-				},
-				function (error){}
-		);
-	 
-		// raises(WebinosEventException);
+		webinos.rpcHandler.executeRPC(rpc);
+
+		// unregister RPC callback obj
+		webinos.rpcHandler.unregisterCallbackObject(registeredRPCCallbacks[listenerId]);
+		registeredRPCCallbacks[listenerId] = undefined;
+		registeredListeners[listenerId] = undefined;
+
 		// returns void
-	}
-	
-	
-	// WebinosEvent functionalities
-	
+	};
+
+	/**
+	 * Webinos event exception constructor.
+	 * @constructor
+	 * @param code Error code.
+	 * @param message Descriptive error message.
+	 */
+	WebinosEventException = function(code, message) {
+		this.code = code;
+		this.message = message;
+	};
+	// constants
+	WebinosEventException.__defineGetter__("INVALID_ARGUMENT_ERROR",  function() {return 1});
+	WebinosEventException.__defineGetter__("PERMISSION_DENIED_ERROR", function() {return 2});
+
 	/**
 	 * Webinos Event constructor.
 	 * @constructor
@@ -196,91 +192,103 @@
 	 * @param referenceTimeout Moment in time until which the Webinos runtime SHALL ensure that the WebinosEvent object being sent is not garbage collected for the purpose of receiving events in response to the event being sent (null, undefined and values up to the current date/time mean that no special action is taken by the runtime in this regard).
 	 * @param sync If false or undefined, the function is non-blocking, otherwise if true it will block.
 	 */
-	WebinosEvent.prototype.dispatchWebinosEvent = function(callbacks, referenceTimeout, sync){
-		
-		var params = {};
-		params.webinosevent = {};
-		params.webinosevent.id = this.id;
-		params.webinosevent.type = this.type;
-		params.webinosevent.addressing = this.addressing;
-		
-		if (typeof params.webinosevent.addressing === 'undefined' || params.webinosevent.addressing == null){
+	WebinosEvent.prototype.dispatchWebinosEvent = function(callbacks, referenceTimeout, sync) {
+
+		var params = {
+			webinosevent: {
+				id: this.id,
+				type: this.type,
+				addressing: this.addressing,
+				inResponseTo: this.inResponseTo,
+				timeStamp: this.timeStamp,
+				expiryTimeStamp: this.expiryTimeStamp,
+				addressingSensitive: this.addressingSensitive,
+				forwarding: this.forwarding,
+				forwardingTimeStamp: this.forwardingTimeStamp,
+				payload: this.payload
+			},
+			referenceTimeout: referenceTimeout,
+			sync: sync
+		};
+
+		if (!params.webinosevent.addressing) {
 			params.webinosevent.addressing = {};
 		}
-		
 		params.webinosevent.addressing.source = {};
 		params.webinosevent.addressing.source.id = eventService.myAppID;
-		
-		params.webinosevent.inResponseTo = this.inResponseTo;
-		params.webinosevent.timeStamp = this.timeStamp;
-		params.webinosevent.expiryTimeStamp = this.expiryTimeStamp;
-		params.webinosevent.addressingSensitive = this.addressingSensitive;
-		params.webinosevent.forwarding = this.forwarding;
-		params.webinosevent.forwardingTimeStamp = this.forwardingTimeStamp;
-		params.webinosevent.payload = this.payload;
-		params.referenceTimeout = referenceTimeout;
-		params.sync = sync;
-		
-		
-		
-		registeredDispatchListeners[this.id] = callbacks;
-		
-		var rpc = webinos.rpcHandler.createRPC(eventService, "WebinosEvent.dispatchWebinosEvent",  params);
-		
-		if (typeof callbacks !== "undefined"){	
-		
-			console.log("Registering delivery callback");
-			
-			rpc.fromObjectRef =  Math.floor(Math.random()*1001);
-		
-			var callback = new RPCWebinosService({api:rpc.fromObjectRef});
-		
-			callback.onSending = function (params) {
-			//params.event, params.recipient
-				
-				if (typeof callbacks.onSending !== "undefined") {callbacks.onSending(params.event, params.recipient);}
-			};
-			callback.onCaching = function (params) {
-				//params.event
-				if (typeof callbacks.onCaching !== "undefined") {callbacks.onCaching(params.event);}
-			};
-			callback.onDelivery = function (params) {
-			//params.event, params.recipient
-				if (typeof callbacks.onDelivery !== "undefined") {callbacks.onDelivery(params.event, params.recipient);}
-			};
-			callback.onTimeout = function (params) {
-			//params.event, params.recipient
-				if (typeof callbacks.onTimeout !== "undefined") {callbacks.onTimeout(params.event, params.recipient);}
-			};
-			callback.onError = function (params) {
-			//params.event, params.recipient, params.error
-				if (typeof callbacks.onError !== "undefined") {callbacks.onError(params.event, params.recipient, params.error);}
-			};
-	
-		
-			webinos.rpcHandler.registerCallbackObject(callback);
+
+		// check that callbacks has the right type
+		if (callbacks) {
+			if (typeof callbacks !== "object") {
+				throw new WebinosEventException(WebinosEventException.INVALID_ARGUMENT_ERROR, "callbacks must be of type WebinosEventCallbacks");
+			}
+			var cbNames = ["onSending", "onCaching", "onDelivery", "onTimeout", "onError"];
+			for (var cbName in cbNames) {
+				var cb = callbacks[cbName];
+				if (cb && typeof cb !== "function") {
+					throw new WebinosEventException(WebinosEventException.INVALID_ARGUMENT_ERROR, "cb is not a function");
+				}
+			}
+			params.withCallbacks = true;
 		}
-		
+
+		var rpc = webinos.rpcHandler.createRPC(eventService, "WebinosEvent.dispatchWebinosEvent", params);
+
+		if (callbacks) {
+
+			console.log("Registering delivery callback");
+
+			rpc.onSending = function (params) {
+				// params.event, params.recipient
+				if (callbacks.onSending) {
+					callbacks.onSending(params.event, params.recipient);
+				}
+			};
+			rpc.onCaching = function (params) {
+				// params.event
+				if (callbacks.onCaching) {
+					callbacks.onCaching(params.event);
+				}
+			};
+			rpc.onDelivery = function (params) {
+				// params.event, params.recipient
+				if (callbacks.onDelivery) {
+					callbacks.onDelivery(params.event, params.recipient);
+				}
+				webinos.rpcHandler.unregisterCallbackObject(rpc);
+			};
+			rpc.onTimeout = function (params) {
+				// params.event, params.recipient
+				if (callbacks.onTimeout) {
+					callbacks.onTimeout(params.event, params.recipient);
+				}
+				webinos.rpcHandler.unregisterCallbackObject(rpc);
+			};
+			rpc.onError = function (params) {
+				// params.event, params.recipient, params.error
+				if (callbacks.onError) {
+					callbacks.onError(params.event, params.recipient, params.error);
+				}
+				webinos.rpcHandler.unregisterCallbackObject(rpc);
+			};
+
+			webinos.rpcHandler.registerCallbackObject(rpc);
+		}
+
 		webinos.rpcHandler.executeRPC(rpc);
-		
-		
-		//rpc.serviceAddress = webinos.session.getPZHId();
-		//webinos.rpcHandler.executeRPC(rpc);
-    	
-		
+
+		//raises(WebinosEventException);
 		//returns void
-    	//raises(WebinosEventException);
-         
-    }
-    
+    };
+
 	/**
 	 * Forwards an event.
 	 * [not yet implemented]
 	 */
 	WebinosEvent.prototype.forwardWebinosEvent = function(forwarding, withTimeStamp, callbacks, referenceTimeout, sync){
-    	
+
     	//returns void
     	//raises(WebinosEventException);
     };
-	
+
 }());

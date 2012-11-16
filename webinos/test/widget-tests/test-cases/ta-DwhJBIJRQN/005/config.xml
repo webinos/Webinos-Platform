@@ -1,0 +1,8 @@
+<widget id="ba:" xmlns="http://www.w3.org/ns/widgets">
+<name>ba</name>
+<preference name="a" value="a"/>
+<preference name="a" value="b"/>
+<preference name="a" value="c" readonly="true"/>
+<preference name="a" value="d"/>
+<preference name="a" value="e" readonly="false"/>
+</widget>

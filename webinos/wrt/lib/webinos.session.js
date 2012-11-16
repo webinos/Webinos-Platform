@@ -127,13 +127,10 @@
       case "login":
         callListenerForMsg(data);
         break;
-      case "authenticate-google":
+      case "authenticate":
         callListenerForMsg(data);
         break;
-      case "authenticate-yahoo":
-        callListenerForMsg(data);
-        break;
-      case "auth-status":
+      case "authStatus":
         callListenerForMsg(data);
         break;
       case "error":

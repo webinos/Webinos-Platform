@@ -12,7 +12,9 @@
 <script type="text/javascript" src="./webinos.js"></script>
  <script>
     var test = {}, recentService;
+
     $(document).ready(function() {
+
       function setPage(type, page){
         var port = window.location.port;
         if (typeof port === "undefined") {
@@ -92,7 +94,7 @@
        setPage("File Demo", "file/file.html");
       });
       $("#contacts").click(function(){
-       setPage("Contacts Demo", "contacts/contactsClient.html");
+       setPage("Contacts Demo", "contacts/contacts.html");
       });
       $("#disco_hrm").click(function(){
        setPage("Discovery HRM Demo", "discovery/Android/bluetooth_hrm.html");
@@ -177,37 +179,29 @@
       });
       // This is added here as we intend to get response back here
       function authStatus(msg) {
-        console.log(msg);
-
-        if (msg.payload.message === "true") {
-          var existPzh = confirm(" Enroll PZP at "+msg.payload.pzhid) ;
+        if (msg.payload.message.connected === "true") {
+          var pzhProvider = msg.payload.message.pzhId.substr(0,msg.payload.message.pzhId.indexOf("_"));
+          var userAccount = msg.payload.message.pzhId.substr(msg.payload.message.pzhId.indexOf("_")+1);
+          var confirmText = "Your device will now be enrolled with the following personal zone provider: \n\t" + pzhProvider + "\n For the following user account: \n\t" + userAccount;
+          var existPzh = confirm(confirmText) ;
           if (existPzh === true) {
-            var options = {"type": 'prop', "payload":
-                            {
-                              "status": "enrollPzp", "authCode": msg.payload.authCode, "pzhid": msg.payload.pzhid
-                            }
-                          };
-            webinos.session.message_send(options);
+            var options = {"type": 'prop', "payload": { "status": "enrollPzp", message: msg.payload.message.authCode }};
+            webinos.session.message_send(options, msg.payload.message.pzhId);
           } else {
-            alert ("connection with PZH aborted");
+            alert ("Connecting your device with a personal zone hub was cancelled.");
           }
         } else {
-          var createPzh = confirm(" Create PZH - " + msg.payload.pzhid ) ;
+          var createPzh = confirm(" Create PZH - " + msg.payload.message.pzhId ) ;
           if (createPzh === true) {
-             var options ={"type": 'prop',  "payload":
-                            {
-                              "status": "registerPzh", "pzhid": msg.payload.pzhid
-                            }
-                          };
-             webinos.session.message_send(options);
+             var options ={"type": 'prop', "payload": { "status": "registerPzh" }};
+             webinos.session.message_send(options, msg.payload.message.pzhId);
           } else  {
-            alert ("connection with PZH aborted");
-
+            alert ("connection with a personal zone hub cancelled");
           }
         }
       };
 
-      webinos.session.addListener('auth-status', authStatus);
+      webinos.session.addListener('authStatus', authStatus);
       function error(msg) {
         alert(msg.error);
       }

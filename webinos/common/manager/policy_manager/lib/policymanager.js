@@ -21,73 +21,64 @@
 (function () {
 	"use strict";
 
-	var policyManager,
-	exec = require('child_process').exec;
-	var os = require('os');
-	var bridge = null;
-	var promptMan = null;
+    var exec = require('child_process').exec;
+    var os = require('os');
+    var path = require('path');
+    var dependencies= require('find-dependencies')(__dirname);
+    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
+    var promptLib = dependencies.local.require(dependencies.local.manager.policy_manager.location,'src/promptMan/promptManager.js');
+    var bridge = null;
+    var pmCore = null;
+    var pmNativeLib = null;
+    var promptMan = null;
+    var policyFile = null;
 
-	policyManager = function() {
+
+	var policyManager = function() {
 		// Load the native module
+		try {
+			this.pmNativeLib = require('pm');
+		} catch (err) {
+			console.log("Warning! Policy manager could not be loaded");
+		}
+		// Load the prompt manager
 		if (os.platform()==='android') {
-			this.pmNativeLib = require('pm'); 
 			this.bridge = require('bridge');
 			this.promptMan = this.bridge.load('org.webinos.impl.PromptImpl', this);
 		}
-		else {
-			//this.pmNativeLib = (process.versions.node < "0.6.0" ) ? require('../src/build/default/pm.node') : require('../src/build/Release/pm.node');
-			try {
-				this.pmNativeLib = require('pm');
-			} catch (err) {
-				console.log("policy manager could not be loaded");
-			}
-			if (os.platform()==='win32'){
-				this.promptMan = require('promptMan');
-			}
+		else if (os.platform()==='win32') {
+			this.promptMan = require('promptMan');
 		}
-		this.pmCore = new this.pmNativeLib.PolicyManagerInt();
+		else {
+			this.promptMan = new promptLib.promptManager();
+		}
+		//Policy file location
+        	policyFile = path.join(webinosPath,"policies", "policy.xml");
+		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 	};
 
-	policyManager.prototype.enforceRequest = function(request, errorCallback, successCallback /*, successCallbackParams*/ ) {
+	policyManager.prototype.getPolicyFilePath = function() {
+		return policyFile;
+	}
+
+	policyManager.prototype.enforceRequest = function(request, noprompt) {
 		var res = this.pmCore.enforceRequest(request);
-		if (arguments.length > 1) {
-
-			var successCallbackParams = Array.prototype.slice.call(arguments).splice(3);
-
-			switch(res) {
-				case 0:		successCallback.apply(this, successCallbackParams);
-						break;
-
-				case 1:		errorCallback("SECURITY_ERR: " + res);
-						break;
-
-				case 2:
-				case 3:
-				case 4:		var child = exec("xmessage -buttons allow,deny -print 'Access request to " + request.resourceInfo.apiFeature  + "'",
-							function (error, stdout, stderr) {	
-								if (stdout === "allow\n") {
-									successCallback.apply(this, successCallbackParams);
-								}
-								else {
-									errorCallback("SECURITY_ERR: " + res);
-								}
-							});
-						break;
-
-				default:	errorCallback("SECURITY_ERR: " + res);
-			}
+		var promptcheck = true;
+		if (arguments.length == 2) {
+			if (noprompt == true)
+				promptcheck = false;
 		}
-		else {
-			if(res>1) {
-				if (this.promptMan) { // if there is a promptMan then show a message
-					var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
-					var choices = new Array();
-					choices[0] = "Allow";
-					choices[1] = "Deny";
-					res = this.promptMan.display(message, choices);
-				}
-			}
-		}
+
+        if(res>1 && res<5) {
+           if (this.promptMan && promptcheck) { // if there is a promptMan then show a message
+               var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
+               var choices = new Array();
+               choices[0] = "Allow";
+               choices[1] = "Deny";
+               res = this.promptMan.display(message, choices);
+           }
+        }
+
 		return (res);
 	};
 
@@ -96,6 +87,8 @@
 		return;
 	};
 
+    require('./rpcInterception.js');
 	exports.policyManager = policyManager;
 
 }());
+
