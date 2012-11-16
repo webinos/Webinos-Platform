@@ -27,14 +27,6 @@ ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 	value1 = child->GetText();
 	child = (TiXmlElement*)child->NextSibling("AttributeValue");
 	string value2 = child->GetText();
-
-	// DeveloperProvidedDescription Tags
-	for(TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("DeveloperProvidedDescription"); child;
-			child = (TiXmlElement*)child->NextSibling("DeveloperProvidedDescription")) {
-		// TODO use description values
-		//string language = child->Attribute("language");
-		//string value = child->GetText();
-	}
 }
 
 ProvisionalAction::~ProvisionalAction(){

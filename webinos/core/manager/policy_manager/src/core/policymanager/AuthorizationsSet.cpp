@@ -28,6 +28,7 @@ AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
 			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
 		authzuseforpurpose[i] = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
+		i++;
 	}
 }
 
