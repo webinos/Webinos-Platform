@@ -21,7 +21,8 @@
 
     app.configure(function () {
       app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-      app.use(express.logger());
+	  // Un-comment this line to switch on request logging.
+      //app.use(express.logger());
     });
 
     app.use(app.router);
@@ -31,6 +32,7 @@
     var apps = require('./routes/apps');
     var settings = require('./routes/settings');
     var widgetTests = require('./routes/widgetTests');
+    var widgetDigSigTests = require('./routes/widgetDigSigTests');
 
       /**
        * Expose the current communication channel websocket port using this virtual file.
@@ -42,7 +44,6 @@
     // apps routing
     app.get('/', apps.installed);
     app.get('/apps', apps.installed);
-    app.get('/install/:id', apps.install);
     app.get('/uninstall/:id', apps.uninstall);
     app.get('/widget/about/:id', apps.about);
     app.get('/widget/:id', apps.boot);
@@ -51,13 +52,14 @@
     
     // widget testing
     app.get('/widget-tests', widgetTests.listTestWidgets);
+    app.get('/widget-dig-sig-tests', widgetDigSigTests.listTestWidgets);
 
     // stores routing
     app.get('/stores', stores.stores);
  
     // settings routing
-    app.get('/settings/:saved', settings.getSettings);
-    app.post('/settings/*', settings.saveSettings);
+    app.get('/settings/:saved?', settings.getSettings);
+    app.post('/settings', settings.saveSettings);
     app.get('/about', settings.about);
 
     // tests routing
