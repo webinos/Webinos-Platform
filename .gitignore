@@ -1,15 +1,15 @@
 # generated webinos.js
-webinos/test/client/webinos.js
+webinos/web_root/webinos.js
 
 # context db
 Manager/Context/Storage/data/context.json
 webinos/common/manager/context_manager/data/log.json
 
 # android generated build stuff
-webinos/common/android/*/bin/*
-webinos/common/android/*/gen/*
-webinos/common/android/app/assets/modules/webinos.zip
-webinos/common/android/wrt/assets/js/webinos.js
+webinos/platform/android/*/bin/*
+webinos/platform/android/*/gen/*
+webinos/platform/android/app/assets/modules/webinos.zip
+webinos/platform/android/wrt/assets/js/webinos.js
 
 # build stuff
 build

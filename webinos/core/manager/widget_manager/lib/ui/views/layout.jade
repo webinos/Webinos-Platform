@@ -1,0 +1,78 @@
+doctype 5
+html(lang="en")
+	head
+		meta(charset="UTF-8")
+		meta(http-equiv="Content-Language",content="en")
+		title webinos | #{pageTitle}
+		link(type="text/css",href="/css/style.css",rel="stylesheet")
+		link(rel="icon",href="/images/favicon.ico",type="image/x-icon")
+		script(src='/js/jquery-1.7.2.min.js')
+		script(src="/js/jquery.corner.js")
+		script(src="/webinos.js")
+		script(type='text/javascript')
+			$(function() {				
+				$(".page").corner("keep");
+				$(".footer").corner("bottom");
+				$("#indicator-connected").hide();
+				$(".slow").click(function() { 
+					$(".content").html("<div class='loadingIndicator'><img src='/images/loading.gif' /></div>"); 
+					var that = this; 
+					setTimeout(function() {  window.location = $(that).attr('href'); }, 150); 
+					return false; 
+				});
+				$(".content a").each(function() { 
+					var href = $(this).attr('href');
+					if (href.indexOf("http") == 0) {
+						$(this).addClass("external"); 
+					} else if (href.lastIndexOf(".wgt") == href.length-4) {
+						$(this).addClass("widget-link");
+					}
+				});				
+				$(".listItem").hover(
+					function() { 
+						$(this).addClass("listItemHighlight"); 
+					}, 
+					function() { 
+						$(this).removeClass("listItemHighlight"); 
+					}
+				);
+				setTimeout(function() {$(".feedback").hide(); },5000);
+				function gotPZP(data) {
+					$("#indicator-not-connected").hide();
+					$("#indicator-connected").show();
+				}
+				try {
+					webinos.session.addListener('registeredBrowser', gotPZP);
+				} catch (e) {
+					alert("webinos not loaded");
+				}
+			});
+	body
+		div.page
+			div.header
+				div.menuContainer
+					div.menuLeft
+					div.menuMiddle
+						div.menuItems.commands
+							a.menuItem(href="/") apps
+							a.menuItem(href="/stores") stores
+							a.menuItem(href="/tests") tests
+							a.menuItem(href="/settings/false") settings
+							a.menuItem(href="/about") about
+					div.menuRight
+				div.logo
+					a(href="/")
+						img(src="/images/webinos_logo.png")
+
+			div.pageTitleContainer
+				span.pageTitle &nbsp;#{pageTitle}&nbsp;
+			div.content
+				block content
+			div.footer.commands
+				div.footerRight 
+					span Copyright &copy; 2012 &middot; 
+					a(target="_blank",href="http://webinos.org") webinos.org
+				div.connectionStatus
+					img(id="indicator-connected",src="/images/green-bullet.png",alt="pzp indicator",title="pzp connected")
+					img(id="indicator-not-connected",src="/images/red-bullet.png",alt="pzp indicator",title="pzp NOT connected")
+					

@@ -16,7 +16,7 @@
 *
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
-var pzh_provider  = require("./webinos/pzh/lib/pzh_provider.js");
+var pzh_provider  = require("./webinos/core/pzh/lib/pzh_provider.js");
 
 var host = null, name = null;
 
@@ -61,7 +61,7 @@ _pzh_provider.startProvider(function(result, details) {
   if (result) {
     console.log("ZONE PROVIDER STARTED");
   } else {
-    console.log("ZONE PROVIDER FAILED TO START "+ details);
+    console.error("ZONE PROVIDER FAILED TO START "+ details);
   }
 });
 

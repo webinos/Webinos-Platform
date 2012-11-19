@@ -1,0 +1,31 @@
+extends layout
+
+block content
+	div.infoPanel
+		div  
+			span= os 
+			span  webinos runtime v0.6.08
+		div 
+			span node version 
+			span= nodeVersion
+			br
+		div
+			br
+			span webinos pzp configured to run on localhost:
+			=pzpPort
+			br
+			span webinos runtime configured to run on localhost:
+			=runtimePort
+		div
+			br
+			span project site 
+			br
+			a(target="_blank",href="http://webinos.org") webinos.org
+			br
+			br
+			span developer portal 
+			br
+			a(target="_blank",href="http://developer.webinos.org") developer.webinos.org
+		div
+			br
+			span copyright &copy; 2012 &middot; all rights reserved

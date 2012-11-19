@@ -1,0 +1,29 @@
+{ "name": "devicestatus"
+, "publishConfig": { "tag": "alpha" }
+, "description": "DeviceStatus API"
+, "keywords": [ "webinos", "device", "status", "API"]
+, "version": "0.7.1"
+, "homepage": "http://webinos.org/"
+, "bugs" : "http://jira.webinos.org"
+, "author": "Salvatore Monteleone <salvatore.monteleone@dieei.unict.it>, Krishna Bangalore <krishna.bangalore@in.tum.de>"
+, "repository":
+  { "type": "git"
+  , "url": "http://github.com/webinos/Webinos-Platform"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 , "src": "./src"
+                 }
+, "main": "./lib/webinos.rpc.devicestatus.js"
+, "dependencies":
+   { "find-dependencies" : "0.0.x"
+  , "inherits" : "1.0.0"
+  , "mkdirp" : "0.3.x"
+  }
+, "bundleDependencies":
+  [
+  ]
+}

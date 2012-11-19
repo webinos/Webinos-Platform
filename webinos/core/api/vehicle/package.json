@@ -1,0 +1,32 @@
+{
+  "name": "Vehicle"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Vehicle API"
+, "keywords": ["webinos", "vehicle" , "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Simon Isenberg <simon.isenberg@bmw.de>"
+, "repository":
+  { "type": "git"
+  , "url": "git://github.com/webinos/Webinos-Platform.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "contrib": "./contrib"
+                 , "lib": "./lib"
+                 , "test": "./test"
+                 }
+, "main": "./lib/webinos.vehicle.rpc"
+, "dependencies":
+  { "now": "0.8.8"
+  }
+, "bundleDependencies":
+  [ "events"
+  , "fs"
+  , "https"
+  , "path"
+  , "url"
+  ]
+}
