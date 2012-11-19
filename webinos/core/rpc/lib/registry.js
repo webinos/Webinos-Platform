@@ -125,27 +125,6 @@
 	};
 
 	/**
-	 * Used to load and register webinos services.
-	 * @private
-	 * @param modules An array of services, must be valid node add-ons exporting a Service constructor.
-	 */
-	Registry.prototype.loadModules = function(modules, rpcHandler) {
-		if (!modules) return;
-
-		var services = load(modules);
-		for (var i = 0; i < services.length; i++){
-			try {
-				var Service = services[i];
-                if (typeof Service === "function") //Some modules are just modification and do not expose any real API function
-				_registerObject.call(this, new Service(rpcHandler, modules[i].params));
-			}catch (error){
-				logger.error(error);
-				logger.error("Could not load module " + modules[i].name + " with message: " + error );
-			}
-		}
-	};
-
-	/**
 	 * Get all registered objects.
 	 *
 	 * Objects are returned in a key-value map whith service type as key and
