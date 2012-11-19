@@ -241,6 +241,12 @@ public:
 			}
 		}
 
+		vector<bool> purpose;
+		Local<Array> pTmp = (args[2]->ToObject())->GetPropertyNames();
+		for(unsigned int i = 0; i < pTmp->Length(); i++) {
+			purpose.push_back(pTmp->Get(i)->BooleanValue());
+		}
+
 //		string widPath(".");
 
 //		string roam("N");
@@ -248,7 +254,7 @@ public:
 //		(*environment)["roaming"] = roam;
 		
 //		Request* myReq = new Request(widPath, *resource_attrs, *environment);
-		Request* myReq = new Request(*subject_attrs, *resource_attrs);
+		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose);
 		
 		Effect myEff = pmtmp->pminst->checkRequest(myReq);
 

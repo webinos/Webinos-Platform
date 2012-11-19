@@ -19,7 +19,7 @@
 
 #include "Request.h"
 
-Request::Request(map<string, vector<string>*>& info, map<string, vector<string>*>& resources){	
+Request::Request(map<string, vector<string>*>& info, map<string, vector<string>*>& resources, vector<bool> purpose){	
 	subject_attrs = info;
 	resource_attrs = resources;
 	request_subject_text = "";
