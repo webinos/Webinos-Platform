@@ -25,8 +25,14 @@ try {
   console.log ("missing ansi module");
 }
 var webinos = require ("find-dependencies") (__dirname);
-var wPath = webinos.local.require (webinos.local.util.location, "lib/webinosPath.js"),
-  wId = webinos.local.require (webinos.local.util.location, "lib/webinosId.js");
+var wPath, wId;
+try {
+  wPath = webinos.local.require(webinos.local.util.location, "lib/webinosPath.js"),
+  wId = webinos.local.require(webinos.local.util.location, "lib/webinosId.js");
+} catch(err) {
+  wPath = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js"),
+  wId = webinos.global.require(webinos.global.util.location, "lib/webinosId.js");
+}
 
 var writeInfo = {}, writeError = {};
 var Log = function (filename) {
