@@ -1,22 +1,13 @@
-{ "name": "xmpp"
-, "publishConfig": { "tag": "alpha" }
-, "description": "XMPP communication for the PZP"
-, "keywords": [ "xmpp"]
-, "version": "0.2.0"
-, "author": "Eelco Cramer <eelco.cramer@tno.nl>"
-, "repository":
-  { "type": "git"
-  , "url": "http://dev.webinos.org/git/wp4.git"
-  }
-, "bugs":
-  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
-  , "url": ""
-  }
-, "directories": { "lib": "./lib"
-                 }
-, "main": "./lib/xmpp.js"
-, "bundleDependencies":
-  [ "fs"
-  , "path"
-  ]
+{ "name": "xmpp",
+  "version": "0.3.0",
+  "description": "PZP for XMPP based overlay network",
+  "main": "./lib/pzp.js",
+  "author": "Eelco Cramer <eelco.cramer@tno.nl>",
+  "directories": {
+    "lib": "./lib",
+    "test":"./test"
+  },
+ "dependencies":{
+  "node-xmpp":"git://github.com/eelcocramer/node-xmpp.git"
+ }
 }
