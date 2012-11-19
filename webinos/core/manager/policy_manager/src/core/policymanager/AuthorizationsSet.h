@@ -22,11 +22,57 @@
 #define AUTHORIZATIONSSET_H_
 
 #include "IPolicyBase.h"
+#define PURPOSES_NUMBER	35
+
+enum purpose_ontology {
+
+	// P3P ontology
+	// http://www.w3.org/TR/P3P11/#PURPOSE
+	CURRENT,
+	ADMIN,
+	DEVELOP,
+	TAILORING,
+	PSEUDO_ANALYSIS,
+	PSEUDO_DECISION,
+	INDIVIDUAL_ANALYSIS,
+	INDIVIDUAL_DECISION,
+	CONTACT,
+	HISTORICAL,
+	TELEMARKETING,
+	ACCOUNT,
+	ARTS,
+	BROWSING,
+	CHARITY,
+	COMMUNICATE,
+	CUSTOM,
+	DELIVERY,
+	DOWNLOADS,
+	EDUCATION,
+	FEEDBACK,
+	FINMGT,
+	GAMBLING,
+	GAMING,
+	GOVERNMENT,
+	HEALTH,
+	LOGIN,
+	MARKETING,
+	NEWS,
+	PAYMENT,
+	SALES,
+	SEARCH,
+	STATE,
+	SURVEYS,
+
+	// PrimeLife extension
+	// http://primelife.ercim.eu/results/documents/153-534d
+	UNSPECIFIED
+};
 
 class AuthorizationsSet{
 	
 private:
 	vector<string>	authzuseforpurpose;
+	bool		purpose_array[PURPOSES_NUMBER];
 
 public:
 	AuthorizationsSet(TiXmlElement*);
