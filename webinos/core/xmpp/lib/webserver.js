@@ -34,7 +34,7 @@
     var rpcServer = require("./RpcServer.js");
 
     var path = require('path');
-    var documentRoot = path.resolve(__dirname, '../../../test/client');
+    var documentRoot = path.resolve(__dirname, '../../../web_root');
     var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
     var dependencyPath = path.join(__dirname, '../', moduleRoot.root.location, '/dependencies.json')
     var dependencies = require(path.normalize(dependencyPath));
