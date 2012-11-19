@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8"/>
+  <title>PZH Dashboard</title>
+  <script src="js/webinosPzh.js" type="text/javascript"></script>
+  <link rel="stylesheet" href="css/layout.css" type="text/css" media="screen" />
+  <!--[if lt IE 9]>
+  <link rel="stylesheet" href="css/ie.css" type="text/css" media="screen" />
+  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+  <script src="js/hideshow.js" type="text/javascript"></script>
+  <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
+  <script type="text/javascript">
+
+  function DisplayListOfDevices(payload){
+      $("#enumConnectedPzh").html("");
+      $("#enumConnectedPzp").html("");
+      var text = "";
+      for (var i = 0 ; i < payload.pzhs.length; i += 1){
+        var style = payload.pzhs[i].isConnected?"connected":"disconnected";
+        text+= "<li><a class='"+ style +"'>"+payload.pzhs[i].id + "</a></li>";
+      }
+      $("#enumConnectedPzh").html(text);
+      text = "";
+      for (i = 0 ; i < payload.pzps.length; i += 1){
+        var style = payload.pzps[i].isConnected?"connected":"disconnected";
+        text+= "<li><a class='"+ style +"'>"+payload.pzps[i].id + "</a></li>";
+      }
+      $("#enumConnectedPzp").html(text);
+      $('.column').equalHeight(); // Fix height
+  }
+  function displayQRCode(payload){
+      var text = "<center>";
+      text += "<p> <img src=" + payload.img + "> </img> </p> ";
+      text += "<p> <h2 class='authCode'>" +payload.code +"</h2> </p>";
+      text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
+      setArticle("Temporary access code",text);
+  }
+  function setArticle(header,body){
+    $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
+    $('.column').equalHeight(); // Fix height
+  }
+  function connectPzh(){
+    var id =  document.getElementById('connectPzhId').value;
+    id = id.split("/");
+    id = id[0] + "_" + id[1];
+    webinosPZH.commands.connectPzh(id, function(result){
+      if (result === true) {
+        setArticle("Success", "<p>Pzh in now connected!</p>");
+        webinosPZH.commands.listDevices(DisplayListOfDevices);
+      } else {
+        setArticle("Fail", "<p>Pzh did not connect, reason -  " + result + "</p>" );
+      }
+    });
+  }
+  function pzpRevokeResult(payload){
+    setArticle("Device removed from personal zone", "<p>" + payload + " device removed.</p>");
+  }
+  function listPzpsToRevoke(payload){
+      var i, id;
+      var text = " <h3 align=center> Connected PZP's</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      for (i = 0; i < payload.signedCert.length; i += 1 ) {
+        id = payload.signedCert[i].id;
+        text += "<tr>  <td> " + payload.signedCert[i].url + "</td> <td> "+
+        "<input id=\'"+payload.signedCert[i].url+"\' type=\'button\' onclick=\'webinosPZH.commands.revokePzp(id,pzpRevokeResult)\'; value =\'"+id+"\' />  </td> </tr>" ;
+      }
+      text += '</table> </p>';
+      text += " <p> <h3 align=center> Remove a device from your personal zone</h3> </p><p>This page will allow you to remove a device from your personal zone.</p> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      for (i = 0; i < payload.revokedCert.length; i += 1 ) {
+        id = payload.revokedCert[i].id;
+        text += "<tr>  <td> " + payload.revokedCert[i].url + "</td> </td> </tr>" ;
+      }
+      text += '</table> </p>';
+      setArticle("Remove device from personal zone", text);
+  }
+  function listAllServices(payload){
+      var text = " <h3 align=center> Configure services</h3> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      for (var i = 0; i < payload.pzEntityList.length; i += 1 ) {
+        var pzId = payload.pzEntityList[i].pzId;
+        text += '<tr><td><input type="button" onclick="webinosPZH.commands.listUnregServices(\'' +
+          pzId + '\', listUnregServices)" value="' + pzId + '"/></td></tr>';
+      }
+      text += "</table> </p>";
+      text += "<p><ul>";
+      for (var i = 0; i < payload.services.length; i += 1 ) {
+        var sv = payload.services[i];
+        text += "<li> " + sv.api + " @ " + sv.serviceAddress +
+          "<input type='button' value='unregister' onclick='webinosPZH.commands.unregisterService(\"" + sv.serviceAddress + "\",\"" + sv.id + "\",\"" + sv.api + "\")'></li>";
+      }
+      text += '</ul>';
+      setArticle("Services", text);
+  }
+  function listUnregServices(payload){
+      var text = '<h3 align=center>Original Services from ' + payload.pzEntityId + '</h3><ul>';
+      for (var i = 0; i < payload.modules.length; i += 1) {
+        var mod = payload.modules[i];
+          text += '<li>' + mod.name + '<input type="button" value="register" onclick="webinosPZH.commands.registerService(\'' + payload.pzEntityId + '\',\'' + mod.name + '\')"></li>';
+      }
+      text += '</ul>';
+      setArticle("unregistered Services", text);
+  }
+  function showCrashLog(payload){
+      setArticle("Crash Log", payload);
+  }
+  function showInfoLog(payload){
+      setArticle("Info Log", payload);
+  }
+  function listUserDetails(payload){
+      var text = "";
+      if (!payload) {
+        payload = {
+          name: "Connected",
+          country: "Undefined",
+          email: "Undefined",
+          servername: "Undefined"
+        }
+      }
+      if (payload.image){
+        text += "<p><h3> <img src =  "+ payload.image+"> </img> </h3></p>";
+      }
+      text += "<p><h3> Name    :     "+ payload.name +"</h3></p>";
+      text += "<p><h3> Country :     "+ payload.country +"</h3></p>";
+      text += "<p><h3> Email   :     "+ payload.email+"</h3></p>";
+      text += "<p><h3> Connected to: "+ payload.servername+"</h3></p>";
+
+      setArticle("About you", text);
+      $("#userId").html(payload.name);
+      webinosPZH.commands.listDevices(DisplayListOfDevices);
+  }
+  $(document).ready(function() {
+    webinosPZH.init(function(){
+      webinosPZH.commands.userDetails(listUserDetails);
+      setTimeout(function() {
+        webinosPZH.commands.listDevices(DisplayListOfDevices);
+      }, 100);
+    });
+    $("#addPzp").click(function(){
+      webinosPZH.commands.addPzp(displayQRCode);
+    });
+    $("#connectPzh").click(function(){
+      var text = "Connect to zone:<br/> <input type='text' id='connectPzhId' value=''/>";
+      text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/> <p>The address should be of of form hostname/email eg: pzh.webinos.org/bob@gmail.com</p>";
+      setArticle("Connect to another personal zone",text);
+    });
+    $("#revokeCert").click(function(){
+      webinosPZH.commands.listPzp(listPzpsToRevoke);
+    });
+    $("#refresh").click(function(){
+       webinosPZH.commands.listDevices(DisplayListOfDevices);
+    });
+    $("#crashLog").click(function(){
+      webinosPZH.commands.crashLog(showCrashLog);
+    });
+    $("#infoLog").click(function(){
+      webinosPZH.commands.infoLog(showInfoLog);
+    });
+    $("#userDetails").click(function(){
+      webinosPZH.commands.userDetails(listUserDetails);
+    });
+    $("#restartPzh").click(function(){
+      webinosPZH.commands.restartPzh();
+      setArticle("Command sent", "<p>Restart command sent!</p>");
+    });
+    $("#serviceConfig").click(function(){
+      webinosPZH.commands.listAllServices(listAllServices);
+    });
+    $('.column').equalHeight(); // Fix height
+    });
+    </script>
+</head>
+<body>
+  <header id="header">
+    <hgroup>
+      <h1 class="site_title"><img src="./images/webinosWithBorder.png">Personal zone admin</h1>
+      <h2 class="section_title">Dashboard</h2><div class="btn_view_site"><a href="#logout" onclick="webinosPZH.commands.logout()">Logout</a></div>
+    </hgroup>
+  </header> <!-- end of header bar -->
+
+  <section id="secondary_bar">
+    <div class="user">
+      <p id="userId">Connecting...</p>
+    </div>
+    <div class="breadcrumbs_container">
+      <article class="breadcrumbs"><a href="index.html">webinos personal zone hub</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
+    </div>
+  </section><!-- end of secondary bar -->
+
+  <aside id="sidebar" class="column">
+    <h3> <a href="#refresh" id="refresh" >Refresh list </a> </h3>
+    <h3>Connected personal zones</h3>
+      <ul class="" style="display: block;" id="enumConnectedPzh">
+      </ul>
+      <ul class="" style="" id="connectToAnotherPZHLink">
+        <li> <a href="#connectPzh" id="connectPzh">Connect to another personal zone... </a> </li>
+      </ul>
+      
+      
+      <h3>Connected devices</h3>
+      <ul class="" style="display: block;" id="enumConnectedPzp">
+      </ul>
+      <ul class="" style="">
+        <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
+        <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>   
+      </ul>
+      
+      <h3>Personal zone admin</h3>
+      <ul class="" style="">
+        <li> <a href="#userDetails" id="userDetails">About you </a> </li>
+        <li> <a href="#serviceConfig" id="serviceConfig">Service configuration </a> </li>
+        <li> <a href="#restartPzh" id="restartPzh">Restart the personal zone hub </a> </li>
+        <li> <a href="#crashLog" id="crashLog">Crash log </a> </li>
+        <li> <a href="#infoLog" id="infoLog">Info log </a> </li>
+      </ul>
+
+    <footer>
+      <hr />
+      <p><strong>Powered by <a href="http://www.webinos.org">webinos</a></strong></p>
+    </footer>
+  </aside><!-- end of sidebar -->
+
+  <section id="main" class="column">
+
+    <article class="module width_full">
+      <header><h3>webinos personal zone hub</h3></header>
+        <div class="module_content">
+          <p>Please select one of the actions on the left menu</p>
+        </div>
+    </article><!-- end of styles article -->
+    <div class="spacer"></div>
+  </section>
+</body>
+</html>

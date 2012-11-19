@@ -1,0 +1,162 @@
+<html>
+	<head>
+    <script src="./jquery-1.8.2.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="./webinos.js"></script>
+		<link rel="stylesheet" type="text/css" href="/client/css/style.css" media="screen"/>
+		<script>
+			$(document).ready(function() {
+				var auth = null;
+						
+		        function fillPZAddrs(data) {
+		          	var pzhId, connectedPzp, connectedPzh;
+                    //If there is a pzh available
+                    if(typeof webinos.session.getPZHId()!="undefined") {
+                        pzhId = webinos.session.getPZHId();
+			            connectedPzp = data.payload.message.connectedPzp;
+		                connectedPzh = data.payload.message.connectedPzh;
+			        }
+		            var pzpId = data.from;
+		           
+		            
+		            if(document.getElementById('pzh_pzp_list'))
+		                document.getElementById('pzh_pzp_list').innerHTML="";
+		    
+		            $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
+		            
+		            var i;
+		            if(typeof connectedPzp !== "undefined") {
+				        for(i =0; i < connectedPzp.length; i++) {
+				            $("<option value=" + connectedPzp[i] + " >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
+				        }
+				    }
+		            $("<option value="+pzpId+" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
+		            $("</optgroup>").appendTo("#pzh_pzp_list");
+		            $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
+		            if(typeof connectedPzh !== "undefined") {
+				        for(i =0; i < connectedPzh.length; i++) {
+				            $("<option value=" + connectedPzh[i] + " >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
+				        }
+				    }
+		            $("</optgroup>").appendTo("#pzh_pzp_list");
+		        }
+		        webinos.session.addListener('registeredBrowser', fillPZAddrs);
+                //TODO: Perhaps we should be reading the info from the already loaded webinos.
+                if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+                    webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+                }
+		        
+		        function updatePZAddrs(data) {
+		            if(typeof data.payload.message.pzp !== "undefined") {
+		                $("<option value=" + data.payload.message.pzp + " >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
+		            } else {
+		                $("<option value=" + data.payload.message.pzh + " >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
+		            }
+		        }
+		        webinos.session.addListener('update', updatePZAddrs);
+		        
+		        function printInfo(data) {
+		            $('#message').append('<li>'+data.payload.message+'</li>');
+		        }
+		        webinos.session.addListener('info', printInfo);
+		        
+				$('#findService').bind('click', function() {
+					webinos.discovery.findServices(new ServiceType('http://webinos.org/api/authentication'), {onFound: function (service) {
+						auth = service;
+                    	document.getElementById("find_message").innerHTML = 'Service found';
+                    	document.getElementById("bind_message").innerHTML = 'Click on Bind Service';
+						$('#bindService').bind('click', function() {
+							service.bindService({
+								onBind: function () {
+									document.getElementById("bind_message").innerHTML = 'Service bound';
+								}
+							});
+						});
+					}});
+				});
+					
+				$('#authenticate').bind('click', function() {
+					if (auth == null) {
+						alert("Click on Find Service first");
+					}
+					else {
+						auth.authenticate(document.getElementById("username").value, function (result){
+							alert(result);
+						}, function (error){
+							if(typeof(error) == 'object') {
+								alert("error code: " + error.code + "\nerror message: " + error.message);
+							}
+							else {
+								alert("Unknown error");
+							}
+						});
+					}
+				}); 
+
+				$('#isAuthenticated').bind('click', function() {
+					if (auth == null) {
+						alert("Click on Find Service first");
+					}
+					else {
+						auth.isAuthenticated(document.getElementById("username").value, function (result){
+							alert(result);
+						}, function (error){
+							if(typeof(error) == 'object') {
+								alert("error code: " + error.code + "\nerror message: " + error.message);
+							}
+							else {
+								alert("Unknown error");
+							}
+						});
+					}
+				}); 
+
+				$('#getAuthenticationStatus').bind('click', function() {
+					if (auth == null) {
+						alert("Click on Find Service first");
+					}
+					else {
+						auth.getAuthenticationStatus(document.getElementById("username").value, function (result){
+							alert(result);
+						}, function (error){
+							if(typeof(error) == 'object') {
+								alert("error code: " + error.code + "\nerror message: " + error.message);
+							}
+							else {
+								alert("Unknown error");
+							}
+						});
+					}
+				}); 
+			});
+		</script>
+	</head>
+<body>
+<table border="1">
+	<tr valign="top" >
+		<td>
+			<div>
+				<p>PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> </p>
+			</div>
+		</td>
+	</tr>
+	<tr valign="top" >
+		<td>
+			<div >
+				<p><button id="findService">Find Service</button> <span id="find_message">Click on Find Service</span></p>
+				<p><button id="bindService">Bind Service</button> <span id="bind_message"></span></p>
+			</div>
+		</td>
+	</tr>
+	<tr valign="top" >
+		<td>
+			<div >
+				<p><button id="authenticate">authenticate</button>
+				<button id="isAuthenticated">isAuthenticated</button>
+				<button id="getAuthenticationStatus">getAuthenticationStatus</button></p>
+				<p><label for="username">Username</label><input type="text" id="username" /></p>
+			</div>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

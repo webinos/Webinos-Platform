@@ -2,8 +2,7 @@
   "ports":{
     "provider"          :80,
     "provider_webServer":443,
-    "pzp_webSocket"     :8081,
-    "pzp_web_webSocket" :8080,
+    "pzp_webSocket"     :8080,
     "pzp_tlsServer"     :8040,
     "pzp_zeroConf"      :4321
   },
