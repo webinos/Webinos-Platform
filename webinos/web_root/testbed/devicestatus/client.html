@@ -1,24 +1,32 @@
 <html>
 <head>
-<title>Webinos RPC - DeviceStatus API Test</title>
-	<!-- script type="text/javascript" src="./webinos.client.devicestatus.js"></script-->
-<script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
-  <script type="text/javascript" src="./webinos.js"></script>
-	<script type="text/javascript" src="devicestatus/vocabulary.js"></script>
-	<script type="text/javascript" src="devicestatus/client.js"></script>
-  
+    <title>Webinos RPC - DeviceStatus API Test</title>
+
+    <script type="text/javascript" src="./jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="./webinos.js"></script>
+    <script type="text/javascript" src="devicestatus/vocabulary.js"></script>
+    <script type="text/javascript" src="devicestatus/client.js"></script>
+
 <body>
-	PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br>
-	<button id="findService">Find Service</button>
-	<button id="bindService">Bind Service</button> <span><--Click these before you go below</span>
-	<hr>
-	Aspects:<br>
-	<select id="aspects_list"></select>
-	<button id="getComponents">Get Components</button><br>
-	Components:<br>
-	<select id="components_list"></select><br>
-	Properties:<br>
-	<select id="properties_list"></select>
-	<button id="getPropertyValue">Get Property Value</button>
+
+<button id="findService" class="button">Find Service</button><br>
+
+<select id="servicesList" size="5"></select><br>
+
+<button id="bindService" class="button">Bind Service</button>
+<span><--Click these before you go below</span>
+
+<hr>
+
+Aspects:<br>
+<select id="aspectsList"></select><br>
+<button id="getComponents" class="button">Get Components</button><br>
+
+Components:<br>
+<select id="componentsList"></select><br>
+
+Properties:<br>
+<select id="propertiesList"></select><br>
+<button id="getPropertyValue" class="button">Get Property Value</button>
 </body>
 </html>
