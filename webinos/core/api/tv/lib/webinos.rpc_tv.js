@@ -26,6 +26,16 @@
 	// reference to specific tv manager implementation
 	var tvMgrImpl;
 
+	var TVApiModule = function(rpcHandler, params) {
+		this.rpcHandler = rpcHandler;
+		this.params = params;
+	};
+
+	TVApiModule.prototype.init = function (register, unregister) {
+		var service = new RemoteTVManager(this.rpcHandler, this.params);
+		register(service);
+	};
+
 	/**
 	 * Webinos TV service constructor (server side).
 	 * @constructor
@@ -122,6 +132,6 @@
 	};
 
 	// export our object
-	exports.Service = RemoteTVManager;
+	exports.Module = TVApiModule;
 
 }());
