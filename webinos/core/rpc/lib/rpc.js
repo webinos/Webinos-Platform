@@ -508,7 +508,7 @@
 	 * @constructor
 	 * @param api String with API URI.
 	 */
-	ServiceType = function(api) {
+	var ServiceType = function(api) {
 		if (!api)
 			throw new Error('ServiceType: missing argument: api');
 

@@ -20,13 +20,28 @@ var webinos = require("find-dependencies")(__dirname);
 var logger = console;
 
 exports.loadServiceModules = function(modules, registry, rpcHandler) {
-	var services = modules.map(function(m) {
-		return webinos.global.require(webinos.global.api[m.name].location).Service;
+	var mmm = modules.map(function(m) {
+		return webinos.global.require(webinos.global.api[m.name].location);
 	});
-	for (var i=0; i<services.length; i++) {
+	for (var i=0; i<mmm.length; i++) {
 		try {
-			var Service = services[i];
-			registry.registerObject(new Service(rpcHandler, modules[i].params));
+			if (mmm[i].Module) {
+				var ApiModule = mmm[i].Module;
+				var m = new ApiModule(rpcHandler, modules[i].params);
+				if (!m.init) {
+					throw new Error("api module has no init function");
+				}
+
+				m.init(function register(o) {
+					registry.registerObject(o);
+				}, function unregister(o) {
+					registry.unregisterObject(o);
+				});
+			} else if (mmm[i].Service) {
+				var Service = mmm[i].Service;
+				var s = new Service(rpcHandler, modules[i].params);
+				registry.registerObject(s);
+			}
 		} catch (error) {
 			logger.error(error);
 			logger.error("Could not load module " + modules[i].name + " with message: " + error);
