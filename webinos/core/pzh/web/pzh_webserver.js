@@ -173,13 +173,13 @@ var PZH_WebServer = function() {
         pzh_api.listAllServices(instance, result);
         break;
       case 'listUnregServices':
-        pzh_api.listUnregServices(instance, query.at, result);
+        pzh_api.listUnregServices(instance, query.payload.at, result);
         break;
       case 'registerService':
-        pzh_api.registerService(instance, query.at, query.name, result);
+        pzh_api.registerService(instance, query.payload.at, query.payload.name, result);
         break;
       case 'unregisterService':
-        pzh_api.unregisterService(instance, query.at, query.svId, query.svAPI, result);
+        pzh_api.unregisterService(instance, query.payload.at, query.payload.svId, query.payload.svAPI, result);
         break;
     }
   }
