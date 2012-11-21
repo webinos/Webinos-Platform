@@ -29,7 +29,7 @@ SetCompressor lzma
 !define INSTALLER_BANNER "installBanner.bmp"
 
 !define PRODUCT_NAME "webinos"
-!define VERSION "0.6.08"
+!define VERSION "0.6.09"
 
 ; XP Compatibility
 !ifndef SF_SELECTED
@@ -193,8 +193,8 @@ SectionIn RO
 	File "${RedistPath}\Openssl\libeay32.dll"
   File "${RedistPath}\Openssl\ssleay32.dll"
 
-  SetOutPath "$INSTDIR\webinos\testbed_root"  
-  File /r /x certificates /x *.txt /x tools /x apps /x build.xml "${SRCROOT}\webinos\testbed_root\*.*"
+  SetOutPath "$INSTDIR\webinos\web_root"  
+  File /r /x certificates /x *.txt /x tools /x apps /x build.xml "${SRCROOT}\webinos\web_root\*.*"
   
 ;  SetOutPath "$INSTDIR\storage"
   

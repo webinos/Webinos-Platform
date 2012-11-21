@@ -1,0 +1,38 @@
+W3C Digital Signatures for Widgets Test Suite
+=============================================
+
+Example flow
+------------
+
+    # Generate all the keys to use
+    ./create-keys.sh new
+    # Create a new test case
+    ./create-test-case ta-XX XXa
+
+    # Create a new key/cert (final parameter is command to generate the key)
+    ./create-keys.sh add "name" "cert title" "openssl genrsa -out special.key.pem 2048"
+    # Add a new signature to the widget
+    ./sign-widget.sh --pkcs12 "/abosolute/path/keys/special.p12" --pwd secret -i w3c-testsuite-id ../test-cases/ta-XX/XXa
+    # Rezip it
+    ./repack-test-case.sh ta-XX XXa
+
+    # Validate the signatures
+    ./validate-widget --pkcs12 "/absolute/path/keys/special.p12" --pwd secret ../test-cases/ta-XX/XXa
+
+Dependencies
+------------
+
+uuid        1.6.2
+xmlsec1     >=1.2.13    (I compiled from source available at
+    http://www.aleksey.com/xmlsec/download/xmlsec1-1.2.16.tar.gz )
+OpenSSL     0.9.8k      (Ubuntu package openssl )
+
+XMLstarlet  1.0.1       (Ubuntu package xmlstarlet )
+Relax NG    1.7.10      (Ubuntu package rnv )
+
+
+Notes
+-----
+
+The author-signature.xml must be included in all the signature*.xml files, so
+make it first.

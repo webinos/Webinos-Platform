@@ -47,7 +47,6 @@ CefRefPtr<CefStreamReader> GetBinaryResourceReader(const char* resource_name) {
   } resource_map[] = {
     {"webinos404.html", IDS_WEBINOS_404_PAGE},
     {"webinos500.html", IDS_WEBINOS_500_PAGE},
-    {"webinosAboutWidget.html", IDS_WEBINOS_ABOUT_WIDGET_PAGE},
     {"webinosInvalidWidget.html", IDS_WEBINOS_INVALID_WIDGET_PAGE},
   };
 

@@ -206,7 +206,7 @@ this.WidgetManager = (function () {
         } catch (e) {
             Logger.logAction(Logger.LOG_ERROR, "WidgetManager.prepareInstall() exception", e.stack);
             var processingResult = new ProcessingResult();
-            e.status = WidgetConfig.STATUS_IO_ERROR;
+            processingResult.status = WidgetConfig.STATUS_IO_ERROR;
             processingResult.setError(e);
             callPrepareListener(processingResult, listener);
             return e.status;

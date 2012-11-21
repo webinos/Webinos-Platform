@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite spec="http://dev.w3.org/2006/waf/widgets-digsig/"
+name="Widgets Digial Signatures">
+
+	<test id="bad_signature" for="ta-validate" src="test-cases/ta-validation/bad_signature/bad_signature.wgt" expected="invalid">
+	This test checks that a user agent rejects a broken signature block (the test has some changed bits in the signature, which makes the signature invalid). 
+	To pass, the user agent must treat the signature as invalid. 
+	</test>
+	
+	<test id="bad_hash" for="ta-validate" src="test-cases/ta-validation/bad_hash/bad_hash.wgt" expected="invalid">
+	This test checks that hash checking on file references is done correctly (the test has some flipped bits in the hash of a file). 
+	To pass, the user agent must reject this signature as invalid. 
+	</test>
+	
+	<test id="changed_file" for="ta-validate" src="test-cases/ta-validation/changed_file/changed_file.wgt" expected="invalid">
+	This test checks that a use agent actually does the hash checking of files (the config.xml was changed after signing). 
+	To pass, the user agent must reject this widget as invalid as one of the files has been changed after signing. 
+	</test>
+
+	<test id="11a" for="ta-validate" src="test-cases/ta-11/11a/11a.wgt" expected="invalid">
+Tests that the validator treats a distributor signature without a dsp:Role
+signature property as being in error. To pass the validator must fail to
+validate this widget.
+</test>
+	<test id="11b" for="ta-validate" src="test-cases/ta-11/11b/11b.wgt" expected="invalid">
+Tests that the validator treats a distributor signature with a dsp:Role signature
+property that does not contain a URI for a distributor role as being in error.
+To pass the validator must fail to validate this widget.
+</test>
+	<test id="12a" for="ta-validate" src="test-cases/ta-12/12a/12a.wgt" expected="invalid">
+Tests that the validator treats an author signature without a dsp:Role signature
+property as being in error. To pass the validator must fail to validate this
+widget.
+</test>
+	<test id="12b" for="ta-validate" src="test-cases/ta-12/12b/12b.wgt" expected="invalid">
+Tests that the validator treats an author signature with a dsp:Role signature
+property that does not contain a URI for a author role as being in error.
+To pass the validator must fail to validate this widget.
+</test>
+	<test id="13a" for="ta-validate" src="test-cases/ta-13/13a/13a.wgt" expected="invalid">
+[Optional Test] - Tests if the validator performs revocation checking using a CRL obtained independently of the signature document. To pass the validator must fail to validate this widget as the key used to sign (revoked.13a.rsa.{key,cert}.pem) has been revoked (testCA/crl/revoked.13a.rsa.crl).
+</test>
+	<test id="13b" for="ta-validate" src="test-cases/ta-13/13b/13b.wgt" expected="invalid">
+[Optional Test] - Tests if the validator performs revocation checking using an embedded X509CRL element. To pass the validator must fail to validate this widget as the key used to sign it (revoked.13b.rsa.{key,cert}.pem) has been revoked. 
+</test>
+	<test id="16c" for="ta-validate" src="test-cases/ta-16/16c/16c.wgt" expected="invalid">
+Tests that a widget signature contains a dsp:Profile signature properties
+element with the correct URI attribute value. To pass a validator must
+fail to validate this widget due to the incorrect URI in the dsp:Profile
+signature property. 
+</test>
+	<test id="16e" for="ta-validate" src="test-cases/ta-16/16e/16e.wgt" expected="invalid">
+Tests that each widget signature contains a dsp:Identifier signature properties
+element. To pass a validator must fail to
+validate this widget as there are two dsp:Identifier elements.
+</test>
+	<test id="16f" for="ta-validate" src="test-cases/ta-16/16f/16f.wgt" expected="invalid">
+Tests if every ds:Reference used within a widget signature has a URI attribute.
+To pass a validator must fail to validate this widget, as a ds:Reference is
+missing a URI attribute to the LICENSE file entry.
+</test>
+	<test id="16g" for="ta-validate" src="test-cases/ta-16/16g/16g.wgt" expected="invalid">
+Tests if every ds:Reference used within a widget signature is a reference to a
+file entry in the same widget package. To pass a validator must fail to validate
+this widget as it references a file that is not in the widget package.
+</test>
+	<!--test id="20a" for="ta-generate" src="test-cases/ta-20/20a/20a.wgt">
+This test is intended for products that sign widget packages. It does not apply to validators. 
+Tests that the signer supports generating author and distributor signatures with the recommended signature algorithm: To run this test, generate an author signature and distributor signature with the
+default RSA key ("3.rsa.key.pem") and the template files (config.xml and index.html). To pass,  
+make sure the signed widget validates on at least one conforming validator. 
+</test-->
+	<test id="24a" for="ta-validate" src="test-cases/ta-24/24a/24a.wgt">
+Tests that a validator supports the XML Canonicalization 1.0 (omits
+comments) canonicalization algorithm. To pass a validator must successfully
+validate this widget.
+</test>
+	<test id="25a" for="ta-validate" src="test-cases/ta-25/25a/25a.wgt" expected="invalid">
+Tests that a validator performs a case-sensitive comparisons on file
+names. To pass the validator must fail to validate this widget as the reference
+to the LICENSE file entry has the incorrect case.
+</test>
+	<test id="29a" for="ta-validate" src="test-cases/ta-29/29a/29a.wgt" expected="invalid">
+Tests that if an author signature is present within the widget package, the
+implementation ensures that a distributor signature has a ds:Reference for any
+author signature. To pass a validator must fail to validate this widget as
+signature1.xml lacks a ds:Reference to author-signature.xml. 
+</test>
+	<test id="33a" for="ta-validate" src="test-cases/ta-33/33a/33a.wgt">
+Tests that a validator is able to process a ds:Reference to same-document
+XML content when that ds:Reference does not have a ds:Transform child element,
+and that the default canonicalization algorithm Canonical XML 1.0 is used. To
+pass the validaotr must  successfully validate this widget.
+</test>
+	<test id="34a" for="ta-validate" src="test-cases/ta-34/34a/34a.wgt" expected="invalid">
+Tests that a validator ensures that the ds:Object element contains a
+single ds:SignatureProperties element. To pass a validator must fail to validate
+this widget.
+</test>
+	<test id="35a" for="ta-validate" src="test-cases/ta-35/35a/35a.wgt">
+Tests that the validator can validate a widget that makes use of various XML Digital 
+Signature Properties. To pass a validator must successfully validate this widget (the user 
+agent is not required to do anything with the additional properties).
+</test>
+	<test id="37a" for="ta-validate" src="test-cases/ta-37/37a/37a.wgt" expected="invalid">
+Tests if a validator ensures that the widget signature includes a
+ds:Object element within the ds:Signature element. To pass a validator must fail
+to validate this widget as it lacks a ds:Object element. 
+</test>
+	<test id="37b" for="ta-validate" src="test-cases/ta-37/37b/37b.wgt" expected="invalid">
+Tests if a validator ensures that the ds:Object element is referenced by a
+ds:Reference element. To pass a validator must fail to validate this widget as
+it lacks a ds:Reference to the ds:Object element. 
+</test>
+
+	<test id="40a" for="ta-validate" src="test-cases/ta-40/40a/40a.wgt">
+Tests whether the validator can locate all signature files in a widget package.
+To pass the validator must find "signature1.xml", "signature2.xml",
+"signature987654321.xml" and "author-signature.xml".
+</test>
+</testsuite>

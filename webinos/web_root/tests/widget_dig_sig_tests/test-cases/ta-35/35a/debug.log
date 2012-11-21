@@ -1,0 +1,7 @@
+[1113/141340:ERROR:tcp_listen_socket.cc(72)] Could not bind socket to 127.0.0.1:9222
+[1113/141340:ERROR:renderer_main.cc(215)] Running without renderer sandbox
+[1113/141341:ERROR:ipc_channel_win.cc(130)] pipe error: 109
+[1113/141341:ERROR:renderer_main.cc(215)] Running without renderer sandbox
+[1113/141342:INFO:CONSOLE(1116)] "WebSocket Client: Message Received : "{\"type\":\"prop\",\"from\":\"TE-Dev_Pzp\",\"to\":\"TE-Dev_Pzp/0\",\"payload\":{\"status\":\"registeredBrowser\",\"message\":{\"connectedPzp\":[],\"connectedPzh\":[]}}}"", source: http://localhost:53510/widget/a2ea0217a15f844fb1aa49aae5ad9208ed2e0cb8/index.html (1116)
+[1113/141342:INFO:CONSOLE(798)] "[object Object]", source: http://localhost:53510/widget/a2ea0217a15f844fb1aa49aae5ad9208ed2e0cb8/index.html (798)
+[1113/141343:ERROR:window_impl.cc(55)] Failed to unregister class Chrome_WidgetWin_0. Error = 1412

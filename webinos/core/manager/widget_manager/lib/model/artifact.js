@@ -135,6 +135,10 @@ this.Artifact = (function() {
     return result;
   };
 
+  Artifact.prototype.getReasonText = function() {
+	return this.reason;
+  }
+  
   Artifact.prototype.getDetailsText = function() {
     var result = new Array[this.details.length];
     for(var i in this.details)
