@@ -35,14 +35,18 @@
 		var policyPath = policyFile;
 		//Decision files locations
 		var decisionFilePermanent = path.join(path.dirname(policyPath), "decisionpermanent.xml");
-		//var decisionFileSession = path.join(path.dirname(policyPath), "decisionsession.xml");
 		var decisionFileSession = new Array();
 		console.log("Permanent file is "+decisionFilePermanent);
-		//console.log("Session file is "+decisionFileSession);
 
-		//Reset session decision file at startup
-		//resetDecisionFile(decisionFileSession);
-		//TODO: delete all session files at startup!
+		//Remove session decision file at startup
+		var fileList = fs.readdirSync(path.dirname(policyPath));
+		for(var j in fileList) {
+			if(fileList[j].indexOf("decisionsession_") == 0) {
+				fs.unlinkSync(path.join(path.dirname(policyPath), fileList[j]));
+			}
+
+		}
+		
 		//If permanent file not present, create it
 		if(!fs.existsSync(decisionFilePermanent)) {
 			resetDecisionFile(decisionFilePermanent);
@@ -50,12 +54,10 @@
 
 		//Native pm module instance
 		var pmCorePermanent = new pmNativeLib.PolicyManagerInt(decisionFilePermanent);
-		//var pmCoreSession = new pmNativeLib.PolicyManagerInt(decisionFileSession);
 		var pmCoreSession = new Array();
 
 		//Policy editor instances
 		var peCorePermanent = new pe.policyEditor(decisionFilePermanent, pmCorePermanent);
-		//var peCoreSession = new pe.policyEditor(decisionFileSession, pmCoreSession);
 		var peCoreSession = new Array();
 
 

@@ -43,6 +43,7 @@ _RPCHandler.prototype.handleMessage = function(){
 
 
         var userAndRequestor = arguments[1].split("_")[1].split("/");
+	var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
 
         var request = {
             'subjectInfo' : { 'userId' : userAndRequestor[0] },
@@ -51,7 +52,7 @@ _RPCHandler.prototype.handleMessage = function(){
         };
 
 
-        if (pm.enforceRequest(request, "defaultSession") == 0) {
+        if (pm.enforceRequest(request, sessionId) == 0) {
             //request is allowed by policy manager
             this._handleMessage.apply(this, arguments)
         } else {
