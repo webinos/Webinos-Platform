@@ -49,6 +49,7 @@ var PzpWSS = function(_parent) {
 
 
   function prepMsg(from, to, status, message) {
+    "use strict";
     return {
       "type": "prop",
         "from": from,
@@ -61,6 +62,7 @@ var PzpWSS = function(_parent) {
   }
 
   function getConnectedPzp() {
+    "use strict";
     return Object.keys(parent.pzp_state.connectedPzp);
   }
 
@@ -69,6 +71,7 @@ var PzpWSS = function(_parent) {
   }
 
   function getVersion(callback) {
+    "use strict";
     var version;
     if (os.platform().toLowerCase() !== "android") {
       child_process("git describe", function(error, stderr, stdout){
@@ -82,6 +85,13 @@ var PzpWSS = function(_parent) {
       callback("v0.7");
     }
 
+  }
+
+  function getWebinosLog (type, callback) {
+    "use strict";
+    logger.fetchLog(type, "Pzp", parent.config.metaData.friendlyName, function(data) {
+      callback(data);
+    });
   }
 
   function wsServerMsg(message) {
@@ -116,20 +126,37 @@ var PzpWSS = function(_parent) {
     if (msg.type === "prop") {
       if (msg.payload.status === "registerBrowser") {
         connectedApp(connection);
-      } else if (msg.payload.status === "setFriendlyName") {
+      }
+      else if (msg.payload.status === "setFriendlyName") {
         parent.changeFriendlyName(msg.payload.value);
-      } else if (msg.payload.status === "getFriendlyName") {
+      }
+      else if (msg.payload.status === "getFriendlyName") {
         var msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
         self.sendConnectedApp(msg.from, msg1);
-      } else if (msg.payload.status === "webinosVersion") {
+      }
+      else if (msg.payload.status === "infoLog") {
+        getWebinosLog("info", function(value) {
+          msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "infoLog", value);
+          self.sendConnectedApp(msg.from, msg1);
+        });
+      }
+      else if (msg.payload.status === "errorLog") {
+        getWebinosLog("error", function(value) {
+          msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "errorLog", value);
+          self.sendConnectedApp(msg.from, msg1);
+        });
+      }
+      else if (msg.payload.status === "webinosVersion") {
         getVersion(function(value){
           var msg2 = prepMsg(parent.pzp_state.sessionId, msg.from, "webinosVersion", value);
           self.sendConnectedApp(msg.from, msg2);
         });
-      } else {
+      }
+      else {
         autoEnrollment(msg, origin);
       }
-    } else {
+    }
+    else {
       parent.webinos_manager.messageHandler.onMessageReceived(msg, msg.to);
     }
   }
@@ -341,7 +368,7 @@ var PzpWSS = function(_parent) {
           httpServer: value,
           autoAcceptConnections: false
         });
-
+        logger.addId(parent.config.metaData.webinosName);
         wsServer.on("request", function(request) {
           logger.log("Request for a websocket, origin: " + request.origin + ", host: " + request.host);
           if (approveRequest(request)) {

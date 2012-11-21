@@ -53,7 +53,7 @@ var Pzh = function () {
     connectedPzp: {},// Holds connected PZP information such as IP address and socket connection
     connectedPzh: {},
     expecting   : "", // Set by auth-code directly
-    logger      : ""
+    logger      :new logging(__filename)
   };
 
   /**
@@ -263,7 +263,6 @@ var Pzh = function () {
    * @param _callback returns instance of PZH
    */
   this.addLoadPzh = function (_friendlyName, _uri, _user, _callback) {
-    self.pzh_state.logger = new logging(__filename); // log is initialized in order to show log as per sessions
     auth_code.createAuthCounter(function (res) {
       self.pzh_state.expecting = res;
     });
@@ -276,7 +275,7 @@ var Pzh = function () {
       if (status) {
         self.config.storeUserDetails(_user);
         self.pzh_state.sessionId = _uri;
-        self.pzh_state.logger.addId(self.pzh_state.sessionId);
+        self.pzh_state.logger.addId(self.config.userData.email);
         self.pzh_otherManager = new pzh_otherManager(self);
         self.pzh_pzh = new Pzh_Pzh(self);
         self.revoke  = new RevokePzh(self);

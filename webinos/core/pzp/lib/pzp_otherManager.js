@@ -37,7 +37,7 @@ var Pzp_OtherManager = function (_parent) {
   this.localDiscovery;
   var self = this;
   var sync = new Sync();
-
+  logger.addId(_parent.config.metaData.webinosName);
   /**
    * Any entity connecting to PZP has to register its address with other end point
    */
