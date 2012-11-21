@@ -47,9 +47,10 @@
      * @param rpcHandler The rpc handler instance.
      * @param connector The geolocation connector scheme that is used.
      */
-    function FileFeature(rpcHandler) {
+    function FileFeature(rpcHandler, params) {
+        console.log('*******************' + params);
     	GenericFeature.GenericFeature.call(this);
-        this.embedService(new file.Service(rpcHandler));
+        this.embedService(new file.Service(rpcHandler, params));
     }
 
     sys.inherits(FileFeature, GenericFeature.GenericFeature);
