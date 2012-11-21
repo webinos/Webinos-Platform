@@ -39,19 +39,21 @@
 
     // Parse command line
     var argv = require('optimist')
-        .usage('Usage: pzh.js --password=<xmpp component password>')
-        .demand(['password'])
+        .usage('Usage: pzh.js --host=<xmpp server> --jid=<component name> --password=<xmpp component password> [--port=5275]')
+        .demand(['host', 'jid', 'password'])
         .argv;
+
+    if (!argv.port) argv.port = 5275;
 
     connector.on('online', function() {
       logger.info('Online!');
     });
     
     connector.connect({
-        jid: 'webinos.servicelab.org',
+        jid: argv.jid,
         password: argv.password,
-        host: 'xmpp.servicelab.org',
-        port: 5275,
+        host: argv.host,
+        port: argv.port,
         bosh: undefined
     });
     
@@ -64,5 +66,4 @@
     };
 
     process.on('SIGINT', stop);
-    
 })();

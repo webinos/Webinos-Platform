@@ -58,8 +58,6 @@
     				 	 	  "http://jabber.org/protocol/disco#info",
                        	 	  "http://jabber.org/protocol/commands"];
     
-        this.sharedFeatures = {};    // services that the app wants shared
-        this.remoteFeatures = {};    // services that are shared with us, assoc array of arrays
         this.pendingRequests = {};   // hash to store <stanza id, geo service> so results can be handled
         this.featureMap = {};        // holds features, see initPresence() for explanation
     }
@@ -79,7 +77,7 @@
      * @param params Map containing the connection parameters for the connection.
      */
     XMPPConnector.prototype.connect = function(params) {
-    	logger.verbose("Entering connect()");
+    	logger.trace("Entering connect()");
     	this.remoteFeatures = new Array;
     	this.pendingRequests = new Array;
 	
@@ -106,7 +104,7 @@
     		this.emit('end');
     	});
 
-    	//this.client.on('stanza', this.onStanza);
+    	this.client.on('stanza', this.onStanza);
 
     	this.client.on('error', this.onError);
     }
@@ -122,29 +120,109 @@
     }
 
     /**
+     * Handles incomming message stanza's
+     * @function
+     * @private
+     * @name XMPPConnector#onStanza
+     * @param stanza The XMPP message stanza.
+     */
+     XMPPConnector.prototype.onStanza = function(stanza) {
+     	logger.trace('Stanza received = ' + stanza);
+
+        if (stanza.is('iq')) { //&& stanza.attrs.type !== 'error') {
+     		if (stanza.attrs.type == 'get' && stanza.getChild('query', 'http://jabber.org/protocol/disco#info') != null) {
+     			self.onDiscoInfo(stanza);
+     		} else if (stanza.attrs.type === 'result' || stanza.attrs.type === 'error') {
+ 		    	logger.info("Received a result for an unknown request id: " + stanza.attrs.id + ". Maybe it has no callback?");
+     		} else if (stanza.attrs.type == 'get' || stanza.attrs.type == 'set') {
+ 		    	logger.info("Received a info query request. Will respond with service unavailable");
+ 				this.send(new xmpp.Element('iq', { 'id': stanza.attrs.id, 'type': 'error', 'to': stanza.attrs.from }).c('service-unavailable'));
+     		}
+     	} else if (stanza.is('message')) {
+	    	logger.info("Received a message. Will ignore it for now.");
+     	}
+     }
+
+    /**
      * When an error occurs
      * @function
-     * @name XMPPConnection#onError
+     * @name XMPPConnector#onError
      * @returns The JID.
      */
-    XMPPConnector.prototype.onError = function(msg) {
-        logger.error(msg);
+    XMPPConnector.prototype.onError = function(stanza) {
+        logger.error(stanza);
     }
 
     /**
      * Closes the connection
      * @function
-     * @name XMPPConnection#disconnect
+     * @name XMPPConnector#disconnect
      */
     XMPPConnector.prototype.disconnect = function() {
     	this.client.end();
     }
 
     /**
+     * Called when a disco info stanza is received.
+     * @name XMPPConnector#onDiscoInfo
+     * @function
+     * @private
+     * @param stanza The disco info stanza.
+     */
+    XMPPConnector.prototype.onDiscoInfo = function(stanza) {
+    	var currentFeatures;
+    	var query = stanza.getChild('query', 'http://jabber.org/protocol/disco#info');
+
+    	if (stanza.attrs.from == null) {
+    		return;
+    	}
+
+    	if (query.attrs.node != null) {
+    		var node = query.attrs.node;
+    		var ver = node.substring(nodeType.length + 1);
+		
+    		logger.debug("Received service discovery information request: " + stanza);
+		
+    		logger.trace("Received feature request for version: " + ver);
+    		logger.trace("Returning the features for this version: " + this.featureMap[ver]);
+		
+    		currentFeatures = this.featureMap[ver];
+    	} else {
+    		// return current features
+    		currentFeatures = this.basicFeatures.slice(0);
+    		currentFeatures = currentFeatures.sort();
+    	}
+
+    	var resultQuery = new ltx.Element('query', {xmlns: query.attrs.xmlns});
+	
+    	resultQuery.c('identity', {'category': 'client', 'type': 'webinos'});
+	
+    	for (var i in currentFeatures) {
+    	    logger.trace('key found: ' + currentFeatures[i]);
+    	    var splitted = currentFeatures[i].split('#');
+    	    var id = splitted[splitted.length - 1];
+	    
+    	    logger.trace('Feature id found: ' + id);
+	    
+	        var feature = currentFeatures[i];
+
+            var featureNode = new ltx.Element('feature', {'var': feature});
+    		resultQuery.cnode(featureNode);
+    	}
+	
+    	var result = new xmpp.Element('iq', { 'to': stanza.attrs.from, 'type': 'result', 'id': stanza.attrs.id });
+    	result.cnode(resultQuery);
+	
+    	logger.debug("Anwering service discovery information request: " + result.tree());
+	
+    	this.client.send(result);
+    }
+
+    /**
      * Helper function to return a 'clean' id string based on a jid.
      * @function
      * @private
-     * @name Connection#jid2Id
+     * @name jid2Id
      * @param {string} jid The jid.
      */
     var jid2Id = function (jid) {
@@ -155,7 +233,7 @@
      * Get the bare JID from a JID String.
      * @function
      * @private
-     * @name Connection#getBareJidFromJid
+     * @name getBareJidFromJid
      * @param {string} jid A JID
      * @returns A string containing the bare JID.
      */
@@ -180,7 +258,7 @@
      *  automated testing as well.
      * @function
      * @private
-     * @name Connection#getUniqueId
+     * @name getUniqueId
      * @param {string} [suffix] An optional suffix to append to the id.
      * @returns A unique string to be used for the id attribute.
      */
