@@ -78,7 +78,7 @@ var PzpWSS = function(_parent) {
         if(!error){
           callback(stderr);
         } else {
-          callback("v0.7");
+          callback("v0.7"); // Change this or find another way of reading git describe for android
         }
       })
     } else {
@@ -248,29 +248,36 @@ var PzpWSS = function(_parent) {
   }
 
   function connectedApp(connection) {
-    var appId, tmp, payload, connectedPzhIds = [],  connectedPzpIds= [], key, msg;
-    connectedPzpIds = getConnectedPzp();
-    connectedPzhIds = getConnectedPzh();
+    var appId, tmp, payload, key, msg, msg2;
     if (connection) {
       appId = parent.pzp_state.sessionId+ "/"+ sessionWebApp;
       sessionWebApp  += 1;
       connectedWebApp[appId] = connection;
       connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-      payload = { "pzhId": parent.config.metaData.pzhId, "connectedPzp": connectedPzpIds, "connectedPzh": connectedPzhIds};
+      payload = { "pzhId": parent.config.metaData.pzhId, "connectedPzp": getConnectedPzp(), "connectedPzh": getConnectedPzh()};
       msg = prepMsg(parent.pzp_state.sessionId, appId, "registeredBrowser", payload);
+      self.sendConnectedApp(appId, msg);
+
+      if(Object.keys(connectedWebApp).length == 1 ) {
+        getVersion(function(value){
+          msg2 = prepMsg(parent.pzp_state.sessionId, appId, "webinosVersion", value);
+          self.sendConnectedApp(appId, msg2);
+        });
+      }
+
       self.sendConnectedApp(appId, msg);
     } else {
       for (key in connectedWebApp) {
         if (connectedWebApp.hasOwnProperty(key)) {
           tmp = connectedWebApp[key];
-          if (key.split("/").length > 2)
+          /*if (key.split("/") && key.split("/").length > 2)
             break;
           key = parent.pzp_state.sessionId+ "/" + key.split("/")[1];
           tmp.id = key;
-          connectedWebApp[key] = tmp;
-          payload = {"pzhId": parent.pzp_state.sessionId.split("/")[0],"connectedPzp": connectedPzpIds,"connectedPzh": connectedPzhIds};
-          msg = prepMsg(parent.pzp_state.sessionId, key, "registeredBrowser", payload);
+          connectedWebApp[key] = tmp;*/
+          payload = {"pzhId": parent.config.metaData.pzhId, "connectedPzp":  getConnectedPzp(),"connectedPzh":  getConnectedPzh()};
+          msg = prepMsg(parent.pzp_state.sessionId, key, "update", payload);
           self.sendConnectedApp(key, msg);
         }
       }
@@ -406,6 +413,15 @@ var PzpWSS = function(_parent) {
   };
   this.updateApp = function() {
     connectedApp();
+  };
+  this.pzhDisconnected = function(){
+    var key;
+    for (key in connectedWebApp) {
+      if (connectedWebApp.hasOwnProperty(key)) {
+        var msg = prepMsg(parent.pzp_state.sessionId, key, "pzhDisconnected", "pzh disconnected");
+        self.sendConnectedApp(key, msg);
+      }
+    }
   }
 };
 
