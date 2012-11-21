@@ -26,10 +26,6 @@
 	
 	RemoteDeviceStatusManager.prototype.isSupported = 
 		function (params, successCallback) {
-			console.log(params[0]);
-			console.log(params[1]);
-			console.log("successCallback is:" + successCallback);
-			
 			devicestatusmodule.devicestatus.isSupported(
 				params[0],
 				params[1],
