@@ -5,20 +5,23 @@
 
 using namespace std;
 
-class InputDevice : Aspect {
+class ParentalRating : Aspect {
 	public:
 		vector<string> getComponents();
 		bool isSupported(string * = 0);
 		string getPropertyValue(string *, string * = 0);
 
-		static InputDevice * getInstance();
+		static ParentalRating * getInstance();
 
-		string type(string);
-
-	private:
-		InputDevice(){};
-		~InputDevice(){};
 		
-		static InputDevice * inputDevice;
+		string name(string);
+		string scheme(string);
+		string region(string);
+		
+	private:
+		ParentalRating(){};
+		~ParentalRating(){};
+
+		static ParentalRating * parentalRating;
 		static AspectsRegister aspectsRegister;
 };

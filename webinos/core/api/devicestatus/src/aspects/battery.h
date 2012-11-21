@@ -3,10 +3,6 @@
 #include "../aspect.h"
 #include "../aspects.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
 using namespace std;
 
 class Battery : Aspect {
@@ -17,7 +13,6 @@ class Battery : Aspect {
 
 		static Battery * getInstance();
 
-		
 		string batteryLevel(string);
 		string batteryBeingCharged(string);
 		
