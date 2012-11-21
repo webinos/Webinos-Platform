@@ -5,27 +5,29 @@
 
 using namespace std;
 
-class Display : Aspect {
-	
+class Camera : Aspect {
 	public:
-
 		vector<string> getComponents();
 		bool isSupported(string * = 0);
 		string getPropertyValue(string *, string * = 0);
 
-		static Display * getInstance();
+		static Camera * getInstance();
 
+		string model(string);
+		string vendor(string);
+		string status(string);
 		string resolutionHeight(string);
-		string pixelAspectRatio(string);
-		string dpiY(string);
 		string resolutionWidth(string);
-	        string dpiX(string);
-                string colorDepth(string);
+		string maxZoom(string);
+		string minZoom(string);
+		string currentZoom(string);
+		string hasFlash(string);
+		string flashOn(string);
 		
 	private:
-		Display(){};
-		~Display(){};
+		Camera(){};
+		~Camera(){};
 
-		static Display * display;
+		static Camera * camera;
 		static AspectsRegister aspectsRegister;
 };
