@@ -25,6 +25,7 @@ var Registry       = dependency.global.require(dependency.global.rpc.location, "
 var Discovery      = dependency.global.require(dependency.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
 var RPCHandler     = rpc.RPCHandler;
 var Sync           = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
+var path = require("path");
 
 var Pzh_RPC = function(_parent) {
   this.messageHandler;
@@ -34,6 +35,7 @@ var Pzh_RPC = function(_parent) {
   this.rpcHandler;
   this.modules;         // holds startup modules
   var self = this;
+  var sync = new Sync();
   /**
   * Initialize RPC to enable discovery and rpcHandler
   */
@@ -109,17 +111,43 @@ var Pzh_RPC = function(_parent) {
   };
 
   this.syncStart = function(_pzpId) {
-    Sync.getFileHash(_parent.config.metaData.webinosRoot, _parent.config.metaData.webinosName, function(result) {
-      var msg = _parent.prepMsg(_parent.pzh_state.sessionId, _pzpId, "sync_hash", result);
-      _parent.sendMessage(msg, _pzpId)
-    });
+    var policy, policyPath, list, result, myKey, msg;
+    policyPath= path.join(_parent.config.metaData.webinosRoot, "policies","policy.xml");
+    policy = sync.parseXMLFile(policyPath);
+    list = {trustedList: _parent.config.trustedList, _crl: _parent.config.crl, cert: _parent.config.cert.external, policy: policy};
+    result = sync.getFileHash(list);
+
+    for (myKey in _parent.pzh_state.connectedPzp) {
+      if (_parent.pzh_state.connectedPzp.hasOwnProperty(myKey)) { // Sync with everyone.
+        msg = _parent.prepMsg(_parent.pzh_state.sessionId, myKey, "sync_hash", result);
+        _parent.sendMessage(msg, myKey);
+      }
+    }
   };
 
   this.syncUpdateHash = function(_pzpId, rcvdMsg) {
-    Sync.syncFileMissing(_parent.config.metaData.webinosRoot, _parent.config.metaData.webinosName, rcvdMsg, function(result) {
+    var result = sync.syncFileMissing(rcvdMsg);
+    if (Object.keys(result).length >= 1) {
+      if (result["trustedList"])  {
+        _parent.config.metaData.trustedList = result["trustedList"];
+        _parent.config.storeTrustedList(_parent.config.metaData.trustedList);
+      }
+      if (result["crl"]) {
+        _parent.config.crl = receivedMsg[msg];
+        _parent.config.storeCrl(_parent.config.crl);
+      }
+      if (result["cert"]) {
+        _parent.config.cert.external = receivedMsg[msg];
+        _parent.config.storeCertificate(_parent.config.cert.external, "external");
+      }
       var msg = _parent.prepMsg(_parent.pzh_state.sessionId, _pzpId, "update_hash", result);
-      _parent.sendMessage(msg, _pzpId)
-    });
+      _parent.sendMessage(msg, _pzpId);
+    }
+    else {
+      logger.log("Nothing to synchronize with the PZP " + _pzpId)
+    }
+
+
   };
 
   /**

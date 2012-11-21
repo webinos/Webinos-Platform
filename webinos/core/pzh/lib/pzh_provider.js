@@ -74,22 +74,23 @@ var Provider = function(_hostname, _friendlyName) {
   /**
    *  PZH already registered, are reloaded in case Provider is restarted
    */
-  function loadPzhs() {
-    var myKey, key, email;
-    for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
-      key = config.trustedList.pzh[myKey];
-      pzhs[key] = new pzh_session();
-      var first = key.indexOf("_") +1;
-      var last  = key.length
-      email = key.slice(parseInt(first), parseInt(last));
-      pzhs[key].addLoadPzh(email, key, null, function(status, value, pzhId) {
-        if (status) {
-          server.addContext(pzhId, value);
-          logger.log("started zone hub " + pzhId);
-        } else {
-          logger.error("failed starting zone hub" + value);
-        }
-      });
+  function loadPzhs () {
+    var myKey, email;
+    for (myKey in config.trustedList.pzh) {
+      if(config.trustedList.pzh.hasOwnProperty(myKey)) {
+        pzhs[myKey] = new pzh_session();
+        var first = myKey.indexOf("_") +1;
+        var last  = myKey.length;
+        email = myKey.slice(first, last);
+        pzhs[myKey].addLoadPzh(email, myKey, null, function(status, value, pzhId) {
+          if (status) {
+            server.addContext(pzhId, value);
+            logger.log("started zone hub " + pzhId);
+          } else {
+            logger.error("failed starting zone hub" + value);
+          }
+        });
+      }
     }
   }
 
@@ -117,7 +118,7 @@ var Provider = function(_hostname, _friendlyName) {
 
   /**
    * Loads provider session/certificate details and starts the TLS server
-   * @param callback: If successful returns true or false uf server fails to start
+   * @param callback - If successful returns true or false uf server fails to start
    */
   function loadSession (callback) {
     config  = new session.configuration();
@@ -265,7 +266,7 @@ var Provider = function(_hostname, _friendlyName) {
    */
   this.createPzh = function(user, callback) {
     var pzhId = hostname + "_" + user.email;
-    if (config.trustedList.pzh.indexOf(pzhId) !== -1 )  {
+    if (config.trustedList.pzh.hasOwnProperty(pzhId))  {
       callback(true, pzhId);
     } else {
       logger.log("adding new zone hub - " + pzhId);
@@ -273,7 +274,7 @@ var Provider = function(_hostname, _friendlyName) {
       pzhs[pzhId].addLoadPzh(user.email, pzhId, user, function(status, options, uri){
         if (status) {
           server.addContext(uri, options);
-          config.trustedList.pzh.push(uri);
+          config.trustedList.pzh[uri] = {"address":hostname};
           config.storeTrustedList(config.trustedList);
           return callback(true, pzhId);
         } else {
