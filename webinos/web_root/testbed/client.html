@@ -148,7 +148,21 @@
       $('#friendlyName').click(function() {
         setPage("Add FriendlyName", "friendlyName.html");
       });
-
+      $('#infoLog').click(function() {
+        var options = {type: 'prop', payload: {status:'infoLog'}};
+        webinos.session.message_send(options);
+      });
+      $('#errorLog').click(function() {
+        var options = {type: 'prop', payload: {status:'errorLog'}};
+        webinos.session.message_send(options);
+      });
+      function logs(msg) {
+        $('#main').html('<article class="module width_full"><header><h3>Logs</h3></header>' +
+        '<div class="module_content">'+ msg.payload.message +'</div></article>' +
+        '<div class="spacer"></div>');
+      }
+      webinos.session.addListener('infoLog', logs);
+      webinos.session.addListener('errorLog', logs);
       // This is added here as we intend to get response back here
       function authStatus(msg) {
         if (msg.payload.message.connected === "true") {
@@ -243,7 +257,9 @@
       </ul>
       <h3> PZP Details</h3>
       <ul class="toggle" style="">
-          <li><a href="#friendlyName" id="friendlyName"> PZP Friendly Name </a></li>
+        <li><a href="#friendlyName" id="friendlyName"> PZP Friendly Name </a></li>
+        <li><a href="#infoLog" id="infoLog"> Info Logs </a></li>
+        <li><a href="#errorLog" id="errorLog"> Error Logs </a></li>
        </ul>
     <footer>
       <hr />

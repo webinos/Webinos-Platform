@@ -140,6 +140,12 @@
       case "webinosVersion":
         callListenerForMsg(data);
         break;
+      case "infoLog":
+        callListenerForMsg(data);
+        break;
+      case "errorLog":
+        callListenerForMsg(data);
+        break;
     }
   }
 }());
