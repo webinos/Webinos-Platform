@@ -53,12 +53,17 @@ var Pzp_OtherManager = function (_parent) {
     _parent.sendMessage(msg, validMsgObj.from);
   }
 
+  function getInitModules() {
+	  return this.loadedModules;
+  };
+
   /**
    * Initializes Webinos Other Components that interact with the session manager
    * @param loadModules : webinos modules that should be loaded in the PZP
    */
   this.initializeRPC_Message = function(_loadModules) {
-    self.registry       = new Registry();
+    self.loadedModules  = _loadModules;
+    self.registry       = new Registry(this);
     self.rpcHandler     = new RPCHandler(_parent, self.registry); // Handler for remote method calls.
     self.discovery      = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
@@ -86,7 +91,8 @@ var Pzp_OtherManager = function (_parent) {
   /**
    * Used by RPC to register and update services to the PZH
    */
-  this.registerServicesWithPzh = function(pzhId) {
+  this.registerServicesWithPzh = function() {
+    var pzhId = _parent.config.metaData.pzhId;
     if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.mode === _parent.modes[1]) {
       var localServices = self.discovery.getRegisteredServices();
       var msg = {"type" : "prop", "from" : _parent.pzp_state.sessionId, "to": pzhId, "payload":{"status":"registerServices",
@@ -102,7 +108,7 @@ var Pzp_OtherManager = function (_parent) {
   this.startOtherManagers = function(){
     self.setupMessage_RPCHandler();
     registerMessaging(_parent.config.metaData.pzhId);    //message handler
-    self.registerServicesWithPzh(_parent.config.metaData.pzhId); //rpc
+    self.registerServicesWithPzh(); //rpc
     if(!self.localDiscovery ) {// local discovery&& mode !== modes[0]
       self.localDiscovery = new PzpDiscovery(_parent);
       self.localDiscovery.startLocalAdvert();
@@ -135,7 +141,7 @@ var Pzp_OtherManager = function (_parent) {
             setFoundService(validMsgObj);
             break;
           case 'listUnregServices':
-            _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "unregServicesReply", {services: self.getInitModules(), id:validMsgObj.payload.message.listenerId });
+            _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "unregServicesReply", {services: getInitModules.call(self), id:validMsgObj.payload.message.listenerId });
             break;
           case 'registerService':
             self.registry.loadModule({"name": validMsgObj.payload.message.name,"params": validMsgObj.payload.message.params}, self.rpcHandler);
