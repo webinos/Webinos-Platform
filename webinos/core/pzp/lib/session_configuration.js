@@ -33,7 +33,7 @@ var certificate = webinos.global.require(webinos.global.manager.certificate_mana
 function Config() {
   certificate.call(this);
   this.metaData       = {};
-  this.trustedList    = {pzh:[], pzp:[]};
+  this.trustedList    = {pzh:{}, pzp:{}};
   this.crl            = "";
   this.policies       = {};//todo: integrate policy in the configuration
   this.userData       = {name: ""};
@@ -437,7 +437,7 @@ Config.prototype.createPolicyFile = function(self) {
         data = fs.readFileSync(path.resolve(__dirname, "../../manager/policy_manager/defaultpolicy.xml"));
       }
       catch(e) {
-        logger.error("Default policy non found");
+        logger.error("Default policy not found");
         data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
       }
       fs.writeFileSync(path.join(self.metaData.webinosRoot, "policies", "policy.xml"), data);
@@ -482,8 +482,7 @@ Config.prototype.fetchConfigDetails = function(webinosType, inputConfig, callbac
       self.userPref.ports ={};
       self.userPref.ports.provider               = 80;
       self.userPref.ports.provider_webServer     = 443;
-      self.userPref.ports.pzp_webSocket          = 8081;
-      self.userPref.ports.pzp_web_webSocket      = 8080;
+      self.userPref.ports.pzp_webSocket          = 8080;
       self.userPref.ports.pzp_tlsServer          = 8040;
       self.userPref.ports.pzp_zeroConf           = 4321;
       self.userData.country                      = "UK";
