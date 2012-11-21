@@ -65,35 +65,16 @@ CefRefPtr<CefCommandLine> AppGetCommandLine()
 //
 std::string AppGetWidgetStoreDirectory() 
 {
-  base::Environment* environment = base::Environment::Create();
-
-  // Get the widget store path from environment.
-  std::string wrtHomePath;
-  environment->GetVar("WRT_HOME",&wrtHomePath);
-
-  if (wrtHomePath.length() == 0)
-  {
-    // No environment variable found => use default.
-#if defined(OS_WIN)
-    environment->GetVar("AppData",&wrtHomePath);
-    wrtHomePath += "/webinos/wrt/widgetStore";
-#else
-    FilePath fpHome;
-    PathService::Get(base::DIR_HOME,&fpHome);
-    wrtHomePath = fpHome.value() + "/.webinos/wrt/widgetStore";
-#endif
-  }
-
-  delete environment;
-    
+  std::string pzpPath = AppGetWebinosWRTConfig(NULL,NULL);
   std::string widgetStorePath;
 
   // Make sure there is a trailing separator on the path.
-  if (wrtHomePath.length() > 0) {
-    if (wrtHomePath.find_last_of('/') == wrtHomePath.length()-1 || wrtHomePath.find_last_of('\\') == wrtHomePath.length()-1)
-      widgetStorePath = wrtHomePath;  
+  if (pzpPath.length() > 0) 
+  {
+    if (pzpPath.find_last_of('/') == pzpPath.length()-1 || pzpPath.find_last_of('\\') == pzpPath.length()-1)
+      widgetStorePath = pzpPath + "wrt/widgetStore/";
     else
-      widgetStorePath = wrtHomePath + "/";
+      widgetStorePath = pzpPath + "/wrt/widgetStore/";
   }
 
   return widgetStorePath;
@@ -234,8 +215,10 @@ void AppGetBrowserSettings(CefBrowserSettings& settings)
 
 // Read the configuration (port) data from webinos_runtime.json
 //
-void AppGetWebinosWRTConfig(int* pzpPort, int* webPort)
+std::string AppGetWebinosWRTConfig(int* pzpPort, int* webPort)
 {
+  std::string pzpPath;
+
   CefString wrtConfigFilePath(WRT_CONFIG_FILE);
 
   FilePath wrtConfig;
@@ -268,36 +251,63 @@ void AppGetWebinosWRTConfig(int* pzpPort, int* webPort)
     if (v->IsType(base::Value::TYPE_DICTIONARY))
     {
       base::DictionaryValue* dv = static_cast<base::DictionaryValue*>(v);
-      base::Value* portVal;
+      base::Value* dataVal;
 
       // Read the port the widget server is running on.
       if (webPort != NULL)
       {
-        dv->Get("runtimeWebServerPort",&portVal);
-
-        if (portVal->IsType(base::Value::TYPE_STRING))
+        if (dv->Get("runtimeWebServerPort",&dataVal))
+        {
+          if (dataVal->IsType(base::Value::TYPE_STRING))
         {
           std::string sPort;
-          portVal->GetAsString(&sPort);
+            dataVal->GetAsString(&sPort);
           *webPort = atoi(sPort.c_str());
         }
         else
-          portVal->GetAsInteger(webPort);
+            dataVal->GetAsInteger(webPort);
+        }
+        else
+        {
+          LOG(ERROR) << "webinos_runtime.json runtimeWebServerPort data missing";
+        }
       }
 
       // Read the port the pzp socket is listening on.
       if (pzpPort != NULL)
       {
-        dv->Get("pzpWebSocketPort",&portVal);
-
-        if (portVal->IsType(base::Value::TYPE_STRING))
+        if (dv->Get("pzpWebSocketPort",&dataVal))
+        {
+          if (dataVal->IsType(base::Value::TYPE_STRING))
         {
           std::string sPort;
-          portVal->GetAsString(&sPort);
+            dataVal->GetAsString(&sPort);
           *pzpPort = atoi(sPort.c_str());
         }
         else
-          portVal->GetAsInteger(pzpPort);
+            dataVal->GetAsInteger(pzpPort);
+        }
+        else
+        {
+          LOG(ERROR) << "webinos_runtime.json pzpWebSocketPort data missing";
+        }
+      }
+
+      // Read the pzp path.
+      if (dv->Get("pzpPath",&dataVal))
+      {
+        if (dataVal->IsType(base::Value::TYPE_STRING))
+        {
+          dataVal->GetAsString(&pzpPath);
+        }
+        else
+        {
+          LOG(ERROR) << "webinos_runtime.json pzpPath data invalid type";
+        }
+      }
+      else
+      {
+        LOG(ERROR) << "webinos_runtime.json pzpPath data missing";
       }
     }
   }
@@ -305,6 +315,8 @@ void AppGetWebinosWRTConfig(int* pzpPort, int* webPort)
   {
     LOG(ERROR) << "webinos_runtime.json missing";
   }
+
+  return pzpPath;
 }
 
 // Get the URL the renderer should use based on command line parameters

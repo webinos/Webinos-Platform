@@ -1,0 +1,4 @@
+V	310520142523Z		01	unknown	/C=UK/ST=England/O=W3C/OU=Webapps/CN=2.rsa
+V	310520142524Z		02	unknown	/C=UK/ST=England/O=W3C/OU=Webapps/CN=3.rsa
+R	310520142524Z	110525142526Z	03	unknown	/C=UK/ST=England/O=W3C/OU=Webapps/CN=revoked.13a.rsa
+V	310520142525Z		04	unknown	/C=UK/ST=England/O=W3C/OU=Webapps/CN=revoked.13b.rsa

@@ -150,12 +150,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "webinos node service UI Module"
-            VALUE "FileVersion", "0, 6, 0, 8"
+            VALUE "FileVersion", "0, 6, 0, 9"
             VALUE "InternalName", "webinosNodeServiceUI"
             VALUE "LegalCopyright", "Copyright 2012"
             VALUE "OriginalFilename", "webinosNodeServiceUI.exe"
             VALUE "ProductName", "webinos"
-            VALUE "ProductVersion", "0, 6, 0, 8"
+            VALUE "ProductVersion", "0, 6, 0, 9"
         END
     END
     BLOCK "VarFileInfo"
@@ -289,7 +289,7 @@ BEGIN
     EDITTEXT        IDC_AUTH_CODE_EDIT,68,65,185,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Save",IDOK,257,65,50,14
     GROUPBOX        "PZP status",IDC_STATIC,7,86,302,24
-    CONTROL         "<a href=""http://localhost:8080/client/client.html"">pzp testbed</a>",IDC_PZP_SYSLINK,
+    CONTROL         "<a href=""http://localhost:8080/testbed/client.html"">pzp testbed</a>",IDC_PZP_SYSLINK,
                     "SysLink",WS_TABSTOP,217,95,40,12
     PUSHBUTTON      "Restart PZP",IDC_RESET_BUTTON,257,93,50,14
     /*
@@ -300,7 +300,7 @@ BEGIN
     PUSHBUTTON      "Restart PZH",IDC_PZH_RESET_BUTTON,257,117,50,14
     */
     CONTROL         203,IDC_STATIC,"Static",SS_BITMAP,0,141,333,37
-    LTEXT           "runtime v0.6.08  ©2012 · ",IDC_VERSION_STATIC,102,160,80,10
+    LTEXT           "runtime v0.6.09  ©2012 · ",IDC_VERSION_STATIC,102,160,80,10
     CONTROL         "<a href=""http://webinos.org"">webinos.org</a>",IDC_SYSLINK,
                     "SysLink",WS_TABSTOP,183,160,41,9
     LTEXT           "",IDC_STATUS_STATIC,11,96,205,8

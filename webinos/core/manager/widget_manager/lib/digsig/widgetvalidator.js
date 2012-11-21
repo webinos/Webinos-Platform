@@ -19,73 +19,76 @@
 
 this.WidgetValidator = (function() {
 
-	/* public constructor */
-	function WidgetValidator(res, certMgr) {
-		this.res = res;
-		this.certMgr = certMgr;
-		this.status = WidgetConfig.STATUS_UNSIGNED;
-		this.authorSignature = undefined;
-		this.distributorSignatures = [];
-		this.errorArtifact = undefined;
-	}
+  /* public constructor */
+  function WidgetValidator(res, certMgr) {
+    this.res = res;
+    this.certMgr = certMgr;
+    this.status = WidgetConfig.STATUS_UNSIGNED;
+    this.authorSignature = undefined;
+    this.distributorSignatures = [];
+    this.errorArtifact = undefined;
+  }
 
-	var isAuthorSignature = WidgetValidator.isAuthorSignature = function(name) {
-		return name == 'author.xml';
-	};
+  var isAuthorSignature = WidgetValidator.isAuthorSignature = function(name) {
+    return name == 'author-signature.xml';
+  };
 
-	var isDistributorSignature = WidgetValidator.isDistributorSignature = function(name) {
-		var numStart = 'signature'.length;
-		var numEnd = name.length - '.xml'.length;
-		if(name.substr(0, numStart) == 'signature') {
-			if(name.substr(numEnd) == '.xml') {
-				var sigNum = name.substring(numStart, numEnd);
-				if(parseInt(sigNum) >= 1)
-					return sigNum;
-			}
-		}
-	};
+  var isDistributorSignature = WidgetValidator.isDistributorSignature = function(name) {
+    var numStart = 'signature'.length;
+    var numEnd = name.length - '.xml'.length;
+    if(name.substr(0, numStart) == 'signature') {
+      if(name.substr(numEnd) == '.xml') {
+        var sigNum = name.substring(numStart, numEnd);
+        if(parseInt(sigNum) >= 1)
+          return sigNum;
+      }
+    }
+  };
 
-	/* public instance methods */
-	WidgetValidator.prototype.validate = function() {
-		var allEntries = this.res.list();
-		var nonSignatureEntries = this.nonSignatureEntries = [];
-		var signatureNames = this.signatureNames = {};
-		var sigNum;
-		for(var i in allEntries) {
-			if(isAuthorSignature(i)) {
-				signatureNames[0] = i;
-			} else if(sigNum = isDistributorSignature(i)) {
-				signatureNames[sigNum] = i;
-			} else {
-				nonSignatureEntries.push(i);
-			}
-		}
-		for(var i in signatureNames) {
-			(new SignatureValidator(this, i, signatureNames[i])).validate();
-			if(this.status < WidgetConfig.STATUS_UNSIGNED) break;
-		}
-		return (this.validationResult = new ValidationResult(this.status, this.authorSignature, this.distributorSignatures, this.errorArtifact));
-	};
-	
-	WidgetValidator.prototype.setInvalid = function(str) {
-		this.status = WidgetConfig.STATUS_INVALID;
-		console.log('setInvalid: ' + str);
-		this.errorArtifact = new Artifact(WidgetConfig.STATUS_INVALID, Artifact.CODE_MALFORMED, str);
-	};
-	
-	WidgetValidator.prototype.setUnsupported = function(str) {
-		this.status = WidgetConfig.STATUS_CAPABILITY_ERROR;
-		console.log('setUnsupported: ' + str);
-		this.errorArtifact = new Artifact(WidgetConfig.STATUS_INVALID, Artifact.CODE_INCOMPATIBLE_FEATURE, str);
-	};
-	
-	WidgetValidator.prototype.addSignature = function(signature) {
-		if(signature.name == 'author.xml')
-			this.authorSignature = signature;
-		else
-			this.distributorSignatures.push(signature);
-		this.status = WidgetConfig.STATUS_VALID;
-	};
+  /* public instance methods */
+  WidgetValidator.prototype.validate = function() {
+    var allEntries = this.res.list();
+    var nonSignatureEntries = this.nonSignatureEntries = [];
+    var signatureNames = this.signatureNames = {};
+    var sigNum;
+    for(var i in allEntries) {
+      if(isAuthorSignature(i)) {
+        signatureNames[0] = i;
+      } else if(sigNum = isDistributorSignature(i)) {
+        signatureNames[sigNum] = i;
+      } else {
+        // Don't add directory paths (determined by entries with a trailing slash)
+        if (i.lastIndexOf('/') < i.length-1) {
+          nonSignatureEntries.push(i);
+        }
+      }
+    }
+    for(var i in signatureNames) {
+      (new SignatureValidator(this, i, signatureNames[i])).validate();
+      if(this.status < WidgetConfig.STATUS_UNSIGNED) break;
+    }
+    return (this.validationResult = new ValidationResult(this.status, this.authorSignature, this.distributorSignatures, this.errorArtifact));
+  };
+  
+  WidgetValidator.prototype.setInvalid = function(str) {
+    this.status = WidgetConfig.STATUS_INVALID;
+    console.log('setInvalid: ' + str);
+    this.errorArtifact = new Artifact(WidgetConfig.STATUS_INVALID, Artifact.CODE_MALFORMED, str);
+  };
+  
+  WidgetValidator.prototype.setUnsupported = function(str) {
+    this.status = WidgetConfig.STATUS_CAPABILITY_ERROR;
+    console.log('setUnsupported: ' + str);
+    this.errorArtifact = new Artifact(WidgetConfig.STATUS_INVALID, Artifact.CODE_INCOMPATIBLE_FEATURE, str);
+  };
+  
+  WidgetValidator.prototype.addSignature = function(signature) {
+    if(signature.name == 'author-signature.xml')
+      this.authorSignature = signature;
+    else
+      this.distributorSignatures.push(signature);
+    this.status = WidgetConfig.STATUS_VALID;
+  };
 
-	return WidgetValidator;
+  return WidgetValidator;
 })();

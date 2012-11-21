@@ -1,0 +1,8 @@
+Message: WebSocket Client: Message Received : "{\"type\":\"prop\",\"from\":\"TE-Dev_Pzp\",\"to\":\"TE-Dev_Pzp/0\",\"payload\":{\"status\":\"registeredBrowser\",\"message\":{\"connectedPzp\":[],\"connectedPzh\":[]}}}"
+Source: http://localhost:53510/widget/a2ea0217a15f844fb1aa49aae5ad9208ed2e0cb8/index.html
+Line: 1116
+-----------------------
+Message: [object Object]
+Source: http://localhost:53510/widget/a2ea0217a15f844fb1aa49aae5ad9208ed2e0cb8/index.html
+Line: 798
+-----------------------
