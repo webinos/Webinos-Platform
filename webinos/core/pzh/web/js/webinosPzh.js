@@ -68,7 +68,7 @@ var webinosPZH = {
     if (urlArgs.length >= 2) payload.from = urlArgs[2];
     webinosPZH.channel = new XMLHttpRequest();
     webinosPZH.channel.onreadystatechange = webinosPZH.messageRecieved;
-    if (typeof location.port !== "undefined") {
+    if (location.port) {
       webinosPZH.channel.open("POST", 'https://'+window.location.hostname+":"+location.port+"?cmd=pzhWS&status="+payload.payload.status);
     } else {
       webinosPZH.channel.open("POST", 'https://'+window.location.hostname+"?cmd=pzhWS&status="+payload.payload.status);
@@ -144,20 +144,20 @@ var webinosPZH = {
     },
     listAllServices: function(callback){
         webinosPZH.callbacks.listAllServices = callback;
-        webinosPZH.send({cmd:"listAllServices"});
+        webinosPZH.send({payload: {status:"listAllServices"}});
     },
     listUnregServices: function(at, callback){
         webinosPZH.callbacks.listUnregServices = callback;
-        webinosPZH.send({cmd:"listUnregServices", "at":at});
+        webinosPZH.send({payload: {status:"listUnregServices", "at":at}});
     },
     registerService: function(at, name, callback){
         webinosPZH.callbacks.registerService = callback;
         console.log("hi");
-        webinosPZH.send({cmd:"registerService", "at":at, "name":name});
+        webinosPZH.send({payload: {status:"registerService", "at":at, "name":name}});
     },
     unregisterService: function(svAddress, svId, svAPI, callback){
         webinosPZH.callbacks.unregisterService = callback;
-        webinosPZH.send({cmd:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI});
+        webinosPZH.send({payload: {status:"unregisterService", "at":svAddress, "svId":svId, "svAPI":svAPI}});
     },
     crashLog: function(callback){
       webinosPZH.callbacks.crashLog = callback;

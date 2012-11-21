@@ -133,8 +133,8 @@ Pzh_Apis.listAllServices = function(_instance, _callback) {
   "use strict";
   var result = { pzEntityList: [] }, connectedPzp = getConnectedPzp(_instance), key;
   result.pzEntityList.push({pzId:_instance.pzh_state.sessionId});
-  for (key = 0; key <  connectedPzp.length; key = key + 1) {
-    result.pzEntityList.push({pzId:connectedPzp[key]});
+  for (key = 0; key < connectedPzp.length; key = key + 1) {
+    result.pzEntityList.push({pzId:connectedPzp[key].url});
   }
   result.services = _instance.pzh_otherManager.discovery.getAllServices();
   var payload = {to: _instance.pzh_state.sessionId, cmd:"listAllServices", payload:result};
@@ -158,11 +158,11 @@ Pzh_Apis.listUnregServices = function(_instance, _at, _callback) {
 
   if (_instance.pzh_state.sessionId !== _at) {
     var id = _instance.pzh_otherManager.addMsgListener(function(modules) {
-      runCallback(at, modules);
+      runCallback(_at, modules.services);
     });
     var msg =  {"type"  : "prop", "from" : _instance.pzh_state.sessionId, "to"   : _at,
       "payload" : {"status" : "listUnregServices", "message" : {listenerId:id}}};
-    _instance.sendMessage(msg, at);
+    _instance.sendMessage(msg, _at);
   } else {
     runCallback(_instance.pzh_state.sessionId, _instance.pzh_otherManager.getInitModules());
   }

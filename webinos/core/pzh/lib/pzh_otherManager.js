@@ -64,14 +64,14 @@ var Pzh_RPC = function(_parent) {
    * Unregister services
    * @param validMsgObj
    */
-  this.unregisterServices = function(validMsgObj) {
+  this.unregisteredServices = function(validMsgObj) {
     logger.log("receiving initial modules from pzp...");
-    if (!validMsgObj.payload.id) {
+    if (!validMsgObj.payload.message.id) {
       logger.error("cannot find callback");
       return;
     }
-    self.listenerMap[validMsgObj.payload.id](validMsgObj.payload.message);
-    delete self.listenerMap[validMsgObj.payload.id];
+    self.listenerMap[validMsgObj.payload.message.id](validMsgObj.payload.message);
+    delete self.listenerMap[validMsgObj.payload.message.id];
   };
 
   /**
@@ -100,7 +100,7 @@ var Pzh_RPC = function(_parent) {
   };
 
   this.getInitModules = function() {
-    return serviceCache;
+    return _parent.config.serviceCache;
   };
 
   this.addMsgListener = function (callback) {
@@ -141,7 +141,7 @@ var Pzh_RPC = function(_parent) {
             self.sendFoundServices(validMsgObj);
             break;
           case "unregServicesReply":
-            self.unregisterServices(validMsgObj);
+            self.unregisteredServices(validMsgObj);
             break;
           case "sync_compare":
             self.syncUpdateHash(validMsgObj.from, validMsgObj.payload.message);
