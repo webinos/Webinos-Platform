@@ -15,8 +15,8 @@ class Device : Aspect {
 
 		string imei(string);
 		string model(string);
-		string version(string);
 		string vendor(string);
+		string version(string);
 		
 	private:
 		Device(){};

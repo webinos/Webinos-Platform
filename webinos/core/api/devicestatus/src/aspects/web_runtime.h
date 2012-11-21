@@ -5,20 +5,23 @@
 
 using namespace std;
 
-class InputDevice : Aspect {
+class WebRuntime : Aspect {
 	public:
 		vector<string> getComponents();
 		bool isSupported(string * = 0);
 		string getPropertyValue(string *, string * = 0);
 
-		static InputDevice * getInstance();
+		static WebRuntime * getInstance();
 
-		string type(string);
+		string version(string);
+		string name(string);
+		string vendor(string);
+		string webinosVersion(string);
 
 	private:
-		InputDevice(){};
-		~InputDevice(){};
+		WebRuntime(){};
+		~WebRuntime(){};
 		
-		static InputDevice * inputDevice;
+		static WebRuntime * webRuntime;
 		static AspectsRegister aspectsRegister;
 };
