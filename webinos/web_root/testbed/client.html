@@ -188,7 +188,7 @@
       }
       webinos.session.addListener('authStatus', authStatus);
       function error(msg) {
-        alert(msg.error);
+        alert(msg.payload.message);
       }
       webinos.session.addListener('error', error);
       //$('.column').equalHeight(); // Fix height

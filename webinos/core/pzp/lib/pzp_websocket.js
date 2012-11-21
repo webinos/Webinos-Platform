@@ -153,7 +153,12 @@ var PzpWSS = function(_parent) {
         });
       }
       else {
-        autoEnrollment(msg, origin);
+        autoEnrollment(msg, origin, function(status){
+          if(!status){
+            var msg2 = prepMsg(parent.pzp_state.sessionId, msg.from, "error", "failed connecting to pzh provider");
+            self.sendConnectedApp(msg.from, msg2);
+          }
+        });
       }
     }
     else {
@@ -289,7 +294,7 @@ var PzpWSS = function(_parent) {
   }
 
 
-  function autoEnrollment(query, origin) {
+  function autoEnrollment(query, origin, callback) {
     var msg, sendAdd;
     var cmd = query.payload.status;
     var to = query.to;
@@ -334,7 +339,12 @@ var PzpWSS = function(_parent) {
         });
       });
 
+      req.on('connect', function(){
+        callback(true);
+      });
+
       req.on('error', function (err) {
+        callback(false);
         logger.error(err);
       });
 
