@@ -16,136 +16,156 @@
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
- webinos.session = {};
-  var sessionid = null;
-  var pzpId, pzhId;
+  "use strict";
+  webinos.session = {};
+  var sessionId = null, pzpId, pzhId, otherPzp = [], otherPzh = [], isConnected = false;
   var serviceLocation;
   var listenerMap = {};
   var channel;
-  webinos.session.setChannel = function(channel1) {
-    channel = channel1
+  webinos.session.setChannel = function(_channel) {
+    channel = _channel;
   };
   webinos.session.message_send_messaging = function(msg, to) {
     msg.resp_to = webinos.session.getSessionId();
-    channel.send(JSON.stringify(msg))
+    channel.send(JSON.stringify(msg));
   };
   webinos.session.message_send = function(rpc, to) {
     var type, id = Math.floor(Math.random() * 101);
     if(rpc.type !== undefined && rpc.type === "prop") {
       type = "prop";
-      rpc = rpc.payload
+      rpc = rpc.payload;
     }else {
-      type = "JSONRPC"
+      type = "JSONRPC";
     }
     if(typeof rpc.method !== undefined && rpc.method === "ServiceDiscovery.findServices") {
-      id = rpc.params[2]
+      id = rpc.params[2];
     }
     if(typeof to === "undefined") {
-      to = pzpId
+      to = pzpId;
     }
     var message = {"type":type, "id":id, "from":webinos.session.getSessionId(), "to":to, "resp_to":webinos.session.getSessionId(), "payload":rpc};
     if(rpc.register !== "undefined" && rpc.register === true) {
       console.log(rpc);
-      channel.send(JSON.stringify(rpc))
+      channel.send(JSON.stringify(rpc));
     }else {
       console.log("creating callback");
       console.log("WebSocket Client: Message Sent");
       console.log(message);
-      channel.send(JSON.stringify(message))
+      channel.send(JSON.stringify(message));
     }
   };
   webinos.session.setServiceLocation = function(loc) {
-    serviceLocation = loc
+    serviceLocation = loc;
   };
   webinos.session.getServiceLocation = function() {
     if(typeof serviceLocation !== "undefined") {
-      return serviceLocation
+      return serviceLocation;
     }else {
-      return pzpId
+      return pzpId;
     }
   };
   webinos.session.getSessionId = function() {
-    return sessionid
+    return sessionId;
   };
   webinos.session.getPZPId = function() {
-    return pzpId
+    return pzpId;
   };
   webinos.session.getPZHId = function() {
-    return pzhId
+    return ( pzhId || "");
   };
   webinos.session.getOtherPZP = function() {
-    return otherpzp
+    return (otherPzp || []);
+  };
+  webinos.session.getOtherPZH = function() {
+    return (otherPzh || []);
   };
   webinos.session.addListener = function(statusType, listener) {
     var listeners = listenerMap[statusType] || [];
     listeners.push(listener);
     listenerMap[statusType] = listeners;
-    return listeners.length
+    return listeners.length;
   };
   webinos.session.removeListener = function(statusType, id) {
     var listeners = listenerMap[statusType] || [];
     try {
-      listeners[id - 1] = undefined
+      listeners[id - 1] = undefined;
     }catch(e) {
     }
+  };
+  webinos.session.isConnected = function(){
+    return isConnected;
   };
   function callListenerForMsg(data) {
     var listeners = listenerMap[data.payload.status] || [];
     for(var i = 0;i < listeners.length;i++) {
-      listeners[i](data)
+      listeners[i](data) ;
     }
   }
+  function setWebinosMessaging() {
+    webinos.messageHandler.setGetOwnId(sessionId);
+    var msg = webinos.messageHandler.registerSender(sessionId, pzpId);
+    webinos.session.message_send(msg, pzpId);
+  }
+  function setIsConnected() {
+    isConnected = (otherPzh.indexOf(pzhId) !== -1) ? true: false;
+  }
+  function updateConnected(message){
+    otherPzh = message.connectedPzh;
+    otherPzp = message.connectedPzp;
+    setIsConnected();
+  }
+  function setWebinosSession(data){
+    sessionId = data.to;
+    pzpId = data.from;
+    if(data.payload.message) {
+      pzhId = data.payload.message.pzhId;
+      updateConnected(data.payload.message);
+    }
+    setWebinosMessaging();
+  }
   webinos.session.handleMsg = function(data) {
-    switch(data.payload.status) {
-      case "registeredBrowser":
-        sessionid = data.to;
-        pzpId = data.from;
-        if(typeof data.payload.message !== "undefined") {
-          pzhId = data.payload.message.pzhId
-        }
-        webinos.messageHandler.setGetOwnId(sessionid);
-        var msg = webinos.messageHandler.registerSender(sessionid, pzpId);
-        webinos.session.message_send(msg, pzpId);
-        callListenerForMsg(data);
-        break;
-      case "update":
-        if(data.type === "prop") {
-          callListenerForMsg(data)
-        }
-        break;
-      case "info":
-      ;
-      case "listPzh":
-      ;
-      case "listAllPzps":
-      ;
-      case "addPzpQR":
-        callListenerForMsg(data);
-        break;
-      case "login":
-        callListenerForMsg(data);
-        break;
-      case "authenticate":
-        callListenerForMsg(data);
-        break;
-      case "authStatus":
-        callListenerForMsg(data);
-        break;
-      case "error":
-        callListenerForMsg(data);
-        break;
-      case "friendlyName":
-        callListenerForMsg(data);
-        break;
-      case "webinosVersion":
-        callListenerForMsg(data);
-        break;
-      case "infoLog":
-        callListenerForMsg(data);
-        break;
-      case "errorLog":
-        callListenerForMsg(data);
-        break;
+    if(data.type === "prop") {
+      switch(data.payload.status) {
+        case "registeredBrowser":
+          setWebinosSession(data);
+          callListenerForMsg(data);
+          break;
+        case "update":
+          updateConnected(data.payload.message);
+          callListenerForMsg(data);
+          break;
+        case "infoLog":
+          callListenerForMsg(data);
+          break;
+        case "errorLog":
+          callListenerForMsg(data);
+          break;
+        case "addPzpQR":
+          callListenerForMsg(data);
+          break;
+        case "login":
+          callListenerForMsg(data);
+          break;
+        case "authenticate":
+          callListenerForMsg(data);
+          break;
+        case "authStatus":
+          callListenerForMsg(data);
+          break;
+        case "error":
+          callListenerForMsg(data);
+          break;
+        case "friendlyName":
+          callListenerForMsg(data);
+          break;
+        case "webinosVersion":
+          callListenerForMsg(data);
+          break;
+        case "pzhDisconnected":
+          isConnected = false;
+          callListenerForMsg(data);
+          break;
+      }
     }
   }
 }());
