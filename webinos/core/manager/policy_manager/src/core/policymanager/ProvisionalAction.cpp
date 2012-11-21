@@ -26,7 +26,7 @@ ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
 	value1 = child->GetText();
 	child = (TiXmlElement*)child->NextSibling("AttributeValue");
-	string value2 = child->GetText();
+	value2 = child->GetText();
 }
 
 ProvisionalAction::~ProvisionalAction(){
