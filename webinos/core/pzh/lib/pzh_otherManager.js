@@ -34,17 +34,16 @@ var Pzh_RPC = function(_parent) {
   this.rpcHandler;
   this.modules;         // holds startup modules
   var self = this;
-
   /**
-   * Initialize RPC to enable discovery and rpcHandler
-   */
+  * Initialize RPC to enable discovery and rpcHandler
+  */
   this.initializeRPC = function(){
     self.registry     = new Registry();
     self.rpcHandler   = new RPCHandler(undefined, self.registry); // Handler for remote method calls.
+    self.rpcHandler.setSessionId(_parent.pzh_state.sessionId);
     self.discovery    = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
     self.registry.loadModules(_parent.config.serviceCache, self.rpcHandler); // load specified modules
-    self.rpcHandler.setSessionId(_parent.pzh_state.sessionId);
   };
 
   /**
@@ -52,12 +51,12 @@ var Pzh_RPC = function(_parent) {
    * @param validMsgObj
    */
   this.sendFoundServices = function(validMsgObj){
-    logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
+    _parent.pzh_state.logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
     var services = self.discovery.getAllServices(validMsgObj.from);
     var msg = _parent.prepMsg(_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
     msg.payload.id = validMsgObj.payload.message.id;
     _parent.sendMessage(msg, validMsgObj.from);
-    logger.log("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
+    _parent.pzh_state.logger.log("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
   };
 
   /**
@@ -65,9 +64,9 @@ var Pzh_RPC = function(_parent) {
    * @param validMsgObj
    */
   this.unregisteredServices = function(validMsgObj) {
-    logger.log("receiving initial modules from pzp...");
+    _parent.pzh_state.logger.log("receiving initial modules from pzp...");
     if (!validMsgObj.payload.message.id) {
-      logger.error("cannot find callback");
+      _parent.pzh_state.logger.error("cannot find callback");
       return;
     }
     self.listenerMap[validMsgObj.payload.message.id](validMsgObj.payload.message);
@@ -96,7 +95,7 @@ var Pzh_RPC = function(_parent) {
     var msg = {"type"  : "prop", "from" : _parent.pzh_state.sessionId, "to" : pzhId, "payload" : {"status" : "registerServices", "message" :  {services:localServices, from:_parent.pzh_state.sessionId}}};
     parent.sendMessage(msg, pzhId);
 
-    logger.log("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
+    _parent.pzh_state.logger.log("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
   };
 
   this.getInitModules = function() {

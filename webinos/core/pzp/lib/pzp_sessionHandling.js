@@ -82,6 +82,7 @@ var Pzp = function () {
     if(self.config.metaData.pzhId) {
       self.pzp_state.sessionId = self.config.metaData.pzhId + "/" +  self.config.metaData.webinosName;
     }
+    logger.addId(self.config.metaData.webinosName);
   };
 
   /**
