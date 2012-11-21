@@ -16,12 +16,12 @@
  * Copyright 2012 Fraunhofer
  *******************************************************************************/
 
-var webinos = require("find-dependencies")(__dirname);
-var logger = console;
+var deps = require("find-dependencies")(__dirname);
+var logger = require("./logging.js")(__filename);
 
 exports.loadServiceModules = function(modules, registry, rpcHandler) {
 	var mmm = modules.map(function(m) {
-		return webinos.global.require(webinos.global.api[m.name].location);
+		return deps.global.require(deps.global.api[m.name].location);
 	});
 	for (var i=0; i<mmm.length; i++) {
 		try {
@@ -43,7 +43,6 @@ exports.loadServiceModules = function(modules, registry, rpcHandler) {
 				registry.registerObject(s);
 			}
 		} catch (error) {
-			logger.error(error);
 			logger.error("Could not load module " + modules[i].name + " with message: " + error);
 		}
 	}
@@ -51,10 +50,9 @@ exports.loadServiceModules = function(modules, registry, rpcHandler) {
 
 exports.loadServiceModule = function(m, registry, rpcHandler) {
 	try {
-		var Service = webinos.global.require(webinos.global.api[m.name].location).Service;
+		var Service = deps.global.require(deps.global.api[m.name].location).Service;
 		registry.registerObject(new Service(rpcHandler, modules[i].params));
 	} catch (error) {
-		logger.error(error);
 		logger.error("Could not load module " + m.name + " with message: " + error);
 	}
 };
