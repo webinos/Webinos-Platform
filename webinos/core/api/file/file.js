@@ -16,4 +16,4 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-exports.Service = require("./lib/exports/service.js")
+exports.Service = require("./lib/exports/service.js");
