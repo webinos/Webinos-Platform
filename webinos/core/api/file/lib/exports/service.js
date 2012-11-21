@@ -31,8 +31,9 @@ var rpcModule = dependencies.global.require(dependencies.global.rpc.location,
 
 inherits(Service, rpcModule.RPCWebinosService)
 function Service(rpc, params) {
-    console.log("***************************" + params.getPath());
-  LocalFileSystem.init(pathModule.join(params.getPath(), "userData", "file"))
+    if (params && params.getPath) {
+        LocalFileSystem.init(pathModule.join(params.getPath(), "userData", "file"))
+    }
     
   Service.super.call(this,
       { api         : "http://webinos.org/api/file"
