@@ -22,6 +22,7 @@
 Request::Request(map<string, vector<string>*>& info, map<string, vector<string>*>& resources, vector<bool> purpose){	
 	subject_attrs = info;
 	resource_attrs = resources;
+	purpose_attrs = purpose;
 	request_subject_text = "";
 	request_resource_text = "";
 	request_environment_text = "";
@@ -159,6 +160,10 @@ map<string, vector<string>*>& Request::getSubjectAttrs(){
 
 map<string, vector<string>*>& Request::getResourceAttrs(){
 	return resource_attrs;
+}
+
+vector<bool> Request::getPurposeAttrs(){
+	return purpose_attrs;
 }
 
 map<string,string>& Request::getEnvironmentAttrs(){

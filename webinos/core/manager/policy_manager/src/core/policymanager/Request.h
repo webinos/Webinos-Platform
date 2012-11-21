@@ -34,6 +34,7 @@ private:
 	map<string, vector<string>*>	subject_attrs;
 	map<string, vector<string>*>	resource_attrs;
 	map<string, string>				environment_attrs;
+	vector<bool> purpose_attrs;
 	string request_subject_text;
 	string request_resource_text;
 	string request_environment_text;
@@ -53,6 +54,7 @@ public:
 	
 	map<string, vector<string>*>&	getSubjectAttrs();
 	map<string, vector<string>*>&	getResourceAttrs();
+	vector<bool>	getPurposeAttrs();
 	map<string, string>&			getEnvironmentAttrs();
 	string getWidgetRootPath();
 	string getRequestText();
