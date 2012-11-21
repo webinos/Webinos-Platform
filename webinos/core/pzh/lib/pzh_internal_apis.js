@@ -20,19 +20,19 @@ var webinos = require('find-dependencies')(__dirname);
 var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
 
 function getConnectedPzp(_instance){
-  var myKey, pzps = [];
-  for (myKey=0; myKey < _instance.config.trustedList.pzp.length; myKey = myKey + 1){
-    if (_instance.pzh_state.connectedPzp.hasOwnProperty(_instance.config.trustedList.pzp[myKey])){
-      pzps.push({id: _instance.config.trustedList.pzp[myKey].split("/")[1], url: _instance.config.trustedList.pzp[myKey], isConnected: true});
+  var i, pzps = [], list = Object.keys(_instance.config.trustedList.pzp);
+  for (i=0; i < list.length; i = i + 1){
+    if (_instance.pzh_state.connectedPzp.hasOwnProperty(list[i])){
+      pzps.push({id: list[i].split("/")[1], url: list[i], isConnected: true});
     } else {
-      pzps.push({id: _instance.config.trustedList.pzp[myKey].split("/")[1], url: _instance.config.trustedList.pzp[myKey], isConnected: false});
+      pzps.push({id: list[i].split("/")[1], url: list[i], isConnected: false});
     }
   }
   return pzps;
 }
 
 function getConnectedPzh(_instance){
-  var pzhs = [], myKey;
+  var pzhs = [], myKey, list = Object.keys(_instance.config.trustedList.pzh);
   for (myKey=0; myKey < _instance.config.trustedList.pzh.length; myKey = myKey + 1){
     var id =  _instance.config.trustedList.pzh[myKey]
     var first = id.indexOf("_") +1;
