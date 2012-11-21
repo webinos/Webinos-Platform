@@ -98,7 +98,7 @@ bool PolicySet::matchSubject(Request* req){
 Effect PolicySet::evaluatePolicies(Request * req){
 
 	string preferenceid;
-	bool dhpreference_evaluated = false;
+	bool dhpreference_evaluated = false, dhpreference_result = false;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
 			LOGD("policies[%d] = %s",i,policies[i]->description.data());
@@ -116,7 +116,7 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		if (preferenceid.compare(NULL) != 0){
 			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
 				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-					datahandlingpreferences[i]->evaluate(req);
+					dhpreference_result = datahandlingpreferences[i]->evaluate(req);
 					dhpreference_evaluated = true;
 					break;
 				}
@@ -166,7 +166,10 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		if(effects_result[PROMPT_BLANKET])
 			return PROMPT_BLANKET;
 		if(effects_result[PERMIT])
-			return PERMIT;
+			if (dhpreference_evaluated == true && dhpreference_result == true)
+				return PERMIT;
+			else
+				return PROMPT_BLANKET;
 		return INAPPLICABLE;		
 	}
 	else if(policyCombiningAlgorithm == permit_overrides_algorithm){
@@ -176,7 +179,10 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		for(unsigned int i=0; i<sortArray.size(); i++){
 			effects_result[sortArray[i]->evaluate(req)]++;
 			if(effects_result[PERMIT] > 0)
-				return PERMIT;
+				if (dhpreference_evaluated == true && dhpreference_result == true)
+					return PERMIT;
+				else
+					return PROMPT_BLANKET;
 		}
 /*		
 		for(int i=0; i<policies.size(); i++){

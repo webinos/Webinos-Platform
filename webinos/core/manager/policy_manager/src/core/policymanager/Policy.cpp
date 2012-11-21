@@ -82,25 +82,7 @@ bool Policy::matchSubject(Request* req){
 Effect Policy::evaluate(Request* req){
 
 	string preferenceid;
-	bool dhpreference_evaluated = false;
-
-	// search for a provisional action with a resource matching the request
-	for(unsigned int i=0; i<provisionalactions.size(); i++){
-		preferenceid = provisionalactions[i]->evaluate(req);
-		// search for a dh preference with an id matching the string returned by
-		// the previous provisional action
-		if (preferenceid.compare(NULL) != 0){
-			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-					datahandlingpreferences[i]->evaluate(req);
-					dhpreference_evaluated = true;
-					break;
-				}
-			}
-			if (dhpreference_evaluated == true)
-				break;
-		}
-	}
+	bool dhpreference_evaluated = false, dhpreference_result = false;
 
 /*	
 	if(req->getResourceAttrs().find("api-feature") != req->getResourceAttrs().end())
@@ -112,6 +94,24 @@ Effect Policy::evaluate(Request* req){
 	if(matchSubject(req)){
 		if (req->getResourceAttrs().size() == 0)
 			return PERMIT;
+
+		// search for a provisional action with a resource matching the request
+		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			preferenceid = provisionalactions[i]->evaluate(req);
+			// search for a dh preference with an id matching the string returned by
+			// the previous provisional action
+			if (preferenceid.compare(NULL) != 0){
+				for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
+					if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
+						dhpreference_result = datahandlingpreferences[i]->evaluate(req);
+						dhpreference_evaluated = true;
+						break;
+					}
+				}
+				if (dhpreference_evaluated == true)
+					break;
+			}
+		}
 		
 		LOGD("RULE COMBINING ALG : %s",ruleCombiningAlgorithm.data());
 		
@@ -141,7 +141,10 @@ Effect Policy::evaluate(Request* req){
 			if(effects_result[PROMPT_BLANKET])
 				return PROMPT_BLANKET;
 			if(effects_result[PERMIT])
-				return PERMIT;
+				if (dhpreference_evaluated == true && dhpreference_result == true)
+					return PERMIT;
+				else
+					return PROMPT_BLANKET;
 			return INAPPLICABLE;		
 		}
 		else if(ruleCombiningAlgorithm == permit_overrides_algorithm){
@@ -150,7 +153,10 @@ Effect Policy::evaluate(Request* req){
 			for(unsigned int i=0; i<rules.size(); i++){
 				effects_result[rules[i]->evaluate(req)]++;
 				if(effects_result[PERMIT] > 0)
-					return PERMIT;
+					if (dhpreference_evaluated == true && dhpreference_result == true)
+						return PERMIT;
+					else
+						return PROMPT_BLANKET;
 			}
 			
 			LOGD("[Policy::evaluate] (0) PERMIT %d",effects_result[0]);

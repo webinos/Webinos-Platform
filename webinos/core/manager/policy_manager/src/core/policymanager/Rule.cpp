@@ -65,7 +65,7 @@ Effect Rule::string2effect(const string & effect_str){
 Effect Rule::evaluate(Request* req){
 
 	string preferenceid;
-	bool dhpreference_evaluated = false;
+	bool dhpreference_evaluated = false, dhpreference_result = false;
 
 	// search for a provisional action with a resource matching the request
 	for(unsigned int i=0; i<provisionalactions.size(); i++){
@@ -75,7 +75,7 @@ Effect Rule::evaluate(Request* req){
 		if (preferenceid.compare(NULL) != 0){
 			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
 				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-					datahandlingpreferences[i]->evaluate(req);
+					dhpreference_result = datahandlingpreferences[i]->evaluate(req);
 					dhpreference_evaluated = true;
 					break;
 				}
@@ -85,6 +85,8 @@ Effect Rule::evaluate(Request* req){
 		}
 	}
 
+	if (effect == PERMIT && (dhpreference_evaluated == false || dhpreference_result == false))
+		effect = PROMPT_BLANKET;
 	
 	if(condition){
 		ConditionResponse cr = condition->evaluate(req);

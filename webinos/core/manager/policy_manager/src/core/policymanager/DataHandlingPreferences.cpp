@@ -47,6 +47,6 @@ string DataHandlingPreferences::GetId(){
 	return PolicyId;
 }
 
-void DataHandlingPreferences::evaluate(Request * req){
-	authorizationsset->evaluate(req);
+bool DataHandlingPreferences::evaluate(Request * req){
+	return authorizationsset->evaluate(req);
 }

@@ -37,7 +37,7 @@ public:
 	virtual ~DataHandlingPreferences();
 
 	string GetId();
-	void evaluate(Request *);
+	bool evaluate(Request *);
 };
 
 #endif /* DHPREFERENCES_H_ */
