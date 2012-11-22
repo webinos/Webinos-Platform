@@ -24,16 +24,40 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
 	// Trigger Tag
 	if(triggersset->FirstChild("TriggerAtTime")){
-		// TODO read data about start and delay
+		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerAtTime"); child;
+				child = (TiXmlElement*)child->NextSibling("TriggerAtTime") ) {
+			trigger["triggerID"] = "TriggerAtTime";
+			// TODO read data about start and delay
+			triggers.push_back(trigger);
+			trigger.clear();
+		}
 	}
-	if(triggersset->FirstChild("riggerPersonalDataAccessedForPurpose")){
-		// TODO read data about purpose and delay
+	if(triggersset->FirstChild("TriggerPersonalDataAccessedForPurpose")){
+		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataAccessedForPurpose"); child;
+				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataAccessedForPurpose") ) {
+			trigger["triggerID"] = "TriggerPersonalDataAccessedForPurpose";
+			// TODO read data about purpose and delay
+			triggers.push_back(trigger);
+			trigger.clear();
+		}
 	}
 	if(triggersset->FirstChild("TriggerPersonalDataDeleted")){
-		// TODO read data about delay
+		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataDeleted"); child;
+				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataDeleted") ) {
+			trigger["triggerID"] = "TriggerPersonalDataDeleted";
+			// TODO read data about delay
+			triggers.push_back(trigger);
+			trigger.clear();
+		}
 	}
 	if(triggersset->FirstChild("TriggerDataSubjectAccess")){
-		// TODO read data about endpoint?
+		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerDataSubjectAccess"); child;
+				child = (TiXmlElement*)child->NextSibling("TriggerDataSubjectAccess") ) {
+			trigger["triggerID"] = "TriggerDataSubjectAccess";
+			// TODO read data about endpoint?
+			triggers.push_back(trigger);
+			trigger.clear();
+		}
 	}
 
 }

@@ -26,8 +26,8 @@
 class TriggersSet{
 	
 private:
-	//TriggersSet*	triggersset;
-	bool 		trigger[5];
+	map<string,string> trigger;
+	vector< map<string,string> > triggers;
 
 public:
 	TriggersSet(TiXmlElement*);
