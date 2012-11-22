@@ -32,6 +32,8 @@ function help() {
   console.log("--friendly-name=[name]   friendly name (currently unused)");
   console.log("--widgetServer           start widget server");
   console.log("--policyEditor           start policy editor server");
+  console.log("--signedWidgetOnly       only allow signed widgets");
+  console.log("--enforceWidgetCSP       enforce content security policy on widgets");
   process.exit();
 }
 
@@ -65,6 +67,12 @@ process.argv.forEach(function (arg) {
           break;
         case "--widgetServer":
           options.startWidgetServer = true;
+          break;
+        case "--signedWidgetOnly":
+          options.signedWidgetOnly = true;
+          break;
+        case "--enforceWidgetCSP":
+          options.enforceWidgetCSP = true;
           break;
         case "--policyEditor":
           __EnablePolicyEditor = true;
@@ -141,7 +149,7 @@ function initializeWidgetServer() {
   var wrt = require("./webinos/core/manager/widget_manager/lib/ui/widgetServer");
   if (typeof wrt !== "undefined") {
     // Attempt to start the widget server.
-    wrt.start(function (msg, wrtPort) {
+    wrt.start(options.signedWidgetOnly, options.enforceWidgetCSP, pzp.session.getWebinosPorts().pzp_webSocket, function (msg, wrtPort) {
       if (msg === "startedWRT") {
         // Write the websocket and widget server ports to file so the renderer can pick them up.
         var wrtConfig = {};

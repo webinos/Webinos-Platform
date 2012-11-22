@@ -7,7 +7,7 @@
     var wm = require('../../../index.js');
     var pzp = require('../../../../../pzp/lib/pzp');
     var signedOnly = false;
-    var enforceCSP = false;
+    var useWGTProtocol = false;
     
     // ToDo - is there a 3rd party library we can use for this?
     var mimeTypes = {
@@ -173,7 +173,7 @@
           var startFileProtocol = url.parse(startFile).protocol;
           if (typeof startFileProtocol === "undefined") {
             // Normal widget with local start file.
-            if (enforceCSP) {
+            if (useWGTProtocol) {
               res.redirect('wgt://' + installId);
             } else {
               res.redirect(req.url + "/" + startFile);
@@ -209,7 +209,7 @@
           return;
         } else {        
           var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
-          res.writeHead(200, mimeType);
+          res.setHeader('Content-Type', mimeType);
 
           var fileStream = fs.createReadStream(filename);
           fileStream.pipe(res);
@@ -233,7 +233,7 @@
     signedOnly = typeof signedOnlyFlag === "undefined" ? false : signedOnlyFlag;
   }
   
-  exports.setEnforceCSP = function(enforceCSPFlag) {
-    enforceCSP = typeof enforceCSPFlag === "undefined" ? false : enforceCSPFlag;    
+  exports.setUseWGTProtocol = function(useWGTProtocolFlag) {
+    useWGTProtocol = typeof useWGTProtocolFlag === "undefined" ? false : useWGTProtocolFlag;    
   }
 }(module.exports));

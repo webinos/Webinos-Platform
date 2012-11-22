@@ -7,5 +7,9 @@
   <h4>problem</h4>
   <p>widget installation failed</p>
   <p>invalid widget</p>
+  <p id="reason"></p>
+  <script type="text/javascript">
+	document.getElementById("reason").innerHTML = decodeURIComponent(window.location.pathname.substring(1));
+  </script>
 </body>
 </html>
