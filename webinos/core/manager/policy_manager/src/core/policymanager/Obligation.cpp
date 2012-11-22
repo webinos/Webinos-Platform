@@ -31,31 +31,22 @@ Obligation::Obligation(TiXmlElement* obligation){
 
 	// Action Tag
 	if(obligation->FirstChild("ActionDeletePersonalData")){
-		action[DELETE] = true;
+		action["actionID"] = "ActionDeletePersonalData";
 	}
-	else
-		action[DELETE] = false;
-	if(obligation->FirstChild("ActionAnonymizePersonalData")){
-		action[ANONYMIZE] = true;
+	else if(obligation->FirstChild("ActionAnonymizePersonalData")){
+		action["actionID"] = "ActionAnonymizePersonalData";
 	}
-	else
-		action[ANONYMIZE] = false;
-	if(obligation->FirstChild("ActionNotifyDataSubject")){
-		action[NOTIFY] = true;
-		// TODO read data about media and access
+	else if(obligation->FirstChild("ActionNotifyDataSubject")){
+		action["actionID"] = "ActionNotifyDataSubject";
+		action["Media"] = ((TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))->Attribute("Media");
+		action["Address"] = ((TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))->Attribute("Address");
 	}
-	else
-		action[NOTIFY] = false;
-	if(obligation->FirstChild("ActionLog")){
-		action[LOG] = true;
+	else if(obligation->FirstChild("ActionLog")){
+		action["actionID"] = "ActionLog";
 	}
-	else
-		action[LOG] = false;
-	if(obligation->FirstChild("ActionSecureLog")){
-		action[SECURELOG] = true;
+	else if(obligation->FirstChild("ActionSecureLog")){
+		action["actionID"] = "ActionSecureLog";
 	}
-	else
-		action[SECURELOG] = false;
 }
 
 Obligation::~Obligation(){
@@ -63,16 +54,7 @@ Obligation::~Obligation(){
 
 bool Obligation::evaluate(Request * req){
 
-	bool actions_to_evaluate = false;
-
-	for (unsigned int i = 0; i < ACTIONS_NUMBER; i++){
-		if (action[i] == true) {
-			actions_to_evaluate = true;
-			break;
-		}
-	}
-	
-	if (actions_to_evaluate == false)
+	if (action.empty() == true)
 		return true;
 
 	// TODO evaluate if DELETE is satisfied

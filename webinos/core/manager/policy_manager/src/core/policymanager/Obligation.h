@@ -24,21 +24,11 @@
 #include "TriggersSet.h"
 #include "IPolicyBase.h"
 
-#define ACTIONS_NUMBER	5
-
-enum action_ontology {
-	DELETE,
-	ANONYMIZE,
-	NOTIFY,
-	LOG,
-	SECURELOG
-};
-
 class Obligation{
 	
 private:
 	TriggersSet*	triggersset;
-	bool 		action[ACTIONS_NUMBER];
+	map<string, string> action;
 
 public:
 	Obligation(TiXmlElement*);
