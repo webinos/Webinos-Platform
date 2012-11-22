@@ -242,7 +242,7 @@ public:
 		}
 
 		vector<bool> purpose;
-		Local<Array> pTmp = (args[2]->ToObject())->GetPropertyNames();
+		v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[2]);
 		for(unsigned int i = 0; i < pTmp->Length(); i++) {
 			purpose.push_back(pTmp->Get(i)->BooleanValue());
 		}
