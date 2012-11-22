@@ -32,3 +32,11 @@ ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 ObligationsSet::~ObligationsSet(){
 }
 
+bool ObligationsSet::evaluate(Request * req){
+
+	for(unsigned int i; i<obligation.size(); i++){
+		if (obligation[i]->evaluate(req) == false)
+			return false;
+	}
+	return true;
+}
