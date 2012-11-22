@@ -18,34 +18,29 @@
  * 
  ******************************************************************************/
 
-#ifndef OBLIGATION_H_
-#define OBLIGATION_H_
-
 #include "TriggersSet.h"
-#include "IPolicyBase.h"
 
-#define ACTIONS_NUMBER	5
+TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
-enum action_ontology {
-	DELETE,
-	ANONYMIZE,
-	NOTIFY,
-	LOG,
-	SECURELOG
-};
+	// Trigger Tag
+	if(triggersset->FirstChild("TriggerAtTime")){
+		// TODO read data about start and delay
+	}
+	if(triggersset->FirstChild("riggerPersonalDataAccessedForPurpose")){
+		// TODO read data about purpose and delay
+	}
+	if(triggersset->FirstChild("TriggerPersonalDataDeleted")){
+		// TODO read data about delay
+	}
+	if(triggersset->FirstChild("TriggerDataSubjectAccess")){
+		// TODO read data about endpoint?
+	}
 
-class Obligation{
-	
-private:
-	TriggersSet*	triggersset;
-	bool 		action[ACTIONS_NUMBER];
+}
 
-public:
-	Obligation(TiXmlElement*);
-	virtual ~Obligation();
+TriggersSet::~TriggersSet(){
+}
 
-	bool evaluate(Request *);
-};
-
-#endif /* OBLIGATION_H_ */
-
+bool TriggersSet::evaluate(Request * req){
+	// TODO evaluate triggers
+}

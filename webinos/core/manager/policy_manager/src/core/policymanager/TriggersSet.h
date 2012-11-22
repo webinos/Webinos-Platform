@@ -18,34 +18,23 @@
  * 
  ******************************************************************************/
 
-#ifndef OBLIGATION_H_
-#define OBLIGATION_H_
+#ifndef TRIGGERSSET_H_
+#define TRIGGERSSET_H_
 
-#include "TriggersSet.h"
 #include "IPolicyBase.h"
 
-#define ACTIONS_NUMBER	5
-
-enum action_ontology {
-	DELETE,
-	ANONYMIZE,
-	NOTIFY,
-	LOG,
-	SECURELOG
-};
-
-class Obligation{
+class TriggersSet{
 	
 private:
-	TriggersSet*	triggersset;
-	bool 		action[ACTIONS_NUMBER];
+	//TriggersSet*	triggersset;
+	bool 		trigger[5];
 
 public:
-	Obligation(TiXmlElement*);
-	virtual ~Obligation();
+	TriggersSet(TiXmlElement*);
+	virtual ~TriggersSet();
 
 	bool evaluate(Request *);
 };
 
-#endif /* OBLIGATION_H_ */
+#endif /* TRIGGERSSET_H_ */
 
