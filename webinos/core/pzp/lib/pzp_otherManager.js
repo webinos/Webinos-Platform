@@ -24,7 +24,7 @@ var Discovery    = dependency.global.require(dependency.global.api.service_disco
 var MessageHandler= dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
 var RPCHandler   = rpc.RPCHandler;
 var Sync         = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
-var loadModules  = dependency.global.require(dependency.global.util.location, "lib/loadservice.js").loadServiceModules;
+var modLoader    = dependency.global.require(dependency.global.util.location, "lib/loadservice.js");
 var PzpDiscovery = require("./pzp_peerDiscovery");
 var Session      = require("./session");
 var path = require("path");
@@ -100,7 +100,7 @@ var Pzp_OtherManager = function (_parent) {
     self.rpcHandler     = new RPCHandler(_parent, self.registry); // Handler for remote method calls.
     self.discovery      = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
-    loadModules(modules, self.registry, self.rpcHandler); // load specified modules
+    modLoader.loadServiceModules(modules, self.registry, self.rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(self.rpcHandler); // handler for all things message
     // Init the rpc interception of policy manager
     dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js");
@@ -178,7 +178,10 @@ var Pzp_OtherManager = function (_parent) {
             _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "unregServicesReply", {services: getInitModules.call(self), id:validMsgObj.payload.message.listenerId });
             break;
           case 'registerService':
-            self.registry.loadModule({"name": validMsgObj.payload.message.name,"params": validMsgObj.payload.message.params}, self.rpcHandler);
+            modLoader.loadServiceModule({
+              "name": validMsgObj.payload.message.name,
+              "params": validMsgObj.payload.message.params
+            }, self.registry, self.rpcHandler);
             break;
           case'unregisterService':
             self.registry.unregisterObject({ "id": validMsgObj.payload.message.svId, "api": validMsgObj.payload.message.svAPI});
