@@ -463,7 +463,7 @@ var ConnectHub = function(_parent) {
           if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
             logger.error("Connect  attempt to YOUR PZH "+ _parent.config.metaData.pzhId+" failed.");
             if(_parent.pzp_state.mode === _parent.modes[1]){
-              _parent.webinos_manager.localDiscovery.findLocalPzp();
+              //_parent.webinos_manager.localDiscovery.findLocalPzp();
             }
           } else {
             logger.error(err);
