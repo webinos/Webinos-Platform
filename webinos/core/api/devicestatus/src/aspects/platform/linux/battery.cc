@@ -1,6 +1,10 @@
 #include "../../battery.h"
 #include "../../../utils.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 #define BATTERY_BASE_DIR "/proc/acpi/battery/"
 
 AspectsRegister Battery::aspectsRegister("Battery", getInstance());
