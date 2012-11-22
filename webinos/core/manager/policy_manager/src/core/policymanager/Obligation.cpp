@@ -40,8 +40,8 @@ Obligation::Obligation(TiXmlElement* obligation){
 	}
 	else if(child = (TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject")){
 		action["actionID"] = "ActionNotifyDataSubject";
-		action["Media"] = child->FirstChild("Media")->GetText();
-		action["Address"] = child->FirstChild("Address")->GetText();
+		action["Media"] = ((TiXmlElement*)child->FirstChild("Media"))->GetText();
+		action["Address"] = ((TiXmlElement*)child->FirstChild("Address"))->GetText();
 	}
 	else if(obligation->FirstChild("ActionLog")){
 		action["actionID"] = "ActionLog";
