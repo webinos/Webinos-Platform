@@ -247,6 +247,83 @@ public:
 			purpose.push_back(pTmp->Get(i)->BooleanValue());
 		}
 
+		obligations *obs = new obligations();
+		obligation *ob;
+		map<string, string> *action = new map<string,string>();
+		map<string, string> *trigger = new map<string,string>();
+		vector< map<string, string> > *triggers = new vector< map<string, string> >();
+		v8::Local<Value> actTmp, triggerTmp;
+		v8::Local<Array> triggersTmp;
+		v8::Local<Array> obTmp = v8::Local<Array>::Cast(args[3]);
+
+		for(unsigned int i = 0; i < obTmp->Length(); i++){
+			if (obTmp->Get(i)->ToObject()->Has(String::New("action"))) {
+				actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
+				if (actTmp->ToObject()->Has(String::New("actionID"))){
+					v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New("actionID")));
+					(*action)["actionID"]=*actionID;
+				}
+				if (actTmp->ToObject()->Has(String::New("Media"))){
+					v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New("Media")));
+					(*action)["Media"]=*media;
+				}
+				if (actTmp->ToObject()->Has(String::New("Address"))){
+					v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New("Address")));
+					(*action)["Address"]=*address;
+				}
+			}
+			if (obTmp->Get(i)->ToObject()->Has(String::New("triggers"))) {
+				triggersTmp = v8::Local<Array>::Cast(obTmp->Get(i)->ToObject()->Get(String::New("triggers")));
+				for(unsigned int i = 0; i < triggersTmp->Length(); i++){
+					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerAtTime"))) {
+						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerAtTime"));
+						if (triggerTmp->ToObject()->Has(String::New("Start"))){
+							v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New("Start")));
+							(*trigger)["Start"]=*start;
+						}
+						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+							(*trigger)["MaxDelay"]=*maxdelay;
+						}
+					}
+					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerPersonalDataAccessedForPurpose"))) {
+						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerPersonalDataAccessedForPurpose"));
+						if (triggerTmp->ToObject()->Has(String::New("Purpose"))){
+							v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New("Purpose")));
+							(*trigger)["Purpose"]=*pur;
+						}
+						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+							(*trigger)["MaxDelay"]=*maxdelay;
+						}
+					}
+					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerPersonalDataDeleted"))) {
+						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerPersonalDataDeleted"));
+						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+							(*trigger)["MaxDelay"]=*maxdelay;
+						}
+					}
+					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerDataSubjectAccess"))) {
+						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerDataSubjectAccess"));
+						if (triggerTmp->ToObject()->Has(String::New("Endpoint"))){
+							v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New("Endpoint")));
+							(*trigger)["Endpoint"]=*endpoint;
+						}
+					}
+					triggers->push_back(*trigger);
+					trigger->clear();
+				}
+			}
+			ob->action = (*action);
+			ob->triggers = (*triggers);
+
+			obs->push_back(*ob);
+
+			action->clear();
+			triggers->clear();
+		}
+
 //		string widPath(".");
 
 //		string roam("N");
@@ -254,7 +331,7 @@ public:
 //		(*environment)["roaming"] = roam;
 		
 //		Request* myReq = new Request(widPath, *resource_attrs, *environment);
-		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose);
+		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose, *obs);
 		
 		Effect myEff = pmtmp->pminst->checkRequest(myReq);
 
