@@ -22,6 +22,8 @@
 
 Obligation::Obligation(TiXmlElement* obligation){
 
+	TiXmlElement* child;
+
 	// TriggerSet Tag
 	if(obligation->FirstChild("TriggersSet")){
 		triggersset = new TriggersSet((TiXmlElement*)obligation->FirstChild("TriggersSet"));
@@ -36,10 +38,10 @@ Obligation::Obligation(TiXmlElement* obligation){
 	else if(obligation->FirstChild("ActionAnonymizePersonalData")){
 		action["actionID"] = "ActionAnonymizePersonalData";
 	}
-	else if(obligation->FirstChild("ActionNotifyDataSubject")){
+	else if(child = (TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject")){
 		action["actionID"] = "ActionNotifyDataSubject";
-		action["Media"] = ((TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))->Attribute("Media");
-		action["Address"] = ((TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))->Attribute("Address");
+		action["Media"] = child->FirstChild("Media")->GetText();
+		action["Address"] = child->FirstChild("Address")->GetText();
 	}
 	else if(obligation->FirstChild("ActionLog")){
 		action["actionID"] = "ActionLog";
