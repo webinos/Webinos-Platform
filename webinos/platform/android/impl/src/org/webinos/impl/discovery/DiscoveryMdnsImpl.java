@@ -49,63 +49,97 @@ import android.provider.Settings.System;
 
 public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 	
-	private Context androidContext;
-	
-	private static final String TAG = "org.webinos.impl.DiscoveryMdnsImpl";
-	private static final boolean D = true;
-    
-	private String ptl_type = null;
-	private JmDNS mZeroconf = null;
-	private ServiceListener mListener = null;
-	private ServiceInfo mServiceInfo;
-    
-	private WifiManager mWiFiManager;
-	private MulticastLock mLock;
-	private WifiInfo mInfo;
-    
-	private DNSFindService dnsFindService;
-    
-	DiscoveryServiceImpl srv = new DiscoveryServiceImpl();
-    
-	/*****************************
-	 * DiscoveryManager methods
-	 *****************************/
-	@Override
-	public synchronized PendingOperation findServices(
-		ServiceType serviceType,
-		FindCallback findCallback,
-		Options options, 
-		Filter filter){
-			
-		if(D) Log.v(TAG, "DiscoveryMdnsImpl: findservices");
-		
-		/*	if(serviceType == null) {
-			Log.e(TAG, "DiscoveryMdnsImpl: Please specify a serviceType");
-			return null;
-		} 
-			
-		if(serviceType.api != null)
-		{
-			Log.e(TAG,"servicetype is not null");
-			ptl_type = serviceType.api;
-			
-			//System.out.println("ptl_type: " + ptl_type);
-		} */
-		
-		ptl_type = "_pzp._tcp.local.";
+  private Context androidContext;
 
-		// new thread 	
-		dnsFindService = new DNSFindService(serviceType, findCallback, options, filter);	
-		dnsFindService.start();
-		
-		Log.v(TAG, "Mdns findServices - thread started with id "+(int)dnsFindService.getId());
-		return new DiscoveryPendingOperation(dnsFindService, dnsFindService);
+  private static final String TAG = "org.webinos.impl.DiscoveryMdnsImpl";
+  private static final boolean D = true;
+    
+  private String ptl_type = null;
+  private int server_port = 4321; //randomly choose server port
+  private boolean adverton = false; //watch advertServices status
+  private boolean findon = false; //watch findServices status
+  private JmDNS mZeroconf = null;
+  private ServiceListener mListener = null;
+  private ServiceInfo mServiceInfo;
+    
+  private WifiManager mWiFiManager;
+  private MulticastLock mLock;
+  private WifiInfo mInfo;
+    
+  private DNSFindService dnsFindService;
+    
+  DiscoveryServiceImpl srv = new DiscoveryServiceImpl();
+    
+  /*****************************
+   * DiscoveryManager methods
+   *****************************/
+  @Override
+  public synchronized PendingOperation findServices(
+    ServiceType serviceType,
+    FindCallback findCallback,
+    Options options, 
+    Filter filter){
+      
+    if(D) Log.v(TAG, "DiscoveryMdnsImpl: findservices");
+    if(serviceType == null) {
+      Log.e(TAG, "DiscoveryMdnsImpl: Please specify a serviceType");
+      return null;
+    }
+    else{
+      if(serviceType.api == null){
+        Log.e(TAG, "DiscoveryMdnsImpl: Please specify serviceType.api");
+        return null;
+      }
+      else
+      {
+        ptl_type = serviceType.api;
+        if(D) Log.v(TAG, "Mdns findServices - service type "+ptl_type);
+      }  
+    }
+      
+    // new thread 	
+    dnsFindService = new DNSFindService(serviceType, findCallback, options, filter);	
+    dnsFindService.start();
+    
+    if(D)	Log.v(TAG, "Mdns findServices - thread started with id "+(int)dnsFindService.getId());
+    return new DiscoveryPendingOperation(dnsFindService, dnsFindService);
 	}
 	
+	public void advertServices(String serviceType){
+		
+    //clean up before start
+    if(!adverton && !findon)
+      cleanup();
+
+    //start advertisement
+    if(D) Log.v(TAG, "Mdns advertServices "+serviceType);
+    String hostname = System.getString(androidContext.getContentResolver(),System.ANDROID_ID);
+
+    InetAddress addr = getselfAddress();
+    if(D) Log.d(TAG, String.format("own address: addr=%s", addr.toString()));
+
+
+    //Replace "." with "_"
+    String tmp = addr.toString();
+    String mIp = tmp.replace(".", "_");
+    String mNameIp = hostname + mIp;
+
+    mServiceInfo = ServiceInfo.create(serviceType, mNameIp, server_port, "Create new service type in android");
+
+    try {
+      if(mZeroconf == null)
+        mZeroconf = JmDNS.create(addr);
+      mZeroconf.registerService(mServiceInfo);
+      adverton = true;
+    } catch (IOException e) {
+      e.printStackTrace();
+    }  
+	}
+		
 	public String getServiceId(String serviceType){
 		// TODO Auto-generated method stub 
 		return null; 
-	 }
+  }
 	
 	public Service createService(){
 		DiscoveryServiceImpl srv = new DiscoveryServiceImpl();
@@ -124,7 +158,7 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 		// Setup WiFi
 		mWiFiManager = (WifiManager) androidContext.getSystemService(Context.WIFI_SERVICE);
 		if(!mWiFiManager.isWifiEnabled()){
-			Log.v(TAG, "DiscoveryMdnsImpl: Enable WiFi");
+			if(D) Log.v(TAG, "DiscoveryMdnsImpl: Enable WiFi");
 			mWiFiManager.setWifiEnabled(true);  
 		}
 		return this;
@@ -135,12 +169,56 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 		/*
 		 * perform any module shutdown here ...
 		 */
-		Log.v(TAG, "DiscoveryMdnsImpl: stopModule");
+		if(D) Log.v(TAG, "DiscoveryMdnsImpl: stopModule");
 	}
 	
 	/*****************************
 	 * Helpers
 	 *****************************/
+  
+  public InetAddress getselfAddress (){
+
+    mInfo = mWiFiManager.getConnectionInfo();
+    int intaddr = mInfo.getIpAddress();
+    byte[] byteaddr = new byte[] { 
+      (byte) (intaddr & 0xff), (byte) (intaddr >> 8 & 0xff), (byte) (intaddr >> 16 & 0xff), (byte) (intaddr >> 24 & 0xff)
+    };
+    InetAddress addr = null;
+    try {
+      addr = InetAddress.getByAddress(byteaddr);
+    } catch (UnknownHostException e1) {
+      e1.printStackTrace();
+    }
+    
+    if(D) Log.d(TAG, String.format("found intaddr=%d, addr=%s", intaddr, addr.toString()));
+    return addr;
+  }
+  
+  public void cleanup(){
+    if(mZeroconf != null)
+    {	
+      if(D) Log.v(TAG, "clean up");
+      if(mListener != null){
+        if(ptl_type != null)
+        {
+          mZeroconf.removeServiceListener(ptl_type, mListener);
+          mListener = null;
+        } 
+      }
+      mZeroconf.unregisterAllServices();
+      try {
+        mZeroconf.close();
+      } catch (IOException e) {
+        if(D) Log.d(TAG, String.format("ZeroConf Error: %s", e.getMessage()));
+        e.printStackTrace();
+      }
+      mZeroconf = null;
+    } 
+    //release lock
+    if (mLock != null) 
+      mLock.release(); 
+  }
+  
 	class DNSFindService extends Thread implements Runnable {
 		private ServiceType serviceType;
 		private FindCallback findCallback;
@@ -154,94 +232,76 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 					
 			this.serviceType = srvType;
 			this.findCallback = findCB;
-		    this.options = opts;
-		    this.filter = fltr;
+      this.options = opts;
+      this.filter = fltr;
 			
 			if(D) Log.v(TAG,"constructed WiFiFindService");
 		}
 		
 		public void run() {
+		  
+      InetAddress addr = getselfAddress();
 
-			if(mZeroconf != null)
-			{	
-				//clean up
-				mZeroconf.removeServiceListener(ptl_type, mListener);
-				try {
-					mZeroconf.close();
-					mZeroconf = null;
-				} catch (IOException e) {
-					Log.d(TAG, String.format("ZeroConf Error: %s", e.getMessage()));
-				}
-				mLock.release();
-				mLock = null;
-			}
-			
-			mInfo = mWiFiManager.getConnectionInfo();
-			int intaddr = mInfo.getIpAddress();
-			byte[] byteaddr = new byte[] { 
-					(byte) (intaddr & 0xff), (byte) (intaddr >> 8 & 0xff), (byte) (intaddr >> 16 & 0xff), (byte) (intaddr >> 24 & 0xff)
-			};
-			InetAddress addr = null;
-			try {
-				addr = InetAddress.getByAddress(byteaddr);
-			} catch (UnknownHostException e1) {
-				e1.printStackTrace();
-			}
-			
-			Log.d(TAG, String.format("found intaddr=%d, addr=%s", intaddr, addr.toString()));
-			String hostname = System.getString(androidContext.getContentResolver(),System.ANDROID_ID);
-			
-			// Setup DNS
-			mLock = mWiFiManager.createMulticastLock("MdnsLock");
-			mLock.setReferenceCounted(true);
-			mLock.acquire();
-	        
-			String[] Addresses = {null, null , null, null, null, null};
-			srv.deviceAddresses = Addresses;
+      if(D) Log.d(TAG, String.format("own address: addr=%s", addr.toString()));
+      String hostname = System.getString(androidContext.getContentResolver(),System.ANDROID_ID);
+      if(!adverton && !findon)
+        cleanup();
+
+      // Setup DNS
+      mLock = mWiFiManager.createMulticastLock("MdnsLock");
+      mLock.setReferenceCounted(true);
+      mLock.acquire();
+
+      //TODO: replacing the arrays with HashTable    
+      String[] Addresses = {null, null , null, null, null, null};
+      srv.deviceAddresses = Addresses;
             
-			String[] Devicenames = {null, null , null, null, null, null};
-			srv.deviceNames = Devicenames;
+      String[] Devicenames = {null, null , null, null, null, null};
+      srv.deviceNames = Devicenames;
 	        
-			try {
-				Log.d(TAG, "Listener handling\n");
-				mZeroconf = JmDNS.create(addr);
-
-				mZeroconf.addServiceListener(ptl_type, mListener = new ServiceListener() {
-
-					@Override
-					public void serviceResolved(ServiceEvent ev) {
-						Log.d(TAG, "Service resolved: " + ev.getInfo().getQualifiedName());
-						Log.d(TAG, " port:\n" + ev.getInfo().getPort() + "\nIP Address:\n" + ev.getInfo().getHostAddresses()[0]
-								+ "\nserver name:\n" + ev.getInfo().getServer() + "\nprotocol:\n"  + ev.getInfo().getProtocol()
-								+ "\ntype:\n" + ev.getType());
+      try {
+        if(D) Log.d(TAG, "Listener handling\n");
+        if(mZeroconf == null)
+          mZeroconf = JmDNS.create(addr);
+        
+        findon = true;
+                
+        if(D) Log.d(TAG, "ptl_typ = " + ptl_type);
+        mZeroconf.addServiceListener(ptl_type, mListener = new ServiceListener() {
+          @Override
+          public void serviceResolved(ServiceEvent ev) {
+            if(D) Log.d(TAG, "Service resolved: " + ev.getInfo().getQualifiedName());
+            if(D) Log.d(TAG, " port:\n" + ev.getInfo().getPort() + "\nIP Address:\n" + ev.getInfo().getHostAddresses()[0]
+                + "\nserver name:\n" + ev.getInfo().getServer() + "\nprotocol:\n"  + ev.getInfo().getProtocol()
+                + "\ntype:\n" + ev.getType());
 											
 						//start passing data
 						String[] hostAdresses = ev.getInfo().getHostAddresses();
 		
 						int i = 0;
-											
 						for (String ha : hostAdresses) {
-												
-							//filter out itself
 							int intaddr = mInfo.getIpAddress();
 							byte[] byteaddr = new byte[] { 
 								(byte) (intaddr & 0xff), (byte) (intaddr >> 8 & 0xff), (byte) (intaddr >> 16 & 0xff), (byte) (intaddr >> 24 & 0xff)
 							};
-							InetAddress hostaddr = null;
+							InetAddress mHostaddr = null;
 							try {
-								hostaddr = InetAddress.getByAddress(byteaddr);
-							} catch (UnknownHostException e1) {
+								mHostaddr = InetAddress.getByAddress(byteaddr);
+              } catch (UnknownHostException e1) {
 								e1.printStackTrace();
 							}
+							
+							String hostaddr = mHostaddr.toString();
+							hostaddr = hostaddr.substring(1); //remove "/"
 												
 							String devicename = System.getString(androidContext.getContentResolver(),System.ANDROID_ID);
-											
-							if ((!(hostAdresses[i].equals(hostaddr.toString()))) && (!(devicename.equals(ev.getName()))))
+							//filter out itself
+							if ((!(hostAdresses[i].equals(hostaddr))) && (!(devicename.equals(ev.getName()))))
 							{	
 								srv.deviceAddresses[i] = hostAdresses[i];
-								Log.d(TAG, "Service IP addresses: " + srv.deviceAddresses[i]);
+								if(D) Log.d(TAG, "Service IP addresses: " + srv.deviceAddresses[i]);
 								srv.deviceNames[i] = ev.getName();
-								Log.d(TAG, "Hostnames:" + srv.deviceNames[i]);
+								if(D) Log.d(TAG, "Hostnames:" + srv.deviceNames[i]);
 								i++;
 							}
 						}
@@ -250,29 +310,19 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 
 					@Override
 					public void serviceRemoved(ServiceEvent ev) {
-						Log.d(TAG, "Service removed: " + ev.getName());
+						if(D) Log.d(TAG, "Service removed: " + ev.getName());
 					}
 					@Override
 					public void serviceAdded(ServiceEvent ev) {
 						// Required to force serviceResolved to be called again (after the first search)
+						if(D) Log.d(TAG, "serviceAdded" );
 						mZeroconf.requestServiceInfo(ev.getType(), ev.getName(), 1);
 					}
 				});
-	        		
-			//TODO: Isolate create service type out in order to enable app to create new service type  	
-				mServiceInfo = ServiceInfo.create("_pzp._tcp.local.", hostname , 0, "PZP service from android");
-				mZeroconf.registerService(mServiceInfo);
 	    } catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		public void discoveryFinished() {
-
-			//release lock
-			if (mLock != null) 
-				mLock.release();
-	   }
 	}
 
    class DiscoveryPendingOperation extends PendingOperation {
@@ -286,10 +336,9 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 		}
 		
 		public void cancel() {
-			Log.d(TAG, "DiscoveryPendingOperation cancel");
+			if(D) Log.d(TAG, "DiscoveryPendingOperation cancel");
 			if(t!=null) {
-				Log.v(TAG, "DiscoveryPendingOperation cancel - send interrupt...");
-				//Is this interrupt needed??? - copied from messaging
+				if(D) Log.v(TAG, "DiscoveryPendingOperation cancel - send interrupt...");
 				t.interrupt();
 			}
 		}

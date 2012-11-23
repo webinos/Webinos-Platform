@@ -18,6 +18,7 @@
     <!-- One module tag per child module -->
     <module>context_manager</module>
     <module>keystore</module>
+    <module>localconnection_manager</module>
     <module>messaging</module>
     <module>policy_manager</module>
     <module>storage</module>

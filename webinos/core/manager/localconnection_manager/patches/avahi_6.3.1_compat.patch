@@ -1,0 +1,258 @@
+diff -rauB avahi-0.6.31/avahi-compat-libdns_sd/compat.c avahi-0.6.31_new/avahi-compat-libdns_sd/compat.c
+--- avahi-0.6.31/avahi-compat-libdns_sd/compat.c	2010-08-26 01:51:38.979153000 +0100
++++ avahi-0.6.31_new/avahi-compat-libdns_sd/compat.c	2012-05-18 13:52:16.571656000 +0100
+@@ -78,6 +78,7 @@
+     DNSServiceDomainEnumReply domain_browser_callback;
+     DNSServiceRegisterReply service_register_callback;
+     DNSServiceQueryRecordReply query_resolver_callback;
++    DNSServiceGetAddrInfoReply service_getaddrinfo_callback;
+ 
+     AvahiClient *client;
+     AvahiServiceBrowser *service_browser;
+@@ -303,7 +304,7 @@
+ }
+ 
+ static void * thread_func(void *data) {
+-    DNSServiceRef sdref = data;
++	DNSServiceRef sdref = data;
+     sigset_t mask;
+ 
+     sigfillset(&mask);
+@@ -358,6 +359,30 @@
+     return NULL;
+ }
+ 
++static void
++avahi_address_to_sockaddr (AvahiAddress *address,
++						   AvahiIfIndex index_,
++                           struct sockaddr *sockaddr) {
++	switch (address->proto) {
++		case AVAHI_PROTO_INET:
++		{
++			struct sockaddr_in *sockaddr4 = (struct sockaddr_in *) sockaddr;
++			sockaddr4->sin_family = AF_INET;
++			sockaddr4->sin_addr.s_addr = address->data.ipv4.address;
++			break;
++		}
++		case AVAHI_PROTO_INET6:
++		{
++			struct sockaddr_in6 *sockaddr6 = (struct sockaddr_in6 *) sockaddr;
++			sockaddr6->sin6_family = AF_INET6;
++			memcpy (sockaddr6->sin6_addr.s6_addr, address->data.ipv6.address, 16);
++			sockaddr6->sin6_flowinfo = 0;
++			sockaddr6->sin6_scope_id = index_;
++			break;
++		}
++	}
++}
++
+ static DNSServiceRef sdref_new(void) {
+     int fd[2] = { -1, -1 };
+     DNSServiceRef sdref = NULL;
+@@ -527,6 +552,36 @@
+         sdref_unref(sdref);
+ }
+ 
++static void service_getaddrinfo_callback(AvahiHostNameResolver *r,
++										 AvahiIfIndex interface,
++    									 AVAHI_GCC_UNUSED AvahiProtocol protocol,
++									     AvahiResolverEvent event,
++									     const char *name,
++									     const AvahiAddress *address,
++									     AVAHI_GCC_UNUSED AvahiLookupResultFlags flags,
++									     void *userdata) {
++	DNSServiceRef sdref = userdata;
++	assert(r);
++	assert(sdref);
++	assert(sdref->n_ref >= 1); 
++
++	switch (event) {
++	
++		case AVAHI_RESOLVER_FOUND: {
++
++			struct sockaddr * sockaddr = (struct sockaddr *) malloc(sizeof(struct sockaddr_in));
++			avahi_address_to_sockaddr ((AvahiAddress *)address, interface, sockaddr);
++	
++			sdref->service_getaddrinfo_callback(sdref, 0, interface, kDNSServiceErr_NoError, name, 	sockaddr, 0, sdref->context);	
++	        break;
++		}
++		
++		case AVAHI_RESOLVER_FAILURE:
++			fprintf(stderr, ("Failed to resolve host name '%s': %s\n"), name, avahi_strerror(avahi_client_errno(sdref->client)));
++			break; 
++	}
++}
++
+ static void service_browser_callback(
+     AvahiServiceBrowser *b,
+     AvahiIfIndex interface,
+@@ -586,7 +641,8 @@
+                 sdref->domain_browser_callback(sdref, 0, 0, error, NULL, sdref->context);
+             else if (sdref->query_resolver_callback)
+                 sdref->query_resolver_callback(sdref, 0, 0, error, NULL, 0, 0, 0, NULL, 0, sdref->context);
+-
++            else if (sdref->service_getaddrinfo_callback)
++				sdref->service_getaddrinfo_callback(sdref, 0, 0, error, NULL, NULL, 0, sdref->context); 
+             break;
+ 
+         case AVAHI_CLIENT_S_RUNNING:
+@@ -597,6 +653,58 @@
+     }
+ }
+ 
++DNSServiceErrorType DNSSD_API DNSServiceGetAddrInfo ( 
++    DNSServiceRef *ret_sdref,
++    DNSServiceFlags flags, 
++    uint32_t interfaceIndex, 
++    DNSServiceProtocol protocol, 
++    const char *hostname, 
++    DNSServiceGetAddrInfoReply callBack, 
++    void *context) {
++
++	DNSServiceErrorType ret = kDNSServiceErr_Unknown;
++	int error;
++	DNSServiceRef sdref = NULL;
++	AvahiIfIndex ifindex;
++
++	AVAHI_WARN_LINKAGE;
++
++	if (!hostname) return kDNSServiceErr_BadParam;
++	*ret_sdref = NULL;
++
++	if (!(sdref = sdref_new())) {
++	    return kDNSServiceErr_Unknown;
++	}
++
++	sdref->context = context;
++	sdref->service_getaddrinfo_callback = callBack;
++
++	ASSERT_SUCCESS(pthread_mutex_lock(&sdref->mutex));
++
++    if (!(sdref->client = avahi_client_new(avahi_simple_poll_get(sdref->simple_poll), 0, generic_client_callback, sdref, &error))) {
++		ret =  map_error(error);
++        	goto finish;
++	}
++
++	ifindex = interfaceIndex == kDNSServiceInterfaceIndexAny ? AVAHI_IF_UNSPEC : (AvahiIfIndex) interfaceIndex;
++
++	if (!(avahi_host_name_resolver_new(sdref->client, ifindex, AVAHI_PROTO_UNSPEC, hostname, protocol, 0, service_getaddrinfo_callback, sdref))) {
++		fprintf(stderr, ("Failed to create host name resolver: %s\n"), avahi_strerror(avahi_client_errno(sdref->client))); 
++		goto finish;
++	}
++	
++	ret = kDNSServiceErr_NoError;
++	*ret_sdref = sdref;
++
++finish:
++
++	ASSERT_SUCCESS(pthread_mutex_unlock(&sdref->mutex));
++	
++	if (ret != kDNSServiceErr_NoError)
++		DNSServiceRefDeallocate(sdref);
++	return ret;
++}
++
+ DNSServiceErrorType DNSSD_API DNSServiceBrowse(
+         DNSServiceRef *ret_sdref,
+         DNSServiceFlags flags,
+diff -rauB avahi-0.6.31/avahi-compat-libdns_sd/dns_sd.h avahi-0.6.31_new/avahi-compat-libdns_sd/dns_sd.h
+--- avahi-0.6.31/avahi-compat-libdns_sd/dns_sd.h	2010-08-26 01:51:38.979153000 +0100
++++ avahi-0.6.31_new/avahi-compat-libdns_sd/dns_sd.h	2012-05-18 11:46:38.651978000 +0100
+@@ -87,6 +87,8 @@
+ 
+ typedef struct _DNSServiceRef_t *DNSServiceRef;
+ typedef struct _DNSRecordRef_t *DNSRecordRef;
++typedef uint32_t DNSServiceProtocol;  
++
+ 
+ /* General flags used in functions defined below */
+ enum
+@@ -788,6 +788,88 @@
+  *  Service Discovery
+  *
+  *********************************************************************************************/
++ /* Queries for the IP address of a hostname by using either Multicast or Unicast DNS. 
++ *
++ *
++ * DNSServiceGetAddrInfoReply() Parameters:
++ *
++ * sdRef:           The DNSServiceRef initialized by DNSServiceGetAddrInfo(). 
++ *
++ * flags:           Possible values are kDNSServiceFlagsMoreComing and kDNSServiceFlagsAdd. 
++ *
++ * interfaceIndex:  The interface to which the answers pertain. 
++ *
++ * errorCode:       Will be kDNSServiceErr_NoError on success, otherwise will
++ *                  indicate the failure that occurred.  Other parameters are undefined if
++ *                  the errorCode is nonzero.
++ *
++ * hostname:     	The fully qualified domain name of the host to be queried for. 
++ *
++ * address:         IPv4 or IPv6 address.
++ *
++ * ttl:          	If the client wishes to cache the result for performance reasons, the TTL indicates
++ *					how long the client may legitimately hold onto this result, in seconds. 
++ *					After the TTL expires, the client should consider the result no longer valid, 
++ *					and if it requires this data again, it should be re-fetched with a new query. 
++ *					Of course, this only applies to clients that cancel the asynchronous operation
++ *					when they get a result. Clients that leave the asynchronous operation running can 
++ *					safely assume that the data remains valid until they get another callback telling them otherwise. 
++ *
++ * context:         The context pointer that was passed to the callout.
++ *
++ */
++
++ 
++typedef void ( *DNSServiceGetAddrInfoReply) 
++	( 
++    DNSServiceRef						sdRef, 
++    DNSServiceFlags 					flags, 
++    uint32_t 							interfaceIndex, 
++    DNSServiceErrorType 				errorCode, 
++    const char 							*hostname, 
++    const struct 						sockaddr *address, 
++    uint32_t 							ttl, 
++    void 								*context 
++	);  
++
++/* DNSServiceGetAddrInfo() Parameters:
++ *
++ * sdRef:           A pointer to an uninitialized DNSServiceRef. If the call succeeds
++ *                  then it initializes the DNSServiceRef, returns kDNSServiceErr_NoError,
++ *                  and and the query begins and will last indefinitely until the client
++ *					terminates the query by passing this DNSServiceRef to DNSServiceRefDeallocate()
++ *
++ * flags:           kDNSServiceFlagsForceMulticast or kDNSServiceFlagsLongLivedQuery. Pass 
++ *					kDNSServiceFlagsLongLivedQuery to create a "long-lived" unicast query 
++ *					in a non-local domain. Without setting this flag, unicast queries will be 
++ *					one-shot - that is, only answers available at the time of the call will be returned.
++ *					By setting this flag, answers (including Add and Remove events) that become 
++ *					available after the initial call is made will generate callbacks.
++ *					This flag has no effect on link-local multicast queries. 
++ *
++ * interfaceIndex:  The interface on which to issue the query. Passing 0 causes the query to be sent 
++ *					on all active interfaces via Multicast or the primary interface via Unicast.
++ *
++ * protocol:        Pass in kDNSServiceProtocol_IPv4 to look up IPv4 addresses, or kDNSServiceProtocol_IPv6 
++ *					to look up IPv6 addresses, or both to look up both kinds. 
++ * 
++ * hostname: 		The fully qualified domain name of the host to be queried for. 
++ * callBack:		The function to be called when the query succeeds or fails asynchronously.		
++ * context:			An application context pointer which is passed to the callback function (may be NULL). 			
++ *
++ * return value:    Returns kDNSServiceErr_NoError on success (any subsequent, asynchronous errors are delivered to 
++ *					the callback), otherwise returns an error code indicating the error that occurred. 
++ */
++
++DNSServiceErrorType DNSSD_API DNSServiceGetAddrInfo ( 
++    DNSServiceRef *sdref,
++    DNSServiceFlags flags, 
++    uint32_t interfaceIndex, 
++    DNSServiceProtocol protocol, 
++    const char *hostname, 
++    DNSServiceGetAddrInfoReply callBack, 
++    void *context /* may be NULL */
++    );  
+ 
+ /* Browse for instances of a service.
+  *
