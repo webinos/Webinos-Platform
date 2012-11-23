@@ -48,5 +48,8 @@ string DataHandlingPreferences::GetId(){
 }
 
 bool DataHandlingPreferences::evaluate(Request * req){
-	return authorizationsset->evaluate(req);
+	if (authorizationsset->evaluate(req) == true && obligationsset->evaluate(req) == true)
+		return true;
+	else
+		return false;	
 }
