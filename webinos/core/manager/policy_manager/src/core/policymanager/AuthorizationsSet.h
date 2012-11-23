@@ -68,6 +68,8 @@ enum purpose_ontology {
 	UNSPECIFIED
 };
 
+extern string ontology_vector[PURPOSES_NUMBER];
+
 class AuthorizationsSet{
 	
 private:
