@@ -65,6 +65,6 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 TriggersSet::~TriggersSet(){
 }
 
-bool TriggersSet::evaluate(Request * req){
+bool TriggersSet::evaluate(vector< map<string, string> > triggers){
 	// TODO evaluate triggers
 }

@@ -33,7 +33,7 @@ public:
 	TriggersSet(TiXmlElement*);
 	virtual ~TriggersSet();
 
-	bool evaluate(Request *);
+	bool evaluate(vector< map<string, string> >);
 };
 
 #endif /* TRIGGERSSET_H_ */

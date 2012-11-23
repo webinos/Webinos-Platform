@@ -58,14 +58,38 @@ bool Obligation::evaluate(Request * req){
 
 	if (action.empty() == true)
 		return true;
+	else {
+		obligations ob = req->getObligationsAttrs();
+		for (obligations::iterator oit=ob.begin(); oit!=ob.end(); oit++){
+			// ActionDeletePersonalData, ActionAnonymizePersonalData and ActionSecureLog evaluation
+			// subset of ActionLog evaluation (exact match only)
+			if (action["actionID"] == "ActionDeletePersonalData" || 
+					action["actionID"] == "ActionAnonymizePersonalData" || 
+					action["actionID"] == "ActionLog" || 
+					action["actionID"] == "ActionSecureLog"){
+				if ((*oit).action["actionID"].compare(action["actionID"]) == 0){
+					if (triggersset->evaluate((*oit).triggers) == true)
+						return true;
+				}
+			}
+			// ActionNotifyDataSubject evaluation
+			else {
+				// ActionNotifyDataSubject parameters are the same
+				if ((*oit).action["actionID"].compare("ActionNotifyDataSubject") == 0 && 
+						(*oit).action["Media"].compare(action["Media"]) == 0 &&
+						 (*oit).action["Address"].compare(action["Address"]) == 0){
+					if (triggersset->evaluate((*oit).triggers) == true)
+						return true;
+				}
+			}
+			// subset of ActionLog evaluation (ActionLog is satisfied by ActionSecureLog too)
+			if ((*oit).action["actionID"].compare("ActionSecureLog") == 0 &&
+					action["actionID"].compare("ActionLog") == 0){
+				if (triggersset->evaluate((*oit).triggers) == true)
+					return true;
+			}
+		}
+	}
 
-	// TODO evaluate if DELETE is satisfied
-	// TODO evaluate if ANONYMIZE is satisfied
-	// TODO evaluate if NOTIFY is satisfied (check media and address parameters too)
-	// TODO evaluate if LOG is satisfied (by LOG or SECURELOG)
-	// TODO evaluate if SECURELOG is satisfied
-
-	// TODO if not satisfied return false
-
-	return triggersset->evaluate(req);
+	return false;
 }
