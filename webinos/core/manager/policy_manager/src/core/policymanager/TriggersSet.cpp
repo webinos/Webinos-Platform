@@ -27,7 +27,18 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerAtTime"); child;
 				child = (TiXmlElement*)child->NextSibling("TriggerAtTime") ) {
 			trigger["triggerID"] = "TriggerAtTime";
-			// TODO read data about start and delay
+
+			// read start parameter
+			TiXmlElement * start = (TiXmlElement*)child->FirstChild("Start");
+			if ((TiXmlElement*)start->FirstChild("StartNow"))
+				trigger["Start"]="StartNow";
+			if ((TiXmlElement*)start->FirstChild("DateAndTime"))
+				trigger["Start"]=((TiXmlElement*)start->FirstChild("DateAndTime"))->GetText();
+
+			// read MaxDelay parameter
+			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
+				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
@@ -36,7 +47,16 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataAccessedForPurpose"); child;
 				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataAccessedForPurpose") ) {
 			trigger["triggerID"] = "TriggerPersonalDataAccessedForPurpose";
-			// TODO read data about purpose and delay
+
+			// read Purpose parameters
+			for(TiXmlElement * purpose = (TiXmlElement*)child->FirstChild("Purpose"); purpose;
+					purpose = (TiXmlElement*)child->NextSibling("Purpose") ) {
+			}
+
+			// read MaxDelay parameter
+			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
+				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
@@ -45,7 +65,11 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataDeleted"); child;
 				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataDeleted") ) {
 			trigger["triggerID"] = "TriggerPersonalDataDeleted";
-			// TODO read data about delay
+
+			// read MaxDelay parameter
+			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
+				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
@@ -54,7 +78,10 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerDataSubjectAccess"); child;
 				child = (TiXmlElement*)child->NextSibling("TriggerDataSubjectAccess") ) {
 			trigger["triggerID"] = "TriggerDataSubjectAccess";
-			// TODO read data about endpoint?
+
+			// read url parameter
+			trigger["url"] = ((TiXmlElement*)child->FirstChild("url"))->GetText();
+			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
@@ -66,5 +93,4 @@ TriggersSet::~TriggersSet(){
 }
 
 bool TriggersSet::evaluate(vector< map<string, string> > triggers){
-	// TODO evaluate triggers
 }
