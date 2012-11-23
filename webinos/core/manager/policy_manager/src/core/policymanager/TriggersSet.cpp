@@ -19,8 +19,13 @@
  ******************************************************************************/
 
 #include "TriggersSet.h"
+#include "AuthorizationsSet.h"
 
 TriggersSet::TriggersSet(TiXmlElement* triggersset){
+
+	string p, purposes;
+	for(unsigned int i=0; i<PURPOSES_NUMBER; i++)
+		purposes.append("0");
 
 	// Trigger Tag
 	if(triggersset->FirstChild("TriggerAtTime")){
@@ -37,7 +42,7 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
 			// read MaxDelay parameter
 			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
@@ -51,11 +56,19 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 			// read Purpose parameters
 			for(TiXmlElement * purpose = (TiXmlElement*)child->FirstChild("Purpose"); purpose;
 					purpose = (TiXmlElement*)child->NextSibling("Purpose") ) {
+				p = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
+				for(unsigned int i = 0; i<PURPOSES_NUMBER; i++){
+					if (p.compare(ontology_vector[i]) == 0)
+						purposes[i]='1';
+				}
 			}
+			trigger["Purpose"]=purposes;
+			for(unsigned int i=0; i<PURPOSES_NUMBER; i++)
+				purposes[i]='0';
 
 			// read MaxDelay parameter
 			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
@@ -68,7 +81,7 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
 			// read MaxDelay parameter
 			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-				trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
