@@ -46,8 +46,8 @@ var PzpPeerDiscovery = function(_parent){
   
     var connectPeerFunction = function (msg) {
         "use strict";
-        //parent.connectPeer(msg);
-        _parent.pzpClient.connectPeer(msg);
+        // Don't connect yet - this requires certificate check  
+        //_parent.pzpClient.connectPeer(msg);
       };
       
     this.localconnectionManager.setConnectPeersfunction(connectPeerFunction);
