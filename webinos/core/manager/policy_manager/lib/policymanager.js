@@ -21,22 +21,18 @@
 (function () {
 	"use strict";
 
-    var exec = require('child_process').exec;
-    var os = require('os');
-    var path = require('path');
-    var dependencies= require('find-dependencies')(__dirname);
-    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
-    var promptLib = dependencies.local.require(dependencies.local.manager.policy_manager.location,'src/promptMan/promptManager.js');
-    var dslib = dependencies.local.require(dependencies.local.manager.policy_manager.location,'lib/decisionstorage.js');
-    var bridge = null;
-    var pmCore = null;
-    var pmNativeLib = null;
-    var promptMan = null;
-    var policyFile = null;
+	var os = require('os');
+	var promptLib = require('../src/promptMan/promptManager.js');
+	var dslib = require('./decisionstorage.js');
+	var bridge = null;
+	var pmCore = null;
+	var pmNativeLib = null;
+	var promptMan = null;
+	var policyFile = null;
 	var decisionStorage = null;
 
 
-	var policyManager = function() {
+	var policyManager = function(policyFilename) {
 		// Load the native module
 		try {
 			this.pmNativeLib = require('pm');
@@ -55,7 +51,7 @@
 			this.promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-        	policyFile = path.join(webinosPath,"policies", "policy.xml");
+        	policyFile = policyFilename;
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
 		//Loads decision storage module
 		this.decisionStorage = new dslib.decisionStorage(policyFile);
@@ -150,7 +146,6 @@
 		return;
 	};
 
-	require('./rpcInterception.js');
 	exports.policyManager = policyManager;
 
 }());
