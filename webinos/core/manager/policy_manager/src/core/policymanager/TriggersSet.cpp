@@ -109,7 +109,8 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 	bool purpose_satisfied, trigger_satisfied;
 	tm start1, start2, delay1, delay2;
 	time_t t_start1, t_start2, t_delay1, t_delay2;
-	char buffer[100];
+	char sign;
+	int millisec, off_hours, off_min;
 
 	for(vector< map<string, string> >::iterator triggers_it=triggers.begin() ; triggers_it!=triggers.end() ; triggers_it++){
 		trigger_satisfied = false;
@@ -126,17 +127,21 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 				if ((*triggers_it)["Start"] != (*it)["Start"]){
 					if((*triggers_it)["Start"] == "StartNow"){ 
 
-						t_start1 = time(NULL);
+						t_start1 = mktime(gmtime(NULL));
 						sscanf((*triggers_it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%ds",
 								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
 						t_delay1 = mktime(&delay1);
 						
-						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%s",
-								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, buffer);
+						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start2 = mktime(&start2);
 						sscanf((*it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%ds",
 								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
 						t_delay2 = mktime(&delay2);
+						if (sign == '+')
+							t_delay2 += 60*off_hours+off_min;
+						else
+							t_delay2 -= (60*off_hours+off_min);
 
 						if (t_start1 > t_start2 && (t_start1+t_delay1 < t_start2+t_delay2)){
 							trigger_satisfied = true;
@@ -144,19 +149,28 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 						}
 					}
 					if((*triggers_it)["Start"] != "StartNow" && (*it)["Start"] != "StartNow"){ 
-						sscanf((*triggers_it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%s",
-								&start1.tm_year, &start1.tm_mon, &start1.tm_mday, &start1.tm_hour, &start1.tm_min, &start1.tm_sec, buffer);
+						sscanf((*triggers_it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+								&start1.tm_year, &start1.tm_mon, &start1.tm_mday, &start1.tm_hour, &start1.tm_min, &start1.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start1 = mktime(&start1);
 						sscanf((*triggers_it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%ds",
 								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
 						t_delay1 = mktime(&delay1);
+						if (sign == '+')
+							t_delay1 += 60*off_hours+off_min;
+						else
+							t_delay1 -= (60*off_hours+off_min);
 						
-						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%s",
-								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, buffer);
+						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start2 = mktime(&start2);
 						sscanf((*it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%ds",
 								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
 						t_delay2 = mktime(&delay2);
+						if (sign == '+')
+							t_delay2 += 60*off_hours+off_min;
+						else
+							t_delay2 -= (60*off_hours+off_min);
+
 						if (t_start1 > t_start2 && (t_start1+t_delay1 < t_start2+t_delay2)){
 							trigger_satisfied = true;
 							break;
