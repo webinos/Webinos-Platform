@@ -24,7 +24,7 @@ var Discovery    = dependency.global.require(dependency.global.api.service_disco
 var MessageHandler= dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
 var RPCHandler   = rpc.RPCHandler;
 var Sync         = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
-var PzpDiscovery = require("./pzp_local");
+var PzpDiscovery = require("./pzp_peerDiscovery");
 var Session      = require("./session");
 var path = require("path");
 var Pzp_OtherManager = function (_parent) {
@@ -34,7 +34,7 @@ var Pzp_OtherManager = function (_parent) {
   this.rpcHandler;
   this.discovery;
   this.messageHandler;
-  this.localDiscovery;
+  this.peerDiscovery;
   var self = this;
   var sync = new Sync();
   logger.addId(_parent.config.metaData.webinosName);
@@ -141,9 +141,9 @@ var Pzp_OtherManager = function (_parent) {
     self.setupMessage_RPCHandler();
     registerMessaging(_parent.config.metaData.pzhId);    //message handler
     self.registerServicesWithPzh(); //rpc
-    if(!self.localDiscovery ) {// local discovery&& mode !== modes[0]
-      self.localDiscovery = new PzpDiscovery(_parent);
-      self.localDiscovery.startLocalAdvert();
+    if(!self.peerDiscovery ) {// local discovery&& mode !== modes[0]
+      self.peerDiscovery = new PzpDiscovery(_parent);
+      self.peerDiscovery.advertPzp('zeroconf', _parent.config.userPref.ports.pzp_zeroConf);
     }
   };
 

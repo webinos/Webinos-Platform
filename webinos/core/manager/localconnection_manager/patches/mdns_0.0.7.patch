@@ -1,0 +1,14 @@
+--- resolver_sequence_tasks.js.origin	2012-11-08 15:24:46.715027164 +0000
++++ resolver_sequence_tasks.js	2012-11-08 16:20:42.699433735 +0000
+@@ -16,7 +16,10 @@
+           hosttarget, port, txtRecord, context)
+       {
+         try {
+-          var error = dns_sd.buildException(errorCode);
++          if(errorCode !== dns_sd.kDNSServiceErr_Unknown)
++            var error = dns_sd.buildException(errorCode);
++          else
++            var error = null;
+           if ( ! error && service.interfaceIndex === iface) {
+             if (fullname)       service.fullname = fullname;
+             if (hosttarget)     service.host = hosttarget;
