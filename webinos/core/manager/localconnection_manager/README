@@ -1,0 +1,64 @@
+
+Local Connection Manager
+
+Copyright 2012 Ziran Sun, Samsung Electronics(UK) Ltd
+-------------------------------------------------------------------------------
+DESCRIPTION
+
+A set of APIs that enable device and service discovery, connection over multiple discovery protocols.
+
+The purpose of the Local Connection Manager is to provide a generic interface that isolate differences of 
+the low level discovery schemes. 
+
+Users for this interface are application developers and webinos core platform developers.   	
+
+-------------------------------------------------------------------------------
+BEFORE USE
+
+Ubuntu users -
+Please check on ./patches/README and apply patches
+
+Mac OS -¶
+
+Download and install mDNSResponder
+http://opensource.apple.com/tarballs/mDNSResponder/
+
+-------------------------------------------------------------------------------
+TO USE
+
+[1] Application developers 
+
+	examples are coming soon!
+ 
+[2] Webinos core developers and users for PZP peer discovery.
+
+	Enrol at least of two of your PZPs with PZH. Make sure they are connected while in Hub mode.
+	Stop Hub.
+	
+	Restart the two PZPs. They should discover each other and get connected automatically.
+	
+	To see it's working from PZP landing page,in either of this PZP device, browse
+		http://localhost:8080/client/client.html
+	
+-------------------------------------------------------------------------------
+WORK STATUS
+
+By 12/Nov/2012, working scenarios are:
+
+[1] Zeroconf (mdns)
+
+	Android <-----> Android
+	Linux <-----> Linux
+	Android <-----> Linux  
+
+-------------------------------------------------------------------------------
+
+TODO LIST
+
+[1] Create client side discovery interface. This will enable triggering peer discovery from web page. 
+[2]"Seeing is beleiving" offline certificate exchange
+[3] Pairing authentication implementation
+[4] modularize offline discovery-authentication-connection code  
+[5] Bluetooth discovery refactoring 
+[6] mdns Tests on Mac OS and cross OS tests
+[7] mdns patches for windows and cross OS tests
