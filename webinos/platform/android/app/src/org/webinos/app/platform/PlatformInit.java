@@ -35,7 +35,12 @@ public class PlatformInit {
 	private static final String MODULE_PATH = "modules";
 	private static boolean initialised;
 
-	public static void init(Context ctx) {
+	/**
+	 * Install all module dependencies located in assets/modules
+	 * @param ctx the service context
+	 * @param force force update, even if module is already present
+	 */
+	public static void installModuleDependencies(Context ctx, boolean force) {
 		if(!initialised) {
 			Config.init(ctx);
 			AssetManager mgr = ctx.getAssets();
@@ -44,7 +49,7 @@ public class PlatformInit {
 				if (modules != null) {
 					for(String module : modules) {
 						Log.v(TAG, "Checking module: " + module);
-						checkModule(ctx, module);
+						checkModule(ctx, module, force);
 					}
 				}
 			} catch (IOException e) {
@@ -54,15 +59,20 @@ public class PlatformInit {
 		}
 	}
 	
-	private static void checkModule(Context ctx, String asset) {
+	private static void checkModule(Context ctx, String asset, boolean force) {
 		ModuleType modType = ModuleUtils.guessModuleType(asset);
 		String module = ModuleUtils.guessModuleName(asset, modType);
 		File installLocation = ModuleUtils.getModuleFile(module, modType);
 		if(installLocation.exists()) {
-			Log.v(TAG, "Module already installed, ignoring: " + module);
-			return;
+			if(force) {
+				Log.v(TAG, "Module already installed, removing: " + module);
+				ModuleUtils.uninstall(module);
+			} else {
+				Log.v(TAG, "Module already installed, ignoring: " + module);
+				return;
+			}
 		}
-		Log.v(TAG, "Module not installed, installing from package: " + module);
+		Log.v(TAG, "Installing module from package: " + module);
 		ModuleUtils.install(ctx, module, AssetUtils.ASSET_URI + MODULE_PATH + '/' + asset);
 	}
 }

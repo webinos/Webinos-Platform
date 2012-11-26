@@ -20,17 +20,22 @@ import org.meshpoint.anode.Isolate;
 import org.meshpoint.anode.Runtime;
 import org.meshpoint.anode.Runtime.IllegalStateException;
 import org.meshpoint.anode.Runtime.NodeException;
+import org.webinos.app.platform.PlatformInit;
 import org.webinos.app.wrt.ui.WidgetInstallActivity;
 import org.webinos.app.wrt.ui.WidgetUninstallActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.util.Log;
 
 public class AnodeReceiver extends BroadcastReceiver {
 
 	private static String TAG = "anode::AnodeReceiver";
+	public static final String ACTION_POSTINSTALL = "org.webinos.app.POSTINSTALL";
 	public static final String ACTION_START = "org.webinos.app.START";
 	public static final String ACTION_STOP = "org.webinos.app.STOP";
 	public static final String ACTION_STOPALL = "org.webinos.app.STOPALL";
@@ -52,6 +57,34 @@ public class AnodeReceiver extends BroadcastReceiver {
 	public void onReceive(Context ctx, Intent intent) {
 		/* get the system options */
 		String action = intent.getAction();
+		if(ACTION_POSTINSTALL.equals(action)) {
+			if(Runtime.isInitialised()) {
+				/* the runtime is running .. we can't replace
+				 * the modules while we're running. Therefore
+				 * we have to kill the process and reschedule 
+				 * the intent to be handled by starting us
+				 * again .... 
+				 *
+				 * First kill all isolates */
+				for(Isolate isolate : AnodeService.getAll())
+					stopInstance(isolate);
+
+				/* post alarm event to re-wake us */
+				Log.v(TAG, "AnodeReceiver.onReceive::postinstall: service is running, so exit and reschedule");
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				AlarmManager alarmMgr = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
+				alarmMgr.set(AlarmManager.ELAPSED_REALTIME, SystemClock.uptimeMillis() + 2000, pendingIntent);
+
+				/* kill this process */
+				System.exit(0);
+				return;
+			}
+			/* otherwise, we can just update the modules */
+			Log.v(TAG, "AnodeReceiver.onReceive::postinstall: installing module dependencies");
+			PlatformInit.installModuleDependencies(ctx, true);
+			return;
+		}
+
 		if(ACTION_STOPALL.equals(action)) {
 			if(Runtime.isInitialised()) {
 				for(Isolate isolate : AnodeService.getAll())

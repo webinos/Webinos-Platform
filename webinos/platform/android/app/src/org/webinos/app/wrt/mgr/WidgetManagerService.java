@@ -44,7 +44,7 @@ public class WidgetManagerService {
 	
 	private static void startInstance(Context ctx) {
 		try {
-			PlatformInit.init(ctx);
+			PlatformInit.installModuleDependencies(ctx, false);
 			String launchScript = Constants.RESOURCE_DIR + "/widgetmanager.js";
 			AssetUtils.writeAssetToFile(ctx,"js/widgetmanager.js", launchScript);
 			Intent intent = new Intent(ctx, AnodeService.class);
