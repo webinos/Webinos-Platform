@@ -47,7 +47,6 @@ var Pzh_RPC = function(_parent) {
     self.discovery    = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
     loadModules(_parent.config.serviceCache, self.registry, self.rpcHandler); // load specified modules
-    self.rpcHandler.setSessionId(_parent.pzh_state.sessionId);
   };
 
   /**

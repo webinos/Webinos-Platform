@@ -105,25 +105,6 @@
 		}
 	};
 
-	var load = function(modules) {
-		var webinos = require("find-dependencies")(__dirname);
-
-		return modules.map(function(m) {
-			return webinos.global.require(webinos.global.api[m.name].location).Service;
-		});
-	};
-
-	Registry.prototype.loadModule = function(module, rpcHandler) {
-		var Service = load([module])[0];
-		try {
-			this.registerObject(new Service(rpcHandler, module.params));
-		}
-		catch (error) {
-			logger.log('INFO: [Registry] '+error);
-			logger.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
-		}
-	};
-
 	/**
 	 * Get all registered objects.
 	 *
