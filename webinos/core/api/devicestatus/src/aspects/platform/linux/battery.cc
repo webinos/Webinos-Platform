@@ -1,5 +1,9 @@
 #include "../../battery.h"
 #include "../../../utils.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <iostream>
 #include <fstream>
@@ -91,7 +95,6 @@ string Battery::batteryLevel(string batteryName)
 
 	sprintf(res, "%.2f", (float)remainingCapacity / lastFullCapacity * 100);
 
-//	cout << res;
 	return string(res);
 }
 
@@ -118,4 +121,5 @@ string Battery::batteryBeingCharged(string batteryName)
 	}
 
 	return chargingState == "charging" ? "true" : "false";
+//	cout << res;
 }

@@ -1,5 +1,9 @@
 #include "../../device.h"
 #include "../../../utils.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 AspectsRegister Device::aspectsRegister("Device", getInstance());
 
