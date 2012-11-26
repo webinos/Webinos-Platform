@@ -35,14 +35,22 @@ public class PlatformInit {
 	private static final String MODULE_PATH = "modules";
 	private static boolean initialised;
 
+	private static void initConfig(Context ctx) {
+		if(!initialised) {
+			Config.init(ctx);
+			initialised = true;
+		}
+	}
+
 	/**
 	 * Install all module dependencies located in assets/modules
 	 * @param ctx the service context
 	 * @param force force update, even if module is already present
 	 */
 	public static void installModuleDependencies(Context ctx, boolean force) {
-		if(!initialised) {
-			Config.init(ctx);
+		boolean installNeeded = force || !initialised;
+		initConfig(ctx);
+		if(installNeeded) {
 			AssetManager mgr = ctx.getAssets();
 			try {
 				String[] modules = mgr.list(MODULE_PATH);

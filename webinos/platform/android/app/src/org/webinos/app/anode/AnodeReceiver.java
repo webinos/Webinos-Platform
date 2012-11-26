@@ -57,38 +57,10 @@ public class AnodeReceiver extends BroadcastReceiver {
 	public void onReceive(Context ctx, Intent intent) {
 		/* get the system options */
 		String action = intent.getAction();
-		if(ACTION_POSTINSTALL.equals(action)) {
-			if(Runtime.isInitialised()) {
-				/* the runtime is running .. we can't replace
-				 * the modules while we're running. Therefore
-				 * we have to kill the process and reschedule 
-				 * the intent to be handled by starting us
-				 * again .... 
-				 *
-				 * First kill all isolates */
-				for(Isolate isolate : AnodeService.getAll())
-					stopInstance(isolate);
-
-				/* post alarm event to re-wake us */
-				Log.v(TAG, "AnodeReceiver.onReceive::postinstall: service is running, so exit and reschedule");
-				PendingIntent pendingIntent = PendingIntent.getBroadcast(ctx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-				AlarmManager alarmMgr = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-				alarmMgr.set(AlarmManager.ELAPSED_REALTIME, SystemClock.uptimeMillis() + 2000, pendingIntent);
-
-				/* kill this process */
-				System.exit(0);
-				return;
-			}
-			/* otherwise, we can just update the modules */
-			Log.v(TAG, "AnodeReceiver.onReceive::postinstall: installing module dependencies");
-			PlatformInit.installModuleDependencies(ctx, true);
-			return;
-		}
-
 		if(ACTION_STOPALL.equals(action)) {
 			if(Runtime.isInitialised()) {
 				for(Isolate isolate : AnodeService.getAll())
-					stopInstance(isolate);
+					AnodeService.stopInstance(isolate);
 			}
 			/* temporary ... kill the process */
 			System.exit(0);
@@ -109,7 +81,7 @@ public class AnodeReceiver extends BroadcastReceiver {
 					Log.v(TAG, "AnodeReceiver.onReceive::stop: instance " + instance + " not found");
 					return;
 				}
-				stopInstance(isolate);
+				AnodeService.stopInstance(isolate);
 			}
 			/* temporary ... Kill the process */
 			System.exit(0); // This was added for the review meeting to free up the ports
@@ -146,15 +118,5 @@ public class AnodeReceiver extends BroadcastReceiver {
 		/* otherwise, start service */
 		intent.setClassName(ctx, AnodeService.class.getName());
 		ctx.startService(intent);
-	}
-
-	private void stopInstance(Isolate isolate) {
-		try {
-			isolate.stop();
-		} catch (IllegalStateException e) {
-			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
-		} catch (NodeException e) {
-			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
-		}
 	}
 }
