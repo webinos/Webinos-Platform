@@ -23,6 +23,9 @@
 PolicyManager::PolicyManager() {}
 
 PolicyManager::PolicyManager(const string & policyFileName){
+
+	// Data Handling Preferences map declaration
+	DHPrefs* dhp = new DHPrefs();
 	
 	TiXmlDocument doc(policyFileName);
 	LOGD("Policy manager file : %s",policyFileName.data());
@@ -33,10 +36,10 @@ PolicyManager::PolicyManager(const string & policyFileName){
 		validPolicyFile = true;
 		TiXmlElement * element = (TiXmlElement *)doc.RootElement();
 		if(element->ValueStr() == "policy"){
-			policyDocument = new PolicySet(new Policy(element));
+			policyDocument = new PolicySet(new Policy(element, dhp));
 		}
 		else if(element->ValueStr() == "policy-set"){
-			policyDocument = new PolicySet(element);
+			policyDocument = new PolicySet(element, dhp);
 		}
 		policyName = policyDocument->description;
 	}

@@ -34,12 +34,12 @@ private:
 	string 				ruleCombiningAlgorithm;
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
-	vector<DataHandlingPreferences*>	datahandlingpreferences;
+	DHPrefs			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 	
 public:
-	Policy(TiXmlElement*);
+	Policy(TiXmlElement*, DHPrefs*);
 	virtual ~Policy();
 	
 	bool matchSubject(Request*);

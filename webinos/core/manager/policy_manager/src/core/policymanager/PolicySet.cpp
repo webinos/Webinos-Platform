@@ -20,8 +20,9 @@
 #include "PolicySet.h"
 #include "../../debug.h"
 
-PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
+PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 	iType = POLICY_SET;
+	datahandlingpreferences = *dhp;
 	policyCombiningAlgorithm = (set->Attribute("combine")!=NULL) ? set->Attribute("combine") : deny_overrides_algorithm;
 	
 	//init subjects
@@ -36,7 +37,7 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences.push_back(new DataHandlingPreferences(child));
+		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
 
 	//init ProvisionalActions
@@ -53,12 +54,12 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 			continue;
 	
 		if(child->ValueStr() == "policy-set"){
-			PolicySet * set = new PolicySet(child);
+			PolicySet * set = new PolicySet(child, &datahandlingpreferences);
 			policysets.push_back(set);
 			sortArray.push_back(set);
 		}
 		else if(child->ValueStr() == "policy"){
-			Policy * policy = new Policy(child);
+			Policy * policy = new Policy(child, &datahandlingpreferences);
 			policies.push_back(policy);
 			sortArray.push_back(policy);
 		}
@@ -114,12 +115,10 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		// search for a dh preference with an id matching the string returned by
 		// the previous provisional action
 		if (preferenceid.compare(NULL) != 0){
-			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-					dhpreference_result = datahandlingpreferences[i]->evaluate(req);
-					dhpreference_evaluated = true;
-					break;
-				}
+			if (datahandlingpreferences.count(preferenceid) == 1){
+				dhpreference_result = datahandlingpreferences[preferenceid]->evaluate(req);
+				dhpreference_evaluated = true;
+				break;
 			}
 			if (dhpreference_evaluated == true)
 				break;

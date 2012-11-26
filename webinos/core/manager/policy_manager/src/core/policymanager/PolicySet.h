@@ -39,7 +39,7 @@ private:
 	vector<PolicySet*>	policysets;
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
-	vector<DataHandlingPreferences*>	datahandlingpreferences;
+	DHPrefs			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);
@@ -47,7 +47,7 @@ private:
 //	Effect evaluatePolicySets(Request*);
 	
 public:
-	PolicySet(TiXmlElement*);
+	PolicySet(TiXmlElement*, DHPrefs*);
 	PolicySet(IPolicyBase*);
 	virtual ~PolicySet();
 	

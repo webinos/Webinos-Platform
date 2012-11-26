@@ -40,4 +40,6 @@ public:
 	bool evaluate(Request *);
 };
 
+typedef map<string, DataHandlingPreferences*> DHPrefs;
+
 #endif /* DHPREFERENCES_H_ */

@@ -19,8 +19,9 @@
 
 #include "Policy.h"
 
-Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
+Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 	iType = POLICY;
+	datahandlingpreferences = *dhp;
 	ruleCombiningAlgorithm = (policy->Attribute("combine")!=NULL) ? policy->Attribute("combine") : deny_overrides_algorithm;
 	//init subjects
 	TiXmlNode * target = policy->FirstChild("target");
@@ -34,7 +35,7 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences.push_back(new DataHandlingPreferences(child));
+		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
 
 	//init ProvisionalActions
@@ -46,7 +47,7 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 	// init rules
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("rule"); child;
 			child = (TiXmlElement*)child->NextSibling("rule")) {
-		rules.push_back(new Rule(child));
+		rules.push_back(new Rule(child, &datahandlingpreferences));
 	}
 	
 	LOGD("[Policy]  : subjects size : %d",subjects.size());
@@ -101,12 +102,10 @@ Effect Policy::evaluate(Request* req){
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
 			if (preferenceid.compare(NULL) != 0){
-				for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-					if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-						dhpreference_result = datahandlingpreferences[i]->evaluate(req);
-						dhpreference_evaluated = true;
-						break;
-					}
+				if (datahandlingpreferences.count(preferenceid) == 1){
+					dhpreference_result = datahandlingpreferences[preferenceid]->evaluate(req);
+					dhpreference_evaluated = true;
+					break;
 				}
 				if (dhpreference_evaluated == true)
 					break;

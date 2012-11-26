@@ -22,8 +22,8 @@
 
 #include "Request.h"
 #include "PolicySet.h"
+#include "DataHandlingPreferences.h"
 //#include "debug.h"
-
 
 class PolicyManager{ 
 

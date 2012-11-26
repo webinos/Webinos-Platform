@@ -31,11 +31,11 @@ class Rule
 private:
 	Effect 		effect;
 	Condition* 	condition;
-	vector<DataHandlingPreferences*>	datahandlingpreferences;
+	DHPrefs			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 public:
-	Rule(TiXmlElement*);
+	Rule(TiXmlElement*, DHPrefs*);
 	virtual ~Rule();
 	
 	Effect evaluate(Request*);
