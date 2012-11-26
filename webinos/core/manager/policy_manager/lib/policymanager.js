@@ -21,20 +21,18 @@
 (function () {
 	"use strict";
 
-    var exec = require('child_process').exec;
-    var os = require('os');
-    var path = require('path');
-    var dependencies= require('find-dependencies')(__dirname);
-    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
-    var promptLib = dependencies.local.require(dependencies.local.manager.policy_manager.location,'src/promptMan/promptManager.js');
-    var bridge = null;
-    var pmCore = null;
-    var pmNativeLib = null;
-    var promptMan = null;
-    var policyFile = null;
+	var os = require('os');
+	var promptLib = require('../src/promptMan/promptManager.js');
+	var dslib = require('./decisionstorage.js');
+	var bridge = null;
+	var pmCore = null;
+	var pmNativeLib = null;
+	var promptMan = null;
+	var policyFile = null;
+	var decisionStorage = null;
 
 
-	var policyManager = function() {
+	var policyManager = function(policyFilename) {
 		// Load the native module
 		try {
 			this.pmNativeLib = require('pm');
@@ -53,32 +51,93 @@
 			this.promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-        	policyFile = path.join(webinosPath,"policies", "policy.xml");
+        	policyFile = policyFilename;
 		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
+		//Loads decision storage module
+		this.decisionStorage = new dslib.decisionStorage(policyFile);
 	};
 
 	policyManager.prototype.getPolicyFilePath = function() {
 		return policyFile;
 	}
 
-	policyManager.prototype.enforceRequest = function(request, noprompt) {
+	policyManager.prototype.enforceRequest = function(request, sessionId, noprompt) {
 		var res = this.pmCore.enforceRequest(request);
 		var promptcheck = true;
-		if (arguments.length == 2) {
+		if (arguments.length == 3) {
 			if (noprompt == true)
 				promptcheck = false;
 		}
 
-        if(res>1 && res<5) {
-           if (this.promptMan && promptcheck) { // if there is a promptMan then show a message
-               var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
-               var choices = new Array();
-               choices[0] = "Allow";
-               choices[1] = "Deny";
-               res = this.promptMan.display(message, choices);
-           }
-        }
+		if(res>1 && res<5) {
+			// if there is a promptMan then show a message
+			if (this.promptMan && this.decisionStorage && promptcheck) {
+				var storedDecision = this.decisionStorage.checkDecision(request, sessionId);
+				if(storedDecision == 0 || storedDecision == 1) {
+					res = storedDecision;
+				}
+				else {
+					var message = request.subjectInfo.userId+" is requesting access to feature "+request.resourceInfo.apiFeature;
+					var choices = new Array();
+					var selected;
+					if(res == 2) {
+						//Prompt oneshot
+						choices[0] = "Deny always";
+						choices[1] = "Deny this time";
+						choices[2] = "Allow this time";
+						selected = this.promptMan.display(message, choices);
+						if(selected == 0 || selected == 1)
+							res = 1;
+						if(selected == 2)
+							res = 0;
+						if(selected == 0) {
+							this.decisionStorage.addDecision(request, sessionId, res, 0);
+						}
+					}
+					else if(res==3) {
+						//Prompt session
+						choices[0] = "Deny always";
+						choices[1] = "Deny for this session";
+						choices[2] = "Deny this time";
+						choices[3] = "Allow this time";
+						choices[4] = "Allow for this session";
+						selected = this.promptMan.display(message, choices);
+						if(selected == 0 || selected == 1 || selected == 2)
+							res = 1;
+						if(selected == 3 || selected == 4)
+							res = 0;
+						if(selected == 0) {
+							this.decisionStorage.addDecision(request, sessionId, res, 0);
+						}
+						if(selected == 1 || selected == 4) {
+							this.decisionStorage.addDecision(request, sessionId, res, 1);
+						}
+					}
+					else {
+						//Prompt blanket
+						choices[0] = "Deny always";
+						choices[1] = "Deny for this session";
+						choices[2] = "Deny this time";
+						choices[3] = "Allow this time";
+						choices[4] = "Allow for this session";
+						choices[5] = "Allow always";
+						selected = this.promptMan.display(message, choices);
+						if(selected == 0 || selected == 1 || selected == 2)
+							res = 1;
+						if(selected == 3 || selected == 4 || selected == 5)
+							res = 0;
+						if(selected == 0 || selected == 5) {
+							this.decisionStorage.addDecision(request, sessionId, res, 0);
+						}
+						if(selected == 1 || selected == 4) {
+							this.decisionStorage.addDecision(request, sessionId, res, 1);
+						}
+					}
+				}
+			}
+		}
 
+		console.log("Policy Manager enforce request: "+JSON.stringify(request)+" - result is "+res);
 		return (res);
 	};
 
@@ -87,7 +146,6 @@
 		return;
 	};
 
-    require('./rpcInterception.js');
 	exports.policyManager = policyManager;
 
 }());
