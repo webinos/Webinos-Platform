@@ -1,6 +1,10 @@
 #include "../../cpu.h"
 #include "../../../utils.h"
 #include <cstdlib>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 #define CPU_INFO_DIR "/proc/cpuinfo"
 
@@ -18,16 +22,6 @@ vector<string> CPU::getComponents()
 {
 	vector<string> components;
 	components.insert(components.end(), "_default");
-
-/*	string res = Utils::exec(string("cat ") + CPU_INFO_DIR + " | grep 'processor' | cut -c 13-");
-
-	int pos, lastpos = 0;
-
-	while ( (pos = res.find('\n',lastpos)) != string::npos)
-	{
-		components.insert(components.end(), string("processor") + res.substr(lastpos, pos-lastpos).c_str());
-		lastpos = pos+1;
-	}*/
 
 	return components;
 }
@@ -48,23 +42,6 @@ string CPU::getPropertyValue(string * property, string * component)
 
 string CPU::model(string model)
 {
-/*	vector<string> models;
-	
-	string res = Utils::exec(string("cat ") + CPU_INFO_DIR + string(" | grep 'model name' | cut -c 14-"));
-
-	int pos, lastpos = 0;
-
-	while ( (pos = res.find('\n',lastpos)) != string::npos)
-	{
-		models.insert(models.end(), string("processor") + res.substr(lastpos, pos-lastpos).c_str());
-		lastpos = pos+1;
-	}
-
-	if (model[0] == '_')
-		model = getComponents()[2];
-
-	return models[atoi(model.substr(9).c_str())];*/
-
 	return Utils::exec(string("echo -n `uname -p`"));
 }
 
