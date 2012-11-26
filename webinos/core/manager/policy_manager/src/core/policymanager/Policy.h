@@ -34,16 +34,17 @@ private:
 	string 				ruleCombiningAlgorithm;
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
-	vector<DataHandlingPreferences*>	datahandlingpreferences;
+	DHPrefs			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
+	void selectDHPref(Request*, string*);
 	
 	
 public:
-	Policy(TiXmlElement*);
+	Policy(TiXmlElement*, DHPrefs*);
 	virtual ~Policy();
 	
 	bool matchSubject(Request*);
-	Effect evaluate(Request*);
+	Effect evaluate(Request*, string*);
 	PolicyType get_iType();
 //	static string modFunction(const string&, const string&);
 	

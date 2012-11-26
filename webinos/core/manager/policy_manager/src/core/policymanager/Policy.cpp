@@ -19,8 +19,9 @@
 
 #include "Policy.h"
 
-Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
+Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 	iType = POLICY;
+	datahandlingpreferences = *dhp;
 	ruleCombiningAlgorithm = (policy->Attribute("combine")!=NULL) ? policy->Attribute("combine") : deny_overrides_algorithm;
 	//init subjects
 	TiXmlNode * target = policy->FirstChild("target");
@@ -34,7 +35,7 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences.push_back(new DataHandlingPreferences(child));
+		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
 
 	//init ProvisionalActions
@@ -46,7 +47,7 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 	// init rules
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("rule"); child;
 			child = (TiXmlElement*)child->NextSibling("rule")) {
-		rules.push_back(new Rule(child));
+		rules.push_back(new Rule(child, &datahandlingpreferences));
 	}
 	
 	LOGD("[Policy]  : subjects size : %d",subjects.size());
@@ -79,11 +80,7 @@ bool Policy::matchSubject(Request* req){
 }
 
 //virtual
-Effect Policy::evaluate(Request* req){
-
-	string preferenceid;
-	bool dhpreference_evaluated = false, dhpreference_result = false;
-
+Effect Policy::evaluate(Request* req, string* selectedDHPref){
 /*	
 	if(req->getResourceAttrs().find("api-feature") != req->getResourceAttrs().end())
 		LOGD("[Policy::evaluate] api-feature size : %d",req->getResourceAttrs()["api-feature"]->size());
@@ -94,24 +91,6 @@ Effect Policy::evaluate(Request* req){
 	if(matchSubject(req)){
 		if (req->getResourceAttrs().size() == 0)
 			return PERMIT;
-
-		// search for a provisional action with a resource matching the request
-		for(unsigned int i=0; i<provisionalactions.size(); i++){
-			preferenceid = provisionalactions[i]->evaluate(req);
-			// search for a dh preference with an id matching the string returned by
-			// the previous provisional action
-			if (preferenceid.compare(NULL) != 0){
-				for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-					if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-						dhpreference_result = datahandlingpreferences[i]->evaluate(req);
-						dhpreference_evaluated = true;
-						break;
-					}
-				}
-				if (dhpreference_evaluated == true)
-					break;
-			}
-		}
 		
 		LOGD("RULE COMBINING ALG : %s",ruleCombiningAlgorithm.data());
 		
@@ -119,7 +98,10 @@ Effect Policy::evaluate(Request* req){
 			LOGD("[Policy::evaluate] deny_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
 			for(unsigned int i=0; i<rules.size(); i++){
-				int tmp = rules[i]->evaluate(req);
+				int tmp = rules[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
 				LOGD("eval : %d",tmp);
 				effects_result[tmp]++;
 				if(effects_result[DENY] > 0)
@@ -141,22 +123,19 @@ Effect Policy::evaluate(Request* req){
 			if(effects_result[PROMPT_BLANKET])
 				return PROMPT_BLANKET;
 			if(effects_result[PERMIT])
-				if (dhpreference_evaluated == true && dhpreference_result == true)
-					return PERMIT;
-				else
-					return PROMPT_BLANKET;
+				return PERMIT;
 			return INAPPLICABLE;		
 		}
 		else if(ruleCombiningAlgorithm == permit_overrides_algorithm){
 			LOGD("[Policy::evaluate] permit_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
 			for(unsigned int i=0; i<rules.size(); i++){
-				effects_result[rules[i]->evaluate(req)]++;
+				effects_result[rules[i]->evaluate(req, selectedDHPref)]++;
+
+				selectDHPref(req, selectedDHPref);
+
 				if(effects_result[PERMIT] > 0)
-					if (dhpreference_evaluated == true && dhpreference_result == true)
-						return PERMIT;
-					else
-						return PROMPT_BLANKET;
+					return PERMIT;
 			}
 			
 			LOGD("[Policy::evaluate] (0) PERMIT %d",effects_result[0]);
@@ -182,7 +161,10 @@ Effect Policy::evaluate(Request* req){
 			LOGD("[Policy] first_applicable algorithm");
 			Effect tmp_effect;
 			for(unsigned int i=0; i<rules.size(); i++){
-				tmp_effect = rules[i]->evaluate(req);
+				tmp_effect = rules[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
 				if(tmp_effect != UNDETERMINED && tmp_effect != INAPPLICABLE)
 					return tmp_effect;
 				else if(tmp_effect == UNDETERMINED)
@@ -199,6 +181,25 @@ Effect Policy::evaluate(Request* req){
 	else
 		return INAPPLICABLE;
 }
+
+void Policy::selectDHPref(Request* req, string* selectedDHPref){
+	string preferenceid;
+
+	if ((*selectedDHPref).empty() == true){
+		// search for a provisional action with a resource matching the request
+		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			preferenceid = provisionalactions[i]->evaluate(req);
+			// search for a dh preference with an id matching the string returned by
+			// the previous provisional action
+			if (preferenceid.empty() == false)
+				if (datahandlingpreferences.count(preferenceid) == 1){
+					(*selectedDHPref) = preferenceid;
+					break;
+				}
+		}
+	}
+}
+
 /*
 string Policy::modFunction(const string& func, const string& val){
 	// func = {scheme, host, authority, scheme-authority, path}

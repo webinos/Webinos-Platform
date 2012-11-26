@@ -20,7 +20,8 @@
 #include "Rule.h"
 #include "../../debug.h"
 
-Rule::Rule(TiXmlElement* rule){
+Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
+	datahandlingpreferences = *dhp;
 	effect = (rule->Attribute("effect") != NULL) ? string2effect(rule->Attribute("effect")) : UNDETERMINED;
 	if(rule->FirstChild("condition")){
 		condition = new Condition((TiXmlElement*)rule->FirstChild("condition"));
@@ -31,7 +32,7 @@ Rule::Rule(TiXmlElement* rule){
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences.push_back(new DataHandlingPreferences(child));
+		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
 
 	//init ProvisionalActions
@@ -62,33 +63,26 @@ Effect Rule::string2effect(const string & effect_str){
 		return UNDETERMINED;
 }
 
-Effect Rule::evaluate(Request* req){
+Effect Rule::evaluate(Request* req, string* selectedDHPref){
 
 	string preferenceid;
-	bool dhpreference_evaluated = false, dhpreference_result = false;
 
-	// search for a provisional action with a resource matching the request
-	for(unsigned int i=0; i<provisionalactions.size(); i++){
-		preferenceid = provisionalactions[i]->evaluate(req);
-		// search for a dh preference with an id matching the string returned by
-		// the previous provisional action
-		if (preferenceid.compare(NULL) != 0){
-			for(unsigned int i=0; i<datahandlingpreferences.size(); i++){
-				if (preferenceid.compare(datahandlingpreferences[i]->GetId()) == 0){
-					dhpreference_result = datahandlingpreferences[i]->evaluate(req);
-					dhpreference_evaluated = true;
-					break;
-				}
-			}
-			if (dhpreference_evaluated == true)
-				break;
-		}
-	}
-
-	if (effect == PERMIT && (dhpreference_evaluated == false || dhpreference_result == false))
-		effect = PROMPT_BLANKET;
-	
 	if(condition){
+
+		if((*selectedDHPref).empty() == true){
+			// search for a provisional action with a resource matching the request
+			for(unsigned int i=0; i<provisionalactions.size(); i++){
+				preferenceid = provisionalactions[i]->evaluate(req);
+				// search for a dh preference with an id matching the string returned by
+				// the previous provisional action
+				if (preferenceid.empty() == false)
+					if (datahandlingpreferences.count(preferenceid) == 1){
+						*selectedDHPref = preferenceid;
+						break;
+					}
+			}
+		}
+
 		ConditionResponse cr = condition->evaluate(req);
 //		LOGD("[RULE EVAL] %d",cr); 
 		if(cr==MATCH)
