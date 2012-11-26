@@ -82,7 +82,7 @@ process.argv.forEach(function (arg) {
   }
 });
 
-var fileParams = {},
+var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } },
   pzpModules = [
   {name: "get42", params: {num: "21"}},
   {name: "zap-and-shake", params: {}},

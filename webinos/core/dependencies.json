@@ -120,9 +120,13 @@
     "name": "RPC",
     "location": "rpc/"
   },
-  "xmpp": {
-    "name": "xmpp",
-    "location": "xmpp/"
+  "xmpppzp": {
+    "name": "xmpp-pzp",
+    "location": "xmpp-pzp/"
+  },
+  "xmpppzh": {
+    "name": "xmpp-pzh",
+    "location": "xmpp-pzh/"
   },
   "pzp": {
     "name": "PZP",
