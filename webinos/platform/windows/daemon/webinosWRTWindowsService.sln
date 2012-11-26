@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webinosNodeService", "webinosNodeService\webinosNodeService.vcxproj", "{C225C9E2-5F15-4355-B64B-87339079421C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF} = {A1505475-E136-4A7B-9116-0B23ACEB4ECF}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webinosNodeServiceManager", "webinosNodeServiceManager\webinosNodeServiceManager.vcxproj", "{A1505475-E136-4A7B-9116-0B23ACEB4ECF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "webinosNodeServiceUI", "webinosNodeServiceUI\webinosNodeServiceUI.vcxproj", "{0828B07D-79E0-4661-98A3-50222E3287CC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF} = {A1505475-E136-4A7B-9116-0B23ACEB4ECF}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		Template|Win32 = Template|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Debug|Win32.Build.0 = Debug|Win32
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Release|Win32.ActiveCfg = Release|Win32
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Release|Win32.Build.0 = Release|Win32
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Template|Win32.ActiveCfg = Release|Win32
+		{C225C9E2-5F15-4355-B64B-87339079421C}.Template|Win32.Build.0 = Release|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Debug|Win32.Build.0 = Debug|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Release|Win32.ActiveCfg = Release|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Release|Win32.Build.0 = Release|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Template|Win32.ActiveCfg = Release|Win32
+		{A1505475-E136-4A7B-9116-0B23ACEB4ECF}.Template|Win32.Build.0 = Release|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Debug|Win32.Build.0 = Debug|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Release|Win32.ActiveCfg = Release|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Release|Win32.Build.0 = Release|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Template|Win32.ActiveCfg = Template|Win32
+		{0828B07D-79E0-4661-98A3-50222E3287CC}.Template|Win32.Build.0 = Template|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

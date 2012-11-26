@@ -65,6 +65,10 @@ reports
 *.sln
 *.vcxproj*
 
+# allow vstudio files in windows-specific folders.
+!webinos/platform/windows/*/*.sln
+!webinos/platform/windows/*/*/*.vcxproj
+
 # waf lock files
 .lock-wscript
 
