@@ -25,7 +25,7 @@
 (function() {
    	"use strict";
 
-    var xmpp = require('./xmpp');
+    var xmpp = require('./Connection');
     var ws = require('./webserver');
     var featureManager = require('./FeatureManager.js');
 

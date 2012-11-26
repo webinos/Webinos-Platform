@@ -49,29 +49,13 @@ Files:
 
 Installation prerequests:
 
-0. Open op a command line window and cd into the '<webinos home>webinos/common/xmpp/lib' folder.
+0. Open op a command line window and cd into the '<webinos home>webinos/common/xmpp-pzp/lib' folder.
 
 1. Node.js ;-)
 
-2. LibExpat:
+2. Install the dependencies:
 
-On Ubuntu / Debian: apt-get install libexpat1
-On OS X please use homebrew or macports to install libexpat.
-
-3. Node-Xmpp or Node-Bosh-Xmpp:
-
-For native XMPP support install node-xmpp: npm install node-xmpp
-For XMPP over HTTP (BOSH) install node-bosh-xmpp-client: npm install node-bosh-xmpp-client
-
-4. node-stringprep (optional)
-
-npm install node-stringprep
-
-5. ltx: npm install ltx
-
-6. socket.io: npm install socket.io
-
-7. nlogger: npm install nlogger
+npm install
 
 Instructions:
 

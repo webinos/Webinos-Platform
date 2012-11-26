@@ -1,0 +1,14 @@
+{ "name": "xmpp-pzh",
+  "version": "0.1.0-SNAPSHOT",
+  "description": "PZH for XMPP based overlay network",
+  "main": "./lib/pzh.js",
+  "author": "Eelco Cramer <eelco.cramer@tno.nl>",
+  "directories": {
+    "lib": "./lib",
+    "test":"./test"
+  },
+ "dependencies":{
+   "node-xmpp":"git://github.com/eelcocramer/node-xmpp.git",
+   "optimist": "0.3.x"
+ }
+}

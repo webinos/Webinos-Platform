@@ -1,5 +1,5 @@
-{ "name": "xmpp",
-  "version": "0.3.0",
+{ "name": "xmpp-pzp",
+  "version": "0.3.1",
   "description": "PZP for XMPP based overlay network",
   "main": "./lib/pzp.js",
   "author": "Eelco Cramer <eelco.cramer@tno.nl>",

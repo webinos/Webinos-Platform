@@ -29,6 +29,20 @@
     var webinosFeatures = require('./WebinosFeatures');
     var http = require("http");
     var logger = require('./Logger').getLogger('FeatureManager', 'trace');
+    
+    var webinos = require("find-dependencies")(__dirname);
+    var wPath = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
+    var wId = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
+
+    wId.fetchDeviceName('Pzp', undefined, function(deviceName) {
+        if (!webinos.metaData) {
+            webinos.metaData = {};
+        }
+
+        webinos.metaData.webinosName  = deviceName;
+        webinos.metaData.webinosRoot  = wPath.webinosPath() + "/"+ webinos.metaData.webinosName;
+        console.log('************' + webinos.metaData.webinosRoot);
+    });
 
     var features = {};
 
@@ -58,9 +72,15 @@
     	get42Feature.setConnection(connection);
         rpcHandler.registry.registerObject(get42Feature);
     	connection.shareFeature(get42Feature);
+    	
+    	var fileFeature = webinosFeatures.factory[webinosFeatures.NS.FILE](rpcHandler, { getPath: function () { return webinos.metaData.webinosRoot }});
+    	fileFeature.setConnection(connection);
+        rpcHandler.registry.registerObject(fileFeature);
+    	connection.shareFeature(fileFeature);
 	
     	features[geoLocationFeature.id] = geoLocationFeature;
     	features[get42Feature.id] = get42Feature;
+    	features[fileFeature.id] = fileFeature;
 
     	// we do not add the service discovery feature. This special kind of feature is not discoverable.
     	var serviceDiscoveryFeature = webinosFeatures.factory[webinosFeatures.NS.SERVICE_DISCOVERY](rpcHandler, features);
