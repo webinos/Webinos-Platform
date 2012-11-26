@@ -175,7 +175,13 @@ var Pzp_OtherManager = function (_parent) {
             setFoundService(validMsgObj);
             break;
           case 'listUnregServices':
-            _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "unregServicesReply", {services: getInitModules.call(self), id:validMsgObj.payload.message.listenerId });
+            _parent.prepMsg(
+              _parent.pzp_state.sessionId,
+              _parent.config.metaData.pzhId,
+              "unregServicesReply", {
+                "services": getInitModules.call(self),
+                "id": validMsgObj.payload.message.listenerId
+              });
             break;
           case 'registerService':
             modLoader.loadServiceModule({
@@ -184,7 +190,10 @@ var Pzp_OtherManager = function (_parent) {
             }, self.registry, self.rpcHandler);
             break;
           case'unregisterService':
-            self.registry.unregisterObject({ "id": validMsgObj.payload.message.svId, "api": validMsgObj.payload.message.svAPI});
+            self.registry.unregisterObject({
+              "id": validMsgObj.payload.message.svId,
+              "api": validMsgObj.payload.message.svAPI
+            });
             break;
           case "sync_hash":
             syncHash(validMsgObj.payload.message);
