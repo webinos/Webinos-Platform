@@ -1,5 +1,9 @@
 #include "../../operating_system.h"
 #include "../../../utils.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 AspectsRegister OperatingSystem::aspectsRegister("OperatingSystem", getInstance());
 

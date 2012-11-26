@@ -44,7 +44,6 @@ string res;
 
         res = Utils::exec(string("lsusb"));
         return string(res);
-	//return "type";
 }
 
 
