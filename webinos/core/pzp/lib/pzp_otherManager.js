@@ -101,7 +101,8 @@ var Pzp_OtherManager = function (_parent) {
     self.registry.registerObject(self.discovery);
     self.registry.loadModules(_loadModules, self.rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(self.rpcHandler); // handler for all things message
-    dependency.global.require(dependency.global.manager.policy_manager.location); //initializes the policy manager
+    // Init the rpc interception of policy manager
+    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js");
     dependency.global.require(dependency.global.manager.context_manager.location);//initializes context manager
   };
 
