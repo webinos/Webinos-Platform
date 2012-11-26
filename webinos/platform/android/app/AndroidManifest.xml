@@ -96,6 +96,7 @@
             </intent-filter>
             </receiver>
         <service android:exported="true" android:enabled="true" android:name=".anode.AnodeService" android:description="@string/anode_service_description" android:label="@string/anode_service"></service>
+        <service android:exported="true" android:enabled="true" android:name=".pzp.PzpService" android:description="@string/pzp_service_description" android:label="@string/pzp_service"></service>
         <service android:name=".wrt.channel.WebinosSocketService">
             <intent-filter>
                 <action android:name="org.webinos.wrt.channel.SERVER" />
