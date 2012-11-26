@@ -96,10 +96,9 @@ bool PolicySet::matchSubject(Request* req){
 	return false;
 }
 
-Effect PolicySet::evaluatePolicies(Request * req){
+Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
 
-	string preferenceid;
-	bool dhpreference_evaluated = false, dhpreference_result = false;
+	Effect eff;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
 			LOGD("policies[%d] = %s",i,policies[i]->description.data());
@@ -109,28 +108,14 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		return PERMIT;
 	}
 
-	// search for a provisional action with a resource matching the request
-	for(unsigned int i=0; i<provisionalactions.size(); i++){
-		preferenceid = provisionalactions[i]->evaluate(req);
-		// search for a dh preference with an id matching the string returned by
-		// the previous provisional action
-		if (preferenceid.compare(NULL) != 0){
-			if (datahandlingpreferences.count(preferenceid) == 1){
-				dhpreference_result = datahandlingpreferences[preferenceid]->evaluate(req);
-				dhpreference_evaluated = true;
-				break;
-			}
-			if (dhpreference_evaluated == true)
-				break;
-		}
-	}
-	
-	
 	if(policyCombiningAlgorithm == deny_overrides_algorithm){
 		LOGD("[PolicySet] deny_overrides algorithm");
 		int effects_result[] = {0,0,0,0,0,0,0};
 		for(unsigned int i=0; i<sortArray.size(); i++){
-			effects_result[sortArray[i]->evaluate(req)]++;
+			effects_result[sortArray[i]->evaluate(req, selectedDHPref)]++;
+
+			selectDHPref(req, selectedDHPref);
+
 			if(effects_result[DENY] > 0)
 				return DENY;
 		}
@@ -165,10 +150,7 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		if(effects_result[PROMPT_BLANKET])
 			return PROMPT_BLANKET;
 		if(effects_result[PERMIT])
-			if (dhpreference_evaluated == true && dhpreference_result == true)
-				return PERMIT;
-			else
-				return PROMPT_BLANKET;
+			return PERMIT;
 		return INAPPLICABLE;		
 	}
 	else if(policyCombiningAlgorithm == permit_overrides_algorithm){
@@ -176,12 +158,12 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		int effects_result[] = {0,0,0,0,0,0,0};
 		
 		for(unsigned int i=0; i<sortArray.size(); i++){
-			effects_result[sortArray[i]->evaluate(req)]++;
+			effects_result[sortArray[i]->evaluate(req, selectedDHPref)]++;
+
+			selectDHPref(req, selectedDHPref);
+
 			if(effects_result[PERMIT] > 0)
-				if (dhpreference_evaluated == true && dhpreference_result == true)
-					return PERMIT;
-				else
-					return PROMPT_BLANKET;
+				return PERMIT;
 		}
 /*		
 		for(int i=0; i<policies.size(); i++){
@@ -215,7 +197,11 @@ Effect PolicySet::evaluatePolicies(Request * req){
 			LOGD("[PolicySet] try eval %s",sortArray[i]->description.data());
 			if(sortArray[i]->matchSubject(req)){
 				LOGD("[PolicySet] eval %s",sortArray[i]->description.data());
-				return sortArray[i]->evaluate(req);
+				eff = sortArray[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
+				return eff;
 			}
 		}
 		return INAPPLICABLE;
@@ -223,15 +209,33 @@ Effect PolicySet::evaluatePolicies(Request * req){
 	return INAPPLICABLE;
 }
 
-Effect PolicySet::evaluate(Request * req){
+Effect PolicySet::evaluate(Request * req, string* selectedDHPref){
 	if(matchSubject(req)){
 		if(policies.size()==	0 && policysets.size()==0){
 			return PERMIT;
 		}
 		else{
-			return evaluatePolicies(req);	
+			return evaluatePolicies(req, selectedDHPref);	
 		}
 	}
 	else
 		return INAPPLICABLE;	
+}
+
+void PolicySet::selectDHPref(Request* req, string* selectedDHPref){
+	string preferenceid;
+
+	if ((*selectedDHPref).empty() == true){
+		// search for a provisional action with a resource matching the request
+		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			preferenceid = provisionalactions[i]->evaluate(req);
+			// search for a dh preference with an id matching the string returned by
+			// the previous provisional action
+			if (preferenceid.empty() == false)
+				if (datahandlingpreferences.count(preferenceid) == 1){
+					(*selectedDHPref) = preferenceid;
+					break;
+				}
+		}
+	}
 }

@@ -36,6 +36,7 @@ private:
 	vector<Rule*>		rules;
 	DHPrefs			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
+	void selectDHPref(Request*, string*);
 	
 	
 public:
@@ -43,7 +44,7 @@ public:
 	virtual ~Policy();
 	
 	bool matchSubject(Request*);
-	Effect evaluate(Request*);
+	Effect evaluate(Request*, string*);
 	PolicyType get_iType();
 //	static string modFunction(const string&, const string&);
 	

@@ -41,6 +41,6 @@ string ProvisionalAction::evaluate(Request * req){
 			return value2;
 		if (value2.compare(it->first.data()) == 0)
 			return value1;
-		return NULL;
 	}
+	return "";
 }

@@ -24,9 +24,6 @@ PolicyManager::PolicyManager() {}
 
 PolicyManager::PolicyManager(const string & policyFileName){
 
-	// Data Handling Preferences map declaration
-	DHPrefs* dhp = new DHPrefs();
-	
 	TiXmlDocument doc(policyFileName);
 	LOGD("Policy manager file : %s",policyFileName.data());
 
@@ -36,10 +33,10 @@ PolicyManager::PolicyManager(const string & policyFileName){
 		validPolicyFile = true;
 		TiXmlElement * element = (TiXmlElement *)doc.RootElement();
 		if(element->ValueStr() == "policy"){
-			policyDocument = new PolicySet(new Policy(element, dhp));
+			policyDocument = new PolicySet(new Policy(element, &dhp));
 		}
 		else if(element->ValueStr() == "policy-set"){
-			policyDocument = new PolicySet(element, dhp);
+			policyDocument = new PolicySet(element, &dhp);
 		}
 		policyName = policyDocument->description;
 	}
@@ -66,9 +63,18 @@ string PolicyManager::getPolicyName(){
 }
 
 Effect PolicyManager::checkRequest(Request * req){
+	Effect xacml_eff;
+	bool dhp_eff = false;
 	LOGD("Policy manager start check");
-	if(validPolicyFile)
-		return policyDocument->evaluate(req);
+	if(validPolicyFile) {
+		xacml_eff = policyDocument->evaluate(req, &selectedDHPref);
+		if (selectedDHPref.empty() == false)
+			dhp_eff = dhp[selectedDHPref]->evaluate(req);
+		if (xacml_eff == PERMIT && dhp_eff == false)
+			return PROMPT_BLANKET;
+		else
+			return xacml_eff;
+	}
 	else
 		return INAPPLICABLE;
 }

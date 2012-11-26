@@ -43,15 +43,16 @@ private:
 	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);
-	Effect evaluatePolicies(Request*);
+	Effect evaluatePolicies(Request*, string*);
 //	Effect evaluatePolicySets(Request*);
+	void selectDHPref(Request*, string*);
 	
 public:
 	PolicySet(TiXmlElement*, DHPrefs*);
 	PolicySet(IPolicyBase*);
 	virtual ~PolicySet();
 	
-	Effect evaluate(Request *);
+	Effect evaluate(Request*, string*);
 	};
 
 #endif /* POLICYSET_H_ */

@@ -63,31 +63,26 @@ Effect Rule::string2effect(const string & effect_str){
 		return UNDETERMINED;
 }
 
-Effect Rule::evaluate(Request* req){
+Effect Rule::evaluate(Request* req, string* selectedDHPref){
 
 	string preferenceid;
-	bool dhpreference_evaluated = false, dhpreference_result = false;
 
-	// search for a provisional action with a resource matching the request
-	for(unsigned int i=0; i<provisionalactions.size(); i++){
-		preferenceid = provisionalactions[i]->evaluate(req);
-		// search for a dh preference with an id matching the string returned by
-		// the previous provisional action
-		if (preferenceid.compare(NULL) != 0){
-			if (datahandlingpreferences.count(preferenceid) == 1){
-				dhpreference_result = datahandlingpreferences[preferenceid]->evaluate(req);
-				dhpreference_evaluated = true;
-				break;
-			}
-			if (dhpreference_evaluated == true)
-				break;
-		}
-	}
-
-	if (effect == PERMIT && (dhpreference_evaluated == false || dhpreference_result == false))
-		effect = PROMPT_BLANKET;
-	
 	if(condition){
+
+		if((*selectedDHPref).empty() == true){
+			// search for a provisional action with a resource matching the request
+			for(unsigned int i=0; i<provisionalactions.size(); i++){
+				preferenceid = provisionalactions[i]->evaluate(req);
+				// search for a dh preference with an id matching the string returned by
+				// the previous provisional action
+				if (preferenceid.empty() == false)
+					if (datahandlingpreferences.count(preferenceid) == 1){
+						*selectedDHPref = preferenceid;
+						break;
+					}
+			}
+		}
+
 		ConditionResponse cr = condition->evaluate(req);
 //		LOGD("[RULE EVAL] %d",cr); 
 		if(cr==MATCH)

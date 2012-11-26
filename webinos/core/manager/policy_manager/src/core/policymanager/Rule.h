@@ -38,7 +38,7 @@ public:
 	Rule(TiXmlElement*, DHPrefs*);
 	virtual ~Rule();
 	
-	Effect evaluate(Request*);
+	Effect evaluate(Request*, string*);
 	static Effect string2effect(const string &);
 	
 	};
