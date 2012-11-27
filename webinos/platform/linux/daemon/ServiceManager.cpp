@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <syslog.h>
+#include <dirent.h>
 #endif
 
 #include "ServiceManager.h"
@@ -418,4 +419,96 @@ unsigned long CServiceManager::GetNodeHeartbeatTime(const CUserParameters& user,
 	}
 
 	return ret;
+}
+
+void CServiceManager::GetLaunchFiles(const CUserParameters& user, long allowedTimespan, std::vector<std::string> &out)
+{
+  std::string directory;
+  GetUserSettingsPath(user,directory);
+
+#if defined(WIN32)
+  SYSTEMTIME timeNow;
+  GetSystemTime(&timeNow);
+  FILETIME fileTimeNow;
+  SystemTimeToFileTime(&timeNow,&fileTimeNow);
+  ULONGLONG timeNowLong = (((ULONGLONG)fileTimeNow.dwHighDateTime) << 32) + fileTimeNow.dwLowDateTime;
+
+  HANDLE dir;
+  WIN32_FIND_DATA file_data;
+
+  if ((dir = FindFirstFile((directory + "\\*.launch").c_str(), &file_data)) == INVALID_HANDLE_VALUE)
+    return; /* No files found */
+
+  do 
+  {
+    const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+    if (is_directory)
+    	continue;
+
+    const std::string file_name = file_data.cFileName;
+    const std::string full_file_name = directory + "/" + file_name;
+    const std::string failed_file_name = full_file_name + ".failed";
+   
+    ULONGLONG fileTimeLong = (((ULONGLONG)file_data.ftCreationTime.dwHighDateTime) << 32) + file_data.ftCreationTime.dwLowDateTime;
+
+    if (timeNowLong < fileTimeLong)
+    {
+      // File creation time invalid (in the future).
+      ::MoveFile(full_file_name.c_str(),failed_file_name.c_str());
+    }
+    else if (timeNowLong - fileTimeLong > (allowedTimespan * 100000000))
+    {
+      // File too old.
+      ::MoveFile(full_file_name.c_str(),failed_file_name.c_str());
+    }
+    else
+    {
+      out.push_back(full_file_name);
+    }
+  } 
+  while (FindNextFile(dir, &file_data));
+
+  FindClose(dir);
+#else
+  DIR *dir;
+  class dirent *ent;
+  class stat st;
+  time_t currentTime = time(NULL);
+
+  dir = opendir(directory.c_str());
+  while ((ent = readdir(dir)) != NULL) 
+  {
+    const std::string file_name = ent->d_name;
+    const std::string full_file_name = directory + "/" + file_name;
+    const std::string failed_file_name = full_file_name + ".failed";
+
+    if (stat(full_file_name.c_str(), &st) == -1)
+      continue;
+
+    const bool is_directory = (st.st_mode & S_IFDIR) != 0;
+    if (is_directory)
+      continue;
+
+    size_t extIdx = file_name.find_last_of('.');
+    if (extIdx == std::string::npos || file_name.substr(extIdx+1) != std::string("launch"))
+      continue;
+
+    if (currentTime < st.st_ctime)
+    {
+      // File creation time invalid (in the future).
+      rename(full_file_name.c_str(), failed_file_name.c_str());
+    }
+    else if (currentTime - st.st_ctime > allowedTimespan)
+    {
+      // File too old.
+      rename(full_file_name.c_str(), failed_file_name.c_str());
+    }
+    else
+    {
+      out.push_back(full_file_name);
+    }
+  }
+  closedir(dir);
+#endif
 }
