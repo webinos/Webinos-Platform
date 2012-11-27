@@ -24,6 +24,7 @@ class CWebinosUI : public CDialogImpl<CWebinosUI>, public CUpdateUI<CWebinosUI>,
 	void ClearSession();
   bool ParseArg(std::string& arg, std::string argName, std::string& argVal);
 	void ShowServiceStatus(int& restarting, CServiceParameters& params, int statusCtl, int resetCtl);
+  void CheckForLaunchRequests();
 
 public:
 	enum { IDD = IDD_UIDIALOG };

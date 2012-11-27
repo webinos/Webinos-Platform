@@ -390,6 +390,8 @@ LRESULT CWebinosUI::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHand
 	//ShowServiceStatus(m_restartingPzh, m_pzh_params, IDC_PZH_STATUS_STATIC, IDC_PZH_RESET_BUTTON);
 	ShowServiceStatus(m_restartingPzp, m_pzp_params, IDC_STATUS_STATIC, IDC_RESET_BUTTON);
 
+  CheckForLaunchRequests();
+
 	return 0;
 }
 
@@ -481,4 +483,34 @@ LRESULT CWebinosUI::OnBnClickedShutdownBtn(WORD /*wNotifyCode*/, WORD /*wID*/, H
 	ConfirmExit();
 
 	return 0;
+}
+
+void CWebinosUI::CheckForLaunchRequests()
+{
+  std::vector<std::string> files;
+  CServiceManager mgr;
+  mgr.GetLaunchFiles(m_user_params, (SERVICE_POLL_INTERVAL*2)/1000, files);
+
+  for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+  {
+    std::string launch = mgr.ReadFile(*it);
+
+    size_t cmdIdx = launch.find_first_of(':');
+    if (cmdIdx != std::string::npos)
+    {
+      std::string launchType = launch.substr(0,cmdIdx);
+      std::string appURI = launch.substr(cmdIdx+1);
+            
+      TCHAR browserPath[MAX_PATH];
+      sprintf(browserPath,"%s\\wrt\\webinosBrowser.exe",m_pzp_params.nodePath.c_str());
+      TCHAR browserParams[256];
+      if (launchType == "wgt")
+        sprintf(browserParams,"--webinos-widget %s",appURI.c_str());
+      else
+        sprintf(browserParams,"%s",appURI.c_str());
+      ::ShellExecute(m_hWnd,NULL,browserPath,browserParams,NULL,SW_SHOWNORMAL);
+    }
+
+    ::DeleteFile((*it).c_str());
+  }
 }
