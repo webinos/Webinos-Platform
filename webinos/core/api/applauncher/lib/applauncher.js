@@ -16,139 +16,132 @@
 * Copyright 2012 Andre Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
-	var exec = require('child_process').exec;
-	
+  var androidLauncher = null;
+  var widgetLibrary = require('../../../manager/widget_manager/index.js');
+    
+  if (process.platform == 'android') {
+    androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
+  }
 
-	var androidLauncher = null;
-		
-	if(process.platform=='android')
-	{
-		androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
-	}
+  var dependencies = require("find-dependencies")(__dirname);
+  var pzp = dependencies.global.require(dependencies.global.pzp.location, "lib/pzp.js");
+  var uuid = require('node-uuid');
+  var fs = require('fs');
+  var path = require('path');
+  var existsSync = fs.existsSync || path.existsSync;
 
+  function findInstalledApp(appURI) {
+    var installedApps = widgetLibrary.widgetmanager.getInstalledWidgets();
+    var requestedApp;
+    
+    for (var idx in installedApps) {
+      var cfg = widgetLibrary.widgetmanager.getWidgetConfig(installedApps[idx]);
+      if (cfg && cfg.id == appURI) {
+          console.log("found app id " + cfg.id);
+          requestedApp = cfg;
+          break;
+      }
+    }
+    
+    return requestedApp;
+  }
+  
+  function writeLaunchRequest(appId,widget) {
+    var fname = uuid.v1() + ".launch";
+    var launchFile = path.join(pzp.session.getWebinosPath(),'../wrt/' + fname);
+    if (widget) {
+      fs.writeFileSync(launchFile,'wgt:' + appId);
+    } else {
+      fs.writeFileSync(launchFile,'web:' + appId);
+    }
+    
+    return launchFile;
+  }
+  
+  function checkLaunchRequest(launchFile, successCB, errorCB) {
+    var failedFile = launchFile + ".failed";
+    if (existsSync(failedFile)) {
+      errorCB("error while launching application");
+    } else if (existsSync(launchFile)){
+      errorCB("runtime failed to launch application - check runtime is running");
+    } else {
+      successCB(true);
+    }
+  }
+  
+  /**
+   * Webinos AppLauncher service constructor (server side).
+   * @constructor
+   * @alias WebinosAppLauncherModule
+   * @param rpcHandler A handler for functions that use RPC to deliver their result.  
+   */
+  var WebinosAppLauncherModule = function(rpcHandler, params) {
+    // inherit from RPCWebinosService
+    this.base = RPCWebinosService;
+    this.base({
+      api:'http://webinos.org/api/applauncher',
+      displayName:'AppLauncher API',
+      description:'The AppLauncher API for starting applications.'
+    });
+  };
 
+  WebinosAppLauncherModule.prototype = new RPCWebinosService;
 
-var dependencies = require("find-dependencies")(__dirname)	
-var pzp = dependencies.global.require(dependencies.global.pzp.location,
-    "lib/pzp.js")
+  /**
+   * Launch an application.
+   * @param successCB Success callback.
+   * @param errorCB Error callback.
+   * @param appURI URI of application to be launched
+   */
+  WebinosAppLauncherModule.prototype.launchApplication = function (appURI, successCB, errorCB){
+    console.log("launchApplication was invoked. AppID: " +  appURI);
+    
+    if (process.platform == 'android'){
+        androidLauncher.launchApplication(
+          function (res) {
+            successCB();
+          }, 
+          function (err) {
+          errorCB(err)
+          },
+          appURI
+        );
+        return;
+    }
+    
+    var installedApp = findInstalledApp(appURI);   
+    if (typeof installedApp !== "undefined") {
+      // Run the installed widget...
+      console.log("applauncher: launching widget " + installedApp.installId);
+      var req = writeLaunchRequest(installedApp.installId,true);
+      setTimeout(checkLaunchRequest, 2000, req, successCB, errorCB);
+    } else if (/^http[s]?:\/{2}/.test(appURI)) {
+      console.log("applauncher: launching " + appURI);
+      var req = writeLaunchRequest(appURI,false);
+      setTimeout(checkLaunchRequest, 2000, req, successCB, errorCB);
+    } else {
+      console.log("applauncher: invalid/unknown appURI " + appURI);
+      if (typeof errorCB === "function") {
+        errorCB("Unknown appURI - " + appURI);
+      }
+    }
+  };
+  
+  /**
+   * Determine whether an app is available.
+   * 
+   * [not yet implemented.]
+   */
+  WebinosAppLauncherModule.prototype.appInstalled = function (appURI, successCB, errorCB){
+    console.log("appInstalled was invoked. AppID: " + appURI);
 
-	/**
-	 * Webinos AppLauncher service constructor (server side).
-	 * @constructor
-	 * @alias WebinosAppLauncherModule
-	 * @param rpcHandler A handler for functions that use RPC to deliver their result.  
-	 */
-	var WebinosAppLauncherModule = function(rpcHandler, params) {
-		// inherit from RPCWebinosService
-		this.base = RPCWebinosService;
-		this.base({
-			api:'http://webinos.org/api/applauncher',
-			displayName:'AppLauncher API',
-			description:'The AppLauncher API for starting applications.'
-		});
-
-		this.browserExecPath = undefined;
-		if (params.browserExecPath) {
-			this.browserExecPath = params.browserExecPath;
-
-		} else {
-			var that = this;
-			if (process.platform === 'win32') {
-				exec('reg query HKCR\\http\\shell\\open\\command -ve', function(err, stdout, stderr) {
-					if (err) return;
-
-					that.browserExecPath = stdout.split('\r\n')[2].split('    ')[3];
-					if (/--/.test(that.browserExecPath)) {
-						that.browserExecPath = that.browserExecPath.split('--')[0];
-					}
-				});
-			} else if (process.platform === 'linux') {
-				this.browserExecPath = 'xdg-open';
-			}
-		}
-	};
-
-	WebinosAppLauncherModule.prototype = new RPCWebinosService;
-
-	/**
-	 * Launch an application.
-	 * @param params Params.
-	 * @param successCB Success callback.
-	 * @param errorCB Error callback.
-	 */
-	WebinosAppLauncherModule.prototype.launchApplication = function (params, successCB, errorCB){
-		console.log("launchApplication was invoked. AppID: " +  params.applicationID + " Parameters: " + params.params);
-		
-		if(process.platform=='android'){
-			  androidLauncher.launchApplication(
-				  function (res) {
-				  	successCB();
-				  }, 
-				  function (err) {
-					errorCB(err)
-				  },
-				  params.applicationID 
-			  );
-			  return;
-		}
-
-		
-		if (endsWith(params.applicationID, ".wgt")){
-			
-			var path = pzp.session.getWebinosPath() + "/" + params.applicationID;
-			console.log("LAUNCHING: " + path)
-			
-			exec(path, function(error, stdout, stderr){
-				console.log("Result: " + error + " " + stdout + " " + stderr);
-
-				if (error && typeof errorCB === "function") {
-					errorCB();
-					return;
-				}
-
-				successCB();
-			});
-			return;
-		}
-
-		if (!/^http[s]?:\/{2}/.test(params.applicationID) || !this.browserExecPath) {
-			console.log("applauncher: only http[s] AppIds are allowed or no browser available.");
-			if (typeof errorCB === "function") {
-				errorCB();
-			}
-			return;
-		}
-		
-		var cmdLine = this.browserExecPath.concat(' ', params.applicationID);
-		console.log("AppLauncher trying to launch: " + cmdLine);
-		
-		exec(cmdLine, function(error, stdout, stderr){
-			console.log("Result: " + error + " " + stdout + " " + stderr);
-
-			if (error && typeof errorCB === "function") {
-				errorCB();
-				return;
-			}
-
-			successCB();
-		});
-	};
-	
-	/**
-	 * Determine whether an app is available.
-	 * 
-	 * [not yet implemented.]
-	 */
-	WebinosAppLauncherModule.prototype.appInstalled = function (params, successCB, errorCB){
-		console.log("appInstalled was invoked");
-		errorCB();
-	};
-	
-	function endsWith(str, suffix) {
-		console.log(str + " with " + suffix);
-		return str.indexOf(suffix, str.length - suffix.length) !== -1;
-	}
-
-	exports.Service = WebinosAppLauncherModule;
-
+    if (typeof appURI === "undefined" || !appURI) {
+      errorCB("invalid appURI parameter");
+    } else {    
+      var foundApp = findInstalledApp(appURI);      
+      successCB(typeof foundApp != "undefined");
+    }
+  };
+  
+  exports.Service = WebinosAppLauncherModule;
 })();

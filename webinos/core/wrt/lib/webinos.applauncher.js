@@ -45,17 +45,11 @@
 	 * Launches an application.
 	 * @param successCallback Success callback.
 	 * @param errorCallback Error callback.
-	 * @param applicationID Application ID to be launched.
-	 * @param params Parameters for starting the application.
+	 * @param appURI Application ID to be launched.
 	 */
-	AppLauncherModule.prototype.launchApplication = function (successCallback, errorCallback, applicationID, params){
-		//returns pendingOp
-		
-		var reqParams = {};
-		reqParams.applicationID = applicationID;
-		reqParams.params = params;
-		
-		var rpc = webinos.rpcHandler.createRPC(this, "launchApplication", reqParams);
+	AppLauncherModule.prototype.launchApplication = function (successCallback, errorCallback, appURI){
+
+		var rpc = webinos.rpcHandler.createRPC(this, "launchApplication", [appURI]);
 		webinos.rpcHandler.executeRPC(rpc,
 				function (params){
 					successCallback(params);
@@ -73,9 +67,18 @@
 	 * @param applicationID Application ID to test if installed.
 	 * @returns Boolean whether application is installed.
 	 */
-	AppLauncherModule.prototype.appInstalled = function(applicationID){
+	AppLauncherModule.prototype.appInstalled = function(successCallback, errorCallback, appURI){
 
-		//returns bool
+		var rpc = webinos.rpcHandler.createRPC(this, "appInstalled", [appURI]);
+		webinos.rpcHandler.executeRPC(rpc,
+				function (params){
+					successCallback(params);
+				},
+				function (error){
+					errorCallback(error);
+				}
+		);
+    
 	};
 	
 	
