@@ -103,7 +103,7 @@ var Pzp_OtherManager = function (_parent) {
     modLoader.loadServiceModules(modules, self.registry, self.rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(self.rpcHandler); // handler for all things message
     // Init the rpc interception of policy manager
-    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js");
+    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js").setRPCHandler(self.rpcHandler);
     dependency.global.require(dependency.global.manager.context_manager.location);//initializes context manager
   };
 

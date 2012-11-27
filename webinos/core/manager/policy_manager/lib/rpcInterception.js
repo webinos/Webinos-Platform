@@ -14,17 +14,16 @@
       var policyViewer = new pvlib.policyViewer(pm);
     }
 
-    var getNextID = function(a) {
-    // implementation taken from here: https://gist.github.com/982883
-    return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,getNextID);
-}
+    exports.setRPCHandler = function(rpc) {
+        rpc.registerPolicycheck(handleMessage);
+    };
 
-_RPCHandler.prototype._handleMessage = _RPCHandler.prototype.handleMessage;
+
 
 /**
  * Handles a new JSON RPC message (as string)
  */
-_RPCHandler.prototype.handleMessage = function(){
+function handleMessage() {
     if (arguments[0].jsonrpc) {
 
         var rpcRequest = arguments[0];
@@ -45,7 +44,7 @@ _RPCHandler.prototype.handleMessage = function(){
 
 
         var userAndRequestor = arguments[1].split("_")[1].split("/");
-	var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
+        var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
 
         var request = {
             'subjectInfo' : { 'userId' : userAndRequestor[0] },
@@ -56,21 +55,12 @@ _RPCHandler.prototype.handleMessage = function(){
 
         if (pm.enforceRequest(request, sessionId) == 0) {
             //request is allowed by policy manager
-            this._handleMessage.apply(this, arguments)
+            return true;
         } else {
             //request is NOT allowed by policy manager
-            var rpc = {
-                jsonrpc: '2.0',
-                id: rpcRequest.id || getNextID(),
-//                result: "SECURITY_ERROR",
-                error: {
-                    data: { name: "SecurityError", code: 18, message: "Access to " + apiFeature + " has been denied."},
-                    code: -31000,
-                    message: 'Method Invocation returned with error'
-                }
-            }
-            this.executeRPC(rpc, undefined, undefined, arguments[1], arguments[2]);
+            return false;
         }
     }
 }
+
 }());
