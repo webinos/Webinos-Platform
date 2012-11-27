@@ -1,0 +1,16 @@
+<resources>
+
+    <string name="app_name">Webinos Installer</string>
+    <string name="title_activity_main">Installer</string>
+    <string name="install_complete">All components installed and up to date</string>
+    <string name="install_failed">Unexpected error installing component</string>
+    <string name="install_progress">Installation in progress</string>
+    <string name="install_remaining">Components remaining:</string>
+    <string name="incompatible_version">This device has an incompatible Android version</string>
+    <string name="install_complete_title">Install complete</string>
+    <string name="install_failed_title">Installation failed</string>
+    <string name="ok">OK</string>
+    <string name="install_failed_cancelled">Installation of a component failed or was cancelled</string>
+    <string name="install_extracting">Extracting component</string>
+
+</resources>

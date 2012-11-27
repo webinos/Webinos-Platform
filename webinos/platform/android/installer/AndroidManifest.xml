@@ -1,0 +1,40 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.webinos.installer"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="15" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:icon="@drawable/webinos_icon"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".InstallActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@android:style/Theme.Black" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".PackageReceiver">
+			<intent-filter>
+				<action android:name="android.intent.action.PACKAGE_ADDED"/>
+				<action android:name="android.intent.action.PACKAGE_REPLACED"/>
+				<data android:scheme="package"/>
+		    </intent-filter>            
+		</receiver>
+        <receiver android:name=".PostInstallReceiver">
+			<intent-filter>
+				<action android:name="org.webinos.installer.POSTINSTALL_COMPLETE"/>
+		    </intent-filter>            
+				<data android:scheme="package"/>
+		</receiver>
+    </application>
+
+</manifest>

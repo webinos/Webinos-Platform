@@ -103,7 +103,7 @@ public class AnodeService extends IntentService {
 			return;
 		}
 
-		if(AnodeReceiver.ACTION_POSTINSTALL.equals(action)) {
+		if(PlatformInit.ACTION_POSTINSTALL.equals(action)) {
 			if(Runtime.isInitialised()) {
 				/* the runtime is running .. we can't replace
 				 * the modules while we're running. Therefore
@@ -126,8 +126,9 @@ public class AnodeService extends IntentService {
 				return;
 			}
 			/* otherwise, we can just update the modules */
-			Log.v(TAG, "AnodeReceiver.onReceive::postinstall: installing module dependencies");
-			PlatformInit.installModuleDependencies(this, true);
+			Log.v(TAG, "AnodeReceiver.onReceive::postinstall: starting PlatformInit service");
+			intent.setClass(this, PlatformInit.class);
+			startService(intent);
 			return;
 		}
 

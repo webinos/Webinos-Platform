@@ -18,24 +18,17 @@ package org.webinos.app.anode;
 
 import org.meshpoint.anode.Isolate;
 import org.meshpoint.anode.Runtime;
-import org.meshpoint.anode.Runtime.IllegalStateException;
-import org.meshpoint.anode.Runtime.NodeException;
-import org.webinos.app.platform.PlatformInit;
 import org.webinos.app.wrt.ui.WidgetInstallActivity;
 import org.webinos.app.wrt.ui.WidgetUninstallActivity;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
 import android.util.Log;
 
 public class AnodeReceiver extends BroadcastReceiver {
 
 	private static String TAG = "anode::AnodeReceiver";
-	public static final String ACTION_POSTINSTALL = "org.webinos.app.POSTINSTALL";
 	public static final String ACTION_START = "org.webinos.app.START";
 	public static final String ACTION_STOP = "org.webinos.app.STOP";
 	public static final String ACTION_STOPALL = "org.webinos.app.STOPALL";
