@@ -20,6 +20,7 @@
     <module>devicestatus</module>
     <module>actuator</module>
     <module>events</module>
+    <module>app2app</module>
     <module>applauncher</module>
     <module>webnotification</module>
     <module>zap-and-shake</module>
