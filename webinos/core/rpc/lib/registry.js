@@ -105,46 +105,6 @@
 		}
 	};
 
-	var load = function(modules) {
-		var webinos = require("find-dependencies")(__dirname);
-
-		return modules.map(function(m) {
-			return webinos.global.require(webinos.global.api[m.name].location).Service;
-		});
-	};
-
-	Registry.prototype.loadModule = function(module, rpcHandler) {
-		var Service = load([module])[0];
-		try {
-			this.registerObject(new Service(rpcHandler, module.params));
-		}
-		catch (error) {
-			logger.log('INFO: [Registry] '+error);
-			logger.log('INFO: [Registry] '+"Could not load module " + module.name + " with message: " + error);
-		}
-	};
-
-	/**
-	 * Used to load and register webinos services.
-	 * @private
-	 * @param modules An array of services, must be valid node add-ons exporting a Service constructor.
-	 */
-	Registry.prototype.loadModules = function(modules, rpcHandler) {
-		if (!modules) return;
-
-		var services = load(modules);
-		for (var i = 0; i < services.length; i++){
-			try {
-				var Service = services[i];
-                if (typeof Service === "function") //Some modules are just modification and do not expose any real API function
-				_registerObject.call(this, new Service(rpcHandler, modules[i].params));
-			}catch (error){
-				logger.error(error);
-				logger.error("Could not load module " + modules[i].name + " with message: " + error );
-			}
-		}
-	};
-
 	/**
 	 * Get all registered objects.
 	 *
