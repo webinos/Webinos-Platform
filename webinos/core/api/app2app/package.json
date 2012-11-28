@@ -1,0 +1,25 @@
+{
+  "name": "app2app",
+  "publishConfig": {
+    "tag": "alpha" 
+  },
+  "description": "App2App Messaging API",
+  "keywords": [ "webinos", "app2app", "messaging", "API"],
+  "version": "0.0.1",
+  "homepage": "http://webinos.org/",
+  "author": "Fabian Walraven <fabian.walraven@tno.nl>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fabianatwork/Webinos-Platform.git"
+  },
+  "bugs": {
+    "email": "webinos-wp4-ml@fokus.fraunhofer.de",
+    "url": "http://jira.webinos.org/browse/WP-218"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib/app2app.js",
+  "dependencies": {},
+  "bundleDependencies": []
+}

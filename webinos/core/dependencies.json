@@ -28,6 +28,10 @@
       "name": "Events API",
       "location": "api/events/"
     },
+    "app2app": {
+      "name": "App2App Messaging API",
+      "location": "api/app2app/"
+    },
     "zap-and-shake": {
       "name": "Zap and Shake (hack)",
       "location": "api/zap-and-shake/"
