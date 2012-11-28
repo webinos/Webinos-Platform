@@ -51,7 +51,7 @@ var Provider = function(_hostname, _friendlyName) {
 
   /**
    * Fetches the public IP address if hostname is not specified
-   * @param callback :
+   * @param callback - empty callback to get async behavior
    */
   function setHostName(callback) {
     if (hostname === "") {
@@ -59,14 +59,14 @@ var Provider = function(_hostname, _friendlyName) {
       socket.on('connect', function() {
         socket.end();
         hostname =  socket.address().address;
-        return callback();
+        callback();
       });
       socket.on('error', function() { // Assuming this will happen as internet is not reachable
         hostname =  "0.0.0.0";
-        return callback();
+         callback();
       });
     } else {
-      return callback();
+      callback();
     }
   }
 
@@ -74,20 +74,23 @@ var Provider = function(_hostname, _friendlyName) {
   /**
    *  PZH already registered, are reloaded in case Provider is restarted
    */
-  function loadPzhs() {
-    var myKey, key, email;
-    for (myKey = 0 ; myKey < config.trustedList.pzh.length; myKey=myKey+1) {
-      key = config.trustedList.pzh[myKey];
-      pzhs[key] = new pzh_session();
-      email = key.split("_")[1].split("/")[0];
-      pzhs[key].addLoadPzh(email, key, "", function(status, value, pzhId) {
-        if (status) {
-          server.addContext(pzhId, value);
-          logger.log("started zone hub " + pzhId);
-        } else {
-          logger.error("failed starting zone hub" + value);
-        }
-      });
+  function loadPzhs () {
+    var myKey, email;
+    for (myKey in config.trustedList.pzh) {
+      if(config.trustedList.pzh.hasOwnProperty(myKey)) {
+        pzhs[myKey] = new pzh_session();
+        var first = myKey.indexOf("_") +1;
+        var last  = myKey.length;
+        email = myKey.slice(first, last);
+        pzhs[myKey].addLoadPzh(email, myKey, null, function(status, value, pzhId) {
+          if (status) {
+            server.addContext(pzhId, value);
+            logger.log("started zone hub " + pzhId);
+          } else {
+            logger.error("failed starting zone hub" + value);
+          }
+        });
+      }
     }
   }
 
@@ -115,11 +118,16 @@ var Provider = function(_hostname, _friendlyName) {
 
   /**
    * Loads provider session/certificate details and starts the TLS server
-   * @param callback: If successful returns true or false uf server fails to start
+   * @param callback - If successful returns true or false uf server fails to start
    */
   function loadSession (callback) {
     config  = new session.configuration();
-    config.setConfiguration(friendlyName, "PzhP", hostname, function (status, value) {
+    var inputConfig = {
+      "friendlyName": friendlyName,
+      "sessionIdentity": hostname
+    };
+
+    config.setConfiguration("PzhP", inputConfig, function (status, value) {
       if (!status) {
         logger.error("setting configuration for the zone provider failed, the .webinos directory needs to be deleted.")
         return callback(status, value);
@@ -258,7 +266,7 @@ var Provider = function(_hostname, _friendlyName) {
    */
   this.createPzh = function(user, callback) {
     var pzhId = hostname + "_" + user.email;
-    if (config.trustedList.pzh.indexOf(pzhId) !== -1 )  {
+    if (config.trustedList.pzh.hasOwnProperty(pzhId))  {
       callback(true, pzhId);
     } else {
       logger.log("adding new zone hub - " + pzhId);
@@ -266,7 +274,7 @@ var Provider = function(_hostname, _friendlyName) {
       pzhs[pzhId].addLoadPzh(user.email, pzhId, user, function(status, options, uri){
         if (status) {
           server.addContext(uri, options);
-          config.trustedList.pzh.push(uri);
+          config.trustedList.pzh[uri] = {"address":hostname};
           config.storeTrustedList(config.trustedList);
           return callback(true, pzhId);
         } else {
@@ -306,10 +314,10 @@ var Provider = function(_hostname, _friendlyName) {
 };
 util.inherits(Provider, pzhWI);
 
-/*// This keeps pzh running but you cannot find where error occurred
+// This keeps pzh running but you cannot find where error occurred
 process.on("uncaughtException", function(err) {
   logger.error("uncaught exception " + err.message);
-});*/
+});
 
 
 module.exports = Provider;

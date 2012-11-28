@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../aspect.h"
 #include "../aspects.h"
 
@@ -9,12 +10,12 @@ class InputDevice : Aspect {
 		vector<string> getComponents();
 		bool isSupported(string * = 0);
 		string getPropertyValue(string *, string * = 0);
+
 		static InputDevice * getInstance();
 
 		string type(string);
 
 	private:
-
 		InputDevice(){};
 		~InputDevice(){};
 		

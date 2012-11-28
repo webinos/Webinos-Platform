@@ -11,10 +11,15 @@ public class Org_webinos_api_discovery_DiscoveryManager {
 	static Object __invoke(org.webinos.api.discovery.DiscoveryManager inst, int opIdx, Object[] args) {
 		Object result = null;
 		switch(opIdx) {
-		case 0: /* createService */
+		case 0: /* advertServices */
+			inst.advertServices(
+				(String)args[0]
+			);
+			break;
+		case 1: /* createService */
 			result = inst.createService();
 			break;
-		case 1: /* findServices */
+		case 2: /* findServices */
 			result = inst.findServices(
 				(org.webinos.api.discovery.ServiceType)args[0],
 				(org.webinos.api.discovery.FindCallback)args[1],
@@ -22,7 +27,7 @@ public class Org_webinos_api_discovery_DiscoveryManager {
 				(org.webinos.api.discovery.Filter)args[3]
 			);
 			break;
-		case 2: /* getServiceId */
+		case 3: /* getServiceId */
 			result = inst.getServiceId(
 				(String)args[0]
 			);

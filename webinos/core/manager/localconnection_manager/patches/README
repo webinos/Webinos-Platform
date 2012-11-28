@@ -1,0 +1,84 @@
+
+Patches for avahi6.3.1 distribution and mdns node module v0.0.7
+
+Copyright 2012 Ziran Sun, Samsung Electronics(UK) Ltd
+-------------------------------------------------------------------------------
+DESCRIPTION
+
+Both patches are for zeroconf libraries running in Ubuntu environment.
+
+[1] avahi_6.3.1_compat.patch: 
+
+	A patch for avahi Bonjour compatible layer. It provides functions to resolve IP addreses of discovered peers. Both IPv4 and IPv6 are supported.  
+	Applicable for Ubuntu version lower than 12.04
+
+[2] mdns_0.0.7.patch:
+
+	A simple patch that works as a workaround while mdns could not resolve the discovered Android peers details.  
+	
+
+-------------------------------------------------------------------------------
+APPLICABILITY
+
+[1] avahi_6.3.1_compat.patch. 
+
+Whether it is mandatory to Apply this patch depends on your Ubuntu system.
+ 
+To check if this patch is required by your system, do the follows. 
+	
+Assuming that you have mdns node module installed at $MDNS_MODULE = .../Webinos_Platform/node_modules/mdns
+
+cp ../example/http_app.js $MDNS_MODULE/examples/
+
+cd $MDNS_MODULE/examples/
+
+node ./http_app.js
+
+Check the addresses fields of the result output on the screen. If it's empty - showing like "[]", you need to 
+go to INTALLATION step next and get the patch in.
+ 
+[2] mdns_0.0.7.patch
+
+Applying this patch is a "MUST" until further notice. 
+
+-------------------------------------------------------------------------------
+INSTALLATION
+
+[1] avahi_6.3.1_compat.patch
+
+    
+    Download (HTTP): http://avahi.org/download/avahi-0.6.31.tar.gz
+    tar xvzf avahi-0.6.31.tar.gz
+    cd avahi-0.6.31
+    
+    $ cd avahi-0.6.31
+    $ patch -p1 -i ../avahi_compat.patch
+
+    ./configure --prefix=/usr \
+    --sysconfdir=/etc \
+    --localstatedir=/var \
+    --disable-static \
+    --disable-mono \
+    --disable-monodoc \
+    --disable-python \
+    --disable-qt3 \
+    --disable-qt4 \
+    --enable-core-docs \
+    --enable-compat-libdns_sd \
+    --disable-gtk3 \
+    --with-distro=none
+
+    make
+    sudo make install
+
+[2] mdns_0.0.7.patch
+    
+    Assuming that your mdns module is in .../Webinos_Platform/node_modules/mdns
+    
+    so we have
+    $MDNS_MODULE = .../Webinos_Platform/node_modules/mdns/lib/
+    
+    cp mdns_0.0.7.patch $MDNS_MODULE
+    cd $MDNS_MODULE
+    patch -p1 -i mdns_0.0.7.patch
+  

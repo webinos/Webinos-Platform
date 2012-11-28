@@ -1,0 +1,253 @@
+namespace ds = "http://www.w3.org/2000/09/xmldsig#"
+
+# Relax NG Grammar for XML Signatures
+# Namespace: http://www.w3.org/2000/09/xmldsig#
+# $Revision: 1.6 $ on $Date: 2011-05-24 13:40:54 $ by $Author: mcaceres $
+#
+# Copyright 2001 The Internet Society and W3C (Massachusetts Institute
+# of Technology, Institut National de Recherche en Informatique et en
+# Automatique, Keio University). All Rights Reserved.
+# http://www.w3.org/Consortium/Legal/
+#
+# This document is governed by the W3C Software License [1] as described
+# in the FAQ [2].
+#
+# [1] http://www.w3.org/Consortium/Legal/copyright-software-19980720
+# [2] http://www.w3.org/Consortium/Legal/IPR-FAQ-20000620.html#DTD
+#
+# Constructed by hand from xmldsig-core-schema.xsd by
+# Norman.Walsh@marklogic.com on 5 May 2008.
+#
+# Notes:
+#
+# You must not use the RELAX NG DTD Compatibility features with this
+# grammar. DTD Compatibility features, ID type attributes, and
+# wildcard attributes are mutually exclusive.
+#
+# The definition for the Signature element includes a SignatureType
+# pattern. The rest of the patterns are "inline". This is a matter of
+# style. I constructed only one "type" pattern as an example of the
+# style, not because it's significant in the Signature pattern.
+
+start = Signature
+
+# Start Signature
+
+SignatureType = 
+   attribute Id { xsd:ID }?,
+   SignedInfo,
+   SignatureValue,
+   KeyInfo?,
+   Object*
+
+Signature = element ds:Signature {
+   SignatureType
+}
+
+SignatureValue = element ds:SignatureValue {
+   attribute Id { xsd:ID }?,
+   xsd:base64Binary
+}
+
+# Start SignedInfo
+
+SignedInfo = element ds:SignedInfo {
+   attribute Id { xsd:ID }?,
+   CanonicalizationMethod,
+   SignatureMethod,
+   Reference+
+}
+
+CanonicalizationMethod = element ds:CanonicalizationMethod {
+   attribute Algorithm { xsd:anyURI },
+   (text | anyElement)*
+}
+
+SignatureMethod = element ds:SignatureMethod {
+   attribute Algorithm { xsd:anyURI },
+   (text | HMACOutputLength | anyOtherElement)*
+}
+
+# Start Reference
+
+Reference = element ds:Reference {
+   attribute Id { xsd:ID }?,
+   attribute URI { xsd:anyURI }?,
+   attribute Type { xsd:anyURI }?,
+   Transforms?,
+   DigestMethod,
+   DigestValue
+}
+
+Transforms = element ds:Transforms {
+   Transform+
+}
+
+Transform = element ds:Transform {
+   attribute Algorithm { xsd:anyURI },
+   (anyOtherElement | XPath)*
+}
+
+XPath = element ds:XPath {
+   xsd:string
+}
+
+# End Reference
+
+DigestMethod = element ds:DigestMethod {
+   attribute Algorithm { xsd:anyURI },
+   anyOtherElement*
+}
+
+DigestValue = element ds:DigestValue {
+   DigestValueType
+}
+
+DigestValueType = xsd:base64Binary
+
+# End SignedInfo
+
+# Start KeyInfo
+
+KeyInfo = element ds:KeyInfo {
+   attribute Id { xsd:ID }?,
+   (text | KeyName | KeyValue
+    | RetrievalMethod | X509Data | PGPData | SPKIData | MgmtData
+    | anyOtherElement)*
+}
+
+KeyName = element ds:KeyName { xsd:string }
+
+MgmtData = element ds:MgmtData { xsd:string }
+
+KeyValue = element ds:KeyValue {
+   (text | DSAKeyValue | RSAKeyValue | anyOtherElement)*
+}
+
+RetrievalMethod = element ds:RetrievalMethod {
+   attribute URI { xsd:anyURI },
+   attribute Type { xsd:anyURI }?,
+   Transforms?
+}
+
+# Start X509Data
+
+X509Data = element ds:X509Data {
+   (X509IssuerSerial | X509SKI | X509SubjectName | X509Certificate | X509CRL
+    | anyOtherElement)*
+}
+
+X509IssuerSerial = element ds:X509IssuerSerial {
+   X509IssuerName,
+   X509SerialNumber
+}
+
+X509IssuerName = element ds:X509IssuerName { xsd:string }
+
+X509SerialNumber = element ds:X509SerialNumber { xsd:integer }
+
+X509SKI = element ds:X509SKI { xsd:base64Binary }
+
+X509SubjectName = element ds:X509SubjectName { xsd:string }
+
+X509Certificate = element ds:X509Certificate { xsd:base64Binary }
+
+X509CRL = element ds:X509CRL { xsd:base64Binary }
+
+# End X509Data
+
+# Begin PGPData
+
+PGPData = element ds:PGPData {
+   ((PGPKeyID,PGPKeyPacket?,anyOtherElement*)
+    | (PGPKeyPacket,anyOtherElement*))
+}
+
+PGPKeyID = element ds:PGPKeyID { xsd:base64Binary }
+
+PGPKeyPacket = element ds:PGPKeyPacket { xsd:base64Binary  }
+
+# End PGPData
+
+# Begin SPKIData
+
+SPKIData = element ds:SPKIData {
+   (SPKISexp,anyOtherElement*)+
+}
+
+SPKISexp = element ds:SPKISexp { xsd:base64Binary }
+
+# End SPKIData
+
+# End KeyInfo
+
+# Start Object (Manifest, SignatureProperty)
+
+Object = element ds:Object {
+   attribute Id { xsd:ID }?,
+   attribute MimeType { xsd:string }?,
+   attribute Encoding { xsd:anyURI }?,
+   (anyElement|text)*
+}
+
+Manifest = element ds:Manifest {
+   attribute Id { xsd:ID }?,
+   Reference+
+}
+
+SignatureProperties = element ds:SignatureProperties {
+   attribute Id { xsd:ID }?,
+   SignatureProperty+
+}
+   
+SignatureProperty = element ds:SignatureProperty {
+   attribute Id { xsd:ID }?,
+   attribute Target { xsd:anyURI },
+   anyOtherElement+
+}
+
+# End Object (Manifest, SignatureProperty)
+
+# Start Algorithm Parameters
+
+HMACOutputLength = element ds:HMACOutputLength {
+   xsd:integer
+}
+
+# Start KeyValue Element-types
+
+DSAKeyValue = element ds:DSAKeyValue {
+   (P,Q)?, G?, Y, J?, (Seed, PgenCounter)?
+}
+
+P = element ds:P { CryptoBinary }
+Q = element ds:Q { CryptoBinary }
+G = element ds:G { CryptoBinary }
+Y = element ds:Y { CryptoBinary }
+J = element ds:J { CryptoBinary }
+Seed = element ds:Seed { CryptoBinary }
+PgenCounter = element ds:PgenCounter { CryptoBinary }
+
+CryptoBinary = xsd:base64Binary
+
+RSAKeyValue = element ds:RSAKeyValue {
+   Modulus,
+   Exponent
+}
+
+Modulus = element ds:Modulus { CryptoBinary }
+Exponent = element ds:Exponent { CryptoBinary }
+
+# End KeyValue Element-types
+
+# End Signature
+
+# Definitions for the *any* wild card and the *any other* wildcard
+
+anyAttribute = attribute * { text }
+
+anyElement = element * { (anyAttribute | text | anyElement)* }
+
+anyOtherElement = element * - ds:* { (anyAttribute | text | anyOtherElement)* }
+
+# EOF

@@ -32,12 +32,12 @@ this.DirectoryWidgetResource = (function() {
     function scanDir(name) {
       var children = fs.readdirSync(path.resolve(that.resource, name));
       for(var i in children) {
-        var childName = path.resolve(name, children[i]);
+        var childName = path.join(name, children[i]);
         var stats = fs.statSync(path.resolve(that.resource, childName));
         if(stats.isDirectory())
           scanDir(childName);
         else
-          that.contents[childName] = undefined;
+          that.contents[childName.replace(/\\/g,"/")] = undefined;		
       }
     }
     
@@ -47,24 +47,24 @@ this.DirectoryWidgetResource = (function() {
 
   /* public instance methods */
   DirectoryWidgetResource.prototype.contains = function(name) {
-    return (name in contents);
+    return (name in this.contents);
   };
 
   DirectoryWidgetResource.prototype.list = function() {
-    return contents;
+    return this.contents;
   };
 
   DirectoryWidgetResource.prototype.readFileSync = function(name) {
     var result = undefined;
-    if(name in contents)
-      result = fs.readFileSync(path.resolve(resource, name));
+    if(name in this.contents) 
+      result = fs.readFileSync(path.resolve(this.resource, name));	
     return result;
   };
 
   DirectoryWidgetResource.prototype.readFile = function(name, callback) {
     var result = undefined;
-    if(name in contents)
-      result = fs.readFile(path.resolve(resource, name), callback);
+    if(name in this.contents)
+      result = fs.readFile(path.resolve(this.resource, name), callback);
     return result;
   };
 

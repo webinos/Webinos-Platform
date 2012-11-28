@@ -181,6 +181,6 @@
 		var crypto = require('crypto');
 	} else {
 		// export for web browser
-		this.Registry = Registry;
+		window.Registry = Registry;
 	}
 })();

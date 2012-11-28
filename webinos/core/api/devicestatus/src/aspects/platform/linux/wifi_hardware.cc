@@ -1,6 +1,9 @@
 #include "../../wifi_hardware.h"
 #include "../../../utils.h"
 #include "string"
+#include "iostream"
+#include "fstream"
+#include "sstream"
 
 AspectsRegister WiFiHardware::aspectsRegister("WiFiHardware", getInstance());
 

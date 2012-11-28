@@ -19,7 +19,7 @@ const std::string kWebinosRuntimeError = "webinos://runtimeerror/";
 const std::string kWebinosResourceNotFoundError = "webinos://resourcenotfound/";
 const std::string kWebinosSideLoadComplete = "webinos://sideloadcomplete/";
 const std::string kWebinosSideLoadFailed = "webinos://sideloadfailed/";
-const std::string kWebinosAboutWidget = "webinos://aboutwidget/";
+const std::string kWebinosReload = "webinos://reload/";
 
 // Custom menu command Ids.
 enum client_menu_ids 
@@ -287,38 +287,38 @@ CefRefPtr<CefResourceHandler> ClientHandler::GetResourceHandler(CefRefPtr<CefBro
 {
   std::string url = request->GetURL();
 
-  if (url == kWebinosAboutWidget)
-  {
-    CefRefPtr<CefStreamReader> stream = GetBinaryResourceReader("webinosAboutWidget.html");
-    ASSERT(stream.get());
-    return new CefStreamResourceHandler("text/html", stream);
-  }
-  else if (url == kWebinosResourceNotFoundError) 
+  CefRefPtr<CefResourceHandler> handler;
+
+  if (url == kWebinosResourceNotFoundError) 
   {
     CefRefPtr<CefStreamReader> stream = GetBinaryResourceReader("webinos404.html");
     ASSERT(stream.get());
-    return new CefStreamResourceHandler("text/html", stream);
+    handler = new CefStreamResourceHandler("text/html", stream);
+  }
+  else if (url == kWebinosReload)
+  {
+    std::string startupURL = GetStartUrl();
+    frame->LoadURL(startupURL);
   } 
   else  if (url == kWebinosRuntimeError) 
   {
     CefRefPtr<CefStreamReader> stream = GetBinaryResourceReader("webinos500.html");
     ASSERT(stream.get());
-    return new CefStreamResourceHandler("text/html", stream);
+    handler = new CefStreamResourceHandler("text/html", stream);
   } 
   else if (url.substr(0,kWebinosSideLoadComplete.length()) == kWebinosSideLoadComplete) 
   {
     std::string installId(url.substr(kWebinosSideLoadComplete.length()));
     CompleteSideLoad(installId);
   } 
-  else if (url == kWebinosSideLoadFailed) 
+  else if (url.substr(0,kWebinosSideLoadFailed.length()) == kWebinosSideLoadFailed) 
   {
     ShowMainWindow();
     CefRefPtr<CefStreamReader> stream = GetBinaryResourceReader("webinosInvalidWidget.html");
     ASSERT(stream.get());
-    return new CefStreamResourceHandler("text/html", stream);
+    handler = new CefStreamResourceHandler("text/html", stream);
   }
 
-  CefRefPtr<CefResourceHandler> handler;
   return handler;
 }
 

@@ -1,0 +1,25 @@
+{ "name": "localconnection_manager"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Local Connection Manager"
+, "keywords": [ "webinos", "Local", "Peer", "Discovery", "Connection", "Manager"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Ziran Sun <ziran.sun@samsung.com>
+, "repository":
+  { "type": "git"
+  , "url": "https://github.com/webinos/Webinos-Platform.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/localconnectionmanager.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

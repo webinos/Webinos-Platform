@@ -16,6 +16,7 @@
   , "sax" : "0.x.x"
   , "seq" : "0.x.x"
   , "xml2js" : "0.x.x"
+  , "data2xml" : "0.x.x"
   , "crypt" : "0.0.x"
   , "ejs" : "0.x.x"
   , "openid" : "0.x.x"
@@ -29,6 +30,7 @@
   , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
+  , "grunt-contrib-clean" : ">= 0.3.x"
   }
 , "engines" :
   { "node" : ">= 0.6.0"
@@ -40,6 +42,6 @@
   , "webinos_pzp": "webinos_pzp.js"
   }
 , "scripts":
-  { "install": "node-gyp configure build && node webinos_build.js"
+  { "install": "node-gyp configure build && cd webinos && grunt && cd .."
   }
 }

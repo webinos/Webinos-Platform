@@ -26,11 +26,6 @@
 using namespace node;
 using namespace v8;
 
-#ifdef ANDROID
-	string policyFileName = "/sdcard/webinos/policy/policy.xml";
-#else
-	string policyFileName = "./policy.xml";
-#endif
 
 class PolicyManagerInt: ObjectWrap{
 
@@ -39,6 +34,7 @@ private:
 	
 public:
 	PolicyManager* pminst;
+	string policyFileName;
 	static Persistent<FunctionTemplate> s_ct;
   
 	static void Init(Handle<Object> target)  {
@@ -69,10 +65,17 @@ public:
 			}
 			v8::String::AsciiValue tmpFileName(args[0]->ToString());
 			LOGD("Parameter file: %s", *tmpFileName);
-			policyFileName = *tmpFileName;
+			//if(pmtmp->policyFileName) {
+			//	delete[] pmtmp->policyFileName;
+			//}
+			pmtmp->policyFileName = *tmpFileName;
+		}
+		else {
+			LOGD("Missing parameter");
+			return ThrowException(Exception::TypeError(String::New("Missing argument")));
 		}
 
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 		pmtmp->Wrap(args.This());
 		return args.This();
 	}
@@ -273,9 +276,10 @@ public:
 
 		PolicyManagerInt* pmtmp = ObjectWrap::Unwrap<PolicyManagerInt>(args.This());
 
+		LOGD("ReloadPolicy - file is %s", pmtmp->policyFileName.c_str());
 		//TODO: Reload policy file
 		delete pmtmp->pminst;
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 
 		Local<Integer> result = Integer::New(0);
 		

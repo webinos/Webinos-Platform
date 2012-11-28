@@ -58,10 +58,10 @@ void ClientApp::InjectWebinos(CefRefPtr<CefFrame> frame)
   // First try and load the platform-supplied webinos.js
 #if defined(OS_WIN)
   FilePath workingDir(commandLine->GetProgram().ToWString().c_str());
-  FilePath webinosJSPath = workingDir.DirName().Append(L"..\\..\\webinos\\test\\client\\webinos.js");
+  FilePath webinosJSPath = workingDir.DirName().Append(L"..\\..\\webinos\\web_root\\webinos.js");
 #else
   FilePath workingDir(commandLine->GetProgram());
-  FilePath webinosJSPath = workingDir.DirName().Append("..\\..\\webinos\\test\\client\\webinos.js");
+  FilePath webinosJSPath = workingDir.DirName().Append("..\\..\\webinos\\web_root\\webinos.js");
 #endif
 
   int64 webinosJSCodeSize;

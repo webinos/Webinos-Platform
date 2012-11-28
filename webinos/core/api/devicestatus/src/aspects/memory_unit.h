@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../aspect.h"
 #include "../aspects.h"
 
@@ -18,7 +19,6 @@ class MemoryUnit : Aspect {
 		string volatil(string);
 
 	private:
-
 		MemoryUnit(){};
 		~MemoryUnit(){};
 

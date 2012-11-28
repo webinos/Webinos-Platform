@@ -24,14 +24,16 @@ var webinos     = require("find-dependencies")(__dirname);
 var logger      = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 var wPath       = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
 var wId         = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
-
 var certificate = webinos.global.require(webinos.global.manager.certificate_manager.location);
 
-
+/**
+ *
+ * @constructor
+ */
 function Config() {
   certificate.call(this);
   this.metaData       = {};
-  this.trustedList    = {pzh:[], pzp:[]};
+  this.trustedList    = {pzh:{}, pzp:{}};
   this.crl            = "";
   this.policies       = {};//todo: integrate policy in the configuration
   this.userData       = {name: ""};
@@ -41,10 +43,18 @@ function Config() {
 
 util.inherits(Config, certificate);
 
-function createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback){
+/**
+ *
+ * @param self
+ * @param webinosType
+ * @param inputConfig
+ * @param callback
+ * @return {*}
+ */
+function createNewConfiguration(self, webinosType, inputConfig, callback){
   var cn;
   try {
-    self.fetchConfigDetails(friendlyName, webinosType, sessionIdentity, function(status) {
+    self.fetchConfigDetails(webinosType, inputConfig, function(status) {
       if(status){
         cn = self.metaData.webinosType + ":"+self.metaData.webinosName ;
         self.generateSelfSignedCertificate(self.metaData.webinosType, cn, function(status, value ) {
@@ -79,14 +89,14 @@ function createNewConfiguration(self, friendlyName, webinosType, sessionIdentity
 /**
 * Checks if metaData exists, if not creates a range of certificates
 * it calls generating certificate function defined in certificate manager.
-* This function is crypto sensitive.
 *
 * @param {function} callback It is callback function that is invoked after
 * checking/creating certificates
 */
-Config.prototype.setConfiguration = function (friendlyName, webinosType, sessionIdentity, callback) {
+Config.prototype.setConfiguration = function (webinosType, inputConfig, callback) {
   var self = this, conn_key, cn;
-  wId.fetchDeviceName(webinosType, friendlyName, function(deviceName){
+
+  wId.fetchDeviceName(webinosType, inputConfig, function(deviceName){
     var webinosRoot  =  path.join(wPath.webinosPath(), deviceName);
     logger.addType(deviceName); // per instance this should be only set once..
     if (typeof callback !== "function") {
@@ -95,7 +105,7 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
     }
     self.fetchMetaData(webinosRoot, deviceName, function(status, value){
       if (status && value && (value.code=== "ENOENT" || value.code=== "EACCES")) {//meta data does not exist
-        createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);
+        createNewConfiguration(self, webinosType, inputConfig, callback);
       } else { //metaData not found
         self.metaData= value;
         self.fetchCertificate("external", function(status, value) { if (status) { self.cert.external = value;} });
@@ -105,26 +115,43 @@ Config.prototype.setConfiguration = function (friendlyName, webinosType, session
               self.fetchUserData(function(status, value) { if (status) { self.userData = value;
                 self.fetchUserPref(function(status, value) { if (status) { self.userPref = value;
                   self.fetchTrustedList(function(status, value) { if (status) { self.trustedList = value; return callback(true);
-                  }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
-                }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
-              }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
-            }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
-          }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
-        }else{createNewConfiguration(self, friendlyName, webinosType, sessionIdentity, callback);}});
+                  }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
+                }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
+              }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
+            }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
+          }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
+        }else{createNewConfiguration(self, webinosType, inputConfig, callback);}});
       }
     });
-
-    //});
   });
 };
-
+/**
+ * Store user data based on OpenId Details
+ * @param user -
+ */
+Config.prototype.storeUserDetails = function(user) {
+  if (this.userData && user !== null && this.userData.name !== user.username) {
+    this.userData.name     = user.username;
+    this.userData.email    = user.email;
+    this.userData.country  = user.country;
+    this.userData.image    = user.image;
+    this.storeUserData(this.userData);
+  }
+};
+/**
+ *
+ */
 Config.prototype.storeAll = function() {
   var self = this;
   self.storeCertificate(self.cert.internal, "internal");
   self.storeCrl(self.crl);
   self.storeTrustedList(self.trustedList);
 };
-
+/**
+ *
+ * @param data
+ * @param callback
+ */
 function processData(data,  callback){
   var JSONData, dataString = data.toString();
   if (dataString !== "") {
@@ -135,7 +162,11 @@ function processData(data,  callback){
     callback(false);
   }
 }
-
+/**
+ *
+ * @param certificate
+ * @param ext_int
+ */
 Config.prototype.storeCertificate = function (certificate, ext_int) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
@@ -147,7 +178,11 @@ Config.prototype.storeCertificate = function (certificate, ext_int) {
     }
   });
 };
-
+/**
+ *
+ * @param ext_int
+ * @param callback
+ */
 Config.prototype.fetchCertificate = function(ext_int, callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "certificates", ext_int, self.metaData.webinosName+".json");
@@ -163,7 +198,10 @@ Config.prototype.fetchCertificate = function(ext_int, callback) {
   });
 
 };
-
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeMetaData = function(data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, self.metaData.webinosName+".json");
@@ -175,7 +213,12 @@ Config.prototype.storeMetaData = function(data) {
     }
   });
 };
-
+/**
+ *
+ * @param webinosRoot
+ * @param webinosName
+ * @param callback
+ */
 Config.prototype.fetchMetaData = function(webinosRoot, webinosName, callback) {
   var self = this;
   var filePath = path.join(webinosRoot, webinosName+".json");
@@ -187,7 +230,10 @@ Config.prototype.fetchMetaData = function(webinosRoot, webinosName, callback) {
     }
   });
 };
-
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeCrl = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"crl.pem");
@@ -199,6 +245,10 @@ Config.prototype.storeCrl = function (data) {
     }
   });
 };
+/**
+ *
+ * @param callback
+ */
 Config.prototype.fetchCrl = function (callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "crl.pem");
@@ -212,6 +262,10 @@ Config.prototype.fetchCrl = function (callback) {
     }
   });
 };
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeTrustedList = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"trustedList.json");
@@ -223,6 +277,10 @@ Config.prototype.storeTrustedList = function (data) {
     }
   });
 };
+/**
+ *
+ * @param callback
+ */
 Config.prototype.fetchTrustedList = function (callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "trustedList.json");
@@ -235,6 +293,10 @@ Config.prototype.fetchTrustedList = function (callback) {
     }
   });
 };
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeUserData = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+".json");
@@ -246,6 +308,10 @@ Config.prototype.storeUserData = function (data) {
     }
   });
 };
+/**
+ *
+ * @param callback
+ */
 Config.prototype.fetchUserData = function (callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+".json");
@@ -258,6 +324,10 @@ Config.prototype.fetchUserData = function (callback) {
     }
   });
 };
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeServiceCache = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
@@ -269,6 +339,10 @@ Config.prototype.storeServiceCache = function (data) {
     }
   });
 };
+/**
+ *
+ * @param callback
+ */
 Config.prototype.fetchServiceCache = function (callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_serviceCache.json");
@@ -281,6 +355,10 @@ Config.prototype.fetchServiceCache = function (callback) {
     }
   });
 };
+/**
+ *
+ * @param data
+ */
 Config.prototype.storeUserPref = function (data) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_pref.json");
@@ -292,6 +370,10 @@ Config.prototype.storeUserPref = function (data) {
     }
   });
 };
+/**
+ *
+ * @param callback
+ */
 Config.prototype.fetchUserPref = function (callback) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot,"userData",self.metaData.webinosName+"_pref.json");
@@ -304,7 +386,11 @@ Config.prototype.fetchUserPref = function (callback) {
     }
   });
 };
-
+/**
+ *
+ * @param callback
+ * @return {*}
+ */
 Config.prototype.createDirectories = function (callback) {
     var self = this, dirPath, permission = 0777;
     try {
@@ -322,7 +408,7 @@ Config.prototype.createDirectories = function (callback) {
         if (!fs.existsSync(self.metaData.webinosRoot))//If the folder doesn't exist
             fs.mkdirSync(self.metaData.webinosRoot, permission);
         // webinos root was created, we need the following 1st level dirs
-        var list = [ path.join(wPath.webinosPath(), "logs"), path.join(self.metaData.webinosRoot, "wrt"), path.join(self.metaData.webinosRoot, "policies"),
+        var list = [ path.join(wPath.webinosPath(), "logs"), path.join(self.metaData.webinosRoot, "wrt"), path.join(wPath.webinosPath(), "wrt"), path.join(self.metaData.webinosRoot, "policies"),
             path.join(self.metaData.webinosRoot, "certificates"), path.join(self.metaData.webinosRoot, "userData"), path.join(self.metaData.webinosRoot, "keys")];
         list.forEach(function (name) {
             if (!fs.existsSync(name))
@@ -338,7 +424,10 @@ Config.prototype.createDirectories = function (callback) {
         return callback(false, err.code);
     }
 };
-
+/**
+ *
+ * @param self
+ */
 Config.prototype.createPolicyFile = function(self) {
   // policy file
   fs.readFile( path.join(self.metaData.webinosRoot, "policies", "policy.xml"), function(err) {
@@ -348,7 +437,7 @@ Config.prototype.createPolicyFile = function(self) {
         data = fs.readFileSync(path.resolve(__dirname, "../../manager/policy_manager/defaultpolicy.xml"));
       }
       catch(e) {
-        logger.error("Default policy non found");
+        logger.error("Default policy not found");
         data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
       }
       fs.writeFileSync(path.join(self.metaData.webinosRoot, "policies", "policy.xml"), data);
@@ -356,9 +445,15 @@ Config.prototype.createPolicyFile = function(self) {
   });
 };
 
-Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessionIdentity, callback) {
+/**
+ *
+ * @param webinosType
+ * @param inputConfig
+ * @param callback
+ */
+Config.prototype.fetchConfigDetails = function(webinosType, inputConfig, callback) {
   var self = this;
-  var filePath = path.resolve(__dirname, "../../../webinos_config.json");
+  var filePath = path.resolve(__dirname, "../../../../webinos_config.json");
   fs.readFile(filePath, function(err,data) {
     if (!err) {
       var key, userPref = JSON.parse(data.toString());
@@ -387,8 +482,7 @@ Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessio
       self.userPref.ports ={};
       self.userPref.ports.provider               = 80;
       self.userPref.ports.provider_webServer     = 443;
-      self.userPref.ports.pzp_webSocket          = 8081;
-      self.userPref.ports.pzp_web_webSocket      = 8080;
+      self.userPref.ports.pzp_webSocket          = 8080;
       self.userPref.ports.pzp_tlsServer          = 8040;
       self.userPref.ports.pzp_zeroConf           = 4321;
       self.userData.country                      = "UK";
@@ -399,10 +493,10 @@ Config.prototype.fetchConfigDetails = function(friendlyName, webinosType, sessio
       self.userData.orgUnit                      = "";
       self.userData.cn                           = "";
     }
-    self.metaData.friendlyName = friendlyName;
+    self.metaData.friendlyName = inputConfig.friendlyName;
     self.metaData.webinosType  = webinosType;
-    self.metaData.serverName   = sessionIdentity;
-    wId.fetchDeviceName(webinosType, friendlyName, function(deviceName) {
+    self.metaData.serverName   = inputConfig.sessionIdentity;
+    wId.fetchDeviceName(webinosType, inputConfig, function(deviceName) {
       self.metaData.webinosName  = deviceName;
       self.metaData.webinosRoot  = wPath.webinosPath() + "/"+ self.metaData.webinosName;
       self.createDirectories(function(status){

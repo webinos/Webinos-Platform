@@ -3,16 +3,16 @@ var https   = require("https");
 var webinos = require('find-dependencies')(__dirname);
 var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 
-exports.sendCertificate = function( to, serverName, webServerPort, providerPort, masterCert, masterCrl, fetchPzh, refreshCert, connectOtherPZH, callback) {
+exports.sendCertificate = function( to, config, fetchPzh, refreshCert, callback) {
   var payload = {
-      to  : to, from: serverName,
+      to  : to, from: config.metaData.serverName,
       payload: {
-        status: "sendCert", message:{cert: masterCert, crl : masterCrl}}
+        status: "sendCert", message:{cert: config.cert.internal.master.cert, crl : config.crl}}
     },
     length = (JSON.stringify(payload).length % 2 === 0)? JSON.stringify(payload).length + 1: JSON.stringify(payload).length,
     options= {
       host: to.split('_')[0],
-      port: webServerPort,
+      port: config.userPref.ports.provider_webServer,
       path: "/main.html?cmd=transferCert",
       method:"POST"//,
       //headers: { 'Content-Length': length}
@@ -25,9 +25,9 @@ exports.sendCertificate = function( to, serverName, webServerPort, providerPort,
         logger.log("pzh to pzh receive response");
         var instance = fetchPzh(parse.to);
         if(instance) {
-          instance.addExternalCert(parse, function(serverName, options){
+          instance.pzh_pzh.addExternalCert(parse, function(serverName, options){
             refreshCert(serverName, options);
-            connectOtherPZH(to, options, providerPort, callback);
+            instance.pzh_pzh.connectOtherPZH(to, options, callback);
           });
         } else {
           callback({to: parse.to, cmd: 'pzhPzh', payload: "Pzh does not exist in this farm"});
