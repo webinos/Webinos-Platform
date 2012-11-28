@@ -17,7 +17,8 @@
 ******************************************************************************/
 (function() {
   var androidLauncher = null;
-  var widgetLibrary = require('../../../manager/widget_manager/index.js');
+  var widgetLibrary; 
+  try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
     
   if (process.platform == 'android') {
     androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
@@ -31,18 +32,20 @@
   var existsSync = fs.existsSync || path.existsSync;
 
   function findInstalledApp(appURI) {
-    var installedApps = widgetLibrary.widgetmanager.getInstalledWidgets();
     var requestedApp;
-    
-    for (var idx in installedApps) {
-      var cfg = widgetLibrary.widgetmanager.getWidgetConfig(installedApps[idx]);
-      if (cfg && cfg.id == appURI) {
-          console.log("found app id " + cfg.id);
-          requestedApp = cfg;
-          break;
+    if (widgetLibrary) {
+      var installedApps = widgetLibrary.widgetmanager.getInstalledWidgets();
+      
+      for (var idx in installedApps) {
+        var cfg = widgetLibrary.widgetmanager.getWidgetConfig(installedApps[idx]);
+        if (cfg && cfg.id == appURI) {
+            console.log("found app id " + cfg.id);
+            requestedApp = cfg;
+            break;
+        }
       }
     }
-    
+      
     return requestedApp;
   }
   
