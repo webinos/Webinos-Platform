@@ -23,9 +23,19 @@
 	
 	var _TV_MODULE_IMPLEMENTATION_ = 'mock'; // mock, vlcdvb, coolstream, ce4100
 
-	// reference to a certain tv module implementation
-	var tvmodule;
-	
+	// reference to specific tv manager implementation
+	var tvMgrImpl;
+
+	var TVApiModule = function(rpcHandler, params) {
+		this.rpcHandler = rpcHandler;
+		this.params = params;
+	};
+
+	TVApiModule.prototype.init = function (register, unregister) {
+		var service = new RemoteTVManager(this.rpcHandler, this.params);
+		register(service);
+	};
+
 	/**
 	 * Webinos TV service constructor (server side).
 	 * @constructor
@@ -42,11 +52,11 @@
 		});
 		
 		if (typeof params.impl !== 'undefined') {
-			tvmodule = require('./webinos.service_tv.' + params.impl + '.js');
-			if(tvmodule.tv_setConf)tvmodule.tv_setConf(params);
-			tvmodule=tvmodule.tv;
+			tvMgrImpl = require('./webinos.service_tv.' + params.impl + '.js');
+			if(tvMgrImpl.tv_setConf)tvMgrImpl.tv_setConf(params);
+			tvMgrImpl=tvMgrImpl.tv;
 		} else {
-			tvmodule = require('./webinos.service_tv.' + _TV_MODULE_IMPLEMENTATION_ + '.js').tv;
+			tvMgrImpl = require('./webinos.service_tv.' + _TV_MODULE_IMPLEMENTATION_ + '.js').tv;
 		}
 		
 		/**
@@ -60,7 +70,7 @@
 			if(params[0]==='channelchange'){
 				var useCapture = params[2];
 			
-			tvmodule.tv.display.addEventListener('channelchange',function(channel){
+			tvMgrImpl.tv.display.addEventListener('channelchange',function(channel){
 				var json = rpcHandler.createRPC(objectRef, "onchannelchangeeventhandler", channel);
 				rpcHandler.executeRPC(json);
 			},useCapture);
@@ -82,7 +92,7 @@
 	 * @param errorCallback Error callback.
 	 */
 	RemoteTVManager.prototype.display.setChannel = function ( params,  successCallback,  errorCallback) {
-		tvmodule.tv.display.setChannel(params[0],function(channel){
+		tvMgrImpl.tv.display.setChannel(params[0],function(channel){
 			successCallback(channel);
 		},function(){
 			
@@ -99,7 +109,7 @@
 		//TODO: only internal temporarily use!
 		//This is only to bridge the missing Media Capture API and EPG functionality 
         
-        tvmodule.tv.display.getEPGPIC(params[0],function(EPGPIC){
+        tvMgrImpl.tv.display.getEPGPIC(params[0],function(EPGPIC){
 			successCallback(EPGPIC);
 		},function(){
 			
@@ -114,7 +124,7 @@
 	 * @param errorCallback Error callback.
 	 */
 	RemoteTVManager.prototype.tuner.getTVSources = function ( params,  successCallback,  errorCallback) {
-		tvmodule.tv.tuner.getTVSources(function(sources){
+		tvMgrImpl.tv.tuner.getTVSources(function(sources){
 			successCallback(sources);
 		},function(){
 			
@@ -122,6 +132,6 @@
 	};
 
 	// export our object
-	exports.Service = RemoteTVManager;
+	exports.Module = TVApiModule;
 
 }());

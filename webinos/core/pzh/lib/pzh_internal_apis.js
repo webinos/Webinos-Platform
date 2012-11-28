@@ -16,8 +16,9 @@
  * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
  *******************************************************************************/
 
-var webinos = require('find-dependencies')(__dirname);
-var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var dependency = require('find-dependencies')(__dirname);
+var modLoader = dependency.global.require(dependency.global.util.location, "lib/loadservice.js");
+var logger  = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename);
 
 function getConnectedPzp(_instance){
   var i, pzps = [], list = Object.keys(_instance.config.trustedList.pzp);
@@ -181,7 +182,10 @@ Pzh_Apis.registerService = function(_instance, _at, _name, _callback) {
       "payload" : {"status" : "registerService", "message" :  {name:_name, params:{}}}};
     _instance.sendMessage(msg, _at);
   } else {
-    _instance.pzh_otherManager.registry.loadModule({"name":_name, "params":{}}, _instance.rpcHandler);
+    modLoader.loadServiceModule(
+      {"name":_name, "params":{}},
+      _instance.pzh_otherManager.registry,
+      _instance.pzh_otherManager.rpcHandler);
   }
 };
 /**
