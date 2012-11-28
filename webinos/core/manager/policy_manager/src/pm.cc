@@ -245,10 +245,33 @@ public:
 		}
 
 		vector<bool> purpose;
-		v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[2]);
-		for(unsigned int i = 0; i < pTmp->Length(); i++) {
-			purpose.push_back(pTmp->Get(i)->BooleanValue());
+		if (args[0]->ToObject()->Has(String::New("purpose"))) {
+			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("purpose")));
+			LOGD("DHPref: read %d purposes", pTmp->Length());
+			for(unsigned int i = 0; i < pTmp->Length(); i++) {
+				if (pTmp->Get(i)->BooleanValue() == true) {
+					LOGD("DHPref: purpose number %d is true", i);
+				}
+				else if (pTmp->Get(i)->BooleanValue() == false) {
+					LOGD("DHPref: purpose number %d is false", i);
+				}
+				else
+					LOGD("DHPref: purpose number %d is undefined", i);
+				purpose.push_back(pTmp->Get(i)->BooleanValue());
+			}
 		}
+
+		/*vector<bool> purpose;
+		if (args.Length() > 2) {
+			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[2]);
+			LOGD("DHPref: read %d purposes", pTmp->Length());
+			for(unsigned int i = 0; i < pTmp->Length(); i++) {
+				LOGD("DHPref: process purpose number %d", pTmp->Get(i));
+				purpose.push_back(pTmp->Get(i)->BooleanValue());
+			}
+		}
+		else
+			LOGD("DHPref: no purposes parameter");*/
 
 //		string widPath(".");
 
