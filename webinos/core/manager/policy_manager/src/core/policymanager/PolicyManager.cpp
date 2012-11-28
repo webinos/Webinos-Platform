@@ -68,12 +68,24 @@ Effect PolicyManager::checkRequest(Request * req){
 	LOGD("Policy manager start check");
 	if(validPolicyFile) {
 		xacml_eff = policyDocument->evaluate(req, &selectedDHPref);
-		if (selectedDHPref.empty() == false)
+		LOGD("XACML response: %d", xacml_eff);
+		if (selectedDHPref.empty() == false) {
+			LOGD("Selected DHPref: %s", selectedDHPref.c_str());
 			dhp_eff = dhp[selectedDHPref]->evaluate(req);
-		if (xacml_eff == PERMIT && dhp_eff == false)
-			return PROMPT_BLANKET;
+		}
+		if (dhp_eff == true){
+			LOGD("DHP response: true");
+		}
 		else
+			LOGD("DHP response: false");
+		if (xacml_eff == PERMIT && dhp_eff == false){
+			LOGD("XACML-DHPref combined response: %d", PROMPT_BLANKET);
+			return PROMPT_BLANKET;
+		}
+		else {
+			LOGD("XACML-DHPref combined response: %d", xacml_eff);
 			return xacml_eff;
+		}
 	}
 	else
 		return INAPPLICABLE;

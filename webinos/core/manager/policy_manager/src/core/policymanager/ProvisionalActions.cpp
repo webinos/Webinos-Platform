@@ -19,12 +19,14 @@
  ******************************************************************************/
 
 #include "ProvisionalActions.h"
+#include "../../debug.h"
 
 ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 
 	// ProvisionalAction Tags
 	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild("ProvisionalAction"); child;
 			child = (TiXmlElement*)child->NextSibling("ProvisionalAction")) {
+		LOGD("ProvisionalActions constructor, ProvisionalAction found");
 		provisionalaction.push_back(new ProvisionalAction(child));
 	}
 }
@@ -38,9 +40,11 @@ string ProvisionalActions::evaluate(Request * req){
 
 	// search for a provisional action with a resource matching the request
 	for(unsigned int i=0; i<provisionalaction.size(); i++){
+		LOGD("ProvisionalActions: ProvisionalAction %d evaluation", i);
 		preferenceid = provisionalaction[i]->evaluate(req);
-		if (preferenceid.compare(NULL) != 0)
+		LOGD("ProvisionalActions: ProvisionalAction %d evaluation response: %s", i, preferenceid.c_str());
+		if (preferenceid.empty() == false)
 			return preferenceid;
 	}
-	return NULL;
+	return "";
 }

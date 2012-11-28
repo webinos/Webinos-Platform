@@ -261,18 +261,6 @@ public:
 			}
 		}
 
-		/*vector<bool> purpose;
-		if (args.Length() > 2) {
-			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[2]);
-			LOGD("DHPref: read %d purposes", pTmp->Length());
-			for(unsigned int i = 0; i < pTmp->Length(); i++) {
-				LOGD("DHPref: process purpose number %d", pTmp->Get(i));
-				purpose.push_back(pTmp->Get(i)->BooleanValue());
-			}
-		}
-		else
-			LOGD("DHPref: no purposes parameter");*/
-
 //		string widPath(".");
 
 //		string roam("N");

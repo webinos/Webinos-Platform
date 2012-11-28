@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 #include "AuthorizationsSet.h"
+#include "../../debug.h"
 
 string ontology_vector[PURPOSES_NUMBER] = {
 	"http://www.w3.org/2002/01/P3Pv1/current",
@@ -60,13 +61,11 @@ string ontology_vector[PURPOSES_NUMBER] = {
 
 AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 
-	unsigned int i=0;
-
 	// AuthzUseForPurpose Tags
 	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
 			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
-		authzuseforpurpose[i] = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
-		i++;
+		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose %s found", ((TiXmlElement*)child->FirstChild("Purpose"))->GetText());
+		authzuseforpurpose.push_back(((TiXmlElement*)child->FirstChild("Purpose"))->GetText());
 	}
 }
 

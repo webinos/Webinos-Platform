@@ -19,25 +19,33 @@
  ******************************************************************************/
 
 #include "DataHandlingPreferences.h"
+#include "../../debug.h"
 
 DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences){
 
 	// PolicyId attribute
 	PolicyId = dhpreferences->Attribute("PolicyId");
+	LOGD("Construction of %s DHPref", PolicyId.c_str());
 
 	// AuthorizationsSet Tag
 	if(dhpreferences->FirstChild("AuthorizationsSet")){
+		LOGD("DHPref constructor, AuthorizationsSet found");
 		authorizationsset = new AuthorizationsSet((TiXmlElement*)dhpreferences->FirstChild("AuthorizationsSet"));
 	}
-	else
+	else{
+		LOGD("DHPref constructor, AuthorizationsSet not found");
 		authorizationsset = NULL;
+	}
 
 	// ObligationsSet Tag
 	if(dhpreferences->FirstChild("ObligationsSet")){
+		LOGD("DHPref constructor, ObligationsSet found");
 		obligationsset = new ObligationsSet((TiXmlElement*)dhpreferences->FirstChild("ObligationsSet"));
 	}
-	else
+	else{
+		LOGD("DHPref constructor, ObligationsSet not found");
 		obligationsset = NULL;
+	}
 }
 
 DataHandlingPreferences::~DataHandlingPreferences(){
