@@ -19,14 +19,20 @@
  ******************************************************************************/
 
 #include "ProvisionalAction.h"
+#include "../../debug.h"
 
 ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 
 	// AttributeValue Tags
 	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
-	value1 = child->GetText();
-	child = (TiXmlElement*)child->NextSibling("AttributeValue");
-	value2 = child->GetText();
+	if (child) {
+		value1 = child->GetText();
+	}
+		child = (TiXmlElement*)child->NextSibling("AttributeValue");
+	if (child) {
+		value2 = child->GetText();
+	}
+	LOGD("ProvisionalAction constructor, attribute values: %s, %s", value1.c_str(), value2.c_str());
 }
 
 ProvisionalAction::~ProvisionalAction(){
@@ -35,11 +41,15 @@ ProvisionalAction::~ProvisionalAction(){
 string ProvisionalAction::evaluate(Request * req){
 
 	map<string, vector<string>* > resource_attrs = req->getResourceAttrs();
+	
+	map<string, vector<string>* >::iterator it = resource_attrs.find(API_FEATURE);
+	vector<string>* req_features = (it != resource_attrs.end()) ? it->second : NULL;
 
-	for(map<string, vector<string>* >::iterator it = resource_attrs.begin(); it!= resource_attrs.end(); it++){
-		if (value1.compare(it->first.data()) == 0)
+	for(unsigned int i = 0; i<req_features->size(); i++){
+		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), (req_features->at(i)).c_str());
+		if (value1.compare(req_features->at(i)) == 0)
 			return value2;
-		if (value2.compare(it->first.data()) == 0)
+		if (value2.compare(req_features->at(i)) == 0)
 			return value1;
 	}
 	return "";
