@@ -71,7 +71,15 @@ Effect PolicyManager::checkRequest(Request * req){
 		LOGD("XACML response: %d", xacml_eff);
 		if (selectedDHPref.empty() == false) {
 			LOGD("Selected DHPref: %s", selectedDHPref.c_str());
-			dhp_eff = dhp[selectedDHPref]->evaluate(req);
+			DHPrefs::iterator it;
+			it=dhp.find(selectedDHPref);
+			if (it == dhp.end()){
+				LOGD("DHPref: %s not found", selectedDHPref.c_str());
+			}
+			else {	
+				LOGD("DHPref: %s not found", selectedDHPref.c_str());
+				dhp_eff = dhp[selectedDHPref]->evaluate(req);
+			}
 		}
 		if (dhp_eff == true){
 			LOGD("DHP response: true");

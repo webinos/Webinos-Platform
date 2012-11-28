@@ -35,6 +35,7 @@ Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
 		LOGD("Rule: DHPref %s found", child->Attribute("PolicyId"));
 		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
+	LOGD("Rule DHPref number: %d", datahandlingpreferences.size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("ProvisionalActions"); child;

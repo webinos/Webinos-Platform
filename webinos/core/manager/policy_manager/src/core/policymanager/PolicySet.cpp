@@ -40,6 +40,7 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 		LOGD("PolicySet: DHPref %s found", child->Attribute("PolicyId"));
 		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
+	LOGD("PolicySet DHPref number: %d", datahandlingpreferences.size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("ProvisionalActions"); child;
