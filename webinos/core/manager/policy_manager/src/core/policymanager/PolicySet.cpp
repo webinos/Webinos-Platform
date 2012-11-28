@@ -36,13 +36,15 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
+			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
+		LOGD("PolicySet: DHPref %s found", child->Attribute("PolicyId"));
 		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
+			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+		LOGD("PolicySet: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
 
@@ -101,7 +103,7 @@ Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
 	Effect eff;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
-			LOGD("policies[%d] = %s",i,policies[i]->description.data());
+		LOGD("policies[%d] = %s",i,policies[i]->description.data());
 	}
 	
  	if(req->getResourceAttrs().size() == 0){
@@ -227,8 +229,11 @@ void PolicySet::selectDHPref(Request* req, string* selectedDHPref){
 
 	if ((*selectedDHPref).empty() == true){
 		// search for a provisional action with a resource matching the request
+		LOGD("PolicySet: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			LOGD("PolicySet: ProvisionalActions %d evaluation", i);
 			preferenceid = provisionalactions[i]->evaluate(req);
+			LOGD("PolicySet: ProvisionalActions %d evaluation response: %s", i, preferenceid.c_str());
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
 			if (preferenceid.empty() == false)
