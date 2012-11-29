@@ -21,7 +21,7 @@
 #include "../../debug.h"
 
 Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
-	datahandlingpreferences = *dhp;
+	datahandlingpreferences = dhp;
 	effect = (rule->Attribute("effect") != NULL) ? string2effect(rule->Attribute("effect")) : UNDETERMINED;
 	if(rule->FirstChild("condition")){
 		condition = new Condition((TiXmlElement*)rule->FirstChild("condition"));
@@ -33,9 +33,9 @@ Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
 		LOGD("Rule: DHPref %s found", child->Attribute("PolicyId"));
-		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
-	LOGD("Rule DHPref number: %d", datahandlingpreferences.size());
+	LOGD("Rule DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("ProvisionalActions"); child;
@@ -82,7 +82,7 @@ Effect Rule::evaluate(Request* req, string* selectedDHPref){
 				// search for a dh preference with an id matching the string returned by
 				// the previous provisional action
 				if (preferenceid.empty() == false)
-					if (datahandlingpreferences.count(preferenceid) == 1){
+					if ((*datahandlingpreferences).count(preferenceid) == 1){
 						*selectedDHPref = preferenceid;
 						break;
 					}

@@ -31,7 +31,7 @@ class Rule
 private:
 	Effect 		effect;
 	Condition* 	condition;
-	DHPrefs			datahandlingpreferences;
+	DHPrefs*			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 public:

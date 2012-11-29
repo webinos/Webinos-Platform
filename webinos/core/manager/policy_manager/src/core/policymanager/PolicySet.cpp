@@ -22,7 +22,7 @@
 
 PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 	iType = POLICY_SET;
-	datahandlingpreferences = *dhp;
+	datahandlingpreferences = dhp;
 	policyCombiningAlgorithm = (set->Attribute("combine")!=NULL) ? set->Attribute("combine") : deny_overrides_algorithm;
 	
 	//init subjects
@@ -38,9 +38,9 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("DataHandlingPreferences"); child;
 			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
 		LOGD("PolicySet: DHPref %s found", child->Attribute("PolicyId"));
-		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
-	LOGD("PolicySet DHPref number: %d", datahandlingpreferences.size());
+	LOGD("PolicySet DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("ProvisionalActions"); child;
@@ -57,12 +57,12 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 			continue;
 	
 		if(child->ValueStr() == "policy-set"){
-			PolicySet * set = new PolicySet(child, &datahandlingpreferences);
+			PolicySet * set = new PolicySet(child, dhp);
 			policysets.push_back(set);
 			sortArray.push_back(set);
 		}
 		else if(child->ValueStr() == "policy"){
-			Policy * policy = new Policy(child, &datahandlingpreferences);
+			Policy * policy = new Policy(child, dhp);
 			policies.push_back(policy);
 			sortArray.push_back(policy);
 		}
@@ -238,7 +238,7 @@ void PolicySet::selectDHPref(Request* req, string* selectedDHPref){
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
 			if (preferenceid.empty() == false)
-				if (datahandlingpreferences.count(preferenceid) == 1){
+				if ((*datahandlingpreferences).count(preferenceid) == 1){
 					(*selectedDHPref) = preferenceid;
 					break;
 				}

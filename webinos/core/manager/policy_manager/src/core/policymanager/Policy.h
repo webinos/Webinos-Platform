@@ -34,7 +34,7 @@ private:
 	string 				ruleCombiningAlgorithm;
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
-	DHPrefs			datahandlingpreferences;
+	DHPrefs*			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	void selectDHPref(Request*, string*);
 	

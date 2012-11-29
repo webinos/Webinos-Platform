@@ -29,14 +29,17 @@ PolicyManager::PolicyManager(const string & policyFileName){
 
 	if (doc.LoadFile())
 	{
+		dhp = new DHPrefs();
 		LOGD("Policy manager file load ok");
 		validPolicyFile = true;
 		TiXmlElement * element = (TiXmlElement *)doc.RootElement();
 		if(element->ValueStr() == "policy"){
-			policyDocument = new PolicySet(new Policy(element, &dhp));
+			policyDocument = new PolicySet(new Policy(element, dhp));
+			LOGD("DHPref number after Policy element creation: %d", (*dhp).size());
 		}
 		else if(element->ValueStr() == "policy-set"){
-			policyDocument = new PolicySet(element, &dhp);
+			policyDocument = new PolicySet(element, dhp);
+			LOGD("DHPref number after PolicySet element creation: %d", (*dhp).size());
 		}
 		policyName = policyDocument->description;
 	}
@@ -72,13 +75,13 @@ Effect PolicyManager::checkRequest(Request * req){
 		if (selectedDHPref.empty() == false) {
 			LOGD("Selected DHPref: %s", selectedDHPref.c_str());
 			DHPrefs::iterator it;
-			it=dhp.find(selectedDHPref);
-			if (it == dhp.end()){
+			it=(*dhp).find(selectedDHPref);
+			if (it == (*dhp).end()){
 				LOGD("DHPref: %s not found", selectedDHPref.c_str());
 			}
 			else {	
-				LOGD("DHPref: %s not found", selectedDHPref.c_str());
-				dhp_eff = dhp[selectedDHPref]->evaluate(req);
+				LOGD("DHPref: %s found", selectedDHPref.c_str());
+				dhp_eff = (*dhp)[selectedDHPref]->evaluate(req);
 			}
 		}
 		if (dhp_eff == true){

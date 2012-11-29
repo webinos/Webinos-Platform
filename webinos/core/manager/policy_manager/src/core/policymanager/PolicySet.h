@@ -39,7 +39,7 @@ private:
 	vector<PolicySet*>	policysets;
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
-	DHPrefs			datahandlingpreferences;
+	DHPrefs*			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);

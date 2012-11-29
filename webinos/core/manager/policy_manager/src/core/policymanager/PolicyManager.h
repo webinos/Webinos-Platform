@@ -34,7 +34,7 @@ private:
 
 public:
 	string selectedDHPref;
-	DHPrefs dhp;
+	DHPrefs* dhp;
 	PolicyManager();
 	PolicyManager(const string &);
 	virtual ~PolicyManager();
