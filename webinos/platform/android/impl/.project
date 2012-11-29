@@ -30,4 +30,27 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>api_src</name>
+			<type>2</type>
+			<locationURI>PARENT-1-PROJECT_LOC/api/src</locationURI>
+		</link>
+		<link>
+			<name>bridge_src</name>
+			<type>2</type>
+			<locationURI>ANODE_ROOT/bridge-java/src</locationURI>
+		</link>
+		<link>
+			<name>libnode_src</name>
+			<type>2</type>
+			<locationURI>ANODE_ROOT/libnode/src</locationURI>
+		</link>
+	</linkedResources>
+	<variableList>
+		<variable>
+			<name>ANODE_ROOT</name>
+			<value>file:/FILL_THIS_IN</value>
+		</variable>
+	</variableList>
 </projectDescription>
