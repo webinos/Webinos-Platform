@@ -69,9 +69,14 @@ Effect Rule::string2effect(const string & effect_str){
 Effect Rule::evaluate(Request* req, string* selectedDHPref){
 
 	string preferenceid;
+	ConditionResponse cr;
 
-	if(condition){
-
+	if (condition) {
+		cr = condition->evaluate(req);
+//		LOGD("[RULE EVAL] %d",cr); 
+	}
+	// there is no condition tag, or there is condition tag and request resource is matching policy resource
+	if (!condition || cr == MATCH) {
 		if((*selectedDHPref).empty() == true){
 			// search for a provisional action with a resource matching the request
 			LOGD("Rule: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
@@ -88,16 +93,11 @@ Effect Rule::evaluate(Request* req, string* selectedDHPref){
 					}
 			}
 		}
-
-		ConditionResponse cr = condition->evaluate(req);
-//		LOGD("[RULE EVAL] %d",cr); 
-		if(cr==MATCH)
-			return effect;
-		else if (cr==NO_MATCH)
-			return INAPPLICABLE;
-		else
-			return UNDETERMINED;
-	}
-	else
 		return effect;
+	}
+	// there is condition tag and request resource is not matching policy resource
+	if (cr==NO_MATCH)
+		return INAPPLICABLE;
+	else
+		return UNDETERMINED;
 }
