@@ -19,11 +19,11 @@
 
 
 (function () {
-	"use strict";
+    'use strict';
 
 
-	exports.initialize = function() {
-		console.log("This should not be loaded...");
-	};
+    exports.initialize = function() {
+        console.log('This should not be loaded...');
+    };
 
 }());
