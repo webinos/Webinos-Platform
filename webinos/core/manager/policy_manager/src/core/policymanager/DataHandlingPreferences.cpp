@@ -56,6 +56,6 @@ string DataHandlingPreferences::GetId(){
 }
 
 bool DataHandlingPreferences::evaluate(Request * req){
-	LOGD("Evalutaing %d DHPref", PolicyId.c_str());
+	LOGD("Evalutaing %s DHPref", PolicyId.c_str());
 	return authorizationsset->evaluate(req);
 }

@@ -73,6 +73,7 @@ AuthorizationsSet::~AuthorizationsSet(){
 }
 
 bool AuthorizationsSet::evaluate(Request * req){
+	LOGD("Evaluating AuthorizationsSet");
 
 	bool purpose_satisfied[PURPOSES_NUMBER];
 	vector<bool> purpose = req->getPurposeAttrs();
@@ -81,19 +82,22 @@ bool AuthorizationsSet::evaluate(Request * req){
 	for(vector<bool>::iterator it = purpose.begin(); it!= purpose.end(); it++){
 		// Purpose requested
 		if (*it == true){
+			purpose_satisfied[i] = false;
+			LOGD("AuthorizationsSet: purpose %d is true", i);
 			for(unsigned int j=0; j<authzuseforpurpose.size(); j++){
+				LOGD("AuthorizationsSet: checking authzuseforpurpose %d, %s", j, authzuseforpurpose[j].c_str());
 				if (ontology_vector[i].compare(authzuseforpurpose[j]) == 0){
 					// Purpose requested and satisfied
 					purpose_satisfied[i] = true;
 					break;
 				}
 			}
-			// Purpose requested and not satisfied
-			purpose_satisfied[i] = false;
 		}
 		// Purpose not requested
-		else
+		else {
+			LOGD("AuthorizationsSet: purpose %d is false", i);
 			purpose_satisfied[i] = true;
+		}
 		i++;
 	}
 
