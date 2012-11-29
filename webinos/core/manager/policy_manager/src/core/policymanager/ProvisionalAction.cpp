@@ -40,16 +40,23 @@ ProvisionalAction::~ProvisionalAction(){
 
 string ProvisionalAction::evaluate(Request * req){
 
+	int features = 0;
+	string req_feature;
 	map<string, vector<string>* > resource_attrs = req->getResourceAttrs();
-	
-	map<string, vector<string>* >::iterator it = resource_attrs.find(API_FEATURE);
-	vector<string>* req_features = (it != resource_attrs.end()) ? it->second : NULL;
 
-	for(unsigned int i = 0; i<req_features->size(); i++){
-		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), (req_features->at(i)).c_str());
-		if (value1.compare(req_features->at(i)) == 0)
+	if (resource_attrs.count(API_FEATURE) == 1) {
+		features = (req->getResourceAttrs())[API_FEATURE]->size();
+		req_feature = (req->getResourceAttrs())[API_FEATURE]->at(0);
+	}
+	
+	// Provisional actions link together a single DHPref and a single feature,
+	// more than a feature in a request should not be allowed
+	// this is already tested in PolicyManager.cpp, but it is tested again here to be careful
+	if (features == 1) {
+		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), req_feature.c_str());
+		if (value1.compare(req_feature) == 0)
 			return value2;
-		if (value2.compare(req_features->at(i)) == 0)
+		if (value2.compare(req_feature) == 0)
 			return value1;
 	}
 	return "";

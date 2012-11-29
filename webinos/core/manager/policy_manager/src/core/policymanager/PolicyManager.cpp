@@ -68,21 +68,38 @@ string PolicyManager::getPolicyName(){
 Effect PolicyManager::checkRequest(Request * req){
 	Effect xacml_eff;
 	bool dhp_eff = false;
+	int features = 0;
 	LOGD("Policy manager start check");
 	if(validPolicyFile) {
 		xacml_eff = policyDocument->evaluate(req, &selectedDHPref);
 		LOGD("XACML response: %d", xacml_eff);
-		if (selectedDHPref.empty() == false) {
-			LOGD("Selected DHPref: %s", selectedDHPref.c_str());
-			DHPrefs::iterator it;
-			it=(*dhp).find(selectedDHPref);
-			if (it == (*dhp).end()){
-				LOGD("DHPref: %s not found", selectedDHPref.c_str());
+
+		// in ProvisionalAction tags a single resouce requires a single DHPref
+		// no more than one resouce must be used in non installation enforceRequest call
+		if ((req->getResourceAttrs()).count(API_FEATURE) == 1) {
+			features = (req->getResourceAttrs())[API_FEATURE]->size();
+		}
+		if (features == 1){
+			LOGD("One feature requested, DHPref evaluation started");
+			if (selectedDHPref.empty() == false) {
+				LOGD("Selected DHPref: %s", selectedDHPref.c_str());
+				DHPrefs::iterator it;
+				it=(*dhp).find(selectedDHPref);
+				if (it == (*dhp).end()){
+					LOGD("DHPref: %s not found", selectedDHPref.c_str());
+				}
+				else {	
+					LOGD("DHPref: %s found", selectedDHPref.c_str());
+					dhp_eff = (*dhp)[selectedDHPref]->evaluate(req);
+				}
 			}
-			else {	
-				LOGD("DHPref: %s found", selectedDHPref.c_str());
-				dhp_eff = (*dhp)[selectedDHPref]->evaluate(req);
-			}
+		}
+		// in installation enforceRequest call more resource parameters can be used
+		// the result of Data handling preferences evaluation is set to true because
+		// the XACML response only is significant
+		else {
+			LOGD("%d features requested, DHPref evaluation skipped", features);
+			dhp_eff = true;
 		}
 		if (dhp_eff == true){
 			LOGD("DHP response: true");
