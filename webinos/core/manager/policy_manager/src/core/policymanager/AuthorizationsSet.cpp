@@ -61,11 +61,20 @@ string ontology_vector[PURPOSES_NUMBER] = {
 
 AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 
-	// AuthzUseForPurpose Tags
-	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
-			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
-		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose %s found", ((TiXmlElement*)child->FirstChild("Purpose"))->GetText());
-		authzuseforpurpose.push_back(((TiXmlElement*)child->FirstChild("Purpose"))->GetText());
+	TiXmlElement * child;
+
+	// AuthzUseForPurpose Tag
+	if (authorizationsset->FirstChild("AuthzUseForPurpose")) {
+		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose found");
+		child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose");
+		for(child = (TiXmlElement*)child->FirstChild("Purpose"); child; 
+				child = (TiXmlElement*)child->NextSibling("Purpose")) {
+			LOGD("Purpose %s found", child->GetText());
+			authzuseforpurpose.push_back(child->GetText());
+		}
+	}
+	else{
+		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose not found");
 	}
 }
 
