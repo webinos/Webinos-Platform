@@ -34,32 +34,24 @@
       mediaContentService = mediaContentServices[$ ('#serviceList option:selected').val ()];
       mediaContentService.bindService ({onBind:function (service) {
         document.getElementById('position').innerHTML = "Bound MediaContent service";
-        initiateMediaContent();
       }});
     }
 
     function handle_errors() {
     }
 
-    function initiateMediaContent() {
-      "use strict";
-      function success(_mediaContent) {
-        mediaContent = _mediaContent;
-      }
-      mediaContentService.getLocalMediaSource(success, handle_errors);
-    }
-
     function folderDetails(folderDetails) {
       "use strict";
       var i;
       document.getElementById('displayDetails').innerHTML = "";
-      var folderData = "<table>";
-      for (i = 0; i = folderDetails.length; i = i + 1) {
-        folderData += "<tr><td>ID</td><td>" + folderDetails[i].id + "</td></tr>";
-        folderData += "<tr><td>Path</td><td>" + folderDetails[i].folderURI + "</td></tr>";
-        folderData += "<tr><td>Name</td><td>" + folderDetails[i].title + "</td></tr>";
-        folderData += "<tr><td>Type</td><td>" + folderDetails[i].storageType + "</td></tr>";
-        folderData += "<tr><td>Date</td><td>" + folderDetails[i].modifiedDate + "</td></tr>";
+      var folderData = "<table border=2 cellpadding='2' cellspacing='2'>";
+      folderData += "<tr><th>ID</th><th>Path</th><th>Name</th><th>Type</th><th>Date</th></tr>";
+      for (i = 0; i < folderDetails.length; i = i + 1) {
+        folderData += "<tr><td>" + folderDetails[i].id + "</td>";
+        folderData += "<td>" + folderDetails[i].folderURI + "</td>";
+        folderData += "<td>" + folderDetails[i].title + "</td>";
+        folderData += "<td>" + folderDetails[i].storageType + "</td>";
+        folderData += "<td>" + folderDetails[i].modifiedDate + "</td></tr>";
       }
       folderData += "</table>";
       document.getElementById('displayDetails').innerHTML = folderData;
@@ -68,29 +60,57 @@
     function itemDetails(folderDetails) {
       "use strict";
       var i;
-      document.getElementById('displayDetails').innerHTML = folderData;
-      var folderData = "<table>";
-      for (i = 0; i = folderDetails.length; i = i + 1) {
-        folderData += "<tr><td>ID</td><td>" + folderDetails[i].id + "</td></tr>";
-        folderData += "<tr><td>Path</td><td>" + folderDetails[i].folderURI + "</td></tr>";
-        folderData += "<tr><td>Name</td><td>" + folderDetails[i].title + "</td></tr>";
-        folderData += "<tr><td>Type</td><td>" + folderDetails[i].storageType + "</td></tr>";
-        folderData += "<tr><td>Date</td><td>" + folderDetails[i].modifiedDate + "</td></tr>";
+      document.getElementById('displayDetails').innerHTML = "";
+      var folderData = "<table border=2 cellpadding='2' cellspacing='2'><tr>";
+      folderData += "<th>Title</th><th>Path</th><th>Type</th><th>Size</th><th>Date</th>";
+      folderData += "<th>Album</th><th>Artists</th><th>Duration</th><th>Width</th><th>Height</th>";
+      folderData += "<th>TrackNumber</th><th>BitRate</th>";
+      folderData += "</tr>";
+      for (i = 0; i < folderDetails.length; i = i + 1) {
+        /*if (folderDetails[i].type === "Image") { folderData += "<tr>"+createObjectURL(folderDetails[i])+"</tr>";}*/
+        folderData += "<tr> <td>" + folderDetails[i].title + "</td>";
+        folderData += "<td>" + folderDetails[i].itemURI + "</td>";
+        folderData += "<td>" + folderDetails[i].type + " ("+ folderDetails[i].mimeType + ")</td>";
+        folderData += "<td>" + folderDetails[i].size + "</td>";
+        folderData += "<td>" + folderDetails[i].modifiedDate + "</td>";
+        if (folderDetails[i].type === "Video") {
+          folderData += "<td>" + folderDetails[i].album + "</td>";
+          folderData += "<td>" + folderDetails[i].artists + "</td>";
+          folderData += "<td>" + folderDetails[i].duration + "</td>";
+          folderData += "<td>" + folderDetails[i].width + "</td>";
+          folderData += "<td>" + folderDetails[i].height + "</td>";
+        }
+        else if (folderDetails[i].type === "Audio") {
+          folderData += "<td>" + folderDetails[i].album + "</td>";
+          folderData += "<td>" + folderDetails[i].artists + "</td>";
+          folderData += "<td>" + folderDetails[i].duration + "</td>";
+          folderData += "<td></td><td></td>";
+          folderData += "<td>" + folderDetails[i].trackNumber + "</td>";
+          folderData += "<td>" + folderDetails[i].bitrate + "</td>";
+        }
+        else if (folderDetails[i].type === "Image") {
+          folderData += "<td></td><td></td><td></td>";
+          folderData += "<td>" + folderDetails[i].width + "</td>";
+          folderData += "<td>" + folderDetails[i].height + "</td>";
+          folderData += "<td></td><td></td>";
+        }
+        folderData += "</tr>";
       }
       folderData += "</table>";
       document.getElementById('displayDetails').innerHTML = folderData;
     }
 
+
+
     function getLocalFolders() {
-      if(mediaContent) {
-        console.log(mediaContent)
-        console.log(mediaContentService)
-        mediaContentService.getFolders(folderDetails, handle_errors);
+      if(mediaContentService) {
+        mediaContentService.getLocalFolders(folderDetails, handle_errors);
       }
     }
+
     function findItemInFolders() {
-      if(mediaContent) {
-        mediaContent.findItem(itemDetails, handle_errors);
+      if(mediaContentService) {
+        mediaContentService.findItem(itemDetails, handle_errors);
       }
     }
   </script>

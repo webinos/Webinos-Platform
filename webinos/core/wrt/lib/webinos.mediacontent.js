@@ -33,12 +33,10 @@
    * @param bindCB BindCallback object.
    */
   MediaContentModule.prototype.bindService = function (bindCB, serviceId) {
-    var MediaSource;
-    this.getLocalMediaSource = function (successCB, errorCB) {
-      var rpc = webinos.rpcHandler.createRPC(this, "getLocalMediaSource", []);
+    this.getLocalFolders = function (successCB, errorCB) {
+      var rpc = webinos.rpcHandler.createRPC(this, "getLocalFolders", []);
       webinos.rpcHandler.executeRPC(rpc,
         function (params) {
-          MediaSource = params;
           successCB(params);
         },
         function (error) {
@@ -46,9 +44,9 @@
         }
         );
     };
-    this.getFolders = function (successCB, errorCB) {
+    this.findItem = function (successCB, errorCB) {
       "use strict";
-      var rpc = webinos.rpcHandler.createRPC(this, "MediaSource.getFolders", []);
+      var rpc = webinos.rpcHandler.createRPC(this, "findItem", []);
       webinos.rpcHandler.executeRPC(rpc,
         function (params) {
           successCB(params);
@@ -58,6 +56,32 @@
         }
         );
     };
+    this.updateItem = function (successCB, errorCB) {
+      "use strict";
+      var rpc = webinos.rpcHandler.createRPC(this, "updateItem", []);
+      webinos.rpcHandler.executeRPC(rpc,
+        function (params) {
+          successCB(params);
+        },
+        function (error) {
+          errorCB(error);
+        }
+        );
+    };
+
+    this.updateItemsBatch = function (successCB, errorCB) {
+      "use strict";
+      var rpc = webinos.rpcHandler.createRPC(this, "updateItemBatches", []);
+      webinos.rpcHandler.executeRPC(rpc,
+        function (params) {
+          successCB(params);
+        },
+        function (error) {
+          errorCB(error);
+        }
+        );
+    };
+
 
     if (typeof bindCB.onBind === 'function') {
       bindCB.onBind(this);
