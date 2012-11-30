@@ -83,6 +83,10 @@
     "discovery": {
       "name": "Discovery",
       "location": "api/discovery/"
+    },
+    "mediacontent": {
+      "name": "MediaContent",
+      "location":"api/mediacontent/"
     }
   },
   "manager": {

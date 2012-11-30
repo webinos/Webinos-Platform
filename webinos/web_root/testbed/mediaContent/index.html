@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="./jquery-1.8.2.min.js"></script>
+  <script type="text/javascript" src="./webinos.js"></script>
+  <script type="text/javascript">
+    $('#serviceList').empty ();
+    $(document).ready (function () {
+      function printInfo (data) {
+        $('#message').append ('<li>' + data.payload.message + '</li>');
+      }
+      webinos.session.addListener ('info', printInfo);
+      jQuery("#btnFind").click(findService);
+      jQuery("#btnBind").click(bindService);
+      jQuery("#btnGetLocalFolders").click(getLocalFolders);
+      jQuery("#btnFindItems").click(findItemInFolders);
+    });
+
+    var mediaContentService = null;
+    var mediaContentServices =[];
+    var mediaContent = null;
+
+    function findService() {
+      "use strict";
+      webinos.discovery.findServices(new ServiceType ('http://webinos.org/api/mediacontent'), {onFound:function (service) {
+        $('#serviceList').append ($ ('<option>' + service.serviceAddress + '</option>'));
+        mediaContentServices[service.serviceAddress] = service;
+        document.getElementById('position').innerHTML = "MediaContent service found";
+      }});
+    }
+
+    function bindService() {
+      "use strict";
+      mediaContentService = mediaContentServices[$ ('#serviceList option:selected').val ()];
+      mediaContentService.bindService ({onBind:function (service) {
+        document.getElementById('position').innerHTML = "Bound MediaContent service";
+        initiateMediaContent();
+      }});
+    }
+
+    function handle_errors() {
+    }
+
+    function initiateMediaContent() {
+      "use strict";
+      function success(_mediaContent) {
+        mediaContent = _mediaContent;
+      }
+      mediaContentService.getLocalMediaSource(success, handle_errors);
+    }
+
+    function folderDetails(folderDetails) {
+      "use strict";
+      var i;
+      document.getElementById('displayDetails').innerHTML = "";
+      var folderData = "<table>";
+      for (i = 0; i = folderDetails.length; i = i + 1) {
+        folderData += "<tr><td>ID</td><td>" + folderDetails[i].id + "</td></tr>";
+        folderData += "<tr><td>Path</td><td>" + folderDetails[i].folderURI + "</td></tr>";
+        folderData += "<tr><td>Name</td><td>" + folderDetails[i].title + "</td></tr>";
+        folderData += "<tr><td>Type</td><td>" + folderDetails[i].storageType + "</td></tr>";
+        folderData += "<tr><td>Date</td><td>" + folderDetails[i].modifiedDate + "</td></tr>";
+      }
+      folderData += "</table>";
+      document.getElementById('displayDetails').innerHTML = folderData;
+    }
+
+    function itemDetails(folderDetails) {
+      "use strict";
+      var i;
+      document.getElementById('displayDetails').innerHTML = folderData;
+      var folderData = "<table>";
+      for (i = 0; i = folderDetails.length; i = i + 1) {
+        folderData += "<tr><td>ID</td><td>" + folderDetails[i].id + "</td></tr>";
+        folderData += "<tr><td>Path</td><td>" + folderDetails[i].folderURI + "</td></tr>";
+        folderData += "<tr><td>Name</td><td>" + folderDetails[i].title + "</td></tr>";
+        folderData += "<tr><td>Type</td><td>" + folderDetails[i].storageType + "</td></tr>";
+        folderData += "<tr><td>Date</td><td>" + folderDetails[i].modifiedDate + "</td></tr>";
+      }
+      folderData += "</table>";
+      document.getElementById('displayDetails').innerHTML = folderData;
+    }
+
+    function getLocalFolders() {
+      if(mediaContent) {
+        console.log(mediaContent)
+        console.log(mediaContentService)
+        mediaContentService.getFolders(folderDetails, handle_errors);
+      }
+    }
+    function findItemInFolders() {
+      if(mediaContent) {
+        mediaContent.findItem(itemDetails, handle_errors);
+      }
+    }
+  </script>
+</head>
+<body>
+
+<p><div style="background-color:lightgray; border:1px solid black">
+  PZH PZP LIST :
+  <select id="serviceList">
+    <option></option>
+  </select>
+</div></p>
+
+
+<p><div>
+  <button id="btnFind">Find MediaContent Service</button>
+  <button id="btnBind">Bind MediaContent Service</button>
+  <button id="btnGetLocalFolders"> Get Local Folder</button>
+  <button id="btnFindItems"> FindContents in Folder</button>
+</div></p>
+<p><div id="position"></div></p>
+<p><div id="displayDetails"></div></p>
+
+</body>
+</html>
