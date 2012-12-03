@@ -82,6 +82,29 @@ bool CServiceManager::CreateDirectory(std::string path)
 #endif
 }
 
+void CServiceManager::CreateSharedFile(std::string path)
+{
+#if defined(WIN32)
+  // For Windows we need to make sure all users can write to this file.
+  // We achieve this by setting a security descriptor
+  BYTE sd[SECURITY_DESCRIPTOR_MIN_LENGTH];
+  SECURITY_ATTRIBUTES sa;
+
+  sa.nLength = sizeof(sa);
+  sa.bInheritHandle = TRUE;
+  sa.lpSecurityDescriptor = &sd;
+
+  InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+  SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
+
+  HANDLE hFile = ::CreateFile(path.c_str(),GENERIC_WRITE,0,&sa,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
+  if (hFile != INVALID_HANDLE_VALUE)
+    ::CloseHandle(hFile);
+#else
+  // Do nothing - not necessary on Linux
+#endif
+}
+
 // Read settings from the users configuration file for the service.
 // Don't have a full-on json parser so we just do it manually for the time being (apologies).
 bool CServiceManager::GetServiceParameters(CUserParameters& user, CServiceParameters& params)
@@ -230,6 +253,8 @@ bool CServiceManager::SetUserParameters(std::string appDataPath)
 	{
 		serviceConfigPath += pathSeparator + WEBINOS_SERVER_EXE + std::string(".dat");
 
+    CreateSharedFile(serviceConfigPath.c_str());
+
     std::ofstream fs(serviceConfigPath.c_str());
 
     if (fs)
@@ -323,6 +348,8 @@ void CServiceManager::WriteServiceHeartbeat(const CServiceParameters& params)
 	if (GetCommonSettingsPath(serviceConfigPath))
 	{
 		serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
+
+    CreateSharedFile(serviceConfigPath.c_str());
 
     std::ofstream fs(serviceConfigPath.c_str());
     if (fs)
