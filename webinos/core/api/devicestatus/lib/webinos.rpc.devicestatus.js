@@ -1,6 +1,7 @@
 (function () {
 	"use strict";
 
+	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 	var devicestatusmodule = require('./webinos.devicestatus.js').devicestatus,
 	RemoteDeviceStatusManager = function(rpcHandler) {
 		// inherit from RPCWebinosService

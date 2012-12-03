@@ -18,13 +18,13 @@
 
 var dependency   = require("find-dependencies")(__dirname);
 var logger       = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
-var rpc          = dependency.global.require(dependency.global.rpc.location);
-var Registry     = dependency.global.require(dependency.global.rpc.location, "lib/registry").Registry;
 var Discovery    = dependency.global.require(dependency.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
 var MessageHandler= dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
-var RPCHandler   = rpc.RPCHandler;
 var Sync         = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
 var modLoader    = dependency.global.require(dependency.global.util.location, "lib/loadservice.js");
+var rpc          = require("webinos-jsonrpc2");
+var RPCHandler   = rpc.RPCHandler;
+var Registry     = rpc.Registry;
 var PzpDiscovery = require("./pzp_peerDiscovery");
 var Session      = require("./session");
 var path = require("path");
@@ -104,7 +104,7 @@ var Pzp_OtherManager = function (_parent) {
     modLoader.loadServiceModules(modules, self.registry, self.rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(self.rpcHandler); // handler for all things message
     // Init the rpc interception of policy manager
-    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js");
+    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js").setRPCHandler(self.rpcHandler);
     dependency.global.require(dependency.global.manager.context_manager.location);//initializes context manager
   };
 

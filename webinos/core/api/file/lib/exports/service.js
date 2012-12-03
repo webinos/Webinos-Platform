@@ -26,8 +26,7 @@ var pathModule = require("path")
 var LocalFileSystem = require("../engine/local-file-system.js")
 
 var dependencies = require("find-dependencies")(__dirname)
-var rpcModule = dependencies.global.require(dependencies.global.rpc.location,
-    "lib/rpc.js")
+var rpcModule = require("webinos-jsonrpc2")
 
 inherits(Service, rpcModule.RPCWebinosService)
 function Service(rpc, params) {

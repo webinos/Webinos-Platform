@@ -1,6 +1,7 @@
 (function() {
 
 var OAuth= require('oauth').OAuth;
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 /**
  * Webinos Service constructor.
