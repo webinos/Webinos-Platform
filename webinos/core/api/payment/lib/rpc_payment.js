@@ -20,6 +20,7 @@
     (function() {
 
 var wPayment = require('./impl_payment.js');
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
         
 var basket = null;
 

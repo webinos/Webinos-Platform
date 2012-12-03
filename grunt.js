@@ -37,8 +37,8 @@ module.exports = function(grunt) {
       dist: {
         src: [
           'webinos/core/wrt/lib/webinos.util.js',
-          'webinos/core/rpc/lib/registry.js',
-          'webinos/core/rpc/lib/rpc.js',
+          'node_modules/webinos-jsonrpc2/lib/registry.js',
+          'node_modules/webinos-jsonrpc2/lib/rpc.js',
           'webinos/core/manager/messaging/lib/messagehandler.js',
           'webinos/core/wrt/lib/webinos.session.js',
           'webinos/core/wrt/lib/webinos.servicedisco.js',
@@ -83,6 +83,21 @@ module.exports = function(grunt) {
   // plugin provides "clean" task
   grunt.loadNpmTasks('grunt-contrib-clean');
 
+  grunt.registerTask(
+    'check-rpc',
+    'Check if webinos-jsonrpc2 is in local node_modules, required for concat task',
+    function() {
+      var isInstalled = fs.existsSync('./node_modules/webinos-jsonrpc2/');
+      if (!isInstalled) {
+        console.log();
+        console.log('\nError: webinos-jsonrpc2 must be in local node_modules.\n');
+        console.log();
+        return false;
+      }
+
+      grunt.task.run('concat');
+    });
+
   grunt.registerTask('clean-certs', 'Cleans certificates from user dir', function() {
     var winPath = ['AppData', 'Roaming', 'webinos'];
     var unixPath = ['.webinos'];
@@ -126,7 +141,7 @@ module.exports = function(grunt) {
     grunt.config.set('clean', oldClean);
   });
 
-  grunt.registerTask('minify', 'concat min');
+  grunt.registerTask('minify', 'check-rpc min');
 
-  grunt.registerTask('default', 'concat');
+  grunt.registerTask('default', 'check-rpc');
 };

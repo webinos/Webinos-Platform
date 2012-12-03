@@ -16,6 +16,7 @@
 * Copyright 2012 André Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
+	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 	/**
 	 * Webinos Event service constructor (server side).

@@ -21,6 +21,8 @@
 (function() {
 	"use strict";
 	
+	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
+
 	var _TV_MODULE_IMPLEMENTATION_ = 'mock'; // mock, vlcdvb, coolstream, ce4100
 
 	// reference to specific tv manager implementation

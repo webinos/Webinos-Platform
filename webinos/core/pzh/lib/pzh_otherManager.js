@@ -20,12 +20,12 @@ var dependency     = require("find-dependencies")(__dirname);
 var logger         = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
 var session        = dependency.global.require(dependency.global.pzp.location, "lib/session.js");
 var MessageHandler = dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
-var rpc            = dependency.global.require(dependency.global.rpc.location);
-var Registry       = dependency.global.require(dependency.global.rpc.location, "lib/registry").Registry;
 var Discovery      = dependency.global.require(dependency.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
-var RPCHandler     = rpc.RPCHandler;
 var Sync           = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
 var loadModules    = dependency.global.require(dependency.global.util.location, "lib/loadservice.js").loadServiceModules;
+var rpc            = require("webinos-jsonrpc2");
+var RPCHandler     = rpc.RPCHandler;
+var Registry       = rpc.Registry;
 var path = require("path");
 
 var Pzh_RPC = function(_parent) {
