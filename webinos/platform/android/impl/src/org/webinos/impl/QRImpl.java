@@ -30,6 +30,7 @@ import android.content.Context;
 import android.util.Log;
 import android.graphics.Bitmap;
 
+import org.webinos.api.qrencoder.EncodeCallback;
 import org.webinos.api.qrencoder.QRManager;
 
 public class QRImpl extends QRManager implements IModule {
@@ -45,7 +46,7 @@ public class QRImpl extends QRManager implements IModule {
 *****************************/
 
   @Override
-  public void enCode(String data, int width, int height, String filename) {
+  public void enCode(String data, int width, int height, String filename, EncodeCallback encodeCallBack) {
     
     Log.v(LABEL, "QREncoder - Starts enCode function");
 
@@ -71,8 +72,10 @@ public class QRImpl extends QRManager implements IModule {
     try {
       FileOutputStream out = new FileOutputStream(filename);
       bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+      encodeCallBack.onSuccess(filename);
     } catch (Exception e) {
       e.printStackTrace();
+      encodeCallBack.onError();
     }
   }	
 /*****************************

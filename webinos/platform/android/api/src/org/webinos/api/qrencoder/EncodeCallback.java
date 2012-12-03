@@ -13,19 +13,14 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *
-* Copyright 2011-2012 Ziran Sun Samsung Electronics(UK) Ltd
+* Copyright 2012 Ziran Sun Samsung Electronics(UK) Ltd
 *
 ******************************************************************************/
 
 package org.webinos.api.qrencoder;
 
-import org.meshpoint.anode.bridge.Env;
-import org.meshpoint.anode.java.Base;
-import org.webinos.api.DeviceAPIError;
-
-public abstract class QRManager extends Base {
-  private static short classId = Env.getInterfaceId(QRManager.class);
-  protected QRManager() { super(classId); }
-
-  public abstract void enCode(String data, int width, int height, String filename, EncodeCallback encodeCallBack) throws DeviceAPIError;
+public interface EncodeCallback {
+	 public void onSuccess(String filename);        
+     public void onError();
 }
+

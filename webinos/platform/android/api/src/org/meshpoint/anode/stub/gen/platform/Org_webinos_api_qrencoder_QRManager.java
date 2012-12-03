@@ -4,7 +4,7 @@ package org.meshpoint.anode.stub.gen.platform;
 
 public class Org_webinos_api_qrencoder_QRManager {
 
-	private static Object[] __args = new Object[4];
+	private static Object[] __args = new Object[5];
 
 	public static Object[] __getArgs() { return __args; }
 
@@ -13,7 +13,8 @@ public class Org_webinos_api_qrencoder_QRManager {
 			(String)args[0],
 			(int)((org.meshpoint.anode.js.JSValue)args[1]).longValue,
 			(int)((org.meshpoint.anode.js.JSValue)args[2]).longValue,
-			(String)args[3]
+			(String)args[3],
+			(org.webinos.api.qrencoder.EncodeCallback)args[4]
 		);
 		return null;
 	}
