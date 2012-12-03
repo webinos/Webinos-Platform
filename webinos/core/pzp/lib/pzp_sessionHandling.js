@@ -21,8 +21,6 @@ var path = require("path"),
   fs   = require("fs"),
   os   = require("os");
 
-
-
 var dependency = require("find-dependencies")(__dirname);
 var Session    = require("./session");
 var logger     = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
@@ -463,6 +461,11 @@ var ConnectHub = function(_parent) {
           if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
             logger.error("Connect  attempt to YOUR PZH "+ _parent.config.metaData.pzhId+" failed.");
             if(_parent.pzp_state.mode === _parent.modes[1]){
+              if(os.type().toLowerCase() == "windows_nt")
+              {
+                //Do nothing until WinSockWatcher works
+              }
+              else 
                 _parent.webinos_manager.peerDiscovery.findPzp(self,'zeroconf', _parent.config.userPref.ports.pzp_tlsServer, _parent.config.metaData.pzhId);
             }
           } else {

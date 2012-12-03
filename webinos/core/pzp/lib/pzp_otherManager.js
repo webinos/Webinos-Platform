@@ -28,6 +28,7 @@ var modLoader    = dependency.global.require(dependency.global.util.location, "l
 var PzpDiscovery = require("./pzp_peerDiscovery");
 var Session      = require("./session");
 var path = require("path");
+var os = require('os');
 var Pzp_OtherManager = function (_parent) {
   // TODO: these variables are directly set by service discovery does not look right
   this.serviceListener;  // For a single callback to be registered via addRemoteServiceListener.
@@ -144,8 +145,15 @@ var Pzp_OtherManager = function (_parent) {
     registerMessaging(_parent.config.metaData.pzhId);    //message handler
     self.registerServicesWithPzh(); //rpc
     if(!self.peerDiscovery ) {// local discovery&& mode !== modes[0]
-      self.peerDiscovery = new PzpDiscovery(_parent);
-      self.peerDiscovery.advertPzp('zeroconf', _parent.config.userPref.ports.pzp_zeroConf);
+      if(os.type().toLowerCase() == "windows_nt")
+      {
+        //Do nothing until WinSockWatcher works
+      } 
+      else
+      {
+        self.peerDiscovery = new PzpDiscovery(_parent);
+        self.peerDiscovery.advertPzp('zeroconf', _parent.config.userPref.ports.pzp_zeroConf);
+      }
     }
   };
 
