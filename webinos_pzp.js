@@ -99,6 +99,7 @@ var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } 
   {name: "deviceorientation", params: {}},
   {name: "vehicle", params: {connector : "simulator"}},
   {name: "context", params: {}},
+  {name: "app2app", params: {}},
   {name: "authentication", params: {}},
   {name: "contacts", params: {}},
   {name: "devicestatus", params: {}},
