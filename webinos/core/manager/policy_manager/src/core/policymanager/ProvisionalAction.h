@@ -34,7 +34,7 @@ public:
 	ProvisionalAction(TiXmlElement*);
 	virtual ~ProvisionalAction();
 
-	string evaluate(Request *);
+	pair<string, bool> evaluate(Request *);
 };
 
 #endif /* PROVISIONALACTION_H_ */

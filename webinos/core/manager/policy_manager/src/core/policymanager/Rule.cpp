@@ -66,9 +66,9 @@ Effect Rule::string2effect(const string & effect_str){
 		return UNDETERMINED;
 }
 
-Effect Rule::evaluate(Request* req, string* selectedDHPref){
+Effect Rule::evaluate(Request* req, pair<string, bool>* selectedDHPref){
 
-	string preferenceid;
+	pair<string, bool> preferenceid;
 	ConditionResponse cr;
 
 	if (condition) {
@@ -77,20 +77,28 @@ Effect Rule::evaluate(Request* req, string* selectedDHPref){
 	}
 	// there is no condition tag, or there is condition tag and request resource is matching policy resource
 	if (!condition || cr == MATCH) {
-		if((*selectedDHPref).empty() == true){
+		if((*selectedDHPref).second == false) {
 			// search for a provisional action with a resource matching the request
 			LOGD("Rule: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 			for(unsigned int i=0; i<provisionalactions.size(); i++){
 				LOGD("Rule: ProvisionalActions %d evaluation", i);
 				preferenceid = provisionalactions[i]->evaluate(req);
-				LOGD("Rule: ProvisionalActions %d evaluation response: %s", i, preferenceid.c_str());
+				LOGD("Rule: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+				
 				// search for a dh preference with an id matching the string returned by
 				// the previous provisional action
-				if (preferenceid.empty() == false)
-					if ((*datahandlingpreferences).count(preferenceid) == 1){
-						*selectedDHPref = preferenceid;
-						break;
+				if (preferenceid.first.empty() == false) {
+					// exact match (preferenceid.second == true): select this DHPref
+					// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+					if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+						// test if DHPref exists
+						if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+							(*selectedDHPref) = preferenceid;
+							LOGD("Rule: DHPref found: %s", (*selectedDHPref).first.c_str());
+							break;
+						}
 					}
+				}
 			}
 		}
 		return effect;

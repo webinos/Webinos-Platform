@@ -33,7 +33,7 @@ private:
 	string policyName;
 
 public:
-	string selectedDHPref;
+	pair<string, bool> selectedDHPref;
 	DHPrefs* dhp;
 	PolicyManager();
 	PolicyManager(const string &);

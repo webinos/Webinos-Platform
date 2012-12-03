@@ -81,16 +81,16 @@ Effect PolicyManager::checkRequest(Request * req){
 		}
 		if (features == 1){
 			LOGD("One feature requested, DHPref evaluation started");
-			if (selectedDHPref.empty() == false) {
-				LOGD("Selected DHPref: %s", selectedDHPref.c_str());
+			if (selectedDHPref.first.empty() == false) {
+				LOGD("Selected DHPref: %s", selectedDHPref.first.c_str());
 				DHPrefs::iterator it;
-				it=(*dhp).find(selectedDHPref);
+				it=(*dhp).find(selectedDHPref.first);
 				if (it == (*dhp).end()){
-					LOGD("DHPref: %s not found", selectedDHPref.c_str());
+					LOGD("DHPref: %s not found", selectedDHPref.first.c_str());
 				}
 				else {	
-					LOGD("DHPref: %s found", selectedDHPref.c_str());
-					dhp_eff = (*dhp)[selectedDHPref]->evaluate(req);
+					LOGD("DHPref: %s found", selectedDHPref.first.c_str());
+					dhp_eff = (*dhp)[selectedDHPref.first]->evaluate(req);
 				}
 			}
 		}

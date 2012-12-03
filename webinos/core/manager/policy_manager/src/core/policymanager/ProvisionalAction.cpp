@@ -38,7 +38,7 @@ ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 ProvisionalAction::~ProvisionalAction(){
 }
 
-string ProvisionalAction::evaluate(Request * req){
+pair<string, bool> ProvisionalAction::evaluate(Request * req){
 
 	int features = 0;
 	string req_feature;
@@ -54,10 +54,22 @@ string ProvisionalAction::evaluate(Request * req){
 	// this is already tested in PolicyManager.cpp, but it is tested again here to be careful
 	if (features == 1) {
 		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), req_feature.c_str());
-		if (value1.compare(req_feature) == 0)
-			return value2;
-		if (value2.compare(req_feature) == 0)
-			return value1;
+		if (value1.compare(req_feature) == 0) {
+			LOGD("ProvisionalAction: %s and %s exact match", value1.c_str(), req_feature.c_str());
+			return pair<string, bool>(value2, true);
+		}
+		if (value2.compare(req_feature) == 0) {
+			LOGD("ProvisionalAction: %s and %s exact match", value2.c_str(), req_feature.c_str());
+			return pair<string, bool>(value1, true);
+		}
+		if (equals(req_feature, value1, string2strcmp_mode("glob"))) {
+			LOGD("ProvisionalAction: %s and %s partial match", value1.c_str(), req_feature.c_str());
+			return pair<string, bool>(value2, false);
+		}
+		if (equals(req_feature, value2, string2strcmp_mode("glob"))) {
+			LOGD("ProvisionalAction: %s and %s partial match", value2.c_str(), req_feature.c_str());
+			return pair<string, bool>(value1, false);
+		}
 	}
-	return "";
+	return pair<string, bool>("", false);
 }

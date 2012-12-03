@@ -99,7 +99,7 @@ bool PolicySet::matchSubject(Request* req){
 	return false;
 }
 
-Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
+Effect PolicySet::evaluatePolicies(Request* req, pair<string, bool>* selectedDHPref){
 
 	Effect eff;
 	
@@ -212,7 +212,7 @@ Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
 	return INAPPLICABLE;
 }
 
-Effect PolicySet::evaluate(Request * req, string* selectedDHPref){
+Effect PolicySet::evaluate(Request * req, pair<string, bool>* selectedDHPref){
 	if(matchSubject(req)){
 		if(policies.size()==	0 && policysets.size()==0){
 			return PERMIT;
@@ -225,23 +225,31 @@ Effect PolicySet::evaluate(Request * req, string* selectedDHPref){
 		return INAPPLICABLE;	
 }
 
-void PolicySet::selectDHPref(Request* req, string* selectedDHPref){
-	string preferenceid;
+void PolicySet::selectDHPref(Request* req, pair<string, bool>* selectedDHPref){
+	pair<string, bool> preferenceid;
 
-	if ((*selectedDHPref).empty() == true){
+	if((*selectedDHPref).second == false) {
 		// search for a provisional action with a resource matching the request
 		LOGD("PolicySet: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 		for(unsigned int i=0; i<provisionalactions.size(); i++){
 			LOGD("PolicySet: ProvisionalActions %d evaluation", i);
 			preferenceid = provisionalactions[i]->evaluate(req);
-			LOGD("PolicySet: ProvisionalActions %d evaluation response: %s", i, preferenceid.c_str());
+			LOGD("PolicySet: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+			
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
-			if (preferenceid.empty() == false)
-				if ((*datahandlingpreferences).count(preferenceid) == 1){
-					(*selectedDHPref) = preferenceid;
-					break;
+			if (preferenceid.first.empty() == false) {
+				// exact match (preferenceid.second == true): select this DHPref
+				// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+				if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+					// test if DHPref exists
+					if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+						(*selectedDHPref) = preferenceid;
+						LOGD("PolicySet: DHPref found: %s", (*selectedDHPref).first.c_str());
+						break;
+					}
 				}
+			}
 		}
 	}
 }

@@ -32,7 +32,7 @@ public:
 	ProvisionalActions(TiXmlElement*);
 	virtual ~ProvisionalActions();
 
-	string evaluate(Request *);
+	pair<string, bool> evaluate(Request *);
 };
 
 #endif /* PROVISIONALACTIONS_H_ */

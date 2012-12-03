@@ -34,17 +34,28 @@ ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 ProvisionalActions::~ProvisionalActions(){
 }
 
-string ProvisionalActions::evaluate(Request * req){
+pair<string, bool> ProvisionalActions::evaluate(Request * req){
 
-	string preferenceid;
+	pair<string, bool> preferenceid;
+	pair<string, bool> partial_match_preferenceid;
 
 	// search for a provisional action with a resource matching the request
 	for(unsigned int i=0; i<provisionalaction.size(); i++){
 		LOGD("ProvisionalActions: ProvisionalAction %d evaluation", i);
 		preferenceid = provisionalaction[i]->evaluate(req);
-		LOGD("ProvisionalActions: ProvisionalAction %d evaluation response: %s", i, preferenceid.c_str());
-		if (preferenceid.empty() == false)
+		LOGD("ProvisionalActions: ProvisionalAction %d evaluation response: %s", i, preferenceid.first.c_str());
+
+		// return the exact match
+		if (preferenceid.second == true)
 			return preferenceid;
+
+		// save the partial match
+		if (preferenceid.first.empty() == false && preferenceid.second == false)
+			partial_match_preferenceid = preferenceid;
 	}
-	return "";
+	
+	if (partial_match_preferenceid.first.empty() == false)
+		return partial_match_preferenceid;
+	else
+		return pair<string, bool>("", false);
 }
