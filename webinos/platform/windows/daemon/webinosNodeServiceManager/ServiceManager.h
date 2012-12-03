@@ -41,6 +41,7 @@ private:
   void WriteJSONKey(std::ofstream& fs, std::string keyName, std::string keyVal, bool final=false);
   unsigned long GetLastWriteTimeElapsed(std::string path);
   bool CreateDirectory(std::string path);
+  void CreateSharedFile(std::string path);
 
 public:
 	CServiceManager(void);
