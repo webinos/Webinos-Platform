@@ -167,9 +167,11 @@ var Provider = function(_hostname, _friendlyName) {
 
   function isWebInterface(conn, data) {
     //TODO: Validate the certificate from the connection data.
-    
-    
-    return true;
+    if (webInterface === null) {
+        webInterface = new pzh_web_session(pzhs);
+    }    
+
+    return webInterface.helloIsItYouImLookingFor(conn, data);
   }
 
   /**
@@ -181,9 +183,6 @@ var Provider = function(_hostname, _friendlyName) {
       pzhs[conn.servername].handleConnectionAuthorization(conn);
     } else {
         if (isWebInterface(conn)) {
-            if (webInterface === null) {
-                webInterface = new pzh_web_session(pzhs);
-            }
             logger.log("web interface connected");
             webInterface.handleAuthorization(conn);
         } else { 
