@@ -17,13 +17,15 @@ So avoid the following
     </script>
     <div style="width: 100px; padding: 20px"></div>
 
-And instead us separate css and javascript files.
+And instead use separate css and javascript files.
 
     <link type="text/css" href="style.css" rel="stylesheet" />
     <script src="myScript.js"></script>
     <div class="myClass">...</div>
 
 As with any web application, you can use folders to keep your widget code neat and tidy.
+
+Refer to this sample widget for more details.
 
 ##### Accessing webinos APIs
 
@@ -42,9 +44,13 @@ This widget was signed using the steps outlined in the above link, using both an
 
 ##### author signature
 
+The following command was used to add the author signature. Replace the paths with the equivalents on your system.
+
     tools/sign-widget.sh --pkcs12 /path/to/test-suite/keys/3.rsa.p12 --pwd secret -x -c -a /path/to/test-suite/keys/3.rsa.cert.pem -c /path/to/test-suite/keys/2.rsa.cert.pem /path/to/hello-world-signed/.wgt
 
 #### distributor signature
+
+The following command was used to add the distributor signature. Replace the paths with the equivalents on your system.
 
     tools/sign-widget.sh --pkcs12 /path/to/test-suite/keys/3.rsa.p12 --pwd secret -x -c /path/to/test-suite/keys/3.rsa.cert.pem -c /path/to/test-suite/keys/2.rsa.cert.pem /path/to/hello-world-signed/.wgt
 
@@ -54,7 +60,7 @@ After running the sign-widget tool you should see two new files in the widget fo
 
 To package the widget, you simply need to zip up the contents of the widget folder. A common mistake at this point is to zip up the actual widget folder, whereas what you want to do is zip up only the contents of the folder.
 
-For example, in Windows, open Explorer and navigate to the widget folder (e.g. c:\users\alice\webinos-platform\webinos\samples\widgets\hello-world-signed\.wgt). Select all the contents of the folder, then right-click and select Send To -> Zip File
+For example, in Windows, open Explorer and navigate to the widget folder (e.g. c:\users\alice\webinos-platform\webinos\samples\widgets\hello-world-signed\\.wgt). Select all the contents of the folder, then right-click and select Send To -> Zip File
 
 n.b. Do not right click on the .wgt folder and compress that - the package should only include the widget content, not the root containing folder.
 
