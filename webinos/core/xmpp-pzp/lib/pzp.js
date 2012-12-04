@@ -28,15 +28,11 @@
     var xmpp = require('./Connection');
     var ws = require('./webserver');
     var featureManager = require('./FeatureManager.js');
+    var fs = require('fs');
 
     var path = require('path');
-    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
 
-    var webinos       = require("find-dependencies")(__dirname);
-    var rpc           = webinos.global.require(webinos.global.rpc.location);
-    var registry      = webinos.global.require(webinos.global.rpc.location, "lib/registry");
+    var rpc = require('webinos-jsonrpc2');
 
     var argv = process.argv;
     var WebinosFeatures = require('./WebinosFeatures.js');
@@ -46,6 +42,35 @@
     var port;
     var jid;
     var bosh;
+
+    function initializeWidgetServer(port) {
+      // Widget manager server
+      var wrt = webinos.global.require(webinos.global.manager.widget_manager.location, "lib/ui/widgetServer");
+      
+      if (typeof wrt !== "undefined") {
+        // Attempt to start the widget server.
+        wrt.start(false, false, port, function (msg, wrtPort) {
+          if (msg === "startedWRT") {
+              logger.info('Started the WRT');
+              
+              // Write the websocket and widget server ports to file so the renderer can pick them up.
+              var wrtConfig = {};
+              wrtConfig.runtimeWebServerPort = wrtPort;
+              wrtConfig.pzpWebSocketPort = port;
+              wrtConfig.pzpPath = '..';
+              fs.writeFile((path.join('..','wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
+                if (err) {
+                  console.log('error saving runtime configuration file: ' + err);
+                } else {
+                  console.log('saved configuration runtime file');
+                }
+              });
+          } else {
+              logger.warn('error starting wrt server: ' + msg);
+          }
+        });
+      }
+    }
 
     // Parse command line
     var arguments_ok = false;
@@ -86,7 +111,7 @@
     port = 8000+10*index;
     logger.info("Using index=" + index + ", jid=" + jid + " and port=" + port);
 
-    var rpcRegistry = new registry.Registry();
+    var rpcRegistry = new rpc.Registry();
     var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
     var connection = new xmpp.Connection(rpcHandler);
 
@@ -102,6 +127,7 @@
 
     logger.verbose("Starting servers...");
     ws.start(port, port+1, rpcHandler, connection);
+    //initializeWidgetServer(port+1);
 
     featureManager.initialize(connection, rpcHandler);
 

@@ -26,14 +26,9 @@
     var sys = require('util');
     var logger = require('./Logger').getLogger('ServiceDiscovery', 'verbose');
 
-    var path = require('path');
-    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-    var geolocation = require(path.join(webinosRoot, dependencies.api.geolocation.location));
-
     var WebinosFeatures = require('./WebinosFeatures.js');
+    var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
+    
 
     /**
      * The namespace of this feature

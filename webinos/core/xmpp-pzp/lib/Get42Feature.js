@@ -33,11 +33,8 @@
      */
     var NS = "http://webinos.org/api/test";
 
-    var moduleRoot = require('../dependencies.json');
-    var dependencies = require('../' + moduleRoot.root.location + '/dependencies.json');
-    var webinosRoot = '../' + moduleRoot.root.location;
-
-    var get42 = require(webinosRoot + dependencies.api.get42.location);
+    var webinos = require("find-dependencies")(__dirname);
+    var get42 = webinos.global.require(webinos.global.api.get42.location);
 
     /**
      * Testing feature with life answer.
