@@ -26,7 +26,7 @@ var MediaItem = function () {
     editableAttributes: [],
     id: "",
     type: MediaFolderType.INTERNAL,
-    mimeType:"",
+    mimeType: "",
     title: "",
     itemURI: "",
     thumbnailURIs: [],
@@ -88,11 +88,20 @@ var MediaImage = function () {
     geolocation: "",
     width: "",
     height: "",
-    orientation:MediaImageOrientation.NORMAL
+    orientation: MediaImageOrientation.NORMAL
   };
 };
 
 MediaImage.prototype = new MediaItem();
+
+var Media = function () {
+  "use strict";
+  return {
+    content: ""
+  };
+};
+
+Media.prototype = new MediaItem();
 
 this.MediaImage  = MediaImage;
 this.MediaAudio  = MediaAudio;
@@ -100,3 +109,4 @@ this.MediaVideo  = MediaVideo;
 this.MediaItem   = MediaItem;
 this.MediaFolder = MediaFolder;
 this.MediaFolderType = MediaFolderType;
+this.Media      = Media;

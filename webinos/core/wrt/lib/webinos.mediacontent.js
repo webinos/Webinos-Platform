@@ -44,9 +44,9 @@
         }
         );
     };
-    this.findItem = function (successCB, errorCB) {
+    this.findItem = function (successCB, errorCB, params) {
       "use strict";
-      var rpc = webinos.rpcHandler.createRPC(this, "findItem", []);
+      var rpc = webinos.rpcHandler.createRPC(this, "findItem", params);
       webinos.rpcHandler.executeRPC(rpc,
         function (params) {
           successCB(params);
@@ -82,9 +82,37 @@
         );
     };
 
+    this.getContents = function (listener, errorCB, params) {
+      "use strict";
+      var rpc = webinos.rpcHandler.createRPC(this, "getContents", params);//, totalBuffer = 0, data = "";
+      rpc.onEvent = function (params) {
+        // we were called back, now invoke the given listener
+     /*   totalBuffer += params.currentBuffer;
+        data += btoa(params.contents);
+        if (totalBuffer === params.totalLength) {
+          //photo = new Buffer(data, 'binary').toString('base64');
+          window.open("data:image/png;base64"+atob(data));*/
+        listener(params);
+          //totalBuffer = 0;
+          //data = '';
+          //webinos.rpcHandler.unregisterCallbackObject(rpc);
+        //}
+      };
 
-    if (typeof bindCB.onBind === 'function') {
-      bindCB.onBind(this);
-    }
+      webinos.rpcHandler.registerCallbackObject(rpc);
+      webinos.rpcHandler.executeRPC(rpc);
+      /*webinos.rpcHandler.executeRPC(rpc,
+        function (params) {
+          totalBuffer += params.currentBuffer;
+          if (totalBuffer === params.totalLength) {
+            successCB(params);
+            totalBuffer = 0;
+          }
+        },
+        function (error) {
+          errorCB(error);
+        }
+        );*/
+    };
   };
 }());

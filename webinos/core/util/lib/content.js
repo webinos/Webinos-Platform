@@ -19,38 +19,51 @@
 var fs = require('fs');
 var path = require('path');
 
-exports.getContentType = function(uri) {
-	var contentType = "text/plain";
-	switch (uri.substr(uri.lastIndexOf("."))) {
-	case ".js":
-		contentType = "application/x-javascript";
-		break;
-	case ".html":
-		contentType = "text/html";
-		break;
-	case ".css":
-		contentType = "text/css";
-		break;
-	case ".jpg":
-		contentType = "image/jpeg";
-		break;
-	case ".png":
-		contentType = "image/png";
-		break;
-	case ".gif":
-		contentType = "image/gif";
-		break;
-	case ".svg":
-		contentType = "image/svg+xml";
-		break;
-	}
-	return {"Content-Type": contentType};
+exports.getContentType = function (uri) {
+  "use strict";
+  var contentType = "text/plain";
+  switch (uri.substr(uri.lastIndexOf("."))) {
+  case ".js":
+    contentType = "application/x-javascript";
+    break;
+  case ".html":
+    contentType = "text/html";
+    break;
+  case ".css":
+    contentType = "text/css";
+    break;
+  case ".jpg":
+    contentType = "image/jpeg";
+    break;
+  case ".png":
+    contentType = "image/png";
+    break;
+  case ".gif":
+    contentType = "image/gif";
+    break;
+  case ".svg":
+    contentType = "image/svg+xml";
+    break;
+  case ".mp3":
+    contentType = "audio/mp3";
+    break;
+  case ".ogg":
+    contentType = "audio/ogg";
+    break;
+  case ".mp4":
+    contentType = "video/mp4";
+    break;
+  case ".wav":
+    contentType = "video/x-ms-wmv";
+    break;
+  }
+  return {"Content-Type": contentType};
 };
 
 function respondErr(res, status, body) {
-	res.writeHead(status, {"Content-Type": "text/plain"});
-	res.write(body);
-	res.end();
+  res.writeHead(status, {"Content-Type": "text/plain"});
+  res.write(body);
+  res.end();
 }
 
 /**
@@ -62,30 +75,30 @@ function respondErr(res, status, body) {
  * @param filepath filepath which was request, string
  * @param indexFile relative path from documentRoot to show as default instead, string
  */
-exports.sendFile = function(res, documentRoot, filepath, indexFile) {
-	// check requested path to be inside document root
-	// no directory traversal past documentRoot allowed
-	if (documentRoot !== filepath.slice(0, documentRoot.length)) {
-		respondErr(res, 403, "403 Forbidden\n");
-		return;
-	}
+exports.sendFile = function (res, documentRoot, filepath, indexFile) {
+  // check requested path to be inside document root
+  // no directory traversal past documentRoot allowed
+  if (documentRoot !== filepath.slice(0, documentRoot.length)) {
+    respondErr(res, 403, "403 Forbidden\n");
+    return;
+  }
 
-	fs.stat(filepath, function(err, stats) {
-		if (err) {
-			respondErr(res, 404, "404 Not Found\n");
-			return;
-		}
-		if (stats.isDirectory()) {
-			filepath = path.join(filepath, indexFile);
-		}
-		fs.readFile(filepath, "binary", function(err, file) {
-			if (err) {
-				respondErr(res, 500, "500 Could not open path\n");
-				return;
-			}
-			res.writeHead(200, exports.getContentType(filepath));
-			res.write(file, "binary");
-			res.end();
-		});
-	});
+  fs.stat(filepath, function(err, stats) {
+    if (err) {
+      respondErr(res, 404, "404 Not Found\n");
+      return;
+    }
+    if (stats.isDirectory()) {
+      filepath = path.join(filepath, indexFile);
+    }
+    fs.readFile(filepath, "binary", function(err, file) {
+      if (err) {
+        respondErr(res, 500, "500 Could not open path\n");
+        return;
+      }
+      res.writeHead(200, exports.getContentType(filepath));
+      res.write(file, "binary");
+      res.end();
+    });
+  });
 };

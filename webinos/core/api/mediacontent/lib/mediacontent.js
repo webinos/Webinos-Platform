@@ -36,6 +36,7 @@
   }
 
   WebinosMediaContentModule = function (rpcHandler, params) {
+    this.rpcHandler = rpcHandler;
     // inherit from RPCWebinosService
     this.base = RPCWebinosService;
     this.base({
@@ -94,75 +95,113 @@
     }
   };
 
-  WebinosMediaContentModule.prototype.findItem = function (params, successCB, errorCB, folderId, filter, sortMode, count,
-                                                           offset) {
+  // sortMode and filter not implemented
+  WebinosMediaContentModule.prototype.findItem = function (params, successCB, errorCB) {
+    //folderId, filter, sortMode,count, offset
     function success(list) {
-      var i, count = 0, listSend = [];
+      var i, countTotal = 0, listSend = [], dirName;
       for (i = 0; i < list.length; i = i + 1) {
-        fetchMediaInfo(list[i].folderURI, list[i].id, function (id, info) {
-          var i, mediaItem,  title, result, current, data;
+        if (params.folderId) {
+          if (list[i].id === parseInt(params.folderId, 10)) {
+            dirName = list[i].folderURI;
+          } else {
+            continue;
+          }
+        } else {
+          dirName = list[i].folderURI;
+        }
+        fetchMediaInfo(dirName, list[i].id, function (id, info) {
+          var i = 0, mediaItem,  title, result, current, data, track;
+          if (params.offset) {
+            i = parseInt(params.offset, 10);
+          }
           result = JSON.parse(info);
-          for (i = 0; i < result.Mediainfo.File.length; i = i + 1) {
+          while (i < result.Mediainfo.File.length) {
             current =  result.Mediainfo.File[i];
+            track = current.track[0] || current.track;
+            i = i + 1;
             mediaItem = new MediaType.MediaItem();
             mediaItem.id = id;
-            mediaItem.type = current.track[1].type;
-            mediaItem.mimeType = current.track[0].Format || "";
-            title = current.track[0].Complete_name.slice(current.track[0].Complete_name.lastIndexOf("/") + 1,
-              current.track[0].Complete_name.length) || "";
-            mediaItem.title = title.replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(n); });
-            mediaItem.itemURI = (current.track[0].Complete_name.replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(n); }) || "");
+            mediaItem.type = (current.track[1] && current.track[1].type) || "";
+            mediaItem.mimeType = track.format || "";
+            title = track.Complete_name.slice(track.Complete_name.lastIndexOf("/") + 1, track.Complete_name.length) || "";
+            mediaItem.title = title && title.replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(n); }) || "";
+            mediaItem.itemURI = track.Complete_name.replace(/&#(\d+);/g,
+              function (m, n) { return String.fromCharCode(n); }) || "";
             mediaItem.thumbnailURIs = "";
-            mediaItem.releaseDate = current.track[0].Tagged_date || 0;
-            mediaItem.modifiedDate = current.track[0].Encoded_date || 0;
-            mediaItem.size = current.track[0].File_size || 0;
-            mediaItem.description = current.track[0].Comment || "";
+            mediaItem.releaseDate = track.Tagged_date || 0;
+            mediaItem.modifiedDate = track.Encoded_date || 0;
+            mediaItem.size = track.File_size || 0;
+            mediaItem.description = track.Comment || "";
             mediaItem.rating = "";
-            if (current.track[1].type === "Audio") {
-              mediaItem.album = current.track[0].Album;
+            if (current.track[1] && current.track[1].type === "Audio") {
+              mediaItem.album = track.Album || "";
               mediaItem.genres = "";
-              mediaItem.artists = current.track[0].Performer;
-              mediaItem.composers = current.track[0].Performer;
+              mediaItem.artists = track.Performer || "";
+              mediaItem.composers = track.Performer || "";
               mediaItem.lyrics = "";
               mediaItem.copyright = "";
-              mediaItem.bitrate = current.track[1].Bit_rate;
-              mediaItem.trackNumber = current.track[0].Track_name_Position;
-              mediaItem.duration = current.track[1].Duration;
+              mediaItem.bitrate = track.Bit_rate || "";
+              mediaItem.trackNumber = track.Track_name_Position || "";
+              mediaItem.duration = (current.track[1] && current.track[1].Duration) || "";
               mediaItem.playedTime = 0;
               mediaItem.playCount = 0;
               mediaItem.editableAttributes = [mediaItem.playedTime, mediaItem.playCount];
-            } else if (current.track[1].type === "Video") {
+            } else if (current.track[1] && current.track[1].type === "Video") {
               mediaItem.geolocation = "";
-              mediaItem.album = current.track[0].Album || '';
-              mediaItem.artists = current.track[0].Performer || '';
-              mediaItem.duration = current.track[1].Duration || '';
-              mediaItem.width = current.track[1].Width || 0;
-              mediaItem.height = current.track[1].Height || 0;
+              mediaItem.album = track.Album || '';
+              mediaItem.artists = track.Performer || '';
+              mediaItem.duration = (current.track[1] &&current.track[1].Duration )|| '';
+              mediaItem.width = (current.track[1] && current.track[1].Width) || 0;
+              mediaItem.height = (current.track[1] && current.track[1].Height) || 0;
               mediaItem.playedTime = 0;
               mediaItem.playCount = 0;
               mediaItem.editableAttributes = [mediaItem.playedTime, mediaItem.playCount];
-            } else if (current.track[1].type === "Image") {
-              /*try {
-                data = fs.readFileSync(current.track[0].Complete_name);
-                mediaItem = data;
-              } catch (err) {
-
-              }*/
+            } else if (current.track[1] && current.track[1].type === "Image") {
               mediaItem.geolocation = "";
-              mediaItem.width = current.track[1].Width;
-              mediaItem.height = current.track[1].Height;
+              mediaItem.width = (current.track[1] && current.track[1].Width) || 0;
+              mediaItem.height = (current.track[1] && current.track[1].Height) || 0;
               mediaItem.editableAttributes = [];
             }
             listSend.push(mediaItem);
+            if (params.fileName && params.fileName === title) {
+              return successCB(mediaItem);
+            }
+            if (params.count && i === parseInt(params.count, 10)) {
+              return successCB(listSend);
+            }
           }
-          count = count + 1;
-          if (count === list.length) {
-            successCB(listSend);
+          countTotal = countTotal + 1;
+          if (countTotal === list.length) {
+            return successCB(listSend);
+          } else if (params.count || params.offset || params.folderId) {
+            return successCB(listSend);
           }
         });
       }
     }
     this.getLocalFolders([], success, errorCB);
+  };
+
+  WebinosMediaContentModule.prototype.getContents = function (params, successCB, errorCB, objectRef) {
+    var self = this;
+    //params.type, params.fileName
+    function success(mediaContents) {
+      var photo, media = new MediaType.Media(), readStream, fileSize, rpc, buf = [];
+      media = mediaContents;
+      readStream = fs.createReadStream(media.itemURI);
+      readStream.on("data", function (data) {
+        buf.push(data);
+      });
+      readStream.on("end", function (data) {
+        var complete_image = Buffer.concat(buf);
+        media.contents = complete_image.toString("base64");
+        rpc = self.rpcHandler.createRPC(objectRef, 'onEvent', media);
+        self.rpcHandler.executeRPC(rpc);
+        readStream.destroy();
+      });
+    }
+    this.findItem(params, success, errorCB);
   };
   // export our object
   exports.Service = WebinosMediaContentModule;

@@ -14,6 +14,8 @@
       jQuery("#btnBind").click(bindService);
       jQuery("#btnGetLocalFolders").click(getLocalFolders);
       jQuery("#btnFindItems").click(findItemInFolders);
+      jQuery("#btnDisplayContents").click(displayMedia)
+      jQuery('#btnDisplayAllPictures').click(displayAllPictures);
     });
 
     var mediaContentService = null;
@@ -100,9 +102,7 @@
       document.getElementById('displayDetails').innerHTML = folderData;
     }
 
-
-
-    function getLocalFolders() {
+      function getLocalFolders() {
       if(mediaContentService) {
         mediaContentService.getLocalFolders(folderDetails, handle_errors);
       }
@@ -110,27 +110,104 @@
 
     function findItemInFolders() {
       if(mediaContentService) {
-        mediaContentService.findItem(itemDetails, handle_errors);
+        var params = {};
+        if ($('#txtFolderId').val() !== "") {
+          params.folderId = $('#txtFolderId').val();
+        }
+        if ($('#txtOffset').val() !== "") {
+          params.offset = $('#txtOffset').val();
+        }
+        if ($('#txtCount').val() !== "") {
+          params.count = $('#txtCount').val();
+        }
+        mediaContentService.findItem(itemDetails, handle_errors, params);
+      }
+    }
+
+    function displayMedia() {
+      if(mediaContentService) {
+        var params = {};
+        if ($('#txtFileName').val() !== "") {
+          params.fileName = $('#txtFileName').val();
+        }
+        document.getElementById('displayDetails').innerHTML = "";
+        mediaContentService.getContents(function(contents) {
+          if (contents.contents) {
+            var ext = params.fileName.substr(params.fileName.lastIndexOf(".")), type;
+            type = ext.substr(1, ext.length);
+            console.log(type)
+            if (ext === ".gif" || ext === ".jpg" || ext === ".png" || ext === ".svg") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<img src='data:image/"+type+";base64,"+contents.contents+"'/>" ;
+            } else if (ext === ".mp3" || ext === ".ogg") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<audio controls src='data:audio/"+type+";base64,"+contents.contents+"'/>" ;
+            } else if (ext === ".wav" || ext === ".mp4") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<video source src='data:video/"+type+";base64,"+contents.contents+"'/>" ;
+
+            }
+          }
+        }, handle_errors, params);
+      }
+    }
+
+    function displayAllPictures() {
+      if(mediaContentService) {
+        mediaContentService.getLocalFolders(function(folderDetails) {
+          var i;
+          for (i = 0 ; i < folderDetails.length; i = i + 1) {
+            if (folderDetails[i].title === "Pictures" || folderDetails[i].title === "My Pictures") {
+              var params = {};
+              params.folderId = folderDetails[i].id;
+              mediaContentService.findItem(function(folderDetails) {
+                for (var i = 0; i < folderDetails.length; i = i + 1) {
+                  params = {};
+                  params.fileName = folderDetails[i].title;
+                  document.getElementById('displayDetails').innerHTML = "";
+                  mediaContentService.getContents(function(contents) {
+                    if (contents.contents) {
+                      document.getElementById('displayDetails').innerHTML +=
+                              "<img src='data:image/png;base64,"+contents.contents+"'/>" ;
+                    }
+                  }, handle_errors, params);
+                }
+              }, handle_errors, params);
+            }
+          }
+        }, handle_errors);
       }
     }
   </script>
 </head>
 <body>
 
-<p><div style="background-color:lightgray; border:1px solid black">
+<div style="background-color:#b0c4de; border:1px solid black; color:#f0f8ff;"><p>
   PZH PZP LIST :
   <select id="serviceList">
     <option></option>
   </select>
-</div></p>
+  </p>
 
-
-<p><div>
+  <p>
   <button id="btnFind">Find MediaContent Service</button>
   <button id="btnBind">Bind MediaContent Service</button>
-  <button id="btnGetLocalFolders"> Get Local Folder</button>
-  <button id="btnFindItems"> FindContents in Folder</button>
-</div></p>
+  </p>
+</div>
+<div style="background-color:#191970; border:1px solid black; color:#f0f8ff;">
+  <p> Display folders   <button id="btnGetLocalFolders"> Get Local Folder</button></p>
+  <p> Find contents in folders:
+    <label> FolderID </label> <input type="text" id="txtFolderId"/>
+    <label> Offset   </label> <input type="text" id="txtOffset"/>
+    <label> Count    </label> <input type="text" id="txtCount"/>
+    <button id="btnFindItems"> FindContents in Folder</button>
+  </p>
+  <p> Find contents in folders:
+    <label> Enter Valid FileName </label> <input type="text" id="txtFileName"/>
+    <button id="btnDisplayContents"> DisplayContents </button>
+  </p>
+  <p> <button id="btnDisplayAllPictures"> Display All Pictures </button> </p>
+</div>
 <p><div id="position"></div></p>
 <p><div id="displayDetails"></div></p>
 
