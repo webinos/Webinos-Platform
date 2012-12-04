@@ -110,6 +110,10 @@
     "keystore": {
       "name": "Key Store",
       "location": "manager/keystore/"
+    },
+    "widget_manager": {
+        "name": "Widget Manager",
+        "location": "manager/widget_manager"
     }
   },
   "util": {
