@@ -44,7 +44,6 @@
      * @param connector The geolocation connector scheme that is used.
      */
     function FileFeature(rpcHandler, params) {
-        console.log('*******************' + params);
     	GenericFeature.GenericFeature.call(this);
         this.embedService(new file.Service(rpcHandler, params));
     }

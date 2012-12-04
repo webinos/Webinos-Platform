@@ -38,10 +38,11 @@
     var WebinosFeatures = require('./WebinosFeatures.js');
     var logger = require('./Logger').getLogger('pzp', 'info');
 
-    var index;
-    var port;
-    var jid;
-    var bosh;
+    var webinos = require("find-dependencies")(__dirname);
+
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
+    var webinosPath = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js").webinosPath;
+    var wId = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
 
     function initializeWidgetServer(port) {
       // Widget manager server
@@ -56,13 +57,14 @@
               // Write the websocket and widget server ports to file so the renderer can pick them up.
               var wrtConfig = {};
               wrtConfig.runtimeWebServerPort = wrtPort;
-              wrtConfig.pzpWebSocketPort = port;
+              wrtConfig.pzpWebSocketPort = pzp.session.getWebinosPorts().pzp_webSocket;
               wrtConfig.pzpPath = '..';
-              fs.writeFile((path.join('..','wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
+              
+              fs.writeFile((path.join(pzp.session.getWebinosPath(),'wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
                 if (err) {
-                  console.log('error saving runtime configuration file: ' + err);
+                  logger.warn('error saving runtime configuration file: ' + err);
                 } else {
-                  console.log('saved configuration runtime file');
+                  logger.info('saved configuration runtime file');
                 }
               });
           } else {
@@ -72,51 +74,61 @@
       }
     }
 
+
     // Parse command line
-    var arguments_ok = false;
-    console.error();
-    if (argv.length == 5 || argv.length == 6) {
-    	var index = parseInt(argv[2], 10);
-    	if (isNaN(index) || (index > 100)) {
-    		logger.error("*** " + argv[2] + " is not a valid index number.\r\n");
-    	} else {
-    		jid = argv[3];
-    		// simple check for user@domain/resource format
-    		if (jid.match(/^.+@.+\/./i)) {
-    			arguments_ok = true;
-    		} else {
-    			logger.error("*** " + argv[3] + " is not a valid full jid\r\n");
-    		}
+    var optimist = require('optimist')
+        .usage(
+            'Usage: $0 <index> --jid=<your jid> --password=<your password> [--bosh=<bosh url>] [--widgets]\n\r' +
+            'Where:\n\r' +
+            '\tindex\t\tis the index number of this PZP instance (see below)\n\r' +
+            '\tjid\t\tis the xmpp account name plus resource, e.g. w012@servicelab.com/mobile\n\r' +
+            '\tpassword\tto use\n\r' +
+            '\tbosh\t\tis the URL of the BOSH server, e.g. http://xmpp.servicelab.com/jabber/\n\r' +
+            '\twidgets\t\twhether or not to start the widget manager\n\r\n\r' +
+            'From the index, a port number is calculated like so: port = 8000 + 10*index. So,\n\r' +
+            'the first PZP client (with index 0) can connect at http://localhost:8000/, the\n\r' +
+            'second one (with index 1) should use http://localhost:8010/ and so on.\r\n\n\r' +
+            'When using a xmpp resource for the second time, it is expected behaviour that the\n\r' +
+            'xmpp server disconnects the first client with that same resource name.'
+        ).demand(['jid', 'password']);
+        
+    var argv = optimist.argv;
 
-    		bosh = argv[5];
-    	}
-    }
-    if (!arguments_ok) {
-        console.error('Usage: pzp.js <index> <jid> <password> [bosh]\r\n');
-        console.error("Where:");
-        console.error("    index is the index number of this PZP instance (see below)");
-        console.error("    jid is the xmpp account name plus resource, e.g. w012@servicelab.com/mobile");
-        console.error("    password to use");
-        console.error("    bosh is the URL of the BOSH server, e.g. http://xmpp.servicelab.com/jabber/");
-        console.error("");
-        console.error("From the index, a port number is calculated like so: port = 8000 + 10*index. So,");
-        console.error("the first PZP client (with index 0) can connect at http://localhost:8000/, the");
-        console.error("second one (with index 1) should use http://localhost:8010/ and so on.\r\n");
-        console.error("When using a xmpp resource for the second time, it is expected behaviour that the");
-        console.error("xmpp server disconnects the first client with that same resource name.\r\n");
-        process.exit(1);
+    if (argv._ == "") {
+        optimist.showHelp();
+        logger.error('Add an index to the commandline.');
+        return;
     }
 
-    logger.verbose("Done parsing command line.");
-    port = 8000+10*index;
-    logger.info("Using index=" + index + ", jid=" + jid + " and port=" + port);
+    var port = 8000+10*argv._;
+    
+    logger.info("Using index=" + argv._ + ", jid=" + argv.jid + " and port=" + port);
+    
+    // dirty hack to override the pzp session inforamtion. This is needed because
+    // there is no seperation of concerns between a lot of modules and the pzp session code.
+    var webinosRoot;
+    
+    wId.fetchDeviceName("Pzp", undefined, function(deviceName){
+      webinosRoot =  path.join(webinosPath(), deviceName);
+    });
+    
+    pzp.session.getWebinosPath = function() {
+        return webinosRoot;
+    };
+    
+    pzp.session.getWebinosPorts = function() {
+        return { 
+            pzp_webSocket: port+1
+        };
+    };
+    // end of hack
 
     var rpcRegistry = new rpc.Registry();
     var rpcHandler = new rpc.RPCHandler(this, rpcRegistry);
     var connection = new xmpp.Connection(rpcHandler);
 
     logger.verbose("Initialising connection to xmpp server.");
-    connection.connect({ jid: argv[3], password: argv[4], bosh: argv[5] }, function() {
+    connection.connect({ jid: argv.jid, password: argv.password, bosh: argv.bosh }, function() {
     	logger.info("Connected to the XMPP server.");
     });
 
@@ -127,9 +139,11 @@
 
     logger.verbose("Starting servers...");
     ws.start(port, port+1, rpcHandler, connection);
-    //initializeWidgetServer(port+1);
+    initializeWidgetServer(port+1);
 
-    featureManager.initialize(connection, rpcHandler);
+    if (argv.widgets) {
+        featureManager.initialize(connection, rpcHandler);
+    }
 
     logger.verbose("Done starting servers.");
 })();
