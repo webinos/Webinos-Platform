@@ -29,6 +29,7 @@
 				node_modules/mkdirp/,
 				node_modules/node-uuid/,
 				webinos/web_root/webinos.js,
+				webinos/web_root/testbed,
 				webinos/" 
 			excludes="
 				webinos/platform/,
