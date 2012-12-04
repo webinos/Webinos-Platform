@@ -31,14 +31,14 @@ class Rule
 private:
 	Effect 		effect;
 	Condition* 	condition;
-	DHPrefs			datahandlingpreferences;
+	DHPrefs*			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 public:
 	Rule(TiXmlElement*, DHPrefs*);
 	virtual ~Rule();
 	
-	Effect evaluate(Request*, string*);
+	Effect evaluate(Request*, pair<string, bool>*);
 	static Effect string2effect(const string &);
 	
 	};

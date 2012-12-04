@@ -32,7 +32,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 IDS_WEBINOS_404_PAGE BINARY "res\\webinos404.html"
 IDS_WEBINOS_500_PAGE BINARY "res\\webinos500.html"
 IDS_WEBINOS_INVALID_WIDGET_PAGE BINARY "res\\webinosInvalidWidget.html"
-IDS_WEBINOS_ABOUT_WIDGET_PAGE BINARY "res\\webinosAboutWidget.html"
 
 /////////////////////////////////////////////////////////////////////////////
 //

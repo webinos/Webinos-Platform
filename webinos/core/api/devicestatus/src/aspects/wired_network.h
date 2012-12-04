@@ -1,24 +1,23 @@
 #pragma once
+
 #include "../aspect.h"
 #include "../aspects.h"
 
 using namespace std;
 
-class WiredNetwork : Aspect {	
+class WiredNetwork : Aspect {
 	public:
-
-		vector<string> getComponents();	
+		vector<string> getComponents();
 		bool isSupported(string * = 0);
 		string getPropertyValue(string *, string * = 0);
 
 		static WiredNetwork * getInstance();
 
- 		string networkStatus(string);
- 		string ipAddress(string);
- 		string macAddress(string);
+		string networkStatus(string);
+		string ipAddress(string);
+		string macAddress(string);
 
 	private:
-	
 		WiredNetwork(){};
 		~WiredNetwork(){};
 		

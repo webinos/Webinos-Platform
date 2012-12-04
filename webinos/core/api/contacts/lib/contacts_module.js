@@ -67,7 +67,8 @@ else
 /**
  * Either open a local address book or perform login into GMail account TODO
  * this method has to be removed when user profile will handle authentication
- */this.authenticate=function(params, successCB, errorCB)
+ */
+this.authenticate=function(params, successCB, errorCB)
 {
     //ACCESS TO ANDROID CONTACTS
     if (params[0].type === 'local') {
@@ -249,7 +250,22 @@ function rawContact2W3CContact(rawContact)
 	var _contactPhotos = new Array(rawContact.photos.length);
 	for ( var j = 0; j < rawContact.photos.length; j++)
 	{
-		_contactPhotos[j] = new ContactField(rawContact.photos[j]['value'].trim(), rawContact.photos[j]['type'],
+		//Constructor ContactField(_value, _type, _pref)
+		var _photo = "";
+		if (rawContact.photos[j]['value'].trim().indexOf('file:') === 0)
+		{
+			var fs = require('fs');
+			var Buffer = require('buffer').Buffer;
+			//var constants = require('constants');
+			
+			_photo = new Buffer(fs.readlinkSync(rawContact.photos[j]['value'].trim())).toString('base64')
+		}
+		else
+		{
+			_photo = rawContact.photos[j]['value'].trim()
+		}
+		
+		_contactPhotos[j] = new ContactField(_photo, rawContact.photos[j]['type'],
 		Boolean(rawContact.photos[j]['pref'] == "true"));
 	}
 

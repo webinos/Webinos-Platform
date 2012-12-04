@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Change your PZP ID</title>
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/structure.css">
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+    <script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
+    <script type="text/javascript" src="../webinos.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        var options = {"type": 'prop', "payload":{"status": "getFriendlyName"}};
+        webinos.session.message_send(options, webinos.session.getPZPId());
+      });
+
+      function friendlyName(msg) {
+        document.getElementById("pzpFriendlyName").setAttribute("value", msg.payload.message);
+      }
+
+      webinos.session.addListener('friendlyName', friendlyName);
+
+      $("#addFriendlyName").click(function(){
+        var name = document.getElementById("pzpFriendlyName").value;
+        if (name){
+          var options = {"type": 'prop', "payload":{"status": "setFriendlyName", value: name}};
+          webinos.session.message_send(options, webinos.session.getPZPId());
+        } else {
+        alert("Pzp friendly name not entered")
+        }
+      });
+
+    </script>
+</head>
+<body>
+<form class="box login">
+    <header>
+        <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png" width="100px">
+        <label>Enter Friendly Name for Your PZP </label>
+    </header>
+    <fieldset class="boxBody">
+        <label> Enter the address</label>
+        <input type="text" id="pzpFriendlyName" value=""> </input>
+        <input type="button" id="addFriendlyName" class="btnLogin" value="Save Friendly Name"/>
+        <submit> </submit>
+    </fieldset>
+</form>
+</body>
+</html>

@@ -46,7 +46,7 @@ bool IPolicyBase::matchSubject(Request*){
 	return false;
 }
 
-Effect IPolicyBase::evaluate(Request*, string*){
+Effect IPolicyBase::evaluate(Request*, pair<string, bool>*){
 	return DENY;
 }
 

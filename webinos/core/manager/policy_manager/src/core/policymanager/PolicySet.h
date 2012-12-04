@@ -39,20 +39,20 @@ private:
 	vector<PolicySet*>	policysets;
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
-	DHPrefs			datahandlingpreferences;
+	DHPrefs*			datahandlingpreferences;
 	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);
-	Effect evaluatePolicies(Request*, string*);
+	Effect evaluatePolicies(Request*, pair<string, bool>*);
 //	Effect evaluatePolicySets(Request*);
-	void selectDHPref(Request*, string*);
+	void selectDHPref(Request*, pair<string, bool>*);
 	
 public:
 	PolicySet(TiXmlElement*, DHPrefs*);
 	PolicySet(IPolicyBase*);
 	virtual ~PolicySet();
 	
-	Effect evaluate(Request*, string*);
+	Effect evaluate(Request*, pair<string, bool>*);
 	};
 
 #endif /* POLICYSET_H_ */

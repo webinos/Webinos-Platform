@@ -21,7 +21,7 @@
 #include "../../debug.h"
 
 Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
-	datahandlingpreferences = *dhp;
+	datahandlingpreferences = dhp;
 	effect = (rule->Attribute("effect") != NULL) ? string2effect(rule->Attribute("effect")) : UNDETERMINED;
 	if(rule->FirstChild("condition")){
 		condition = new Condition((TiXmlElement*)rule->FirstChild("condition"));
@@ -31,13 +31,16 @@ Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
 		
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
+		LOGD("Rule: DHPref %s found", child->Attribute("PolicyId"));
+		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
+	LOGD("Rule DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
+			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+		LOGD("Rule: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
 }
@@ -63,35 +66,46 @@ Effect Rule::string2effect(const string & effect_str){
 		return UNDETERMINED;
 }
 
-Effect Rule::evaluate(Request* req, string* selectedDHPref){
+Effect Rule::evaluate(Request* req, pair<string, bool>* selectedDHPref){
 
-	string preferenceid;
+	pair<string, bool> preferenceid;
+	ConditionResponse cr;
 
-	if(condition){
-
-		if((*selectedDHPref).empty() == true){
+	if (condition) {
+		cr = condition->evaluate(req);
+//		LOGD("[RULE EVAL] %d",cr); 
+	}
+	// there is no condition tag, or there is condition tag and request resource is matching policy resource
+	if (!condition || cr == MATCH) {
+		if((*selectedDHPref).second == false) {
 			// search for a provisional action with a resource matching the request
+			LOGD("Rule: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 			for(unsigned int i=0; i<provisionalactions.size(); i++){
+				LOGD("Rule: ProvisionalActions %d evaluation", i);
 				preferenceid = provisionalactions[i]->evaluate(req);
+				LOGD("Rule: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+				
 				// search for a dh preference with an id matching the string returned by
 				// the previous provisional action
-				if (preferenceid.empty() == false)
-					if (datahandlingpreferences.count(preferenceid) == 1){
-						*selectedDHPref = preferenceid;
-						break;
+				if (preferenceid.first.empty() == false) {
+					// exact match (preferenceid.second == true): select this DHPref
+					// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+					if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+						// test if DHPref exists
+						if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+							(*selectedDHPref) = preferenceid;
+							LOGD("Rule: DHPref found: %s", (*selectedDHPref).first.c_str());
+							break;
+						}
 					}
+				}
 			}
 		}
-
-		ConditionResponse cr = condition->evaluate(req);
-//		LOGD("[RULE EVAL] %d",cr); 
-		if(cr==MATCH)
-			return effect;
-		else if (cr==NO_MATCH)
-			return INAPPLICABLE;
-		else
-			return UNDETERMINED;
-	}
-	else
 		return effect;
+	}
+	// there is condition tag and request resource is not matching policy resource
+	if (cr==NO_MATCH)
+		return INAPPLICABLE;
+	else
+		return UNDETERMINED;
 }

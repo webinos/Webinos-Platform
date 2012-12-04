@@ -21,7 +21,7 @@
 
 Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 	iType = POLICY;
-	datahandlingpreferences = *dhp;
+	datahandlingpreferences = dhp;
 	ruleCombiningAlgorithm = (policy->Attribute("combine")!=NULL) ? policy->Attribute("combine") : deny_overrides_algorithm;
 	//init subjects
 	TiXmlNode * target = policy->FirstChild("target");
@@ -34,20 +34,23 @@ Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 		
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
+		LOGD("Policy: DHPref %s found", child->Attribute("PolicyId"));
+		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
+	LOGD("Policy DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
+			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+		LOGD("Policy: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
 	
 	// init rules
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("rule"); child;
 			child = (TiXmlElement*)child->NextSibling("rule")) {
-		rules.push_back(new Rule(child, &datahandlingpreferences));
+		rules.push_back(new Rule(child, dhp));
 	}
 	
 	LOGD("[Policy]  : subjects size : %d",subjects.size());
@@ -80,7 +83,7 @@ bool Policy::matchSubject(Request* req){
 }
 
 //virtual
-Effect Policy::evaluate(Request* req, string* selectedDHPref){
+Effect Policy::evaluate(Request* req, pair<string, bool>* selectedDHPref){
 /*	
 	if(req->getResourceAttrs().find("api-feature") != req->getResourceAttrs().end())
 		LOGD("[Policy::evaluate] api-feature size : %d",req->getResourceAttrs()["api-feature"]->size());
@@ -182,20 +185,31 @@ Effect Policy::evaluate(Request* req, string* selectedDHPref){
 		return INAPPLICABLE;
 }
 
-void Policy::selectDHPref(Request* req, string* selectedDHPref){
-	string preferenceid;
+void Policy::selectDHPref(Request* req, pair<string, bool>* selectedDHPref){
+	pair<string, bool> preferenceid;
 
-	if ((*selectedDHPref).empty() == true){
+	if((*selectedDHPref).second == false) {
 		// search for a provisional action with a resource matching the request
+		LOGD("Policy: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			LOGD("Policy: ProvisionalActions %d evaluation", i);
 			preferenceid = provisionalactions[i]->evaluate(req);
+			LOGD("Policy: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+			
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
-			if (preferenceid.empty() == false)
-				if (datahandlingpreferences.count(preferenceid) == 1){
-					(*selectedDHPref) = preferenceid;
-					break;
+			if (preferenceid.first.empty() == false) {
+				// exact match (preferenceid.second == true): select this DHPref
+				// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+				if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+					// test if DHPref exists
+					if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+						(*selectedDHPref) = preferenceid;
+						LOGD("Policy: DHPref found: %s", (*selectedDHPref).first.c_str());
+						break;
+					}
 				}
+			}
 		}
 	}
 }

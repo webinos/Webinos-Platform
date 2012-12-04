@@ -1,0 +1,122 @@
+<html>
+<head>
+	<title>webinos device orientation</title>
+	<script type="text/javascript" src="../../webinos.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+
+
+            $(document).ready(function() {
+
+                function printInfo(data) {
+                    $('#message').append('<li>'+data.payload.message+'</li>');
+                }
+                webinos.session.addListener('info', printInfo);
+                
+                	var launcherAPIS = [];
+            	    var devOrientationToUse;
+                    $('#findService').bind('click', function() {
+                	    webinos.discovery.findServices(new ServiceType('http://webinos.org/api/deviceorientation'), 
+						{onFound: function (service) {
+							
+							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
+								launcherAPIS[service.serviceAddress] = service;
+							
+                	    	$('#messages').append('<li> DeviceOrientation API found: ' + service.api + ' @ ' + service.serviceAddress + '</li>');
+
+                	    }});
+                    });
+                    
+                    $('#cls').bind('click', function() {
+                    	document.getElementById("messages").innerHTML = "";
+                    }); 
+                    
+                    $('#bind').bind('click', function() {
+                    	
+                    	devOrientationToUse = launcherAPIS[$('#pzh_pzp_list option:selected').val()];
+                    	
+                    	devOrientationToUse.bindService({onBind:function(){
+                        	$('#messages').append('<li> DeviceOrientation API ' + devOrientationToUse.api + ' bound.</li>');
+                        }});
+                    }); 
+                    
+                    
+                    $('#registerOrientation').bind('click', function() {
+                    	
+                    	
+                    	
+                   	    devOrientationToUse.addEventListener("deviceorientation", function(event) {
+          					// process event.alpha, event.beta and event.gamma
+                   	    	$('#lastevent').html('<li> Latest Orientation Event: alpha ' + event.alpha 
+                   	    			+ ' beta ' + event.beta + ' gamma ' + event.gamma + '</li>');
+          					
+                   	     // gamma is the left-to-right tilt in degrees, where right is positive
+                   	     var tiltLR = event.gamma;
+                   	     // beta is the front-to-back tilt in degrees, where front is positive
+                   	     var tiltFB = event.beta;
+                   	     // alpha is the compass direction the device is facing in degrees
+                   	     var dir = event.alpha;
+                   	     
+                   	     
+	                   	// Apply the transform to the image
+    	               	  
+	                   	
+	                   	document.getElementById("pic").style.webkitTransform = "rotate(" + tiltLR + "deg) rotate3d(1,0,0, " + (tiltFB * -1) + "deg)";
+
+	                   	document.getElementById("pic").style.MozTransform = "rotate(" + tiltLR + "deg) rotate3d(1,0,0, " + (tiltFB * -1) + "deg)";
+            	       	  
+            	       	document.getElementById("pic").style.transform = "rotate(" + tiltLR + 
+                   		    "deg) rotate3d(1,0,0, " + (tiltFB * -1) + "deg)";
+         				
+                	   	  
+      					}, true);
+                    	
+                    });
+
+                     
+                     $('#unregisterOrientation').bind('click', function() {
+                    	 
+                     });
+
+
+
+                    
+            });
+        </script>
+     
+</head>
+<body>
+<br>
+<br>
+<br>
+	<div>
+  		<img src="/testbed/deviceorientation/webinos.png" id="pic" width="200px">
+	</div>
+	<br>
+	<br>
+	<br>
+	<div >
+		<div >
+			<p>
+				<div> DeviceOriantation Services: <select id="pzh_pzp_list"> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
+				<button id="cls">Clear</button><button id="findService">Find DeviceOrientation Service</button>
+				<button id="bind">Bind</button>
+		    	<button id="registerOrientation">Register for DeviceOrientation</button>
+		    	<button id="unregisterOrientation">Unregister DeviceOrientation</button>
+			</p>
+			<p><div>
+				1. Press "Find DeviceOrientation Service" Button
+			to get the Service<br>2. Press "Bind" button to bind the found service.<br>3. Register for Events<br>4. You may try another browser if the logo does not transforms<br></p>
+			</div>
+		</div>
+				<div >
+			<ul id="lastevent">
+			</ul>
+		</div>
+		<div >
+			<ul id="messages">
+			</ul>
+		</div>
+	</div>
+</body>
+</html>

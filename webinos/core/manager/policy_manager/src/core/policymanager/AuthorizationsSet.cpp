@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 #include "AuthorizationsSet.h"
+#include "../../debug.h"
 
 string ontology_vector[PURPOSES_NUMBER] = {
 	"http://www.w3.org/2002/01/P3Pv1/current",
@@ -60,13 +61,20 @@ string ontology_vector[PURPOSES_NUMBER] = {
 
 AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 
-	unsigned int i=0;
+	TiXmlElement * child;
 
-	// AuthzUseForPurpose Tags
-	for(TiXmlElement * child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose"); child;
-			child = (TiXmlElement*)child->NextSibling("AuthzUseForPurpose")) {
-		authzuseforpurpose[i] = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
-		i++;
+	// AuthzUseForPurpose Tag
+	if (authorizationsset->FirstChild("AuthzUseForPurpose")) {
+		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose found");
+		child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose");
+		for(child = (TiXmlElement*)child->FirstChild("Purpose"); child; 
+				child = (TiXmlElement*)child->NextSibling("Purpose")) {
+			LOGD("Purpose %s found", child->GetText());
+			authzuseforpurpose.push_back(child->GetText());
+		}
+	}
+	else{
+		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose not found");
 	}
 }
 
@@ -74,27 +82,37 @@ AuthorizationsSet::~AuthorizationsSet(){
 }
 
 bool AuthorizationsSet::evaluate(Request * req){
+	LOGD("Evaluating AuthorizationsSet");
 
 	bool purpose_satisfied[PURPOSES_NUMBER];
 	vector<bool> purpose = req->getPurposeAttrs();
 	unsigned int i = 0;
 
+	// invalid purposes vector
+	if (purpose.size() != PURPOSES_NUMBER) {
+		LOGD("AuthorizationsSet: invalid purposes vector");
+		return false;
+	}
+
 	for(vector<bool>::iterator it = purpose.begin(); it!= purpose.end(); it++){
 		// Purpose requested
 		if (*it == true){
+			purpose_satisfied[i] = false;
+			LOGD("AuthorizationsSet: purpose %d is true", i);
 			for(unsigned int j=0; j<authzuseforpurpose.size(); j++){
+				LOGD("AuthorizationsSet: checking authzuseforpurpose %d, %s", j, authzuseforpurpose[j].c_str());
 				if (ontology_vector[i].compare(authzuseforpurpose[j]) == 0){
 					// Purpose requested and satisfied
 					purpose_satisfied[i] = true;
 					break;
 				}
 			}
-			// Purpose requested and not satisfied
-			purpose_satisfied[i] = false;
 		}
 		// Purpose not requested
-		else
+		else {
+			LOGD("AuthorizationsSet: purpose %d is false", i);
 			purpose_satisfied[i] = true;
+		}
 		i++;
 	}
 

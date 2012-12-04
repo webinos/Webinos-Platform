@@ -26,11 +26,6 @@
 using namespace node;
 using namespace v8;
 
-#ifdef ANDROID
-	string policyFileName = "/sdcard/webinos/policy/policy.xml";
-#else
-	string policyFileName = "./policy.xml";
-#endif
 
 class PolicyManagerInt: ObjectWrap{
 
@@ -39,6 +34,7 @@ private:
 	
 public:
 	PolicyManager* pminst;
+	string policyFileName;
 	static Persistent<FunctionTemplate> s_ct;
   
 	static void Init(Handle<Object> target)  {
@@ -69,10 +65,17 @@ public:
 			}
 			v8::String::AsciiValue tmpFileName(args[0]->ToString());
 			LOGD("Parameter file: %s", *tmpFileName);
-			policyFileName = *tmpFileName;
+			//if(pmtmp->policyFileName) {
+			//	delete[] pmtmp->policyFileName;
+			//}
+			pmtmp->policyFileName = *tmpFileName;
+		}
+		else {
+			LOGD("Missing parameter");
+			return ThrowException(Exception::TypeError(String::New("Missing argument")));
 		}
 
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 		pmtmp->Wrap(args.This());
 		return args.This();
 	}
@@ -242,13 +245,31 @@ public:
 		}
 
 		vector<bool> purpose;
-		v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[2]);
-		for(unsigned int i = 0; i < pTmp->Length(); i++) {
-			purpose.push_back(pTmp->Get(i)->BooleanValue());
+		if (args[0]->ToObject()->Has(String::New("purpose"))) {
+			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("purpose")));
+			LOGD("DHPref: read %d purposes", pTmp->Length());
+			if (pTmp->Length() == PURPOSES_NUMBER) {
+				for(unsigned int i = 0; i < PURPOSES_NUMBER; i++) {
+					if (pTmp->Get(i)->BooleanValue() == true) {
+						LOGD("DHPref: purpose number %d is true", i);
+						purpose.push_back(pTmp->Get(i)->BooleanValue());
+					}
+					else if (pTmp->Get(i)->BooleanValue() == false) {
+						LOGD("DHPref: purpose number %d is false", i);
+						purpose.push_back(pTmp->Get(i)->BooleanValue());
+					}
+					else {
+						// invalid purpose vector
+						LOGD("DHPref: purpose number %d is undefined", i);
+						purpose.clear();
+						break;
+					}
+				}
+			}
 		}
 
 		obligations *obs = new obligations();
-		obligation *ob;
+		obligation *ob = new obligation();
 		map<string, string> *action = new map<string,string>();
 		map<string, string> *trigger = new map<string,string>();
 		vector< map<string, string> > *triggers = new vector< map<string, string> >();
@@ -350,9 +371,10 @@ public:
 
 		PolicyManagerInt* pmtmp = ObjectWrap::Unwrap<PolicyManagerInt>(args.This());
 
+		LOGD("ReloadPolicy - file is %s", pmtmp->policyFileName.c_str());
 		//TODO: Reload policy file
 		delete pmtmp->pminst;
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 
 		Local<Integer> result = Integer::New(0);
 		

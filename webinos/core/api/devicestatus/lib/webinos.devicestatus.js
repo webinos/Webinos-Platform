@@ -33,7 +33,7 @@
 	};
 
 	DeviceStatusManager.prototype.getPropertyValue = function (successCallback, errorCallback, prop) {
-        nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component);
+        	successCallback(nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component));
 	};
 
 	DeviceStatusManager.prototype.watchPropertyChange = function (successCallback, errorCallback, prop, options) {

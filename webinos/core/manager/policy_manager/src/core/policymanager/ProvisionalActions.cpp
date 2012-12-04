@@ -19,12 +19,14 @@
  ******************************************************************************/
 
 #include "ProvisionalActions.h"
+#include "../../debug.h"
 
 ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 
 	// ProvisionalAction Tags
 	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild("ProvisionalAction"); child;
 			child = (TiXmlElement*)child->NextSibling("ProvisionalAction")) {
+		LOGD("ProvisionalActions constructor, ProvisionalAction found");
 		provisionalaction.push_back(new ProvisionalAction(child));
 	}
 }
@@ -32,15 +34,28 @@ ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 ProvisionalActions::~ProvisionalActions(){
 }
 
-string ProvisionalActions::evaluate(Request * req){
+pair<string, bool> ProvisionalActions::evaluate(Request * req){
 
-	string preferenceid;
+	pair<string, bool> preferenceid;
+	pair<string, bool> partial_match_preferenceid;
 
 	// search for a provisional action with a resource matching the request
 	for(unsigned int i=0; i<provisionalaction.size(); i++){
+		LOGD("ProvisionalActions: ProvisionalAction %d evaluation", i);
 		preferenceid = provisionalaction[i]->evaluate(req);
-		if (preferenceid.compare(NULL) != 0)
+		LOGD("ProvisionalActions: ProvisionalAction %d evaluation response: %s", i, preferenceid.first.c_str());
+
+		// return the exact match
+		if (preferenceid.second == true)
 			return preferenceid;
+
+		// save the partial match
+		if (preferenceid.first.empty() == false && preferenceid.second == false)
+			partial_match_preferenceid = preferenceid;
 	}
-	return NULL;
+	
+	if (partial_match_preferenceid.first.empty() == false)
+		return partial_match_preferenceid;
+	else
+		return pair<string, bool>("", false);
 }

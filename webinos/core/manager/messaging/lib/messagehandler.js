@@ -176,6 +176,9 @@
 	 *  @param to  Message destination
 	 */
 	MessageHandler.prototype.registerSender = function(from, to) {
+		logger.log('creating register msg to send from ' + from + ' to ' + to);
+		if (from === to) throw new Error('cannot create register msg to itself');
+
 		var options = {};
 		options.register = true;
 		options.to = to;
@@ -432,7 +435,7 @@
 		exports.MessageHandler = MessageHandler;
 	} else {
 		// export for web browser
-		this.MessageHandler = MessageHandler;
+		window.MessageHandler = MessageHandler;
 	}
 
 }());

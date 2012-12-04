@@ -34,7 +34,7 @@ ObligationsSet::~ObligationsSet(){
 
 bool ObligationsSet::evaluate(Request * req){
 
-	for(unsigned int i; i<obligation.size(); i++){
+	for(unsigned int i = 0; i<obligation.size(); i++){
 		if (obligation[i]->evaluate(req) == false)
 			return false;
 	}

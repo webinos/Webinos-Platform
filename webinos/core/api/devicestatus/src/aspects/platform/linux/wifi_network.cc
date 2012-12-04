@@ -56,12 +56,12 @@ size_t pos;
  pos = line.find("ESSID");
  result = line.substr (pos);
  res = result.substr (6,10);
-
+if (res == "ESSID")
+{
  return string(res);
-
-
-
-//	return "ssid";
+}
+else 
+ return "No ssid found";
 }
 
 string WiFiNetwork::signalStrength(string wifiNetworkName)
@@ -75,15 +75,11 @@ size_t pos;
  res = result.substr (9,8);
 
  return string(res);
-
-//        return "signalStrength";
 }
 
 string WiFiNetwork::networkStatus(string wifiNetworkName)
 {
-
-
-//        return "networkStatus";
+        return "networkStatus not Implemented";
 }
 
 string WiFiNetwork::ipAddress(string wifiNetworkName)
@@ -92,13 +88,11 @@ string line, res, result;
 size_t pos;
 
  line = Utils::exec(string("ifconfig -a")); // iwconfig
- pos = line.find("HWaddr");
+ pos = line.find("inet addr");
  result = line.substr (pos);
- res = result.substr (7,20);
+ res = result.substr (10,27);
 
         return string(res);
-       
-// return "ipAddress";
 }
 
 string WiFiNetwork::macAddress(string wifiNetworkName)
@@ -113,8 +107,6 @@ size_t pos;
  res = result.substr (7,20);
 
         return string(res);
-
-//        return "macAddress";
 }
 
             

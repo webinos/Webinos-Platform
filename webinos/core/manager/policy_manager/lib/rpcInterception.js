@@ -1,8 +1,18 @@
 (function () {
     "use strict";
 
-    var pm = null;
-    var policyViewer = null;
+    var path = require('path');
+    var dependencies= require('find-dependencies')(__dirname);
+    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
+    var policyFile = path.join(webinosPath,"policies", "policy.xml");
+
+    var pmlib = require('./policymanager.js');
+    var pm = new pmlib.policyManager(policyFile);
+    //TODO: polic editor for the review - remove it!
+    if(__EnablePolicyEditor) {
+      var pvlib = require('../viewer/policyviewerserver.js');
+      var policyViewer = new pvlib.policyViewer(pm);
+    }
 
     var getNextID = function(a) {
     // implementation taken from here: https://gist.github.com/982883
@@ -16,14 +26,6 @@ _RPCHandler.prototype._handleMessage = _RPCHandler.prototype.handleMessage;
  */
 _RPCHandler.prototype.handleMessage = function(){
     if (arguments[0].jsonrpc) {
-        if (!pm) {
-            var pmlib = require('./policymanager.js');
-            pm = new pmlib.policyManager();
-	    if(__EnablePolicyEditor) {
-	        var pvlib = require('../viewer/policyviewerserver.js');
-	        policyViewer = new pvlib.policyViewer(pm);
-	    }
-        }
 
         var rpcRequest = arguments[0];
         var id = rpcRequest.id;
@@ -43,6 +45,7 @@ _RPCHandler.prototype.handleMessage = function(){
 
 
         var userAndRequestor = arguments[1].split("_")[1].split("/");
+	var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
 
         var request = {
             'subjectInfo' : { 'userId' : userAndRequestor[0] },
@@ -51,7 +54,7 @@ _RPCHandler.prototype.handleMessage = function(){
         };
 
 
-        if (pm.enforceRequest(request) == 0) {
+        if (pm.enforceRequest(request, sessionId) == 0) {
             //request is allowed by policy manager
             this._handleMessage.apply(this, arguments)
         } else {

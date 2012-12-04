@@ -38,7 +38,7 @@ Obligation::Obligation(TiXmlElement* obligation){
 	else if(obligation->FirstChild("ActionAnonymizePersonalData")){
 		action["actionID"] = "ActionAnonymizePersonalData";
 	}
-	else if(child = (TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject")){
+	else if ((child = (TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))) {
 		action["actionID"] = "ActionNotifyDataSubject";
 		action["Media"] = ((TiXmlElement*)child->FirstChild("Media"))->GetText();
 		action["Address"] = ((TiXmlElement*)child->FirstChild("Address"))->GetText();

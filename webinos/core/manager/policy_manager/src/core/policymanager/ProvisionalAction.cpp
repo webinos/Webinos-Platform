@@ -19,28 +19,57 @@
  ******************************************************************************/
 
 #include "ProvisionalAction.h"
+#include "../../debug.h"
 
 ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 
 	// AttributeValue Tags
 	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
-	value1 = child->GetText();
-	child = (TiXmlElement*)child->NextSibling("AttributeValue");
-	value2 = child->GetText();
+	if (child) {
+		value1 = child->GetText();
+	}
+		child = (TiXmlElement*)child->NextSibling("AttributeValue");
+	if (child) {
+		value2 = child->GetText();
+	}
+	LOGD("ProvisionalAction constructor, attribute values: %s, %s", value1.c_str(), value2.c_str());
 }
 
 ProvisionalAction::~ProvisionalAction(){
 }
 
-string ProvisionalAction::evaluate(Request * req){
+pair<string, bool> ProvisionalAction::evaluate(Request * req){
 
+	int features = 0;
+	string req_feature;
 	map<string, vector<string>* > resource_attrs = req->getResourceAttrs();
 
-	for(map<string, vector<string>* >::iterator it = resource_attrs.begin(); it!= resource_attrs.end(); it++){
-		if (value1.compare(it->first.data()) == 0)
-			return value2;
-		if (value2.compare(it->first.data()) == 0)
-			return value1;
+	if (resource_attrs.count(API_FEATURE) == 1) {
+		features = (req->getResourceAttrs())[API_FEATURE]->size();
+		req_feature = (req->getResourceAttrs())[API_FEATURE]->at(0);
 	}
-	return "";
+	
+	// Provisional actions link together a single DHPref and a single feature,
+	// more than a feature in a request should not be allowed
+	// this is already tested in PolicyManager.cpp, but it is tested again here to be careful
+	if (features == 1) {
+		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), req_feature.c_str());
+		if (value1.compare(req_feature) == 0) {
+			LOGD("ProvisionalAction: %s and %s exact match", value1.c_str(), req_feature.c_str());
+			return pair<string, bool>(value2, true);
+		}
+		if (value2.compare(req_feature) == 0) {
+			LOGD("ProvisionalAction: %s and %s exact match", value2.c_str(), req_feature.c_str());
+			return pair<string, bool>(value1, true);
+		}
+		if (equals(req_feature, value1, string2strcmp_mode("glob"))) {
+			LOGD("ProvisionalAction: %s and %s partial match", value1.c_str(), req_feature.c_str());
+			return pair<string, bool>(value2, false);
+		}
+		if (equals(req_feature, value2, string2strcmp_mode("glob"))) {
+			LOGD("ProvisionalAction: %s and %s partial match", value2.c_str(), req_feature.c_str());
+			return pair<string, bool>(value1, false);
+		}
+	}
+	return pair<string, bool>("", false);
 }

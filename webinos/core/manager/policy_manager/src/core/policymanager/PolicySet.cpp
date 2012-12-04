@@ -22,7 +22,7 @@
 
 PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 	iType = POLICY_SET;
-	datahandlingpreferences = *dhp;
+	datahandlingpreferences = dhp;
 	policyCombiningAlgorithm = (set->Attribute("combine")!=NULL) ? set->Attribute("combine") : deny_overrides_algorithm;
 	
 	//init subjects
@@ -36,13 +36,16 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 
 	//init datahandlingpreferences
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
-		datahandlingpreferences[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
+		LOGD("PolicySet: DHPref %s found", child->Attribute("PolicyId"));
+		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
 	}
+	LOGD("PolicySet DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
 	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling() ) {
+			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+		LOGD("PolicySet: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
 
@@ -54,12 +57,12 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 			continue;
 	
 		if(child->ValueStr() == "policy-set"){
-			PolicySet * set = new PolicySet(child, &datahandlingpreferences);
+			PolicySet * set = new PolicySet(child, dhp);
 			policysets.push_back(set);
 			sortArray.push_back(set);
 		}
 		else if(child->ValueStr() == "policy"){
-			Policy * policy = new Policy(child, &datahandlingpreferences);
+			Policy * policy = new Policy(child, dhp);
 			policies.push_back(policy);
 			sortArray.push_back(policy);
 		}
@@ -96,12 +99,12 @@ bool PolicySet::matchSubject(Request* req){
 	return false;
 }
 
-Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
+Effect PolicySet::evaluatePolicies(Request* req, pair<string, bool>* selectedDHPref){
 
 	Effect eff;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
-			LOGD("policies[%d] = %s",i,policies[i]->description.data());
+		LOGD("policies[%d] = %s",i,policies[i]->description.data());
 	}
 	
  	if(req->getResourceAttrs().size() == 0){
@@ -209,7 +212,7 @@ Effect PolicySet::evaluatePolicies(Request* req, string* selectedDHPref){
 	return INAPPLICABLE;
 }
 
-Effect PolicySet::evaluate(Request * req, string* selectedDHPref){
+Effect PolicySet::evaluate(Request * req, pair<string, bool>* selectedDHPref){
 	if(matchSubject(req)){
 		if(policies.size()==	0 && policysets.size()==0){
 			return PERMIT;
@@ -222,20 +225,31 @@ Effect PolicySet::evaluate(Request * req, string* selectedDHPref){
 		return INAPPLICABLE;	
 }
 
-void PolicySet::selectDHPref(Request* req, string* selectedDHPref){
-	string preferenceid;
+void PolicySet::selectDHPref(Request* req, pair<string, bool>* selectedDHPref){
+	pair<string, bool> preferenceid;
 
-	if ((*selectedDHPref).empty() == true){
+	if((*selectedDHPref).second == false) {
 		// search for a provisional action with a resource matching the request
+		LOGD("PolicySet: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
 		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			LOGD("PolicySet: ProvisionalActions %d evaluation", i);
 			preferenceid = provisionalactions[i]->evaluate(req);
+			LOGD("PolicySet: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+			
 			// search for a dh preference with an id matching the string returned by
 			// the previous provisional action
-			if (preferenceid.empty() == false)
-				if (datahandlingpreferences.count(preferenceid) == 1){
-					(*selectedDHPref) = preferenceid;
-					break;
+			if (preferenceid.first.empty() == false) {
+				// exact match (preferenceid.second == true): select this DHPref
+				// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+				if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+					// test if DHPref exists
+					if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+						(*selectedDHPref) = preferenceid;
+						LOGD("PolicySet: DHPref found: %s", (*selectedDHPref).first.c_str());
+						break;
+					}
 				}
+			}
 		}
 	}
 }

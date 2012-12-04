@@ -111,7 +111,7 @@ var Pzh_DeviceEnrollment = function() {
       if(status){
         prepMsg(res, query.to, query.from, "authenticate", url);
       } else {
-        prepMsg(res, query.to, query.from, "error", url);
+        prepMsg(res, query.to, query.from, "error",  query.payload.message.returnPath);
       }
     });
   }
@@ -144,12 +144,12 @@ var Pzh_DeviceEnrollment = function() {
   function enrollPzp(res,  query) {
     if (storeTempDetails[query.to]) {
       var pzhInstance = parent.fetchPzh(query.to);
-      pzhInstance.expecting.isExpected(function(expected) {
+      pzhInstance.pzh_state.expecting.isExpected(function(expected) {
         if (!expected){
           prepMsg(res, query.to, query.from, "error", "not expecting new pzp");
         } else {
           var msg = createEnrollMsg(query);
-          pzhInstance.addNewPZPCert(msg, function(err, msgSend) {
+          pzhInstance.enroll.addNewPZPCert(msg, function(err, msgSend) {
             res.write(JSON.stringify(msgSend));
             res.end();
           });
@@ -170,7 +170,7 @@ var Pzh_DeviceEnrollment = function() {
     if(!instance) {
       prepMsg(res, query.to, query.from, "error", "pzh "+ query.to + " does not exist with this provider");
     } else {
-      instance.addExternalCert(query, function(serverName, options, masterCert, masterCrl){
+      instance.pzh_pzh.addExternalCert(query, function(serverName, options, masterCert, masterCrl){
         prepMsg(res, serverName, query.from, "receiveCert", {cert: masterCert,crl: masterCrl});
         parent.refreshCert(serverName, options);
       });

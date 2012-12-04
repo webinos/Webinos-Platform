@@ -64,6 +64,13 @@ void WidgetSchemeHandler::GetResponseHeaders(CefRefPtr<CefResponse> response, in
 {
   REQUIRE_IO_THREAD();
 
+  // Add CSP header. ToDo - make the CSP string configurable/dynamic.
+  CefResponse::HeaderMap headerMap;
+  response->GetHeaderMap(headerMap);
+  CefResponse::HeaderMap::value_type vt(CefString("X-WebKit-CSP"),CefString("default-src 'self'; img-src 'self';"));
+  headerMap.insert(vt);
+  response->SetHeaderMap(headerMap);
+
   size_t extStart = m_resourcePath.find_last_of('.');
   if (extStart != std::string::npos)
   {

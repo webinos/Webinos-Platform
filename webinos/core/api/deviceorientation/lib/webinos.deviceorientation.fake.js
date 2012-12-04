@@ -96,9 +96,9 @@ DeviceMotionEvent.prototype.initDeviceMotionEvent = function(acceleration, accel
 }
 
 function addEventListener(params, successCB, errorCB, objectRef){
-    switch(params[0]){
+	switch(params[0]){
         case "devicemotion":
-            objectRefsDo.push([objectRef.rpcId, params[0]]);
+            objectRefsDo.push([objectRef, params[0]]);
             if (typeof successCB === 'function') successCB();
             console.log('listening to device motion');
             if(!listeningToDeviceMotion){
@@ -107,7 +107,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             }
             break;
         case "deviceorientation":
-            objectRefsDo.push([objectRef.rpcId, params[0]]);
+            objectRefsDo.push([objectRef, params[0]]);
             if (typeof successCB === 'function') successCB();
             if(!listeningToDeviceOrientation){
                 listeningToDeviceOrientation = true;
@@ -115,7 +115,7 @@ function addEventListener(params, successCB, errorCB, objectRef){
             }
             break;
         case "compassneedscalibration":
-            objectRefsDo.push([objectRef.rpcId, params[0]]);
+            objectRefsDo.push([objectRef, params[0]]);
             if (typeof successCB === 'function') successCB();
             if(!listeningToCompassNeedsCalibration){
                 listeningToCompassNeedsCalibration = true;
@@ -262,8 +262,8 @@ exports.setRequired = setRequired;
 
 exports.serviceDesc = {
 		api:'http://webinos.org/api/deviceorientation',
-		displayName:'Device Orientation (by car input)',
-		description:'Provides deviceorientation depending on vehicle bus data.'
+		displayName:'Device Orientation Simulator',
+		description:'Provides deviceorientation based on simulated values.'
 };
 
 })(module.exports);

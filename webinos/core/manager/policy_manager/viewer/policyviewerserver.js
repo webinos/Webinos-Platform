@@ -97,7 +97,7 @@ http.createServer(function(request, response){
 		sendResponse(response, "");
 	}
 	else {
-		var filename = path.join(__dirname, "../../../../test/client/policy", reqpath);
+		var filename = path.join(__dirname, "../../../../web_root/testbed/policy", reqpath);
 		fs.readFile(filename, function(err, file) {
 			if(err) {
 				console.log("Error: file "+filename+" not found");
@@ -175,7 +175,7 @@ function checkFeature(featureName, userId, appId) {
 	req.subjectInfo.userId = userId;
 	req.widgetInfo.id = appId;
 	req.resourceInfo.apiFeature = featureName;
-	res = pm.enforceRequest(req, true);
+	res = pm.enforceRequest(req, "testSession", true);
 	return(ruleEffectDescription(res));
 	//return(res);
 }

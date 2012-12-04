@@ -1,6 +1,10 @@
 #include "../../display.h"
 #include "../../../utils.h"
 #include <cstdlib>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 AspectsRegister Display::aspectsRegister("Display", getInstance());
 

@@ -45,7 +45,7 @@ string WiredNetwork::getPropertyValue(string * property, string * component)
 
 string WiredNetwork::networkStatus(string wiredNetworkName)
 {
-/*string line, res, result;
+string line, res, result;
 size_t pos;
 
  line = Utils::exec(string("ifconfig -a")); //netstat
@@ -53,9 +53,9 @@ size_t pos;
  result = line.substr (pos);
  res = result.substr (10,27);
 
-        return string(res);*/
+        return string(res);
 
-        return "networkStatus";
+    //    return "networkStatus";
 }
 
 string WiredNetwork::ipAddress(string wiredNetworkName)
@@ -69,8 +69,6 @@ size_t pos;
  res = result.substr (10,27);
 
         return string(res);
-
-     //   return "ipAddress";
 }
 
 string WiredNetwork::macAddress(string wiredNetworkName)
@@ -85,7 +83,6 @@ size_t pos;
 
         return string(res);       
 
-// return "macAddress";
 }
 
             

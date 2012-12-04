@@ -22,14 +22,12 @@
 	if (typeof webinos === 'undefined')
 		webinos = {};
 	var logger = console;
-//    var policyManager = {'enforceRPCRequest':function(scope, jsonRPC, from, msgid){handleRequest.call(scope, jsonRPC, from, msgid)}};
 	if (typeof module === 'undefined') {
 		var exports = {};
 	} else {
 		var exports = module.exports = {};
 		var webinos_= require("find-dependencies")(__dirname);
 		logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
-//        policyManager = webinos_.global.require(webinos_.global.manager.policy_manager.location).policyManager;
 	}	
 
 	var idCount = 0;
@@ -312,7 +310,6 @@
 
 		if (typeof jsonRPC.method !== 'undefined' && jsonRPC.method != null) {
 			// received message is RPC request
-//            policyManager.enforceRPCRequest(this, jsonRPC, from, msgid, handleRequest);
 			handleRequest.call(this, jsonRPC, from, msgid);
 		} else {
 			// received message is RPC response
@@ -536,8 +533,8 @@
 
 	} else {
 		// export for web browser
-		this.RPCHandler = _RPCHandler;
-		this.RPCWebinosService = RPCWebinosService;
-		this.ServiceType = ServiceType;
+		window.RPCHandler = _RPCHandler;
+		window.RPCWebinosService = RPCWebinosService;
+		window.ServiceType = ServiceType;
 	}
 })();

@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.webinos</groupId>
+    <artifactId>manager</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>localconnection_manager</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Local Connection Manager</name>
+  <url>http://www.webinos.org</url>
+
+  <!-- Uncomment the plugin executions you need. 
+  If you're component structure is correct, everything will run as it should. -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <!-- Runs Jslint validation on the javascript files  -->
+          <execution>
+            <id>jslint-validation</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>         
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <executions>
+          <!-- Activation for build-node-modules. Activate by uncommenting the execution tag. 
+          Only needed when C files that need to be compiled to a node module are present in the src folder. -->
+          <!--
+          <execution>
+            <id>compile-node-module</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          -->
+          <!-- Activation for jasmine-node-testing. Activate by uncommenting the execution tag. 
+          Only needed when *.spec.js files in the jasmine test folder need to run.-->
+          <execution>
+            <id>jasmine-node-testing</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          <!-- Activation for jsdoc. Runs creating js documentation. -->
+          <execution>
+            <id>jsdoc</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          <!-- Activation for vows-testing. Activate by uncommenting the execution tag.  
+          Only needed when test.spec.js files in the vows test folder need to run.-->
+          <!--
+          <execution>
+            <id>vows-testing</id>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+          -->
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

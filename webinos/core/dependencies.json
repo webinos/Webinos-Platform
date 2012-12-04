@@ -4,6 +4,14 @@
       "name": "Applauncher module",
       "location": "api/applauncher/"
     },
+    "actuator": {
+      "name": "Actuator API",
+      "location": "api/actuator/"
+    },
+    "webnotification": {
+      "name": "WebNotification",
+      "location": "api/webnotification/"
+     },
     "authentication": {
       "name": "Authentication",
       "location": "api/authentication/"
@@ -82,9 +90,18 @@
       "name": "Context manager",
       "location": "manager/context_manager/"
     },
+    "localconnection_manager": {
+      "name": "local connection manager",
+      "location": "manager/localconnection_manager/"
+    },
+    
     "messaging": {
       "name": "Messaging Manager",
       "location": "manager/messaging/"
+    },
+    "synchronisation_manager": {
+       "name": "Synchronisation Manager",
+       "location": "manager/synchronisation_manager/"
     },
     "policy_manager": {
       "name": "Policy Manager",
@@ -103,9 +120,13 @@
     "name": "RPC",
     "location": "rpc/"
   },
-  "xmpp": {
-    "name": "xmpp",
-    "location": "xmpp/"
+  "xmpppzp": {
+    "name": "xmpp-pzp",
+    "location": "xmpp-pzp/"
+  },
+  "xmpppzh": {
+    "name": "xmpp-pzh",
+    "location": "xmpp-pzh/"
   },
   "pzp": {
     "name": "PZP",

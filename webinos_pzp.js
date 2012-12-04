@@ -29,11 +29,11 @@ function help() {
   console.log("Options:");
   console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
   console.log("--pzh-name=[name]        name of the pzh (default \"\")");
-  console.log("--friendly-name=[name]   name of the pzp (default \"\")");
-  console.log("--auth-code=[code]       context debug flag (default DEBUG)");
-  console.log("--preference=[option]    preference option (default hub, other option peer)");
+  console.log("--friendly-name=[name]   friendly name (currently unused)");
   console.log("--widgetServer           start widget server");
   console.log("--policyEditor           start policy editor server");
+  console.log("--signedWidgetOnly       only allow signed widgets");
+  console.log("--enforceWidgetCSP       enforce content security policy on widgets");
   process.exit();
 }
 
@@ -52,11 +52,8 @@ process.argv.forEach(function (arg) {
       case "--friendly-name":
         options.friendlyName = parts[1];
         break;
-      case "--preference":
-        options.preference = parts[1];
-        break;
-      case "--auth-code":
-        options.code = parts[1];
+      case "--force-device-name":
+        options.forcedDeviceName = parts[1];
         break;
       default:
         console.log("unknown option: " + parts[0]);
@@ -71,6 +68,12 @@ process.argv.forEach(function (arg) {
         case "--widgetServer":
           options.startWidgetServer = true;
           break;
+        case "--signedWidgetOnly":
+          options.signedWidgetOnly = true;
+          break;
+        case "--enforceWidgetCSP":
+          options.enforceWidgetCSP = true;
+          break;
         case "--policyEditor":
           __EnablePolicyEditor = true;
           break;
@@ -79,10 +82,12 @@ process.argv.forEach(function (arg) {
   }
 });
 
-var fileParams = {},
+var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } },
   pzpModules = [
   {name: "get42", params: {num: "21"}},
   {name: "zap-and-shake", params: {}},
+  {name: "actuator", params: {}},
+  {name: "webnotification", params: {}},
   {name: "file", params: fileParams},
   {name: "geolocation", params: {connector : "geoip"}},
   {name: "applauncher", params: {}},
@@ -90,7 +95,8 @@ var fileParams = {},
   {name: "payment", params: {}},
   {name: "tv", params: {}},
   {name: "oauth", params: {}},
-  {name: "deviceorientation", params: {connector : "simulator"}},
+ // {name: "deviceorientation", params: {connector : "simulator"}},
+  {name: "deviceorientation", params: {}},
   {name: "vehicle", params: {connector : "simulator"}},
   {name: "context", params: {}},
   {name: "authentication", params: {}},
@@ -115,35 +121,20 @@ fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
     if (!config.pzhName) {
       config.pzhName = "";
     }
-    if (!config.pzpHost) {
-      config.pzpHost="localhost";
-    }
     if (!config.friendlyName) {
       config.friendlyName = "";
-    }
-    if (!config.code) {
-      config.code = "DEBUG";
-    }
-    if (!config.preference) {
-      config.prefence = "hub";
     }
     if (options.pzhHost) {
       config.pzhHost = options.pzhHost;
     }
     if (options.pzhName) {
-  config.pzhName = options.pzhName;
-    }
-    if (options.pzpHost) {
-      config.pzpHost = options.pzpHost;
+      config.pzhName = options.pzhName;
     }
     if (options.friendlyName) {
       config.friendlyName = options.friendlyName;
     }
-    if (options.code) {
-      config.code = options.code;
-    }
-    if (options.preference) {
-      config.preference = options.preference;
+    if (options.forcedDeviceName) {
+      config.forcedDeviceName = options.forcedDeviceName;
     }
     if (config.pzhName !== "") {
       config.hostname = config.pzhHost+'/'+config.pzhName;
@@ -158,12 +149,13 @@ function initializeWidgetServer() {
   var wrt = require("./webinos/core/manager/widget_manager/lib/ui/widgetServer");
   if (typeof wrt !== "undefined") {
     // Attempt to start the widget server.
-    wrt.start(function (msg, wrtPort) {
+    wrt.start(options.signedWidgetOnly, options.enforceWidgetCSP, pzp.session.getWebinosPorts().pzp_webSocket, function (msg, wrtPort) {
       if (msg === "startedWRT") {
         // Write the websocket and widget server ports to file so the renderer can pick them up.
         var wrtConfig = {};
         wrtConfig.runtimeWebServerPort = wrtPort;
         wrtConfig.pzpWebSocketPort = pzp.session.getWebinosPorts().pzp_webSocket;
+        wrtConfig.pzpPath = pzp.session.getWebinosPath();
         fs.writeFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
           if (err) {
             console.log('error saving runtime configuration file: ' + err);
