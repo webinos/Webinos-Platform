@@ -88,6 +88,12 @@ bool AuthorizationsSet::evaluate(Request * req){
 	vector<bool> purpose = req->getPurposeAttrs();
 	unsigned int i = 0;
 
+	// invalid purposes vector
+	if (purpose.size() != PURPOSES_NUMBER) {
+		LOGD("AuthorizationsSet: invalid purposes vector");
+		return false;
+	}
+
 	for(vector<bool>::iterator it = purpose.begin(); it!= purpose.end(); it++){
 		// Purpose requested
 		if (*it == true){

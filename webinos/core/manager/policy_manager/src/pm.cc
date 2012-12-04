@@ -248,16 +248,23 @@ public:
 		if (args[0]->ToObject()->Has(String::New("purpose"))) {
 			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("purpose")));
 			LOGD("DHPref: read %d purposes", pTmp->Length());
-			for(unsigned int i = 0; i < pTmp->Length(); i++) {
-				if (pTmp->Get(i)->BooleanValue() == true) {
-					LOGD("DHPref: purpose number %d is true", i);
+			if (pTmp->Length() == PURPOSES_NUMBER) {
+				for(unsigned int i = 0; i < PURPOSES_NUMBER; i++) {
+					if (pTmp->Get(i)->BooleanValue() == true) {
+						LOGD("DHPref: purpose number %d is true", i);
+						purpose.push_back(pTmp->Get(i)->BooleanValue());
+					}
+					else if (pTmp->Get(i)->BooleanValue() == false) {
+						LOGD("DHPref: purpose number %d is false", i);
+						purpose.push_back(pTmp->Get(i)->BooleanValue());
+					}
+					else {
+						// invalid purpose vector
+						LOGD("DHPref: purpose number %d is undefined", i);
+						purpose.clear();
+						break;
+					}
 				}
-				else if (pTmp->Get(i)->BooleanValue() == false) {
-					LOGD("DHPref: purpose number %d is false", i);
-				}
-				else
-					LOGD("DHPref: purpose number %d is undefined", i);
-				purpose.push_back(pTmp->Get(i)->BooleanValue());
 			}
 		}
 
