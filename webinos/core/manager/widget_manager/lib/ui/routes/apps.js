@@ -6,7 +6,7 @@
     var path = require('path');
     var wm = require('../../../index.js');
     
-    var webinos = require("find-dependencies")(".");
+    var webinos = require("find-dependencies")(__dirname);
     var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
     
     var signedOnly = false;

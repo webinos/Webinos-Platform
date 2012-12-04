@@ -59,7 +59,7 @@ this.Config = (function() {
 	  wrtHome = '/data/data/org.webinos.app/wrt';
   else if (process.platform == 'win32' || process.platform == 'linux' || process.platform == 'darwin') {
 		var path = require('path');
-		var webinos = require("find-dependencies")(".");
+		var webinos = require("find-dependencies")(__dirname);
         var pzp_sessionHandling = webinos.global.require(webinos.global.pzp.location, "lib/pzp_sessionHandling.js");
 		wrtHome = path.join(pzp_sessionHandling.getWebinosPath(),'wrt/widgetStore');
 	} else {

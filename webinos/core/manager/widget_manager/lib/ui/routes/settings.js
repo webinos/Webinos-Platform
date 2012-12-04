@@ -2,7 +2,7 @@
     var fs = require('fs');
 	var path = require('path');
 	
-    var webinos = require("find-dependencies")(".");
+    var webinos = require("find-dependencies")(__dirname);
     var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
 
     var wrtPort = 0;
