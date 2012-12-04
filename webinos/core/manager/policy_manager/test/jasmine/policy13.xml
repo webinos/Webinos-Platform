@@ -2,7 +2,7 @@
 	<policy combine="first-applicable" description="NoSMSfromDevice2">
 		<target>
 			<subject>
-                <subject-match attr="requestor-id" match="device2"/>
+				<subject-match attr="requestor-id" match="device2"/>
 			</subject>
 		</target>
 		<rule effect="deny">
@@ -10,42 +10,46 @@
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
 			</condition>
 		</rule>
+		<rule effect="permit"></rule>
 	</policy>
 	<policy combine="first-applicable" description="user1allowAll">
 		<target>
 			<subject>
-                <subject-match attr="user-id" match="user1"/>
+				<subject-match attr="user-id" match="user1"/>
 			</subject>
 		</target>
-		<rule effect="permit">
-		</rule>
+		<rule effect="permit"></rule>
 	</policy>
 	<policy combine="first-applicable" description="user2trustedApp">
 		<target>
 			<subject>
-                <subject-match attr="user-id" match="user2"/>
+				<subject-match attr="user-id" match="user2"/>
 				<subject-match attr="distributor-key-cn" match="Company1"/>
 			</subject>
 		</target>
 		<rule effect="permit">
-            <condition combine="or">
-                <resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
-                <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
-                <resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
-                <resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
-            </condition>
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+			</condition>
 		</rule>
+		<rule effect="deny"></rule>
 	</policy>
 	<policy combine="first-applicable" description="user3fromDevice3">
 		<target>
 			<subject>
-                <subject-match attr="user-id" match="user3"/>
-                <subject-match attr="requestor-id" match="device3"/>
+				<subject-match attr="user-id" match="user3"/>
+				<subject-match attr="requestor-id" match="device3"/>
 			</subject>
 		</target>
 		<rule effect="permit">
-            <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+			</condition>
 		</rule>
+		<rule effect="deny"></rule>
 	</policy>
 	<policy combine="first-applicable" description="untrusted">
 		<rule effect="deny"></rule>
