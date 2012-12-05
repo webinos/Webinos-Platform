@@ -3,7 +3,9 @@
     var http = require('http');
     var fs = require('fs');
 	var path = require('path');
-	var pzp   = require("../../../../../pzp/lib/pzp");
+
+    var webinos = require("find-dependencies")(__dirname);
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp.js");
 
 	exports.stores = function (req, res) {
 		fs.readFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_stores.json')), function (err, data) {

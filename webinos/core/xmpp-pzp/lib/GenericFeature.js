@@ -31,12 +31,8 @@
     var uniqueId = Math.round(Math.random() * 10000);
     var logger = require('./Logger').getLogger('GenericFeature', 'verbose');
 
-    var path = require('path');
-    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-    var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
+    var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
+    
 
     /**
      * The base class for webinos features.

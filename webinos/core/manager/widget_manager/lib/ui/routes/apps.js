@@ -5,7 +5,10 @@
     var fs = require('fs');
     var path = require('path');
     var wm = require('../../../index.js');
-    var pzp = require('../../../../../pzp/lib/pzp');
+    
+    var webinos = require("find-dependencies")(__dirname);
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
+    
     var signedOnly = false;
     var useWGTProtocol = false;
     
