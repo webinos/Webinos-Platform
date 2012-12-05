@@ -66,7 +66,12 @@ var policyList = [
 	"policy10.xml",
 	"policy11.xml",
 	"policy12.xml",
-	"policy13.xml"
+	"policy13.xml",
+	"policy_dhp_1.xml",
+	"policy_dhp_2.xml",
+	"policy_dhp_3.xml",
+	"policy_dhp_4.xml",
+	"policy_dhp_5.xml"
 	];
 
 
@@ -108,43 +113,76 @@ function checkFeature(policyName, userName, certName, featureName, deviceId) {
 	pm = loadManager();
 
 	var req = setRequest(userName, certName, featureName, deviceId);
-	var res = pm.enforceRequest(req);
+
+	// noprompt (third parameter) set to true
+	var res = pm.enforceRequest(req, 0, true);
 	console.log("result is "+res);
 	return res;
 }
 
+function setRequest_DHPref(userId, certCn, feature, deviceId, purpose) {
+	console.log("Setting request for user "+userId+", device "+deviceId+", application released by "+certCn+", feature "+feature+" and purpose "+purpose);
+	var req = {};
+	var ri = {};
+	var si = {};
+	var wi = {};
+	var di = {};
+	si.userId = userId;
+	req.subjectInfo = si;
+	wi.distributorKeyCn = certCn;
+        req.widgetInfo = wi;
+	di.requestorId = deviceId;
+        req.deviceInfo = di;
+	ri.apiFeature = feature;
+	req.resourceInfo = ri;
+	req.purpose = purpose
+	return req;
+}
+
+
+function checkFeature_DHPref(policyName, userName, certName, featureName, deviceId, purpose) {
+	changepolicy(policyName);
+	pm = loadManager();
+
+	var req = setRequest_DHPref(userName, certName, featureName, deviceId, purpose);
+
+	// noprompt (third parameter) set to true
+	var res = pm.enforceRequest(req, 0, true);
+	console.log("result is "+res);
+	return res;
+}
 
 describe("Manager.PolicyManager", function() {
 
 	it("Every user can access every feature", function() {
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[0], companyList[0], featureList[3], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[1], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[1], companyList[0], featureList[4], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[2], companyList[0], featureList[2], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[0], userList[2], companyList[0], featureList[5], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 
@@ -186,22 +224,22 @@ describe("Manager.PolicyManager", function() {
 	it("user1 and user2 are allowed, user3 denied", function() {
 		runs(function() {
 			var res = checkFeature(policyList[1], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[1], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[1], userList[1], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[1], userList[1], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -221,22 +259,22 @@ describe("Manager.PolicyManager", function() {
 	it("Test with generic uris (pzowner and pzfriend are allowed, untrusted user denied)", function() {
 		runs(function() {
 			var res = checkFeature(policyList[3], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[3], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[3], userList[1], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[3], userList[1], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -255,27 +293,27 @@ describe("Manager.PolicyManager", function() {
 	it("Users mixed permissions", function() {
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[0], companyList[0], featureList[3], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[0], companyList[0], featureList[6], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[0], companyList[0], featureList[7], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -290,7 +328,7 @@ describe("Manager.PolicyManager", function() {
 
 		runs(function() {
 			var res = checkFeature(policyList[4], userList[1], companyList[0], featureList[7], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -309,7 +347,7 @@ describe("Manager.PolicyManager", function() {
 	it("Applications signed by Company1 are allowed, other denied", function() {
 		runs(function() {
 			var res = checkFeature(policyList[5], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -330,7 +368,7 @@ describe("Manager.PolicyManager", function() {
 	it("Test with generic uris (trusted app can access every feature, others are denied)", function() {
 		runs(function() {
 			var res = checkFeature(policyList[6], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -349,17 +387,17 @@ describe("Manager.PolicyManager", function() {
 	it("Applications mixed permissions", function() {
 		runs(function() {
 			var res = checkFeature(policyList[7], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[7], userList[0], companyList[0], featureList[3], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[7], userList[0], companyList[1], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -378,7 +416,7 @@ describe("Manager.PolicyManager", function() {
 	it("device1 is allowed, others are denied", function() {
 		runs(function() {
 			var res = checkFeature(policyList[8], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -399,7 +437,7 @@ describe("Manager.PolicyManager", function() {
 	it("test with generic uris (device from pz is allowed, others are denied)", function() {
 		runs(function() {
 			var res = checkFeature(policyList[9], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -418,7 +456,7 @@ describe("Manager.PolicyManager", function() {
 	it("test with generic uris (mobile device is allowed, others are denied)", function() {
 		runs(function() {
 			var res = checkFeature(policyList[10], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -437,17 +475,17 @@ describe("Manager.PolicyManager", function() {
 	it("Device mixed permissions", function() {
 		runs(function() {
 			var res = checkFeature(policyList[11], userList[0], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[11], userList[0], companyList[0], featureList[3], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[11], userList[0], companyList[0], featureList[0], deviceList[1]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -466,12 +504,12 @@ describe("Manager.PolicyManager", function() {
 	it("mixed policy", function() {
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[0], companyList[0], featureList[0], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[0], companyList[1], featureList[4], deviceList[2]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -481,17 +519,17 @@ describe("Manager.PolicyManager", function() {
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[1], companyList[0], featureList[3], deviceList[1]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[1], companyList[0], featureList[1], deviceList[0]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[1], companyList[1], featureList[0], deviceList[1]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -506,7 +544,7 @@ describe("Manager.PolicyManager", function() {
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[2], companyList[2], featureList[1], deviceList[2]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -516,7 +554,7 @@ describe("Manager.PolicyManager", function() {
 
 		runs(function() {
 			var res = checkFeature(policyList[12], userList[2], companyList[0], featureList[0], deviceList[1]);
-			expect(res).toEqual(0);
+			expect(res).toEqual(4);
 		});
 
 		runs(function() {
@@ -524,6 +562,408 @@ describe("Manager.PolicyManager", function() {
 			expect(res).toEqual(1);
 		});
 
+	});
+
+
+	/*********************
+	* BEGINNING OF DHPREF
+	**********************/
+
+	it("DHPref: Every user can access every feature", function() {
+		var purpose = [
+			true,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			true	//"http://www.primelife.eu/purposes/unspecified"
+			];
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[0], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[0], companyList[0], featureList[3], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[1], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[1], companyList[0], featureList[4], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[2], companyList[0], featureList[2], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[13], userList[2], companyList[0], featureList[5], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+	});
+
+	it("DHPref: Every feature is denied to every user", function() {
+		var purpose = [
+			true,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			true	//"http://www.primelife.eu/purposes/unspecified"
+			];
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[0], companyList[0], featureList[2], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[0], companyList[0], featureList[3], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[1], companyList[0], featureList[4], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[1], companyList[0], featureList[5], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[2], companyList[0], featureList[6], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[14], userList[2], companyList[0], featureList[7], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+	});
+
+	it("DHPref: user1 allowed, user2 prompted due to DHPref, user3 denied", function() {
+		var purpose = [
+			true,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			true,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			true	//"http://www.primelife.eu/purposes/unspecified"
+			];
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[0], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[0], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[1], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[1], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[2], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[15], userList[2], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+	});
+
+	it("DHPref: Users mixed permissions", function() {
+		var purpose = [
+			true,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			false	//"http://www.primelife.eu/purposes/unspecified"
+			];
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[3], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[6], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[7], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[2], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[0], companyList[0], featureList[4], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[1], companyList[0], featureList[7], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[1], companyList[0], featureList[6], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[16], userList[2], companyList[0], featureList[7], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+	});
+
+	it("DHPref: mixed policy", function() {
+		var purpose = [
+			true,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			false	//"http://www.primelife.eu/purposes/unspecified"
+			];
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[0], companyList[0], featureList[0], deviceList[0], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[0], companyList[1], featureList[4], deviceList[2], purpose);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[0], companyList[0], featureList[4], deviceList[1], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[1], companyList[0], featureList[3], deviceList[1], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[1], companyList[0], featureList[1], deviceList[0], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[1], companyList[1], featureList[0], deviceList[1], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[1], companyList[0], featureList[6], deviceList[2], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[1], companyList[0], featureList[4], deviceList[1], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[2], companyList[2], featureList[1], deviceList[2], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[2], companyList[0], featureList[7], deviceList[0], purpose);
+			expect(res).toEqual(1);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[2], companyList[0], featureList[0], deviceList[1], purpose);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature_DHPref(policyList[17], userList[2], companyList[1], featureList[4], deviceList[1], purpose);
+			expect(res).toEqual(1);
+		});
 	});
 
 });
