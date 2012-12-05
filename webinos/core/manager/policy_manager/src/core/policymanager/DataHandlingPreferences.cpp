@@ -57,8 +57,21 @@ string DataHandlingPreferences::GetId(){
 
 bool DataHandlingPreferences::evaluate(Request * req){
 	LOGD("Evalutaing %s DHPref", PolicyId.c_str());
-	if (authorizationsset->evaluate(req) == true && obligationsset->evaluate(req) == true)
-		return true;
-	else
-		return false;	
+	if (authorizationsset != NULL) {
+		LOGD("AuthorizationsSet found");
+		if (authorizationsset->evaluate(req) == true) {
+			if (obligationsset != NULL) {
+				LOGD("ObligationsSet found");
+				return obligationsset->evaluate(req);
+			}
+			LOGD("No ObligationsSet found");
+			return true;
+		}
+		else
+			return false;
+	}
+	else {
+		LOGD("No AuthorizationsSet found");
+		return false;
+	}
 }

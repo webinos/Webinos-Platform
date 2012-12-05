@@ -275,74 +275,178 @@ public:
 		vector< map<string, string> > *triggers = new vector< map<string, string> >();
 		v8::Local<Value> actTmp, triggerTmp;
 		v8::Local<Array> triggersTmp;
-		v8::Local<Array> obTmp = v8::Local<Array>::Cast(args[3]);
 
-		for(unsigned int i = 0; i < obTmp->Length(); i++){
-			if (obTmp->Get(i)->ToObject()->Has(String::New("action"))) {
-				actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
-				if (actTmp->ToObject()->Has(String::New("actionID"))){
-					v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New("actionID")));
-					(*action)["actionID"]=*actionID;
+		if (args[0]->ToObject()->Has(String::New("obligations"))) {
+			v8::Local<Array> obTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("obligations")));
+			LOGD("DHPref: read %d obligations", obTmp->Length());
+
+			for (unsigned int i = 0; i < obTmp->Length(); i++) {
+				if (obTmp->Get(i)->ToObject()->Has(String::New("action"))) {
+					LOGD("Obligation %d: action found", i);
+					actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
+					if (actTmp->ToObject()->Has(String::New("actionID"))) {
+						v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New("actionID")));
+						(*action)["actionID"]=*actionID;
+						LOGD("Obligation %d: actionID %s", i, *actionID);
+						if (strcmp(*actionID, "ActionNotifyDataSubject") == 0) {
+							if (actTmp->ToObject()->Has(String::New("Media"))) {
+								v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New("Media")));
+								(*action)["Media"]=*media;
+								LOGD("Obligation %d: Media %s", i, *media);
+							}
+							else {
+								// invalid action: Media required
+								LOGD("Obligation %d: Media is missing", i);
+								action->clear();
+								continue;
+							}
+							if (actTmp->ToObject()->Has(String::New("Address"))) {
+								v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New("Address")));
+								(*action)["Address"]=*address;
+								LOGD("Obligation %d: Address %s", i, *address);
+							}
+							else {
+								// invalid action: Address required
+								LOGD("Obligation %d: Address is missing", i);
+								action->clear();
+								continue;
+							}
+						}
+						else if (strcmp(*actionID, "ActionDeletePersonalData") != 0 &&
+							strcmp(*actionID, "ActionAnonymizePersonalData") != 0 &&
+							strcmp(*actionID, "ActionLog") != 0 && strcmp(*actionID, "ActionSecureLog") != 0) {
+
+							// invalid action: unrecognized actionID
+							LOGD("Obligation %d: unrecognized actionID %s", i, *actionID);
+							action->clear();
+							continue;
+						}
+					}
+					else {
+						// invalid action: actionID field required
+						LOGD("Obligation %d: actionID is missing", i);
+						continue;
+					}
 				}
-				if (actTmp->ToObject()->Has(String::New("Media"))){
-					v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New("Media")));
-					(*action)["Media"]=*media;
+				else {
+					// invalid obligation: action required
+					LOGD("Obligation %d: action is missing", i);
+					continue;
 				}
-				if (actTmp->ToObject()->Has(String::New("Address"))){
-					v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New("Address")));
-					(*action)["Address"]=*address;
+				if (obTmp->Get(i)->ToObject()->Has(String::New("triggers"))) {
+					triggersTmp = v8::Local<Array>::Cast(obTmp->Get(i)->ToObject()->Get(String::New("triggers")));
+					LOGD("Obligation %d: %d triggers found", i, triggersTmp->Length());
+					for (unsigned int j = 0; j < triggersTmp->Length(); j++) {
+						if (triggersTmp->Get(j)->ToObject()->Has(String::New("triggerID"))) {
+							v8::String::AsciiValue triggerID(triggersTmp->Get(j)->ToObject()->Get(String::New("triggerID")));
+							(*trigger)["triggerID"]=*triggerID;
+							LOGD("Obligation %d, trigger %d: actionID %s", i, j, *triggerID);
+							triggerTmp = triggersTmp->Get(j);
+							if (strcmp(*triggerID, "TriggerAtTime") == 0) {
+								if (triggerTmp->ToObject()->Has(String::New("Start"))){
+									v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New("Start")));
+									(*trigger)["Start"]=*start;
+									LOGD("Obligation %d, trigger %d: Start %s", i, j, *start);
+								}
+								else {
+									// invalid trigger: Start required
+									LOGD("Obligation %d, trigger %d: Start is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+									(*trigger)["MaxDelay"]=*maxdelay;
+									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+								}
+								else {
+									// invalid trigger: MaxDelay required
+									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+							}
+							else if (strcmp(*triggerID, "TriggerPersonalDataAccessedForPurpose") == 0) {
+								if (triggerTmp->ToObject()->Has(String::New("Purpose"))){
+									v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New("Purpose")));
+									(*trigger)["Purpose"]=*pur;
+									LOGD("Obligation %d, trigger %d: Purpose %s", i, j, *pur);
+								}
+								else {
+									// invalid trigger: Purpose required
+									LOGD("Obligation %d, trigger %d: Purpose is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+									(*trigger)["MaxDelay"]=*maxdelay;
+									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+								}
+								else {
+									// invalid trigger: MaxDelay required
+									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+							}
+							else if (strcmp(*triggerID, "TriggerPersonalDataDeleted") == 0) {
+								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
+									(*trigger)["MaxDelay"]=*maxdelay;
+									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+								}
+								else {
+									// invalid trigger: MaxDelay required
+									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+							}
+							else if (strcmp(*triggerID, "TriggerDataSubjectAccess") == 0) {
+								if (triggerTmp->ToObject()->Has(String::New("Endpoint"))){
+									v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New("Endpoint")));
+									(*trigger)["Endpoint"]=*endpoint;
+									LOGD("Obligation %d, trigger %d: Endpoint %s", i, j, *endpoint);
+								}
+								else {
+									// invalid trigger: Endpoint required
+									LOGD("Obligation %d, trigger %d: Endpoint is missing", i, j);
+									trigger->clear();
+									continue;
+								}
+							}
+							else {
+								// invalid trigger: unrecognized triggerID
+								LOGD("Obligation %d, trigger %d: unrecognized triggerID %s", i, j, *triggerID);
+								trigger->clear();
+								continue;
+							}
+						}
+						else {
+							// invalid trigger: triggerID required
+							LOGD("Obligation %d, trigger %d: triggerID is missing", i, j);
+							continue;
+						}
+						triggers->push_back(*trigger);
+						trigger->clear();
+					}
 				}
+				else {
+					// invalid obligation: triggers required
+					LOGD("Obligation %d: triggers are missing", i);
+					continue;
+				}
+
+				if (action->empty() == false && triggers->empty() == false) {
+					ob->action = (*action);
+					ob->triggers = (*triggers);
+
+					obs->push_back(*ob);
+				}
+				action->clear();
+				triggers->clear();
 			}
-			if (obTmp->Get(i)->ToObject()->Has(String::New("triggers"))) {
-				triggersTmp = v8::Local<Array>::Cast(obTmp->Get(i)->ToObject()->Get(String::New("triggers")));
-				for(unsigned int i = 0; i < triggersTmp->Length(); i++){
-					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerAtTime"))) {
-						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerAtTime"));
-						if (triggerTmp->ToObject()->Has(String::New("Start"))){
-							v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New("Start")));
-							(*trigger)["Start"]=*start;
-						}
-						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-							(*trigger)["MaxDelay"]=*maxdelay;
-						}
-					}
-					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerPersonalDataAccessedForPurpose"))) {
-						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerPersonalDataAccessedForPurpose"));
-						if (triggerTmp->ToObject()->Has(String::New("Purpose"))){
-							v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New("Purpose")));
-							(*trigger)["Purpose"]=*pur;
-						}
-						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-							(*trigger)["MaxDelay"]=*maxdelay;
-						}
-					}
-					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerPersonalDataDeleted"))) {
-						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerPersonalDataDeleted"));
-						if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-							v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-							(*trigger)["MaxDelay"]=*maxdelay;
-						}
-					}
-					if (triggersTmp->Get(i)->ToObject()->Has(String::New("TriggerDataSubjectAccess"))) {
-						triggerTmp = triggersTmp->Get(i)->ToObject()->Get(String::New("TriggerDataSubjectAccess"));
-						if (triggerTmp->ToObject()->Has(String::New("Endpoint"))){
-							v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New("Endpoint")));
-							(*trigger)["Endpoint"]=*endpoint;
-						}
-					}
-					triggers->push_back(*trigger);
-					trigger->clear();
-				}
-			}
-			ob->action = (*action);
-			ob->triggers = (*triggers);
-
-			obs->push_back(*ob);
-
-			action->clear();
-			triggers->clear();
 		}
 
 //		string widPath(".");

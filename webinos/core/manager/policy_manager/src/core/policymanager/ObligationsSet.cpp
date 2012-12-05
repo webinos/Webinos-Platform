@@ -19,6 +19,7 @@
  ******************************************************************************/
 
 #include "ObligationsSet.h"
+#include "../../debug.h"
 
 ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 
@@ -35,6 +36,7 @@ ObligationsSet::~ObligationsSet(){
 bool ObligationsSet::evaluate(Request * req){
 
 	for(unsigned int i = 0; i<obligation.size(); i++){
+		LOGD("ObligationsSet: evalutaing obligation %d", i);
 		if (obligation[i]->evaluate(req) == false)
 			return false;
 	}
