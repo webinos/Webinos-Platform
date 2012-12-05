@@ -1,5 +1,5 @@
 describe("app2app messaging api", function () {
-  var TIMEOUT = 60 * 60 * 1000;
+  var TIMEOUT = 1000;
   var app2appService;
 
   function addMatchers() {

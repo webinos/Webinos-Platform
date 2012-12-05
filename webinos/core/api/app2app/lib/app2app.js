@@ -64,6 +64,21 @@
     } else {
       if (registeredPeers.hasOwnProperty(peerId)) {
         console.log("Unregister peer with id " + peerId);
+
+        // first remove all channels where the creator runs on the peer to unregister
+        Object.keys(registeredChannels).forEach(function(channel) {
+          if (channel.creator.peerId === peerId) {
+            delete registeredChannels[channel.namespace];
+          }
+        });
+
+        // for all other channels, remove all clients which run on the peer to unregister
+        Object.keys(registeredChannels).forEach(function(channel) {
+          channel.clients = channel.clients.filter(function(client) {
+            return client.peerId !== peerId;
+          });
+        });
+
         delete registeredPeers[peerId];
       }
       successCallback();
@@ -176,7 +191,7 @@
     var clients = channel.clients;
 
     if (clients.some(equalsClient(connectRequest.from))) {
-      errorCallback(respondWith("Not connected to channel."));
+      errorCallback(respondWith("Client already connected to channel."));
       return;
     }
 
@@ -263,11 +278,12 @@
     if (registeredChannels.hasOwnProperty(namespace)) {
       var channel = registeredChannels[namespace];
 
-      channel.clients = channel.clients.filter(notEqualsClient(from));
-
-      // if creator disconnects, remove channel
       if (equalsClient(from)(channel.creator)) {
+        // if creator disconnects, remove channel
         delete registeredChannels[namespace];
+      } else {
+        // otherwise just remove client from channel list
+        channel.clients = channel.clients.filter(notEqualsClient(from));
       }
 
       successCallback();

@@ -440,7 +440,7 @@
   /**
    * Disconnect from the channel. After disconnecting the client does no longer receive messages from the channel.
    * If the channel creator disconnects, the channel is closed and is no longer available. The service
-   * does not inform connected client of the channel disconnect or close. If needed the client can send an
+   * does not inform connected clients of the disconnect or closing. If needed the client can send an
    * application-specific message to inform other clients before disconnecting.
    *
    * @param successCallback Callback invoked when the disconnect request is accepted for processing.
