@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <syslog.h>
+#include <dirent.h>
 #endif
 
 #include "ServiceManager.h"
@@ -78,6 +79,29 @@ bool CServiceManager::CreateDirectory(std::string path)
 
   int err = errno;
   return res;
+#endif
+}
+
+void CServiceManager::CreateSharedFile(std::string path)
+{
+#if defined(WIN32)
+  // For Windows we need to make sure all users can write to this file.
+  // We achieve this by setting a security descriptor
+  BYTE sd[SECURITY_DESCRIPTOR_MIN_LENGTH];
+  SECURITY_ATTRIBUTES sa;
+
+  sa.nLength = sizeof(sa);
+  sa.bInheritHandle = TRUE;
+  sa.lpSecurityDescriptor = &sd;
+
+  InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+  SetSecurityDescriptorDacl(&sd, TRUE, NULL, FALSE);
+
+  HANDLE hFile = ::CreateFile(path.c_str(),GENERIC_WRITE,0,&sa,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
+  if (hFile != INVALID_HANDLE_VALUE)
+    ::CloseHandle(hFile);
+#else
+  // Do nothing - not necessary on Linux
 #endif
 }
 
@@ -229,6 +253,8 @@ bool CServiceManager::SetUserParameters(std::string appDataPath)
 	{
 		serviceConfigPath += pathSeparator + WEBINOS_SERVER_EXE + std::string(".dat");
 
+    CreateSharedFile(serviceConfigPath.c_str());
+
     std::ofstream fs(serviceConfigPath.c_str());
 
     if (fs)
@@ -322,6 +348,8 @@ void CServiceManager::WriteServiceHeartbeat(const CServiceParameters& params)
 	if (GetCommonSettingsPath(serviceConfigPath))
 	{
 		serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
+
+    CreateSharedFile(serviceConfigPath.c_str());
 
     std::ofstream fs(serviceConfigPath.c_str());
     if (fs)
@@ -418,4 +446,96 @@ unsigned long CServiceManager::GetNodeHeartbeatTime(const CUserParameters& user,
 	}
 
 	return ret;
+}
+
+void CServiceManager::GetLaunchFiles(const CUserParameters& user, long allowedTimespan, std::vector<std::string> &out)
+{
+  std::string directory;
+  GetUserSettingsPath(user,directory);
+
+#if defined(WIN32)
+  SYSTEMTIME timeNow;
+  GetSystemTime(&timeNow);
+  FILETIME fileTimeNow;
+  SystemTimeToFileTime(&timeNow,&fileTimeNow);
+  ULONGLONG timeNowLong = (((ULONGLONG)fileTimeNow.dwHighDateTime) << 32) + fileTimeNow.dwLowDateTime;
+
+  HANDLE dir;
+  WIN32_FIND_DATA file_data;
+
+  if ((dir = FindFirstFile((directory + "\\*.launch").c_str(), &file_data)) == INVALID_HANDLE_VALUE)
+    return; /* No files found */
+
+  do 
+  {
+    const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+    if (is_directory)
+    	continue;
+
+    const std::string file_name = file_data.cFileName;
+    const std::string full_file_name = directory + "/" + file_name;
+    const std::string failed_file_name = full_file_name + ".failed";
+   
+    ULONGLONG fileTimeLong = (((ULONGLONG)file_data.ftCreationTime.dwHighDateTime) << 32) + file_data.ftCreationTime.dwLowDateTime;
+
+    if (timeNowLong < fileTimeLong)
+    {
+      // File creation time invalid (in the future).
+      ::MoveFile(full_file_name.c_str(),failed_file_name.c_str());
+    }
+    else if (timeNowLong - fileTimeLong > (allowedTimespan * 100000000))
+    {
+      // File too old.
+      ::MoveFile(full_file_name.c_str(),failed_file_name.c_str());
+    }
+    else
+    {
+      out.push_back(full_file_name);
+    }
+  } 
+  while (FindNextFile(dir, &file_data));
+
+  FindClose(dir);
+#else
+  DIR *dir;
+  class dirent *ent;
+  class stat st;
+  time_t currentTime = time(NULL);
+
+  dir = opendir(directory.c_str());
+  while ((ent = readdir(dir)) != NULL) 
+  {
+    const std::string file_name = ent->d_name;
+    const std::string full_file_name = directory + "/" + file_name;
+    const std::string failed_file_name = full_file_name + ".failed";
+
+    if (stat(full_file_name.c_str(), &st) == -1)
+      continue;
+
+    const bool is_directory = (st.st_mode & S_IFDIR) != 0;
+    if (is_directory)
+      continue;
+
+    size_t extIdx = file_name.find_last_of('.');
+    if (extIdx == std::string::npos || file_name.substr(extIdx+1) != std::string("launch"))
+      continue;
+
+    if (currentTime < st.st_ctime)
+    {
+      // File creation time invalid (in the future).
+      rename(full_file_name.c_str(), failed_file_name.c_str());
+    }
+    else if (currentTime - st.st_ctime > allowedTimespan)
+    {
+      // File too old.
+      rename(full_file_name.c_str(), failed_file_name.c_str());
+    }
+    else
+    {
+      out.push_back(full_file_name);
+    }
+  }
+  closedir(dir);
+#endif
 }

@@ -16,17 +16,28 @@
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
+var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
+
+var TestApiModule = function(rpcHandler, params) {
+	this.rpcHandler = rpcHandler;
+	this.params = params;
+};
+
+TestApiModule.prototype.init = function (register, unregister) {
+	var service = new TestService(this.rpcHandler, this.params);
+	register(service);
+};
 
 /**
  * Webinos Get42 service constructor (server side).
  * 
  * This is an example, useful as a guide or writing a new service implementation.
  * @constructor
- * @alias TestModule
+ * @alias TestService
  * @param rpcHandler A handler for functions that use RPC to deliver their result.
  * @param params Parameters to initialize the service.
  */
-var TestModule = function(rpcHandler, params) {
+var TestService = function(rpcHandler, params) {
 	// inherit from RPCWebinosService
 	this.base = RPCWebinosService;
 	this.base({
@@ -60,7 +71,7 @@ var TestModule = function(rpcHandler, params) {
 	};
 }
 
-TestModule.prototype = new RPCWebinosService;
+TestService.prototype = new RPCWebinosService;
 
 /**
  * Get the value of an internal property and whatever was sent as params.
@@ -68,12 +79,12 @@ TestModule.prototype = new RPCWebinosService;
  * @param successCB Success callback.
  * @param errorCB Error callback.
  */
-TestModule.prototype.get42 = function(params, successCB, errorCB){
+TestService.prototype.get42 = function(params, successCB, errorCB){
 	console.log("get42 was invoked");
 	successCB(this.blaa + " " + params[0]);
 }
 
 // export our object
-exports.Service = TestModule;
+exports.Module = TestApiModule;
 
 })();

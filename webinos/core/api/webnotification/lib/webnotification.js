@@ -13,10 +13,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 André Paul, Fraunhofer FOKUS
+* Copyright 2012 AndrÃ© Paul, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
-	var exec = require('child_process').exec;
+var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
+var exec = require('child_process').exec;
 
 var dependencies = require("find-dependencies")(__dirname)	
 var pzp = dependencies.global.require(dependencies.global.pzp.location,
