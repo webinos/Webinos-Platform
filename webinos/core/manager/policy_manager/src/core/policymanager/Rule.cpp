@@ -20,8 +20,9 @@
 #include "Rule.h"
 #include "../../debug.h"
 
-Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
-	datahandlingpreferences = dhp;
+Rule::Rule(TiXmlElement* rule, DHPrefs* dhp)
+	:datahandlingpreferences(dhp)
+{
 	effect = (rule->Attribute("effect") != NULL) ? string2effect(rule->Attribute("effect")) : UNDETERMINED;
 	if(rule->FirstChild("condition")){
 		condition = new Condition((TiXmlElement*)rule->FirstChild("condition"));
@@ -30,25 +31,25 @@ Rule::Rule(TiXmlElement* rule, DHPrefs* dhp){
 		condition = NULL;
 		
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
-		LOGD("Rule: DHPref %s found", child->Attribute("PolicyId"));
-		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild(dhPrefTag); child;
+			child = (TiXmlElement*)child->NextSibling(dhPrefTag) ) {
+		LOGD("Rule: DHPref %s found", child->Attribute(policyIdTag.c_str()));
+		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("Rule DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild(provisionalActionsTag); child;
+			child = (TiXmlElement*)child->NextSibling(provisionalActionsTag) ) {
 		LOGD("Rule: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
 }
 
-Rule::~Rule()
-	{
-	// TODO Auto-generated destructor stub
-	}
+Rule::~Rule() {
+	for (vector<ProvisionalActions*>::iterator it = provisionalactions.begin(); it != provisionalactions.end(); it++)
+		delete *it;
+}
 
 
 Effect Rule::string2effect(const string & effect_str){

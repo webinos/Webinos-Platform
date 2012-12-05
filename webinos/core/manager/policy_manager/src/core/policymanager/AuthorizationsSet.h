@@ -21,8 +21,15 @@
 #ifndef AUTHORIZATIONSSET_H_
 #define AUTHORIZATIONSSET_H_
 
-#include "IPolicyBase.h"
-#define PURPOSES_NUMBER	35
+using namespace std;
+
+#include <string>
+#include <vector>
+#include "../../../contrib/xmltools/tinyxml.h"
+#include "Request.h"
+
+static const string authzTag = "AuthzUseForPurpose";
+static const string purposeTag = "Purpose";
 
 enum purpose_ontology {
 
@@ -68,13 +75,51 @@ enum purpose_ontology {
 	UNSPECIFIED
 };
 
-extern string ontology_vector[PURPOSES_NUMBER];
+static const string ontology_vector[] = {
+	"http://www.w3.org/2002/01/P3Pv1/current",
+	"http://www.w3.org/2002/01/P3Pv1/admin",
+	"http://www.w3.org/2002/01/P3Pv1/develop",
+	"http://www.w3.org/2002/01/P3Pv1/tailoring",
+	"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis",
+	"http://www.w3.org/2002/01/P3Pv1/pseudo-decision",
+	"http://www.w3.org/2002/01/P3Pv1/individual-analysis",
+	"http://www.w3.org/2002/01/P3Pv1/individual-decision",
+	"http://www.w3.org/2002/01/P3Pv1/contact",
+	"http://www.w3.org/2002/01/P3Pv1/historical",
+	"http://www.w3.org/2002/01/P3Pv1/telemarketing",
+	"http://www.w3.org/2002/01/P3Pv11/account",
+	"http://www.w3.org/2002/01/P3Pv11/arts",
+	"http://www.w3.org/2002/01/P3Pv11/browsing",
+	"http://www.w3.org/2002/01/P3Pv11/charity",
+	"http://www.w3.org/2002/01/P3Pv11/communicate",
+	"http://www.w3.org/2002/01/P3Pv11/custom",
+	"http://www.w3.org/2002/01/P3Pv11/delivery",
+	"http://www.w3.org/2002/01/P3Pv11/downloads",
+	"http://www.w3.org/2002/01/P3Pv11/education",
+	"http://www.w3.org/2002/01/P3Pv11/feedback",
+	"http://www.w3.org/2002/01/P3Pv11/finmgt",
+	"http://www.w3.org/2002/01/P3Pv11/gambling",
+	"http://www.w3.org/2002/01/P3Pv11/gaming",
+	"http://www.w3.org/2002/01/P3Pv11/government",
+	"http://www.w3.org/2002/01/P3Pv11/health",
+	"http://www.w3.org/2002/01/P3Pv11/login",
+	"http://www.w3.org/2002/01/P3Pv11/marketing",
+	"http://www.w3.org/2002/01/P3Pv11/news",
+	"http://www.w3.org/2002/01/P3Pv11/payment",
+	"http://www.w3.org/2002/01/P3Pv11/sales",
+	"http://www.w3.org/2002/01/P3Pv11/search",
+	"http://www.w3.org/2002/01/P3Pv11/state",
+	"http://www.w3.org/2002/01/P3Pv11/surveys",
+	"http://www.primelife.eu/purposes/unspecified"
+};
+
+template <typename T,unsigned S>
+unsigned arraysize(const T (&v)[S]) { return S; }
 
 class AuthorizationsSet{
 	
 private:
 	vector<string>	authzuseforpurpose;
-	bool		purpose_array[PURPOSES_NUMBER];
 
 public:
 	AuthorizationsSet(TiXmlElement*);

@@ -21,54 +21,15 @@
 #include "AuthorizationsSet.h"
 #include "../../debug.h"
 
-string ontology_vector[PURPOSES_NUMBER] = {
-	"http://www.w3.org/2002/01/P3Pv1/current",
-	"http://www.w3.org/2002/01/P3Pv1/admin",
-	"http://www.w3.org/2002/01/P3Pv1/develop",
-	"http://www.w3.org/2002/01/P3Pv1/tailoring",
-	"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis",
-	"http://www.w3.org/2002/01/P3Pv1/pseudo-decision",
-	"http://www.w3.org/2002/01/P3Pv1/individual-analysis",
-	"http://www.w3.org/2002/01/P3Pv1/individual-decision",
-	"http://www.w3.org/2002/01/P3Pv1/contact",
-	"http://www.w3.org/2002/01/P3Pv1/historical",
-	"http://www.w3.org/2002/01/P3Pv1/telemarketing",
-	"http://www.w3.org/2002/01/P3Pv11/account",
-	"http://www.w3.org/2002/01/P3Pv11/arts",
-	"http://www.w3.org/2002/01/P3Pv11/browsing",
-	"http://www.w3.org/2002/01/P3Pv11/charity",
-	"http://www.w3.org/2002/01/P3Pv11/communicate",
-	"http://www.w3.org/2002/01/P3Pv11/custom",
-	"http://www.w3.org/2002/01/P3Pv11/delivery",
-	"http://www.w3.org/2002/01/P3Pv11/downloads",
-	"http://www.w3.org/2002/01/P3Pv11/education",
-	"http://www.w3.org/2002/01/P3Pv11/feedback",
-	"http://www.w3.org/2002/01/P3Pv11/finmgt",
-	"http://www.w3.org/2002/01/P3Pv11/gambling",
-	"http://www.w3.org/2002/01/P3Pv11/gaming",
-	"http://www.w3.org/2002/01/P3Pv11/government",
-	"http://www.w3.org/2002/01/P3Pv11/health",
-	"http://www.w3.org/2002/01/P3Pv11/login",
-	"http://www.w3.org/2002/01/P3Pv11/marketing",
-	"http://www.w3.org/2002/01/P3Pv11/news",
-	"http://www.w3.org/2002/01/P3Pv11/payment",
-	"http://www.w3.org/2002/01/P3Pv11/sales",
-	"http://www.w3.org/2002/01/P3Pv11/search",
-	"http://www.w3.org/2002/01/P3Pv11/state",
-	"http://www.w3.org/2002/01/P3Pv11/surveys",
-	"http://www.primelife.eu/purposes/unspecified"
-};
 
 AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 
-	TiXmlElement * child;
-
 	// AuthzUseForPurpose Tag
-	if (authorizationsset->FirstChild("AuthzUseForPurpose")) {
+	if (authorizationsset->FirstChild(authzTag)) {
 		LOGD("AuthorizationsSet constructor, AuthzUseForPurpose found");
-		child = (TiXmlElement*)authorizationsset->FirstChild("AuthzUseForPurpose");
-		for(child = (TiXmlElement*)child->FirstChild("Purpose"); child; 
-				child = (TiXmlElement*)child->NextSibling("Purpose")) {
+		TiXmlElement * child = static_cast<TiXmlElement*>(authorizationsset->FirstChild(authzTag));
+		for(child = static_cast<TiXmlElement*>(child->FirstChild(purposeTag)); child; 
+				child = static_cast<TiXmlElement*>(child->NextSibling(purposeTag))) {
 			LOGD("Purpose %s found", child->GetText());
 			authzuseforpurpose.push_back(child->GetText());
 		}
@@ -84,17 +45,17 @@ AuthorizationsSet::~AuthorizationsSet(){
 bool AuthorizationsSet::evaluate(Request * req){
 	LOGD("Evaluating AuthorizationsSet");
 
-	bool purpose_satisfied[PURPOSES_NUMBER];
+	bool purpose_satisfied[arraysize(ontology_vector)];
 	vector<bool> purpose = req->getPurposeAttrs();
 	unsigned int i = 0;
 
 	// invalid purposes vector
-	if (purpose.size() != PURPOSES_NUMBER) {
+	if (purpose.size() != arraysize(ontology_vector)) {
 		LOGD("AuthorizationsSet: invalid purposes vector");
 		return false;
 	}
 
-	for(vector<bool>::iterator it = purpose.begin(); it!= purpose.end(); it++){
+	for(vector<bool>::const_iterator it = purpose.begin(); it!= purpose.end(); it++){
 		// Purpose requested
 		if (*it == true){
 			purpose_satisfied[i] = false;
@@ -116,7 +77,7 @@ bool AuthorizationsSet::evaluate(Request * req){
 		i++;
 	}
 
-	for (i=0; i < PURPOSES_NUMBER; i++){
+	for (i=0; i < arraysize(ontology_vector); i++){
 		if (purpose_satisfied[i] == false)
 			// A purpose is not satisfied
 			return false;

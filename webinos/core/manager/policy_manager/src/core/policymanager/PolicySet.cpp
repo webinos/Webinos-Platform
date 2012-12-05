@@ -20,9 +20,10 @@
 #include "PolicySet.h"
 #include "../../debug.h"
 
-PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
+PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp)
+	: IPolicyBase(set), datahandlingpreferences(dhp)
+{
 	iType = POLICY_SET;
-	datahandlingpreferences = dhp;
 	policyCombiningAlgorithm = (set->Attribute("combine")!=NULL) ? set->Attribute("combine") : deny_overrides_algorithm;
 	
 	//init subjects
@@ -35,16 +36,16 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp) : IPolicyBase(set){
 	}
 
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
-		LOGD("PolicySet: DHPref %s found", child->Attribute("PolicyId"));
-		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild(dhPrefTag); child;
+			child = (TiXmlElement*)child->NextSibling(dhPrefTag) ) {
+		LOGD("PolicySet: DHPref %s found", child->Attribute(policyIdTag.c_str()));
+		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("PolicySet DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild(provisionalActionsTag); child;
+			child = (TiXmlElement*)child->NextSibling(provisionalActionsTag) ) {
 		LOGD("PolicySet: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
@@ -81,10 +82,10 @@ PolicySet::PolicySet(IPolicyBase* policy) : IPolicyBase(policy){
 	this->description = policy->description;
 }
 
-PolicySet::~PolicySet()
-	{
-	// TODO Auto-generated destructor stub
-	}
+PolicySet::~PolicySet() {
+	for (vector<ProvisionalActions*>::iterator it = provisionalactions.begin(); it != provisionalactions.end(); it++)
+		delete *it;
+}
 
 
 bool PolicySet::matchSubject(Request* req){

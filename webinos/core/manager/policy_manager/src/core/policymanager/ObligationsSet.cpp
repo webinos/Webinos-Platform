@@ -30,5 +30,8 @@ ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 }
 
 ObligationsSet::~ObligationsSet(){
+	for (vector<Obligation*>::iterator it=obligation.begin(); it != obligation.end(); it++) {
+		delete *it;
+	}
 }
 

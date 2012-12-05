@@ -20,9 +20,13 @@
 #include "PolicyManager.h"
 #include "../../debug.h"
 
-PolicyManager::PolicyManager() {}
+PolicyManager::PolicyManager()
+	:dhp(0)
+{}
 
-PolicyManager::PolicyManager(const string & policyFileName){
+PolicyManager::PolicyManager(const string & policyFileName)
+	:dhp(0)
+{
 
 	TiXmlDocument doc(policyFileName);
 	LOGD("Policy manager file : %s",policyFileName.data());
@@ -59,7 +63,10 @@ PolicyManager::PolicyManager(const string & policyFileName){
 	LOGD("Policy manager ctor finish");
 }
 
-PolicyManager::~PolicyManager() {}
+PolicyManager::~PolicyManager() {
+	for (map<string, DataHandlingPreferences*>::iterator it = dhp->begin(); it != dhp->end(); it++)
+		delete (*it).second;
+}
 
 string PolicyManager::getPolicyName(){
 	return policyName;
@@ -77,7 +84,7 @@ Effect PolicyManager::checkRequest(Request * req){
 		LOGD("XACML response: %d", xacml_eff);
 
 		// valid purposes vector
-		if (purpose.size() == PURPOSES_NUMBER) {
+		if (purpose.size() == arraysize(ontology_vector)) {
 			LOGD("PolicyManager: valid purposes vector");
 
 			// in ProvisionalAction tags a single resouce requires a single DHPref

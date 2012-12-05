@@ -24,14 +24,16 @@
 ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 
 	// ProvisionalAction Tags
-	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild("ProvisionalAction"); child;
-			child = (TiXmlElement*)child->NextSibling("ProvisionalAction")) {
+	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild(provisionalActionTag); child;
+			child = (TiXmlElement*)child->NextSibling(provisionalActionTag)) {
 		LOGD("ProvisionalActions constructor, ProvisionalAction found");
 		provisionalaction.push_back(new ProvisionalAction(child));
 	}
 }
 
-ProvisionalActions::~ProvisionalActions(){
+ProvisionalActions::~ProvisionalActions() {
+	for (vector<ProvisionalAction*>::iterator it = provisionalaction.begin(); it != provisionalaction.end(); it++)
+		delete *it;
 }
 
 pair<string, bool> ProvisionalActions::evaluate(Request * req){

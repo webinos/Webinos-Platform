@@ -25,10 +25,14 @@
 #include "ObligationsSet.h"
 #include "Request.h"
 
+static const string authzSetTag = "AuthorizationsSet";
+static const string oblSetTag = "ObligationsSet";
+static const string policyIdTag = "PolicyId";
+
 class DataHandlingPreferences{
 	
 private:
-	string			PolicyId;
+	string			policyId;
 	AuthorizationsSet*	authorizationsset;
 	ObligationsSet*		obligationsset;
 	
