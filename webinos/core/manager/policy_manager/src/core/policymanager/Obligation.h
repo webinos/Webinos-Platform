@@ -25,10 +25,6 @@
 
 class Obligation{
 	
-private:
-	//TriggersSet*	triggersset;
-	//Action*		action;
-
 public:
 	Obligation(TiXmlElement*);
 	virtual ~Obligation();
