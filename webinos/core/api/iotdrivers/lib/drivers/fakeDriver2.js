@@ -33,9 +33,9 @@
      * @param cbkFunc This is the function to call to send back data
      *
      */
-    exports.init = function(dId, regFunc, cmdFunc) {
-        console.log('Fake driver 2 init - id is '+driverId);
+    exports.init = function(dId, regFunc, cbkFunc) {
         driverId = dId;
+        console.log('Fake driver 2 init - id is '+driverId);
         registerFunc = regFunc;
         callbackFunc = cbkFunc;
         
@@ -51,8 +51,8 @@
      *
      *
      */
-        exports.execute = function(cmd, eId, data) {
-     }
+    exports.execute = function(cmd, eId, data) {
+    }
 
 
     function intReg() {
@@ -60,6 +60,7 @@
         registerFunc(driverId, 0, 'light');
         registerFunc(driverId, 1, 'linearmotor');
         registerFunc(driverId, 1, 'switch');
+        registerFunc(driverId, 0, 'proximity');
     }
 
 }());
