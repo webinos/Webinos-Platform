@@ -266,6 +266,12 @@ public:
 					}
 				}
 			}
+			else {
+				LOGD("DHPref: invalid purpose parameter, wrong vector length");
+			}
+		}
+		else {
+			LOGD("DHPref: purpose parameter not found");
 		}
 
 //		string widPath(".");
