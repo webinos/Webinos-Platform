@@ -26,8 +26,10 @@ var vm   = require('vm');
     require:require,
     console:console,
     process:process,
-    Buffer:Buffer
+    Buffer:Buffer,
+    __dirname:__dirname
   };
+  
   var context = vm.createContext(env);
   var includeScript = function(name) {
     var filename = path.resolve(__dirname, name);

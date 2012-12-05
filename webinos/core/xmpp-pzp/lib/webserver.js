@@ -33,15 +33,6 @@
     var WebSocketServer = require('websocket').server;
     var rpcServer = require("./RpcServer.js");
 
-    var path = require('path');
-    var documentRoot = path.resolve(__dirname, '../../../web_root');
-    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-    var dependencyPath = path.join(__dirname, '../', moduleRoot.root.location, '/dependencies.json')
-    var dependencies = require(path.normalize(dependencyPath));
-    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-    var rpc = require(path.join(webinosRoot, dependencies.rpc.location));
-
     var webinos = require("find-dependencies")(__dirname);
     var content = webinos.global.require(webinos.global.util.location, "lib/content.js");
     

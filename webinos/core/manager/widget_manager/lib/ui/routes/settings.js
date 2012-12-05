@@ -1,7 +1,10 @@
 (function (exports) {
     var fs = require('fs');
 	var path = require('path');
-    var pzp = require('../../../../../pzp/lib/pzp');
+	
+    var webinos = require("find-dependencies")(__dirname);
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
+
     var wrtPort = 0;
 
     function extractKey(line, key) {

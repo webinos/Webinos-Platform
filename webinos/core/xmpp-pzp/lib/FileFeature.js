@@ -26,12 +26,8 @@
     var sys = require('util');
     var logger = require('./Logger').getLogger('FileFeature', 'info');
 
-    var path = require('path');
-    var moduleRoot = require(path.resolve(__dirname, '../dependencies.json'));
-    var dependencies = require(path.resolve(__dirname, '../' + moduleRoot.root.location + '/dependencies.json'));
-    var webinosRoot = path.resolve(__dirname, '../' + moduleRoot.root.location);
-
-    var file = require(path.join(webinosRoot, dependencies.api.file.location));
+    var webinos = require("find-dependencies")(__dirname);
+    var file = webinos.global.require(webinos.global.api.file.location);
 
     /**
      * The namespace of this feature
@@ -48,7 +44,6 @@
      * @param connector The geolocation connector scheme that is used.
      */
     function FileFeature(rpcHandler, params) {
-        console.log('*******************' + params);
     	GenericFeature.GenericFeature.call(this);
         this.embedService(new file.Service(rpcHandler, params));
     }

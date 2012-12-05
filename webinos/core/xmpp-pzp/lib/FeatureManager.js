@@ -31,18 +31,7 @@
     var logger = require('./Logger').getLogger('FeatureManager', 'trace');
     
     var webinos = require("find-dependencies")(__dirname);
-    var wPath = webinos.global.require(webinos.global.util.location, "lib/webinosPath.js");
-    var wId = webinos.global.require(webinos.global.util.location, "lib/webinosId.js")
-
-    wId.fetchDeviceName('Pzp', undefined, function(deviceName) {
-        if (!webinos.metaData) {
-            webinos.metaData = {};
-        }
-
-        webinos.metaData.webinosName  = deviceName;
-        webinos.metaData.webinosRoot  = wPath.webinosPath() + "/"+ webinos.metaData.webinosName;
-        console.log('************' + webinos.metaData.webinosRoot);
-    });
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
 
     var features = {};
 
@@ -73,7 +62,7 @@
         rpcHandler.registry.registerObject(get42Feature);
     	connection.shareFeature(get42Feature);
     	
-    	var fileFeature = webinosFeatures.factory[webinosFeatures.NS.FILE](rpcHandler, { getPath: function () { return webinos.metaData.webinosRoot }});
+    	var fileFeature = webinosFeatures.factory[webinosFeatures.NS.FILE](rpcHandler, { getPath: pzp.session.getWebinosPath });
     	fileFeature.setConnection(connection);
         rpcHandler.registry.registerObject(fileFeature);
     	connection.shareFeature(fileFeature);
