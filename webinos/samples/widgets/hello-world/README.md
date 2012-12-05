@@ -1,5 +1,5 @@
 
-A basic webinos signed widget
+A basic webinos widget
 ===
 
 This is a sample that demonstrates the basics of building a webinos widget.

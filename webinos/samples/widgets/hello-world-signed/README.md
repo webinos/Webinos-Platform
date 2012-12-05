@@ -2,7 +2,7 @@
 A basic webinos signed widget
 ===
 
-This is a sample that demonstrates the basics of building a webinos widget.
+This is a sample that demonstrates the basics of building and signing a webinos widget.
 
 ### Authoring the widget
 
