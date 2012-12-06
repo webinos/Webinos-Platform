@@ -163,6 +163,50 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
   return 0;
 }
 
+//get hash function
+int getHash(char* filename)
+{
+  FILE *fp;
+  EVP_PKEY * pkey; 
+  X509* cert = NULL; 
+    
+  /* if((cert = X509_new()) == NULL)
+   	printf("Error creating X509 structure.\n"); */
+   
+  if ((pkey = EVP_PKEY_new()) == NULL)
+      printf("Error creating EVP_PKEY structure.\n");
+  
+  printf("filename is %s", filename); 
+  
+  if (! (fp = fopen(filename, "r"))) {
+      printf("Error cant read certificate key file.\n");
+  }
+  
+  if (! (cert = PEM_read_X509(fp, NULL, NULL, NULL)))
+      printf("Error loading certificate x509 content.\n");
+  if (! (pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL)))
+      printf("Error loading certificate private key content.\n"); 
+  
+  else 
+  {
+    printf("reading success\n");
+    //derive public key from the certificate
+    pkey = X509_get_pubkey(cert);
+    
+    /*buf_len = (size_t) BN_num_bytes(bn);
+    key = (unsigned char *)malloc (buf_len);
+    n = BN_bn2bin (bn, (unsigned char *) key);
+    if (n != buf_len)
+      LOG(ERROR," : key error\n");
+    if (key[0] & 0x80)
+      LOG(DEBUG, "00\n"); */
+  }  
+  fclose(fp); 
+  X509_free(cert); 
+  return 0;
+}
+
+
 ASN1_INTEGER* getRandomSN()
 {
   ASN1_INTEGER* res = ASN1_INTEGER_new();

@@ -241,6 +241,27 @@ v8::Handle<Value> _addToCRL(const Arguments& args)
   }
 }
 
+v8::Handle<Value> _getHash(const Arguments& args)
+{
+  HandleScope scope;
+  if (args.Length() == 1 && args[0]->IsString()) {
+    //extract the strings
+    String::Utf8Value keyFile(args[0]->ToString());
+    
+    int res = 0;
+    res = ::getHash(keyFile.operator*());
+    if (res != 0) {
+      return ThrowException(Exception::TypeError(String::New("Failed to read hash")));
+    }
+
+   // Local<String> result = String::New(res);
+   
+    //return scope.Close(result);
+  }
+  else {
+    return ThrowException(Exception::TypeError(String::New("filepath expected")));
+  }
+}
 
 extern "C" {
   static void init(v8::Handle<Object> target)
@@ -251,6 +272,7 @@ extern "C" {
     NODE_SET_METHOD(target,"signRequest",_signRequest);
     NODE_SET_METHOD(target,"createEmptyCRL",_createEmptyCRL);
     NODE_SET_METHOD(target,"addToCRL",_addToCRL);
+    NODE_SET_METHOD(target,"getHash",_getHash);
   }
   NODE_MODULE(certificate_manager,init);
 }

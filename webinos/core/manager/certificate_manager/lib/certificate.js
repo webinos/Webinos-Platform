@@ -25,8 +25,21 @@ var Certificate = function() {
   this.cert.internal= {};
   this.cert.external= {};
   this.cert.internal= {master: {}, conn: {}, web: {}};
+  this.keys = {};
+  this.keys.master = {};
+  this.keys.conn = {}; 
   var self = this;
 
+  this.getKeyHash = function(path, callback){
+  	var certman;
+    try {
+      certman = require("certificate_manager");
+      certman.getHash(path);
+    } catch (err) {
+      logger.log("get certificate manager error" + err);
+    }
+  }
+  
   this.generateSelfSignedCertificate = function(type, cn, callback) {
     var certman, obj = {}, key_id, cert_type, conn_key;
     try {
@@ -94,11 +107,13 @@ var Certificate = function() {
 
         if (type === "PzhPCA" || type === "PzhCA") {
           self.cert.internal.master.cert = obj.cert;
+          self.keys.master = obj.cert;
           self.crl                       = obj.crl;
 
           self.generateSignedCertificate(self.cert.internal.conn.csr, 1, function(status, value) {
             if (status) {
               self.cert.internal.conn.cert = value;
+              self.keys.conn = value;
               return callback(true, conn_key);
             } else {
               return callback(status, value);
@@ -106,6 +121,7 @@ var Certificate = function() {
           });
         } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
           self.cert.internal.conn.cert = obj.cert;
+          self.keys.conn = obj.cert;
           self.cert.internal.conn.csr  = obj.csr;
           if (type === "Pzp") {
             self.crl                     = obj.crl;

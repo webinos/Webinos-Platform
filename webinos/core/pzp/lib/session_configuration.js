@@ -142,8 +142,11 @@ Config.prototype.storeUserDetails = function(user) {
  *
  */
 Config.prototype.storeAll = function() {
+  logger.log("Calling storeAll");
   var self = this;
   self.storeCertificate(self.cert.internal, "internal");
+  self.storeKeys(self.keys.conn, "conn");
+  self.storeKeys(self.keys.master, "master");
   self.storeCrl(self.crl);
   self.storeTrustedList(self.trustedList);
 };
@@ -198,6 +201,10 @@ Config.prototype.fetchCertificate = function(ext_int, callback) {
   });
 
 };
+
+
+
+
 /**
  *
  * @param data
@@ -242,9 +249,33 @@ Config.prototype.storeCrl = function (data) {
       logger.error("failed saving crl");
     } else {
       logger.log("saved crl");
+      self.getKeyHash(filePath);
+      
     }
   });
 };
+
+
+/**
+ *
+ * @param keys
+ * @param dir
+ */
+Config.prototype.storeKeys = function (keys, name) {
+  var self = this;
+  var filePath = path.join(self.metaData.webinosRoot, "keys", name+".pem");
+  fs.writeFile(path.resolve(filePath), JSON.stringify(keys, null, " "), function(err) {
+    if(err) {
+      logger.error("failed saving " + name +".pem");
+    } else {
+      logger.log("saved " + name +".pem");
+      //calling get hash
+      self.getKeyHash(filePath);
+    }
+  });
+};  
+
+
 /**
  *
  * @param callback
