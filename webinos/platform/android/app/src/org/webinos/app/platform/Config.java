@@ -33,8 +33,9 @@ public class Config extends Properties {
 	private static final String CONFIG_FILE = "config/platform.properties";
 	private static final String TAG = "org.webinos.app.platform.Config";
 
-	static void init(Context ctx) {
-		theConfig = new Config(ctx);
+	static synchronized void init(Context ctx) {
+		if(theConfig == null)
+			theConfig = new Config(ctx);
 	}
 
 	public static Config getInstance() {
