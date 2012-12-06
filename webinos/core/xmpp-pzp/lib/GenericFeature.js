@@ -163,7 +163,7 @@
             		this.service.listenAttr[method].apply(this.service, parameters);
                 }
     		} else {
-    		    logger.verbose('invoking remove service');
+    		    logger.verbose('invoking remote service');
 		    
     		    var callback = function(type, payload) {
     		        if (type != 'error') {
