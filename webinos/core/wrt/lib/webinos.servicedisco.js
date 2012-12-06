@@ -79,6 +79,8 @@
             if (typeof Sensor !== 'undefined') {
                 typeMap['http://webinos.org/api/sensors'] = Sensor;
                 typeMap['http://webinos.org/api/sensors.temperature'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.light'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.proximity'] = Sensor;
             }
             if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
             if (typeof UserProfileIntModule !== 'undefined') typeMap['UserProfileInt'] = UserProfileIntModule;
