@@ -23,7 +23,7 @@
 
 	var fs = require('fs');
 	var xml2js = require('xml2js');
-	var data2xml = require('data2xml');
+	var convert2xml = require('data2xml')({attrProp:"$"});
 
 	//var pm = null;
 	//var policyFile = null;
@@ -119,7 +119,7 @@
 
 		function savePolicy() {
 			//console.log("savePolicy to file "+policyFile);
-			var data = data2xml("policy-set", policySet, {attrProp:"$"});
+			var data = convert2xml("policy-set", policySet);
 			//Removes line from output file
 			//data = data.replace("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", "");
 			fs.writeFileSync(policyFile, data);
