@@ -24,8 +24,8 @@
 ProvisionalActions::ProvisionalActions(TiXmlElement* provisionalactions){
 
 	// ProvisionalAction Tags
-	for(TiXmlElement * child = (TiXmlElement*)provisionalactions->FirstChild(provisionalActionTag); child;
-			child = (TiXmlElement*)child->NextSibling(provisionalActionTag)) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(provisionalactions->FirstChild(provisionalActionTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionTag)) ) {
 		LOGD("ProvisionalActions constructor, ProvisionalAction found");
 		provisionalaction.push_back(new ProvisionalAction(child));
 	}

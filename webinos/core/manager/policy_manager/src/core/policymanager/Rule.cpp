@@ -31,16 +31,16 @@ Rule::Rule(TiXmlElement* rule, DHPrefs* dhp)
 		condition = NULL;
 		
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild(dhPrefTag); child;
-			child = (TiXmlElement*)child->NextSibling(dhPrefTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(rule->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
 		LOGD("Rule: DHPref %s found", child->Attribute(policyIdTag.c_str()));
 		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("Rule DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)rule->FirstChild(provisionalActionsTag); child;
-			child = (TiXmlElement*)child->NextSibling(provisionalActionsTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(rule->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
 		LOGD("Rule: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}

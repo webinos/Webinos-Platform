@@ -23,8 +23,8 @@
 ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 
 	// Obligation Tags
-	for(TiXmlElement * child = (TiXmlElement*)obligationsset->FirstChild("Obligation"); child;
-			child = (TiXmlElement*)child->NextSibling("Obligation")) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(obligationsset->FirstChild("Obligation")); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling("Obligation"))) {
 		obligation.push_back(new Obligation(child));
 	}
 }

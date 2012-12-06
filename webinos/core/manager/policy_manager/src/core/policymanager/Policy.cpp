@@ -34,16 +34,16 @@ Policy::Policy(TiXmlElement* policy, DHPrefs* dhp)
 	}
 		
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild(dhPrefTag); child;
-			child = (TiXmlElement*)child->NextSibling(dhPrefTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
 		LOGD("Policy: DHPref %s found", child->Attribute(policyIdTag.c_str()));
 		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("Policy DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild(provisionalActionsTag); child;
-			child = (TiXmlElement*)child->NextSibling(provisionalActionsTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
 		LOGD("Policy: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}

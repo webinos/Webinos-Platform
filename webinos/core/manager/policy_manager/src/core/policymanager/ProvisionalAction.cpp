@@ -24,11 +24,11 @@
 ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 
 	// AttributeValue Tags
-	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
+	TiXmlElement * child = static_cast<TiXmlElement*>(provisionalaction->FirstChild(attributeValueTag));
 	if (child) {
 		value1 = child->GetText();
 	}
-	child = (TiXmlElement*)child->NextSibling("AttributeValue");
+	child = static_cast<TiXmlElement*>(child->NextSibling(attributeValueTag));
 	if (child) {
 		value2 = child->GetText();
 	}

@@ -24,6 +24,8 @@
 #include "Subject.h"
 #include "IPolicyBase.h"
 
+static const string attributeValueTag = "AttributeValue";
+
 class ProvisionalAction{
 
 private:

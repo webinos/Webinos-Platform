@@ -36,16 +36,16 @@ PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp)
 	}
 
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild(dhPrefTag); child;
-			child = (TiXmlElement*)child->NextSibling(dhPrefTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(set->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
 		LOGD("PolicySet: DHPref %s found", child->Attribute(policyIdTag.c_str()));
 		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("PolicySet DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)set->FirstChild(provisionalActionsTag); child;
-			child = (TiXmlElement*)child->NextSibling(provisionalActionsTag) ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(set->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
 		LOGD("PolicySet: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}

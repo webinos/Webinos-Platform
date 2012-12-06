@@ -21,7 +21,6 @@
 #include <node.h>
 
 #include "core/policymanager/PolicyManager.h"
-#include "core/policymanager/Globals.h"
 #include "debug.h"
 
 using namespace node;
