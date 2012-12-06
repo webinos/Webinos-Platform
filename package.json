@@ -22,7 +22,6 @@
   , "crypt" : "0.0.x"
   , "ejs" : "0.x.x"
   , "openid" : "0.x.x"
-  , "qrcode" : "0.x.x"
   , "websocket" : "1.0.2"
   , "ansi" : "0.0.x"
   , "mdns" : "0.x.x"
@@ -36,6 +35,7 @@
   }
 , "optionalDependencies" :
   { "sqlite3" : "2.1.x"
+  , "qrcode" : "0.x.x"
   }
 , "engines" :
   { "node" : ">= 0.6.0"
