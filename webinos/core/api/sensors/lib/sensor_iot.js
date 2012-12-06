@@ -18,7 +18,7 @@
  ******************************************************************************/
 
 (function() {
-
+var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
     var SensorService = function(rpcHandler, data, id, drvInt) {
 
