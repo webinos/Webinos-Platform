@@ -30,12 +30,15 @@ module.exports = function(grunt) {
     },
     // dir names to exclude from "clean-certs" target
     excludepaths: ['auth_api', 'context_manager', 'logs', 'wrt'],
+    header: "if(typeof webinos === 'undefined'){",
+    footer: "}",
 
     // targets
     lint: ['grunt.js', 'webinos/**/*.js'],
     concat: {
       dist: {
         src: [
+          '<banner:header>',
           'webinos/core/wrt/lib/webinos.util.js',
           'node_modules/webinos-jsonrpc2/lib/registry.js',
           'node_modules/webinos-jsonrpc2/lib/rpc.js',
@@ -61,7 +64,8 @@ module.exports = function(grunt) {
           'webinos/core/wrt/lib/webinos.contacts.js',
           'webinos/core/wrt/lib/webinos.devicestatus.js',
           'webinos/core/wrt/lib/webinos.discovery.js',
-          'webinos/core/wrt/lib/webinos.payment.js'
+          'webinos/core/wrt/lib/webinos.payment.js',
+          '<banner:footer>'
         ],
         dest: '<config:generated.normal>'
       }
