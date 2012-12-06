@@ -48,7 +48,8 @@
 		}
 		
 		//If permanent file not present, create it
-		if(!fs.existsSync(decisionFilePermanent)) {
+		var existsSync = fs.existsSync || path.existsSync;
+		if(!existsSync(decisionFilePermanent)) {
 			resetDecisionFile(decisionFilePermanent);
 		}
 
