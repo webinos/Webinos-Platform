@@ -39,7 +39,7 @@
 		<link>
 			<name>bridge_src</name>
 			<type>2</type>
-			<location>ANODE_ROOT/bridge-java/src</location>
+			<location>/Users/paddy/data/work/dev/android/anode/bridge-java/src</location>
 		</link>
 		<link>
 			<name>impl_src</name>
@@ -49,7 +49,7 @@
 		<link>
 			<name>libnode</name>
 			<type>2</type>
-			<locationURI>ANODE_ROOT/libnode/src</locationURI>
+			<location>/Users/paddy/data/work/dev/android/anode/libnode/src</location>
 		</link>
 		<link>
 			<name>util_src</name>
