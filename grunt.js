@@ -87,7 +87,7 @@ module.exports = function(grunt) {
     'check-rpc',
     'Check if webinos-jsonrpc2 is in local node_modules, required for concat task',
     function() {
-      var isInstalled = fs.existsSync('./node_modules/webinos-jsonrpc2/');
+      var isInstalled = (fs.existsSync || path.existsSync)('./node_modules/webinos-jsonrpc2/');
       if (!isInstalled) {
         console.log();
         console.log('\nError: webinos-jsonrpc2 must be in local node_modules.\n');
