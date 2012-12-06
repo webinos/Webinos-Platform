@@ -20,6 +20,7 @@
 package org.webinos.app.pzp;
 
 import org.webinos.app.R;
+import org.webinos.app.platform.PlatformInit;
 import org.webinos.app.pzp.PzpService.ConfigParams;
 import org.webinos.app.pzp.PzpService.PzpServiceListener;
 import org.webinos.app.pzp.PzpService.PzpState;
@@ -60,6 +61,7 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		if(pzpService != null) {
 			Log.v(TAG, "onCreate(): service already running");
 			initUI();
+			return;
 		}
 	}
 
@@ -74,6 +76,7 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		pzpService.addPzpStateListener(this);
 		ConfigParams configParams = pzpService.getConfig();
 		startButton = (Button)findViewById(R.id.start_button);
+		startButton.setEnabled(false);
 		startButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -84,6 +87,7 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		});
 
 		stopButton = (Button)findViewById(R.id.stop_button);
+		stopButton.setEnabled(false);
 		stopButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -112,8 +116,20 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		if(authCodeText != null)
 			authCode.setText(authCodeText);
 
-		stateText = (TextView)findViewById(R.id.args_stateText);
-		__stateChanged(pzpService.getPzpState());
+		/* if the platform is not yet initialised, wait until that
+		 * has completed and retry */
+		if(PlatformInit.onInit(this, new Runnable() {
+			@Override
+			public void run() {
+				/* init buttons (deferred case) */
+				stateText = (TextView)findViewById(R.id.args_stateText);
+				__stateChanged(pzpService.getPzpState());
+			}
+		})) {
+			/* init buttons (no wait) */
+			stateText = (TextView)findViewById(R.id.args_stateText);
+			__stateChanged(pzpService.getPzpState());
+		}
 	}
 
 	private void updateConfigFromEditText() {
@@ -163,11 +179,7 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 
 	private void __stateChanged(final PzpState state) {
 		stateText.setText(getStateString(state));
-		startButton.setEnabled(state == PzpState.STATE_UNINITIALISED || state == PzpState.STATE_CREATED);
+		startButton.setEnabled(state == PzpState.STATE_UNINITIALISED || state == PzpState.STATE_CREATED || state == PzpState.STATE_STOPPED);
 		stopButton.setEnabled(state == PzpState.STATE_STARTED);
-		/* exit the activity if the runtime has exited */
-		if(state == PzpState.STATE_STOPPED) {
-			finish();
-		}
 	}
 }

@@ -26,12 +26,17 @@ import org.meshpoint.anode.Runtime.IllegalStateException;
 import org.meshpoint.anode.Runtime.InitialisationException;
 import org.meshpoint.anode.Runtime.NodeException;
 import org.meshpoint.anode.Runtime.StateListener;
+import org.webinos.app.platform.PlatformInit;
 import org.webinos.util.ArgProcessor;
 import org.webinos.util.Constants;
 import org.webinos.util.ModuleUtils;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 import android.util.Log;
 
 public class AnodeService extends IntentService {
@@ -74,7 +79,7 @@ public class AnodeService extends IntentService {
 	 **********************/
 	public AnodeService() {
 		super(":anode.AnodeService");
-		/* android.os.Debug.waitForDebugger();*/
+		/* android.os.Debug.waitForDebugger(); */
 		(new File(Constants.APP_DIR)).mkdirs();
 		(new File(Constants.MODULE_DIR)).mkdirs();
 		(new File(Constants.RESOURCE_DIR)).mkdirs();
@@ -97,7 +102,36 @@ public class AnodeService extends IntentService {
 			Log.v(TAG, "AnodeService.onHandleIntent::stop: internal error");
 			return;
 		}
-		
+
+		if(PlatformInit.ACTION_POSTINSTALL.equals(action)) {
+			if(Runtime.isInitialised()) {
+				/* the runtime is running .. we can't replace
+				 * the modules while we're running. Therefore
+				 * we have to kill the process and reschedule 
+				 * the intent to be handled by starting us
+				 * again .... 
+				 *
+				 * First kill all isolates */
+				for(Isolate isolate : AnodeService.getAll())
+					stopInstance(isolate);
+
+				/* post alarm event to re-wake us */
+				Log.v(TAG, "AnodeReceiver.onReceive::postinstall: service is running, so exit and reschedule");
+				PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+				AlarmManager alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+				alarmMgr.set(AlarmManager.ELAPSED_REALTIME, SystemClock.uptimeMillis() + 2000, pendingIntent);
+
+				/* kill this process */
+				System.exit(0);
+				return;
+			}
+			/* otherwise, we can just update the modules */
+			Log.v(TAG, "AnodeReceiver.onReceive::postinstall: starting PlatformInit service");
+			intent.setClass(this, PlatformInit.class);
+			startService(intent);
+			return;
+		}
+
 		if(AnodeReceiver.ACTION_START.equals(action)) {
 			/* get system options before handling this invocation */
 			String options = intent.getStringExtra(AnodeReceiver.OPTS);
@@ -164,5 +198,15 @@ public class AnodeService extends IntentService {
 
 	private void handleUninstall(Intent intent) {
 		ModuleUtils.uninstall(intent.getStringExtra(AnodeReceiver.MODULE));
+	}
+
+	static void stopInstance(Isolate isolate) {
+		try {
+			isolate.stop();
+		} catch (IllegalStateException e) {
+			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
+		} catch (NodeException e) {
+			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
+		}
 	}
 }

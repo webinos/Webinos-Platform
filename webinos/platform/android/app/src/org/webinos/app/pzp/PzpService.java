@@ -116,7 +116,7 @@ public class PzpService extends Service implements StateListener {
 	public void onCreate() {
 		super.onCreate();
 		/* init the platform */
-		PlatformInit.init(this);
+		PlatformInit.onInit(this, null);
 		/* init config */
 		initConfig();
 		/* synchronously set ourselves as the singleton instance, and notify

@@ -42,9 +42,18 @@ public class WidgetManagerService {
 		return theManager;
 	}
 	
-	private static void startInstance(Context ctx) {
+	private static void startInstance(final Context ctx) {
 		try {
-			PlatformInit.init(ctx);
+			/* if the platform is not yet initialised, wait until that
+			 * has completed and retry */
+			if(!PlatformInit.onInit(ctx, new Runnable() {
+				@Override
+				public void run() {
+					startInstance(ctx);
+				}
+			})) {
+				return;
+			}
 			String launchScript = Constants.RESOURCE_DIR + "/widgetmanager.js";
 			AssetUtils.writeAssetToFile(ctx,"js/widgetmanager.js", launchScript);
 			Intent intent = new Intent(ctx, AnodeService.class);

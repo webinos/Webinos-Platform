@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="imported">
+	<!-- If this is set, then lot of additional stuff will get dumped out so 
+		you can see what's going on... -->
+	<!-- <property name="verbose" value="true" /> -->
+
+	<!-- Run before -build to update the build file. -->
+	<target name="-pre-build" depends="replace-mode-placeholders,clean-targets,copy-wrt-target,copy-app-target">
+	</target>
+
+	<!-- Run after -compile to do any cleanup. -->
+	<target name="-post-compile">
+	</target>
+
+	<!-- Run after packaging. -->
+	<target name="-post-package">
+	</target>
+
+	<!-- Run after build. -->
+	<target name="-post-build">
+	</target>
+
+	<!-- Custom targets. -->
+	<target name="replace-mode-placeholders">
+	    <echoproperties/>
+		<condition property="build.isrelease" >
+			<equals arg1="${build.target}" arg2="release" />
+		</condition>
+		<replaceregexp file="assets/config/config.properties" match='-(.*).apk'
+			replace='-${build.target}.apk' />
+	</target>
+
+	<target name="clean-targets" depends="replace-mode-placeholders" >
+	    <delete>
+	        <fileset dir="assets/targets" includes="*.apk"/>
+	    </delete>
+	</target>
+
+	<target name="sign-wrt-target" depends="replace-mode-placeholders" if="${build.isrelease}" >
+	    <!--  fake sign: decide what to do once we have webinos signing keys -->
+		<move file="../wrt/bin/wrt-release-unsigned.apk" tofile="../wrt/bin/wrt-release.apk" />
+	</target>
+
+	<target name="sign-app-target" depends="replace-mode-placeholders" if="${build.isrelease}" >
+	    <!--  fake sign: decide what to do once we have webinos signing keys -->
+		<move file="../app/bin/app-release-unsigned.apk" tofile="../app/bin/app-release.apk" />
+	</target>
+
+	<target name="copy-wrt-target" depends="sign-wrt-target">
+		<copy file="../wrt/bin/wrt-${build.target}.apk" tofile="assets/targets/wrt-${build.target}.apk" />
+	</target>
+
+	<target name="copy-app-target" depends="sign-app-target">
+		<copy file="../app/bin/app-${build.target}.apk" tofile="assets/targets/app-${build.target}.apk" />
+	</target>
+
+</project>

@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Anode</string>
     <string name="pzp_activity_name">PZP</string>
+    <string name="initialising_runtime">Initialising Webinos Runtime</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="arguments">Arguments:</string>
@@ -17,8 +18,12 @@
     <string name="stopped">Stopped</string>
     <string name="anode_receiver">Anode Receiver</string>
     <string name="anode_receiver_description">A broadcast receiver for controlling invocations of node.js</string>
-    <string name="anode_service">Anode Service</string><string name="pzp_service">Webinos PZP Service</string>
-    <string name="anode_service_description">A service that permits the running of node.js invocations in the background</string><string name="pzp_service_description">A service that controls the execution and lifecycle of the Webinos PZP</string>
+    <string name="anode_service">Anode Service</string>
+    <string name="pzp_service">Webinos PZP Service</string>
+    <string name="platform_service">Webinos Platform Service</string>
+    <string name="anode_service_description">A service that permits the running of node.js invocations in the background</string>
+    <string name="pzp_service_description">A service that controls the execution and lifecycle of the Webinos PZP</string>
+    <string name="platform_service_description">A service that controls the execution and lifecycle of the Webinos core platform</string>
     <string name="downloading_widget">Downloading application</string>
     <string name="installing_widget">Installing application</string>
     <string name="uninstalling_widget">Uninstalling application</string>
