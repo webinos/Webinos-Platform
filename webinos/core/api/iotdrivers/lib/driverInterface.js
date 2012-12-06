@@ -1,14 +1,14 @@
 /*******************************************************************************
  *  Code contributed to the webinos project
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *  
  *     http://www.apache.org/licenses/LICENSE-2.0
  *  
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -19,13 +19,13 @@
 
 
 (function () {
-    "use strict";
+    'use strict';
 
     var fs = require('fs');
 
     var initialized = false;
 
-    var driversLocation = "./drivers/";
+    var driversLocation = __dirname+'/drivers/';
     var driversList = new Array;
     var newDriverId = 0;
 
@@ -43,7 +43,7 @@
      * @param listener listener of the sensor/actuator api to be called when needed
      */
     var driverInterface = function(sensorActuator, listener) {
-        console.log("Driver Interface constructor");
+        console.log('Driver Interface constructor');
         if(!initialized) {
             loadDrivers();
             initialized = true;
@@ -63,20 +63,20 @@
 
 
         function loadDrivers() {
-            console.log("loadDrivers");
+            console.log('loadDrivers');
             var fileList = fs.readdirSync(driversLocation);
             for(var i in fileList) {
-                console.log("File found: "+fileList[i]);
+                console.log('File found: '+fileList[i]+' - id is '+newDriverId);
                 try {
                     var newDriver = require(driversLocation+fileList[i]);
                     newDriver.init(newDriverId, register, command);
                     driversList[newDriverId++] = newDriver;
                 }
                 catch(e) {
-                    console.log("Error: cannot load driver "+fileList[i]);
+                    console.log('Error: cannot load driver '+fileList[i]);
                 }
             }
-            console.log("loadDrivers: "+driversList.length+" drivers successfully loaded");
+            console.log('loadDrivers: '+driversList.length+' drivers successfully loaded');
         }
 
 
@@ -94,8 +94,14 @@
             newElement.type = type;
             elementList[newElementId] = newElement;
             //Sending up the register command; in this case data is the type of sensor/actuator
-            (apiListener[sensorActuator])("register", newElementId, type);
-            return newElementId++;
+            if(apiListener[sensorActuator] != null) {
+                (apiListener[sensorActuator])('register', newElementId, type);
+                return newElementId++;
+            }
+            else {
+                //api not present - return error
+                return -1;
+            };
         }
 
 
@@ -106,7 +112,7 @@
          * @param data Data of the command
          */
         function command(cmd, id, data) {
-            //console.log("command "+cmd+", id is "+id+", data is "+data);
+            //console.log('command '+cmd+', id is '+id+', data is '+data);
             (apiListener[elementList[id].sensorActuator])(cmd, id, data);
         }
 

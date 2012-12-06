@@ -29,32 +29,44 @@
 
     elementsList[0] = {
         'type': 'temperature',
+        'name': 'Fake temperature sensor',
+        'description': 'Fake sensor for emulation',
         'sa': 0,
-        'interval': 10,
+        'interval': 1,
+        'value': 10,
         'running': false,
         'id': 0
     };
 
     elementsList[1] = {
         'type': 'light',
+        'name': 'Fake light sensor',
+        'description': 'Fake sensor for emulation',
         'sa': 0,
-        'interval': 12,
+        'interval': 3,
+        'value': 55,
         'running': false,
         'id': 0
     };
 
     elementsList[2] = {
         'type': 'linearmotor',
+        'name': 'Fake linear motor',
+        'description': 'Fake actuator for emulation',
         'sa': 1,
         'interval': 0,
+        'value': 0,
         'running': false,
         'id': 0
     };
 
     elementsList[3] = {
         'type': 'temperature',
+        'name': 'Fake temperature sensor',
+        'description': 'Fake sensor for emulation',
         'sa': 0,
-        'interval': 9,
+        'interval': 2,
+        'value': 28,
         'running': false,
         'id': 0
     };
@@ -119,12 +131,56 @@
         };
     }
 
+
     function dataAcquisition(index) {
         //If not stopped send data and call again after interval...
         if(elementsList[index].running) {
             //Send data value...
-            callbackFunc('data', elementsList[index].id, '123456');
+            callbackFunc('data', elementsList[index].id, elementsList[index].value);
+            nextValue(index);
             setTimeout(function(){dataAcquisition(index);}, (elementsList[index].interval)*1000);
+        }
+    }
+
+
+    function nextValue(index) {
+        switch(elementsList[index].type) {
+            case 'temperature':
+                elementsList[index].value+=incDec();
+                if(elementsList[index].value < -10) {
+                    elementsList[index].value = -10;
+                }
+                else if(elementsList[index].value > 40) {
+                    elementsList[index].value = 40;
+                }
+                break;
+            case 'light':
+                elementsList[index].value+=incDec();
+                if(elementsList[index].value < 0) {
+                    elementsList[index].value = 0;
+                }
+                else if(elementsList[index].value > 100) {
+                    elementsList[index].value = 100;
+                }
+                break;
+            default:
+                elementsList[index].value = '-1';
+        };
+    }
+
+
+    function incDec() {
+        var upProb = 25;
+        var downProb = 25;
+        var rnd = Math.floor(Math.random()*100);
+        if (rnd < downProb) {
+            return -1;
+        }
+        else if (rnd > (100-upProb)) {
+            return 1;
+        }
+        else {
+            return 0;
         }
     }
 
