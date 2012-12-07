@@ -139,10 +139,11 @@
 
     logger.verbose("Starting servers...");
     ws.start(port, port+1, rpcHandler, connection);
-    initializeWidgetServer(port+1);
+
+    featureManager.initialize(connection, rpcHandler);
 
     if (argv.widgets) {
-        featureManager.initialize(connection, rpcHandler);
+        initializeWidgetServer(port+1);
     }
 
     logger.verbose("Done starting servers.");

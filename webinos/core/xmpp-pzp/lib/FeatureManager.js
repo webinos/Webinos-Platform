@@ -77,11 +77,19 @@
         rpcHandler.registry.registerObject(serviceDiscoveryFeature);
     
         connection.on('newFeature', function(feature) {
-            rpcHandler.registry.registerObject(feature);
+            try {
+                rpcHandler.registry.registerObject(feature);
+            } catch (err) {
+                logger.warn(err);
+            }
         });
     
         connection.on('removeFeature', function (feature) {
-            rpcHandler.registry.unregisterObject(feature);
+            try {
+                rpcHandler.registry.unregisterObject(feature);
+            } catch (err) {
+                logger.warn(err);
+            }
         });
     }
 

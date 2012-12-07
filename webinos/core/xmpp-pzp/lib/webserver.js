@@ -33,6 +33,7 @@
     var WebSocketServer = require('websocket').server;
     var rpcServer = require("./RpcServer.js");
 
+    var documentRoot = path.resolve(__dirname, '../../../web_root');
     var webinos = require("find-dependencies")(__dirname);
     var content = webinos.global.require(webinos.global.util.location, "lib/content.js");
     
