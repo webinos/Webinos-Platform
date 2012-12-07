@@ -16,6 +16,7 @@
 * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
 ******************************************************************************/
 (function() {
+var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
 /**
  * Webinos Sensor service constructor (server side).
