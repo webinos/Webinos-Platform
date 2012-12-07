@@ -24,7 +24,7 @@
  * Handles a new JSON RPC message (as string)
  */
 function handleMessage() {
-    if (arguments[0].jsonrpc) {
+    if (arguments[0].jsonrpc && arguments[0].method) {
 
         var rpcRequest = arguments[0];
         var id = rpcRequest.id;
@@ -61,6 +61,8 @@ function handleMessage() {
             return false;
         }
     }
+    //If no feature is specified then allow
+    return true;
 }
 
 }());
