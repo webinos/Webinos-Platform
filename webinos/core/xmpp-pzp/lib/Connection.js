@@ -193,21 +193,22 @@
      */
     Connection.prototype.invokeFeature = function(feature, objectRef, callback, method, params) {
     	logger.trace('Invoking feature ' + feature.ns + ' on ' + feature.device);
+    	logger.trace('Objectref=' + JSON.stringify(objectRef));
 
     	var id = connection.getUniqueId('feature');
     	connection.pendingRequests[id] = callback;
-	
+	    
     	var payload = {
     	    'method': method,
     	    'params': params,
     	    'id': objectRef.rpcId,
     	    'callbackId': objectRef.from
     	}
-	
+
     	var xmppInvoke = new xmpp.Element('iq', { 'to': feature.device, 'type': 'get', 'id': id }).
     		c('query', {'xmlns': feature.ns}).
     		c('payload', {'xmlns': 'webinos:rpc#invoke', 'id': feature.remoteId }).t(JSON.stringify(payload));
-		
+
     	logger.trace('Sending RPC message via XMPP: ' + xmppInvoke.tree());
     	connection.client.send(xmppInvoke);
     }
@@ -416,7 +417,12 @@
     			}
 
     			if (this.remoteFeatures[from][i] != null) {
-    				this.remoteFeatures[from][i].remove();
+                    // try {
+                    //                      this.remoteFeatures[from][i].remove();
+                    // } catch (err) {
+                    //     logger.trace('Remove not present');
+                    // }
+                    this.emit("removeFeature", this.remoteFeatures[from][i]);
     				delete this.remoteFeatures[from][i];
     			}
     		}
@@ -588,12 +594,10 @@
     	logger.verbose('Removing ' + removedFeatures.length + ' feature(s) that have not been rediscovered.');
 
     	for (var i in removedFeatures) {
-    		//removedFeatures[i].remove();
-		
     		for (var j in this.remoteFeatures[from]) {
     			if (removedFeatures[i].ns == this.remoteFeatures[from][j].ns) {
     				logger.verbose("Removed feature from remote feature list: " + removedFeatures[i].ns);
-    				this.remoteFeatures[from][j].remove();
+                    // this.remoteFeatures[from][j].remove();
     				delete this.remoteFeatures[from][j];
     				this.emit('removeFeature', removedFeatures[i]);
     			}
