@@ -24,7 +24,7 @@
 TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
 	string p, purposes;
-	for(unsigned int i=0; i<PURPOSES_NUMBER; i++)
+	for(unsigned int i=0; i<arraysize(ontology_vector); i++)
 		purposes.append("0");
 
 	// Trigger Tag
@@ -57,13 +57,13 @@ TriggersSet::TriggersSet(TiXmlElement* triggersset){
 			for(TiXmlElement * purpose = (TiXmlElement*)child->FirstChild("Purpose"); purpose;
 					purpose = (TiXmlElement*)child->NextSibling("Purpose") ) {
 				p = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
-				for(unsigned int i = 0; i<PURPOSES_NUMBER; i++){
+				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
 					if (p.compare(ontology_vector[i]) == 0)
 						purposes[i]='1';
 				}
 			}
 			trigger["Purpose"]=purposes;
-			for(unsigned int i=0; i<PURPOSES_NUMBER; i++)
+			for(unsigned int i=0; i<arraysize(ontology_vector); i++)
 				purposes[i]='0';
 
 			// read MaxDelay parameter
@@ -182,7 +182,7 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 			// TriggerPersonalDataAccessedForPurpose
 			if((*triggers_it)["triggerID"] == (*it)["triggerID"] && (*triggers_it)["triggerID"] == "TriggerPersonalDataAccessedForPurpose"){
 				purpose_satisfied = true;
-				for(unsigned int i = 0; i<PURPOSES_NUMBER; i++){
+				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
 					if ((*triggers_it)["Purpose"][i] >= (*it)["Purpose"][i]){
 						purpose_satisfied = false;
 						break;
