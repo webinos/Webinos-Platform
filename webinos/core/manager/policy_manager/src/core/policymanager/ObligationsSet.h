@@ -24,6 +24,8 @@
 #include "Obligation.h"
 #include "IPolicyBase.h"
 
+static const string obligationTag = "Obligation";
+
 class ObligationsSet{
 	
 private:

@@ -290,14 +290,17 @@ public:
 				if (obTmp->Get(i)->ToObject()->Has(String::New("action"))) {
 					LOGD("Obligation %d: action found", i);
 					actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
-					if (actTmp->ToObject()->Has(String::New("actionID"))) {
-						v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New("actionID")));
-						(*action)["actionID"]=*actionID;
+					if (actTmp->ToObject()->Has(String::New(actionIdTag.c_str()))) {
+						v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New(actionIdTag.c_str())));
+						(*action)[actionIdTag]=*actionID;
 						LOGD("Obligation %d: actionID %s", i, *actionID);
-						if (strcmp(*actionID, "ActionNotifyDataSubject") == 0) {
-							if (actTmp->ToObject()->Has(String::New("Media"))) {
-								v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New("Media")));
-								(*action)["Media"]=*media;
+
+						// ActionNotifyDataSubject
+						if (strcmp(*actionID, actionNotifyTag.c_str()) == 0) {
+							// Media paramter
+							if (actTmp->ToObject()->Has(String::New(mediaTag.c_str()))) {
+								v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New(mediaTag.c_str())));
+								(*action)[mediaTag]=*media;
 								LOGD("Obligation %d: Media %s", i, *media);
 							}
 							else {
@@ -306,9 +309,10 @@ public:
 								action->clear();
 								continue;
 							}
-							if (actTmp->ToObject()->Has(String::New("Address"))) {
-								v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New("Address")));
-								(*action)["Address"]=*address;
+							// Address paramter
+							if (actTmp->ToObject()->Has(String::New(addressTag.c_str()))) {
+								v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New(addressTag.c_str())));
+								(*action)[addressTag]=*address;
 								LOGD("Obligation %d: Address %s", i, *address);
 							}
 							else {
@@ -318,9 +322,11 @@ public:
 								continue;
 							}
 						}
-						else if (strcmp(*actionID, "ActionDeletePersonalData") != 0 &&
-							strcmp(*actionID, "ActionAnonymizePersonalData") != 0 &&
-							strcmp(*actionID, "ActionLog") != 0 && strcmp(*actionID, "ActionSecureLog") != 0) {
+						// other actions
+						else if (strcmp(*actionID, actionDeleteTag.c_str()) != 0 &&
+							strcmp(*actionID, actionAnonymizeTag.c_str()) != 0 &&
+							strcmp(*actionID, actionLogTag.c_str()) != 0 && 
+							strcmp(*actionID, actionSecureLogTag.c_str()) != 0) {
 
 							// invalid action: unrecognized actionID
 							LOGD("Obligation %d: unrecognized actionID %s", i, *actionID);
@@ -343,15 +349,17 @@ public:
 					triggersTmp = v8::Local<Array>::Cast(obTmp->Get(i)->ToObject()->Get(String::New("triggers")));
 					LOGD("Obligation %d: %d triggers found", i, triggersTmp->Length());
 					for (unsigned int j = 0; j < triggersTmp->Length(); j++) {
-						if (triggersTmp->Get(j)->ToObject()->Has(String::New("triggerID"))) {
-							v8::String::AsciiValue triggerID(triggersTmp->Get(j)->ToObject()->Get(String::New("triggerID")));
-							(*trigger)["triggerID"]=*triggerID;
+						if (triggersTmp->Get(j)->ToObject()->Has(String::New(triggerIdTag.c_str()))) {
+							v8::String::AsciiValue triggerID(triggersTmp->Get(j)->ToObject()->Get(String::New(triggerIdTag.c_str())));
+							(*trigger)[triggerIdTag]=*triggerID;
 							LOGD("Obligation %d, trigger %d: actionID %s", i, j, *triggerID);
 							triggerTmp = triggersTmp->Get(j);
-							if (strcmp(*triggerID, "TriggerAtTime") == 0) {
-								if (triggerTmp->ToObject()->Has(String::New("Start"))){
-									v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New("Start")));
-									(*trigger)["Start"]=*start;
+							// TriggerAtTime
+							if (strcmp(*triggerID, triggerAtTimeTag.c_str()) == 0) {
+								// Start
+								if (triggerTmp->ToObject()->Has(String::New(startTag.c_str()))){
+									v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New(startTag.c_str())));
+									(*trigger)[startTag]=*start;
 									LOGD("Obligation %d, trigger %d: Start %s", i, j, *start);
 								}
 								else {
@@ -360,9 +368,10 @@ public:
 									trigger->clear();
 									continue;
 								}
-								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-									(*trigger)["MaxDelay"]=*maxdelay;
+								// MaxDelay
+								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+									(*trigger)[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
@@ -372,10 +381,12 @@ public:
 									continue;
 								}
 							}
-							else if (strcmp(*triggerID, "TriggerPersonalDataAccessedForPurpose") == 0) {
-								if (triggerTmp->ToObject()->Has(String::New("Purpose"))){
-									v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New("Purpose")));
-									(*trigger)["Purpose"]=*pur;
+							// TriggerPersonalDataAccessedForPurpose
+							else if (strcmp(*triggerID, triggerPersonalDataAccessedTag.c_str()) == 0) {
+								// Purpose
+								if (triggerTmp->ToObject()->Has(String::New(purposeTag.c_str()))){
+									v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New(purposeTag.c_str())));
+									(*trigger)[purposeTag]=*pur;
 									LOGD("Obligation %d, trigger %d: Purpose %s", i, j, *pur);
 								}
 								else {
@@ -384,9 +395,10 @@ public:
 									trigger->clear();
 									continue;
 								}
-								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-									(*trigger)["MaxDelay"]=*maxdelay;
+								// MaxDelay
+								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+									(*trigger)[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
@@ -396,10 +408,12 @@ public:
 									continue;
 								}
 							}
-							else if (strcmp(*triggerID, "TriggerPersonalDataDeleted") == 0) {
-								if (triggerTmp->ToObject()->Has(String::New("MaxDelay"))){
-									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New("MaxDelay")));
-									(*trigger)["MaxDelay"]=*maxdelay;
+							// TriggerPersonalDataDeleted
+							else if (strcmp(*triggerID, triggerPersonalDataDeletedTag.c_str()) == 0) {
+								// MaxDelay
+								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+									(*trigger)[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
@@ -409,10 +423,11 @@ public:
 									continue;
 								}
 							}
-							else if (strcmp(*triggerID, "TriggerDataSubjectAccess") == 0) {
-								if (triggerTmp->ToObject()->Has(String::New("Endpoint"))){
-									v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New("Endpoint")));
-									(*trigger)["Endpoint"]=*endpoint;
+							// TriggerDataSubjectAccess
+							else if (strcmp(*triggerID, triggerDataSubjectAccessTag.c_str()) == 0) {
+								if (triggerTmp->ToObject()->Has(String::New(uriTag.c_str()))){
+									v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New(uriTag.c_str())));
+									(*trigger)[uriTag]=*endpoint;
 									LOGD("Obligation %d, trigger %d: Endpoint %s", i, j, *endpoint);
 								}
 								else {

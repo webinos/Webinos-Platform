@@ -20,38 +20,38 @@
 
 #include "Obligation.h"
 
-Obligation::Obligation(TiXmlElement* obligation){
-
-	TiXmlElement* child;
+Obligation::Obligation(TiXmlElement* obligation)
+	:triggersset(0)	
+{
 
 	// TriggerSet Tag
-	if(obligation->FirstChild("TriggersSet")){
-		triggersset = new TriggersSet((TiXmlElement*)obligation->FirstChild("TriggersSet"));
+	if(obligation->FirstChild(triggersSetTag)){
+		triggersset = new TriggersSet(static_cast<TiXmlElement*>(obligation->FirstChild(triggersSetTag)));
 	}
-	else
-		triggersset = NULL;
 
 	// Action Tag
-	if(obligation->FirstChild("ActionDeletePersonalData")){
-		action["actionID"] = "ActionDeletePersonalData";
+	if(obligation->FirstChild(actionDeleteTag)){
+		action[actionIdTag] = actionDeleteTag;
 	}
-	else if(obligation->FirstChild("ActionAnonymizePersonalData")){
-		action["actionID"] = "ActionAnonymizePersonalData";
+	else if(obligation->FirstChild(actionAnonymizeTag)){
+		action[actionIdTag] = actionAnonymizeTag;
 	}
-	else if ((child = (TiXmlElement*)obligation->FirstChild("ActionNotifyDataSubject"))) {
-		action["actionID"] = "ActionNotifyDataSubject";
-		action["Media"] = ((TiXmlElement*)child->FirstChild("Media"))->GetText();
-		action["Address"] = ((TiXmlElement*)child->FirstChild("Address"))->GetText();
+	else if (TiXmlElement* child = static_cast<TiXmlElement*>(obligation->FirstChild(actionNotifyTag))) {
+		action[actionIdTag] = actionNotifyTag;
+		action[mediaTag] = (static_cast<TiXmlElement*>(child->FirstChild(mediaTag)))->GetText();
+		action[addressTag] = (static_cast<TiXmlElement*>(child->FirstChild(addressTag)))->GetText();
 	}
-	else if(obligation->FirstChild("ActionLog")){
-		action["actionID"] = "ActionLog";
+	else if(obligation->FirstChild(actionLogTag)){
+		action[actionIdTag] = actionLogTag;
 	}
-	else if(obligation->FirstChild("ActionSecureLog")){
-		action["actionID"] = "ActionSecureLog";
+	else if(obligation->FirstChild(actionSecureLogTag)){
+		action[actionIdTag] = actionSecureLogTag;
 	}
 }
 
 Obligation::~Obligation(){
+	if (triggersset != NULL)
+		delete triggersset;
 }
 
 bool Obligation::evaluate(Request * req){
@@ -63,11 +63,9 @@ bool Obligation::evaluate(Request * req){
 		for (obligations::iterator oit=ob.begin(); oit!=ob.end(); oit++){
 			// ActionDeletePersonalData, ActionAnonymizePersonalData and ActionSecureLog evaluation
 			// subset of ActionLog evaluation (exact match only)
-			if (action["actionID"] == "ActionDeletePersonalData" || 
-					action["actionID"] == "ActionAnonymizePersonalData" || 
-					action["actionID"] == "ActionLog" || 
-					action["actionID"] == "ActionSecureLog"){
-				if ((*oit).action["actionID"].compare(action["actionID"]) == 0){
+			if (action[actionIdTag] == actionDeleteTag || action[actionIdTag] == actionAnonymizeTag || 
+					action[actionIdTag] == actionLogTag || action[actionIdTag] == actionSecureLogTag) {
+				if ((*oit).action[actionIdTag].compare(action[actionIdTag]) == 0){
 					if (triggersset->evaluate((*oit).triggers) == true)
 						return true;
 				}
@@ -75,16 +73,16 @@ bool Obligation::evaluate(Request * req){
 			// ActionNotifyDataSubject evaluation
 			else {
 				// ActionNotifyDataSubject parameters are the same
-				if ((*oit).action["actionID"].compare("ActionNotifyDataSubject") == 0 && 
-						(*oit).action["Media"].compare(action["Media"]) == 0 &&
-						 (*oit).action["Address"].compare(action["Address"]) == 0){
+				if ((*oit).action[actionIdTag].compare(actionNotifyTag) == 0 && 
+						(*oit).action[mediaTag].compare(action[mediaTag]) == 0 &&
+						 (*oit).action[addressTag].compare(action[addressTag]) == 0){
 					if (triggersset->evaluate((*oit).triggers) == true)
 						return true;
 				}
 			}
 			// subset of ActionLog evaluation (ActionLog is satisfied by ActionSecureLog too)
-			if ((*oit).action["actionID"].compare("ActionSecureLog") == 0 &&
-					action["actionID"].compare("ActionLog") == 0){
+			if ((*oit).action[actionIdTag].compare(actionSecureLogTag) == 0 &&
+					action[actionIdTag].compare(actionLogTag) == 0){
 				if (triggersset->evaluate((*oit).triggers) == true)
 					return true;
 			}

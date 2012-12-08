@@ -23,77 +23,85 @@
 
 TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
-	string p, purposes;
+	string purposes;
 	for(unsigned int i=0; i<arraysize(ontology_vector); i++)
 		purposes.append("0");
 
 	// Trigger Tag
-	if(triggersset->FirstChild("TriggerAtTime")){
-		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerAtTime"); child;
-				child = (TiXmlElement*)child->NextSibling("TriggerAtTime") ) {
-			trigger["triggerID"] = "TriggerAtTime";
 
-			// read start parameter
-			TiXmlElement * start = (TiXmlElement*)child->FirstChild("Start");
-			if ((TiXmlElement*)start->FirstChild("StartNow"))
-				trigger["Start"]="StartNow";
-			if ((TiXmlElement*)start->FirstChild("DateAndTime"))
-				trigger["Start"]=((TiXmlElement*)start->FirstChild("DateAndTime"))->GetText();
+	// TriggerAtTime
+	if(triggersset->FirstChild(triggerAtTimeTag)){
+		for(TiXmlElement * child = static_cast<TiXmlElement*>(triggersset->FirstChild(triggerAtTimeTag)); child;
+				child = static_cast<TiXmlElement*>(child->NextSibling(triggerAtTimeTag)) ) {
+			trigger[triggerIdTag] = triggerAtTimeTag;
+
+			// read Start parameter
+			TiXmlElement * start = static_cast<TiXmlElement*>(child->FirstChild(startTag));
+			if (static_cast<TiXmlElement*>(start->FirstChild(startNowTag)))
+				trigger[startTag]=startNowTag;
+			if (static_cast<TiXmlElement*>(start->FirstChild(dateAndTimeTag)))
+				trigger[startTag]=(static_cast<TiXmlElement*>(start->FirstChild(dateAndTimeTag)))->GetText();
 
 			// read MaxDelay parameter
-			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			TiXmlElement * maxdelay = static_cast<TiXmlElement*>(child->FirstChild(maxDelayTag));
+			trigger[maxDelayTag]=(static_cast<TiXmlElement*>(maxdelay->FirstChild(durationTag)))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
 	}
-	if(triggersset->FirstChild("TriggerPersonalDataAccessedForPurpose")){
-		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataAccessedForPurpose"); child;
-				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataAccessedForPurpose") ) {
-			trigger["triggerID"] = "TriggerPersonalDataAccessedForPurpose";
+
+	// TriggerPersonalDataAccessedForPurpose
+	if(triggersset->FirstChild(triggerPersonalDataAccessedTag)){
+		for(TiXmlElement * child = static_cast<TiXmlElement*>(triggersset->FirstChild(triggerPersonalDataAccessedTag)); child;
+				child = static_cast<TiXmlElement*>(child->NextSibling(triggerPersonalDataAccessedTag)) ) {
+			trigger[triggerIdTag] = triggerPersonalDataAccessedTag;
 
 			// read Purpose parameters
-			for(TiXmlElement * purpose = (TiXmlElement*)child->FirstChild("Purpose"); purpose;
-					purpose = (TiXmlElement*)child->NextSibling("Purpose") ) {
-				p = ((TiXmlElement*)child->FirstChild("Purpose"))->GetText();
-				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
+			for(TiXmlElement * purpose = static_cast<TiXmlElement*>(child->FirstChild(purposeTag)); purpose;
+					purpose = static_cast<TiXmlElement*>(child->NextSibling(purposeTag)) ) {
+				string p = (static_cast<TiXmlElement*>(child->FirstChild(purposeTag)))->GetText();
+				for(unsigned int i = 0; i<arraysize(ontology_vector); i++) {
 					if (p.compare(ontology_vector[i]) == 0)
 						purposes[i]='1';
 				}
 			}
-			trigger["Purpose"]=purposes;
+			trigger[purposeTag]=purposes;
 			for(unsigned int i=0; i<arraysize(ontology_vector); i++)
 				purposes[i]='0';
 
 			// read MaxDelay parameter
-			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			TiXmlElement * maxdelay = static_cast<TiXmlElement*>(child->FirstChild(maxDelayTag));
+			trigger[maxDelayTag]=(static_cast<TiXmlElement*>(maxdelay->FirstChild(durationTag)))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
 	}
-	if(triggersset->FirstChild("TriggerPersonalDataDeleted")){
-		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerPersonalDataDeleted"); child;
-				child = (TiXmlElement*)child->NextSibling("TriggerPersonalDataDeleted") ) {
-			trigger["triggerID"] = "TriggerPersonalDataDeleted";
+
+	// TriggerPersonalDataDeleted
+	if(triggersset->FirstChild(triggerPersonalDataDeletedTag)){
+		for(TiXmlElement * child = static_cast<TiXmlElement*>(triggersset->FirstChild(triggerPersonalDataDeletedTag)); child;
+				child = static_cast<TiXmlElement*>(child->NextSibling(triggerPersonalDataDeletedTag)) ) {
+			trigger[triggerIdTag] = triggerPersonalDataDeletedTag;
 
 			// read MaxDelay parameter
-			TiXmlElement * maxdelay = (TiXmlElement*)child->FirstChild("MaxDelay");
-			trigger["MaxDelay"]=((TiXmlElement*)maxdelay->FirstChild("Duration"))->GetText();
+			TiXmlElement * maxdelay = static_cast<TiXmlElement*>(child->FirstChild(maxDelayTag));
+			trigger[maxDelayTag]=(static_cast<TiXmlElement*>(maxdelay->FirstChild(durationTag)))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
 		}
 	}
-	if(triggersset->FirstChild("TriggerDataSubjectAccess")){
-		for(TiXmlElement * child = (TiXmlElement*)triggersset->FirstChild("TriggerDataSubjectAccess"); child;
-				child = (TiXmlElement*)child->NextSibling("TriggerDataSubjectAccess") ) {
-			trigger["triggerID"] = "TriggerDataSubjectAccess";
+
+	// TriggerDataSubjectAccess
+	if(triggersset->FirstChild(triggerDataSubjectAccessTag)){
+		for(TiXmlElement * child = static_cast<TiXmlElement*>(triggersset->FirstChild(triggerDataSubjectAccessTag)); child;
+				child = static_cast<TiXmlElement*>(child->NextSibling(triggerDataSubjectAccessTag)) ) {
+			trigger[triggerIdTag] = triggerDataSubjectAccessTag;
 
 			// read url parameter
-			trigger["url"] = ((TiXmlElement*)child->FirstChild("url"))->GetText();
+			trigger[uriTag] = (static_cast<TiXmlElement*>(child->FirstChild(uriTag)))->GetText();
 			
 			triggers.push_back(trigger);
 			trigger.clear();
@@ -117,25 +125,29 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 		for(vector< map<string, string> >::iterator it=trig.begin() ; it!=trig.end() ; it++){
 
 			// TriggerAtTime evaluation
-			if((*triggers_it)["triggerID"] == (*it)["triggerID"] && (*triggers_it)["triggerID"] == "TriggerAtTime"){
-				// Start is startNow or is the same time
-				// MaxDelay from DH preference is greter or equal of application Max Delay
-				if ((*triggers_it)["Start"] == (*it)["Start"] && (*triggers_it)["MaxDelay"] >= (*it)["MaxDelay"]){
+			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerAtTimeTag){
+
+				// Start is StartNow or is the same time
+				// MaxDelay from DHPref is greter or equal of application MaxDelay
+				if ((*triggers_it)[startTag] == (*it)[startTag] && (*triggers_it)[maxDelayTag] >= (*it)[maxDelayTag]){
 					trigger_satisfied = true;
 					break;
 				}
-				if ((*triggers_it)["Start"] != (*it)["Start"]){
-					if((*triggers_it)["Start"] == "StartNow"){ 
+
+				// Dafault case
+				// Application time interval bust be inside DHPref time interval
+				if ((*triggers_it)[startTag] != (*it)[startTag]){
+					if((*triggers_it)[startTag] == startNowTag){ 
 
 						t_start1 = mktime(gmtime(NULL));
-						sscanf((*triggers_it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+						sscanf((*triggers_it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
 								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
 						t_delay1 = mktime(&delay1);
 						
-						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+						sscanf((*it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
 								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start2 = mktime(&start2);
-						sscanf((*it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+						sscanf((*it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
 								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
 						t_delay2 = mktime(&delay2);
 						if (sign == '+')
@@ -148,11 +160,11 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 							break;
 						}
 					}
-					if((*triggers_it)["Start"] != "StartNow" && (*it)["Start"] != "StartNow"){ 
-						sscanf((*triggers_it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+					if((*triggers_it)[startTag] != startNowTag && (*it)[startTag] != startNowTag){ 
+						sscanf((*triggers_it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
 								&start1.tm_year, &start1.tm_mon, &start1.tm_mday, &start1.tm_hour, &start1.tm_min, &start1.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start1 = mktime(&start1);
-						sscanf((*triggers_it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+						sscanf((*triggers_it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
 								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
 						t_delay1 = mktime(&delay1);
 						if (sign == '+')
@@ -160,10 +172,10 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 						else
 							t_delay1 -= (60*off_hours+off_min);
 						
-						sscanf((*it)["Start"].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+						sscanf((*it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
 								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
 						t_start2 = mktime(&start2);
-						sscanf((*it)["MaxDelay"].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+						sscanf((*it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
 								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
 						t_delay2 = mktime(&delay2);
 						if (sign == '+')
@@ -180,35 +192,32 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 			}
 
 			// TriggerPersonalDataAccessedForPurpose
-			if((*triggers_it)["triggerID"] == (*it)["triggerID"] && (*triggers_it)["triggerID"] == "TriggerPersonalDataAccessedForPurpose"){
+			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerPersonalDataAccessedTag){
 				purpose_satisfied = true;
 				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
-					if ((*triggers_it)["Purpose"][i] >= (*it)["Purpose"][i]){
+					if ((*triggers_it)[purposeTag][i] >= (*it)[purposeTag][i]){
 						purpose_satisfied = false;
 						break;
 					}
 				}
-				if ((*triggers_it)["MaxDelay"] >= (*it)["MaxDelay"] && purpose_satisfied == true){
+				if ((*triggers_it)[maxDelayTag] >= (*it)[maxDelayTag] && purpose_satisfied == true){
 					trigger_satisfied = true;
 					break;
 				}
 			}
 			
 			// TriggerPersonalDataDeleted evaluation
-			if((*triggers_it)["triggerID"] == (*it)["triggerID"] && (*triggers_it)["triggerID"] == "TriggerPersonalDataDeleted"){
-				// Start is startNow or is the same time
-				// MaxDelay from DH preference is greter or equal of application Max Delay
-				if ((*triggers_it)["MaxDelay"] >= (*it)["MaxDelay"]){
+			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerPersonalDataDeletedTag){
+				// MaxDelay from DHPreference is greter or equal of application MaxDelay
+				if ((*triggers_it)[maxDelayTag] >= (*it)[maxDelayTag]){
 					trigger_satisfied = true;
 					break;
 				}
 			}
 
 			// TriggerDataSubjectAccess evaluation
-			if((*triggers_it)["triggerID"] == (*it)["triggerID"] && (*triggers_it)["triggerID"] == "TriggerDataSubjectAccess"){
-				// Start is startNow or is the same time
-				// MaxDelay from DH preference is greter or equal of application Max Delay
-				if ((*triggers_it)["url"] == (*it)["url"]){
+			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerDataSubjectAccessTag){
+				if ((*triggers_it)[uriTag] == (*it)[uriTag]){
 					trigger_satisfied = true;
 					break;
 				}

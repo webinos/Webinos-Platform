@@ -24,6 +24,16 @@
 #include "TriggersSet.h"
 #include "IPolicyBase.h"
 
+static const string triggersSetTag = "TriggersSet";
+static const string actionDeleteTag = "ActionDeletePersonalData";
+static const string actionAnonymizeTag = "ActionAnonymizePersonalData";
+static const string actionNotifyTag = "ActionNotifyDataSubject";
+static const string actionLogTag = "ActionLog";
+static const string actionSecureLogTag = "ActionSecureLog";
+static const string actionIdTag = "actionID";
+static const string mediaTag = "Media";
+static const string addressTag = "Address";
+
 class Obligation{
 	
 private:

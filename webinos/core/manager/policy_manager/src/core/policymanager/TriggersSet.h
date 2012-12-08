@@ -23,6 +23,18 @@
 
 #include "IPolicyBase.h"
 
+static const string triggerAtTimeTag = "TriggerAtTime";
+static const string triggerPersonalDataAccessedTag = "TriggerPersonalDataAccessedForPurpose";
+static const string triggerPersonalDataDeletedTag = "TriggerPersonalDataDeleted";
+static const string triggerDataSubjectAccessTag = "TriggerDataSubjectAccess";
+static const string triggerIdTag = "triggerID";
+static const string startTag = "Start";
+static const string startNowTag = "StartNow";
+static const string dateAndTimeTag = "DateAndTime";
+static const string maxDelayTag = "MaxDelay";
+static const string durationTag = "Duration";
+static const string uriTag = "Uri";
+
 class TriggersSet{
 	
 private:
