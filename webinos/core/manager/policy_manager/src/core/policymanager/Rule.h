@@ -25,6 +25,9 @@
 #include "DataHandlingPreferences.h"
 #include "ProvisionalActions.h"
 
+static const string dhPrefTag = "DataHandlingPreferences";
+static const string provisionalActionsTag = "ProvisionalActions";
+
 class Rule
 	{
 	

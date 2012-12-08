@@ -8,6 +8,8 @@
     "test":"./test"
   },
  "dependencies":{
-  "node-xmpp":"git://github.com/eelcocramer/node-xmpp.git"
+  "node-xmpp":"git://github.com/eelcocramer/node-xmpp.git",
+  "ltx": "0.2.x",
+  "log4js": "0.5.x"
  }
 }

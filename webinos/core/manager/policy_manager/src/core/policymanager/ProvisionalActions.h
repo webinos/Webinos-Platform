@@ -23,6 +23,8 @@
 
 #include "ProvisionalAction.h"
 
+static const string provisionalActionTag = "ProvisionalAction";
+
 class ProvisionalActions{
 	
 private:

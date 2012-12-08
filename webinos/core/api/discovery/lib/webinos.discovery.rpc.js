@@ -23,6 +23,7 @@
 
   var os   = require("os");
   var discoverymodule = '';
+  var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 	
   switch(os.type().toLowerCase()){
     case "linux":

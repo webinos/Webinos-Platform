@@ -13,31 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Copyright 2012 Torsec -Computer and network security group-
- * Politecnico di Torino
+ * Copyright 2012 Telecom Italia SpA
  * 
  ******************************************************************************/
 
-#ifndef PROVISIONALACTION_H_
-#define PROVISIONALACTION_H_
 
-#include "Subject.h"
-#include "IPolicyBase.h"
+(function () {
+    'use strict';
 
-static const string attributeValueTag = "AttributeValue";
 
-class ProvisionalAction{
+    exports.initialize = function() {
+        console.log('This should not be loaded...');
+    };
 
-private:
-	string	value1;
-	string	value2;
-	
-public:
-	ProvisionalAction(TiXmlElement*);
-	virtual ~ProvisionalAction();
-
-	pair<string, bool> evaluate(Request *);
-};
-
-#endif /* PROVISIONALACTION_H_ */
-
+}());

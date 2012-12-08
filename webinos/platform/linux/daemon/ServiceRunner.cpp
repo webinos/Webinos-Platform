@@ -150,6 +150,58 @@ void CServiceRunner::ForceRestart()
   }
 }
 
+void CServiceRunner::CheckForLaunchRequests()
+{
+  std::vector<std::string> files;
+  CServiceManager mgr;
+  mgr.GetLaunchFiles(m_user, 2, files);
+
+  for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+  {
+    std::string launch = mgr.ReadFile(*it);
+
+    size_t cmdIdx = launch.find_first_of(':');
+    if (cmdIdx != std::string::npos)
+    {
+      std::string launchType = launch.substr(0,cmdIdx);
+      std::string appURI = launch.substr(cmdIdx+1);
+
+      char browserPath[256];
+      sprintf(browserPath,"%s/wrt/webinosBrowser",m_parameters.nodePath.c_str());
+      char browserParams[256];
+      if (launchType == "wgt")
+        sprintf(browserParams,"--webinos-widget %s",appURI.c_str());
+      else
+        sprintf(browserParams,"%s",appURI.c_str());
+
+      pid_t pid = fork();
+      if (pid == 0)
+      {
+        // In child fork - launch browser
+        if (execl(browserPath, browserPath, browserParams, NULL) < 0)
+        {
+          // Failed to execute browser.
+          exit(-1);
+        }
+        else
+        {
+          // Browser is running.
+        }
+      }
+      else if (pid > 0)
+      {
+        // In parent after forking.
+      }
+      else
+      {
+        // Fork failed
+      }
+    }
+
+    remove((*it).c_str());
+  }
+}
+
 void* MonitorThread(void * param)
 {
   CServiceRunner* runner = reinterpret_cast<CServiceRunner*>(param);
@@ -187,7 +239,10 @@ void* MonitorThread(void * param)
 
     // Indicate the node process is running.
     if (runner->m_pid != 0)
+    {
       mgr.WriteNodeHeartbeat(runningUser, runningParams);
+      runner->CheckForLaunchRequests();
+    }
 
     sleep(HEARTBEAT_INTERVAL);
   }

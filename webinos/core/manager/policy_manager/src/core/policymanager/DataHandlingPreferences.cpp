@@ -21,42 +21,45 @@
 #include "DataHandlingPreferences.h"
 #include "../../debug.h"
 
-DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences){
-
+DataHandlingPreferences::DataHandlingPreferences(TiXmlElement* dhpreferences)
+	: authorizationsset(0),obligationsset(0)
+{
 	// PolicyId attribute
-	PolicyId = dhpreferences->Attribute("PolicyId");
-	LOGD("Construction of %s DHPref", PolicyId.c_str());
+	policyId = dhpreferences->Attribute(policyIdTag.c_str());
+	LOGD("Construction of %s DHPref", policyId.c_str());
 
 	// AuthorizationsSet Tag
-	if(dhpreferences->FirstChild("AuthorizationsSet")){
+	if(dhpreferences->FirstChild(authzSetTag)){
 		LOGD("DHPref constructor, AuthorizationsSet found");
-		authorizationsset = new AuthorizationsSet((TiXmlElement*)dhpreferences->FirstChild("AuthorizationsSet"));
+		authorizationsset = new AuthorizationsSet((TiXmlElement*)dhpreferences->FirstChild(authzSetTag));
 	}
 	else{
 		LOGD("DHPref constructor, AuthorizationsSet not found");
-		authorizationsset = NULL;
 	}
 
 	// ObligationsSet Tag
-	if(dhpreferences->FirstChild("ObligationsSet")){
+	if(dhpreferences->FirstChild(oblSetTag)){
 		LOGD("DHPref constructor, ObligationsSet found");
-		obligationsset = new ObligationsSet((TiXmlElement*)dhpreferences->FirstChild("ObligationsSet"));
+		obligationsset = new ObligationsSet((TiXmlElement*)dhpreferences->FirstChild(oblSetTag));
 	}
 	else{
 		LOGD("DHPref constructor, ObligationsSet not found");
-		obligationsset = NULL;
 	}
 }
 
 DataHandlingPreferences::~DataHandlingPreferences(){
+	if (authorizationsset != NULL)
+		delete authorizationsset;
+	if (obligationsset != NULL)
+		delete obligationsset;
 }
 
 string DataHandlingPreferences::GetId(){
-	return PolicyId;
+	return policyId;
 }
 
 bool DataHandlingPreferences::evaluate(Request * req){
-	LOGD("Evalutaing %s DHPref", PolicyId.c_str());
+	LOGD("Evalutaing %s DHPref", policyId.c_str());
 	if (authorizationsset != NULL) {
 		LOGD("AuthorizationsSet found");
 		if (authorizationsset->evaluate(req) == true) {

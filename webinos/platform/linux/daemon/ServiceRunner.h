@@ -33,7 +33,7 @@ public:
   void Run();
   bool IsExiting() { return m_exiting; }
   void ForceRestart();
-
+  void CheckForLaunchRequests();
 
   const CServiceParameters& GetParameters() { return m_parameters; }
   const CUserParameters& GetUser() { return m_user; }

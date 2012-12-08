@@ -18,15 +18,17 @@
 
 var dependency   = require("find-dependencies")(__dirname);
 var logger       = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
-var rpc          = dependency.global.require(dependency.global.rpc.location);
-var Registry     = dependency.global.require(dependency.global.rpc.location, "lib/registry").Registry;
 var Discovery    = dependency.global.require(dependency.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
 var MessageHandler= dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
-var RPCHandler   = rpc.RPCHandler;
 var Sync         = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
+var modLoader    = dependency.global.require(dependency.global.util.location, "lib/loadservice.js");
+var rpc          = require("webinos-jsonrpc2");
+var RPCHandler   = rpc.RPCHandler;
+var Registry     = rpc.Registry;
 var PzpDiscovery = require("./pzp_peerDiscovery");
 var Session      = require("./session");
 var path = require("path");
+var os = require('os');
 var Pzp_OtherManager = function (_parent) {
   // TODO: these variables are directly set by service discovery does not look right
   this.serviceListener;  // For a single callback to be registered via addRemoteServiceListener.
@@ -91,18 +93,18 @@ var Pzp_OtherManager = function (_parent) {
   }
   /**
    * Initializes Webinos Other Components that interact with the session manager
-   * @param loadModules : webinos modules that should be loaded in the PZP
+   * @param modules : webinos modules that should be loaded in the PZP
    */
-  this.initializeRPC_Message = function(_loadModules) {
-    self.loadedModules  = _loadModules;
+  this.initializeRPC_Message = function(modules) {
+    self.loadedModules  = modules;
     self.registry       = new Registry(this);
     self.rpcHandler     = new RPCHandler(_parent, self.registry); // Handler for remote method calls.
     self.discovery      = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
-    self.registry.loadModules(_loadModules, self.rpcHandler); // load specified modules
+    modLoader.loadServiceModules(modules, self.registry, self.rpcHandler); // load specified modules
     self.messageHandler = new MessageHandler(self.rpcHandler); // handler for all things message
     // Init the rpc interception of policy manager
-    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js");
+    dependency.global.require(dependency.global.manager.policy_manager.location, "lib/rpcInterception.js").setRPCHandler(self.rpcHandler);
     dependency.global.require(dependency.global.manager.context_manager.location);//initializes context manager
   };
 
@@ -143,8 +145,15 @@ var Pzp_OtherManager = function (_parent) {
     registerMessaging(_parent.config.metaData.pzhId);    //message handler
     self.registerServicesWithPzh(); //rpc
     if(!self.peerDiscovery ) {// local discovery&& mode !== modes[0]
-      self.peerDiscovery = new PzpDiscovery(_parent);
-      self.peerDiscovery.advertPzp('zeroconf', _parent.config.userPref.ports.pzp_zeroConf);
+      if(os.type().toLowerCase() == "windows_nt")
+      {
+        //Do nothing until WinSockWatcher works
+      } 
+      else
+      {
+        self.peerDiscovery = new PzpDiscovery(_parent);
+        self.peerDiscovery.advertPzp('zeroconf', _parent.config.userPref.ports.pzp_zeroConf);
+      }
     }
   };
 
@@ -174,13 +183,25 @@ var Pzp_OtherManager = function (_parent) {
             setFoundService(validMsgObj);
             break;
           case 'listUnregServices':
-            _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "unregServicesReply", {services: getInitModules.call(self), id:validMsgObj.payload.message.listenerId });
+            _parent.prepMsg(
+              _parent.pzp_state.sessionId,
+              _parent.config.metaData.pzhId,
+              "unregServicesReply", {
+                "services": getInitModules.call(self),
+                "id": validMsgObj.payload.message.listenerId
+              });
             break;
           case 'registerService':
-            self.registry.loadModule({"name": validMsgObj.payload.message.name,"params": validMsgObj.payload.message.params}, self.rpcHandler);
+            modLoader.loadServiceModule({
+              "name": validMsgObj.payload.message.name,
+              "params": validMsgObj.payload.message.params
+            }, self.registry, self.rpcHandler);
             break;
           case'unregisterService':
-            self.registry.unregisterObject({ "id": validMsgObj.payload.message.svId, "api": validMsgObj.payload.message.svAPI});
+            self.registry.unregisterObject({
+              "id": validMsgObj.payload.message.svId,
+              "api": validMsgObj.payload.message.svAPI
+            });
             break;
           case "sync_hash":
             syncHash(validMsgObj.payload.message);

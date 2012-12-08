@@ -19,9 +19,10 @@
 
 #include "Policy.h"
 
-Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
+Policy::Policy(TiXmlElement* policy, DHPrefs* dhp)
+	: IPolicyBase(policy), datahandlingpreferences(dhp)
+{
 	iType = POLICY;
-	datahandlingpreferences = dhp;
 	ruleCombiningAlgorithm = (policy->Attribute("combine")!=NULL) ? policy->Attribute("combine") : deny_overrides_algorithm;
 	//init subjects
 	TiXmlNode * target = policy->FirstChild("target");
@@ -33,16 +34,16 @@ Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 	}
 		
 	//init datahandlingpreferences
-	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("DataHandlingPreferences"); child;
-			child = (TiXmlElement*)child->NextSibling("DataHandlingPreferences") ) {
-		LOGD("Policy: DHPref %s found", child->Attribute("PolicyId"));
-		(*dhp)[child->Attribute("PolicyId")]=new DataHandlingPreferences(child);
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
+		LOGD("Policy: DHPref %s found", child->Attribute(policyIdTag.c_str()));
+		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
 	}
 	LOGD("Policy DHPref number: %d", (*dhp).size());
 
 	//init ProvisionalActions
-	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("ProvisionalActions"); child;
-			child = (TiXmlElement*)child->NextSibling("ProvisionalActions") ) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
 		LOGD("Policy: ProvisionalActions found");
 		provisionalactions.push_back(new ProvisionalActions(child));
 	}
@@ -57,10 +58,10 @@ Policy::Policy(TiXmlElement* policy, DHPrefs* dhp) : IPolicyBase(policy){
 	LOGD("[Policy]  : rules size : %d",rules.size());
 }
 
-Policy::~Policy()
-	{
-	// TODO Auto-generated destructor stub
-	}
+Policy::~Policy() {
+	for (vector<ProvisionalActions*>::iterator it = provisionalactions.begin(); it != provisionalactions.end(); it++)
+		delete *it;
+}
 
 //virtual
 PolicyType Policy::get_iType(){

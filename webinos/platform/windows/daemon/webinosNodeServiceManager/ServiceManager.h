@@ -36,12 +36,12 @@ private:
   static const std::string trimChars;
   static const char jsonParamDelim;
 
-  std::string ReadFile(std::string path);
 	bool GetUserSettingsPath(const CUserParameters& params, std::string& settingsPath);
 	bool GetCommonSettingsPath(std::string& ipcPath);
   void WriteJSONKey(std::ofstream& fs, std::string keyName, std::string keyVal, bool final=false);
   unsigned long GetLastWriteTimeElapsed(std::string path);
   bool CreateDirectory(std::string path);
+  void CreateSharedFile(std::string path);
 
 public:
 	CServiceManager(void);
@@ -57,4 +57,6 @@ public:
 	void WriteNodeHeartbeat(const CUserParameters& user,const CServiceParameters& params);
 	unsigned long GetServiceHeartbeatTime(const CServiceParameters& params);
 	unsigned long GetNodeHeartbeatTime(const CUserParameters& user,const CServiceParameters& params);
+  void GetLaunchFiles(const CUserParameters& user,long allowedTimespan , std::vector<std::string> &out);
+  std::string ReadFile(std::string path);
 };

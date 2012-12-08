@@ -25,6 +25,7 @@
 	var os = require('os');
 	var path = require('path');
 	var exec = require('child_process').exec;
+	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 	var localDependencies = require("../dependencies.json");
 	var root = "../" + localDependencies.root.location;

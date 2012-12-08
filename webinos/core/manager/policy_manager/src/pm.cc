@@ -248,8 +248,8 @@ public:
 		if (args[0]->ToObject()->Has(String::New("purpose"))) {
 			v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("purpose")));
 			LOGD("DHPref: read %d purposes", pTmp->Length());
-			if (pTmp->Length() == PURPOSES_NUMBER) {
-				for(unsigned int i = 0; i < PURPOSES_NUMBER; i++) {
+			if (pTmp->Length() == arraysize(ontology_vector)) {
+				for(unsigned int i = 0; i < arraysize(ontology_vector); i++) {
 					if (pTmp->Get(i)->BooleanValue() == true) {
 						LOGD("DHPref: purpose number %d is true", i);
 						purpose.push_back(pTmp->Get(i)->BooleanValue());
@@ -266,6 +266,12 @@ public:
 					}
 				}
 			}
+			else {
+				LOGD("DHPref: invalid purpose parameter, wrong vector length");
+			}
+		}
+		else {
+			LOGD("DHPref: purpose parameter not found");
 		}
 
 		obligations *obs = new obligations();

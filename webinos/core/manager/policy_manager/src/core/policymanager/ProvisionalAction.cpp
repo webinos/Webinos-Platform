@@ -24,15 +24,20 @@
 ProvisionalAction::ProvisionalAction(TiXmlElement* provisionalaction){
 
 	// AttributeValue Tags
-	TiXmlElement * child = (TiXmlElement*)provisionalaction->FirstChild("AttributeValue");
+	TiXmlElement * child = static_cast<TiXmlElement*>(provisionalaction->FirstChild(attributeValueTag));
 	if (child) {
 		value1 = child->GetText();
 	}
-		child = (TiXmlElement*)child->NextSibling("AttributeValue");
+	child = static_cast<TiXmlElement*>(child->NextSibling(attributeValueTag));
 	if (child) {
 		value2 = child->GetText();
 	}
-	LOGD("ProvisionalAction constructor, attribute values: %s, %s", value1.c_str(), value2.c_str());
+	if (value1.empty() == false && value2.empty() == false) {
+		LOGD("ProvisionalAction constructor, attribute values: %s, %s", value1.c_str(), value2.c_str());
+	}
+	else {
+		LOGD("Invalid ProvisionalAction");
+	}
 }
 
 ProvisionalAction::~ProvisionalAction(){
@@ -52,7 +57,7 @@ pair<string, bool> ProvisionalAction::evaluate(Request * req){
 	// Provisional actions link together a single DHPref and a single feature,
 	// more than a feature in a request should not be allowed
 	// this is already tested in PolicyManager.cpp, but it is tested again here to be careful
-	if (features == 1) {
+	if (features == 1 && value1.empty() == false && value2.empty() == false) {
 		LOGD("ProvisionalAction: values %s and %s to compare with %s", value1.c_str(), value2.c_str(), req_feature.c_str());
 		if (value1.compare(req_feature) == 0) {
 			LOGD("ProvisionalAction: %s and %s exact match", value1.c_str(), req_feature.c_str());
