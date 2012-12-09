@@ -383,11 +383,40 @@ public:
 							}
 							// TriggerPersonalDataAccessedForPurpose
 							else if (strcmp(*triggerID, triggerPersonalDataAccessedTag.c_str()) == 0) {
+
+								string purposes;
+								while (purposes.size() < arraysize(ontology_vector))
+									purposes.append("0");
+
 								// Purpose
 								if (triggerTmp->ToObject()->Has(String::New(purposeTag.c_str()))){
-									v8::String::AsciiValue pur(triggerTmp->ToObject()->Get(String::New(purposeTag.c_str())));
-									(*trigger)[purposeTag]=*pur;
-									LOGD("Obligation %d, trigger %d: Purpose %s", i, j, *pur);
+									v8::Local<Array> pTmp = v8::Local<Array>::Cast(triggerTmp->ToObject()->Get(String::New(purposeTag.c_str())));
+									LOGD("Obligation %d, trigger %d: read %d puroses", i, j, pTmp->Length());
+									if (pTmp->Length() == arraysize(ontology_vector)) {
+										for(unsigned int k = 0; k < arraysize(ontology_vector); k++) {
+											if (pTmp->Get(k)->BooleanValue() == true) {
+												LOGD("Obligation %d, trigger %d: purpose number %d is true", i, j, k);
+												purposes[k] = '1';
+											}
+											else if (pTmp->Get(k)->BooleanValue() == false) {
+												LOGD("Obligation %d, trigger %d: purpose number %d is false", i, j, k);
+												purposes[k] = '0';
+											}
+											else {
+												// invalid purpose vector
+												LOGD("Obligation %d, trigger %d: purpose number %d is undefined", i, j, k);
+												trigger->clear();
+												continue;
+											}
+										}
+									}
+									else {
+										LOGD("Obligation %d, trigger %d: invalid purpose parameter, wrong vector length", i, j);
+										trigger->clear();
+										continue;
+									}
+									(*trigger)[purposeTag]=purposes;
+									LOGD("Obligation %d, trigger %d: Purpose %s", i, j, purposes.c_str());
 								}
 								else {
 									// invalid trigger: Purpose required
@@ -395,6 +424,7 @@ public:
 									trigger->clear();
 									continue;
 								}
+
 								// MaxDelay
 								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
 									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
