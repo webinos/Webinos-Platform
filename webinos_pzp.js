@@ -102,7 +102,8 @@ var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } 
   {name: "authentication", params: {}},
   {name: "contacts", params: {}},
   {name: "devicestatus", params: {}},
-  {name: "discovery", params: {}}
+  {name: "discovery", params: {}},
+  {name: "nfc", params: {}}
 ];
 
 fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {

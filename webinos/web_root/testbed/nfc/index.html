@@ -1,0 +1,169 @@
+<html>
+<head>
+<title>NFC API Demo</title>
+<script type="text/javascript" src="../../webinos.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/style.css"
+	media="screen" />
+<script type="text/javascript">
+        $(document).ready(function () {
+
+    function logMessage(msg) {
+                    if (msg) {
+                        $('#message').append('<li>' + msg + '</li>');
+                    }
+                }
+
+                function printInfo(data) {
+                    logMessage(data.payload.message);
+                }
+
+                webinos.session.addListener('info', printInfo);
+
+                var test = {};
+                var recentService;
+
+                $('#findService').bind(
+                        'click',
+                        function() {
+                            test = {};
+                            recentService = null;
+                            $('#NfcServices').empty();
+                            webinos.discovery.findServices(new ServiceType(
+                                    'http://webinos.org/api/nfc'), {
+                                onFound : function(service) {
+                                    test[service.serviceAddress] = service;
+                                    $('#NfcServices').append(
+                                            $('<option>'
+                                                    + service.serviceAddress
+                                                    + '</option>'));
+                                }
+                            });
+                        });
+                $('#bind').bind(
+                        'click',
+                        function() {
+                            recentService = test[$(
+                                    '#NfcServices option:selected').val()];
+                            recentService.bindService({
+                                onBind : function(service) {
+                                    logMessage('NFC API ' + service.api
+                                            + ' bound.');
+                                }
+                            });
+                        });
+
+                var printEvent = function(name, event) {
+                    if (typeof event.ndefMessage[0] !== 'undefined') {
+                    	$('#out').append(name + ":<br>");
+                    	$('#out').append("id=" + event.ndefMessage[0].id + "<br>");
+                    	$('#out').append("TNF=" + event.ndefMessage[0].TNF + "<br>");
+                    	$('#out').append("type=" + event.ndefMessage[0].type + "<br>");
+                    	$('#out').append("info=" + event.ndefMessage[0].info + "<br>");
+                    	$('#out').append("payload=" + event.ndefMessage[0].payload + "<br><br>");
+                    }
+                }
+                
+                var Listener = function(type, extra, listener) {
+                    this.type = type;
+                    this.extra = extra;
+                    this.listener = listener;
+                }
+                
+                var listeners = {};
+                var handle = 0;
+                
+                var listener1 = function(event) {
+                    printEvent("listener1", event);
+                }
+                var listener2 = function(event) {
+                    printEvent("listener2", event);
+                }
+
+                $('#addTextListener1').bind('click', function() {
+                    recentService.addTextTypeListener(listener1, function() {
+                        listeners[++handle] = new Listener("T", null, listener1);
+                        $('#NfcListeners').append($('<option>textListener1</option>').attr('value', handle.toString()));
+                    });
+                });
+                $('#addTextListener2').bind('click', function() {
+                    recentService.addTextTypeListener(listener2, function() {
+                        listeners[++handle] = new Listener("T", null, listener2);
+                        $('#NfcListeners').append($('<option>textListener2</option>').attr('value', handle.toString()));
+                    });
+                });
+                $('#addUriListener1').bind('click', function() {
+                    var scheme = "http";
+                    recentService.addUriTypeListener(scheme, listener1, function() {
+                        listeners[++handle] = new Listener("U", scheme, listener1);
+                        $('#NfcListeners').append($('<option>uriListener1</option>').attr('value', handle.toString()));
+                    });
+                });
+                $('#addMimeListener1').bind('click', function() {
+                    var mimeType = "text/*";
+                    recentService.addMimeTypeListener(mimeType, listener1, function() {
+                        listeners[++handle] = new Listener("M", mimeType, listener1);
+                        $('#NfcListeners').append($('<option>mimeListener1</option>').attr('value', handle.toString()));
+                    });
+                });
+                $('#removeListener').bind('click', function() {
+                    var selectedListener = listeners[$(
+                    '#NfcListeners option:selected').val()];
+                    if (typeof selectedListener !== 'undefined') {
+                        if (selectedListener.type == "T") {
+                        	recentService.removeTextTypeListener(selectedListener.listener);
+                        }
+                        if (selectedListener.type == "U") {
+                        	recentService.removeUriTypeListener(selectedListener.extra, selectedListener.listener);
+                        }
+                        if (selectedListener.type == "M") {
+                        	recentService.removeMimeTypeListener(selectedListener.extra, selectedListener.listener);
+                        }
+                        delete selectedListener;
+                    }
+                    $('#NfcListeners option:selected').remove();
+                });
+                
+                string2byteArray = function(str) {
+                    var ba = [];
+                    for ( var i = 0; i < str.length; i++) {
+                        ba[i] = str.charCodeAt(i);
+                    }
+                    return ba;
+                };
+                
+                $('#dispatch').bind('click', function() {
+                    $('#out').html("");
+                    recentService.dispatchEvent(recentService.textRecord("hello world", "en"));
+                    recentService.dispatchEvent(recentService.uriRecord("http://example.com"));
+                    recentService.dispatchEvent(recentService.mimeRecord("text/plain", string2byteArray("hello world")));
+                });
+
+            });
+</script>
+</head>
+<body>
+	<table>
+		<tr>
+			<td>Use "Find Services" to search for available NFC services.<br />
+				Select one, then bind and use. Select another and bind again and
+				use.
+			</td>
+		</tr>
+		<tr><td><button id="findService" class="button">Find Services</button></td></tr>
+		<tr><td><select id="NfcServices" size="5"></select></td></tr>
+		<tr><td><button id="bind" class="button">Bind</button></td></tr>
+		<tr>
+			<td>Descriptive text here.
+			</td>
+		</tr>
+		<tr><td><select id="NfcListeners" size="5"></select></td></tr>
+		<tr><td><button id="addTextListener1" class="button">Add TextListener 1</button></td></tr>
+		<tr><td><button id="addTextListener2" class="button">Add TextListener 2</button></td></tr>
+		<tr><td><button id="addUriListener1" class="button">Add Uri Listener 1</button></td></tr>
+		<tr><td><button id="addMimeListener1" class="button">Add Mime Listener 1</button></td></tr>
+		<tr><td><button id="removeListener" class="button">Remove Listener</button></td></tr>
+		<tr><td><button id="dispatch" class="button">Dispatch</button></td></tr>
+	</table>
+	<div id="out"></div>
+</body>
+</html>

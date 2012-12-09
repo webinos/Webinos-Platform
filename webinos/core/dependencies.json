@@ -79,6 +79,10 @@
     "discovery": {
       "name": "Discovery",
       "location": "api/discovery/"
+    },
+    "nfc": {
+      "name": "nfc",
+      "location": "api/nfc/"
     }
   },
   "manager": {

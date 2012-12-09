@@ -1,0 +1,21 @@
+{
+  "name": "nfc"
+, "publishConfig": { "tag": "alpha" }
+, "description": "NFC API"
+, "keywords": ["webinos", "NFC" , "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Per Morau <per.morau@sonymobile.com>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"}
+, "main": "./lib/rpc_nfc.js"
+, "dependencies": {}
+, "bundleDependencies": []
+}

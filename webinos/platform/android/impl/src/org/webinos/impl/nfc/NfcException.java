@@ -17,8 +17,23 @@
  *
  ******************************************************************************/
 
-package org.webinos.api.nfc;
+package org.webinos.impl.nfc;
 
-public interface NfcEventListener {
-  public void handleEvent(NfcTag evt);
+
+@SuppressWarnings("serial")
+public class NfcException extends Exception {
+  public static final int UNKNOWN_ERR = 0;
+  public static final int UNSUPPORTED_ERR = 1;
+  public static final int IO_ERR = 2;
+
+  public int code;
+  
+  public NfcException(int code, String message) {
+    super(message);
+    this.code = code;
+  }
+  
+  public NfcException(String message) {
+    super(message);
+  }
 }
