@@ -20,6 +20,7 @@
 
 #include "TriggersSet.h"
 #include "AuthorizationsSet.h"
+#include "../../debug.h"
 
 TriggersSet::TriggersSet(TiXmlElement* triggersset){
 
@@ -115,84 +116,218 @@ TriggersSet::~TriggersSet(){
 
 bool TriggersSet::evaluate(vector< map<string, string> > trig){
 	bool purpose_satisfied, trigger_satisfied;
-	tm start1, start2, delay1, delay2;
+	struct tm start1, start2, delay1, delay2;
 	time_t t_start1, t_start2, t_delay1, t_delay2;
 	char sign;
-	int millisec, off_hours, off_min;
+	int millisec, off_hour1, off_min1, off_hour2, off_min2;
 
+	// loop among user triggers
 	for(vector< map<string, string> >::iterator triggers_it=triggers.begin() ; triggers_it!=triggers.end() ; triggers_it++){
 		trigger_satisfied = false;
+		// loop among application triggers
 		for(vector< map<string, string> >::iterator it=trig.begin() ; it!=trig.end() ; it++){
 
 			// TriggerAtTime evaluation
 			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerAtTimeTag){
+				LOGD("TriggerAtTime evaluation");
 
 				// Start is StartNow or is the same time
 				// MaxDelay from DHPref is greter or equal of application MaxDelay
 				if ((*triggers_it)[startTag] == (*it)[startTag] && (*triggers_it)[maxDelayTag] >= (*it)[maxDelayTag]){
+					LOGD("TriggerAtTime evaluation: Start is StartNow or is the same time");
 					trigger_satisfied = true;
 					break;
 				}
 
 				// Dafault case
-				// Application time interval bust be inside DHPref time interval
+				// Application time interval must be inside DHPref time interval
 				if ((*triggers_it)[startTag] != (*it)[startTag]){
-					if((*triggers_it)[startTag] == startNowTag){ 
+					LOGD("TriggerAtTime evaluation: default case");
 
-						t_start1 = mktime(gmtime(NULL));
-						sscanf((*triggers_it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
-								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
-						t_delay1 = mktime(&delay1);
+					// user start time
+					if ((*triggers_it)[startTag] == startNowTag) {
+						LOGD("TriggerAtTime evaluation: user current start time");
+						if (time(&t_start1) == -1) {
+							LOGD("Error on user Start");
+							trigger_satisfied = false;
+							break;
+						}
+						start1 = *gmtime(&t_start1);
+					}
+					else {
+						LOGD("TriggerAtTime evaluation: user policy start time");
+						if (sscanf((*triggers_it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+								&start1.tm_year, &start1.tm_mon, &start1.tm_mday, &start1.tm_hour,
+								&start1.tm_min, &start1.tm_sec, &millisec, &sign, &off_hour1, &off_min1) != EOF) {
 						
-						sscanf((*it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
-								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
-						t_start2 = mktime(&start2);
-						sscanf((*it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
-								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
-						t_delay2 = mktime(&delay2);
-						if (sign == '+')
-							t_delay2 += 60*off_hours+off_min;
-						else
-							t_delay2 -= (60*off_hours+off_min);
+							// years since 1900
+							start1.tm_year -= 1900;
 
-						if (t_start1 > t_start2 && (t_start1+t_delay1 < t_start2+t_delay2)){
-							trigger_satisfied = true;
+							// months range 0-11
+							start1.tm_mon -= 1;
+
+							// ignore dst because we are managing time offset
+							start1.tm_isdst=0;
+
+							if (sign == '+') {
+								start1.tm_hour -= off_hour1;
+								start1.tm_min -= off_min1;
+							}
+							else if (sign == '-') {
+								start1.tm_hour += off_hour1;
+								start1.tm_min += off_min1;
+							}
+							else {
+								LOGD("Error on user Start");
+								trigger_satisfied = false;
+								break;
+							}
+
+							if ((t_start1 = mktime(&start1)) == -1) {
+								LOGD("Error on user Start");
+								trigger_satisfied = false;
+								break;
+							}
+						}
+						else {
+							LOGD("Error on user Start");
+							trigger_satisfied = false;
 							break;
 						}
 					}
-					if((*triggers_it)[startTag] != startNowTag && (*it)[startTag] != startNowTag){ 
-						sscanf((*triggers_it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
-								&start1.tm_year, &start1.tm_mon, &start1.tm_mday, &start1.tm_hour, &start1.tm_min, &start1.tm_sec, &millisec, &sign, &off_hours, &off_min);
-						t_start1 = mktime(&start1);
-						sscanf((*triggers_it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
-								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour, &delay1.tm_min, &delay1.tm_sec);
-						t_delay1 = mktime(&delay1);
-						if (sign == '+')
-							t_delay1 += 60*off_hours+off_min;
-						else
-							t_delay1 -= (60*off_hours+off_min);
-						
-						sscanf((*it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
-								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour, &start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hours, &off_min);
-						t_start2 = mktime(&start2);
-						sscanf((*it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
-								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour, &delay2.tm_min, &delay2.tm_sec);
-						t_delay2 = mktime(&delay2);
-						if (sign == '+')
-							t_delay2 += 60*off_hours+off_min;
-						else
-							t_delay2 -= (60*off_hours+off_min);
+					LOGD("user start time: year %d, month %d, day %d, hours %d, minutes %d, seconds %d, UTC +00:00",
+							start1.tm_year+1900, start1.tm_mon+1, start1.tm_mday, start1.tm_hour, start1.tm_min, start1.tm_sec);
 
-						if (t_start1 > t_start2 && (t_start1+t_delay1 < t_start2+t_delay2)){
-							trigger_satisfied = true;
+					// user MaxDelay
+					if (sscanf((*triggers_it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+								&delay1.tm_year, &delay1.tm_mon, &delay1.tm_mday, &delay1.tm_hour,
+								&delay1.tm_min, &delay1.tm_sec) != EOF) {
+
+						LOGD("user delay time: years %d, months %d, days %d, hours %d, minutes %d, seconds %d",
+								delay1.tm_year, delay1.tm_mon, delay1.tm_mday, delay1.tm_hour, delay1.tm_min, delay1.tm_sec);
+
+						delay1.tm_year += start1.tm_year;
+						delay1.tm_mon += start1.tm_mon;
+						delay1.tm_mday += start1.tm_mday;
+						delay1.tm_hour += start1.tm_hour;
+						delay1.tm_min += start1.tm_min;
+						delay1.tm_sec += start1.tm_sec;
+
+						LOGD("user deadline time: year %d, month %d, day %d, hours %d, minutes %d, seconds %d UTC +00:00",
+								delay1.tm_year+1900, delay1.tm_mon+1, delay1.tm_mday, delay1.tm_hour, delay1.tm_min, delay1.tm_sec);
+
+						if ((t_delay1 = mktime(&delay1)) == -1) {
+							LOGD("Error on user MaxDelay");
+							trigger_satisfied = false;
 							break;
 						}
+					}
+					else {
+						LOGD("Error on user MaxDelay");
+						trigger_satisfied = false;
+						break;
+					}
+
+					// application start time
+					if ((*it)[startTag] == startNowTag) {
+						LOGD("TriggerAtTime evaluation: application current start time");
+						if (time(&t_start2) == -1) {
+							LOGD("Error on user Start");
+							trigger_satisfied = false;
+							break;
+						}
+						start2 = *gmtime(&t_start2);
+					}
+					else {
+						LOGD("TriggerAtTime evaluation: applications manifest start time");
+						if (sscanf((*it)[startTag].c_str(),"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+								&start2.tm_year, &start2.tm_mon, &start2.tm_mday, &start2.tm_hour,
+								&start2.tm_min, &start2.tm_sec, &millisec, &sign, &off_hour2, &off_min2) != EOF) {
+
+							// years since 1900
+							start2.tm_year -= 1900;
+
+							// months range 0-11
+							start2.tm_mon -= 1;
+
+							// ignore dst because we are managing time offset
+							start2.tm_isdst=0;
+
+							if (sign == '+') {
+								start2.tm_hour -= off_hour2;
+								start2.tm_min -= off_min2;
+							}
+							else if (sign == '-') {
+								start2.tm_hour += off_hour2;
+								start2.tm_min += off_min2;
+							}
+							else {
+								LOGD("Error on application Start");
+								trigger_satisfied = false;
+								break;
+							}
+
+							if ((t_start2 = mktime(&start2)) == -1) {
+								LOGD("Error on user Start");
+								trigger_satisfied = false;
+								break;
+							}
+						}
+						else {
+							LOGD("Error on application Start");
+							trigger_satisfied = false;
+							break;
+						}
+					}
+					LOGD("application start time: year %d, month %d, day %d, hours %d, minutes %d, seconds %d, UTC +00:00",
+							start2.tm_year+1900, start2.tm_mon+1, start2.tm_mday, start2.tm_hour, start2.tm_min, start2.tm_sec);
+
+					// application MaxDelay
+					if (sscanf((*it)[maxDelayTag].c_str(),"P%dY%dM%dDT%dH%dM%dS",
+								&delay2.tm_year, &delay2.tm_mon, &delay2.tm_mday, &delay2.tm_hour,
+								&delay2.tm_min, &delay2.tm_sec) != EOF) {
+
+						LOGD("application delay time: years %d, months %d, days %d, hours %d, minutes %d, seconds %d",
+								delay2.tm_year, delay2.tm_mon, delay2.tm_mday, delay2.tm_hour, delay2.tm_min, delay2.tm_sec);
+
+						delay2.tm_year += start2.tm_year;
+						delay2.tm_mon += start2.tm_mon;
+						delay2.tm_mday += start2.tm_mday;
+						delay2.tm_hour += start2.tm_hour;
+						delay2.tm_min += start2.tm_min;
+						delay2.tm_sec += start2.tm_sec;
+
+						LOGD("application deadline time: year %d, month %d, day %d, hours %d, minutes %d, seconds %d UTC +00:00",
+								delay2.tm_year+1900, delay2.tm_mon+1, delay2.tm_mday, delay2.tm_hour, delay2.tm_min, delay2.tm_sec);
+
+						if ((t_delay2 = mktime(&delay2)) == -1) {
+							LOGD("Error on application MaxDelay");
+							trigger_satisfied = false;
+							break;
+						}
+					}
+					else {
+						LOGD("Error on application MaxDelay");
+						trigger_satisfied = false;
+						break;
+					}
+
+					if (t_start1 <= t_start2 && t_delay1 >= t_delay2){
+						LOGD("TriggerAtTime satisfied");
+						trigger_satisfied = true;
+						break;
+					}
+					else {
+						LOGD("TriggerAtTime not satisfied");
+						trigger_satisfied = false;
+						break;
 					}
 				}
 			}
 
 			// TriggerPersonalDataAccessedForPurpose
 			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerPersonalDataAccessedTag){
+				LOGD("TriggerPersonalDataAccessedForPurpose evaluation");
 				purpose_satisfied = true;
 				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
 					if ((*triggers_it)[purposeTag][i] >= (*it)[purposeTag][i]){
@@ -208,6 +343,7 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 			
 			// TriggerPersonalDataDeleted evaluation
 			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerPersonalDataDeletedTag){
+				LOGD("TriggerPersonalDataDeleted evaluation");
 				// MaxDelay from DHPreference is greter or equal of application MaxDelay
 				if ((*triggers_it)[maxDelayTag] >= (*it)[maxDelayTag]){
 					trigger_satisfied = true;
@@ -217,6 +353,7 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 
 			// TriggerDataSubjectAccess evaluation
 			if((*triggers_it)[triggerIdTag] == (*it)[triggerIdTag] && (*triggers_it)[triggerIdTag] == triggerDataSubjectAccessTag){
+				LOGD("TriggerDataSubjectAccess evaluation");
 				if ((*triggers_it)[uriTag] == (*it)[uriTag]){
 					trigger_satisfied = true;
 					break;
