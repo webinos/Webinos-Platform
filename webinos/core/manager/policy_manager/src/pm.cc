@@ -274,11 +274,11 @@ public:
 			LOGD("DHPref: purpose parameter not found");
 		}
 
-		obligations *obs = new obligations();
-		obligation *ob = new obligation();
-		map<string, string> *action = new map<string,string>();
-		map<string, string> *trigger = new map<string,string>();
-		vector< map<string, string> > *triggers = new vector< map<string, string> >();
+		obligations obs;
+		obligation ob;
+		map<string, string> action;
+		map<string, string> trigger;
+		vector< map<string, string> > triggers;
 		v8::Local<Value> actTmp, triggerTmp;
 		v8::Local<Array> triggersTmp;
 
@@ -292,7 +292,7 @@ public:
 					actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
 					if (actTmp->ToObject()->Has(String::New(actionIdTag.c_str()))) {
 						v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New(actionIdTag.c_str())));
-						(*action)[actionIdTag]=*actionID;
+						action[actionIdTag]=*actionID;
 						LOGD("Obligation %d: actionID %s", i, *actionID);
 
 						// ActionNotifyDataSubject
@@ -300,25 +300,25 @@ public:
 							// Media paramter
 							if (actTmp->ToObject()->Has(String::New(mediaTag.c_str()))) {
 								v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New(mediaTag.c_str())));
-								(*action)[mediaTag]=*media;
+								action[mediaTag]=*media;
 								LOGD("Obligation %d: Media %s", i, *media);
 							}
 							else {
 								// invalid action: Media required
 								LOGD("Obligation %d: Media is missing", i);
-								action->clear();
+								action.clear();
 								continue;
 							}
 							// Address paramter
 							if (actTmp->ToObject()->Has(String::New(addressTag.c_str()))) {
 								v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New(addressTag.c_str())));
-								(*action)[addressTag]=*address;
+								action[addressTag]=*address;
 								LOGD("Obligation %d: Address %s", i, *address);
 							}
 							else {
 								// invalid action: Address required
 								LOGD("Obligation %d: Address is missing", i);
-								action->clear();
+								action.clear();
 								continue;
 							}
 						}
@@ -330,7 +330,7 @@ public:
 
 							// invalid action: unrecognized actionID
 							LOGD("Obligation %d: unrecognized actionID %s", i, *actionID);
-							action->clear();
+							action.clear();
 							continue;
 						}
 					}
@@ -351,7 +351,7 @@ public:
 					for (unsigned int j = 0; j < triggersTmp->Length(); j++) {
 						if (triggersTmp->Get(j)->ToObject()->Has(String::New(triggerIdTag.c_str()))) {
 							v8::String::AsciiValue triggerID(triggersTmp->Get(j)->ToObject()->Get(String::New(triggerIdTag.c_str())));
-							(*trigger)[triggerIdTag]=*triggerID;
+							trigger[triggerIdTag]=*triggerID;
 							LOGD("Obligation %d, trigger %d: actionID %s", i, j, *triggerID);
 							triggerTmp = triggersTmp->Get(j);
 							// TriggerAtTime
@@ -359,25 +359,25 @@ public:
 								// Start
 								if (triggerTmp->ToObject()->Has(String::New(startTag.c_str()))){
 									v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New(startTag.c_str())));
-									(*trigger)[startTag]=*start;
+									trigger[startTag]=*start;
 									LOGD("Obligation %d, trigger %d: Start %s", i, j, *start);
 								}
 								else {
 									// invalid trigger: Start required
 									LOGD("Obligation %d, trigger %d: Start is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 								// MaxDelay
 								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
 									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
-									(*trigger)[maxDelayTag]=*maxdelay;
+									trigger[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
 									// invalid trigger: MaxDelay required
 									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 							}
@@ -405,36 +405,36 @@ public:
 											else {
 												// invalid purpose vector
 												LOGD("Obligation %d, trigger %d: purpose number %d is undefined", i, j, k);
-												trigger->clear();
+												trigger.clear();
 												continue;
 											}
 										}
 									}
 									else {
 										LOGD("Obligation %d, trigger %d: invalid purpose parameter, wrong vector length", i, j);
-										trigger->clear();
+										trigger.clear();
 										continue;
 									}
-									(*trigger)[purposeTag]=purposes;
+									trigger[purposeTag]=purposes;
 									LOGD("Obligation %d, trigger %d: Purpose %s", i, j, purposes.c_str());
 								}
 								else {
 									// invalid trigger: Purpose required
 									LOGD("Obligation %d, trigger %d: Purpose is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 
 								// MaxDelay
 								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
 									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
-									(*trigger)[maxDelayTag]=*maxdelay;
+									trigger[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
 									// invalid trigger: MaxDelay required
 									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 							}
@@ -443,13 +443,13 @@ public:
 								// MaxDelay
 								if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
 									v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
-									(*trigger)[maxDelayTag]=*maxdelay;
+									trigger[maxDelayTag]=*maxdelay;
 									LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
 								}
 								else {
 									// invalid trigger: MaxDelay required
 									LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 							}
@@ -457,20 +457,20 @@ public:
 							else if (strcmp(*triggerID, triggerDataSubjectAccessTag.c_str()) == 0) {
 								if (triggerTmp->ToObject()->Has(String::New(uriTag.c_str()))){
 									v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New(uriTag.c_str())));
-									(*trigger)[uriTag]=*endpoint;
+									trigger[uriTag]=*endpoint;
 									LOGD("Obligation %d, trigger %d: Endpoint %s", i, j, *endpoint);
 								}
 								else {
 									// invalid trigger: Endpoint required
 									LOGD("Obligation %d, trigger %d: Endpoint is missing", i, j);
-									trigger->clear();
+									trigger.clear();
 									continue;
 								}
 							}
 							else {
 								// invalid trigger: unrecognized triggerID
 								LOGD("Obligation %d, trigger %d: unrecognized triggerID %s", i, j, *triggerID);
-								trigger->clear();
+								trigger.clear();
 								continue;
 							}
 						}
@@ -479,8 +479,8 @@ public:
 							LOGD("Obligation %d, trigger %d: triggerID is missing", i, j);
 							continue;
 						}
-						triggers->push_back(*trigger);
-						trigger->clear();
+						triggers.push_back(trigger);
+						trigger.clear();
 					}
 				}
 				else {
@@ -489,14 +489,14 @@ public:
 					continue;
 				}
 
-				if (action->empty() == false && triggers->empty() == false) {
-					ob->action = (*action);
-					ob->triggers = (*triggers);
+				if (action.empty() == false && triggers.empty() == false) {
+					ob.action = action;
+					ob.triggers = triggers;
 
-					obs->push_back(*ob);
+					obs.push_back(ob);
 				}
-				action->clear();
-				triggers->clear();
+				action.clear();
+				triggers.clear();
 			}
 		}
 
@@ -507,7 +507,7 @@ public:
 //		(*environment)["roaming"] = roam;
 		
 //		Request* myReq = new Request(widPath, *resource_attrs, *environment);
-		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose, *obs);
+		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose, obs);
 		
 		Effect myEff = pmtmp->pminst->checkRequest(myReq);
 
