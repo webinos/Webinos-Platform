@@ -38,7 +38,6 @@
 				webinos/core/wrt/,
 				
                 webinos/web_root/tests/,
-                webinos/web_root/testbed/,
 				webinos/web_root/api_test_specs/,
 				webinos/web_root/apps/,
 				webinos/web_root/*.html,
