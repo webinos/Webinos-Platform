@@ -76,7 +76,8 @@ var policyList = [
 	"policy_dhp_7.xml",
 	"policy_dhp_8.xml",
 	"policy_dhp_9.xml",
-	"policy_dhp_10.xml"
+	"policy_dhp_10.xml",
+	"policy_dhp_11.xml"
 	];
 
 
@@ -2341,6 +2342,73 @@ describe("Manager.PolicyManager", function() {
 			expect(res).toEqual(4);
 		});
 
+	});
+
+	it("Two features test", function() {
+		var purpose = [
+			false,	//"http://www.w3.org/2002/01/P3Pv1/current"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/admin"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/develop"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/tailoring"
+			true,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/pseudo-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-analysis"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/individual-decision"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/contact"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/historical"
+			false,	//"http://www.w3.org/2002/01/P3Pv1/telemarketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/account"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/arts"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/browsing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/charity"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/communicate"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/custom"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/delivery"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/downloads"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/education"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/feedback"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/finmgt"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gambling"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/gaming"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/government"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/health"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/login"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/marketing"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/news"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/payment"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/sales"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/search"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/state"
+			false,	//"http://www.w3.org/2002/01/P3Pv11/surveys"
+			false	//"http://www.primelife.eu/purposes/unspecified"
+			];
+
+		var obligations = [];
+		var triggers = [];
+
+		var action = {
+			actionID: "ActionDeletePersonalData"
+		};
+
+		triggers[0] = {
+			triggerID : "TriggerAtTime",
+			Start : "StartNow",
+			MaxDelay : "P0Y0M5DT0H0M0S"
+		};
+
+		obligations[0] = {
+			action : action,
+			triggers : triggers
+		};
+		runs(function() {
+			var res = checkFeature(policyList[23], userList[0], companyList[0], featureList[1], deviceList[0], purpose, obligations);
+			expect(res).toEqual(4);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[23], userList[0], companyList[0], featureList[2], deviceList[0], purpose, obligations);
+			expect(res).toEqual(0);
+		});
 	});
 
 });
