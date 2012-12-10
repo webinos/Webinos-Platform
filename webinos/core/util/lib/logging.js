@@ -19,6 +19,13 @@ var ansi = require ('ansi');
 var path = require ('path');
 var fs   = require ('fs');
 var os   = require ("os");
+var platform_log;
+try {
+  platform_log = require('debuglog');
+} catch(e) {
+  var noop = function() {};
+  platform_log = { log: noop, error: noop }; 
+}
 try {
   var cursor = ansi (process.stderr);
 } catch (err) {
@@ -67,6 +74,7 @@ var Log = function (filename) {
     if (os.type ().toLowerCase () === "windows_nt") { name = this.name.split ("\\").pop (); } else { name = this.name.split ("/").pop ();}
     var time = date.getDate () + "." + date.getMonth () + "." + date.getFullYear () + " " + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
     var formattedMsg = "[" + time + "] error " + name + "(" + getLineNumber () + ")" + id + msg + "\n";
+    platform_log.error(formattedMsg);
     cursor.fg.red ().write (formattedMsg);
     cursor.fg.reset ();
     this.writeLog ("error", "<p>" + formattedMsg + "</p>");
@@ -79,6 +87,7 @@ var Log = function (filename) {
     if (os.type ().toLowerCase () === "windows_nt") { name = this.name.split ("\\").pop (); } else { name = this.name.split ("/").pop ();}
     var time = date.getDate () + "." + date.getMonth () + "." + date.getFullYear () + "-" + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
     var formattedMsg = "[" + time + "] info " + name + "(" + getLineNumber () + ")" + id + msg + "\n";
+    platform_log.log(formattedMsg);
     cursor.fg.cyan ().write (formattedMsg);
     cursor.fg.reset ();
     this.writeLog ("info", "<p>" + formattedMsg + "</p>");
