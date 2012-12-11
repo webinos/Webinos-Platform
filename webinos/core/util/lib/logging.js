@@ -22,6 +22,8 @@ var os   = require ("os");
 var platform_log;
 try {
   platform_log = require('debuglog');
+  console.log = platform_log.log;
+  console.error = platform_log.error;
 } catch(e) {
   var noop = function() {};
   platform_log = { log: noop, error: noop }; 
