@@ -33,8 +33,8 @@
             counter = 0;
             webinos.discovery.findServices(new ServiceType('http://webinos.org/api/sensors.'+$('#sensorTypeList option:selected').val()), 
                 {onFound: function (service) {
-                    $('<option value=' + service.serviceAddress + ' >' + counter +':' +service.serviceAddress + '</option>').appendTo('#pzh_pzp_list');
-                    sensors[service.serviceAddress] = service;
+                    $('<option value=' + service.id + ' >' + counter +':' +service.serviceAddress + '</option>').appendTo('#pzh_pzp_list');
+                    sensors[service.id] = service;
                     $('#messages').append('<li> New Sensor found: ' + service.api + '</li>');
                     logObj(service, 'Service');
                     counter++;
