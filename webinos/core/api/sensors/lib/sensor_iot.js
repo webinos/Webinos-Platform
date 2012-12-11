@@ -111,6 +111,8 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
     }
 
+    SensorService.prototype = new RPCWebinosService;
+
 
     exports.SensorService = SensorService;
 
