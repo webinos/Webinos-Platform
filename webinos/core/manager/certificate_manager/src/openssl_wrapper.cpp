@@ -26,6 +26,13 @@
 #include <openssl/x509.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+
 /*
  * Note: you CANT use STL in this module - it breaks the Android build.
  */
@@ -148,7 +155,7 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
 
   //write it to PEM format
   if (!(err = PEM_write_bio_X509_REQ(mem, req))) {
-    BIO_free(mem);
+	BIO_free(mem);
     BIO_free(bmem);
     return err;
   }
@@ -163,49 +170,95 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
   return 0;
 }
 
-//get hash function
-int getHash(char* filename)
-{
-  FILE *fp;
-  EVP_PKEY * pkey; 
-  X509* cert = NULL; 
-    
-  /* if((cert = X509_new()) == NULL)
-   	printf("Error creating X509 structure.\n"); */
-   
-  if ((pkey = EVP_PKEY_new()) == NULL)
-      printf("Error creating EVP_PKEY structure.\n");
-  
-  printf("filename is %s", filename); 
-  
-  if (! (fp = fopen(filename, "r"))) {
-      printf("Error cant read certificate key file.\n");
-  }
-  
-  if (! (cert = PEM_read_X509(fp, NULL, NULL, NULL)))
-      printf("Error loading certificate x509 content.\n");
-  if (! (pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL)))
-      printf("Error loading certificate private key content.\n"); 
-  
-  else 
-  {
-    printf("reading success\n");
-    //derive public key from the certificate
-    pkey = X509_get_pubkey(cert);
-    
-    /*buf_len = (size_t) BN_num_bytes(bn);
-    key = (unsigned char *)malloc (buf_len);
-    n = BN_bn2bin (bn, (unsigned char *) key);
-    if (n != buf_len)
-      LOG(ERROR," : key error\n");
-    if (key[0] & 0x80)
-      LOG(DEBUG, "00\n"); */
-  }  
-  fclose(fp); 
-  X509_free(cert); 
-  return 0;
-}
+int getHash(char* filename, char *pointer){
+  struct stat           sb;
+  unsigned char       * buff;
+  int                   fd;
+  ssize_t               len;
+  BIO                 * bio;
+  X509                * x;
+  unsigned              err;
+  char                  errmsg[1024];
+  const EVP_MD        * digest;
+  unsigned char         md[EVP_MAX_MD_SIZE];
+  unsigned int          n;
+  int j;
 
+  // checks file
+  if ((stat(filename, &sb)) == -1)
+  {
+    perror("getHash: stat()");
+    return(1);
+  };
+  len = (sb.st_size * 2);
+
+  // allocates memory
+  if (!(buff = (unsigned char*)malloc(len)))
+  {
+    fprintf(stderr, "getHash: out of virtual memory\n");
+    return(1);
+  };
+
+  // opens file for reading
+  if ((fd = open(filename, O_RDONLY)) == -1)
+  {
+    perror("getHash: open()");
+    free(buff);
+    return(1);
+  };
+
+  // reads file
+  if ((len = read(fd, buff, len)) == -1)
+  {
+    perror("getHash: read()");
+    free(buff);
+    return(1);
+  };
+
+  // closes file
+  close(fd);
+
+  // initialize OpenSSL
+  SSL_library_init();
+  SSL_load_error_strings();
+  
+  // creates BIO buffer
+  bio = BIO_new_mem_buf(buff, len);
+
+  // decodes buffer
+  if (!(x = PEM_read_bio_X509(bio, NULL, 0L, NULL)))
+  {
+    while((err = ERR_get_error()))
+    {
+      errmsg[1023] = '\0';
+      ERR_error_string_n(err, errmsg, 1023);
+      fprintf(stderr, "peminfo: %s\n", errmsg);
+    };
+    BIO_free(bio);
+    free(buff);
+    return(1); 
+  };
+  
+  digest = EVP_get_digestbyname("sha1");
+  if(X509_digest(x, digest, md, &n) && n > 0) {
+    static const char hexcodes[] = "0123456789ABCDEF";
+    for (j = 0; j < (int) n; j++) {
+      pointer[j * 3] = hexcodes[(md[j] & 0xf0) >> 4U];
+      pointer[(j * 3) + 1] = hexcodes[(md[j] & 0x0f)];
+      if (j + 1 != (int) n) {
+        pointer[(j * 3) + 2] = ':';
+      } 
+      else {
+        pointer[(j * 3) + 2] = '\0';
+      }
+    }
+  }
+    
+  BIO_free(bio);
+  free(buff);
+
+  return(0);
+}
 
 ASN1_INTEGER* getRandomSN()
 {

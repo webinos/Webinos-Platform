@@ -146,7 +146,6 @@ Config.prototype.storeAll = function() {
   var self = this;
   self.storeCertificate(self.cert.internal, "internal");
   self.storeKeys(self.keys.conn, "conn");
-  self.storeKeys(self.keys.master, "master");
   self.storeCrl(self.crl);
   self.storeTrustedList(self.trustedList);
 };
@@ -249,7 +248,6 @@ Config.prototype.storeCrl = function (data) {
       logger.error("failed saving crl");
     } else {
       logger.log("saved crl");
-      self.getKeyHash(filePath);
       
     }
   });
@@ -264,7 +262,7 @@ Config.prototype.storeCrl = function (data) {
 Config.prototype.storeKeys = function (keys, name) {
   var self = this;
   var filePath = path.join(self.metaData.webinosRoot, "keys", name+".pem");
-  fs.writeFile(path.resolve(filePath), JSON.stringify(keys, null, " "), function(err) {
+  fs.writeFile(path.resolve(filePath), keys, function(err) {
     if(err) {
       logger.error("failed saving " + name +".pem");
     } else {

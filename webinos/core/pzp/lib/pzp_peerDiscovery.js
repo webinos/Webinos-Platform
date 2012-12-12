@@ -15,14 +15,14 @@
  *
  * Copyright 2011 Ziran Sun, Samsung Electronics (UK) Ltd
  *******************************************************************************/
-
+var path        = require("path");
 var webinos = require("find-dependencies")(__dirname);
 var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || console;
 var localconnectionManager = webinos.global.require(webinos.global.manager.localconnection_manager.location, "/lib/localconnectionmanager").localconnectionManager;
 
 var PzpPeerDiscovery = function(_parent){
   this.localconnectionManager = new localconnectionManager();
-
+  
   /**
    * Advertise PZP with service type "pzp". 
    * @discoveryMethod. DiscoveryMethod used. 
@@ -45,13 +45,21 @@ var PzpPeerDiscovery = function(_parent){
   this.findPzp = function(parent, discoveryMethod, tlsServerPort, pzhId){
   
     var connectPeerFunction = function (msg) {
-        "use strict";
-        // Don't connect yet - this requires certificate check  
-        //_parent.pzpClient.connectPeer(msg);
-      };
+      "use strict";
+      // Don't connect yet - this requires certificate check  
+      //_parent.pzpClient.connectPeer(msg);
+      var filePath = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");  
+      _parent.config.getKeyHash(filePath, function(status, value){  
+        if(status)
+          logger.log("get hash: " + value);
+        else
+          logger.log("get hash err: " + value); 
+      }); 
+    };
       
     this.localconnectionManager.setConnectPeersfunction(connectPeerFunction);
     this.localconnectionManager.findPeers('pzp', discoveryMethod, tlsServerPort, pzhId);
-  }; 
-};
-module.exports = PzpPeerDiscovery;
+  };
+}  
+
+  module.exports = PzpPeerDiscovery;

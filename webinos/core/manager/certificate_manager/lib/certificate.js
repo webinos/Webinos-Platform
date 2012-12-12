@@ -30,15 +30,7 @@ var Certificate = function() {
   this.keys.conn = {}; 
   var self = this;
 
-  this.getKeyHash = function(path, callback){
-  	var certman;
-    try {
-      certman = require("certificate_manager");
-      certman.getHash(path);
-    } catch (err) {
-      logger.log("get certificate manager error" + err);
-    }
-  }
+  
   
   this.generateSelfSignedCertificate = function(type, cn, callback) {
     var certman, obj = {}, key_id, cert_type, conn_key;
@@ -133,6 +125,24 @@ var Certificate = function() {
       }
     });
   };
+  
+  Certificate.prototype.getKeyHash = function(path, callback){
+    var certman, self = this;
+    try {
+      certman = require("certificate_manager");
+    }catch (err) {
+      return callback(false, err);
+    }
+    try{  
+      var hash = certman.getHash(path);
+      logger.log("Key Hash is" + hash);
+      return callback(true, hash);
+    } catch (err) {
+      logger.log("get certificate manager error" + err);
+      return callback(false, err);
+    }
+  };
+  
   Certificate.prototype.generateSignedCertificate = function(csr, cert_type,  callback) {
     var certman, self = this;
     try {
