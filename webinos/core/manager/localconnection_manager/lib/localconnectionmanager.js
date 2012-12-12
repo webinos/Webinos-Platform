@@ -201,9 +201,9 @@
               	msg.name = nm.slice(0, index);
               	var mAddr = nm.slice(index+1, nm.length);
               	//replace "_" with "."
-	        msg.address = mAddr.replace(/_/g, '.');
-		logger.log("Found android peer name:" + msg.name);
-	        logger.log("Found android peer address" + msg.address);
+                msg.address = mAddr.replace(/_/g, '.');
+                logger.log("Found android peer name:" + msg.name);
+                logger.log("Found android peer address" + msg.address);
               }
               else
               {
