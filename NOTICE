@@ -15,7 +15,5 @@ Interdisciplinary Institute for Broadband Technology (IBBT).
 
 webinos platform uses and delivers, as part of the project, 
 the following 3rd party software:
-* Closure Compiler, Apache License 2.0 
-  http://code.google.com/p/closure-compiler/
 * jQuery BBQ: Back Button & Query Library, MIT and GPL 
   licenses, http://benalman.com/projects/jquery-bbq-plugin/
