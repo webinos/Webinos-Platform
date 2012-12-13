@@ -25,6 +25,7 @@
 			"core/policymanager/ObligationsSet.cpp",
 			"core/policymanager/ProvisionalAction.cpp",
 			"core/policymanager/ProvisionalActions.cpp",
+			"core/policymanager/TriggersSet.cpp",
 			"core/common.cpp",
 			"../contrib/xmltools/tinyxml.cpp",
 			"../contrib/xmltools/slre.cpp",

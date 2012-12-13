@@ -19,12 +19,13 @@
  ******************************************************************************/
 
 #include "ObligationsSet.h"
+#include "../../debug.h"
 
 ObligationsSet::ObligationsSet(TiXmlElement* obligationsset){
 
 	// Obligation Tags
-	for(TiXmlElement * child = static_cast<TiXmlElement*>(obligationsset->FirstChild("Obligation")); child;
-			child = static_cast<TiXmlElement*>(child->NextSibling("Obligation"))) {
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(obligationsset->FirstChild(obligationTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(obligationTag))) {
 		obligation.push_back(new Obligation(child));
 	}
 }
@@ -35,3 +36,12 @@ ObligationsSet::~ObligationsSet(){
 	}
 }
 
+bool ObligationsSet::evaluate(Request * req){
+
+	for(unsigned int i = 0; i<obligation.size(); i++){
+		LOGD("ObligationsSet: evalutaing obligation %d", i);
+		if (obligation[i]->evaluate(req) == false)
+			return false;
+	}
+	return true;
+}

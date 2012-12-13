@@ -1,0 +1,65 @@
+<policy-set combine="first-matching-target" description="policyTest">
+ <policy combine="first-applicable" description="user1allowAllMess">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<ProvisionalActions>
+				<ProvisionalAction>
+					<AttributeValue>http://webinos.org/api/messaging</AttributeValue>
+					<AttributeValue>#DHPcurrent_and_presudo-analysis</AttributeValue>
+				</ProvisionalAction>
+				<ProvisionalAction>
+					<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+					<AttributeValue>#DHPcurrent</AttributeValue>
+				</ProvisionalAction>
+			</ProvisionalActions>
+		</rule>
+	</policy>
+	<policy combine="first-applicable" description="untrusted">
+		<rule effect="deny"></rule>
+	</policy>
+    <DataHandlingPreferences PolicyId="#DHPcurrent_and_presudo-analysis">
+		<AuthorizationsSet>
+			<AuthzUseForPurpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/pseudo-analysis</Purpose>
+			</AuthzUseForPurpose>
+		</AuthorizationsSet>
+		<ObligationsSet>
+			<Obligation>
+				<TriggersSet>
+					<TriggerAtTime>
+						 <Start>
+							<StartNow/>
+						 </Start>
+						 <MaxDelay>
+							<Duration>P0Y0M7DT0H0M0S</Duration>
+						 </MaxDelay>
+					</TriggerAtTime>
+				</TriggersSet>
+				<ActionDeletePersonalData/>
+			</Obligation>
+		</ObligationsSet>
+	</DataHandlingPreferences>
+
+      <DataHandlingPreferences PolicyId="#DHPcurrent">
+		<AuthorizationsSet>
+			<AuthzUseForPurpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose>
+			</AuthzUseForPurpose>
+		</AuthorizationsSet>
+	</DataHandlingPreferences>
+	<ProvisionalActions>
+		<ProvisionalAction>
+			<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+			<AttributeValue>#DHPcurrent</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>http://webinos.org/api/messaging</AttributeValue>
+			<AttributeValue>#DHPcurrent_and_presudo-analysis</AttributeValue>
+		</ProvisionalAction>
+	</ProvisionalActions>
+</policy-set>

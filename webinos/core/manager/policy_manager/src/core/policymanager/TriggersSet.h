@@ -18,25 +18,35 @@
  * 
  ******************************************************************************/
 
-#ifndef OBLIGATIONSSET_H_
-#define OBLIGATIONSSET_H_
+#ifndef TRIGGERSSET_H_
+#define TRIGGERSSET_H_
 
-#include "Obligation.h"
 #include "IPolicyBase.h"
 
-static const string obligationTag = "Obligation";
+static const string triggerAtTimeTag = "TriggerAtTime";
+static const string triggerPersonalDataAccessedTag = "TriggerPersonalDataAccessedForPurpose";
+static const string triggerPersonalDataDeletedTag = "TriggerPersonalDataDeleted";
+static const string triggerDataSubjectAccessTag = "TriggerDataSubjectAccess";
+static const string triggerIdTag = "triggerID";
+static const string startTag = "Start";
+static const string startNowTag = "StartNow";
+static const string dateAndTimeTag = "DateAndTime";
+static const string maxDelayTag = "MaxDelay";
+static const string durationTag = "Duration";
+static const string uriTag = "Uri";
 
-class ObligationsSet{
+class TriggersSet{
 	
 private:
-	vector<Obligation*>	obligation;
+	map<string,string> trigger;
+	vector< map<string,string> > triggers;
 
 public:
-	ObligationsSet(TiXmlElement*);
-	virtual ~ObligationsSet();
+	TriggersSet(TiXmlElement*);
+	virtual ~TriggersSet();
 
-	bool evaluate(Request *);
+	bool evaluate(vector< map<string, string> >);
 };
 
-#endif /* OBLIGATIONSSET_H_ */
+#endif /* TRIGGERSSET_H_ */
 
