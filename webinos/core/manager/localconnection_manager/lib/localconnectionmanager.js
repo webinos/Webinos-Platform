@@ -21,7 +21,6 @@
   var os = require('os');
   var webinos_= require("find-dependencies")(__dirname);
   var logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
-  var element  = webinos_.global.require(webinos_.global.util.location, "lib/peerElement.js");
   
   var mdns = null;
   var bridge = null;
@@ -194,7 +193,7 @@
             browser.on('serviceUp', function(service) {
               logger.log("Peer Discovery zeroconf mdns service up");
               
-              var nm = element.getPeerElement(service, 'name');
+              var nm = service.name;
               //check nm content
               if(nm.search("/") !== -1) {
               	//split name and address
@@ -202,13 +201,15 @@
               	msg.name = nm.slice(0, index);
               	var mAddr = nm.slice(index+1, nm.length);
               	//replace "_" with "."
-              	msg.address = mAddr.replace(/_/g, '.');
+                msg.address = mAddr.replace(/_/g, '.');
+                logger.log("Found android peer name:" + msg.name);
+                logger.log("Found android peer address" + msg.address);
               }
               else
               {
               	msg.name    = nm;
               	logger.log("Found peer name:" + msg.name);
-              	msg.address = element.getPeerElement(service, 'addresses');
+              	msg.address = service.addresses[0];
               	logger.log("Found peer address:" + msg.address);
               }	
               logger.log("check mdns discovery list");
@@ -216,6 +217,7 @@
               
               if(msg.name !== os.hostname()) {
                 logger.log("found other host");
+		
                 if(serviceType === "pzp")
                   msg.name = option + "/" + msg.name + "_Pzp";
                 connectPeers(msg);
