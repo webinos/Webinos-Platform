@@ -20,7 +20,9 @@
 #include "PolicySet.h"
 #include "../../debug.h"
 
-PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
+PolicySet::PolicySet(TiXmlElement* set, DHPrefs* dhp)
+	: IPolicyBase(set), datahandlingpreferences(dhp)
+{
 	iType = POLICY_SET;
 	policyCombiningAlgorithm = (set->Attribute("combine")!=NULL) ? set->Attribute("combine") : deny_overrides_algorithm;
 	
@@ -32,7 +34,22 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 			subjects.push_back(new Subject(child));
 		}
 	}
-	
+
+	//init datahandlingpreferences
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(set->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
+		LOGD("PolicySet: DHPref %s found", child->Attribute(policyIdTag.c_str()));
+		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
+	}
+	LOGD("PolicySet DHPref number: %d", (*dhp).size());
+
+	//init ProvisionalActions
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(set->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
+		LOGD("PolicySet: ProvisionalActions found");
+		provisionalactions.push_back(new ProvisionalActions(child));
+	}
+
 	for(TiXmlNode * node = (TiXmlNode*)set->FirstChild(); node;
 			node = (TiXmlNode*)node->NextSibling() ) {
 		
@@ -41,12 +58,12 @@ PolicySet::PolicySet(TiXmlElement* set) : IPolicyBase(set){
 			continue;
 	
 		if(child->ValueStr() == "policy-set"){
-			PolicySet * set = new PolicySet(child);
+			PolicySet * set = new PolicySet(child, dhp);
 			policysets.push_back(set);
 			sortArray.push_back(set);
 		}
 		else if(child->ValueStr() == "policy"){
-			Policy * policy = new Policy(child);
+			Policy * policy = new Policy(child, dhp);
 			policies.push_back(policy);
 			sortArray.push_back(policy);
 		}
@@ -65,10 +82,10 @@ PolicySet::PolicySet(IPolicyBase* policy) : IPolicyBase(policy){
 	this->description = policy->description;
 }
 
-PolicySet::~PolicySet()
-	{
-	// TODO Auto-generated destructor stub
-	}
+PolicySet::~PolicySet() {
+	for (vector<ProvisionalActions*>::iterator it = provisionalactions.begin(); it != provisionalactions.end(); it++)
+		delete *it;
+}
 
 
 bool PolicySet::matchSubject(Request* req){
@@ -83,21 +100,26 @@ bool PolicySet::matchSubject(Request* req){
 	return false;
 }
 
-Effect PolicySet::evaluatePolicies(Request * req){
+Effect PolicySet::evaluatePolicies(Request* req, pair<string, bool>* selectedDHPref){
+
+	Effect eff;
 	
 	for(unsigned int i=0; i<policies.size(); i++){
-			LOGD("policies[%d] = %s",i,policies[i]->description.data());
+		LOGD("policies[%d] = %s",i,policies[i]->description.data());
 	}
 	
  	if(req->getResourceAttrs().size() == 0){
 		return PERMIT;
 	}
-	
+
 	if(policyCombiningAlgorithm == deny_overrides_algorithm){
 		LOGD("[PolicySet] deny_overrides algorithm");
 		int effects_result[] = {0,0,0,0,0,0,0};
 		for(unsigned int i=0; i<sortArray.size(); i++){
-			effects_result[sortArray[i]->evaluate(req)]++;
+			effects_result[sortArray[i]->evaluate(req, selectedDHPref)]++;
+
+			selectDHPref(req, selectedDHPref);
+
 			if(effects_result[DENY] > 0)
 				return DENY;
 		}
@@ -140,7 +162,10 @@ Effect PolicySet::evaluatePolicies(Request * req){
 		int effects_result[] = {0,0,0,0,0,0,0};
 		
 		for(unsigned int i=0; i<sortArray.size(); i++){
-			effects_result[sortArray[i]->evaluate(req)]++;
+			effects_result[sortArray[i]->evaluate(req, selectedDHPref)]++;
+
+			selectDHPref(req, selectedDHPref);
+
 			if(effects_result[PERMIT] > 0)
 				return PERMIT;
 		}
@@ -176,7 +201,11 @@ Effect PolicySet::evaluatePolicies(Request * req){
 			LOGD("[PolicySet] try eval %s",sortArray[i]->description.data());
 			if(sortArray[i]->matchSubject(req)){
 				LOGD("[PolicySet] eval %s",sortArray[i]->description.data());
-				return sortArray[i]->evaluate(req);
+				eff = sortArray[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
+				return eff;
 			}
 		}
 		return INAPPLICABLE;
@@ -184,15 +213,44 @@ Effect PolicySet::evaluatePolicies(Request * req){
 	return INAPPLICABLE;
 }
 
-Effect PolicySet::evaluate(Request * req){
+Effect PolicySet::evaluate(Request * req, pair<string, bool>* selectedDHPref){
 	if(matchSubject(req)){
 		if(policies.size()==	0 && policysets.size()==0){
 			return PERMIT;
 		}
 		else{
-			return evaluatePolicies(req);	
+			return evaluatePolicies(req, selectedDHPref);	
 		}
 	}
 	else
 		return INAPPLICABLE;	
+}
+
+void PolicySet::selectDHPref(Request* req, pair<string, bool>* selectedDHPref){
+	pair<string, bool> preferenceid;
+
+	if((*selectedDHPref).second == false) {
+		// search for a provisional action with a resource matching the request
+		LOGD("PolicySet: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
+		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			LOGD("PolicySet: ProvisionalActions %d evaluation", i);
+			preferenceid = provisionalactions[i]->evaluate(req);
+			LOGD("PolicySet: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+			
+			// search for a dh preference with an id matching the string returned by
+			// the previous provisional action
+			if (preferenceid.first.empty() == false) {
+				// exact match (preferenceid.second == true): select this DHPref
+				// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+				if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+					// test if DHPref exists
+					if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+						(*selectedDHPref) = preferenceid;
+						LOGD("PolicySet: DHPref found: %s", (*selectedDHPref).first.c_str());
+						break;
+					}
+				}
+			}
+		}
+	}
 }

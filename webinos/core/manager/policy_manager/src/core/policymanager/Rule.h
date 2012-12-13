@@ -22,6 +22,11 @@
 
 #include "Condition.h"
 #include "IPolicyBase.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
+
+static const string dhPrefTag = "DataHandlingPreferences";
+static const string provisionalActionsTag = "ProvisionalActions";
 
 class Rule
 	{
@@ -29,12 +34,14 @@ class Rule
 private:
 	Effect 		effect;
 	Condition* 	condition;
+	DHPrefs*			datahandlingpreferences;
+	vector<ProvisionalActions*>		provisionalactions;
 	
 public:
-	Rule(TiXmlElement*);
+	Rule(TiXmlElement*, DHPrefs*);
 	virtual ~Rule();
 	
-	Effect evaluate(Request*);
+	Effect evaluate(Request*, pair<string, bool>*);
 	static Effect string2effect(const string &);
 	
 	};
