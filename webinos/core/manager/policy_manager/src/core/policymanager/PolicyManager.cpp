@@ -80,6 +80,8 @@ Effect PolicyManager::checkRequest(Request * req){
 
 	LOGD("Policy manager start check");
 	if(validPolicyFile) {
+		selectedDHPref.first.clear();
+		selectedDHPref.second = false;
 		xacml_eff = policyDocument->evaluate(req, &selectedDHPref);
 		LOGD("XACML response: %d", xacml_eff);
 

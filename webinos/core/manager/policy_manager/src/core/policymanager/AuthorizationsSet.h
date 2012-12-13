@@ -31,51 +31,10 @@ using namespace std;
 static const string authzTag = "AuthzUseForPurpose";
 static const string purposeTag = "Purpose";
 
-enum purpose_ontology {
+static const string ontology_vector[] = {
 
 	// P3P ontology
 	// http://www.w3.org/TR/P3P11/#PURPOSE
-	CURRENT,
-	ADMIN,
-	DEVELOP,
-	TAILORING,
-	PSEUDO_ANALYSIS,
-	PSEUDO_DECISION,
-	INDIVIDUAL_ANALYSIS,
-	INDIVIDUAL_DECISION,
-	CONTACT,
-	HISTORICAL,
-	TELEMARKETING,
-	ACCOUNT,
-	ARTS,
-	BROWSING,
-	CHARITY,
-	COMMUNICATE,
-	CUSTOM,
-	DELIVERY,
-	DOWNLOADS,
-	EDUCATION,
-	FEEDBACK,
-	FINMGT,
-	GAMBLING,
-	GAMING,
-	GOVERNMENT,
-	HEALTH,
-	LOGIN,
-	MARKETING,
-	NEWS,
-	PAYMENT,
-	SALES,
-	SEARCH,
-	STATE,
-	SURVEYS,
-
-	// PrimeLife extension
-	// http://primelife.ercim.eu/results/documents/153-534d
-	UNSPECIFIED
-};
-
-static const string ontology_vector[] = {
 	"http://www.w3.org/2002/01/P3Pv1/current",
 	"http://www.w3.org/2002/01/P3Pv1/admin",
 	"http://www.w3.org/2002/01/P3Pv1/develop",
@@ -110,6 +69,9 @@ static const string ontology_vector[] = {
 	"http://www.w3.org/2002/01/P3Pv11/search",
 	"http://www.w3.org/2002/01/P3Pv11/state",
 	"http://www.w3.org/2002/01/P3Pv11/surveys",
+
+	// PrimeLife extension
+	// http://primelife.ercim.eu/results/documents/153-534d
 	"http://www.primelife.eu/purposes/unspecified"
 };
 
