@@ -13,41 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Copyright 2011 Telecom Italia SpA
+ * Copyright 2012 Torsec -Computer and network security group-
+ * Politecnico di Torino
  * 
  ******************************************************************************/
 
-#ifndef POLICY_H_
-#define POLICY_H_
+#ifndef DHPREFERENCES_H_
+#define DHPREFERENCES_H_
 
-#include "IPolicyBase.h"
-#include "Rule.h"
-#include "Subject.h"
-#include "../../debug.h"
-#include "DataHandlingPreferences.h"
-#include "ProvisionalActions.h"
+#include "AuthorizationsSet.h"
+#include "ObligationsSet.h"
+#include "Request.h"
 
-class Policy : public IPolicyBase
-	{
+static const string authzSetTag = "AuthorizationsSet";
+static const string oblSetTag = "ObligationsSet";
+static const string policyIdTag = "PolicyId";
+
+class DataHandlingPreferences{
 	
 private:
-	string 				ruleCombiningAlgorithm;
-	vector<Subject*> 	subjects;
-	vector<Rule*>		rules;
-	DHPrefs*			datahandlingpreferences;
-	vector<ProvisionalActions*>		provisionalactions;
-	void selectDHPref(Request*, pair<string, bool>*);
-	
+	string			policyId;
+	AuthorizationsSet*	authorizationsset;
+	ObligationsSet*		obligationsset;
 	
 public:
-	Policy(TiXmlElement*, DHPrefs*);
-	virtual ~Policy();
-	
-	bool matchSubject(Request*);
-	Effect evaluate(Request*, pair<string, bool>*);
-	PolicyType get_iType();
-//	static string modFunction(const string&, const string&);
-	
+	DataHandlingPreferences(TiXmlElement*);
+	virtual ~DataHandlingPreferences();
+
+	string GetId();
+	bool evaluate(Request *);
 };
 
-#endif /* POLICY_H_ */
+typedef map<string, DataHandlingPreferences*> DHPrefs;
+
+#endif /* DHPREFERENCES_H_ */

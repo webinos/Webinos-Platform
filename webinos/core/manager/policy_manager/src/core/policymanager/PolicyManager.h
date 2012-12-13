@@ -22,8 +22,8 @@
 
 #include "Request.h"
 #include "PolicySet.h"
+#include "DataHandlingPreferences.h"
 //#include "debug.h"
-
 
 class PolicyManager{ 
 
@@ -33,6 +33,8 @@ private:
 	string policyName;
 
 public:
+	pair<string, bool> selectedDHPref;
+	DHPrefs* dhp;
 	PolicyManager();
 	PolicyManager(const string &);
 	virtual ~PolicyManager();

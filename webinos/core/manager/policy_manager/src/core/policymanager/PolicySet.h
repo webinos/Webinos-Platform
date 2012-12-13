@@ -23,6 +23,8 @@
 #include "../../../contrib/xmltools/tinyxml.h"
 #include "Policy.h"
 #include "IPolicyBase.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
 
 #include <vector>
 using namespace std;
@@ -37,17 +39,20 @@ private:
 	vector<PolicySet*>	policysets;
 	vector<Policy*> 	policies;
 	vector<Subject*> 	subjects;
+	DHPrefs*			datahandlingpreferences;
+	vector<ProvisionalActions*>		provisionalactions;
 	
 	bool matchSubject(Request*);
-	Effect evaluatePolicies(Request*);
+	Effect evaluatePolicies(Request*, pair<string, bool>*);
 //	Effect evaluatePolicySets(Request*);
+	void selectDHPref(Request*, pair<string, bool>*);
 	
 public:
-	PolicySet(TiXmlElement*);
+	PolicySet(TiXmlElement*, DHPrefs*);
 	PolicySet(IPolicyBase*);
 	virtual ~PolicySet();
 	
-	Effect evaluate(Request *);
+	Effect evaluate(Request*, pair<string, bool>*);
 	};
 
 #endif /* POLICYSET_H_ */

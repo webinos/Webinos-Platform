@@ -19,7 +19,9 @@
 
 #include "Policy.h"
 
-Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
+Policy::Policy(TiXmlElement* policy, DHPrefs* dhp)
+	: IPolicyBase(policy), datahandlingpreferences(dhp)
+{
 	iType = POLICY;
 	ruleCombiningAlgorithm = (policy->Attribute("combine")!=NULL) ? policy->Attribute("combine") : deny_overrides_algorithm;
 	//init subjects
@@ -31,21 +33,35 @@ Policy::Policy(TiXmlElement* policy) : IPolicyBase(policy){
 		}
 	}
 		
+	//init datahandlingpreferences
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(dhPrefTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(dhPrefTag)) ) {
+		LOGD("Policy: DHPref %s found", child->Attribute(policyIdTag.c_str()));
+		(*dhp)[child->Attribute(policyIdTag.c_str())]=new DataHandlingPreferences(child);
+	}
+	LOGD("Policy DHPref number: %d", (*dhp).size());
+
+	//init ProvisionalActions
+	for(TiXmlElement * child = static_cast<TiXmlElement*>(policy->FirstChild(provisionalActionsTag)); child;
+			child = static_cast<TiXmlElement*>(child->NextSibling(provisionalActionsTag)) ) {
+		LOGD("Policy: ProvisionalActions found");
+		provisionalactions.push_back(new ProvisionalActions(child));
+	}
 	
 	// init rules
 	for(TiXmlElement * child = (TiXmlElement*)policy->FirstChild("rule"); child;
 			child = (TiXmlElement*)child->NextSibling("rule")) {
-		rules.push_back(new Rule(child));
+		rules.push_back(new Rule(child, dhp));
 	}
 	
 	LOGD("[Policy]  : subjects size : %d",subjects.size());
 	LOGD("[Policy]  : rules size : %d",rules.size());
 }
 
-Policy::~Policy()
-	{
-	// TODO Auto-generated destructor stub
-	}
+Policy::~Policy() {
+	for (vector<ProvisionalActions*>::iterator it = provisionalactions.begin(); it != provisionalactions.end(); it++)
+		delete *it;
+}
 
 //virtual
 PolicyType Policy::get_iType(){
@@ -68,7 +84,7 @@ bool Policy::matchSubject(Request* req){
 }
 
 //virtual
-Effect Policy::evaluate(Request* req){
+Effect Policy::evaluate(Request* req, pair<string, bool>* selectedDHPref){
 /*	
 	if(req->getResourceAttrs().find("api-feature") != req->getResourceAttrs().end())
 		LOGD("[Policy::evaluate] api-feature size : %d",req->getResourceAttrs()["api-feature"]->size());
@@ -86,7 +102,10 @@ Effect Policy::evaluate(Request* req){
 			LOGD("[Policy::evaluate] deny_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
 			for(unsigned int i=0; i<rules.size(); i++){
-				int tmp = rules[i]->evaluate(req);
+				int tmp = rules[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
 				LOGD("eval : %d",tmp);
 				effects_result[tmp]++;
 				if(effects_result[DENY] > 0)
@@ -115,7 +134,10 @@ Effect Policy::evaluate(Request* req){
 			LOGD("[Policy::evaluate] permit_overrides algorithm");
 			int effects_result[] = {0,0,0,0,0,0,0};
 			for(unsigned int i=0; i<rules.size(); i++){
-				effects_result[rules[i]->evaluate(req)]++;
+				effects_result[rules[i]->evaluate(req, selectedDHPref)]++;
+
+				selectDHPref(req, selectedDHPref);
+
 				if(effects_result[PERMIT] > 0)
 					return PERMIT;
 			}
@@ -143,7 +165,10 @@ Effect Policy::evaluate(Request* req){
 			LOGD("[Policy] first_applicable algorithm");
 			Effect tmp_effect;
 			for(unsigned int i=0; i<rules.size(); i++){
-				tmp_effect = rules[i]->evaluate(req);
+				tmp_effect = rules[i]->evaluate(req, selectedDHPref);
+
+				selectDHPref(req, selectedDHPref);
+
 				if(tmp_effect != UNDETERMINED && tmp_effect != INAPPLICABLE)
 					return tmp_effect;
 				else if(tmp_effect == UNDETERMINED)
@@ -160,6 +185,36 @@ Effect Policy::evaluate(Request* req){
 	else
 		return INAPPLICABLE;
 }
+
+void Policy::selectDHPref(Request* req, pair<string, bool>* selectedDHPref){
+	pair<string, bool> preferenceid;
+
+	if((*selectedDHPref).second == false) {
+		// search for a provisional action with a resource matching the request
+		LOGD("Policy: looking for DHPref in %d ProvisionalActions",provisionalactions.size());
+		for(unsigned int i=0; i<provisionalactions.size(); i++){
+			LOGD("Policy: ProvisionalActions %d evaluation", i);
+			preferenceid = provisionalactions[i]->evaluate(req);
+			LOGD("Policy: ProvisionalActions %d evaluation response: %s", i, preferenceid.first.c_str());
+			
+			// search for a dh preference with an id matching the string returned by
+			// the previous provisional action
+			if (preferenceid.first.empty() == false) {
+				// exact match (preferenceid.second == true): select this DHPref
+				// partial match (preferenceid.second == false): select this DHPref only if another partial match is not selected
+				if (preferenceid.second == true || (preferenceid.second == false && (*selectedDHPref).first.empty() == true) ) {
+					// test if DHPref exists
+					if ((*datahandlingpreferences).count(preferenceid.first) == 1) {
+						(*selectedDHPref) = preferenceid;
+						LOGD("Policy: DHPref found: %s", (*selectedDHPref).first.c_str());
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 /*
 string Policy::modFunction(const string& func, const string& val){
 	// func = {scheme, host, authority, scheme-authority, path}

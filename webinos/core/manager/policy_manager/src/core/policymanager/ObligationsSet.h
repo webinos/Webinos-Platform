@@ -13,41 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Copyright 2011 Telecom Italia SpA
+ * Copyright 2012 Torsec -Computer and network security group-
+ * Politecnico di Torino
  * 
  ******************************************************************************/
 
-#ifndef POLICY_H_
-#define POLICY_H_
+#ifndef OBLIGATIONSSET_H_
+#define OBLIGATIONSSET_H_
 
+#include "Obligation.h"
 #include "IPolicyBase.h"
-#include "Rule.h"
-#include "Subject.h"
-#include "../../debug.h"
-#include "DataHandlingPreferences.h"
-#include "ProvisionalActions.h"
 
-class Policy : public IPolicyBase
-	{
+class ObligationsSet{
 	
 private:
-	string 				ruleCombiningAlgorithm;
-	vector<Subject*> 	subjects;
-	vector<Rule*>		rules;
-	DHPrefs*			datahandlingpreferences;
-	vector<ProvisionalActions*>		provisionalactions;
-	void selectDHPref(Request*, pair<string, bool>*);
-	
-	
+	vector<Obligation*>	obligation;
+
 public:
-	Policy(TiXmlElement*, DHPrefs*);
-	virtual ~Policy();
-	
-	bool matchSubject(Request*);
-	Effect evaluate(Request*, pair<string, bool>*);
-	PolicyType get_iType();
-//	static string modFunction(const string&, const string&);
-	
+	ObligationsSet(TiXmlElement*);
+	virtual ~ObligationsSet();
 };
 
-#endif /* POLICY_H_ */
+#endif /* OBLIGATIONSSET_H_ */
+

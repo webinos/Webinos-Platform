@@ -34,6 +34,7 @@ private:
 	map<string, vector<string>*>	subject_attrs;
 	map<string, vector<string>*>	resource_attrs;
 	map<string, string>				environment_attrs;
+	vector<bool> purpose_attrs;
 	string request_subject_text;
 	string request_resource_text;
 	string request_environment_text;
@@ -45,7 +46,7 @@ private:
 public:
 	Request(const string& widgetRootPath, map<string, vector<string>*>& resources);
 	Request(const string& widgetRootPath, map<string, vector<string>*>& resources, map<string,string>&environment);
-	Request(map<string, vector<string>*>&, map<string, vector<string>*>&);
+	Request(map<string, vector<string>*>&, map<string, vector<string>*>&, vector<bool>);
 	virtual ~Request();
 	
 	TiXmlDocument* getXmlDocument();
@@ -53,6 +54,7 @@ public:
 	
 	map<string, vector<string>*>&	getSubjectAttrs();
 	map<string, vector<string>*>&	getResourceAttrs();
+	vector<bool>	getPurposeAttrs();
 	map<string, string>&			getEnvironmentAttrs();
 	string getWidgetRootPath();
 	string getRequestText();
