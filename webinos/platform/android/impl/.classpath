@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="libs/jmdns.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="lib" path="/app/libs/jmdns.jar"/>
+	<classpathentry kind="lib" path="/app/libs/core.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
