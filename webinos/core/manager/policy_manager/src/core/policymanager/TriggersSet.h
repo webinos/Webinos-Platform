@@ -21,6 +21,7 @@
 #ifndef TRIGGERSSET_H_
 #define TRIGGERSSET_H_
 
+#include <ctime>
 #include "IPolicyBase.h"
 
 static const string triggerAtTimeTag = "TriggerAtTime";

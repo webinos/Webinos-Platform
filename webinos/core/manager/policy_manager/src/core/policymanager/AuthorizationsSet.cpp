@@ -45,7 +45,7 @@ AuthorizationsSet::~AuthorizationsSet(){
 bool AuthorizationsSet::evaluate(Request * req){
 	LOGD("Evaluating AuthorizationsSet");
 
-	bool purpose_satisfied[arraysize(ontology_vector)];
+	vector<bool> purpose_satisfied(arraysize(ontology_vector), false);
 	vector<bool> purpose = req->getPurposeAttrs();
 	unsigned int i = 0;
 
