@@ -1,4 +1,3 @@
-#include <aJSON.h>
 #include <SPI.h>
 #include <Ethernet.h>
 
@@ -21,14 +20,14 @@
 
 
 typedef struct {
-  char* id;
-  bool sa;
-  bool ad;
-  int pin;
-  bool active;
-  long rate;
-  long lastConnectionTime;
-  } IOElement;
+    char* id;
+    bool sa;
+    bool ad;
+    int pin;
+    bool active;
+    long rate;
+    long lastConnectionTime;
+} IOElement;
 
 IOElement * elements[NUM_ELEMENTS];
 
@@ -43,254 +42,201 @@ EthernetServer server(BOARD_PORT);
 boolean boardconnected = false;
 
 void setup(){
-  Serial.begin(9600);
-
-  elements[0] = new IOElement();
-  elements[0]->id = "00001_000";
-  elements[0]->sa = 0;
-  elements[0]->ad = 0;
-  elements[0]->pin = 0;
-  elements[0]->active = 0;
-  elements[0]->rate = 1000;
+    Serial.begin(9600);
+    
+    elements[0] = new IOElement();
+    elements[0]->id = "00001_000";
+    elements[0]->sa = 0;
+    elements[0]->ad = 0;
+    elements[0]->pin = 0;
+    elements[0]->active = 0;
+    elements[0]->rate = 1000;
   
-  elements[1] = new IOElement();
-  elements[1]->id = "00001_001";
-  elements[1]->sa = 0;
-  elements[1]->ad = 1;
-  elements[1]->pin = 1;
-  elements[1]->active = 0;
-  elements[1]->rate = 3500;
+    elements[1] = new IOElement();
+    elements[1]->id = "00001_001";
+    elements[1]->sa = 0;
+    elements[1]->ad = 1;
+    elements[1]->pin = 1;
+    elements[1]->active = 0;
+    elements[1]->rate = 3500;
   
-  //start Ethernet
-  Ethernet.begin(mac, arduino_ip);
+    //start Ethernet
+    Ethernet.begin(mac, arduino_ip);
 }
 
-//hell function
 String getValueFromSensor(bool ad, int pin){  
-  int value = -1;
-  if(ad == 0){ //analog sensor
-    value = analogRead(pin);
-  }
-  else{ //digital sensor
-    value = digitalRead(pin);
-  }
-  return String(value);
+    int value = -1;
+    if(ad == 0){ //analog sensor
+        value = analogRead(pin);
+    }
+    else{ //digital sensor
+        value = digitalRead(pin);
+    }
+    return String(value);
 }
 
 void sendDataToAPI(int id_ele){
-//  Serial.print("Send data id : ");
-//  Serial.println(id_ele);
-  if (client.connect(pzp_ip, PZP_PORT)) {
-    client.print("POST /sensor?id=");
-    client.print(elements[id_ele]->id);
-    client.print("&data=");
-    client.print(getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin));
-    client.println("\0 HTTP/1.0");
-    client.println();
-    client.stop();
-    elements[id_ele]->lastConnectionTime = millis();
-  }
+    if (client.connect(pzp_ip, PZP_PORT)) {
+        Serial.print("Send data id : ");
+        Serial.println(id_ele);
+        client.print("POST /sensor?id=");
+        client.print(elements[id_ele]->id);
+        client.print("&data=");
+        client.print(getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin));
+        client.println("\0 HTTP/1.0");
+        client.println();
+        client.stop();
+        elements[id_ele]->lastConnectionTime = millis();
+    }
 }
 
 void loop(){
-  if(!boardconnected){
-    Serial.println("Try connecting to PZP");   
-    if (client.connect(pzp_ip, PZP_PORT)) {
-      client.println(HELLO_REQ);
-      client.println();   
-
-      String s;
-      bool nextisbody = false;   
-      delay(1000);
-      
-      char vet[19];
-      int i=0;
-      int num_spaces=0;
-      while(client.available() > 0){
-        char c = client.read();
- 
-//      // Not work! test it!  
-//        if(num_spaces==2){
-//          vet[i++] = c;
-//          if(i==19){
-//            vet[i] = '/0';
-//            if(strcmp(vet, "{\"ack\":\"newboard\"}") == 0)
-//              Serial.println("new board");
-//            else
-//              Serial.println("error");
-//            
-//            boardconnected=true;
-//            break;
-//          }
-//          else
-//            Serial.print(c);
-//        }
-//        else{
-//          if(c == '\n')
-//            num_spaces++;
-//          else
-//            num_spaces=0;
-//        }
- 
-        s += c;               
-        if(c == '\n'){
-          if(nextisbody){          
-            Serial.println(s);
-            char json_char[s.length()];
-            s.toCharArray(json_char, s.length());
-            aJsonObject* jsonObject = aJson.parse(json_char); 
-            aJsonObject* ack = aJson.getObjectItem(jsonObject, "ack");
-            if(strcmp(ack->valuestring,"newboard")==0){
-//            if(s.equals("{\"ack\":\"newboard\"}")){
-              delete jsonObject;
-              delete ack;
-              free(&json_char);
-              free(&s);
-              boardconnected=true;
-              server.begin();
-            }
-//            else
-//              Serial.println("PZP refused my req");
-            break;
-            
-          }
-          if(s.equals("\r\n")){
-            nextisbody = true;
-          }
-          s = "";
-        }
-       
-      }
-      client.stop();
-    }
-    else {
-     // Serial.println("PZP unavailable");
-      delay(2000);
-    }
-  }
-  else{ // boardisconnected == true
-    EthernetClient client = server.available();
-    if (client) {
-      // an http request ends with a blank line
-      boolean currentLineIsBlank = true;
-      char cmd[4];
-      char pin[4];
-      char dat[30];
-      int counter=1;
-      int i=0,j=0,z=0;
-      bool finish = false;
-
-      while (client.connected()) {        
-        if (client.available()) {
-          char c = client.read();       
-          // GET /?cmd=get&pin=012&dat=.....\n        
-          if(counter>10 && counter<14)
-            cmd[i++] = c;         
-          if(counter>18 && counter<22)
-            pin[j++] = c;
-          if(counter > 26){
-            dat[z++] = c;
-            if(c == '\ ')
-              finish=true;
-          }
-          if(finish){
-            cmd[i] = '\0';
-            pin[j] = '\0';
-            dat[z-1] = '\0';
-            
-            Serial.println(cmd);
-            Serial.println(pin);
-            Serial.println(dat);
-            client.println("HTTP/1.1 200 OK");
-            client.println("Content-Type: application/json");
-            client.println("Connnection: keep-alive");
+    if(!boardconnected){
+        Serial.println("Try connecting to PZP");   
+        if (client.connect(pzp_ip, PZP_PORT)) {
+            client.println(HELLO_REQ);
             client.println();
             
-            if(strcmp(cmd,"ele")==0){
-              client.println(ELEMENTS_RES);
-            }
-            else if(strcmp(cmd,"get")==0){
-              int ipin = atoi(pin);
-              int value = analogRead(ipin);
-              client.print("{\"cmd\":\"get\",\"eid\":\"");
-              client.print(BOARD_ID);
-              client.print("_");
-              client.print(ipin);
-              client.print("\",\"dat\":\"");
-              client.print(value);
-              client.println("\"}");
-            }
-            else if(strcmp(cmd,"str")==0 || strcmp(cmd,"stp")==0){  
-              
-              Serial.print(pin);
-              Serial.print(" mode : ");
-              Serial.println(dat);              
-              
-              int len = strlen(BOARD_ID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
-              Serial.println(len);
-              
-              char eid[len+1];
-              strcpy(eid,BOARD_ID);
-              strcat(eid,"_");
-              strcat(eid,pin);
-              strcat(eid,'\0');
-//              Serial.println(eid);
-              
-              if(strcmp(cmd,"str")==0){
-                client.print("{\"cmd\":\"str\",");
-                client.print("\"id\":\"");
-                client.print(eid);
-                client.println("\"}");
-                Serial.print("starting sensor ");
-                Serial.println(eid);
-                
-                for(int i=0; i<NUM_ELEMENTS; i++){
-                  if(strcmp(elements[i]->id, eid) == 0)
-                    elements[i]->active = true;
+            String s;
+            bool nextisbody = false;   
+            delay(1000);
+      
+            char vet[19];
+            int i=0;
+            int num_spaces=0;
+            while(client.available() > 0){
+                char c = client.read();
+//              Serial.print(c);  
+                if(num_spaces == 4){
+                    vet[i++] = c;
+                    if(i==19){
+                        vet[i-1] = '\0';
+                        String s = vet;
+                        if(s == "{\"ack\":\"newboard\"}"){
+                            Serial.println("new board");
+                            boardconnected=true;
+                        }
+                        else{
+                            Serial.println("error");
+                        }            
+                        break;
+                    }
                 }
-              }
-              else{ //if(strcmp(cmd,"stp")==0){
-                client.println("{\"cmd\":\"stp\"}");
-                Serial.println("stopping sensor ");
-                for(int i=0; i<NUM_ELEMENTS; i++){
-                  if(strcmp(elements[i]->id, eid) == 0)
-                    elements[i]->active = false;
+                else{
+                    if(c == '\n' || c == '\r'){
+                        num_spaces++;
+                    }
+                    else
+                        num_spaces=0;
                 }
-              }             
             }
-            break;
-          }
-          counter++;
+            client.stop();
         }
-      }
-      // give the web browser time to receive the data
-      delay(1);
-      client.stop();
-    }  
-    
-    for(int i=0; i<NUM_ELEMENTS; i++){
-      if(elements[i]->active && (millis() - elements[i]->lastConnectionTime > elements[i]->rate)){
-        sendDataToAPI(i);
-      }
+        else {
+//            Serial.println("PZP unavailable");
+            delay(2000);
+        }
     }
-    
-//    for(int i=0; i<NUM_ELEMENTS; i++){
-//      if(elements[i]->active && ( time*mindelay % elements[i]->rate == 0) ){
-//        Serial.print("Read from sensor ");
-//        Serial.println(elements[i]->id);
-//        if (client.connect(pzp_ip, PZP_PORT)) {
-//          client.print("POST /sensor?id=");
-//          client.print(elements[i]->id);
-//          client.print("&data=");
-//          client.print(getValueFromSensor(elements[i]->ad, elements[i]->pin));
-//          client.println("\0 HTTP/1.0");
-//          client.println();
-//          client.stop();
-//        }
-//      }
-//    }
-//    time++;
-//    delay(mindelay); 
-    
-  }
+    else{ // boardisconnected == true
+        EthernetClient client = server.available();
+        if (client) {
+            // an http request ends with a blank line
+            boolean currentLineIsBlank = true;
+            char cmd[4];
+            char pin[4];
+            char dat[30];
+            int counter=1;
+            int i=0,j=0,z=0;
+            bool finish = false;
+
+            while (client.connected()) {        
+                if (client.available()) {
+                    char c = client.read();       
+                    // GET /?cmd=get&pin=012&dat=.....\n        
+                    if(counter>10 && counter<14)
+                        cmd[i++] = c;         
+                    if(counter>18 && counter<22)
+                        pin[j++] = c;
+                    if(counter > 26){
+                        dat[z++] = c;
+                        if(c == '\ ')
+                            finish=true;
+                    }
+                    if(finish){
+                        cmd[i] = '\0';
+                        pin[j] = '\0';
+                        dat[z-1] = '\0';
+                    
+                        Serial.println(cmd);
+                        Serial.println(pin);
+                        Serial.println(dat);
+                        client.println("HTTP/1.1 200 OK");
+                        client.println("Content-Type: application/json");
+                        client.println("Connnection: keep-alive");
+                        client.println();
+                    
+                        if(strcmp(cmd,"ele")==0){
+                            client.println(ELEMENTS_RES);
+                        }
+                        else if(strcmp(cmd,"get")==0){
+                            int ipin = atoi(pin);
+                            int value = analogRead(ipin);
+                            client.print("{\"cmd\":\"get\",\"eid\":\"");
+                            client.print(BOARD_ID);
+                            client.print("_");
+                            client.print(ipin);
+                            client.print("\",\"dat\":\"");
+                            client.print(value);
+                            client.println("\"}");
+                        }
+                        else if(strcmp(cmd,"str")==0 || strcmp(cmd,"stp")==0){  
+                            Serial.print(pin);
+                            Serial.print(" mode : ");
+                            Serial.println(dat);              
+
+                            int len = strlen(BOARD_ID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
+                            char eid[len+1];
+                            strcpy(eid,BOARD_ID);
+                            strcat(eid,"_");
+                            strcat(eid,pin);
+                            strcat(eid,'\0');
+//                            Serial.println(eid);
+              
+                            if(strcmp(cmd,"str")==0){
+                                client.print("{\"cmd\":\"str\",");
+                                client.print("\"id\":\"");
+                                client.print(eid);
+                                client.println("\"}");
+                                Serial.print("starting sensor ");
+                                Serial.println(eid);
+                            
+                                for(int i=0; i<NUM_ELEMENTS; i++){
+                                    if(strcmp(elements[i]->id, eid) == 0)
+                                        elements[i]->active = true;
+                                }
+                            }
+                            else{ 
+                                client.println("{\"cmd\":\"stp\"}");
+                                Serial.println("stopping sensor ");
+                                for(int i=0; i<NUM_ELEMENTS; i++){
+                                    if(strcmp(elements[i]->id, eid) == 0)
+                                        elements[i]->active = false;
+                                }
+                            }             
+                        }
+                        break;
+                    }
+                    counter++;
+                }
+            }
+            // give the web browser time to receive the data
+            delay(1);
+            client.stop();
+        }  
+        for(int i=0; i<NUM_ELEMENTS; i++){
+            if(elements[i]->active && (millis() - elements[i]->lastConnectionTime > elements[i]->rate)){
+                sendDataToAPI(i);
+            }
+        }
+    }
 }
