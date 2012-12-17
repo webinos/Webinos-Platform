@@ -34,24 +34,29 @@ LOCAL_LDLIBS := \
 LOCAL_CPP_EXTENSION := .cc .cpp
 
 LOCAL_SRC_FILES :=\
-	../../pm.cc \
-        ../../core/policymanager/PolicyManager.cpp \
+        ../../pm.cc \
+        ../../core/policymanager/AuthorizationsSet.cpp \
         ../../core/policymanager/Condition.cpp \
+        ../../core/policymanager/DataHandlingPreferences.cpp \
         ../../core/policymanager/Globals.cpp \
         ../../core/policymanager/IPolicyBase.cpp \
+        ../../core/policymanager/Obligation.cpp \
+        ../../core/policymanager/ObligationsSet.cpp \
         ../../core/policymanager/Policy.cpp \
+        ../../core/policymanager/PolicyManager.cpp \
         ../../core/policymanager/PolicySet.cpp \
+        ../../core/policymanager/ProvisionalAction.cpp \
+        ../../core/policymanager/ProvisionalActions.cpp \
         ../../core/policymanager/Request.cpp \
         ../../core/policymanager/Rule.cpp \
         ../../core/policymanager/Subject.cpp \
+        ../../core/policymanager/TriggersSet.cpp \
         ../../core/common.cpp \
         ../../../contrib/xmltools/tinyxml.cpp \
         ../../../contrib/xmltools/slre.cpp \
         ../../../contrib/xmltools/tinystr.cpp \
         ../../../contrib/xmltools/tinyxmlparser.cpp \
         ../../../contrib/xmltools/tinyxmlerror.cpp
-
-
 
 LOCAL_STATIC_LIBRARIES := 
 
