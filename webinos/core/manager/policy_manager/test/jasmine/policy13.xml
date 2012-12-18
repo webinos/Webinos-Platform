@@ -30,7 +30,7 @@
 		<rule effect="permit">
 			<condition combine="or">
 				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
 			</condition>
@@ -46,7 +46,7 @@
 		</target>
 		<rule effect="permit">
 			<condition combine="or">
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 			</condition>
 		</rule>
 		<rule effect="deny"></rule>

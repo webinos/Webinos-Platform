@@ -30,8 +30,18 @@ AuthorizationsSet::AuthorizationsSet(TiXmlElement* authorizationsset){
 		TiXmlElement * child = static_cast<TiXmlElement*>(authorizationsset->FirstChild(authzTag));
 		for(child = static_cast<TiXmlElement*>(child->FirstChild(purposeTag)); child; 
 				child = static_cast<TiXmlElement*>(child->NextSibling(purposeTag))) {
-			LOGD("Purpose %s found", child->GetText());
-			authzuseforpurpose.push_back(child->GetText());
+			if (child->GetText()) {
+				LOGD("Purpose %s found", child->GetText());
+				authzuseforpurpose.push_back(child->GetText());
+			}
+			else {
+				LOGD("Empty purpose tag, all purposes allowed");
+				authzuseforpurpose.clear();
+				for (unsigned int i = 0; i < arraysize(ontology_vector); i++) {
+					authzuseforpurpose.push_back(ontology_vector[i]);
+				}
+				break;
+			}
 		}
 	}
 	else{

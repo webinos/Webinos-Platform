@@ -12,7 +12,7 @@
 				<AttributeValue>#DHPallow-all</AttributeValue>
 			</ProvisionalAction>
 			<ProvisionalAction>
-				<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+				<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
 				<AttributeValue>#DHPallow-all</AttributeValue>
 			</ProvisionalAction>
 			<ProvisionalAction>
