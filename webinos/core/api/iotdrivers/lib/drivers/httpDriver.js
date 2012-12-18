@@ -75,7 +75,11 @@ var http = require("http");
                 //this data is in json(???) format
                 
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
-                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, data);  
+                
+                var param_data = data.timeout+":"+data.rate+":"+data.eventFireMode;
+                console.log("send : "+param_data);
+                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);  
+                //makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, "peppe");
                 break;
             case 'start':                                 
                 //In this case the sensor should start data acquisition
