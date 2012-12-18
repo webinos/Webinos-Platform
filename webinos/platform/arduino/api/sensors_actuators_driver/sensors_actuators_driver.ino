@@ -25,7 +25,9 @@ typedef struct {
     bool ad;
     int pin;
     bool active;
+    bool mode;    // 0=valuechanged, 1=fixedinterval
     long rate;
+    int lastValue;
     long lastConnectionTime;
 } IOElement;
 
@@ -50,6 +52,8 @@ void setup(){
     elements[0]->ad = 0;
     elements[0]->pin = 0;
     elements[0]->active = 0;
+    elements[0]->mode = 1;
+    elements[0]->lastValue = -1;
     elements[0]->rate = 1000;
   
     elements[1] = new IOElement();
@@ -58,13 +62,15 @@ void setup(){
     elements[1]->ad = 1;
     elements[1]->pin = 1;
     elements[1]->active = 0;
+    elements[1]->mode = 0;
+    elements[1]->lastValue = -1;
     elements[1]->rate = 3500;
   
     //start Ethernet
     Ethernet.begin(mac, arduino_ip);
 }
 
-String getValueFromSensor(bool ad, int pin){  
+int getValueFromSensor(bool ad, int pin){  
     int value = -1;
     if(ad == 0){ //analog sensor
         value = analogRead(pin);
@@ -72,22 +78,32 @@ String getValueFromSensor(bool ad, int pin){
     else{ //digital sensor
         value = digitalRead(pin);
     }
-    return String(value);
+    return value;
 }
 
-void sendDataToAPI(int id_ele){
-    if (client.connect(pzp_ip, PZP_PORT)) {
+void sendDataToAPI(int id_ele, bool check_value_is_changed){
+    bool senddata = true;
+    int val = getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin);
+    if(check_value_is_changed == true){
+      if(val == elements[id_ele]->lastValue)
+        senddata = false;
+    }
+    if (senddata && client.connect(pzp_ip, PZP_PORT)) {
+        Serial.println(val);
+        Serial.println(elements[id_ele]->lastValue);
         Serial.print("Send data id : ");
         Serial.println(id_ele);
+        Serial.println(elements[id_ele]->rate);
         client.print("POST /sensor?id=");
         client.print(elements[id_ele]->id);
         client.print("&data=");
-        client.print(getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin));
+        client.print(val);
         client.println("\0 HTTP/1.0");
         client.println();
         client.stop();
         elements[id_ele]->lastConnectionTime = millis();
     }
+    elements[id_ele]->lastValue = val;
 }
 
 void loop(){
@@ -96,7 +112,7 @@ void loop(){
         if (client.connect(pzp_ip, PZP_PORT)) {
             client.println(HELLO_REQ);
             client.println();
-            
+
             String s;
             bool nextisbody = false;   
             delay(1000);
@@ -117,7 +133,7 @@ void loop(){
                             boardconnected=true;
                         }
                         else{
-                            Serial.println("error");
+                            Serial.println("Connection Error");
                         }            
                         break;
                     }
@@ -133,7 +149,7 @@ void loop(){
             client.stop();
         }
         else {
-//            Serial.println("PZP unavailable");
+            Serial.println("PZP unavailable");
             delay(2000);
         }
     }
@@ -175,6 +191,14 @@ void loop(){
                         client.println("Connnection: keep-alive");
                         client.println();
                     
+                        int len = strlen(BOARD_ID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
+                        char eid[len+1];
+                        strcpy(eid,BOARD_ID);
+                        strcat(eid,"_");
+                        strcat(eid,pin);
+                        strcat(eid,'\0');
+//                      Serial.println(eid);
+                            
                         if(strcmp(cmd,"ele")==0){
                             client.println(ELEMENTS_RES);
                         }
@@ -190,26 +214,13 @@ void loop(){
                             client.println("\"}");
                         }
                         else if(strcmp(cmd,"str")==0 || strcmp(cmd,"stp")==0){  
-                            Serial.print(pin);
-                            Serial.print(" mode : ");
-                            Serial.println(dat);              
-
-                            int len = strlen(BOARD_ID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
-                            char eid[len+1];
-                            strcpy(eid,BOARD_ID);
-                            strcat(eid,"_");
-                            strcat(eid,pin);
-                            strcat(eid,'\0');
-//                            Serial.println(eid);
-              
+//                            Serial.print(pin);
+//                            Serial.print(" mode : ");
+//                            Serial.println(dat);                                        
                             if(strcmp(cmd,"str")==0){
-                                client.print("{\"cmd\":\"str\",");
-                                client.print("\"id\":\"");
-                                client.print(eid);
-                                client.println("\"}");
-                                Serial.print("starting sensor ");
-                                Serial.println(eid);
-                            
+                                client.print("{\"cmd\":\"str\",");                                
+//                                Serial.print("starting sensor ");
+//                                Serial.println(eid);                            
                                 for(int i=0; i<NUM_ELEMENTS; i++){
                                     if(strcmp(elements[i]->id, eid) == 0)
                                         elements[i]->active = true;
@@ -217,12 +228,50 @@ void loop(){
                             }
                             else{ 
                                 client.println("{\"cmd\":\"stp\"}");
-                                Serial.println("stopping sensor ");
+//                                Serial.println("stopping sensor ");
                                 for(int i=0; i<NUM_ELEMENTS; i++){
                                     if(strcmp(elements[i]->id, eid) == 0)
                                         elements[i]->active = false;
                                 }
-                            }             
+                            }
+                            client.print("\"id\":\"");
+                            client.print(eid);
+                            client.println("\"}");
+                        }
+                        else if(strcmp(cmd,"cfg")==0){
+                            String tmp = dat;
+                            int last_tp_pos=0;
+                            String s;
+                            int tp_pos = tmp.indexOf(':');
+                            s = tmp.substring(0, tp_pos);
+//                          Serial.print("Timeout : ");
+//                          Serial.println(s);
+                          
+                            last_tp_pos = tp_pos + 1;
+                            tp_pos = tmp.indexOf(':', last_tp_pos);
+                            s = tmp.substring(last_tp_pos, tp_pos);
+//                          Serial.print("Rate : ");
+//                          Serial.println(s);
+                            for(int i=0; i<NUM_ELEMENTS; i++)
+                                if(strcmp(elements[i]->id, eid) == 0)
+                                    elements[i]->rate = s.toInt();                          
+                          
+                            last_tp_pos = tp_pos + 1;
+                            s = tmp.substring(last_tp_pos);
+//                          Serial.print("Mode : ");
+//                          Serial.println(s);
+                            for(int i=0; i<NUM_ELEMENTS; i++){
+                                if(strcmp(elements[i]->id, eid) == 0){
+                                    if(s.equals("fixedinterval"))
+                                        elements[i]->mode = 1;
+                                    else //valuechange
+                                        elements[i]->mode = 0;
+                                 }                      
+                            }
+                            client.print("{\"cmd\":\"cfg\",");
+                            client.print("\"id\":\"");
+                            client.print(eid);
+                            client.println("\"}");
                         }
                         break;
                     }
@@ -234,8 +283,11 @@ void loop(){
             client.stop();
         }  
         for(int i=0; i<NUM_ELEMENTS; i++){
-            if(elements[i]->active && (millis() - elements[i]->lastConnectionTime > elements[i]->rate)){
-                sendDataToAPI(i);
+            if(elements[i]->active){
+                if(elements[i]->mode == 1 && millis() - elements[i]->lastConnectionTime > elements[i]->rate)
+                    sendDataToAPI(i,0);
+                else if(elements[i]->mode == 0)
+                    sendDataToAPI(i,1);
             }
         }
     }

@@ -174,7 +174,7 @@ var http = require("http");
 	res.send();
     });
     
-    function alreadyRegistered(nativeid){
+    function isAlreadyRegistered(nativeid){
         for(var i in elementsList)
             if(elementsList[i].id === nativeid)
                 return true;
@@ -208,14 +208,14 @@ var http = require("http");
                         for(var i=0; i<data.elements.length ;i++){   
                             console.log("Board ["+data.bid+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
-                            if(!alreadyRegistered(tmp_ele.id)){
+                            if(!isAlreadyRegistered(tmp_ele.id)){
                                 tmp_ele.element.name = "ELEMENT_NAME";
                                 tmp_ele.element.description = "ELEMENT_DESCR";
                                 var id = registerFunc(driverId, tmp_ele.element.sa, JSON.stringify(tmp_ele.element));   
                                 elementsList[id] = tmp_ele;
                             }
                             else
-                                console.log("element is already registered");
+                                console.log("Element is already registered");
                         }        
                     }
                     else if(data.cmd === CONFIGURE_CMD){
@@ -228,7 +228,7 @@ var http = require("http");
                         console.log("Stopped element " + data.id);
                     }
                     else{
-                        console.log("problem");
+                        console.log("Unrecognized command");
                     }
                 }
                 catch(err){
