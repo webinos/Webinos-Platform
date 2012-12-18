@@ -130,7 +130,7 @@
           setWebinosSession(data);
           callListenerForMsg(data);
           break;
-	case "pzpStatus":
+        case "pzpStatus":
           callListenerForMsg(data);
         break;  
         case "update":
