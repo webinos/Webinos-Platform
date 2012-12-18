@@ -130,6 +130,9 @@
           setWebinosSession(data);
           callListenerForMsg(data);
           break;
+	case "pzpStatus":
+          callListenerForMsg(data);
+        break;  
         case "update":
           updateConnected(data.payload.message);
           callListenerForMsg(data);
