@@ -11,7 +11,7 @@
                 <resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
-                <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
             </condition>
         </rule>
         <rule effect="deny"></rule>
@@ -24,7 +24,7 @@
         </target>
         <rule effect="permit">
             <condition combine="or">
-                <resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
                 <resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
             </condition>
         </rule>

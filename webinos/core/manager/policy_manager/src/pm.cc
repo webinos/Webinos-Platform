@@ -277,6 +277,8 @@ public:
 		}
 		else {
 			LOGD("DHPref: purpose parameter not found");
+			purpose = vector<bool>(arraysize(ontology_vector), true);
+			LOGD("DHPref: default purpose parameter generation (all purposes required)");
 		}
 
 		obligations obs;
