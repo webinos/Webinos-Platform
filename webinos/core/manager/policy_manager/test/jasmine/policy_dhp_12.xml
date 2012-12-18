@@ -1,0 +1,16 @@
+<policy combine="first-applicable" description="catch">
+	<rule effect="permit"></rule>
+	<DataHandlingPreferences PolicyId="#DHP_allow_all">
+		<AuthorizationsSet>
+			<AuthzUseForPurpose>
+				<Purpose/>
+			</AuthzUseForPurpose>
+		</AuthorizationsSet>
+	</DataHandlingPreferences>
+	<ProvisionalActions>
+		<ProvisionalAction>
+			<AttributeValue>#DHP_allow_all</AttributeValue>
+			<AttributeValue>http://webinos.org/api</AttributeValue>
+		</ProvisionalAction>
+	</ProvisionalActions>
+</policy>

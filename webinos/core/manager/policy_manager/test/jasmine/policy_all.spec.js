@@ -23,7 +23,7 @@ var policyFile = "./policy.xml";
 
 var featureList = [
 	"http://webinos.org/api/discovery",
-	"http://www.w3.org/ns/api-perms/geolocation",
+	"http://webinos.org/api/w3c/geolocation",
 	"http://webinos.org/api/messaging",
 	"http://webinos.org/api/messaging.find",
 	"http://webinos.org/api/messaging.send",
@@ -77,7 +77,8 @@ var policyList = [
 	"policy_dhp_8.xml",
 	"policy_dhp_9.xml",
 	"policy_dhp_10.xml",
-	"policy_dhp_11.xml"
+	"policy_dhp_11.xml",
+	"policy_dhp_12.xml"
 	];
 
 
@@ -2411,5 +2412,38 @@ describe("Manager.PolicyManager", function() {
 		});
 	});
 
+	it("DHPref, allow all (default policy)", function() {
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[0], companyList[0], featureList[0], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[0], companyList[0], featureList[3], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[1], companyList[0], featureList[1], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[1], companyList[0], featureList[4], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[2], companyList[0], featureList[2], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+		runs(function() {
+			var res = checkFeature(policyList[24], userList[2], companyList[0], featureList[5], deviceList[0]);
+			expect(res).toEqual(0);
+		});
+
+	});
 });
 
