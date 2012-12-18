@@ -25,7 +25,7 @@
 				<AttributeValue>#DHPallow-all</AttributeValue>
 			</ProvisionalAction>
 			<ProvisionalAction>
-				<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+				<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
 				<AttributeValue>#DHPallow-all</AttributeValue>
 			</ProvisionalAction>
 			<ProvisionalAction>
@@ -48,7 +48,7 @@
 		<rule effect="permit">
 			<condition combine="or">
 				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
 			</condition>
@@ -63,7 +63,7 @@
 			</subject>
 		</target>
 		<rule effect="permit">
-			<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+			<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 		</rule>
 		<rule effect="deny"></rule>
 	</policy>
@@ -83,7 +83,7 @@
 			<AttributeValue>#DHPcurrent</AttributeValue>
 		</ProvisionalAction>
 		<ProvisionalAction>
-			<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+			<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
 			<AttributeValue>#DHPcurrent</AttributeValue>
 		</ProvisionalAction>
 		<ProvisionalAction>
