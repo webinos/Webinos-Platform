@@ -50,7 +50,7 @@
             sensorToUse.bind({onBind:function(){
                 logObj(sensors,'sensors');
                 $('#messages').append('<li> Sensor ' + sensorToUse.api + ' bound.</li>');
-                $('#messages').append('<li> Max Range: ' + sensorToUse.maximumRange + '</li>');
+               <!-- $('#messages').append('<li> Max Range: ' + sensorToUse.maximumRange + '</li>'); -->
                 $('#messages').append('<li> Min Delay: ' + sensorToUse.minDelay + '</li>');
                 $('#messages').append('<li> Power: ' + sensorToUse.power + '</li>');
                 $('#messages').append('<li> Resolution: ' + sensorToUse.resolution + '</li>');
@@ -60,7 +60,7 @@
         }); 
                     
         $('#configure').bind('click', function() {
-            sensorToUse.configureSensor({}, function(){
+            sensorToUse.configureSensor({timeout: 120, rate: 5000, eventFireMode: "valuechange"}, function(){
                 $('#messages').append('<li> Sensor ' + sensorToUse.api + ' configured.</li>');
                 },
                 function (){
