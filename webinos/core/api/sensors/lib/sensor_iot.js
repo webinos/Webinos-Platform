@@ -30,17 +30,45 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         var type = data;
         var name = type+' sensor';
         var description = 'A webinos '+type+' sensor';
+        
+        this.maximumRange = "na";
+        this.minDelay = "na";
+        this.power = "na";
+        this.resolution = "na";
+        this.vendor = "na";  
+        this.version = "na";
 
+        var type;
         try {
             var tmp = JSON.parse(data);
+            console.log("Data : "+data);
+
             if(tmp.type) {
                 type = tmp.type;
             }
-            if(tmp.name) {
-                name = tmp.name;
+//            if(tmp.name) {
+//                name = tmp.name;
+//            }
+//            if(tmp.description) {
+//                description = tmp.description;
+//            }
+            if(tmp.maximumRange){
+                this.maximumRange = tmp.maximumRange;
             }
-            if(tmp.description) {
-                description = tmp.description;
+            if(tmp.minDelay){
+                this.minDelay = tmp.minDelay;
+            }
+            if(tmp.power){
+                this.power = tmp.power;
+            }
+            if(tmp.resolution){
+                this.resolution = tmp.resolution;
+            }
+            if(tmp.vendor){
+                this.vendor = tmp.vendor;
+            }
+            if(tmp.version){
+                this.version = tmp.version;
             }
         }
         catch(e) {
@@ -48,37 +76,45 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         }
 
         var sensorEvent = {};
-        sensorEvent.sensorType = data;
+        sensorEvent.sensorType = type;
         sensorEvent.sensorId = id;
         sensorEvent.accuracy = 0;
         sensorEvent.rate = 0;
         sensorEvent.eventFireMode = null;
         sensorEvent.sensorValues = null;
         sensorEvent.position = null;
-
-
+        
         this.base({
             api: 'http://webinos.org/api/sensors.'+type,
             displayName: name,
             description: description+' - id '+id
         });
 
-
-        this.getStaticData = function (params, successCB, errorCB) {
-            successCB(null);
-        }
-
-
+        /**
+        * Get some initial static sensor data.
+        * @param params (unused)
+        * @param successCB Issued when sensor configuration succeeded.
+        * @param errorCB Issued if sensor configuration fails.
+        */
+        this.getStaticData = function (params, successCB, errorCB){
+            var tmp = {};
+            tmp.maximumRange = this.maximumRange;
+            tmp.minDelay = this.minDelay;
+            tmp.power = this.power;
+            tmp.resolution = this.resolution;
+            tmp.vendor = this.vendor;  
+            tmp.version = this.version;
+            successCB(tmp);
+        };
+        
         this.getEvent = function (data) {
             if(data != null) {
                 try {
                     var tmp = JSON.parse(data);
                     if(tmp instanceof Array) {
-                        //console.log('sensor data is array');
                         sensorEvent.sensorValues = tmp;
                     }
                     else {
-                        //console.log('sensor data is NOT array');
                         sensorEvent.sensorValues = new Array;
                         sensorEvent.sensorValues[0] = tmp;
                     }
@@ -92,8 +128,19 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             }
             return sensorEvent;
         }
-
-
+        
+        /**
+        * Configures a sensor.
+        * @param params
+        * @param successCB
+        * @param errorCB
+        */
+        this.configureSensor = function (params, successCB, errorCB){
+            console.log("configuring temperature sensor with params : "+params);
+            driverInterface.sendCommand('cfg', sensorEvent.sensorId, params);
+            successCB(); //TODO probably successCB should be passed to sendCommand and called by driver
+        };
+        
         this.addEventListener = function (eventType, successHandler, errorHandler, objectRef) {
             console.log('Sensor '+sensorEvent.sensorId+': addEventListener');
             this.objRef = objectRef;
@@ -101,16 +148,14 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             driverInterface.sendCommand('start', sensorEvent.sensorId, 'fixed');
         }
 
-
         this.removeEventListener = function (eventType, successHandler, errorHandler, objectRef) {
             this.listenerActive = false;
             driverInterface.sendCommand('stop', sensorEvent.sensorId, null);
         }
-
     }
 
-    SensorService.prototype = new RPCWebinosService;
 
+    SensorService.prototype = new RPCWebinosService;
 
     exports.SensorService = SensorService;
 

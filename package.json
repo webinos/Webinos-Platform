@@ -32,6 +32,7 @@
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
   , "grunt-contrib-clean" : "~0.3.x"
+  , "express": "3.x"
   }
 , "optionalDependencies" :
   { "sqlite3" : "2.1.x"
