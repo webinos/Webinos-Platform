@@ -10,7 +10,15 @@
 	<ProvisionalActions>
 		<ProvisionalAction>
 			<AttributeValue>#DHP_allow_all</AttributeValue>
-			<AttributeValue>http://webinos.org/api</AttributeValue>
+			<AttributeValue>http://webinos.org</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>#DHP_allow_all</AttributeValue>
+			<AttributeValue>http://www.w3.org</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>#DHP_allow_all</AttributeValue>
+			<AttributeValue>http://wacapps.net</AttributeValue>
 		</ProvisionalAction>
 	</ProvisionalActions>
 </policy>
