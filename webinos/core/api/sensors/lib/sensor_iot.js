@@ -33,16 +33,14 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
         try {
             var tmp = JSON.parse(data);
-            if(tmp instanceof Array) {
-                if(tmp.type) {
-                    type = tmp.type;
-                }
-                if(tmp.name) {
-                    name = tmp.name;
-                }
-                if(tmp.description) {
-                    description = tmp.description;
-                }
+            if(tmp.type) {
+                type = tmp.type;
+            }
+            if(tmp.name) {
+                name = tmp.name;
+            }
+            if(tmp.description) {
+                description = tmp.description;
             }
         }
         catch(e) {
