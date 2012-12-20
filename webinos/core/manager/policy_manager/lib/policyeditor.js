@@ -231,6 +231,32 @@
 			newPolicy["$"] = {"combine":"first-applicable","description":"default"};
 			newPolicy.target = target;
 			newPolicy.rule = rule;
+			if (rule[0]['$'].effect === 'permit') {
+				newPolicy.DataHandlingPreferences = {
+					"$": {PolicyId:'#DHP_allow_all'},
+					AuthorizationsSet:{
+						AuthzUseForPurpose:{
+							Purpose:{ }
+						}
+					}
+				};
+				newPolicy.ProvisionalActions = {
+					ProvisionalAction:[
+						{AttributeValue:[
+							'#DHP_allow_all',
+							'http://webinos.org'
+						]},
+						{AttributeValue:[
+							'#DHP_allow_all',
+							'http://www.w3.org'
+						]},
+						{AttributeValue:[
+							'#DHP_allow_all',
+							'http://wacapps.net'
+						]}
+					]
+				};
+			}
 			//Insert policy at the end of the policy set
 			policySet.policy.splice(position, 0, newPolicy);
 		}
