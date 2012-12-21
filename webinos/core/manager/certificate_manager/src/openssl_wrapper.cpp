@@ -405,6 +405,7 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   strcpy(str, "caIssuers;");
   strcat(str, url);
 
+
   if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_info_access, (char*)str))) {
     free(str);
     return ERR_peek_error();

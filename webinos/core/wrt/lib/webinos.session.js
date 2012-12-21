@@ -154,15 +154,6 @@
         case "addPzpQR":
           callListenerForMsg(data);
           break;
-        case "login":
-          callListenerForMsg(data);
-          break;
-        case "authenticate":
-          callListenerForMsg(data);
-          break;
-        case "authStatus":
-          callListenerForMsg(data);
-          break;
         case "error":
           callListenerForMsg(data);
           break;

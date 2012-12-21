@@ -17,52 +17,26 @@
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 var pzh_provider  = require("./webinos/core/pzh/lib/pzh_provider.js");
+var pzh_web       = require("./webinos/core/pzhweb/startweb.js");
 
 var host = null, name = null;
 
-function help() {
-  console.log("Usage: node webinos_provider.js [options]");
-  console.log("Options:");
-  console.log("--host = [host] host of the pzh provider (default \"\")");
-  console.log("--name = [name] friendly provider name (default \"\")");
-  process.exit();
-}
+var argv = require('optimist')
+    .usage('Usage: $0 --host = [host] --name = [name] (host is the domain of the server, name is the friendly name)')
+    .default ('host', "")
+    .default ('name', "")
+    .argv;
 
-process.argv.forEach(function (arg) {
-  var parts;
-  if (arg.indexOf("--") > -1) {
-    parts = arg.split("=");
-    if (parts.length > 1) {
-      switch (parts[0]) {
-      case "--host":
-        host = parts[1];
-        break;
-      case "--name":
-        name = parts[1];
-        break;
-      }
-    }
-    else if (parts[0] === "--help") {
-      help();
-    }
-  }
-});
-
-if ( host === null) {
-  host = "";
-}
-
-if ( name === null) {
-  name = "";
-}
-
-var _pzh_provider = new pzh_provider(host, name);
+var _pzh_provider = new pzh_provider(argv.host, argv.name);
 _pzh_provider.startProvider(function(result, details) {
   if (result) {
     console.log("ZONE PROVIDER STARTED");
+    pzh_web.start(argv.host, argv.name);
   } else {
     console.error("ZONE PROVIDER FAILED TO START "+ details);
   }
 });
+
+
 
 
