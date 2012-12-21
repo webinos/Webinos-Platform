@@ -23,22 +23,20 @@ import org.meshpoint.anode.bridge.Env;
 import org.meshpoint.anode.java.Base;
 
 public abstract class NfcTagTechnology extends Base {
-  //private static short classId = Env.getInterfaceId(NfcTagTechnology.class);
-  private static short classId = 0;
-  
-  protected NfcTagTechnology() {
-    super(classId);
+  private static short classId = Env.getInterfaceId(NfcTagTechnology.class);
+
+  protected NfcTagTechnology(Env env) {
+    super(classId, env);
   }
 
-  protected NfcTagTechnology(int type) {
-    super(classId);
+  protected NfcTagTechnology(Env env, int type) {
+    this(env);
     mType = type;
   }
 
   protected int mType;
   protected boolean mConnected;
-  
-  
+
   public static final int TECH_OTHERS = 0;
   public static final int TECH_NFCA = 1;
   public static final int TECH_NFCB = 2;
@@ -47,7 +45,6 @@ public abstract class NfcTagTechnology extends Base {
   public static final int TECH_ISODEP = 5;
   public static final int TECH_NDEF = 6;
 
-  
   public int getType() {
     return mType;
   }
@@ -55,6 +52,6 @@ public abstract class NfcTagTechnology extends Base {
   public boolean isConnected() {
     return mConnected;
   }
-  
+
   public abstract void close();
 }

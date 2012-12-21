@@ -22,7 +22,7 @@ package org.webinos.api.nfc;
 import org.meshpoint.anode.idl.Dictionary;
 import org.w3c.dom.ByteArray;
 
-public class NdefRecord implements Dictionary {  
+public class NdefRecord implements Dictionary {
   public static final short TNF_EMPTY = 0x00;
   public static final short TNF_WELL_KNOWN = 0x01;
   public static final short TNF_MIME_MEDIA = 0x02;
@@ -43,7 +43,7 @@ public class NdefRecord implements Dictionary {
   public int TNF;
   public String type;
   public String id;
-  //public byte[] payload;
+  // public byte[] payload;
   public ByteArray payload;
   public String info;
 }

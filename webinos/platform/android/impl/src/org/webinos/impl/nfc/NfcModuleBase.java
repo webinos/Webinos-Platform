@@ -5,71 +5,94 @@ import org.webinos.api.ErrorCallback;
 import org.webinos.api.nfc.NdefRecord;
 import org.webinos.api.nfc.NfcEventListener;
 import org.webinos.api.nfc.NfcModule;
+import org.webinos.impl.nfc.NfcManager.NfcDiscoveryListener;
 
-public abstract class NfcModuleBase extends NfcModule {
-  
+public abstract class NfcModuleBase extends NfcModule implements
+    NfcDiscoveryListener {
+
   protected NfcManager nfcMgr;
-  
+  protected NfcEventListener mNfcEventListener;
+
   public NfcModuleBase() {
     nfcMgr = NfcManager.getInstance();
   }
-  
-  @Override
-  public NdefRecord textRecord(String lang, String text) {
-    return NfcManager.createTextNdefRecord(lang, text);
+
+  public void setListener(NfcEventListener listener) {
+    mNfcEventListener = listener;
+    if (mNfcEventListener != null) {
+      nfcMgr.addListener(this);
+    } else {
+      nfcMgr.removeListener(this);
+    }
   }
-  
+
   @Override
-  public NdefRecord uriRecord(String uri) {
-    return NfcManager.createUriNdefRecord(uri);
-  }
-  
-  @Override
-  public NdefRecord mimeRecord(String mimeType, byte[] data) {
-    return NfcManager.createMimeNdefRecord(mimeType, data);
-  }
-  
-  @Override
-  public void addTextTypeListener(NfcEventListener listener, ErrorCallback fail) {
+  public void addTextTypeFilter(ErrorCallback fail) {
     try {
       checkNfcAvailability();
-      nfcMgr.addTextTypeListener(listener);
+      nfcMgr.addTextTypeFilter();
     } catch (NfcException e) {
       fail.onerror(translateException(e));
     }
   }
 
   @Override
-  public void addUriTypeListener(String scheme, NfcEventListener listener, ErrorCallback fail) {
+  public void addUriTypeFilter(String scheme, ErrorCallback fail) {
     try {
       checkNfcAvailability();
-      nfcMgr.addUriTypeListener(scheme, listener);
+      nfcMgr.addUriTypeFilter(scheme);
     } catch (NfcException e) {
       fail.onerror(translateException(e));
     }
   }
 
   @Override
-  public void addMimeTypeListener(String mimeType,
-      NfcEventListener listener, ErrorCallback fail) {
+  public void addMimeTypeFilter(String mimeType, ErrorCallback fail) {
     try {
       checkNfcAvailability();
-      nfcMgr.addMimeTypeListener(mimeType, listener);
+      nfcMgr.addMimeTypeFilter(mimeType);
     } catch (NfcException e) {
       fail.onerror(translateException(e));
     }
   }
-  
-  public void removeListener(NfcEventListener listener) {
-    nfcMgr.removeListener(listener);
+
+  @Override
+  public void removeTextTypeFilter(ErrorCallback fail) {
+    try {
+      checkNfcAvailability();
+      nfcMgr.removeTextTypeFilter();
+    } catch (NfcException e) {
+      fail.onerror(translateException(e));
+    }
   }
-  
+
+  @Override
+  public void removeUriTypeFilter(String scheme, ErrorCallback fail) {
+    try {
+      checkNfcAvailability();
+      nfcMgr.removeUriTypeFilter(scheme);
+    } catch (NfcException e) {
+      fail.onerror(translateException(e));
+    }
+  }
+
+  @Override
+  public void removeMimeTypeFilter(String mimeType, ErrorCallback fail) {
+    try {
+      checkNfcAvailability();
+      nfcMgr.addMimeTypeFilter(mimeType);
+    } catch (NfcException e) {
+      fail.onerror(translateException(e));
+    }
+  }
+
   private void checkNfcAvailability() throws NfcException {
     if (!isNfcAvailable()) {
-      throw new NfcException(NfcException.UNSUPPORTED_ERR, "NFC is not supported on this device");
+      throw new NfcException(NfcException.UNSUPPORTED_ERR,
+          "NFC is not supported on this device");
     }
   }
-  
+
   private DeviceAPIError translateException(NfcException e) {
     switch (e.code) {
     case NfcException.UNKNOWN_ERR:
@@ -83,7 +106,7 @@ public abstract class NfcModuleBase extends NfcModule {
       return new DeviceAPIError(DeviceAPIError.UNKNOWN_ERR, e.getMessage());
     }
   }
-  
+
   @Override
   public void log(String message) {
     System.out.println("[NfcModuleBase] " + message);

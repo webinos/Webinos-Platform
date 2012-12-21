@@ -9,13 +9,13 @@ public class Org_webinos_api_nfc_NfcTag {
 	public static Object[] __getArgs() { return __args; }
 
 	public static void __import(org.webinos.api.nfc.NfcTag ob, Object[] vals) {
-		ob.ndefMessage = (org.webinos.api.nfc.NdefRecord[])vals[0];
-		ob.tagId = (byte[])vals[1];
+		ob.tagId = (byte[])vals[0];
+		ob.tech = (org.webinos.api.nfc.NfcTagTechnologyNdef)vals[1];
 	}
 
 	public static Object[] __export(org.webinos.api.nfc.NfcTag ob) {
-		__args[0] = ob.ndefMessage;
-		__args[1] = ob.tagId;
+		__args[0] = ob.tagId;
+		__args[1] = ob.tech;
 		return __args;
 	}
 

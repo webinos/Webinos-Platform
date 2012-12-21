@@ -123,6 +123,10 @@
                     $('#NfcListeners option:selected').remove();
                 });
                 
+                $('#clearEvents').bind('click', function() {
+                    $('#out').html("");
+                });
+                
                 string2byteArray = function(str) {
                     var ba = [];
                     for ( var i = 0; i < str.length; i++) {
@@ -132,10 +136,13 @@
                 };
                 
                 $('#dispatch').bind('click', function() {
-                    $('#out').html("");
-                    recentService.dispatchEvent(recentService.textRecord("hello world", "en"));
-                    recentService.dispatchEvent(recentService.uriRecord("http://example.com"));
-                    recentService.dispatchEvent(recentService.mimeRecord("text/plain", string2byteArray("hello world")));
+                    var ndefMsg = [];
+                    ndefMsg[0] = recentService.textRecord("hello world", "en");
+                    recentService.dispatchEvent(ndefMsg);
+                    ndefMsg[0] = recentService.uriRecord("http://example.com");
+                    recentService.dispatchEvent(ndefMsg);
+                    ndefMsg[0] = recentService.mimeRecord("text/plain", string2byteArray("hello world"));
+                    recentService.dispatchEvent(ndefMsg);
                 });
 
             });
@@ -162,6 +169,7 @@
 		<tr><td><button id="addUriListener1" class="button">Add Uri Listener 1</button></td></tr>
 		<tr><td><button id="addMimeListener1" class="button">Add Mime Listener 1</button></td></tr>
 		<tr><td><button id="removeListener" class="button">Remove Listener</button></td></tr>
+		<tr><td><button id="clearEvents" class="button">Clear events</button></td></tr>
 		<tr><td><button id="dispatch" class="button">Dispatch</button></td></tr>
 	</table>
 	<div id="out"></div>

@@ -23,7 +23,6 @@ import org.meshpoint.anode.idl.Dictionary;
 
 public class NfcTag implements Dictionary {
   public byte[] tagId;
-  //public NfcTagTechnology[] techList;
-  //public NfcTagTechnologyNdef tech;
-  public NdefRecord[] ndefMessage;
+  // public NfcTagTechnology[] techList;
+  public NfcTagTechnologyNdef tech;
 }

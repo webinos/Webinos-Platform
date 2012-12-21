@@ -11,24 +11,24 @@ public abstract class NfcModule extends Base {
     super(classId);
   }
 
+  public abstract void setListener(NfcEventListener listener);
+
   public abstract boolean isNfcAvailable();
 
-  public abstract void addTextTypeListener(NfcEventListener listener,
+  public abstract void addTextTypeFilter(ErrorCallback fail);
+
+  public abstract void addUriTypeFilter(String scheme, ErrorCallback fail);
+
+  public abstract void addMimeTypeFilter(String mimeType, ErrorCallback fail);
+
+  public abstract void removeTextTypeFilter(ErrorCallback fail);
+
+  public abstract void removeUriTypeFilter(String scheme, ErrorCallback fail);
+
+  public abstract void removeMimeTypeFilter(String mimeType,
       ErrorCallback fail);
 
-  public abstract void addUriTypeListener(String scheme,
-      NfcEventListener listener, ErrorCallback fail);
-
-  public abstract void addMimeTypeListener(String mimeType,
-      NfcEventListener listener, ErrorCallback fail);
   
-  public abstract void removeListener(NfcEventListener listener);
-
-  public abstract NdefRecord textRecord(String lang, String text);
-
-  public abstract NdefRecord uriRecord(String uri);
-
-  public abstract NdefRecord mimeRecord(String mimeType, byte[] data);
 
   public abstract void log(String message);
 

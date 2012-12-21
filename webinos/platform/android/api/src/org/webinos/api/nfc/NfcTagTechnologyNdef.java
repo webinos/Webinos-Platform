@@ -19,15 +19,16 @@
 
 package org.webinos.api.nfc;
 
+import org.meshpoint.anode.bridge.Env;
 import org.webinos.api.ErrorCallback;
 import org.webinos.api.PendingOperation;
 import org.webinos.api.SuccessCallback;
 
 public abstract class NfcTagTechnologyNdef extends NfcTagTechnology {
-  protected NfcTagTechnologyNdef() {
-    super(TECH_NDEF);
+  protected NfcTagTechnologyNdef(Env env) {
+    super(env, TECH_NDEF);
   }
-  
+
   public abstract PendingOperation makeReadOnly(
       SuccessCallback successCallback, ErrorCallback errorCallback);
 

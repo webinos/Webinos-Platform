@@ -19,7 +19,6 @@
 
 package org.webinos.impl.nfc;
 
-
 @SuppressWarnings("serial")
 public class NfcException extends Exception {
   public static final int UNKNOWN_ERR = 0;
@@ -27,12 +26,12 @@ public class NfcException extends Exception {
   public static final int IO_ERR = 2;
 
   public int code;
-  
+
   public NfcException(int code, String message) {
     super(message);
     this.code = code;
   }
-  
+
   public NfcException(String message) {
     super(message);
   }

@@ -11,7 +11,7 @@
       var service = new NfcService(this.rpcHandler, this.params);
       register(service);
     };
-
+    
     var ListenerType = {
         TEXT : 0,
         URI : 1,
@@ -44,28 +44,34 @@
         this.rpcHandler = rpcHandler;
         this.listeners = {};
         this.handle = 1;
+        
+        this.moduleListener = new NfcModuleListener(this.listeners);
 
         this.androidNfcModule = null;
         if (process.platform == 'android') {
             this.androidNfcModule = require('bridge').load(
                     'org.webinos.impl.nfc.NfcAnodeModule', this);
+            this.androidNfcModule.setListener(this.moduleListener);
         }
-        
-        this.urlparser = require('url');
     };
 
     NfcService.prototype = new RPCWebinosService;
 
-    Listener = function(rpcHandler, objectRef) {
-        this.rpcHandler = rpcHandler;
-        this.objectRef = objectRef;
-
+    function mimeTypeMatches(mimeType, matchAgainst) {
+        var re = new RegExp(matchAgainst.replace("\\*", "\\.\\*"), "i");
+        return mimeType.match(re) != null;
+    }
+    
+    NfcModuleListener = function(listeners) {
+        this.listeners = listeners;
+        
         this.handleEvent = function(event) {
-            //var ndefMsg = event.tech.readCachedNdefMessage();
-            var ndefMsg = event.ndefMessage;
+            var urlparser = require('url');
+            var ndefMsg = event.tech.readCachedNdefMessage();
             var tagEvent = {};
             tagEvent.ndefMessage = [];
-            for ( var i = 0; i < ndefMsg.length; i++) {
+            var listenersToTrigger = [];
+            for (var i = 0; i < ndefMsg.length; i++) {
                 var ndefRecord = {};
                 ndefRecord.id = ndefMsg[i].id;
                 ndefRecord.TNF = ndefMsg[i].TNF;
@@ -76,18 +82,39 @@
                     ndefRecord.payload[j] = ndefMsg[i].payload[j];
                 }
                 tagEvent.ndefMessage[i] = ndefRecord;
+                
+                var j = 0;
+                for (var handle in this.listeners) {
+                    var listenerWrapper = this.listeners[handle];
+                    if (listenerWrapper.type == ListenerType.TEXT && ndefRecord.TNF == 1 && ndefRecord.type == "T") {
+                        listenersToTrigger[j++] = listenerWrapper.listener;
+                    }
+                    if (listenerWrapper.type == ListenerType.URI && ndefRecord.TNF == 1 && ndefRecord.type == "U") {
+                        var url = urlparser.parse(ndefRecord.info);
+                        if (url.protocol.substring(0, url.protocol.length-1) == listenerWrapper.extra) {
+                            listenersToTrigger[j++] = listenerWrapper.listener;
+                        }
+                    }
+                    if (listenerWrapper.type == ListenerType.MIME && ndefRecord.TNF == 2) {
+                        if (mimeTypeMatches(ndefRecord.type, listenerWrapper.extra)) {
+                            listenersToTrigger[j++] = listenerWrapper.listener;
+                        }
+                    }
+                }
             }
-            var rpc = this.rpcHandler.createRPC(this.objectRef, 'onEvent',
-                    tagEvent);
-            this.rpcHandler.executeRPC(rpc);
+            for (var i = 0; i < listenersToTrigger.length; i++) {
+                listenersToTrigger[i].handleEvent(tagEvent);
+            }
         }
+    }
+    
+    Listener = function(rpcHandler, objectRef) {
+        this.rpcHandler = rpcHandler;
+        this.objectRef = objectRef;
 
-        this.handleSimulatedEvent = function(event) {
-            var tagEvent = {};
-            tagEvent.ndefMessage = [];
-            tagEvent.ndefMessage[0] = event;
+        this.handleEvent = function(event) {
             var rpc = this.rpcHandler.createRPC(this.objectRef, 'onEvent',
-                    tagEvent);
+                    event);
             this.rpcHandler.executeRPC(rpc);
         }
     };
@@ -95,8 +122,7 @@
     NfcService.prototype.addTextTypeListener = function(params, successCB,
             errorCB, objectRef) {
         if (process.platform == 'android') {
-            this.androidNfcModule.addTextTypeListener(new Listener(
-                    this.rpcHandler, objectRef), function(err) {errorCB(err)});
+            this.androidNfcModule.addTextTypeFilter(function(err) {errorCB(err)});
         }
         this.listeners[this.handle] = new ListenerWrapper(ListenerType.TEXT, null, new Listener(this.rpcHandler, objectRef));
         successCB(this.handle++);
@@ -105,8 +131,7 @@
     NfcService.prototype.addUriTypeListener = function(params, successCB,
             errorCB, objectRef) {
         if (process.platform == 'android') {
-            this.androidNfcModule.addUriTypeListener(params[0], new Listener(
-                    this.rpcHandler, objectRef), function(err) {errorCB(err)});
+            this.androidNfcModule.addUriTypeFilter(params[0], function(err) {errorCB(err)});
         }
         this.listeners[this.handle] = new ListenerWrapper(ListenerType.URI, params[0], new Listener(this.rpcHandler, objectRef));
         successCB(this.handle++);
@@ -115,44 +140,40 @@
     NfcService.prototype.addMimeTypeListener = function(params, successCB,
             errorCB, objectRef) {
         if (process.platform == 'android') {
-            this.androidNfcModule.addMimeTypeListener(params[0], new Listener(
-                    this.rpcHandler, objectRef), function(err) {errorCB(err)});
+            this.androidNfcModule.addMimeTypeFilter(params[0], function(err) {errorCB(err)});
         }
         this.listeners[this.handle] = new ListenerWrapper(ListenerType.MIME, params[0], new Listener(this.rpcHandler, objectRef));
         successCB(this.handle++);
     };
     
     NfcService.prototype.removeListener = function(params, successCB, errorCB){
-        if (process.platform == 'android') {
-            this.androidNfcModule.removeListener(this.listeners[params[0]].listener);
+        var listenerWrapper = this.listeners[params[0]];
+        if (listenerWrapper != null) {
+            if (process.platform == 'android') {
+                if (listenerWrapper.type == ListenerType.TEXT) {
+                    this.androidNfcModule.removeTextTypeFilter();
+                } else if (listenerWrapper.type == ListenerType.URI) {
+                    this.androidNfcModule.removeUriTypeFilter(listenerWrapper.extra);
+                } else if (listenerWrapper.type == ListenerType.MIME) {
+                    this.androidNfcModule.removeMimeTypeFilter(listenerWrapper.extra);
+                }
+            }
+            delete listenerWrapper;
         }
-        delete this.listeners[params[0]];
     };
-
-    function mimeTypeMatches(mimeType, matchAgainst) {
-        var re = new RegExp(matchAgainst.replace("\\*", "\\.\\*"), "i");
-        return mimeType.match(re) != null;
+    
+    SimulatedNdefTech = function(ndefMsg) {
+        this.ndefMessage = ndefMsg;
+        
+        this.readCachedNdefMessage = function() {
+           return this.ndefMessage;
+        } 
     }
 
     NfcService.prototype.dispatchEvent = function(params, successCB, errorCB) {
-        var event = params[0];
-        for (var handle in this.listeners) {
-            var element = this.listeners[handle];
-            if (element.type == ListenerType.TEXT && event.TNF == 1 && event.type == "T") {
-                element.listener.handleSimulatedEvent(event);
-            }
-            if (element.type == ListenerType.URI && event.TNF == 1 && event.type == "U") {
-                var url = this.urlparser.parse(event.info);
-                if (url.protocol.substring(0, url.protocol.length-1) == element.extra) {
-                    element.listener.handleSimulatedEvent(event);
-                }
-            }
-            if (element.type == ListenerType.MIME && event.TNF == 2) {
-                if (mimeTypeMatches(event.type, element.extra)) {
-                    element.listener.handleSimulatedEvent(event);
-                }
-            }
-        }
+        var event = {};
+        event.tech = new SimulatedNdefTech(params[0]);
+        this.moduleListener.handleEvent(event);
     };
 
     // export our object
