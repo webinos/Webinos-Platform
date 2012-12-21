@@ -1,0 +1,66 @@
+/* This file has been automatically generated; do not edit */
+
+package org.meshpoint.anode.stub.gen.platform;
+
+public class Org_webinos_api_nfc_NfcModule {
+
+	private static Object[] __args = new Object[2];
+
+	public static Object[] __getArgs() { return __args; }
+
+	static Object __invoke(org.webinos.api.nfc.NfcModule inst, int opIdx, Object[] args) {
+		Object result = null;
+		switch(opIdx) {
+		case 0: /* addMimeTypeFilter */
+			inst.addMimeTypeFilter(
+				(String)args[0],
+				(org.webinos.api.ErrorCallback)args[1]
+			);
+			break;
+		case 1: /* addTextTypeFilter */
+			inst.addTextTypeFilter(
+				(org.webinos.api.ErrorCallback)args[0]
+			);
+			break;
+		case 2: /* addUriTypeFilter */
+			inst.addUriTypeFilter(
+				(String)args[0],
+				(org.webinos.api.ErrorCallback)args[1]
+			);
+			break;
+		case 3: /* isNfcAvailable */
+			result = org.meshpoint.anode.js.JSValue.asJSBoolean(inst.isNfcAvailable());
+			break;
+		case 4: /* log */
+			inst.log(
+				(String)args[0]
+			);
+			break;
+		case 5: /* removeMimeTypeFilter */
+			inst.removeMimeTypeFilter(
+				(String)args[0],
+				(org.webinos.api.ErrorCallback)args[1]
+			);
+			break;
+		case 6: /* removeTextTypeFilter */
+			inst.removeTextTypeFilter(
+				(org.webinos.api.ErrorCallback)args[0]
+			);
+			break;
+		case 7: /* removeUriTypeFilter */
+			inst.removeUriTypeFilter(
+				(String)args[0],
+				(org.webinos.api.ErrorCallback)args[1]
+			);
+			break;
+		case 8: /* setListener */
+			inst.setListener(
+				(org.webinos.api.nfc.NfcEventListener)args[0]
+			);
+			break;
+		default:
+		}
+		return result;
+	}
+
+}

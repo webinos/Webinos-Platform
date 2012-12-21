@@ -34,5 +34,6 @@
     <module>tv</module>
     <module>contacts</module>
     <module>vehicle</module>
+    <module>nfc</module>
   </modules>
 </project>

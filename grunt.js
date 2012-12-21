@@ -66,6 +66,7 @@ module.exports = function(grunt) {
           'webinos/core/wrt/lib/webinos.devicestatus.js',
           'webinos/core/wrt/lib/webinos.discovery.js',
           'webinos/core/wrt/lib/webinos.payment.js',
+          'webinos/core/wrt/lib/webinos.nfc.js',
           '<banner:footer>'
         ],
         dest: '<config:generated.normal>'
