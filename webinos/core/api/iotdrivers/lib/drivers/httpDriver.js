@@ -17,7 +17,7 @@
  * 
  ******************************************************************************/
 
-var PZP_IOT_IP                  = "192.168.1.130";
+
 var PZP_IOT_PORT                = 1984;
 var START_LISTENING_CMD         = "str";
 var STOP_LISTENING_CMD          = "stp";
@@ -110,8 +110,7 @@ var http = require("http");
         }
      }
 
-    //var app = express.createServer("192.168.1.130");
-    var app = express(PZP_IOT_IP);
+    var app = express();
 
     // Configuration
     app.configure( function() {
@@ -245,7 +244,7 @@ var http = require("http");
             console.log('problem with request: ' + e.message);
         });
         
-        console.log("Making HTTP request, cmd: "+cmd+", id: "+id+", data: "+data);
+        console.log("Making HTTP request to " + ip + ":" + port + ", cmd: " + cmd + ", id: " + id + ", data: " + data);
         req.end();
     }
 }());
