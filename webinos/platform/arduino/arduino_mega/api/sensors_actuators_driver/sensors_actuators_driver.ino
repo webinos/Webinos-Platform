@@ -43,7 +43,7 @@ typedef struct {
 
 IOElement * elements[MAX_NUM_ELEMENTS];
 
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xAC };
 byte* pzp_ip;
 byte* board_ip;
 IPAddress BOARD_IP(DFLT_BOARD_IP);
@@ -66,16 +66,15 @@ void sayHello(){
     client.println("\",\"port\":\"80\"} HTTP/1.0");
 }
 
-String getInfoFromSD(boolean check_for_elements){
+void getInfoFromSD(boolean check_for_elements){
     boolean first_element = true;
     boolean ignore = false;
-    String req;
     
     // see if the card is present and can be initialized:
     if (!sd_ready && !SD.begin(chipSelect)) {
         Serial.println("Card failed, or not present");
         // don't do anything more:
-        return "";
+        return;
     }
     else{
         Serial.println("card initialized.");
@@ -88,6 +87,10 @@ String getInfoFromSD(boolean check_for_elements){
     if (configFile) {
         String s;
         char c;
+        
+        if(check_for_elements && !client.connected())
+            client = server.available();
+        
         while (configFile.available()) {
             c = configFile.read();
             if(c == '#' ){
@@ -113,11 +116,10 @@ String getInfoFromSD(boolean check_for_elements){
                         buf[i] = tmp.charAt(i);
                     buf[tmp.length()-1] = '\0';
                     board_id = buf;
-                    req = board_id;
                 }
-                else if(s.startsWith("BRDIPAD")){  // BOARD IP ADDRESS
-                    board_ip = strIp2byteVect(s.substring(7));
-                }
+//                else if(s.startsWith("BRDIPAD")){  // BOARD IP ADDRESS
+//                    board_ip = strIp2byteVect(s.substring(7));
+//                }
 //                else if(s.startsWith("BRDPORT")){  // BOARD PORT 
 //                    board_port = s.substring(7).toInt();
 //                }
@@ -134,10 +136,12 @@ String getInfoFromSD(boolean check_for_elements){
                     int tp_pos = 0;
                     if(first_element){
                         first_element=false;
-                        req += "[";
+//                        req += "[";
+                        client.print("[");
                     }
                     else{
-                        req += ",";
+//                        req += ",";
+                        client.print(",");
                     }
                     for(int i=0; i<tmp.length(); i++){
                         if(tmp.charAt(i) == ':' || tmp.charAt(i) == '\n'){
@@ -145,11 +149,17 @@ String getInfoFromSD(boolean check_for_elements){
                             
                             if(counter == 0){  // ELEMENT ID
                                 elements[num_elements] = new IOElement();
-                                req += "{\"id\":\"";
-                                req += board_id;
-                                req += "_";
-                                req += field;
-                                req += "\", \"element\":{";
+//                                req += "{\"id\":\"";
+//                                req += board_id;
+//                                req += "_";
+//                                req += field;
+//                                req += "\", \"element\":{";
+                                client.print("{\"id\":\"");
+                                client.print(board_id);
+                                client.print("_");
+                                client.print(field);
+                                client.print("\", \"element\":{");
+                                
                                 int len = strlen(board_id) + 1 + field.length() +1 ;  // BOARD_ID + _ + id + \0
                                 char * buf = (char*) malloc(sizeof(char)*(len));
                                 strcpy(buf,board_id);
@@ -162,9 +172,12 @@ String getInfoFromSD(boolean check_for_elements){
                                 elements[num_elements]->rate = DFLT_ELEMENT_RATE;
                             }
                             else if(counter == 1){  // ELEMENT SA
-                                req += "\"sa\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"sa\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"sa\":\"");
+                                client.print(field);
+                                client.print("\",");
                                 elements[num_elements]->sa = !field.equals("0");
                             }
                             else if(counter == 2){  // ELEMENT AD
@@ -174,39 +187,60 @@ String getInfoFromSD(boolean check_for_elements){
                                 elements[num_elements]->pin = field.toInt();
                             }
                             else if(counter == 4){  // ELEMENT MAXIMUMRANGE
-                                req += "\"maximumRange\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"maximumRange\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"maximumRange\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 5){  // ELEMENT MINDELAY
-                                req += "\"minDelay\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"minDelay\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"minDelay\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 6){  // ELEMENT POWER
-                                req += "\"power\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"power\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"power\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 7){  // ELEMENT RESOLUTION
-                                req += "\"resolution\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"resolution\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"resolution\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 8){  // ELEMENT TYPE
-                                req += "\"type\":\"";
-                                req += field;
-                                req += "\",";
+//                                req += "\"type\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"type\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 9){  // ELEMENT VENDOR
-                                req +="\"vendor\":\"";
-                                req += field;
-                                req += "\",";
+//                                req +="\"vendor\":\"";
+//                                req += field;
+//                                req += "\",";
+                                client.print("\"vendor\":\"");
+                                client.print(field);
+                                client.print("\",");
                             }
                             else if(counter == 10){  // ELEMENT VERSION
-                                req +="\"version\":\"";
-                                req += field;
-                                req += "\"}}";
+//                                req +="\"version\":\"";
+//                                req += field;
+//                                req += "\"}}";
+                                client.print("\"version\":\"");
+                                client.print(field);
+                                client.print("\"}}");
                             }
                             counter++;
                             tp_pos = i+1;
@@ -215,33 +249,18 @@ String getInfoFromSD(boolean check_for_elements){
                     }
                     num_elements++;
                 }
-                s = "";  
+                s = "";
             }
         }
         if(check_for_elements){
-            req += "]";
+//            req += "]";
+              client.print("]");
         }
         configFile.close();
     }
     else {
         Serial.println("error opening configuration file");
     }
-    return req;
-}
-
-
-void setup(){
-    Serial.begin(9600);
-    
-    getInfoFromSD(false);
-    
-    if(board_ip != NULL)
-        Ethernet.begin(mac, board_ip);
-    else
-        Ethernet.begin(mac, BOARD_IP);
-    
-    Serial.print("My IP address: ");
-    Serial.println(Ethernet.localIP());
 }
 
 int getValueFromSensor(bool ad, int pin){  
@@ -262,12 +281,16 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
         if(val == elements[id_ele]->lastValue)
             senddata = false;
     }
+    
+    if(client.connected())
+      client.stop();
+    
     if (senddata && client.connect(pzp_ip, pzp_port)) {
-        // Serial.println(val);
-        // Serial.println(elements[id_ele]->lastValue);
-        // Serial.print("Send data id : ");
-        // Serial.println(id_ele);
-        // Serial.println(elements[id_ele]->rate);
+//        Serial.println(val);
+//        Serial.println(elements[id_ele]->lastValue);
+//        Serial.print("Send data id : ");
+//        Serial.println(id_ele);
+//        Serial.println(elements[id_ele]->rate);
         client.print("POST /sensor?id=");
         client.print(elements[id_ele]->id);
         client.print("&data=");
@@ -278,6 +301,33 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
         elements[id_ele]->lastConnectionTime = millis();
     }
     elements[id_ele]->lastValue = val;
+}
+
+void setup(){
+    Serial.begin(9600);
+    
+    getInfoFromSD(false);
+    
+    /*
+    if(board_ip != NULL)
+        Ethernet.begin(mac, board_ip);
+    else
+        Ethernet.begin(mac, BOARD_IP);
+    */
+    
+    Serial.println("Trying to get an IP address using DHCP");
+    if (Ethernet.begin(mac) == 0) {
+        Serial.println("Failed to configure Ethernet using DHCP");
+        
+        // initialize the ethernet device not using DHCP:
+        if(board_ip != NULL)
+            Ethernet.begin(mac, board_ip);
+        else
+            Ethernet.begin(mac, BOARD_IP);
+    }
+    
+    Serial.print("My IP address: ");
+    Serial.println(Ethernet.localIP());
 }
 
 void loop(){
@@ -375,7 +425,8 @@ void loop(){
                             client.print("{\"bid\":\"");
                             client.print(board_id);
                             client.print("\",\"cmd\":\"ele\",\"elements\":");
-                            client.print(getInfoFromSD(true));
+                            getInfoFromSD(true);
+                            //client.print(getInfoFromSD(true));
                             client.println("}");
                             elements_ready = true;
                         }
@@ -400,8 +451,11 @@ void loop(){
                             if(strcmp(cmd,"str")==0){
                                 client.print("{\"cmd\":\"str\",");                                  
                                 for(int i=0; i<num_elements; i++){
-                                    if(strcmp(elements[i]->id, eid) == 0)
+                                    if(strcmp(elements[i]->id, eid) == 0){
+                                        Serial.print("starting ");
+                                        Serial.println(elements[i]->id);
                                         elements[i]->active = true;
+                                    }
                                 }
                             }
                             else{ 
