@@ -122,6 +122,7 @@ public:
 		map<string, vector<string>*> * resource_attrs = new map<string, vector<string>*>();
 		(*resource_attrs)["api-feature"] = new vector<string>();
 		(*resource_attrs)["device-cap"] = new vector<string>();
+		(*resource_attrs)["param:feature"] = new vector<string>();
 
 		if (args[0]->ToObject()->Has(String::New("resourceInfo"))) {
 			v8::Local<Value> riTmp = args[0]->ToObject()->Get(String::New("resourceInfo"));
@@ -134,6 +135,11 @@ public:
 				v8::String::AsciiValue apiFeature(riTmp->ToObject()->Get(String::New("apiFeature")));
 				(*resource_attrs)["api-feature"]->push_back(*apiFeature);
 				LOGD("Parameter api-feature : %s", *apiFeature);
+			}
+			if (riTmp->ToObject()->Has(String::New("paramFeature"))) {
+				v8::String::AsciiValue paramFeature(riTmp->ToObject()->Get(String::New("paramFeature")));
+				(*resource_attrs)["param:feature"]->push_back(*paramFeature);
+				LOGD("Parameter param:feature : %s", *paramFeature);
 			}
 		}
 		
