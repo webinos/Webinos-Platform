@@ -98,7 +98,7 @@ void getInfoFromSD(boolean check_for_elements){
                 s="";
             }
             else if(!ignore){
-                if(s.length()==7 && !s.startsWith("BOARDID") && !s.startsWith("PZPIPAD") && !s.startsWith("PZPPORT") && !s.startsWith("ELEMENT")){
+                if(s.length()==7 && !s.startsWith("BOARDID") && !s.startsWith("BRDIPAD") && !s.startsWith("BRDPORT") && !s.startsWith("PZPIPAD") && !s.startsWith("PZPPORT") && !s.startsWith("ELEMENT")){
                     s = "";
                     ignore = true;
                 }
@@ -117,12 +117,12 @@ void getInfoFromSD(boolean check_for_elements){
                     buf[tmp.length()-1] = '\0';
                     board_id = buf;
                 }
-//                else if(s.startsWith("BRDIPAD")){  // BOARD IP ADDRESS
-//                    board_ip = strIp2byteVect(s.substring(7));
-//                }
-//                else if(s.startsWith("BRDPORT")){  // BOARD PORT 
-//                    board_port = s.substring(7).toInt();
-//                }
+                else if(!check_for_elements && s.startsWith("BRDIPAD")){  // BOARD IP ADDRESS
+                    board_ip = strIp2byteVect(s.substring(7));
+                }
+                else if(!check_for_elements && s.startsWith("BRDPORT")){  // BOARD PORT 
+                    board_port = s.substring(7).toInt();
+                }
                 else if(!check_for_elements && s.startsWith("PZPIPAD")){  // PZP IP ADDRESS
                     pzp_ip = strIp2byteVect(s.substring(7));
                 }
@@ -136,11 +136,9 @@ void getInfoFromSD(boolean check_for_elements){
                     int tp_pos = 0;
                     if(first_element){
                         first_element=false;
-//                        req += "[";
                         client.print("[");
                     }
                     else{
-//                        req += ",";
                         client.print(",");
                     }
                     for(int i=0; i<tmp.length(); i++){
@@ -149,11 +147,6 @@ void getInfoFromSD(boolean check_for_elements){
                             
                             if(counter == 0){  // ELEMENT ID
                                 elements[num_elements] = new IOElement();
-//                                req += "{\"id\":\"";
-//                                req += board_id;
-//                                req += "_";
-//                                req += field;
-//                                req += "\", \"element\":{";
                                 client.print("{\"id\":\"");
                                 client.print(board_id);
                                 client.print("_");
@@ -166,15 +159,12 @@ void getInfoFromSD(boolean check_for_elements){
                                 strcat(buf,"_");
                                 for(int i=strlen(board_id)+1,j=0; i<len;i++,j++)
                                     buf[i] = field.charAt(j);
-                                buf[len] = '\0';                              
+                                buf[len] = '\0';                                
                                 elements[num_elements]->id = buf;
                                 elements[num_elements]->active = DFLT_ELEMENT_ACTIVE;
                                 elements[num_elements]->rate = DFLT_ELEMENT_RATE;
                             }
                             else if(counter == 1){  // ELEMENT SA
-//                                req += "\"sa\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"sa\":\"");
                                 client.print(field);
                                 client.print("\",");
@@ -187,57 +177,36 @@ void getInfoFromSD(boolean check_for_elements){
                                 elements[num_elements]->pin = field.toInt();
                             }
                             else if(counter == 4){  // ELEMENT MAXIMUMRANGE
-//                                req += "\"maximumRange\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"maximumRange\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 5){  // ELEMENT MINDELAY
-//                                req += "\"minDelay\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"minDelay\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 6){  // ELEMENT POWER
-//                                req += "\"power\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"power\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 7){  // ELEMENT RESOLUTION
-//                                req += "\"resolution\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"resolution\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 8){  // ELEMENT TYPE
-//                                req += "\"type\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"type\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 9){  // ELEMENT VENDOR
-//                                req +="\"vendor\":\"";
-//                                req += field;
-//                                req += "\",";
                                 client.print("\"vendor\":\"");
                                 client.print(field);
                                 client.print("\",");
                             }
                             else if(counter == 10){  // ELEMENT VERSION
-//                                req +="\"version\":\"";
-//                                req += field;
-//                                req += "\"}}";
                                 client.print("\"version\":\"");
                                 client.print(field);
                                 client.print("\"}}");
@@ -253,7 +222,6 @@ void getInfoFromSD(boolean check_for_elements){
             }
         }
         if(check_for_elements){
-//            req += "]";
               client.print("]");
         }
         configFile.close();
@@ -278,12 +246,12 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
     bool senddata = true;
     int val = getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin);
     if(check_value_is_changed == true){
-        if(val == elements[id_ele]->lastValue)
+        if(val == elements[id_ele]->lastValue){
             senddata = false;
+        }
     }
     
-    if(client.connected())
-      client.stop();
+    client.stop();
     
     if (senddata && client.connect(pzp_ip, pzp_port)) {
 //        Serial.println(val);
@@ -295,10 +263,11 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
         client.print(elements[id_ele]->id);
         client.print("&data=");
         client.print(val);
-        client.println("\0 HTTP/1.0");
+        client.println(" HTTP/1.0");
         client.println();
-        client.stop();
         elements[id_ele]->lastConnectionTime = millis();
+        delay(10);
+        client.stop();
     }
     elements[id_ele]->lastValue = val;
 }
@@ -308,11 +277,16 @@ void setup(){
     
     getInfoFromSD(false);
     
+    while(board_id == NULL){
+         Serial.println("Please disconnect and reconnect the board");
+         delay(2000);
+    }
+    
     /*
     if(board_ip != NULL)
         Ethernet.begin(mac, board_ip);
     else
-        Ethernet.begin(mac, BOARD_IP);
+        Ethernet.begin(mac, BOARD_IP);    
     */
     
     Serial.println("Trying to get an IP address using DHCP");
@@ -345,7 +319,6 @@ void loop(){
             int num_spaces=0;
             while(client.available() > 0){
                 char c = client.read();
-//              Serial.print(c);  
                 if(num_spaces == 4){
                     vet[i++] = c;
                     if(i==19){
@@ -390,8 +363,7 @@ void loop(){
 
             while (client.connected()) {        
                 if (client.available()) {
-                    char c = client.read();       
-                    // GET /?cmd=get&pin=012&dat=.....\n        
+                    char c = client.read();               
                     if(counter>10 && counter<14)
                         cmd[i++] = c;         
                     if(counter>18 && counter<22)
@@ -422,7 +394,7 @@ void loop(){
                         strcat(eid,'\0');
                             
                         if(strcmp(cmd,"ele")==0){
-                            client.print("{\"bid\":\"");
+                            client.print("{\"id\":\"");
                             client.print(board_id);
                             client.print("\",\"cmd\":\"ele\",\"elements\":");
                             getInfoFromSD(true);
@@ -455,6 +427,12 @@ void loop(){
                                         Serial.print("starting ");
                                         Serial.println(elements[i]->id);
                                         elements[i]->active = true;
+                                        if(strcmp(dat,"fix")==0){
+                                            elements[i]->mode = 1;
+                                        }
+                                        else{ //vch
+                                            elements[i]->mode = 0;
+                                        }
                                     }
                                 }
                             }
@@ -485,9 +463,9 @@ void loop(){
                             s = tmp.substring(last_tp_pos);
                             for(int i=0; i<num_elements; i++){
                                 if(strcmp(elements[i]->id, eid) == 0){
-                                    if(s.equals("fixedinterval"))
+                                    if(s.equals("fix"))
                                         elements[i]->mode = 1;
-                                    else //valuechange
+                                    else //vch
                                         elements[i]->mode = 0;
                                  }                      
                             }
@@ -502,17 +480,19 @@ void loop(){
                 }
             }
             // give the web browser time to receive the data
-            delay(1);
+            delay(10);
             client.stop();
         }  
         
         if(elements_ready){
             for(int i=0; i<num_elements; i++){
                 if(elements[i]->active){
-                    if(elements[i]->mode == 1 && millis() - elements[i]->lastConnectionTime > elements[i]->rate)
+                    if(elements[i]->mode == 1 && millis() - elements[i]->lastConnectionTime > elements[i]->rate){
                         sendDataToAPI(i,0);
-                    else if(elements[i]->mode == 0)
+                    }
+                    else if(elements[i]->mode == 0){
                         sendDataToAPI(i,1);
+                    }
                 }
             }
         }
