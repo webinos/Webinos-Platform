@@ -81,7 +81,7 @@ this.SignatureValidator = (function() {
 			 * If an author signature is present in the widget package, verify
 			 * that signature has a ds:Reference for the author signature.
 			 */
-			if(this.sigNum > 0 && 0 in this.widgetValidator.signatureNames)
+			if(this.signum > 0 && 0 in this.widgetValidator.signatureNames)
 				expectedRefs = ['author-signature.xml'].concat(expectedRefs);
 			
 			var dereferencer = function(ref, hash) {
@@ -180,7 +180,7 @@ this.SignatureValidator = (function() {
 
 			var signature = new Signature(this.name, signatureId, this.certificatePath);	
 			this.widgetValidator.addSignature(signature);
-			console.log(util.inspect(this));
+			//console.log(util.inspect(this));
 		} catch(e) {
 			this.widgetValidator.setInvalid(new Error('Internal error: exception = ' + e));
 		}
