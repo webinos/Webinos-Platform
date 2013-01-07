@@ -116,7 +116,6 @@ function newContact(i, item, picture, callback)
 	}
 
 	var emails = [];
-	console.log("Test");
 	if (item['gd$email'] !== undefined) //contact has email
 	{
 		//if (item['gd$email'].length !== undefined) //if is an array
@@ -127,7 +126,6 @@ function newContact(i, item, picture, callback)
 				type = item['gd$email'][j].rel === undefined ? 'other':item['gd$email'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
 				pref = item['gd$email'][j].primary;
 				emails.push(new ContactField(addr, type, pref));
-				console.log("EMAIL ADDED");
 			}
 			/*
 			j = 0;
@@ -332,14 +330,14 @@ this.logIn = function(username, password, callback)
 {
 	"use strict";
 	//USERNAME = full username, e.g. your_username@gmail.com
-	if (username.search('@gmail.com') === -1)
-	{
-		USERNAME = username+'@gmail.com';
-	}
-	else
-	{
+	//if (username.search('@gmail.com') === -1)
+	//{
+	//	USERNAME = username+'@gmail.com';
+	//}
+	//else
+	//{
 		USERNAME = username;
-	}
+	//}
 	var tokenRequirementData = {
 		accountType : "GOOGLE",
 		service: "cp",
