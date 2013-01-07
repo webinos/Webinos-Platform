@@ -18,10 +18,10 @@
 
 module.exports = Entry
 
-var virtualPathModule = require("../virtual-path.js")
+var vpath = require("../vpath.js")
 
 function Entry(filesystem, fullPath) {
-  this.name = virtualPathModule.basename(fullPath)
+  this.name = vpath.basename(fullPath)
   this.fullPath = fullPath
   this.filesystem = filesystem
 }

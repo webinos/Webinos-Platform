@@ -22,30 +22,16 @@ var inherits = require("inherits")
 var pathModule = require("path")
 
 var dependencies = require("find-dependencies")(__dirname)
-var file = dependencies.global.require(dependencies.global.api.file.location,
-    "file.js")
+var Service = dependencies.global.require(dependencies.global.api.file.location, "lib/service.js")
 
-file._Service = file.Service
-file.Service = Service
-
-inherits(Service, file._Service)
-function Service(rpc, params) {
-  Service.super.call(this, rpc, params)
-
-  this.params = params
-}
-
-Service.prototype.getAddress = function (params, successCallback,
-    errorCallback) {
+Service.prototype.getAddress = function (params, successCallback, errorCallback) {
   successCallback(this.params.pzpHost + ":" + port)
 }
 
-var pzp = dependencies.global.require(dependencies.global.pzp.location,
-    "lib/pzp.js")
-var basePath = pathModule.join(pzp.session.getWebinosPath(), "file", "default")
+var root = dependencies.global.require(dependencies.global.util.location, "lib/webinosPath.js").webinosPath()
 
 var port = 6789
-var server = http.createServer(connect().use(connect.static(basePath)))
+var server = http.createServer(connect().use(connect.static(pathModule.join(root, "file"))))
 server.on("error", function (error) {
   if (error.code === "EADDRINUSE") {
     port++
@@ -55,5 +41,4 @@ server.on("error", function (error) {
 })
 server.listen(port)
 
-//Expose an empty service
-exports.Service = null;
+exports.Service = null

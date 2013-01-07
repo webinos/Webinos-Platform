@@ -16,9 +16,7 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Mid-term issues:
-// [WP-?] Support write/truncate abortion.
-// [WP-?] Add extension to mime type mapping.
+// [WP-608] Support write/truncate abort
 
 if (typeof webinos === "undefined") webinos = {};
 if (typeof webinos.file === "undefined") webinos.file = {};

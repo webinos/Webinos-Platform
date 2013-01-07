@@ -18,22 +18,13 @@
 
 module.exports = Service
 
-var api = require("../api.js")
 var inherits = require("inherits")
-var util = require("../util.js")
+var util = require("./util.js")
 
-var pathModule = require("path")
-var LocalFileSystem = require("../engine/local-file-system.js")
+var RPCService = require("webinos-jsonrpc2").RPCWebinosService
 
-var dependencies = require("find-dependencies")(__dirname)
-var rpcModule = require("webinos-jsonrpc2")
-
-inherits(Service, rpcModule.RPCWebinosService)
+inherits(Service, RPCService)
 function Service(rpc, params) {
-    if (params && params.getPath) {
-        LocalFileSystem.init(pathModule.join(params.getPath(), "userData", "file"))
-    }
-    
   Service.super.call(this,
       { api         : "http://webinos.org/api/file"
       , displayName : "File API"
@@ -41,57 +32,50 @@ function Service(rpc, params) {
       })
 
   this.rpc = rpc
+  this.params = params
+
+  this.vfs = params.vfs
 }
 
-Service.prototype.requestFileSystem = function (params, successCallback,
-    errorCallback) {
-  api.requestFileSystem(params.type, params.size,
-      util.combine(successCallback, errorCallback))
+Service.prototype.requestFileSystem = function (params, successCallback, errorCallback) {
+  this.vfs.requestFileSystem(params.type, params.size, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.resolveLocalFileSystemURL = function (params, successCallback,
-    errorCallback) {
-  api.resolveLocalFileSystemURL(params.url,
-      util.combine(successCallback, errorCallback))
+Service.prototype.resolveLocalFileSystemURL = function (params, successCallback, errorCallback) {
+  this.vfs.resolveLocalFileSystemURL(params.url, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.getMetadata = function (params, successCallback,
-    errorCallback) {
-  api.getMetadata(params.entry, util.combine(successCallback, errorCallback))
+Service.prototype.getMetadata = function (params, successCallback, errorCallback) {
+  this.vfs.getMetadata(params.entry, util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.moveTo = function (params, successCallback, errorCallback) {
-  api.moveTo(params.source, params.parent, params.newName,
-      util.combine(successCallback, errorCallback))
+  this.vfs.moveTo(params.source, params.parent, params.newName, util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.copyTo = function (params, successCallback, errorCallback) {
-  api.copyTo(params.source, params.parent, params.newName,
-      util.combine(successCallback, errorCallback))
+  this.vfs.copyTo(params.source, params.parent, params.newName, util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.remove = function (params, successCallback, errorCallback) {
-  api.remove(params.entry, util.combine(successCallback, errorCallback))
+  this.vfs.remove(params.entry, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.getParent = function (params, successCallback,
-    errorCallback) {
-  api.getParent(params.entry, util.combine(successCallback, errorCallback))
+Service.prototype.getParent = function (params, successCallback, errorCallback) {
+  this.vfs.getParent(params.entry, util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.getFile = function (params, successCallback, errorCallback) {
-  api.getFile(params.entry, params.path, params.options,
-      util.combine(successCallback, errorCallback))
+  this.vfs.getFile(params.entry, params.path, params.options, util.combine(successCallback, errorCallback))
 }
 
 // Service.prototype.createWriter = function (params, successCallback,
 //    errorCallback) {}
 // Service.prototype.file = function (params, successCallback, errorCallback) {}
 
-Service.prototype.read = function (params, successCallback, errorCallback,
-    remote) {
+Service.prototype.read = function (params, successCallback, errorCallback, remote) {
   var self = this
-  api.createReadStream(params.entry, params.options, function (error, stream) {
+  self.vfs.createReadStream(params.entry, params.options, function (error, stream) {
     if (error) {
       var message = self.rpc.createRPC(remote, "error", { error : error })
       self.rpc.executeRPC(message)
@@ -105,8 +89,7 @@ Service.prototype.read = function (params, successCallback, errorCallback,
     stream.addListener("data", function (data) {
       if (params.options.autopause) stream.pause()
 
-      var message = self.rpc.createRPC(remote, "data",
-          { data : data.toString("hex") })
+      var message = self.rpc.createRPC(remote, "data", { data : data.toString("hex") })
       self.rpc.executeRPC(message)
     })
     stream.addListener("end", function () {
@@ -146,10 +129,9 @@ Service.prototype.read = function (params, successCallback, errorCallback,
   })
 }
 
-Service.prototype.write = function (params, successCallback, errorCallback,
-    remote) {
+Service.prototype.write = function (params, successCallback, errorCallback, remote) {
   var self = this
-  api.createWriteStream(params.entry, params.options, function (error, stream) {
+  self.vfs.createWriteStream(params.entry, params.options, function (error, stream) {
     if (error) {
       var message = self.rpc.createRPC(remote, "error", { error : error })
       self.rpc.executeRPC(message)
@@ -217,23 +199,17 @@ Service.prototype.write = function (params, successCallback, errorCallback,
 }
 
 Service.prototype.truncate = function (params, successCallback, errorCallback) {
-  api.truncate(params.entry, params.size,
-      util.combine(successCallback, errorCallback))
+  this.vfs.truncate(params.entry, params.size, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.getDirectory = function (params, successCallback,
-    errorCallback) {
-  api.getDirectory(params.entry, params.path, params.options,
-      util.combine(successCallback, errorCallback))
+Service.prototype.getDirectory = function (params, successCallback, errorCallback) {
+  this.vfs.getDirectory(params.entry, params.path, params.options, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.removeRecursively = function (params, successCallback,
-    errorCallback) {
-  api.removeRecursively(params.entry,
-      util.combine(successCallback, errorCallback))
+Service.prototype.removeRecursively = function (params, successCallback, errorCallback) {
+  this.vfs.removeRecursively(params.entry, util.combine(successCallback, errorCallback))
 }
 
-Service.prototype.readEntries = function (params, successCallback,
-    errorCallback) {
-  api.readEntries(params.entry, util.combine(successCallback, errorCallback))
+Service.prototype.readEntries = function (params, successCallback, errorCallback) {
+  this.vfs.readEntries(params.entry, util.combine(successCallback, errorCallback))
 }

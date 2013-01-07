@@ -16,17 +16,14 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Long-term issues:
-// [WP-?] Support multiple file systems (for origin-specificity).
-// [WP-?] Enforce file system quota limitations.
-// [WP-?] Garbage collect temporary file systems.
+module.exports = LocalFileSystem
 
 var fs = require("fs")
 var inherits = require("inherits")
 var mkdirp = require("mkdirp")
 var pathModule = require("path")
 var util = require("../util.js")
-var virtualPathModule = require("../virtual-path.js")
+var vpath = require("../vpath.js")
 
 var EventEmitter = require("events").EventEmitter
 
@@ -64,47 +61,19 @@ function map(error, customErrorMap) {
   return new util.CustomError(mapping.type, mapping.description)
 }
 
-var basePath
-exports.init = function (path) {
-  basePath = path
+function LocalFileSystem(name, path) {
+  mkdirp.sync(path)
 
-  mkdirp.sync(basePath)
-}
-
-// webinos <3 webkit
-var fileSystem
-function openFileSystem(name, create, callback) {
-  if (fileSystem) return util.async(callback)(null, fileSystem)
-
-  mkdirp(pathModule.join(basePath, "default"), function (error) {
-    if (error) return callback(map(error))
-
-    fileSystem = new LocalFileSystem("default", "permanent", 0)
-    callback(null, fileSystem)
-  })
-}
-
-exports.requestFileSystem = function (name, type, size, callback) {
-  // webkit-style: Ignore requested file system type and size.
-  openFileSystem(name, true, callback)
-}
-
-exports.readFileSystem = function (name, callback) {
-  openFileSystem(name, false, callback)
-}
-
-function realize(fileSystem, path) {
-  return pathModule.join(basePath, fileSystem.name, path)
-}
-
-function LocalFileSystem(name, type, size) {
   this.name = name
-  this.type = type
-  this.size = size
+  this.path = path
+}
+
+LocalFileSystem.prototype.realize = function(path) {
+  return pathModule.join(this.path, path)
 }
 
 LocalFileSystem.prototype.readMetadata = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     var metadata = { isFile           : stats.isFile()
@@ -117,16 +86,14 @@ LocalFileSystem.prototype.readMetadata = function (path, callback) {
 }
 
 LocalFileSystem.prototype.move = function (source, destination, callback) {
-  fs.rename(realize(this, source), realize(this, destination),
-      function (error) {
-        callback(error ? map(error) : null)
-      })
+  fs.rename(this.realize(source), this.realize(destination), function (error) {
+    callback(error ? map(error) : null)
+  })
 }
 
-LocalFileSystem.prototype.copy = function (source, destination, recursive,
-    callback) {
+LocalFileSystem.prototype.copy = function (source, destination, recursive, callback) {
   var self = this
-  fs.stat(realize(self, source), function (error, stats) {
+  fs.stat(self.realize(source), function (error, stats) {
     if (error) return callback(map(error))
 
     if (stats.isDirectory()) {
@@ -142,7 +109,7 @@ LocalFileSystem.prototype.copy = function (source, destination, recursive,
 
 LocalFileSystem.prototype.remove = function (path, recursive, callback) {
   var self = this
-  fs.stat(realize(self, path), function (error, stats) {
+  fs.stat(self.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (stats.isDirectory()) {
@@ -160,14 +127,14 @@ LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
   var self = this
 
   var flags = exclusive ? "wx" : "a"
-  fs.open(realize(self, path), flags, function (error, fd) {
+  fs.open(self.realize(path), flags, function (error, fd) {
     if (!error) {
       return fs.close(fd, function (error) {
         callback(error ? map(error) : null)
       })
     }
 
-    fs.stat(realize(self, path), function (error2, stats) {
+    fs.stat(self.realize(path), function (error2, stats) {
       if (error2) return callback(map(error))
 
       if (exclusive) {
@@ -184,7 +151,7 @@ LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
 }
 
 LocalFileSystem.prototype.fileExists = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (!stats.isFile()) {
@@ -233,11 +200,10 @@ ReadStreamWrapper.prototype.destroy = function (callback) {
   })
 }
 
-LocalFileSystem.prototype.createReadStream = function (path, options,
-    callback) {
+LocalFileSystem.prototype.createReadStream = function (path, options, callback) {
   var stream
   try {
-    stream = fs.createReadStream(realize(this, path), options)
+    stream = fs.createReadStream(this.realize(path), options)
   } catch (error) {
     util.async(callback)(map(error))
   }
@@ -286,11 +252,10 @@ WriteStreamWrapper.prototype.destroy = function (callback) {
   })
 }
 
-LocalFileSystem.prototype.createWriteStream = function (path, options,
-    callback) {
+LocalFileSystem.prototype.createWriteStream = function (path, options, callback) {
   var stream
   try {
-    stream = fs.createWriteStream(realize(this, path), options)
+    stream = fs.createWriteStream(this.realize(path), options)
   } catch (error) {
     util.async(callback)(map(error))
   }
@@ -300,7 +265,7 @@ LocalFileSystem.prototype.createWriteStream = function (path, options,
 }
 
 LocalFileSystem.prototype.truncate = function (path, size, callback) {
-  fs.open(realize(this, path), "r+", function (error, fd) {
+  fs.open(this.realize(path), "r+", function (error, fd) {
     if (error) return callback(map(error))
 
     fs.truncate(fd, size, function (error) {
@@ -312,8 +277,8 @@ LocalFileSystem.prototype.truncate = function (path, size, callback) {
 }
 
 LocalFileSystem.prototype.copyFile = function (source, destination, callback) {
-  var sourceStream = fs.createReadStream(realize(this, source))
-  var destinationStream = fs.createWriteStream(realize(this, destination))
+  var sourceStream = fs.createReadStream(this.realize(source))
+  var destinationStream = fs.createWriteStream(this.realize(destination))
 
   function onend() {
     destinationStream.end(function (error) {
@@ -348,22 +313,21 @@ LocalFileSystem.prototype.copyFile = function (source, destination, callback) {
 }
 
 LocalFileSystem.prototype.removeFile = function (path, callback) {
-  fs.unlink(realize(this, path), function (error) {
+  fs.unlink(this.realize(path), function (error) {
     callback(error ? map(error) : null)
   })
 }
 
 // webinos <3 mkdirp
-LocalFileSystem.prototype.createDirectory = function (path, exclusive,
-    recursive, callback) {
+LocalFileSystem.prototype.createDirectory = function (path, exclusive, recursive, callback) {
   var self = this
-  fs.mkdir(realize(self, path), function (error) {
+  fs.mkdir(self.realize(path), function (error) {
     if (!error) return callback(null)
 
     switch (error.code) {
       case "ENOENT":
         if (recursive) {
-          var fullPath = virtualPathModule.dirname(path)
+          var fullPath = vpath.dirname(path)
           self.createDirectory(fullPath, false, true, function (error) {
             if (error) return callback(error)
             self.createDirectory(path, exclusive, false, callback)
@@ -371,7 +335,7 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
         } else callback(map(error))
         break
       default:
-        fs.stat(realize(self, path), function (error2, stats) {
+        fs.stat(self.realize(path), function (error2, stats) {
           if (error2) return callback(map(error))
 
           if (exclusive) {
@@ -389,7 +353,7 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
 }
 
 LocalFileSystem.prototype.directoryExists = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (!stats.isDirectory()) {
@@ -401,26 +365,25 @@ LocalFileSystem.prototype.directoryExists = function (path, callback) {
 }
 
 LocalFileSystem.prototype.readDirectory = function (path, callback) {
-  fs.readdir(realize(this, path), function (error, files) {
+  fs.readdir(this.realize(path), function (error, files) {
     if (error) return callback(map(error))
     callback(null, files)
   })
 }
 
-LocalFileSystem.prototype.copyDirectory = function (source, destination,
-    recursive, callback, isRetry) {
+LocalFileSystem.prototype.copyDirectory = function (source, destination, recursive, callback, isRetry) {
   var self = this
 
   function children() {
-    fs.readdir(realize(self, source), function (error, files) {
+    fs.readdir(self.realize(source), function (error, files) {
       if (error) return callback(map(error))
 
       ;(function iterate() {
         var file = files.shift()
         if (!file) return callback(null)
 
-        var sourcePath = virtualPathModule.join(source, file)
-          , destinationPath = virtualPathModule.join(destination, file)
+        var sourcePath = vpath.join(source, file)
+          , destinationPath = vpath.join(destination, file)
         self.copy(sourcePath, destinationPath, true, function (error) {
           if (error) return callback(error)
           iterate()
@@ -441,25 +404,24 @@ LocalFileSystem.prototype.copyDirectory = function (source, destination,
   })
 }
 
-LocalFileSystem.prototype.removeDirectory = function (path, recursive,
-    callback) {
+LocalFileSystem.prototype.removeDirectory = function (path, recursive, callback) {
   var self = this
 
   function root() {
-    fs.rmdir(realize(self, path), function (error) {
+    fs.rmdir(self.realize(path), function (error) {
       callback(error ? map(error) : null)
     })
   }
 
   if (recursive) {
-    fs.readdir(realize(self, path), function (error, files) {
+    fs.readdir(self.realize(path), function (error, files) {
       if (error) return callback(map(error))
 
       ;(function iterate() {
         var file = files.shift()
         if (!file) return root()
 
-        var fullPath = virtualPathModule.join(path, file)
+        var fullPath = vpath.join(path, file)
         self.remove(fullPath, true, function (error) {
           if (error) return callback(error)
           iterate()

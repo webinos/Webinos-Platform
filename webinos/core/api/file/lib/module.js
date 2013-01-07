@@ -16,14 +16,29 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-var Module = require("./lib/module.js")
+module.exports = Module
 
-var path = require("path")
+var Service = require("./service.js")
+var VirtualFileSystem = require("./fs/virtual.js")
 
-var dependencies = require("find-dependencies")(__dirname)
-var root = dependencies.global.require(dependencies.global.util.location, "lib/webinosPath.js").webinosPath()
+function Module(rpc, params) {
+  this.rpc = rpc
+  this.params = params
+}
 
-var LocalFileSystem = require("./lib/fs/local.js")
-Module.addFileSystem(new LocalFileSystem("default", path.join(root, "file")))
+var list = []
 
-exports.Module = Module
+Module.addFileSystem = function (fs) {
+  list.push(fs)
+}
+
+Module.prototype.init = function (register, unregister) {
+  var self = this
+
+  list.forEach(function (fs) {
+    var params = Object.create(self.params)
+    params.vfs = new VirtualFileSystem(fs)
+
+    register(new Service(self.rpc, params))
+  })
+}
