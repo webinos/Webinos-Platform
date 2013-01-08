@@ -18,30 +18,39 @@
 
 (function() {
   App2AppModule = function (params) {
+
+    if(typeof App2AppModule.prototype._singletonInstance !== 'undefined') {
+      return App2AppModule.prototype._singletonInstance;
+    }
+
+    App2AppModule.prototype._singletonInstance = this;
+
     this.base = WebinosService;
     this.base(params);
 
     this.peerId = webinos.messageHandler.getOwnId();
     module = this;
-  };
 
-  App2AppModule.prototype = new WebinosService();
-
-  App2AppModule.prototype.bindService = function (bindCallback) {
     this.createChannel = createChannel;
     this.searchForChannels = searchForChannels;
 
     registerPeer(
       function (success) {
         console.log("Bind succeeded: registered peer.");
-        if (typeof bindCallback.onBind === 'function') {
-          bindCallback.onBind(this);
-        }
       },
       function (error) {
         console.log("Bind failed: could not register peer: " + error.message);
       }
     );
+
+  };
+
+  App2AppModule.prototype = new WebinosService();
+
+  App2AppModule.prototype.bindService = function (bindCallback) {
+    if (typeof bindCallback.onBind === 'function') {
+      bindCallback.onBind(this);
+    }
   };
 
   App2AppModule.prototype.unbindService = function (successCallback, errorCallback) {
@@ -52,6 +61,7 @@
 
     webinos.rpcHandler.executeRPC(rpc,
       function (success) {
+        App2AppModule.prototype._singletonInstance = undefined;
         successCallback(success);
       },
       function (error) {
