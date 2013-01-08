@@ -79,7 +79,7 @@ this.authenticate=function(params, successCB, errorCB)
         {
             console.log("---contacts: opening address book");
             if (LocalContacts.open(params[0]['addressBookName'])){
-                rsuccessCB(true);
+                successCB(true);
             }
             else {
                 errorCB(false);
