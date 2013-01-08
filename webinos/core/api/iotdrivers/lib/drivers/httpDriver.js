@@ -17,7 +17,7 @@
  * 
  ******************************************************************************/
 
-var PZP_IOT_IP                  = "192.168.1.130";
+
 var PZP_IOT_PORT                = 1984;
 var START_LISTENING_CMD         = "str";
 var STOP_LISTENING_CMD          = "stp";
@@ -66,20 +66,18 @@ var http = require("http");
     *
     */
     exports.execute = function(cmd, eId, data) {
-        console.log("pippo : " + eId);
         var native_element_id = elementsList[eId].id.split("_")[1];  //eg nativeid = "000001_001"
         var board_id = elementsList[eId].id.split("_")[0];
         switch(cmd) {
             case 'cfg':
                 //In this case cfg data are transmitted to the sensor/actuator
                 //this data is in json(???) format
-                
+
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
-                
-                var param_data = data.timeout+":"+data.rate+":"+data.eventFireMode;
+                var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
+                var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
                 makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);  
-                //makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, "peppe");
                 break;
             case 'start':                                 
                 //In this case the sensor should start data acquisition
@@ -88,17 +86,14 @@ var http = require("http");
             
                 console.log('Received start command from API. Element : '+eId+', mode : '+data);
                 var mode = (data === "fixed") ? FIXEDINTERVAL_MODE : VALUECHANGE_MODE;                
-                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, START_LISTENING_CMD, native_element_id, mode);  
-                elementsList[eId].running = true;
+                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, START_LISTENING_CMD, native_element_id, mode);
                 break;
             case 'stop':
                 //In this case the sensor should stop data acquisition
                 //the parameter data can be ignored
                 
                 console.log('Received stop command from API. Element : '+eId);
-                var native_element_id = elementsList[eId].id.split("_")[1];  //eg nativeid = "000001_001"
                 makeHTTPRequest(boards[i].ip, boards[i].port, STOP_LISTENING_CMD, native_element_id, NO_VALUE);                                
-                elementsList[eId].running = false;                
                 break;
             case 'value':
                 //In this case the actuator should store the value
@@ -110,8 +105,7 @@ var http = require("http");
         }
      }
 
-    //var app = express.createServer("192.168.1.130");
-    var app = express(PZP_IOT_IP);
+    var app = express();
 
     // Configuration
     app.configure( function() {
@@ -172,10 +166,10 @@ var http = require("http");
     });
 
     app.get('/info', function(req,res){
-	for(var i in boards){
-		console.log(boards[i]);
-	}
-	res.send();
+	   for(var i in boards){
+	       console.log(boards[i]);
+	   }
+	   res.send();
     });
     
     function isAlreadyRegistered(nativeid){
@@ -205,12 +199,12 @@ var http = require("http");
             res.on('end', function () {
                 try{
                     var data = JSON.parse(str);
-                    console.log("data.cmd : " + data.cmd); 
+                    console.log("data.cmd : " + data.cmd);
                     if(data.cmd === GET_ELEMENTS_CMD){
                         console.log("Received response for cmd=ele");                
-                        boards[data.bid].elements = data.elements;                      
+                        boards[data.id].elements = data.elements;                      
                         for(var i=0; i<data.elements.length ;i++){   
-                            console.log("Board ["+data.bid+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
+                            console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
                             if(!isAlreadyRegistered(tmp_ele.id)){
                                 tmp_ele.element.name = "ELEMENT_NAME";
@@ -223,13 +217,19 @@ var http = require("http");
                         }        
                     }
                     else if(data.cmd === CONFIGURE_CMD){
-                        console.log("Configured element " + data.id);                            
+                        console.log("Configuring element " + data.id);                            
                     }
                     else if(data.cmd === START_LISTENING_CMD){
-                        console.log("Started element " + data.id);
+                        console.log("Starting element " + data.id);
+                        for(var i in elementsList)
+                            if(elementsList[i].id === data.id)
+                                elementsList[i].running = true;
                     }
                     else if(data.cmd === STOP_LISTENING_CMD){
-                        console.log("Stopped element " + data.id);
+                        console.log("Stopping element " + data.id);
+                        for(var i in elementsList)
+                            if(elementsList[i].id === data.id)
+                                elementsList[i].running = false;
                     }
                     else{
                         console.log("Unrecognized command");
@@ -245,7 +245,7 @@ var http = require("http");
             console.log('problem with request: ' + e.message);
         });
         
-        console.log("Making HTTP request, cmd: "+cmd+", id: "+id+", data: "+data);
+        console.log("Making HTTP request to " + ip + ":" + port + ", cmd: " + cmd + ", id: " + id + ", data: " + data);
         req.end();
     }
 }());
