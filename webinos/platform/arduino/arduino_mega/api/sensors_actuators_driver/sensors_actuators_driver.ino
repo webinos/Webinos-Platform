@@ -43,7 +43,8 @@ typedef struct {
 
 IOElement * elements[MAX_NUM_ELEMENTS];
 
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xAC };
+byte MAC[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xAC };
+byte* mac;
 byte* pzp_ip;
 byte* board_ip;
 IPAddress BOARD_IP(DFLT_BOARD_IP);
@@ -98,7 +99,7 @@ void getInfoFromSD(boolean check_for_elements){
                 s="";
             }
             else if(!ignore){
-                if(s.length()==7 && !s.startsWith("BOARDID") && !s.startsWith("BRDIPAD") && !s.startsWith("BRDPORT") && !s.startsWith("PZPIPAD") && !s.startsWith("PZPPORT") && !s.startsWith("ELEMENT")){
+                if(s.length()==7 && !s.startsWith("BOARDID") && !s.startsWith("MACADDR") && !s.startsWith("BRDIPAD") && !s.startsWith("BRDPORT") && !s.startsWith("PZPIPAD") && !s.startsWith("PZPPORT") && !s.startsWith("ELEMENT")){
                     s = "";
                     ignore = true;
                 }
@@ -129,11 +130,15 @@ void getInfoFromSD(boolean check_for_elements){
                 else if(!check_for_elements && s.startsWith("PZPPORT")){  // PZP PORT
                     pzp_port = s.substring(7).toInt();
                 }
+                else if(!check_for_elements && s.startsWith("MACADDR")){  // MAC ADDRESS
+                    String tmp = s.substring(7);
+                    mac = strMac2byteVect(tmp);
+                }
                 else if(check_for_elements && num_elements < MAX_NUM_ELEMENTS && s.startsWith("ELEMENT")){
                     String tmp = s.substring(7);
                     String field;
                     int counter=0;
-                    int tp_pos = 0;
+                    int colon_pos = 0;
                     if(first_element){
                         first_element=false;
                         client.print("[");
@@ -143,7 +148,7 @@ void getInfoFromSD(boolean check_for_elements){
                     }
                     for(int i=0; i<tmp.length(); i++){
                         if(tmp.charAt(i) == ':' || tmp.charAt(i) == '\n'){
-                            field = tmp.substring(tp_pos,i);
+                            field = tmp.substring(colon_pos,i);
                             
                             if(counter == 0){  // ELEMENT ID
                                 elements[num_elements] = new IOElement();
@@ -212,7 +217,7 @@ void getInfoFromSD(boolean check_for_elements){
                                 client.print("\"}}");
                             }
                             counter++;
-                            tp_pos = i+1;
+                            colon_pos = i+1;
                         }
                         field += tmp.charAt(i);                    
                     }
@@ -282,23 +287,25 @@ void setup(){
          delay(2000);
     }
     
-    /*
-    if(board_ip != NULL)
-        Ethernet.begin(mac, board_ip);
-    else
-        Ethernet.begin(mac, BOARD_IP);    
-    */
-    
-    Serial.println("Trying to get an IP address using DHCP");
-    if (Ethernet.begin(mac) == 0) {
-        Serial.println("Failed to configure Ethernet using DHCP");
-        
-        // initialize the ethernet device not using DHCP:
-        if(board_ip != NULL)
-            Ethernet.begin(mac, board_ip);
-        else
-            Ethernet.begin(mac, BOARD_IP);
+    if(mac == NULL){
+        Serial.println("Using default MAC");
+        mac = MAC;
     }
+
+//    if(board_ip != NULL)
+//        Ethernet.begin(mac, board_ip);
+//    else
+//        Ethernet.begin(mac , BOARD_IP);    
+    
+    if(board_ip == NULL){  // board ip is not defined in the configuration file
+        Serial.println("Trying to get an IP address using DHCP");
+        if (Ethernet.begin(mac) == 0){
+            Serial.println("Failed to configure Ethernet using DHCP. Using default IP");
+            Ethernet.begin(mac, BOARD_IP);
+        }
+    }
+    else
+        Ethernet.begin(mac, board_ip);
     
     Serial.print("My IP address: ");
     Serial.println(Ethernet.localIP());
