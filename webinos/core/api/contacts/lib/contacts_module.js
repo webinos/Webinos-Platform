@@ -78,7 +78,13 @@ this.authenticate=function(params, successCB, errorCB)
         else //on other platforms
         {
             console.log("---contacts: opening address book");
-            successCB(LocalContacts.open(params[0]['addressBookName']));
+            if (LocalContacts.open(params[0]['addressBookName'])){
+                rsuccessCB(true);
+            }
+            else {
+                errorCB(false);
+            }
+            //successCB(LocalContacts.open(params[0]['addressBookName']));
         }
     }
     //ACCESS TO REMOTE CONTACTS
@@ -96,7 +102,7 @@ this.authenticate=function(params, successCB, errorCB)
     else //wrong type
     {
         console.error("contacts.authenticate: wrong contact type");
-        errorCB(new ContactError(INVALID_ARGUMENT_ERROR));
+        errorCB(new ContactError(this.INVALID_ARGUMENT_ERROR));
     }
 }
 
@@ -116,7 +122,7 @@ this.isAlreadyAuthenticated = function(params, successCB, errorCB)
             if (LocalContacts.isOpen())
                 successCB();
             else
-                errorCB(new ContactError(PERMISSION_DENIED_ERROR));
+                errorCB(new ContactError(this.PERMISSION_DENIED_ERROR));
 		}
 		else if (params[0]['type'] == "remote")
 		{
@@ -364,7 +370,7 @@ this.find = function(type, fields, successCB, errorCB, options)
 				}
 				else if (res.empty && eb)
 				{
-					throw new ContactError(UNKNOWN_ERROR);
+					throw new ContactError(this.UNKNOWN_ERROR);
 				}
 			})(params);
 		});
@@ -391,7 +397,7 @@ this.find = function(type, fields, successCB, errorCB, options)
 					}
 					else if (res.empty && eb)
 					{
-						throw new ContactError(UNKNOWN_ERROR);
+						throw new ContactError(this.UNKNOWN_ERROR);
 					}
 				})(params);
 			});
