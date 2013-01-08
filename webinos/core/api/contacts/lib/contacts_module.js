@@ -84,7 +84,6 @@ this.authenticate=function(params, successCB, errorCB)
             else {
                 errorCB(false);
             }
-            //successCB(LocalContacts.open(params[0]['addressBookName']));
         }
     }
     //ACCESS TO REMOTE CONTACTS
