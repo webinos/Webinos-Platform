@@ -1,121 +1,90 @@
 /*******************************************************************************
-*  Code contributed to the webinos project
-* 
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*  
-*     http://www.apache.org/licenses/LICENSE-2.0
-*  
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-* 
-* Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
-******************************************************************************/
+ *  Code contributed to the webinos project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *  
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Copyright 2012 Telecom Italia
+ *
+ ******************************************************************************/
+
 (function() {
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
-/**
- * Webinos Sensor service constructor (server side).
- * @constructor
- * @alias SensorModule
- * @param rpcHandler A handler for functions that use RPC to deliver their result.  
- */
-var SensorModule = function(rpcHandler) {
-	// inherit from RPCWebinosService
-	this.base = RPCWebinosService;
-	this.base({
-		api:'http://webinos.org/api/sensors.temperature',
-		displayName:'Sensor',
-		description:'A Webinos temperature sensor.'
-	});
-	
-	this.addEventListener = function (eventType, successHandler, errorHandler, objectRef){
-		console.log("eventType " + eventType);	
-		switch(eventType){
-		case "temperature":
-			simulatateTemp(objectRef);		
-			break;
-		default:
-			console.log('Requested EventType is ' + eventType + " but i am temprature");
+    var SensorModule = function(rpcH, par) {
 
-		}	
-	};
+        var rpcHandler = rpcH;
+        var params = par;
 
-	function simulatateTemp(objectRef) {
-		var tint = 2000;
-		var tempE = generateTempEvent();
-		
-		// first event
-		var rpc = rpcHandler.createRPC(objectRef, "onEvent", tempE);
-		rpcHandler.executeRPC(rpc);
-		
-		setInterval(function(){
-			tempE = generateTempEvent();
-			rpc = rpcHandler.createRPC(objectRef, "onEvent", tempE);
-			rpcHandler.executeRPC(rpc);
-		}, tint);        
-	}
-};
+        var impl = 'iot';
+        if(typeof params.impl != 'undefined') {
+            impl = params.impl;
+        }
 
-SensorModule.prototype = new RPCWebinosService;
+        var regFunc;
+        var unregFunc;
+        var dilib = null;
+        var driverInterface = null;
+        var sslib = null;
+        var serviceList = new Array;
 
-/**
- * Configures a sensor.
- * @param params
- * @param successCB
- * @param errorCB
- */
-SensorModule.prototype.configureSensor = function (params, successCB, errorCB){
-	console.log("configuring temperature sensor");
-	
-	successCB();
-};
+        if (impl == 'iot') {
+            dilib = require(__dirname+'/../../iotdrivers/lib/driverInterface.js');
+            sslib = require(__dirname+'/sensor_iot.js');
+            driverInterface = new dilib.driverInterface(0, driverListener);
+        }
+        else if (impl == 'fake') {
+            sslib = require(__dirname+'/sensor_fake.js');
+        }
 
-/**
- * Get some initial static sensor data.
- * @param params (unused)
- * @param successCB Issued when sensor configuration succeeded.
- * @param errorCB Issued if sensor configuration fails.
- */
-SensorModule.prototype.getStaticData = function (params, successCB, errorCB){
-	var tmp = {};
-	tmp.maximumRange = 100;
-	tmp.minDelay = 10;
-	tmp.power = 50;
-	tmp.resolution = 0.05;
-	tmp.vendor = "FhG";  
-	tmp.version = "0.1"; 
-    successCB(tmp);
-};
 
-function generateTempEvent(){
-    var temp = Math.floor(Math.random()*100);
-    return new TempEvent(temp);        
-}
+        this.init = function(register, unregister) {
+            regFunc = register;
+            unregFunc = unregister;
+            if (impl == 'fake') {
+                var service = new sslib.SensorService(rpcHandler);
+                regFunc(service);
+            }
+        };
 
-function TempEvent(value){
-	this.SENSOR_STATUS_ACCURACY_HIGH = 4;
-	this.SENSOR_STATUS_ACCURACY_MEDIUM = 3;
-	this.SENSOR_STATUS_ACCURACY_LOW = 2;
-	this.SENSOR_STATUS_UNRELIABLE = 1;
-	this.SENSOR_STATUS_UNAVAILABLE = 0;
 
-	this.sensorType = "temperature";
-    this.sensorId = "sensorId (could we use same id as the unique service id here?)";
-    this.accuracy = 4;
-    this.rate = 2;
-    this.interrupt = false;
+        function driverListener(cmd, id, data) {
+            if (impl == 'iot') {
+                switch(cmd) {
+                    case 'register':
+                        //If cmd is register, then data is the type of sensor (temperature, light, ...)
+                        //console.log('sensor api listener: register sensor of type '+data);
+                        var service = new sslib.SensorService(rpcHandler, data, id, driverInterface);
+                        regFunc(service);
+                        serviceList[id] = service;
+                        break;
+                    case 'data':
+                        //console.log('sensor api listener: sensor '+id+' sent value '+data);
+                        if(serviceList[id].listenerActive == true) {
+                            var sensorEvent = serviceList[id].getEvent(data);
+                            var rpc = rpcHandler.createRPC(serviceList[id].objRef, "onEvent", sensorEvent);
+                            rpcHandler.executeRPC(rpc);
+                        }
+                        break;
+                    default:
+                        console.log('sensor api listener: unrecognized command');
+                }
+            }
+        };
 
-    this.sensorValues = new Array();
-    this.sensorValues[0] = value;
-    this.sensorValues[1] = value/100; //because max range is 100
-	
-}
 
-//export our object
-exports.Service = SensorModule;
+    };
+
+
+    exports.Module = SensorModule;
 
 })();

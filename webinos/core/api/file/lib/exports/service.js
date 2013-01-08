@@ -22,12 +22,18 @@ var api = require("../api.js")
 var inherits = require("inherits")
 var util = require("../util.js")
 
+var pathModule = require("path")
+var LocalFileSystem = require("../engine/local-file-system.js")
+
 var dependencies = require("find-dependencies")(__dirname)
-var rpcModule = dependencies.global.require(dependencies.global.rpc.location,
-    "lib/rpc.js")
+var rpcModule = require("webinos-jsonrpc2")
 
 inherits(Service, rpcModule.RPCWebinosService)
 function Service(rpc, params) {
+    if (params && params.getPath) {
+        LocalFileSystem.init(pathModule.join(params.getPath(), "userData", "file"))
+    }
+    
   Service.super.call(this,
       { api         : "http://webinos.org/api/file"
       , displayName : "File API"

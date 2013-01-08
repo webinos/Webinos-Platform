@@ -26,11 +26,6 @@
 using namespace node;
 using namespace v8;
 
-#ifdef ANDROID
-	string policyFileName = "/sdcard/webinos/policy/policy.xml";
-#else
-	string policyFileName = "./policy.xml";
-#endif
 
 class PolicyManagerInt: ObjectWrap{
 
@@ -39,6 +34,7 @@ private:
 	
 public:
 	PolicyManager* pminst;
+	string policyFileName;
 	static Persistent<FunctionTemplate> s_ct;
   
 	static void Init(Handle<Object> target)  {
@@ -69,10 +65,17 @@ public:
 			}
 			v8::String::AsciiValue tmpFileName(args[0]->ToString());
 			LOGD("Parameter file: %s", *tmpFileName);
-			policyFileName = *tmpFileName;
+			//if(pmtmp->policyFileName) {
+			//	delete[] pmtmp->policyFileName;
+			//}
+			pmtmp->policyFileName = *tmpFileName;
+		}
+		else {
+			LOGD("Missing parameter");
+			return ThrowException(Exception::TypeError(String::New("Missing argument")));
 		}
 
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 		pmtmp->Wrap(args.This());
 		return args.This();
 	}
@@ -241,6 +244,279 @@ public:
 			}
 		}
 
+		vector<bool> purpose;
+		if (args[0]->ToObject()->Has(String::New("purpose"))) {
+			if (args[0]->ToObject()->Get(String::New("purpose"))->IsArray()) {
+				v8::Local<Array> pTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("purpose")));
+				LOGD("DHPref: read %d purposes", pTmp->Length());
+				if (pTmp->Length() == arraysize(ontology_vector)) {
+					for(unsigned int i = 0; i < arraysize(ontology_vector); i++) {
+						if (pTmp->Get(i)->BooleanValue() == true) {
+							LOGD("DHPref: purpose number %d is true", i);
+							purpose.push_back(pTmp->Get(i)->BooleanValue());
+						}
+						else if (pTmp->Get(i)->BooleanValue() == false) {
+							LOGD("DHPref: purpose number %d is false", i);
+							purpose.push_back(pTmp->Get(i)->BooleanValue());
+						}
+						else {
+							// invalid purpose vector
+							LOGD("DHPref: purpose number %d is undefined", i);
+							purpose.clear();
+							break;
+						}
+					}
+				}
+				else {
+					LOGD("DHPref: invalid purpose parameter, wrong vector length");
+				}
+			}
+			else {
+				LOGD("DHPref: invalid purpose parameter, it is not an array");
+			}
+		}
+		else {
+			LOGD("DHPref: purpose parameter not found");
+			purpose = vector<bool>(arraysize(ontology_vector), true);
+			LOGD("DHPref: default purpose parameter generation (all purposes required)");
+		}
+
+		obligations obs;
+		obligation ob;
+		map<string, string> action;
+		map<string, string> trigger;
+		vector< map<string, string> > triggers;
+		v8::Local<Value> actTmp, triggerTmp;
+		v8::Local<Array> triggersTmp;
+
+		if (args[0]->ToObject()->Has(String::New("obligations"))) {
+			if (args[0]->ToObject()->Get(String::New("obligations"))->IsArray()) {
+				v8::Local<Array> obTmp = v8::Local<Array>::Cast(args[0]->ToObject()->Get(String::New("obligations")));
+				LOGD("DHPref: read %d obligations", obTmp->Length());
+				for (unsigned int i = 0; i < obTmp->Length(); i++) {
+					if (obTmp->Get(i)->ToObject()->Has(String::New("action"))) {
+						LOGD("Obligation %d: action found", i);
+						actTmp = obTmp->Get(i)->ToObject()->Get(String::New("action"));
+						if (actTmp->ToObject()->Has(String::New(actionIdTag.c_str()))) {
+							v8::String::AsciiValue actionID(actTmp->ToObject()->Get(String::New(actionIdTag.c_str())));
+							action[actionIdTag]=*actionID;
+							LOGD("Obligation %d: actionID %s", i, *actionID);
+
+							// ActionNotifyDataSubject
+							if (strcmp(*actionID, actionNotifyTag.c_str()) == 0) {
+								// Media paramter
+								if (actTmp->ToObject()->Has(String::New(mediaTag.c_str()))) {
+									v8::String::AsciiValue media(actTmp->ToObject()->Get(String::New(mediaTag.c_str())));
+									action[mediaTag]=*media;
+									LOGD("Obligation %d: Media %s", i, *media);
+								}
+								else {
+									// invalid action: Media required
+									LOGD("Obligation %d: Media is missing", i);
+									action.clear();
+									continue;
+								}
+								// Address paramter
+								if (actTmp->ToObject()->Has(String::New(addressTag.c_str()))) {
+									v8::String::AsciiValue address(actTmp->ToObject()->Get(String::New(addressTag.c_str())));
+									action[addressTag]=*address;
+									LOGD("Obligation %d: Address %s", i, *address);
+								}
+								else {
+									// invalid action: Address required
+									LOGD("Obligation %d: Address is missing", i);
+									action.clear();
+									continue;
+								}
+							}
+							// other actions
+							else if (strcmp(*actionID, actionDeleteTag.c_str()) != 0 &&
+								strcmp(*actionID, actionAnonymizeTag.c_str()) != 0 &&
+								strcmp(*actionID, actionLogTag.c_str()) != 0 && 
+								strcmp(*actionID, actionSecureLogTag.c_str()) != 0) {
+
+								// invalid action: unrecognized actionID
+								LOGD("Obligation %d: unrecognized actionID %s", i, *actionID);
+								action.clear();
+								continue;
+							}
+						}
+						else {
+							// invalid action: actionID field required
+							LOGD("Obligation %d: actionID is missing", i);
+							continue;
+						}
+					}
+					else {
+						// invalid obligation: action required
+						LOGD("Obligation %d: action is missing", i);
+						continue;
+					}
+					if (obTmp->Get(i)->ToObject()->Has(String::New("triggers"))) {
+						if (obTmp->Get(i)->ToObject()->Get(String::New("triggers"))->IsArray()) {
+							triggersTmp = v8::Local<Array>::Cast(obTmp->Get(i)->ToObject()->Get(String::New("triggers")));
+							LOGD("Obligation %d: %d triggers found", i, triggersTmp->Length());
+							for (unsigned int j = 0; j < triggersTmp->Length(); j++) {
+								if (triggersTmp->Get(j)->ToObject()->Has(String::New(triggerIdTag.c_str()))) {
+									v8::String::AsciiValue triggerID(triggersTmp->Get(j)->ToObject()->Get(String::New(triggerIdTag.c_str())));
+									trigger[triggerIdTag]=*triggerID;
+									LOGD("Obligation %d, trigger %d: actionID %s", i, j, *triggerID);
+									triggerTmp = triggersTmp->Get(j);
+									// TriggerAtTime
+									if (strcmp(*triggerID, triggerAtTimeTag.c_str()) == 0) {
+										// Start
+										if (triggerTmp->ToObject()->Has(String::New(startTag.c_str()))){
+											v8::String::AsciiValue start(triggerTmp->ToObject()->Get(String::New(startTag.c_str())));
+											trigger[startTag]=*start;
+											LOGD("Obligation %d, trigger %d: Start %s", i, j, *start);
+										}
+										else {
+											// invalid trigger: Start required
+											LOGD("Obligation %d, trigger %d: Start is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+										// MaxDelay
+										if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+											v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+											trigger[maxDelayTag]=*maxdelay;
+											LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+										}
+										else {
+											// invalid trigger: MaxDelay required
+											LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+									}
+									// TriggerPersonalDataAccessedForPurpose
+									else if (strcmp(*triggerID, triggerPersonalDataAccessedTag.c_str()) == 0) {
+
+										string purposes;
+										while (purposes.size() < arraysize(ontology_vector))
+											purposes.append("0");
+
+										// Purpose
+										if (triggerTmp->ToObject()->Has(String::New(purposeTag.c_str()))){
+											v8::Local<Array> pTmp = v8::Local<Array>::Cast(triggerTmp->ToObject()->Get(String::New(purposeTag.c_str())));
+											LOGD("Obligation %d, trigger %d: read %d puroses", i, j, pTmp->Length());
+											if (pTmp->Length() == arraysize(ontology_vector)) {
+												for(unsigned int k = 0; k < arraysize(ontology_vector); k++) {
+													if (pTmp->Get(k)->BooleanValue() == true) {
+														LOGD("Obligation %d, trigger %d: purpose number %d is true", i, j, k);
+														purposes[k] = '1';
+													}
+													else if (pTmp->Get(k)->BooleanValue() == false) {
+														LOGD("Obligation %d, trigger %d: purpose number %d is false", i, j, k);
+														purposes[k] = '0';
+													}
+													else {
+														// invalid purpose vector
+														LOGD("Obligation %d, trigger %d: purpose number %d is undefined", i, j, k);
+														trigger.clear();
+														continue;
+													}
+												}
+											}
+											else {
+												LOGD("Obligation %d, trigger %d: invalid purpose parameter, wrong vector length", i, j);
+												trigger.clear();
+												continue;
+											}
+											trigger[purposeTag]=purposes;
+											LOGD("Obligation %d, trigger %d: Purpose %s", i, j, purposes.c_str());
+										}
+										else {
+											// invalid trigger: Purpose required
+											LOGD("Obligation %d, trigger %d: Purpose is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+
+										// MaxDelay
+										if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+											v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+											trigger[maxDelayTag]=*maxdelay;
+											LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+										}
+										else {
+											// invalid trigger: MaxDelay required
+											LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+									}
+									// TriggerPersonalDataDeleted
+									else if (strcmp(*triggerID, triggerPersonalDataDeletedTag.c_str()) == 0) {
+										// MaxDelay
+										if (triggerTmp->ToObject()->Has(String::New(maxDelayTag.c_str()))){
+											v8::String::AsciiValue maxdelay(triggerTmp->ToObject()->Get(String::New(maxDelayTag.c_str())));
+											trigger[maxDelayTag]=*maxdelay;
+											LOGD("Obligation %d, trigger %d: MaxDelay %s", i, j, *maxdelay);
+										}
+										else {
+											// invalid trigger: MaxDelay required
+											LOGD("Obligation %d, trigger %d: MaxDelay is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+									}
+									// TriggerDataSubjectAccess
+									else if (strcmp(*triggerID, triggerDataSubjectAccessTag.c_str()) == 0) {
+										if (triggerTmp->ToObject()->Has(String::New(uriTag.c_str()))){
+											v8::String::AsciiValue endpoint(triggerTmp->ToObject()->Get(String::New(uriTag.c_str())));
+											trigger[uriTag]=*endpoint;
+											LOGD("Obligation %d, trigger %d: Endpoint %s", i, j, *endpoint);
+										}
+										else {
+											// invalid trigger: Endpoint required
+											LOGD("Obligation %d, trigger %d: Endpoint is missing", i, j);
+											trigger.clear();
+											continue;
+										}
+									}
+									else {
+										// invalid trigger: unrecognized triggerID
+										LOGD("Obligation %d, trigger %d: unrecognized triggerID %s", i, j, *triggerID);
+										trigger.clear();
+										continue;
+									}
+								}
+								else {
+									// invalid trigger: triggerID required
+									LOGD("Obligation %d, trigger %d: triggerID is missing", i, j);
+									continue;
+								}
+								triggers.push_back(trigger);
+								trigger.clear();
+							}
+						}
+						else {
+							LOGD("Invalid triggers parameter, it is not an array");
+							continue;
+						}
+					}
+					else {
+						// invalid obligation: triggers required
+						LOGD("Obligation %d: triggers are missing", i);
+						continue;
+					}
+
+					if (action.empty() == false && triggers.empty() == false) {
+						ob.action = action;
+						ob.triggers = triggers;
+
+						obs.push_back(ob);
+					}
+					action.clear();
+					triggers.clear();
+				}
+			}
+			else {
+				LOGD("Invalid obligations parameter, it is not an array");
+			}
+		}
+
 //		string widPath(".");
 
 //		string roam("N");
@@ -248,7 +524,7 @@ public:
 //		(*environment)["roaming"] = roam;
 		
 //		Request* myReq = new Request(widPath, *resource_attrs, *environment);
-		Request* myReq = new Request(*subject_attrs, *resource_attrs);
+		Request* myReq = new Request(*subject_attrs, *resource_attrs, purpose, obs);
 		
 		Effect myEff = pmtmp->pminst->checkRequest(myReq);
 
@@ -267,9 +543,10 @@ public:
 
 		PolicyManagerInt* pmtmp = ObjectWrap::Unwrap<PolicyManagerInt>(args.This());
 
+		LOGD("ReloadPolicy - file is %s", pmtmp->policyFileName.c_str());
 		//TODO: Reload policy file
 		delete pmtmp->pminst;
-		pmtmp->pminst = new PolicyManager(policyFileName);
+		pmtmp->pminst = new PolicyManager(pmtmp->policyFileName);
 
 		Local<Integer> result = Integer::New(0);
 		

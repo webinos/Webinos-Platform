@@ -19,26 +19,14 @@
 
 package org.webinos.app.pzp;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-
-import org.meshpoint.anode.Isolate;
-import org.meshpoint.anode.Runtime;
-import org.meshpoint.anode.Runtime.IllegalStateException;
-import org.meshpoint.anode.Runtime.InitialisationException;
-import org.meshpoint.anode.Runtime.NodeException;
-import org.meshpoint.anode.Runtime.StateListener;
 import org.webinos.app.R;
-import org.webinos.app.anode.AnodeService;
-import org.webinos.app.platform.Config;
 import org.webinos.app.platform.PlatformInit;
+import org.webinos.app.pzp.PzpService.ConfigParams;
+import org.webinos.app.pzp.PzpService.PzpServiceListener;
+import org.webinos.app.pzp.PzpService.PzpState;
+import org.webinos.app.pzp.PzpService.PzpStateListener;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -49,10 +37,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class ConfigActivity extends Activity implements StateListener {
-	private static final String LASTCONFIG = "lastconfig";
+public class ConfigActivity extends Activity implements PzpServiceListener, PzpStateListener {
 	private static String TAG = "org.webinos.app.pzp.ConfigActivity";
-	private Context ctx;
+	private PzpService pzpService;
 	private Button startButton;
 	private Button stopButton;
 	private EditText pzhHost;
@@ -62,177 +49,123 @@ public class ConfigActivity extends Activity implements StateListener {
 	private TextView stateText;
 	private Handler viewHandler = new Handler();
 	private long uiThread;
-	private String instance;
-	private Isolate isolate;
 	
-	private class ConfigParams {
-		String pzhHost;
-		String pzhName;
-		String pzpName;
-		String authCode;
-
-		void readConfig() {
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new InputStreamReader(openFileInput(LASTCONFIG)));
-				pzhHost = reader.readLine();
-				pzhName = reader.readLine();
-				pzpName = reader.readLine();
-				authCode = reader.readLine();
-			} catch (IOException e) {
-			} finally {
-				try {
-					if(reader != null)
-						reader.close();
-				} catch (IOException e) {}
-			}
-		}
-		
-		void writeConfig() {
-			BufferedWriter writer = null;
-			try {
-				writer = new BufferedWriter(new OutputStreamWriter(openFileOutput(LASTCONFIG, MODE_PRIVATE)));
-				writer.write(pzhHost + '\n');
-				writer.write(pzhName + '\n');
-				writer.write(pzpName + '\n');
-				/* writer.write(authCode + '\n'); */
-			} catch (IOException e) {
-			} finally {
-				try {
-					if(writer != null)
-						writer.close();
-				} catch (IOException e) {}
-			}
-		}
-
-		void fromEditText() {
-			pzhHost = ConfigActivity.this.pzhHost.getText().toString();
-			pzhName = ConfigActivity.this.pzhName.getText().toString();
-			pzpName = ConfigActivity.this.pzpName.getText().toString();
-			authCode = ConfigActivity.this.authCode.getText().toString();
-		}
-
-		String getCmd() {
-			HashMap<String, String> args = new HashMap<String, String>();
-			args.put("pzh.host", pzhHost);
-			args.put("pzh.name", pzhName);
-			args.put("pzp.name", pzpName);
-			args.put("auth_code", authCode);
-			Config config = Config.getInstance();
-			String cmd = config.getProperty("pzp.cmd");
-			for(String key : args.keySet()) {
-				String argValue = args.get(key);
-				if(argValue != null && !argValue.isEmpty())
-					cmd += " " + config.getProperty("pzp.cmd." + key).replace("%" + key, argValue);
-			}
-
-			return cmd;			
-		}
-	}
-
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.v(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pzp);
-		ctx = getApplicationContext();
-		PlatformInit.init(this);
-		initUI();
 		uiThread = viewHandler.getLooper().getThread().getId();
+		pzpService = PzpService.getService(this, this);
+		if(pzpService != null) {
+			Log.v(TAG, "onCreate(): service already running");
+			initUI();
+			return;
+		}
 	}
-	
+
+	@Override
+	public void onServiceAvailable(PzpService service) {
+		Log.v(TAG, "onServiceAvailable(): service running");
+		pzpService = service;
+		initUI();
+	}
+
 	private void initUI() {
-		Config config = Config.getInstance();
+		pzpService.addPzpStateListener(this);
+		ConfigParams configParams = pzpService.getConfig();
 		startButton = (Button)findViewById(R.id.start_button);
-		startButton.setOnClickListener(new StartClickListener());
+		startButton.setEnabled(false);
+		startButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.v(TAG, "startButton.onClick(): requesting PZP start");
+				updateConfigFromEditText();
+				pzpService.startPzp();
+			}
+		});
 
 		stopButton = (Button)findViewById(R.id.stop_button);
-		stopButton.setOnClickListener(new StopClickListener());
+		stopButton.setEnabled(false);
+		stopButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.v(TAG, "stopButton.onClick(): requesting PZP stop");
+				pzpService.stopPzp();
+			}
+		});
 
 		pzhHost = (EditText)findViewById(R.id.args_pzhHost);
-		ConfigParams configParams = new ConfigParams();
-		configParams.readConfig();
 		String pzhHostText = configParams.pzhHost;
-		if(pzhHostText == null)
-			pzhHostText = config.getProperty("pzh.host.default");
 		if(pzhHostText != null)
 			pzhHost.setText(pzhHostText);
 
 		pzhName = (EditText)findViewById(R.id.args_pzhName);
 		String pzhNameText = configParams.pzhName;
-		if(pzhNameText == null)
-			pzhNameText = config.getProperty("pzh.name.default");
 		if(pzhNameText != null)
 			pzhName.setText(pzhNameText);
 
 		pzpName = (EditText)findViewById(R.id.args_pzpName);
 		String pzpNameText = configParams.pzpName;
-		if(pzpNameText == null)
-			pzpNameText = config.getProperty("pzp.name.default");
 		if(pzpNameText != null)
 			pzpName.setText(pzpNameText);
 
 		authCode = (EditText)findViewById(R.id.args_authCode);
 		String authCodeText = configParams.authCode;
-		if(authCodeText == null)
-			authCodeText = config.getProperty("auth_code.default");
 		if(authCodeText != null)
 			authCode.setText(authCodeText);
 
-		stateText = (TextView)findViewById(R.id.args_stateText);
-		__stateChanged(Runtime.STATE_CREATED);
-	}
-
-	private void startAction() {
-		ConfigParams configParams = new ConfigParams();
-		configParams.fromEditText();
-		configParams.writeConfig();
-		String cmd = configParams.getCmd();
-		Log.v(TAG, "PZP start: starting with cmd: " + cmd);
-
-		try {
-			Runtime.initRuntime(this, new String[]{});
-			isolate = Runtime.createIsolate();
-			isolate.addStateListener(this);
-			this.instance = AnodeService.addInstance(instance, isolate);
-			isolate.start(cmd.split("\\s"));
-		} catch (IllegalStateException e) {
-			Log.v(TAG, "isolate start: exception: " + e + "; cause: " + e.getCause());
-		} catch (NodeException e) {
-			Log.v(TAG, "isolate start: exception: " + e);
-		} catch (InitialisationException e) {
-			Log.v(TAG, "runtime init: exception: " + e);
+		/* if the platform is not yet initialised, wait until that
+		 * has completed and retry */
+		if(PlatformInit.onInit(this, new Runnable() {
+			@Override
+			public void run() {
+				/* init buttons (deferred case) */
+				stateText = (TextView)findViewById(R.id.args_stateText);
+				__stateChanged(pzpService.getPzpState());
+			}
+		})) {
+			/* init buttons (no wait) */
+			stateText = (TextView)findViewById(R.id.args_stateText);
+			__stateChanged(pzpService.getPzpState());
 		}
 	}
 
-	private void stopAction() {
-		if(instance == null) {
-			Log.v(TAG, "AnodeReceiver.onReceive::stop: no instance currently running for this activity");
-			return;
-		}
-		try {
-			isolate.stop();
-		} catch (IllegalStateException e) {
-			Log.v(TAG, "isolate stop : exception: " + e + "; cause: " + e.getCause());
-		} catch (NodeException e) {
-			Log.v(TAG, "isolate stop: exception: " + e);
-		}
+	private void updateConfigFromEditText() {
+		ConfigParams configParams = pzpService.getConfig();
+		configParams.pzhHost = pzhHost.getText().toString();
+		configParams.pzhName = pzhName.getText().toString();
+		configParams.pzpName = pzpName.getText().toString();
+		configParams.authCode = authCode.getText().toString();
+		pzpService.updateConfig();
 	}
 
-	class StartClickListener implements OnClickListener {
-		public void onClick(View arg0) {
-			startAction();
+	private String getStateString(PzpState state) {
+		Resources res = getResources();
+		String result = null;
+		switch(state) {
+		case STATE_UNINITIALISED:
+			result = res.getString(R.string.uninitialised);
+			break;
+		case STATE_CREATED:
+			result = res.getString(R.string.created);
+			break;
+		case STATE_STARTED:
+			result = res.getString(R.string.started);
+			break;
+		case STATE_STOPPING:
+			result = res.getString(R.string.stopping);
+			break;
+		case STATE_STOPPED:
+			result = res.getString(R.string.stopped);
+			break;
 		}
-	}
-
-	class StopClickListener implements OnClickListener {
-		public void onClick(View arg0) {
-			stopAction();
-		}
+		return result;
 	}
 
 	@Override
-	public void stateChanged(final int state) {
+	public void onStateChanged(final PzpState state) {
 		if(Thread.currentThread().getId() == uiThread) {
 			__stateChanged(state);
 		} else {
@@ -244,34 +177,9 @@ public class ConfigActivity extends Activity implements StateListener {
 		}
 	}
 
-	private void __stateChanged(final int state) {
+	private void __stateChanged(final PzpState state) {
 		stateText.setText(getStateString(state));
-		startButton.setEnabled(state == Runtime.STATE_CREATED);
-		stopButton.setEnabled(state == Runtime.STATE_STARTED);
-		/* exit the activity if the runtime has exited */
-		if(state == Runtime.STATE_STOPPED) {
-			finish();
-		}
+		startButton.setEnabled(state == PzpState.STATE_UNINITIALISED || state == PzpState.STATE_CREATED || state == PzpState.STATE_STOPPED);
+		stopButton.setEnabled(state == PzpState.STATE_STARTED);
 	}
-
-	private String getStateString(int state) {
-		Resources res = ctx.getResources();
-		String result = null;
-		switch(state) {
-		case Runtime.STATE_CREATED:
-			result = res.getString(R.string.created);
-			break;
-		case Runtime.STATE_STARTED:
-			result = res.getString(R.string.started);
-			break;
-		case Runtime.STATE_STOPPING:
-			result = res.getString(R.string.stopping);
-			break;
-		case Runtime.STATE_STOPPED:
-			result = res.getString(R.string.stopped);
-			break;
-		}
-		return result;
-	}
-
 }

@@ -19,9 +19,11 @@
 
 #include "Request.h"
 
-Request::Request(map<string, vector<string>*>& info, map<string, vector<string>*>& resources){	
+Request::Request(map<string, vector<string>*>& info, map<string, vector<string>*>& resources, vector<bool> purpose, obligations& obl){	
 	subject_attrs = info;
 	resource_attrs = resources;
+	purpose_attrs = purpose;
+	obligations_attrs = obl;
 	request_subject_text = "";
 	request_resource_text = "";
 	request_environment_text = "";
@@ -159,6 +161,14 @@ map<string, vector<string>*>& Request::getSubjectAttrs(){
 
 map<string, vector<string>*>& Request::getResourceAttrs(){
 	return resource_attrs;
+}
+
+vector<bool> Request::getPurposeAttrs(){
+	return purpose_attrs;
+}
+
+obligations& Request::getObligationsAttrs(){
+	return obligations_attrs;
 }
 
 map<string,string>& Request::getEnvironmentAttrs(){

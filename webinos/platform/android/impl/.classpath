@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="src" path="/util"/>
+	<classpathentry kind="src" path="bridge_src"/>
+	<classpathentry kind="src" path="libnode_src"/>
+	<classpathentry kind="src" path="api_src"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="libs/jmdns.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="src" path="/api"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/libnode"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/bridge-java"/>
-	<classpathentry kind="src" path="/util"/>
 	<classpathentry kind="lib" path="/app/libs/jmdns.jar"/>
+	<classpathentry kind="lib" path="/app/libs/core.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

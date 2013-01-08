@@ -16,6 +16,7 @@
 * Copyright 2012 BMW AG
 ******************************************************************************/
 (function() {
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 function DeviceOrientationModule(rpcHandler, params) {
     var car, implFile = 'fake';
@@ -42,6 +43,12 @@ function DeviceOrientationModule(rpcHandler, params) {
         implFile = 'fake';    
         console.log('connecting to fake data generator');
      }
+    
+    if(process.platform=='android')
+	{
+		implFile = 'android';
+	}
+
 
 	var implModule = require('./webinos.deviceorientation.' + implFile + '.js');
 

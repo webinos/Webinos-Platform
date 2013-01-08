@@ -35,7 +35,7 @@ void AppGetSettings(CefSettings& settings, CefRefPtr<ClientApp> app);
 // Returns the application browser settings based on command line arguments.
 void AppGetBrowserSettings(CefBrowserSettings& settings);
 
-void AppGetWebinosWRTConfig(int* pzpPort, int* webPort);
+std::string AppGetWebinosWRTConfig(int* pzpPort, int* webPort);
 
 void AppCreateWebinosBrowser(std::string url, bool isWidget, bool sideLoading, CefWindowHandle closeParent, int width = 0, int height = 0);
 

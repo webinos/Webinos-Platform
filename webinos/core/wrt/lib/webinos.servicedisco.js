@@ -75,10 +75,13 @@
             if (typeof WebinosDeviceOrientation !== 'undefined') typeMap['http://webinos.org/api/deviceorientation'] = WebinosDeviceOrientation;
             if (typeof Vehicle !== 'undefined') typeMap['http://webinos.org/api/vehicle'] = Vehicle;
             if (typeof EventsModule !== 'undefined') typeMap['http://webinos.org/api/events'] = EventsModule;
+            if (typeof App2AppModule !== 'undefined') typeMap['http://webinos.org/api/app2app'] = App2AppModule;
             if (typeof AppLauncherModule !== 'undefined') typeMap['http://webinos.org/api/applauncher'] = AppLauncherModule;
             if (typeof Sensor !== 'undefined') {
                 typeMap['http://webinos.org/api/sensors'] = Sensor;
                 typeMap['http://webinos.org/api/sensors.temperature'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.light'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.proximity'] = Sensor;
             }
             if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
             if (typeof UserProfileIntModule !== 'undefined') typeMap['UserProfileInt'] = UserProfileIntModule;

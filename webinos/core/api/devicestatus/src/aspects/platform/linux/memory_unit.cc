@@ -64,7 +64,7 @@ return string(res);
 string MemoryUnit::removable(string memoUnit)
 {
 
-        //return "removable";
+        return "removable not Implemented";
 }
 
             
@@ -96,6 +96,4 @@ size_t pos;
         }
     }
 return string(res);
-
-//	return "vendor";
 }

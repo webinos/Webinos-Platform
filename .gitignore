@@ -61,9 +61,16 @@ reports
 .settings
 /.metadata/
 
+# allow eclipse project files in linux-specific folders.
+!webinos/platform/linux/*/*.project
+
 # vstudio prj files
 *.sln
 *.vcxproj*
+
+# allow vstudio files in windows-specific folders.
+!webinos/platform/windows/*/*.sln
+!webinos/platform/windows/*/*/*.vcxproj
 
 # waf lock files
 .lock-wscript

@@ -1,0 +1,16 @@
+{ "name": "xmpp-pzp",
+  "version": "0.3.1",
+  "description": "PZP for XMPP based overlay network",
+  "main": "./lib/pzp.js",
+  "author": "Eelco Cramer <eelco.cramer@tno.nl>",
+  "directories": {
+    "lib": "./lib",
+    "test":"./test"
+  },
+ "dependencies":{
+  "node-xmpp":"git://github.com/eelcocramer/node-xmpp.git",
+  "ltx": "0.2.x",
+  "log4js": "0.5.x",
+  "optimist": "0.3.x"
+ }
+}

@@ -16,11 +16,10 @@
  * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
  ******************************************************************************/
 (function () {
-  var logger = logger;
-  if (module) {
-    var webinos_= require("find-dependencies")(__dirname);
-    logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
-  }
+	var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
+	var webinos_= require("find-dependencies")(__dirname);
+	logger = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
+	
 	var idCount = 0;
 
 	/**

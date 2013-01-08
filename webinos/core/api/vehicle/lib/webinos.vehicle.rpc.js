@@ -16,6 +16,8 @@
  * Copyright 2012 BMW AG
  ******************************************************************************/ 
 (function () {
+	var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
+
     function VehicleModule(rpcHandler, params) {
         var implFile = 'fake';
         var car = null;

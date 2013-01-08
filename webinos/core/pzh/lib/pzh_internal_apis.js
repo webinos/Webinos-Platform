@@ -16,23 +16,24 @@
  * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
  *******************************************************************************/
 
-var webinos = require('find-dependencies')(__dirname);
-var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename);
+var dependency = require('find-dependencies')(__dirname);
+var modLoader = dependency.global.require(dependency.global.util.location, "lib/loadservice.js");
+var logger  = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename);
 
 function getConnectedPzp(_instance){
-  var myKey, pzps = [];
-  for (myKey=0; myKey < _instance.config.trustedList.pzp.length; myKey = myKey + 1){
-    if (_instance.pzh_state.connectedPzp.hasOwnProperty(_instance.config.trustedList.pzp[myKey])){
-      pzps.push({id: _instance.config.trustedList.pzp[myKey].split("/")[1], url: _instance.config.trustedList.pzp[myKey], isConnected: true});
+  var i, pzps = [], list = Object.keys(_instance.config.trustedList.pzp);
+  for (i=0; i < list.length; i = i + 1){
+    if (_instance.pzh_state.connectedPzp.hasOwnProperty(list[i])){
+      pzps.push({id: list[i].split("/")[1], url: list[i], isConnected: true});
     } else {
-      pzps.push({id: _instance.config.trustedList.pzp[myKey].split("/")[1], url: _instance.config.trustedList.pzp[myKey], isConnected: false});
+      pzps.push({id: list[i].split("/")[1], url: list[i], isConnected: false});
     }
   }
   return pzps;
 }
 
 function getConnectedPzh(_instance){
-  var pzhs = [], myKey;
+  var pzhs = [], myKey, list = Object.keys(_instance.config.trustedList.pzh);
   for (myKey=0; myKey < _instance.config.trustedList.pzh.length; myKey = myKey + 1){
     var id =  _instance.config.trustedList.pzh[myKey]
     var first = id.indexOf("_") +1;
@@ -133,8 +134,8 @@ Pzh_Apis.listAllServices = function(_instance, _callback) {
   "use strict";
   var result = { pzEntityList: [] }, connectedPzp = getConnectedPzp(_instance), key;
   result.pzEntityList.push({pzId:_instance.pzh_state.sessionId});
-  for (key = 0; key <  connectedPzp.length; key = key + 1) {
-    result.pzEntityList.push({pzId:connectedPzp[key]});
+  for (key = 0; key < connectedPzp.length; key = key + 1) {
+    result.pzEntityList.push({pzId:connectedPzp[key].url});
   }
   result.services = _instance.pzh_otherManager.discovery.getAllServices();
   var payload = {to: _instance.pzh_state.sessionId, cmd:"listAllServices", payload:result};
@@ -158,11 +159,11 @@ Pzh_Apis.listUnregServices = function(_instance, _at, _callback) {
 
   if (_instance.pzh_state.sessionId !== _at) {
     var id = _instance.pzh_otherManager.addMsgListener(function(modules) {
-      runCallback(at, modules);
+      runCallback(_at, modules.services);
     });
     var msg =  {"type"  : "prop", "from" : _instance.pzh_state.sessionId, "to"   : _at,
       "payload" : {"status" : "listUnregServices", "message" : {listenerId:id}}};
-    _instance.sendMessage(msg, at);
+    _instance.sendMessage(msg, _at);
   } else {
     runCallback(_instance.pzh_state.sessionId, _instance.pzh_otherManager.getInitModules());
   }
@@ -181,7 +182,10 @@ Pzh_Apis.registerService = function(_instance, _at, _name, _callback) {
       "payload" : {"status" : "registerService", "message" :  {name:_name, params:{}}}};
     _instance.sendMessage(msg, _at);
   } else {
-    _instance.pzh_otherManager.registry.loadModule({"name":_name, "params":{}}, _instance.rpcHandler);
+    modLoader.loadServiceModule(
+      {"name":_name, "params":{}},
+      _instance.pzh_otherManager.registry,
+      _instance.pzh_otherManager.rpcHandler);
   }
 };
 /**

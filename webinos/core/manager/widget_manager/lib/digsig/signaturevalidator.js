@@ -29,7 +29,7 @@ this.SignatureValidator = (function() {
 	function SignatureValidator(widgetValidator, signum, name) {
 		Validator.call(this);
 		this.widgetValidator = widgetValidator;
-		this.signum = signum;
+		this.signum = parseInt(signum);
 		this.name = name;
 
 	}
@@ -81,8 +81,8 @@ this.SignatureValidator = (function() {
 			 * If an author signature is present in the widget package, verify
 			 * that signature has a ds:Reference for the author signature.
 			 */
-			if(this.sigNum > 0 && 0 in this.widgetValidator.signatureNames)
-				expectedRefs = ['author.xml'].concat(expectedRefs);
+			if(this.signum > 0 && 0 in this.widgetValidator.signatureNames)
+				expectedRefs = ['author-signature.xml'].concat(expectedRefs);
 			
 			var dereferencer = function(ref, hash) {
 				try {
@@ -180,7 +180,7 @@ this.SignatureValidator = (function() {
 
 			var signature = new Signature(this.name, signatureId, this.certificatePath);	
 			this.widgetValidator.addSignature(signature);
-			console.log(util.inspect(this));
+			//console.log(util.inspect(this));
 		} catch(e) {
 			this.widgetValidator.setInvalid(new Error('Internal error: exception = ' + e));
 		}

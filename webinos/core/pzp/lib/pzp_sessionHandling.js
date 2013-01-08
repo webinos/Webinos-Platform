@@ -21,8 +21,6 @@ var path = require("path"),
   fs   = require("fs"),
   os   = require("os");
 
-
-
 var dependency = require("find-dependencies")(__dirname);
 var Session    = require("./session");
 var logger     = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
@@ -67,13 +65,6 @@ var Pzp = function () {
     self.config.storeMetaData(self.config.metaData);
   };
 
-  this.updateTrustedList = function() {
-    self.config.fetchTrustedList(function(status, data){
-      if(status)
-        self.config.trustedList = data;
-    })
-  };
-
   /**
    * Sets webinos pzp sessionId
    */
@@ -82,6 +73,7 @@ var Pzp = function () {
     if(self.config.metaData.pzhId) {
       self.pzp_state.sessionId = self.config.metaData.pzhId + "/" +  self.config.metaData.webinosName;
     }
+    logger.addId(self.config.metaData.webinosName);
   };
 
   /**
@@ -188,15 +180,18 @@ var Pzp = function () {
       self.webinos_manager.messageHandler.removeRoute(_id, self.pzp_state.sessionId);
       for (key in self.pzp_state.connectedPzp) {
         if (self.pzp_state.connectedPzp.hasOwnProperty(key) && key === _id){
+          logger.log("pzp - " + key + " details removed");
           delete self.pzp_state.connectedPzp[key];
         }
       }
       for (key in self.pzp_state.connectedPzh) {
         if (self.pzp_state.connectedPzh.hasOwnProperty(key) && key === _id){
+          logger.log("pzh - " + key + " details removed");
           delete self.pzp_state.connectedPzh[key];
         }
       }
       self.pzpWebSocket.updateApp();
+      self.pzpWebSocket.pzhDisconnected();
     }
   };
 
@@ -346,24 +341,26 @@ var PzpClient = function (_parent) {
   }
 
   this.connectPeer = function(msg) {
-    var client = tls.connect(_parent.port, msg.address, options, function () {
-      if (client.authorized) {
-        pzpClient_Authorized(msg, client);
-      } else {
-        logger.error("pzp client - connection failed, " + client.authorizationError);
-      }
-    });
+    _parent.setConnParam(function(options) {
+      var client = tls.connect(_parent.port, msg.address, options, function () {
+        if (client.authorized) {
+          pzpClient_Authorized(msg, client);
+        } else {
+          logger.error("pzp client - connection failed, " + client.authorizationError);
+        }
+      });
 
-    client.on("data", function (buffer) {
-      _parent.handleMsg(client, buffer);
-    });
+      client.on("data", function (buffer) {
+        _parent.handleMsg(client, buffer);
+      });
 
-    client.on("end", function () {
-      _parent.cleanUp(client.id);
-    });
+      client.on("end", function () {
+        _parent.cleanUp(client.id);
+      });
 
-    client.on("error", function (err) {
-      logger.error("pzp client - " + err.message);
+      client.on("error", function (err) {
+        logger.error("pzp client - " + err.message);
+      });
     });
   }
 };
@@ -444,6 +441,7 @@ var ConnectHub = function(_parent) {
     var pzpClient, master, options = {};
     try {
       _parent.setConnParam(function(options){
+        options.pzpServerPort = _parent.config.userPref.ports.pzp_tlsServer;
         pzpClient = tls.connect(_parent.config.userPref.ports.provider, _parent.config.metaData.serverName, options, function(conn) {
           handleAuthorization(pzpClient, _callback);
         });
@@ -463,7 +461,12 @@ var ConnectHub = function(_parent) {
           if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
             logger.error("Connect  attempt to YOUR PZH "+ _parent.config.metaData.pzhId+" failed.");
             if(_parent.pzp_state.mode === _parent.modes[1]){
-              _parent.webinos_manager.localDiscovery.findLocalPzp();
+              if(os.type().toLowerCase() == "windows_nt")
+              {
+                //Do nothing until WinSockWatcher works
+              }
+              else 
+                _parent.webinos_manager.peerDiscovery.findPzp(self,'zeroconf', _parent.config.userPref.ports.pzp_tlsServer, _parent.config.metaData.pzhId);
             }
           } else {
             logger.error(err);
@@ -492,8 +495,8 @@ var EnrollPzp = function(_parent, hub){
     _parent.config.metaData.pzhId            = _from;
     _parent.config.metaData.serverName       = _from.split("_")[0];
 
-    if(_parent.config.trustedList.pzh.indexOf(_parent.config.metaData.pzhId) === -1) {
-      _parent.config.trustedList.pzh.push(_parent.config.metaData.pzhId);
+    if(!_parent.config.trustedList.pzh.hasOwnProperty(_parent.config.metaData.pzhId)) {
+      _parent.config.trustedList.pzh[_parent.config.metaData.pzhId] = {"addr":"", "port":""};
     }
     _parent.config.storeMetaData(_parent.config.metaData);
     _parent.config.storeAll();

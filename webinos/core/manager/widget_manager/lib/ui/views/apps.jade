@@ -41,24 +41,20 @@ block content
 								div.widgetListOption
 									a(target="_blank",href="/widget/about/#{item.installId}") about&nbsp;&nbsp;&nbsp;&nbsp;
 								div.widgetListOption
-									a(style="font-weight:bold;",target="_blank",href="widget/" + item.installId) run&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									a(style="font-weight:bold;",target="_blank",href="/widget/" + item.installId) run&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							div.widgetListItemIcon
 								- if (item.prefIcon)
-									//img(src='wgt://#{item.installId}/#{item.prefIcon}', width="64px", height="64px")
-									img(src='widget/#{item.installId}/#{item.prefIcon}', width="64px", height="64px")
+									img(src='/widget/#{item.installId}/#{item.prefIcon}', width="64px", height="64px")
 								- else
-									//div(style="background: url('/images/no-icon.png') left top no-repeat;") &nbsp;
 									img(src='/images/no-icon.png', width="64px", height="64px")
 							div.widgetListItemTitle
 								- if (item.name)
 									- var dispName = item.name.unicode;
 									- if (dispName.length > 30)
 										- dispName = dispName.substr(0,30) + "...";
-									//a.widgetLaunch(target="_blank",href="wgt://" + item.installId)= dispName
-									a.widgetLaunch(target="_blank",href="widget/" + item.installId)= dispName
+									a.widgetLaunch(target="_blank",href="/widget/" + item.installId)= dispName
 								- else
-									//a.widgetLaunch(target="_blank",href="wgt://" + item.installId)= item.installId
-									a.widgetLaunch(target="_blank",href="widget/" + item.installId)= item.installId
+									a.widgetLaunch(target="_blank",href="/widget/" + item.installId)= item.installId
 				- listIdx++;
 	- else
 		div There are currently no apps installed.

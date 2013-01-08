@@ -1,0 +1,193 @@
+<html>
+<head>
+    <title>App2App Messaging API Example</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="../css/layout.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="../css/style.css" type="text/css" media="screen"/>
+    <script type="text/javascript" src="../jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="../../webinos.js"></script>
+    <script>
+        var app2app;
+        var creatorChannelProxy;
+        var clientChannelProxy;
+
+        var init = function () {
+            webinos.discovery.findServices(new ServiceType("http://webinos.org/api/app2app"), {
+                onFound: function (service) {
+                    service.bindService({
+                        onBind: function () {
+                            app2app = service;
+                        }
+                    });
+                },
+                onError: function (error) {
+                    alert("Error finding service: " + error.message + " (#" + error.code + ")");
+                }
+            });
+        };
+
+        $(document).ready(function () {
+            init();
+
+            $("#btnCreatorCreateChannel").click(function () {
+                var properties = {};
+                // we allow all channel clients to send and receive
+                properties.mode = "send-receive";
+
+                var config = {};
+                // the namespace is an URN which uniquely defines the channel in the personal zone
+                config.namespace = "urn:org-webinos:example";
+                config.properties = properties;
+                // we can attach application-specific information to the channel
+                config.appInfo = {};
+
+                app2app.createChannel(
+                        config,
+                        // callback invoked when a client want to connect to the channel
+                        function(request) {
+                            // we allow all clients to connect (we could also for example check some application-
+                            // specific information in the request.requestInfo to make a decision)
+                            return confirm("Do you allow the client to connect?");
+                        },
+                        // callback invoked to receive messages
+                        function(message) {
+                            alert("The channel creator received a message: " + message.contents);
+                        },
+                        // callback invoked on success, with the client's channel proxy as parameter
+                        function(channelProxy) {
+                            creatorChannelProxy = channelProxy;
+                        },
+                        function(error) {
+                            alert("Could not create channel: " + error.message);
+                        }
+                );
+            });
+
+            $("#btnCreatorSendMessage").click(function() {
+                if (typeof creatorChannelProxy === "undefined") {
+                    alert("You first have to create the channel.");
+                    return;
+                }
+
+                // send message to all connected clients (in our example this is only one)
+                creatorChannelProxy.send(
+                        "creator.ping",
+                        // callback invoked when the message is accepted for processing
+                        function(success) {
+                            // ok, but no action needed in our example
+                        },
+                        function(error) {
+                            alert("Could not send message: " + error.message);
+                        }
+                );
+            });
+
+            $("#btnClientConnectToChannel").click(function() {
+                if (typeof creatorChannelProxy === "undefined") {
+                    alert("First create a channel using Application A.");
+                    return;
+                }
+
+                if (typeof clientChannelProxy !== "undefined") {
+                    alert("Already connected to the channel.");
+                    return;
+                }
+
+                app2app.searchForChannels(
+                        // the namespace to search for (can include a wildcard "*" instead of "example"
+                        // to search for all channels with prefix "org-webinos")
+                        "urn:org-webinos:example",
+                        // no other zones need to be searched, only its own personal zone
+                        [],
+                        // callback invoked on each channel found, we expect it to be called at most once
+                        // because we did not use a wildcard
+                        function(channelProxy) {
+                            // we directly request to connect to the channel
+                            connectToChannel(channelProxy);
+                        },
+                        // callback invoked when the search query is accepted for processing
+                        function(success) {
+                            // ok, but no action needed in our example
+                        },
+                        function(error) {
+                            alert("Could not search for channel: " + error.message);
+                        }
+                );
+            });
+        });
+
+        function connectToChannel(channelProxy) {
+            // we can include application-specific information to the connect request
+            var requestInfo = {};
+            channelProxy.connect(
+                requestInfo,
+                // callback invoked to receive messages, only after successful connect
+                function(message) {
+                    alert("Client received message from creator: " + message.contents);
+                    // we directly reply to the message, and here we send a message to
+                    // the sender only (i.e. the creator in this example)
+                    sendMessageTo(message.from, "client.pong", channelProxy);
+                },
+                // callback invoked when the client is successfully connected (i.e. authorized by the creator)
+                function(success) {
+                    // make the proxy available now that we are successfully connected
+                    clientChannelProxy = channelProxy;
+                },
+                function(error) {
+                    alert("Could not connect to channel: " + error.message);
+                }
+            );
+        }
+
+        function sendMessageTo(client, message, channelProxy) {
+            // send message to a single client only
+            // alternatively you can send to all clients on the channel using channelProxy.send
+            channelProxy.sendTo(
+                client,
+                message,
+                // callback invoked when the message is accepted for processing
+                function(success) {
+                    // ok, but no action needed in our example
+                },
+                function(error) {
+                    alert("Could not send message: " + error.message);
+                }
+            );
+        }
+    </script>
+</head>
+<body>
+<section id="main" class="column">
+    <article class="module width_full">
+        <header><h3>App2App Messaging API Example</h3></header>
+        <div class="module_content">
+            <h4>Application A: Creating and using the channel</h4>
+            <p>
+                To be able to send messages first a channel has to be created. The creator of the channel
+                sets its configuration,  determines who is allowed to connect to the channel, and can close
+                the channel.
+                Here we create a channel with namespace <code>urn:org-webinos:example</code>, which is
+                enforced to be unique in the personal zone. The channel we use here is configured to allow
+                both sending and receiving from all connected clients.
+            </p>
+            <button type="button" id="btnCreatorCreateChannel">Create channel</button>
+            <p>
+                After creating a channel, other applications can find it and request to connect to it.
+                Use the button below to send a message to all clients which are connected to the channel.
+                Here a "ping" message will be send.
+            </p>
+            <button type="button" id="btnCreatorSendMessage">Send message</button>
+
+            <h4>Application B: Finding and using the channel</h4>
+            <p>
+                Other applications can search for channels, and if found they can request to connect to it
+                (the channel creator decides who is allowed to connect). In this example, the client will
+                respond with a "pong" message on each received message (after the connect succeeded).
+            </p>
+            <button type="button" id="btnClientConnectToChannel">Connect to channel</button>
+
+        </div>
+    </article>
+</section>
+</body>
+</html>

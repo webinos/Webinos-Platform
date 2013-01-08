@@ -5,7 +5,12 @@
     var fs = require('fs');
     var path = require('path');
     var wm = require('../../../index.js');
-    var pzp = require('../../../../../pzp/lib/pzp');
+    
+    var webinos = require("find-dependencies")(__dirname);
+    var pzp = webinos.global.require(webinos.global.pzp.location, "lib/pzp");
+    
+    var signedOnly = false;
+    var useWGTProtocol = false;
     
     // ToDo - is there a 3rd party library we can use for this?
     var mimeTypes = {
@@ -72,24 +77,29 @@
         var installId = processingResult.getInstallId();
 
         if (processingResult.status) {
-            // An error occurred.
-            console.log('wm: pendingInstall error: install: ' + processingResult.status);
-            if (installId) {
-                wm.widgetmanager.abortInstall(installId);
-            }
-            callback(false);
+          // An error occurred.
+          console.log('wm: pendingInstall error: install: ' + processingResult.status);
+          if (installId) {
+            wm.widgetmanager.abortInstall(installId);
+          }
+          callback({ title: "widget installation", status: processingResult.status, text: processingResult.error.getReasonText() });
         } else {
-            // Pending install OK => complete the install.
+          // Pending install OK => complete the install.
+          if (signedOnly && processingResult.validationResult.status != wm.WidgetConfig.STATUS_VALID) {
+            console.log("failing installation of unsigned widget");
+            callback({ title: "widget installation", status: processingResult.validationResult.status, text: "widget not signed - installation failed"});        
+          } else {
             console.log("******** completing install: " + installId);
-        
+            
             var result = wm.widgetmanager.completeInstall(installId, true);
             if (result) {
-                console.log('wm: completeInstall error: install: ' + result);
-                callback(false);
+              console.log('wm: completeInstall error: install: ' + result);
+              callback({ title: "widget installation", status: result, text: "completing installation failed"});
             } else {
-                console.log('wm: install complete');
-                callback(true, installId);
+              console.log('wm: install complete');
+              callback(null, installId);
             }
+          }
         }
       }
 
@@ -98,9 +108,9 @@
 
     function uninstallWidget(id, callback) {
       if (wm.widgetmanager.uninstall(id))
-          callback(false);
+        callback(false);
       else
-          callback(true);
+        callback(true);
     }
 
     // Get the list of installed widgets.
@@ -109,29 +119,13 @@
 
       var lst = wm.widgetmanager.getInstalledWidgets();
       for (var idx in lst) {
-          var cfg = wm.widgetmanager.getWidgetConfig(lst[idx]);
-          if (cfg) {
-              cfgs.push(cfg);
-          }
+        var cfg = wm.widgetmanager.getWidgetConfig(lst[idx]);
+        if (cfg) {
+          cfgs.push(cfg);
+        }
       }
 
       res.render('apps', { pageTitle: 'installed apps', list: cfgs, feedback: req.param('feedback', '') });
-    };
-
-    // Install a widget (obsolete - see sideLoad)
-    exports.install = function (req, res) {
-      downloadFile('http://webinos.two268.com/apps/' + req.param('id', 'missing') + '/' + req.param('id', 'missing'), function (ok, wgt) {
-        if (ok) {
-          installWidget(wgt, function (ok, installId) {
-            if (ok)
-              res.render('install', { pageTitle: 'install', id: req.param('id', 'missing!'), success: ok, installId: installId });
-            else
-              res.render('install', { pageTitle: 'install failed', id: req.param('id', 'missing!'), success: ok });
-          });
-        }
-        else
-          res.render('install', { pageTitle: 'install download failed', id: req.param('id', 'missing!'), success: false });
-      });
     };
 
     // Un-install a widget.
@@ -145,37 +139,54 @@
     exports.sideLoad = function (req, res) {
       var wgt = decodeURIComponent(req.param('id', 'missing id!'));
       console.log("side-loading: " + wgt);
-      installWidget(wgt, function (ok, installId) {
-        if (ok) {        
-          //var redirect = '/widget/' + installId;
-          //var redirect = 'wgt://' + installId;
+      installWidget(wgt, function (err, installId) {
+        if (installId) {        
+          // We need to use this trick so that the renderer re-loads the browser instance
+          // and sets the new widget attributes up (width, height, widget interface etc).
           var redirect = 'webinos://sideLoadComplete/' + installId;
           console.log("sideload redirecting to " + redirect);
           res.redirect(redirect);
         } else {      
-          //res.render('install', { pageTitle: 'install failed', id: req.param('id', 'missing!'), success: ok });
-          res.redirect("webinos://sideLoadFailed/");
+          var reason = encodeURIComponent(err.text);
+          res.redirect("webinos://sideLoadFailed/" + reason);
         }        
       });      
     };
 
     // Start running a widget => redirect to widget start file.
     exports.boot = function (req, res) {
-      console.log("apps.boot");
+      console.log("apps.boot - " + req.url);
       var installId = req.param('id', '404');
       var cfg = wm.widgetmanager.getWidgetConfig(installId);
       if (typeof(cfg) === "undefined") {
         console.log("bad widget id: " + installId);
       } else {
-        var startFile = cfg.startFile.path;
-        // Support remote start locations
-        var startFileProtocol = url.parse(startFile).protocol;
-        if (typeof startFileProtocol === "undefined") {
-          // Normal widget with local start file.
-          res.redirect(req.url + "/" + startFile);
+        // Validate the widget signature (if present).
+        var storePath1 = path.join(wm.Config.get().wrtHome, installId);
+        var storePath2 = path.join(storePath1, "wgt");
+        var wgtResource = new wm.DirectoryWidgetResource(storePath2);
+        var validator = new wm.WidgetValidator(wgtResource);
+        var result = validator.validate();
+        
+        if (signedOnly && result.status != wm.WidgetConfig.STATUS_VALID) {
+          res.render("error", { title: "signature validation", status: result.status, text: "widget signature missing or invalid"});
+        } else if (result.status >= wm.WidgetConfig.STATUS_UNSIGNED) {
+          var startFile = cfg.startFile.path;
+          // Support remote start locations
+          var startFileProtocol = url.parse(startFile).protocol;
+          if (typeof startFileProtocol === "undefined") {
+            // Normal widget with local start file.
+            if (useWGTProtocol) {
+              res.redirect('wgt://' + installId);
+            } else {
+              res.redirect(req.url + "/" + startFile);
+            }
+          } else {
+            // Redirect to remote start location.
+            res.redirect(startFile);
+          }
         } else {
-          // Redirect to remote start location.
-          res.redirect(startFile);
+          res.render("error", { title: "signature validation", status: result.status, text: result.errorArtifact.getReasonText()});
         }
       }
     };
@@ -201,7 +212,7 @@
           return;
         } else {        
           var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
-          res.writeHead(200, mimeType);
+          res.setHeader('Content-Type', mimeType);
 
           var fileStream = fs.createReadStream(filename);
           fileStream.pipe(res);
@@ -221,4 +232,11 @@
       }
     };
   
+  exports.setSignedOnly = function(signedOnlyFlag) {
+    signedOnly = typeof signedOnlyFlag === "undefined" ? false : signedOnlyFlag;
+  }
+  
+  exports.setUseWGTProtocol = function(useWGTProtocolFlag) {
+    useWGTProtocol = typeof useWGTProtocolFlag === "undefined" ? false : useWGTProtocolFlag;    
+  }
 }(module.exports));

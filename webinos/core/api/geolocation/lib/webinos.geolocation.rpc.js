@@ -18,6 +18,7 @@
 ******************************************************************************/
 
 (function() {
+var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 /**
  * Webinos Geolocation service constructor  (server side).

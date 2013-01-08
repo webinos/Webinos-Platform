@@ -1,0 +1,12 @@
+extends layout
+
+block content
+	div Click on a widget in the list below to run the test.
+		p For more information about these tests see 
+			a(target="_blank",href="http://dev.w3.org/2006/waf/widgets-digsig/test-suite/") W3C Test Suite for XML Digital Signatures For Widgets
+		hr
+		- widgets.forEach(function(testWidget) {
+			div.listItem
+				a(href="/tests/widget_dig_sig_tests/#{testWidget.src}") #{testWidget.forAttr}/#{testWidget.id}
+				div= testWidget.text
+		- })

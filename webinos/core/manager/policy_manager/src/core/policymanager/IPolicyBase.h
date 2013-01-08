@@ -42,7 +42,7 @@ public:
 	virtual ~IPolicyBase();
 	
 	virtual bool matchSubject(Request* req);
-	virtual Effect evaluate(Request * req);
+	virtual Effect evaluate(Request* req, pair<string, bool>*);
 	virtual PolicyType get_iType();
 	
 protected:

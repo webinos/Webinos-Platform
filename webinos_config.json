@@ -6,7 +6,7 @@
     "pzp_tlsServer"     :8040,
     "pzp_zeroConf"      :4321
   },
-  "pzhDefaultServices": ["context", "events", "get42"],
+  "pzhDefaultServices": ["context", "events", "get42", "app2app"],
   "certConfiguration": {
     "country": "UK",
     "state"  : "MX",

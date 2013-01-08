@@ -24,6 +24,8 @@
 #include "Rule.h"
 #include "Subject.h"
 #include "../../debug.h"
+#include "DataHandlingPreferences.h"
+#include "ProvisionalActions.h"
 
 class Policy : public IPolicyBase
 	{
@@ -32,14 +34,17 @@ private:
 	string 				ruleCombiningAlgorithm;
 	vector<Subject*> 	subjects;
 	vector<Rule*>		rules;
+	DHPrefs*			datahandlingpreferences;
+	vector<ProvisionalActions*>		provisionalactions;
+	void selectDHPref(Request*, pair<string, bool>*);
 	
 	
 public:
-	Policy(TiXmlElement*);
+	Policy(TiXmlElement*, DHPrefs*);
 	virtual ~Policy();
 	
 	bool matchSubject(Request*);
-	Effect evaluate(Request*);
+	Effect evaluate(Request*, pair<string, bool>*);
 	PolicyType get_iType();
 //	static string modFunction(const string&, const string&);
 	

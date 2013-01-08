@@ -1,122 +1,124 @@
 <html>
 <head>
-	<title>webinos rpc</title>
-	<script type="text/javascript" src="./webinos.js"></script>
-	<script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
-	<script type="text/javascript">
+    <title>webinos rpc</title>
+    <script type='text/javascript' src='./webinos.js'></script>
+    <script type='text/javascript' src='./jquery-1.8.2.min.js' ></script>
+    <script type='text/javascript'>
 
-	function logObj(obj, name){
-		for (var myKey in obj){
-			console.log(name + "["+myKey +"] = "+obj[myKey]);
-			if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + "." + myKey);
-		}
-	}
-	
-            $(document).ready(function() {
+    function logObj(obj, name){
+        for (var myKey in obj){
+            console.log(name + '['+myKey +'] = '+obj[myKey]);
+            if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + '.' + myKey);
+        }
+    }
+    
+    var counter = 0;
+
+    $(document).ready(function() {
                 
-                function printInfo(data) {
-                    $('#message').append('<li>'+data.payload.message+'</li>');
-                }
-                webinos.session.addListener('info', printInfo);
-                
-                
-            	    sensors = [];
-                    $('#findService').bind('click', function() {
+        function printInfo(data) {
+            $('#message').append('<li>'+data.payload.message+'</li>');
+        }
+        webinos.session.addListener('info', printInfo);
+        sensors = [];
+        $('<option value=\'temperature\'>temperature</option>').appendTo('#sensorTypeList');
+        $('<option value=\'light\'>light</option>').appendTo('#sensorTypeList');
+        $('<option value=\'proximity\'>proximity</option>').appendTo('#sensorTypeList');
 
-                	    webinos.discovery.findServices(new ServiceType('http://webinos.org/api/sensors.temperature'), 
-						{onFound: function (service) {
-							
-							
-							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
-							 sensors[service.serviceAddress] = service;
-							
-                	    	$('#messages').append('<li> New Sensor found: ' + service.api + '</li>');
+        $('#findService').bind('click', function() {
 
-                	    	logObj(service, "Service");
-                	    }});
-                    });
+            $('#pzh_pzp_list').empty();
+            $('<option></option>').appendTo('#pzh_pzp_list');
+            $('#messages').empty();
+            counter = 0;
+            webinos.discovery.findServices(new ServiceType('http://webinos.org/api/sensors.'+$('#sensorTypeList option:selected').val()), 
+                {onFound: function (service) {
+                    $('<option value=' + service.id + ' >' + counter +':' +service.serviceAddress + '</option>').appendTo('#pzh_pzp_list');
+                    sensors[service.id] = service;
+                    $('#messages').append('<li> New Sensor found: ' + service.api + '</li>');
+                    logObj(service, 'Service');
+                    counter++;
+            }});
+        });
                     
-                    $('#cls').bind('click', function() {
-                    	document.getElementById("messages").innerHTML = "";
-                    }); 
+        $('#cls').bind('click', function() {
+            $('#messages').html('');
+        }); 
                     
-                    $('#bind').bind('click', function() {
-                    	sensorToUse = sensors[$('#pzh_pzp_list option:selected').val()];
-                    	
-
-                        	sensorToUse.bind({onBind:function(){
-                        		
-                        		logObj(sensors,"sensors");
-                        		$('#messages').append('<li> Sensor ' + sensorToUse.api + ' bound.</li>');
-                    			
-                    	    	$('#messages').append("<li> Max Range: " + sensorToUse.maximumRange + '</li>');
-                    	    	$('#messages').append("<li> Min Delay: " + sensorToUse.minDelay + '</li>');
-                    	    	$('#messages').append("<li> Power: " + sensorToUse.power + '</li>');
-                    	    	$('#messages').append("<li> Resolution: " + sensorToUse.resolution + '</li>');
-                    	    	$('#messages').append("<li> Vendor: " + sensorToUse.vendor + '</li>');  
-                    	    	$('#messages').append("<li> Version: " + sensorToUse.version + '</li>'); 
-                        	}});
-            	    	
-                    }); 
+        $('#bind').bind('click', function() {
+            sensorToUse = sensors[$('#pzh_pzp_list option:selected').val()];
+            sensorToUse.bind({onBind:function(){
+                logObj(sensors,'sensors');
+                $('#messages').append('<li> Sensor ' + sensorToUse.api + ' bound.</li>');
+               <!-- $('#messages').append('<li> Max Range: ' + sensorToUse.maximumRange + '</li>'); -->
+                $('#messages').append('<li> Min Delay: ' + sensorToUse.minDelay + '</li>');
+                $('#messages').append('<li> Power: ' + sensorToUse.power + '</li>');
+                $('#messages').append('<li> Resolution: ' + sensorToUse.resolution + '</li>');
+                $('#messages').append('<li> Vendor: ' + sensorToUse.vendor + '</li>');  
+                $('#messages').append('<li> Version: ' + sensorToUse.version + '</li>'); 
+            }});
+        }); 
                     
-                    
-                    $('#configure').bind('click', function() {
-                    	sensorToUse.configureSensor({}, function(){
-                        		$('#messages').append('<li> Sensor ' + sensorToUse.api + ' configured.</li>');
-                        	},
-                        	function (){
-                        		$('#messages').append('<li> Error configuring Sensor ' + sensorToUse.api + '</li>');
-                        	});
-                    });
-                    
-                    $('#register').bind('click', function() {
-                    	sensorToUse.addEventListener('temperature', 
-                    				function(event){
-										if ($("#sensorResult")!=null) {//If there is the element
-											$("#sensorResult").innerHTML = "";
-											$('#sensorResult').append('<li> Sensor Event from: ' + sensorToUse.api + '</li>');
-											$('#sensorResult').append('<li> Sensor Type: ' + event.sensorType + '</li>');
-											$('#sensorResult').append('<li> Sensor Id: ' + event.sensorId + '</li>');
-											$('#sensorResult').append('<li> Accuracy: ' + event.accuracy + '</li>');
-											$('#sensorResult').append('<li> Rate: ' + event.rate + '</li>');
-											$('#sensorResult').append('<li> Interrupt: ' + event.interrupt + '</li>');
-											
-											$('#sensorResult').append('<li> Absolute Temp: ' + event.sensorValues[0] + '</li>');
-											$('#sensorResult').append('<li> Normalized Temp: ' + event.sensorValues[1] + '</li>');
-										}else{
-											
-										}
-                        		
-                        			}
-                    				, false);
-                        
-                     }); 
-
+        $('#configure').bind('click', function() {
+            sensorToUse.configureSensor({timeout: 120, rate: 5000, eventFireMode: "valuechange"}, function(){
+                $('#messages').append('<li> Sensor ' + sensorToUse.api + ' configured.</li>');
+                },
+                function (){
+                    $('#messages').append('<li> Error configuring Sensor ' + sensorToUse.api + '</li>');
             });
-        </script>
+        });
+                    
+        $('#register').bind('click', function() {
+            sensorToUse.addEventListener('temperature', function(event){
+                if ($('#sensorResult')!=null) {//If there is the element
+                    $('#sensorResult').html('');
+                    $('#sensorResult').append('<li> Sensor Event from: ' + sensorToUse.api + '</li>');
+                    $('#sensorResult').append('<li> Sensor Type: ' + event.sensorType + '</li>');
+                    $('#sensorResult').append('<li> Sensor Id: ' + event.sensorId + '</li>');
+                    $('#sensorResult').append('<li> Accuracy: ' + event.accuracy + '</li>');
+                    $('#sensorResult').append('<li> Rate: ' + event.rate + '</li>');
+                    $('#sensorResult').append('<li> Interrupt: ' + event.interrupt + '</li>');
+                    $('#sensorResult').append('<li> Absolute Temp: ' + event.sensorValues[0] + '</li>');
+                    $('#sensorResult').append('<li> Normalized Temp: ' + event.sensorValues[1] + '</li>');
+                }else{
+                } } , false
+            );
+        }); 
+
+        $('#unregister').bind('click', function() {
+            try {
+                sensorToUse.removeEventListener('temperature', function(){}, false);
+            }
+            catch(e) {
+                alert('cannot unregister: '+e.message);
+            }
+        }); 
+
+    });
+</script>
      
 </head>
 <body>
-	<div >
-		<div >
-			<p>
-				<div> Found Sensor APIs @ <select id="pzh_pzp_list"> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
-				<button id="findService">Find Sensors</button>
-				<button id="cls">Clear</button>
-				<button id="bind">Bind Sensor</button>
-		    	<button id="configure">Configure Sensor</button>
-		    	<button id="register">Register</button>
-			</p>
-			<p>
-				<ul id="sensorResult">
-                   <br><br><br><br><br><br><br><br>
-			</ul>
-			</p>
-		</div>
-		<div >
-			<ul id="messages">
-			</ul>
-		</div>
-	</div>
+    <div >
+        <div >
+            <p>
+                <div> Sensor type <select id='sensorTypeList'> <option> </option> </select></div>
+                <br><br>
+                <div> Found Sensor APIs @ <select id='pzh_pzp_list'> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
+                <button id='findService'>Find Sensors</button>
+                <button id='cls'>Clear</button>
+                <button id='bind'>Bind Sensor</button>
+                <button id='configure'>Configure Sensor</button>
+                <button id='register'>Register</button>
+                <button id='unregister'>Unregister</button>
+            </p>
+            <br><br>
+            <div id='messages'>
+            </div>
+            <br><br>
+            <div id='sensorResult'>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

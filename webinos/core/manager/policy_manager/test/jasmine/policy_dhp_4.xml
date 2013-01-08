@@ -1,0 +1,89 @@
+<policy-set combine="first-matching-target" description="policy_dhp_4">
+	<policy combine="first-applicable" description="PZOwner">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user1"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			</condition>
+		</rule>
+		<rule effect="deny"></rule>
+		<ProvisionalActions>
+			<ProvisionalAction>
+				<AttributeValue>http://webinos.org/api/messaging</AttributeValue>
+				<AttributeValue>#DHPcurrent</AttributeValue>
+			</ProvisionalAction>
+			<ProvisionalAction>
+				<AttributeValue>http://webinos.org/api/nfc</AttributeValue>
+				<AttributeValue>#DHPcurrent</AttributeValue>
+			</ProvisionalAction>
+		</ProvisionalActions>
+	</policy>
+	<policy combine="first-applicable" description="PZFriend">
+		<target>
+			<subject>
+				<subject-match attr="user-id" match="user2"/>
+			</subject>
+		</target>
+		<rule effect="permit">
+			<condition combine="or">
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
+			</condition>
+		</rule>
+		<rule effect="deny"></rule>
+		<ProvisionalActions>
+			<ProvisionalAction>
+				<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
+				<AttributeValue>#DHPcurrent</AttributeValue>
+			</ProvisionalAction>
+			<ProvisionalAction>
+				<AttributeValue>http://webinos.org/api/nfc</AttributeValue>
+				<AttributeValue>#DHPcurrent</AttributeValue>
+			</ProvisionalAction>
+		</ProvisionalActions>
+	</policy>
+	<policy combine="first-applicable" description="untrusted">
+		<rule effect="deny"></rule>
+	</policy>
+	<DataHandlingPreferences PolicyId="#DHPcurrent-and-pseudo-analysis">
+		<AuthorizationsSet>
+			<AuthzUseForPurpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/pseudo-analysis</Purpose>
+			</AuthzUseForPurpose>
+		</AuthorizationsSet>
+	</DataHandlingPreferences>
+	<DataHandlingPreferences PolicyId="#DHPcurrent">
+		<AuthorizationsSet>
+			<AuthzUseForPurpose>
+				<Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose>
+			</AuthzUseForPurpose>
+		</AuthorizationsSet>
+	</DataHandlingPreferences>
+	<ProvisionalActions>
+		<ProvisionalAction>
+			<AttributeValue>http://webinos.org/api/discovery</AttributeValue>
+			<AttributeValue>#DHPcurrent-and-pseudo-analysis</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
+			<AttributeValue>#DHPcurrent-and-pseudo-analysis</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>http://webinos.org/api/messaging</AttributeValue>
+			<AttributeValue>#DHPcurrent-and-pseudo-analysis</AttributeValue>
+		</ProvisionalAction>
+		<ProvisionalAction>
+			<AttributeValue>http://webinos.org/api/nfc</AttributeValue>
+			<AttributeValue>#DHPcurrent-and-pseudo-analysis</AttributeValue>
+		</ProvisionalAction>
+	</ProvisionalActions>
+</policy-set>

@@ -20,6 +20,7 @@
 	//	console.log("CONTEXT SERVICE LOADED");
 	var webinos = require("find-dependencies")(__dirname);
 	var appContext = webinos.global.require(webinos.global.manager.context_manager.location, 'lib/appContext.js');
+	var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
 
   /**

@@ -20,11 +20,13 @@ var dependency     = require("find-dependencies")(__dirname);
 var logger         = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console;
 var session        = dependency.global.require(dependency.global.pzp.location, "lib/session.js");
 var MessageHandler = dependency.global.require(dependency.global.manager.messaging.location, "lib/messagehandler").MessageHandler;
-var rpc            = dependency.global.require(dependency.global.rpc.location);
-var Registry       = dependency.global.require(dependency.global.rpc.location, "lib/registry").Registry;
 var Discovery      = dependency.global.require(dependency.global.api.service_discovery.location, "lib/rpc_servicedisco").Service;
-var RPCHandler     = rpc.RPCHandler;
 var Sync           = dependency.global.require(dependency.global.manager.synchronisation_manager.location, "index");
+var loadModules    = dependency.global.require(dependency.global.util.location, "lib/loadservice.js").loadServiceModules;
+var rpc            = require("webinos-jsonrpc2");
+var RPCHandler     = rpc.RPCHandler;
+var Registry       = rpc.Registry;
+var path = require("path");
 
 var Pzh_RPC = function(_parent) {
   this.messageHandler;
@@ -34,17 +36,17 @@ var Pzh_RPC = function(_parent) {
   this.rpcHandler;
   this.modules;         // holds startup modules
   var self = this;
-
+  var sync = new Sync();
   /**
-   * Initialize RPC to enable discovery and rpcHandler
-   */
+  * Initialize RPC to enable discovery and rpcHandler
+  */
   this.initializeRPC = function(){
     self.registry     = new Registry();
     self.rpcHandler   = new RPCHandler(undefined, self.registry); // Handler for remote method calls.
+    self.rpcHandler.setSessionId(_parent.pzh_state.sessionId);
     self.discovery    = new Discovery(self.rpcHandler, [self.registry]);
     self.registry.registerObject(self.discovery);
-    self.registry.loadModules(_parent.config.serviceCache, self.rpcHandler); // load specified modules
-    self.rpcHandler.setSessionId(_parent.pzh_state.sessionId);
+    loadModules(_parent.config.serviceCache, self.registry, self.rpcHandler); // load specified modules
   };
 
   /**
@@ -52,26 +54,26 @@ var Pzh_RPC = function(_parent) {
    * @param validMsgObj
    */
   this.sendFoundServices = function(validMsgObj){
-    logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
+    _parent.pzh_state.logger.log("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
     var services = self.discovery.getAllServices(validMsgObj.from);
     var msg = _parent.prepMsg(_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
     msg.payload.id = validMsgObj.payload.message.id;
     _parent.sendMessage(msg, validMsgObj.from);
-    logger.log("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
+    _parent.pzh_state.logger.log("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
   };
 
   /**
    * Unregister services
    * @param validMsgObj
    */
-  this.unregisterServices = function(validMsgObj) {
-    logger.log("receiving initial modules from pzp...");
-    if (!validMsgObj.payload.id) {
-      logger.error("cannot find callback");
+  this.unregisteredServices = function(validMsgObj) {
+    _parent.pzh_state.logger.log("receiving initial modules from pzp...");
+    if (!validMsgObj.payload.message.id) {
+      _parent.pzh_state.logger.error("cannot find callback");
       return;
     }
-    self.listenerMap[validMsgObj.payload.id](validMsgObj.payload.message);
-    delete self.listenerMap[validMsgObj.payload.id];
+    self.listenerMap[validMsgObj.payload.message.id](validMsgObj.payload.message);
+    delete self.listenerMap[validMsgObj.payload.message.id];
   };
 
   /**
@@ -96,11 +98,11 @@ var Pzh_RPC = function(_parent) {
     var msg = {"type"  : "prop", "from" : _parent.pzh_state.sessionId, "to" : pzhId, "payload" : {"status" : "registerServices", "message" :  {services:localServices, from:_parent.pzh_state.sessionId}}};
     parent.sendMessage(msg, pzhId);
 
-    logger.log("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
+    _parent.pzh_state.logger.log("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
   };
 
   this.getInitModules = function() {
-    return serviceCache;
+    return _parent.config.serviceCache;
   };
 
   this.addMsgListener = function (callback) {
@@ -110,17 +112,43 @@ var Pzh_RPC = function(_parent) {
   };
 
   this.syncStart = function(_pzpId) {
-    Sync.getFileHash(_parent.config.metaData.webinosRoot, _parent.config.metaData.webinosName, function(result) {
-      var msg = _parent.prepMsg(_parent.pzh_state.sessionId, _pzpId, "sync_hash", result);
-      _parent.sendMessage(msg, _pzpId)
-    });
+    var policy, policyPath, list, result, myKey, msg;
+    policyPath= path.join(_parent.config.metaData.webinosRoot, "policies","policy.xml");
+    policy = sync.parseXMLFile(policyPath);
+    list = {trustedList: _parent.config.trustedList, _crl: _parent.config.crl, cert: _parent.config.cert.external, policy: policy};
+    result = sync.getFileHash(list);
+
+    for (myKey in _parent.pzh_state.connectedPzp) {
+      if (_parent.pzh_state.connectedPzp.hasOwnProperty(myKey)) { // Sync with everyone.
+        msg = _parent.prepMsg(_parent.pzh_state.sessionId, myKey, "sync_hash", result);
+        _parent.sendMessage(msg, myKey);
+      }
+    }
   };
 
   this.syncUpdateHash = function(_pzpId, rcvdMsg) {
-    Sync.syncFileMissing(_parent.config.metaData.webinosRoot, _parent.config.metaData.webinosName, rcvdMsg, function(result) {
+    var result = sync.syncFileMissing(rcvdMsg);
+    if (Object.keys(result).length >= 1) {
+      if (result["trustedList"])  {
+        _parent.config.metaData.trustedList = result["trustedList"];
+        _parent.config.storeTrustedList(_parent.config.metaData.trustedList);
+      }
+      if (result["crl"]) {
+        _parent.config.crl = receivedMsg[msg];
+        _parent.config.storeCrl(_parent.config.crl);
+      }
+      if (result["cert"]) {
+        _parent.config.cert.external = receivedMsg[msg];
+        _parent.config.storeCertificate(_parent.config.cert.external, "external");
+      }
       var msg = _parent.prepMsg(_parent.pzh_state.sessionId, _pzpId, "update_hash", result);
-      _parent.sendMessage(msg, _pzpId)
-    });
+      _parent.sendMessage(msg, _pzpId);
+    }
+    else {
+      logger.log("Nothing to synchronize with the PZP " + _pzpId)
+    }
+
+
   };
 
   /**
@@ -141,7 +169,7 @@ var Pzh_RPC = function(_parent) {
             self.sendFoundServices(validMsgObj);
             break;
           case "unregServicesReply":
-            self.unregisterServices(validMsgObj);
+            self.unregisteredServices(validMsgObj);
             break;
           case "sync_compare":
             self.syncUpdateHash(validMsgObj.from, validMsgObj.payload.message);

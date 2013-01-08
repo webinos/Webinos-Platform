@@ -89,6 +89,11 @@ public class DiscoveryImpl extends DiscoveryManager implements IModule {
 		return new DiscoveryPendingOperation(t, bluetoothFindService);
 	}
 	
+	public void advertServices(String serviceType){
+		//start advertisement
+	}
+	
+	
 	public String getServiceId(String serviceType){
 		// TODO Auto-generated method stub - this probably is not applicable for BT discovery
 		return null; 

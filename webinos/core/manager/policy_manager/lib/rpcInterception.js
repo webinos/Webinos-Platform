@@ -1,29 +1,30 @@
 (function () {
     "use strict";
 
-    var pm = null;
-    var policyViewer = null;
+    var path = require('path');
+    var dependencies= require('find-dependencies')(__dirname);
+    var webinosPath = dependencies.local.require(dependencies.local.pzp.location).getWebinosPath();
+    var policyFile = path.join(webinosPath,"policies", "policy.xml");
 
-    var getNextID = function(a) {
-    // implementation taken from here: https://gist.github.com/982883
-    return a?(a^Math.random()*16>>a/4).toString(16):([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,getNextID);
-}
+    var pmlib = require('./policymanager.js');
+    var pm = new pmlib.policyManager(policyFile);
+    //TODO: polic editor for the review - remove it!
+    if(__EnablePolicyEditor) {
+      var pvlib = require('../viewer/policyviewerserver.js');
+      var policyViewer = new pvlib.policyViewer(pm);
+    }
 
-_RPCHandler.prototype._handleMessage = _RPCHandler.prototype.handleMessage;
+    exports.setRPCHandler = function(rpc) {
+        rpc.registerPolicycheck(handleMessage);
+    };
+
+
 
 /**
  * Handles a new JSON RPC message (as string)
  */
-_RPCHandler.prototype.handleMessage = function(){
-    if (arguments[0].jsonrpc) {
-        if (!pm) {
-            var pmlib = require('./policymanager.js');
-            pm = new pmlib.policyManager();
-	    if(__EnablePolicyEditor) {
-	        var pvlib = require('../viewer/policyviewerserver.js');
-	        policyViewer = new pvlib.policyViewer(pm);
-	    }
-        }
+function handleMessage() {
+    if (arguments[0].jsonrpc && arguments[0].method) {
 
         var rpcRequest = arguments[0];
         var id = rpcRequest.id;
@@ -43,6 +44,7 @@ _RPCHandler.prototype.handleMessage = function(){
 
 
         var userAndRequestor = arguments[1].split("_")[1].split("/");
+        var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
 
         var request = {
             'subjectInfo' : { 'userId' : userAndRequestor[0] },
@@ -51,23 +53,16 @@ _RPCHandler.prototype.handleMessage = function(){
         };
 
 
-        if (pm.enforceRequest(request) == 0) {
+        if (pm.enforceRequest(request, sessionId) == 0) {
             //request is allowed by policy manager
-            this._handleMessage.apply(this, arguments)
+            return true;
         } else {
             //request is NOT allowed by policy manager
-            var rpc = {
-                jsonrpc: '2.0',
-                id: rpcRequest.id || getNextID(),
-//                result: "SECURITY_ERROR",
-                error: {
-                    data: { name: "SecurityError", code: 18, message: "Access to " + apiFeature + " has been denied."},
-                    code: -31000,
-                    message: 'Method Invocation returned with error'
-                }
-            }
-            this.executeRPC(rpc, undefined, undefined, arguments[1], arguments[2]);
+            return false;
         }
     }
+    //If no feature is specified then allow
+    return true;
 }
+
 }());

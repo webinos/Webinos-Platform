@@ -56,7 +56,6 @@
 #define IDS_WEBINOS_404_PAGE            1008
 #define IDS_WEBINOS_500_PAGE            1009
 #define IDS_WEBINOS_INVALID_WIDGET_PAGE 1010
-#define IDS_WEBINOS_ABOUT_WIDGET_PAGE   1011
 
 // Avoid files associated with MacOS
 #define _X86_

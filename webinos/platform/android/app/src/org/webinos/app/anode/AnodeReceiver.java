@@ -18,8 +18,6 @@ package org.webinos.app.anode;
 
 import org.meshpoint.anode.Isolate;
 import org.meshpoint.anode.Runtime;
-import org.meshpoint.anode.Runtime.IllegalStateException;
-import org.meshpoint.anode.Runtime.NodeException;
 import org.webinos.app.wrt.ui.WidgetInstallActivity;
 import org.webinos.app.wrt.ui.WidgetUninstallActivity;
 
@@ -55,7 +53,7 @@ public class AnodeReceiver extends BroadcastReceiver {
 		if(ACTION_STOPALL.equals(action)) {
 			if(Runtime.isInitialised()) {
 				for(Isolate isolate : AnodeService.getAll())
-					stopInstance(isolate);
+					AnodeService.stopInstance(isolate);
 			}
 			/* temporary ... kill the process */
 			System.exit(0);
@@ -76,7 +74,7 @@ public class AnodeReceiver extends BroadcastReceiver {
 					Log.v(TAG, "AnodeReceiver.onReceive::stop: instance " + instance + " not found");
 					return;
 				}
-				stopInstance(isolate);
+				AnodeService.stopInstance(isolate);
 			}
 			/* temporary ... Kill the process */
 			System.exit(0); // This was added for the review meeting to free up the ports
@@ -113,15 +111,5 @@ public class AnodeReceiver extends BroadcastReceiver {
 		/* otherwise, start service */
 		intent.setClassName(ctx, AnodeService.class.getName());
 		ctx.startService(intent);
-	}
-
-	private void stopInstance(Isolate isolate) {
-		try {
-			isolate.stop();
-		} catch (IllegalStateException e) {
-			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
-		} catch (NodeException e) {
-			Log.v(TAG, "AnodeReceiver.onReceive::stop: exception: " + e + "; cause: " + e.getCause());
-		}
 	}
 }

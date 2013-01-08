@@ -47,27 +47,27 @@ function ContactName(_formatted, _family, _given, _middle, _pre, _suf)
 	"use strict";
   if (_formatted)
   {
-    this.formatted = _formatted;
+    this.formatted = _formatted["$t"];
   }
   if (_family)
   {
-    this.familyName = _family;
+    this.familyName = _family["$t"];
   }
   if (_given)
   {
-    this.givenName = _given;
+    this.givenName = _given["$t"];
   }
   if (_middle)
   {
-    this.middleName = _middle;
+    this.middleName = _middle["$t"];
   }
   if (_pre)
   {
-    this.honorificPrefix = _pre;
+    this.honorificPrefix = _pre["$t"];
   }
   if (_suf)
   {
-    this.honorificSuffix = _suf;
+    this.honorificSuffix = _suf["$t"];
   }
 }
 
@@ -221,7 +221,7 @@ function ContactOrganization(_name, _type, _pref, _title, _department)
   }
   if (_type)
   {
-    this.type = _type;
+    this.type = _type.substr(('http://schemas.google.com/g/2005#').length);
   }
   if (_name)
   {

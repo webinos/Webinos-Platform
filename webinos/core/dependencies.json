@@ -28,6 +28,10 @@
       "name": "Events API",
       "location": "api/events/"
     },
+    "app2app": {
+      "name": "App2App Messaging API",
+      "location": "api/app2app/"
+    },
     "zap-and-shake": {
       "name": "Zap and Shake (hack)",
       "location": "api/zap-and-shake/"
@@ -90,6 +94,11 @@
       "name": "Context manager",
       "location": "manager/context_manager/"
     },
+    "localconnection_manager": {
+      "name": "local connection manager",
+      "location": "manager/localconnection_manager/"
+    },
+    
     "messaging": {
       "name": "Messaging Manager",
       "location": "manager/messaging/"
@@ -105,19 +114,23 @@
     "keystore": {
       "name": "Key Store",
       "location": "manager/keystore/"
+    },
+    "widget_manager": {
+        "name": "Widget Manager",
+        "location": "manager/widget_manager"
     }
   },
   "util": {
     "name":"Webinos utility",
     "location": "util/"
   },
-  "rpc": {
-    "name": "RPC",
-    "location": "rpc/"
+  "xmpppzp": {
+    "name": "xmpp-pzp",
+    "location": "xmpp-pzp/"
   },
-  "xmpp": {
-    "name": "xmpp",
-    "location": "xmpp/"
+  "xmpppzh": {
+    "name": "xmpp-pzh",
+    "location": "xmpp-pzh/"
   },
   "pzp": {
     "name": "PZP",

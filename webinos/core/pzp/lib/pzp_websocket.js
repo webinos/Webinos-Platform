@@ -49,6 +49,7 @@ var PzpWSS = function(_parent) {
 
 
   function prepMsg(from, to, status, message) {
+    "use strict";
     return {
       "type": "prop",
         "from": from,
@@ -61,6 +62,7 @@ var PzpWSS = function(_parent) {
   }
 
   function getConnectedPzp() {
+    "use strict";
     return Object.keys(parent.pzp_state.connectedPzp);
   }
 
@@ -69,19 +71,27 @@ var PzpWSS = function(_parent) {
   }
 
   function getVersion(callback) {
+    "use strict";
     var version;
     if (os.platform().toLowerCase() !== "android") {
       child_process("git describe", function(error, stderr, stdout){
         if(!error){
           callback(stderr);
         } else {
-          callback("v0.7");
+          callback("v0.7"); // Change this or find another way of reading git describe for android
         }
       })
     } else {
       callback("v0.7");
     }
 
+  }
+
+  function getWebinosLog (type, callback) {
+    "use strict";
+    logger.fetchLog(type, "Pzp", parent.config.metaData.friendlyName, function(data) {
+      callback(data);
+    });
   }
 
   function wsServerMsg(message) {
@@ -116,20 +126,42 @@ var PzpWSS = function(_parent) {
     if (msg.type === "prop") {
       if (msg.payload.status === "registerBrowser") {
         connectedApp(connection);
-      } else if (msg.payload.status === "setFriendlyName") {
+      }
+      else if (msg.payload.status === "setFriendlyName") {
         parent.changeFriendlyName(msg.payload.value);
-      } else if (msg.payload.status === "getFriendlyName") {
+      }
+      else if (msg.payload.status === "getFriendlyName") {
         var msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
         self.sendConnectedApp(msg.from, msg1);
-      } else if (msg.payload.status === "webinosVersion") {
+      }
+      else if (msg.payload.status === "infoLog") {
+        getWebinosLog("info", function(value) {
+          msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "infoLog", value);
+          self.sendConnectedApp(msg.from, msg1);
+        });
+      }
+      else if (msg.payload.status === "errorLog") {
+        getWebinosLog("error", function(value) {
+          msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "errorLog", value);
+          self.sendConnectedApp(msg.from, msg1);
+        });
+      }
+      else if (msg.payload.status === "webinosVersion") {
         getVersion(function(value){
           var msg2 = prepMsg(parent.pzp_state.sessionId, msg.from, "webinosVersion", value);
           self.sendConnectedApp(msg.from, msg2);
         });
-      } else {
-        autoEnrollment(msg, origin);
       }
-    } else {
+      else {
+        autoEnrollment(msg, origin, function(status){
+          if(!status){
+            var msg2 = prepMsg(parent.pzp_state.sessionId, msg.from, "error", "failed connecting to pzh provider");
+            self.sendConnectedApp(msg.from, msg2);
+          }
+        });
+      }
+    }
+    else {
       parent.webinos_manager.messageHandler.onMessageReceived(msg, msg.to);
     }
   }
@@ -221,29 +253,36 @@ var PzpWSS = function(_parent) {
   }
 
   function connectedApp(connection) {
-    var appId, tmp, payload, connectedPzhIds = [],  connectedPzpIds= [], key, msg;
-    connectedPzpIds = getConnectedPzp();
-    connectedPzhIds = getConnectedPzh();
+    var appId, tmp, payload, key, msg, msg2;
     if (connection) {
       appId = parent.pzp_state.sessionId+ "/"+ sessionWebApp;
       sessionWebApp  += 1;
       connectedWebApp[appId] = connection;
       connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-      payload = { "pzhId": parent.config.metaData.pzhId, "connectedPzp": connectedPzpIds, "connectedPzh": connectedPzhIds};
+      payload = { "pzhId": parent.config.metaData.pzhId, "connectedPzp": getConnectedPzp(), "connectedPzh": getConnectedPzh()};
       msg = prepMsg(parent.pzp_state.sessionId, appId, "registeredBrowser", payload);
+      self.sendConnectedApp(appId, msg);
+
+      if(Object.keys(connectedWebApp).length == 1 ) {
+        getVersion(function(value){
+          msg2 = prepMsg(parent.pzp_state.sessionId, appId, "webinosVersion", value);
+          self.sendConnectedApp(appId, msg2);
+        });
+      }
+
       self.sendConnectedApp(appId, msg);
     } else {
       for (key in connectedWebApp) {
         if (connectedWebApp.hasOwnProperty(key)) {
           tmp = connectedWebApp[key];
-          if (key.split("/").length > 2)
+          /*if (key.split("/") && key.split("/").length > 2)
             break;
           key = parent.pzp_state.sessionId+ "/" + key.split("/")[1];
           tmp.id = key;
-          connectedWebApp[key] = tmp;
-          payload = {"pzhId": parent.pzp_state.sessionId.split("/")[0],"connectedPzp": connectedPzpIds,"connectedPzh": connectedPzhIds};
-          msg = prepMsg(parent.pzp_state.sessionId, key, "registeredBrowser", payload);
+          connectedWebApp[key] = tmp;*/
+          payload = {"pzhId": parent.config.metaData.pzhId, "connectedPzp":  getConnectedPzp(),"connectedPzh":  getConnectedPzh()};
+          msg = prepMsg(parent.pzp_state.sessionId, key, "update", payload);
           self.sendConnectedApp(key, msg);
         }
       }
@@ -262,7 +301,7 @@ var PzpWSS = function(_parent) {
   }
 
 
-  function autoEnrollment(query, origin) {
+  function autoEnrollment(query, origin, callback) {
     var msg, sendAdd;
     var cmd = query.payload.status;
     var to = query.to;
@@ -307,7 +346,12 @@ var PzpWSS = function(_parent) {
         });
       });
 
+      req.on('connect', function(){
+        callback(true);
+      });
+
       req.on('error', function (err) {
+        callback(false);
         logger.error(err);
       });
 
@@ -341,7 +385,7 @@ var PzpWSS = function(_parent) {
           httpServer: value,
           autoAcceptConnections: false
         });
-
+        logger.addId(parent.config.metaData.webinosName);
         wsServer.on("request", function(request) {
           logger.log("Request for a websocket, origin: " + request.origin + ", host: " + request.host);
           if (approveRequest(request)) {
@@ -379,6 +423,15 @@ var PzpWSS = function(_parent) {
   };
   this.updateApp = function() {
     connectedApp();
+  };
+  this.pzhDisconnected = function(){
+    var key;
+    for (key in connectedWebApp) {
+      if (connectedWebApp.hasOwnProperty(key)) {
+        var msg = prepMsg(parent.pzp_state.sessionId, key, "pzhDisconnected", "pzh disconnected");
+        self.sendConnectedApp(key, msg);
+      }
+    }
   }
 };
 

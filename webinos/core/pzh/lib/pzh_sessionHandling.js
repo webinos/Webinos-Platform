@@ -53,7 +53,7 @@ var Pzh = function () {
     connectedPzp: {},// Holds connected PZP information such as IP address and socket connection
     connectedPzh: {},
     expecting   : "", // Set by auth-code directly
-    logger      : ""
+    logger      :new logging(__filename)
   };
 
   /**
@@ -68,12 +68,21 @@ var Pzh = function () {
   function handlePzpAuthorization(_pzpId, _conn) {
     var msg;
     _pzpId = self.config.metaData.serverName + "/" + _pzpId;
-    self.pzh_state.logger.log("pzp " + _pzpId + "  connected");
-    self.pzh_state.connectedPzp[_pzpId] = {"socket": _conn,  "address": _conn.socket.remoteAddress};
-    _conn.id = _pzpId;
-    msg = self.pzh_otherManager.messageHandler.registerSender(self.pzh_state.sessionId, _pzpId);
-    self.sendMessage(msg, _pzpId);
-    self.pzh_otherManager.syncStart(_pzpId);
+    if (self.config.trustedList.pzp.hasOwnProperty(_pzpId)) {
+      self.pzh_state.logger.log("pzp " + _pzpId + "  connected");
+      self.pzh_state.connectedPzp[_pzpId] = {"socket": _conn,  "address": _conn.socket.remoteAddress};
+      if (self.config.trustedList.pzp[_pzpId].addr !== _conn.socket.remoteAddress) {
+        self.config.trustedList.pzp[_pzpId].addr = _conn.socket.remoteAddress;
+        self.config.storeTrustedList(self.config.trustedList);
+      }
+      console.log(self.config.trustedList.pzp);
+      _conn.id = _pzpId;
+      msg = self.pzh_otherManager.messageHandler.registerSender(self.pzh_state.sessionId, _pzpId);
+      self.sendMessage(msg, _pzpId);
+      self.pzh_otherManager.syncStart(_pzpId);
+    } else {
+      logger.error("unknown pzp " + _pzpId + " trying to connect")
+    }
   }
 
   /**
@@ -254,7 +263,6 @@ var Pzh = function () {
    * @param _callback returns instance of PZH
    */
   this.addLoadPzh = function (_friendlyName, _uri, _user, _callback) {
-    self.pzh_state.logger = new logging(__filename); // log is initialized in order to show log as per sessions
     auth_code.createAuthCounter(function (res) {
       self.pzh_state.expecting = res;
     });
@@ -267,7 +275,7 @@ var Pzh = function () {
       if (status) {
         self.config.storeUserDetails(_user);
         self.pzh_state.sessionId = _uri;
-        self.pzh_state.logger.addId(self.pzh_state.sessionId);
+        self.pzh_state.logger.addId(self.config.userData.email);
         self.pzh_otherManager = new pzh_otherManager(self);
         self.pzh_pzh = new Pzh_Pzh(self);
         self.revoke  = new RevokePzh(self);
@@ -290,11 +298,10 @@ var Pzh_Pzh = function(_parent){
   var pzh_pzh = require("../web/pzh_pzh_certificateExchange.js");
 
   this.connect_ConnectedPzh = function(options) {
-    var key;
-    for (key = 0; key <  _parent.config.trustedList.pzh.length; key = key + 1) {
-      if (!_parent.pzh_state.connectedPzh.hasOwnProperty(_parent.config.trustedList.pzh[key])) {
-        self.connectOtherPZH(_parent.config.trustedList.pzh[key], options,
-        function(status, errorDetails) {
+    var myKey;
+    for (myKey in  _parent.config.trustedList.pzh) {
+      if (!_parent.pzh_state.connectedPzh.hasOwnProperty(myKey) && _parent.pzh_state.sessionId !== myKey) {
+        self.connectOtherPZH(myKey, options, function(status, errorDetails) {
           if (!status) {
             _parent.pzh_state.logger.error("connecting to pzh failed - due to" + errorDetails);
           }
@@ -349,8 +356,8 @@ var Pzh_Pzh = function(_parent){
       _parent.config.cert.external[_msg.from] = { cert: _msg.payload.message.cert, crl: _msg.payload.message.crl};
       _parent.config.storeCertificate(_parent.config.cert.external,"external");
     }
-    if (_parent.config.trustedList.pzh.indexOf(_msg.from) === -1) {
-      _parent.config.trustedList.pzh.push(_msg.from);
+    if (_parent.config.trustedList.pzh.hasOwnProperty(_msg.from)) {
+      _parent.config.trustedList.pzh[_msg.from] = { ip_addr: ""};
       _parent.config.storeTrustedList(_parent.config.trustedList);
     }
     _parent.setConnParam(function(status, options){
@@ -370,7 +377,7 @@ var Pzh_Pzh = function(_parent){
    * @param callback - result callback invoked to inform client about the status
    */
   this.addOtherZoneCert = function(_from, _fetchPzh, _refreshCert, _callback) {
-    if(_parent.config.trustedList.pzh.indexOf(_from) !== -1) {
+    if(_parent.config.trustedList.pzh.hasOwnProperty(_from)) {
       _callback({to: _parent.config.metaData.serverName, cmd: 'pzhPzh', payload: "PZH already connected"})
     } else if (_from === _parent.config.metaData.serverName) {
       _callback({to: _parent.config.metaData.serverName, cmd: 'pzhPzh', payload: "Trying to connect own PZH"})
@@ -388,14 +395,13 @@ var RevokePzh = function(parent) {
    * @param callback
    */
   this.revokeCert = function(_pzpid, _refreshCert, _callback) {
-    var index, pzpCert = _parent.config.cert.internal.signedCert[_pzpid];
+    var pzpCert = _parent.config.cert.internal.signedCert[_pzpid];
     _parent.config.revokeClientCert(pzpCert, function(status, crl) {
       if (status) {
         _parent.pzh_state.logger.log("revocation success! " + _pzpid + " should not be able to connect anymore ");
         _parent.config.crl = crl;
         delete _parent.config.cert.internal.signedCert[_pzpid] ;
-        index = parent.config.trustedList.pzp.indexOf(_pzpid) ;
-        _parent.config.trustedList.pzp.splice(index,1);
+        delete parent.config.trustedList.pzp[_pzpid] ;
         _parent.config.cert.internal.revokedCert[_pzpid] = crl;
         _parent.config.storeAll();
         if (_parent.pzh_state.connectedPzp[_pzpid]){
@@ -436,8 +442,8 @@ var AddPzp = function(_parent) {
               _parent.config.cert.internal.signedCert[pzpId] = value;
               _parent.pzh_state.expecting.unsetExpected(function() {
                 _parent.config.storeCertificate(_parent.config.cert.internal, "internal");
-                if(_parent.config.trustedList.pzp.indexOf(pzpId) === -1) {// update configuration with signed certificate details ..
-                  _parent.config.trustedList.pzp.push(pzpId);
+                if(!_parent.config.trustedList.pzp.hasOwnProperty(pzpId)) {// update configuration with signed certificate details ..
+                  _parent.config.trustedList.pzp[pzpId] = {addr: "", port:""};
                   _parent.config.storeTrustedList(_parent.config.trustedList);
                 }
                 var payload = {"clientCert": _parent.config.cert.internal.signedCert[pzpId], "masterCert": _parent.config.cert.internal.master.cert, "masterCrl": _parent.config.crl};// Send signed certificate and master certificate to PZP
