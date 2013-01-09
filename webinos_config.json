@@ -1,6 +1,5 @@
 {
   "ports":{
-
     "provider"          :80,
     "provider_webServer":443,
     "pzp_webSocket"     :8080,

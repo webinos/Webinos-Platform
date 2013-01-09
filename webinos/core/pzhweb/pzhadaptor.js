@@ -1,105 +1,35 @@
-var path            = require('path'),
-    util            = require('util'),
-    crypto          = require('crypto'),
-    fs              = require('fs');
-    
+
 var webinos = require("find-dependencies")(__dirname),
-    logger   = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || logger,
-    pzhtls  = require('./realpzhtls.js');    
+    logger  = webinos.global.require(webinos.global.util.location, "lib/logging.js")(__filename) || logger,
+    pzhTLS  = require('./realpzhtls.js');
 
-var pzhadaptor = exports;
+var PzhAdaptor = exports;
 
-function resultHandler(res) {
-    var result = {
-        err: function(err) {
-            logger.log("Failed to get zone status");
+function getUserFromEmail(userEmail, cb) {
+    cb(userEmail, false);
+}
+
+function resultRspHandler(res) {
+    return {
+        err : function(err) {
+            logger.log(err);
+            res.status(500);
         },
-        success: function(val) {
+        success : function(val) {
             res.json(val);
         }
     };
 }
 
-pzhadaptor.getZoneStatus = function(user, res) {
-    pzhtls.send(user, {type : "getZoneStatus"}, resultHandler(res));
-};
-
-pzhadaptor.approveFriend = function(user, externalEmail) {
-    pzhtls.send(user, {type:"approveFriend", externalEmail:externalEmail}, resultHandler(res));
-};
-
-pzhadaptor.rejectFriend = function(user, externalEmail) {
-    pzhtls.send(user, {type:"rejectFriend", externalEmail:externalEmail},resultHandler(res));
-};
-
-pzhadaptor.getRequestingExternalUser = function(user, externalEmail, cb) {
-    pzhtls.send(user, {type:"getExpectedExternal", externalEmail:externalEmail}, {
-        err : function(err) { 
+function resultCbHandler(cb) {
+    return {
+        err : function(err) {
             console.log(err);
             cb(false);
         },
         success : function(val) {
             cb(val);
         }
-    });
-};
-
-pzhadaptor.setExpectedExternalUser = function(user, externalEmail, externalPzh, externalCerts) {
-    pzhtls.send(user, {type:"setExpectedExternal",
-        externalEmail:externalEmail, externalPzh:externalPzh, externalCerts: externalCerts},
-        resultHandler(res));
-};
-
-//unauthenticated input
-pzhadaptor.setRequestingExternalUser = function(internaluser, externaluser, externalPzhDetails) {
-    getUserFromEmail(internaluser, function(user, err) {
-        pzhtls.send(user, {type:"requestAddFriend", externalUser:externaluser, externalPzh:externalPzhDetails},resultHandler(res));
-    });
-};
-
-pzhadaptor.fromWebUnauth = function(userEmail, body, res) {
-    // we've received a request from the web interface over XHR.
-    // translate and send to the PZH TLS server
-    
-    //it's not necessarily from a trusted or authenticated user, it's a public
-    //request for something.  E.g., for our certificates.
-    //first, check that the user is meaningful
-    
-    getUserFromEmail(userEmail, function(result, err) {
-        if (err) {
-            res.writeHead(200);
-            res.end('Request failed: ' + err);
-            return;
-        } else {
-            switch (body.type) {
-                case "certificates":
-                    pzhtls.send(result, {type:"certificates"}, responseCertHandler(res));
-                    break;
-                case "authCode":
-                    pzhtls.send(result, {type:"authCode"}, res);
-                    break;
-                default:
-                    res.writeHead(200);
-                    res.end('Request failed: ' + err);
-            }
-        }
-    });
-}
-
-
-function getUserFromEmail(userEmail, cb) {
-    cb(userEmail, false);
-}
-
-pzhadaptor.fromWeb = function(user, body, res) {
-
-    // we've received a request from the web interface over XHR.
-    // translate and send to the PZH TLS server
-    
-    if (typeof(body.payload) === 'undefined') {
-        manageStatus(body.cmd, user, res);
-    } else { 
-        manageStatus(body.payload, user, res);
     }
 }
 
@@ -115,6 +45,7 @@ function responseCertHandler(res) {
         }
     }
 }
+
 function responseHandler(status, res) {
     return {
         err : function(err) {
@@ -131,8 +62,8 @@ function responseHandler(status, res) {
 }
 
 function pzpResponder(email, res){
-   return {
-       success: function(authCode) {
+    return {
+        success: function(authCode) {
             var msg = "<script> window.parent.postMessage("+
                 JSON.stringify({cmd: 'requestEnroll',
                     pzhId: email,
@@ -140,13 +71,13 @@ function pzpResponder(email, res){
                 ", 'http://localhost:8080')</script>";
             res.write(msg);
             res.end();
-       }
+        }
     }
 }
+
 function pzpEnrollResponder(res){
     return {
         success: function(payload) {
-
             var msg = JSON.stringify(payload);
             res.write(msg);
             res.end();
@@ -154,57 +85,123 @@ function pzpEnrollResponder(res){
     }
 }
 
+PzhAdaptor.getZoneStatus = function(user, res) {
+    pzhTLS.send(user, {type : "getZoneStatus"}, resultRspHandler(res));
+};
+
+PzhAdaptor.approveFriend = function(user, externalEmail, res) {
+    pzhTLS.send(user, {type:"approveFriend", externalEmail:externalEmail}, resultRspHandler(res));
+};
+
+PzhAdaptor.rejectFriend = function(user, externalEmail, res) {
+    pzhTLS.send(user, {type:"rejectFriend", externalEmail:externalEmail}, resultRspHandler(res));
+};
+
+PzhAdaptor.getRequestingExternalUser = function(user, externalEmail, cb) {
+    pzhTLS.send(user, {type:"getExpectedExternal", externalEmail:externalEmail}, resultCbHandler(cb));
+};
+
+PzhAdaptor.storeExternalUserCert = function(user, externalEmail, externalPzh, externalCerts, res) {
+    pzhTLS.send(user, {type:"storeExternalCert",externalEmail:externalEmail, externalPzh:externalPzh,
+            externalCerts: externalCerts}, resultRspHandler(res));
+};
+
+//unauthenticated input
+PzhAdaptor.requestAddFriend = function(internaluser, externaluser, externalPzhDetails, res) {
+    getUserFromEmail(internaluser, function(user, err) {
+        pzhTLS.send(user, {type:"requestAddFriend", externalUser:externaluser, externalPzh:externalPzhDetails}, resultRspHandler(res));
+    });
+};
+
+PzhAdaptor.fromWebUnauth = function(userEmail, body, res) {
+    // we've received a request from the web interface over XHR.
+    // translate and send to the PZH TLS server
+    
+    //it's not necessarily from a trusted or authenticated user, it's a public
+    //request for something.  E.g., for our certificates.
+    //first, check that the user is meaningful
+    
+    getUserFromEmail(userEmail, function(result, err) {
+        if (err) {
+            res.writeHead(200);
+            res.end('Request failed: ' + err);
+            return;
+        } else {
+            switch (body.type) {
+                case "getCertificates":
+                    pzhTLS.send(result, {type:"getCertificates"}, responseCertHandler(res));
+                    break;
+                case "authCode":
+                    pzhTLS.send(result, {type:"authCode"}, res);
+                    break;
+                default:
+                    res.writeHead(200);
+                    res.end('Request failed: ' + err);
+            }
+        }
+    });
+}
+
+PzhAdaptor.fromWeb = function(user, body, res) {
+    // we've received a request from the web interface over XHR.
+    // translate and send to the PZH TLS server
+    if (typeof(body.payload) === 'undefined') {
+        manageStatus(body.cmd, user, res);
+    } else { 
+        manageStatus(body.payload, user, res);
+    }
+}
+
 function manageStatus(payload, user, res) {
     switch (payload.status) {
-      case 'listDevices':
-          pzhtls.send(user, {type:"getZoneStatus"}, responseHandler(payload.status, res));
-        break;
-      case 'userDetails':
-          pzhtls.send(user, {type:"getUserDetails"}, responseHandler(payload.status, res));
-        break;
+        case 'listDevices':
+            pzhTLS.send(user, {type:"getZoneStatus"}, responseHandler(payload.status, res));
+            break;
+        case 'userDetails':
+            pzhTLS.send(user, {type:"getUserDetails"}, responseHandler(payload.status, res));
+            break;
       case 'crashLog':
-          pzhtls.send(user, {type:"getCrashLog"}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"getCrashLog"}, responseHandler(payload.status, res));
+          break;
       case 'infoLog':
-          pzhtls.send(user, {type:"getInfoLog"}, responseHandler(payload.status, res));
-        break;
-      case 'pzhPzh':
-//        instance.addOtherZoneCert(query.payload.message, parent.fetchPzh, parent.refreshCert, result);
-        break;
+          pzhTLS.send(user, {type:"getInfoLog"}, responseHandler(payload.status, res));
+          break;
       case 'listPzp':
-          pzhtls.send(user, {type:"getPzps"}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"getPzps"}, responseHandler(payload.status, res));
+          break;
       case 'revokePzp':
-          pzhtls.send(user, {type:"revokePzp", pzpid: payload.pzpid}, responseHandler(payload.status, res));
-//        instance.revokeCert(query.payload.pzpid, parent.refreshCert, result);
-        break;
+          pzhTLS.send(user, {type:"revokePzp", pzpid: payload.pzpid}, responseHandler(payload.status, res));
+          break;
       case 'addPzp':
-          pzhtls.send(user, {type:"addPzp"}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"addPzp"}, responseHandler(payload.status, res));
+          break;
       case 'login':
-        pzhtls.send(user, {type:"hasLoggedIn"}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"hasLoggedIn"}, responseHandler(payload.status, res));
+          break;
       case 'logout':
-        pzhtls.send(user, {type:"hasLoggedOut"}, responseHandler(payload.status, res));            
-        break;
+          pzhTLS.send(user, {type:"hasLoggedOut"}, responseHandler(payload.status, res));
+          break;
       case 'listAllServices':
-        pzhtls.send(user, {type:"listAllServices"}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"listAllServices"}, responseHandler(payload.status, res));
+          break;
       case 'listUnregServices':
-        pzhtls.send(user, {type:"listUnregServices", at: payload.at}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"listUnregServices", at: payload.at}, responseHandler(payload.status, res));
+          break;
       case 'registerService':
-        pzhtls.send(user, {type:"registerService", at: payload.at, name: payload.name}, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"registerService", at: payload.at, name: payload.name}, responseHandler(payload.status, res));
+          break;
       case 'unregisterService':
-        pzhtls.send(user, {type:"unregisterService", at: payload.at, svId: payload.svId, svAPI: payload.svAPI }, responseHandler(payload.status, res));
-        break;
+          pzhTLS.send(user, {type:"unregisterService", at: payload.at, svId: payload.svId, svAPI: payload.svAPI }, responseHandler(payload.status, res));
+          break;
       case 'enrollPzp':
-        pzhtls.send(user, {type:"enrollPzp", from: payload.from, authCode: payload.authCode, csr: payload.csr}, pzpEnrollResponder(res));
-        break;
+          pzhTLS.send(user, {type:"enrollPzp", from: payload.from, authCode: payload.authCode, csr: payload.csr}, pzpEnrollResponder(res));
+          break;
       case 'authCode':
-        pzhtls.send(user, {type:"authCode"}, pzpResponder(user.emails[0].value, res));
-        break;
+          pzhTLS.send(user, {type:"authCode"}, pzpResponder(user.emails[0].value, res));
+          break;
+      case 'getAllPzh':
+          pzhTLS.send(user, {type:"getAllPzh"}, responseHandler(payload.status, res));
+          break;
     }
 }
 

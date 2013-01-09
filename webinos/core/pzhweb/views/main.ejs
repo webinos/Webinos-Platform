@@ -19,17 +19,19 @@
       $("#enumConnectedPzh").html("");
       $("#enumConnectedPzp").html("");
       var text = "";
-      for (var i = 0 ; i < payload.pzhs.length; i += 1){
-        var style = payload.pzhs[i].isConnected?"connected":"disconnected";
-        text+= "<li><a class='"+ style +"'>"+payload.pzhs[i].id + "</a></li>";
+      if(payload && payload.pzhs) {
+        for (var i = 0 ; i < payload.pzhs.length; i += 1){
+          var style = payload.pzhs[i].isConnected?"connected":"disconnected";
+          text+= "<li><a class='"+ style +"'>"+payload.pzhs[i].id + "</a></li>";
+        }
+        $("#enumConnectedPzh").html(text);
+        text = "";
+        for (i = 0 ; i < payload.pzps.length; i += 1){
+          var style = payload.pzps[i].isConnected?"connected":"disconnected";
+          text+= "<li><a class='"+ style +"'>"+payload.pzps[i].id + "</a></li>";
+        }
+        $("#enumConnectedPzp").html(text);
       }
-      $("#enumConnectedPzh").html(text);
-      text = "";
-      for (i = 0 ; i < payload.pzps.length; i += 1){
-        var style = payload.pzps[i].isConnected?"connected":"disconnected";
-        text+= "<li><a class='"+ style +"'>"+payload.pzps[i].id + "</a></li>";
-      }
-      $("#enumConnectedPzp").html(text);
       $('.column').equalHeight(); // Fix height
   }
   function displayQRCode(payload){
@@ -43,9 +45,24 @@
     $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
     $('.column').equalHeight(); // Fix height
   }
+  function pzhList(payload) {
+    var text = "";
+    if (payload.length !== 0) {
+      text = "Connect to zone:<br/> <select id='pzh_list'>"
+      for (var i = 0; i < payload.length; i = i +1) {
+        text += "<option value="+payload[i].url+">"+ payload[i].username +"</option>";
+      }
+      text += "</select>";
+      text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
+    } else {
+      text = "No other personal zone in the personal zone provider";
+    }
+    setArticle("Connect to another personal zone",text);
+  }
   function connectPzh(){
-    var id =  document.getElementById('connectPzhId').value;
-    id = id.split("/");
+    var e = document.getElementById('pzh_list');
+    var id = e.options[e.selectedIndex].value;
+    id = id.split("_");
     window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(id[1]) + "&externalpzh=" + encodeURIComponent(id[0]) ;
   }
   function pzpRevokeResult(payload){
@@ -127,15 +144,13 @@
       webinosPZH.commands.userDetails(listUserDetails);
       setTimeout(function() {
         webinosPZH.commands.listDevices(DisplayListOfDevices);
-      }, 100);
+      }, 3000);
     });
     $("#addPzp").click(function(){
       webinosPZH.commands.addPzp(displayQRCode);
     });
     $("#connectPzh").click(function(){
-      var text = "Connect to zone:<br/> <input type='text' id='connectPzhId' value=''/>";
-      text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/> <p>The address should be of of form hostname/email eg: pzh.webinos.org/bob@gmail.com</p>";
-      setArticle("Connect to another personal zone",text);
+      webinosPZH.commands.getAllPzh(pzhList);
     });
     $("#revokeCert").click(function(){
       webinosPZH.commands.listPzp(listPzpsToRevoke);
@@ -176,7 +191,8 @@
       <p id="userId">Connecting...</p>
     </div>
     <div class="breadcrumbs_container">
-      <article class="breadcrumbs"><a href="index.html">webinos personal zone hub</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
+      <article class="breadcrumbs"><a href="/">webinos personal zone hub</a> <div class="breadcrumb_divider"></div>
+      <a class="current">Dashboard</a></article>
     </div>
   </section><!-- end of secondary bar -->
 
@@ -195,7 +211,7 @@
       </ul>
       <ul class="" style="">
         <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
-        <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>   
+        <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>
       </ul>
       
       <h3>Personal zone admin</h3>

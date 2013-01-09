@@ -15,14 +15,13 @@
  *
  * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
  *******************************************************************************/
-var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
+var pzhWI = function(pzhs, hostname, addPzh, refreshPzh, getAllPzh) {
     "use strict";
     var dependency = require("find-dependencies")(__dirname);
     var util = dependency.global.require(dependency.global.util.location);
     var logger = util.webinosLogging(__filename) || logger;
     var lock = true;
     var untrustedCert = {};
-
     var messageType = {
         "getUserDetails"      : getUserDetails,
         "getZoneStatus"       : getZoneDetails,
@@ -35,14 +34,15 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
         "listUnregServices"   : listUnRegisterServices,
         "registerService"     : registerServices,
         "unregisterService"   : unregisterService,
-        "certificates"        : getCertificates,
-        "setExpectedExternal" : setExpectedExternal,
+        "getCertificates"     : getCertificates,
+        "storeExternalCert"   : storeExternalCert,
         "requestAddFriend"    : requestAddFriend,
         "getExpectedExternal" : getExpectedExternal,
         "approveFriend"       : approveFriend,
         "rejectFriend"        : rejectFriend,
         "authCode"            : authCode,
-        "enrollPzp"           : enrollPzp
+        "enrollPzp"           : enrollPzp,
+        "getAllPzh"           : getAllPzhList
     };
 
     function getLock() { return lock; }
@@ -72,7 +72,7 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
         for (myKey=0; myKey < _instance.config.trustedList.pzh.length; myKey = myKey + 1){
             var id =  _instance.config.trustedList.pzh[myKey]
             var first = id.indexOf("_") +1;
-            var last  = id.length
+            var last  = id.length;
             id = id.slice(parseInt(first), parseInt(last));
             if (_instance.pzh_state.connectedPzh.hasOwnProperty( _instance.config.trustedList.pzh[myKey])){
                 pzhs.push({id: id, url: _instance.config.trustedList.pzh[myKey], isConnected: true});
@@ -84,7 +84,7 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
         return pzhs;
     }
 
-    function getRevokedCert(_instance){
+   function getRevokedCert(_instance){
         var revokedCert = [], myKey;
         for (myKey in _instance.config.cert.internal.revokedCert){
             if (_instance.config.cert.internal.revokedCert.hasOwnProperty(myKey)){
@@ -92,6 +92,10 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
             }
         }
         return revokedCert;
+    }
+
+    function getAllPzhList(conn, obj, userObj) {
+        sendMsg(conn, obj.user, getAllPzh(userObj.pzh_state.sessionId));
     }
 
     function getUserDetails(conn, obj, userObj){
@@ -137,7 +141,6 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
         });
     }
 
-
     function listAllService(conn, obj, userObj) {
         var result = { pzEntityList: [] }, connectedPzp = getConnectedPzp(userObj), key;
         result.pzEntityList.push({pzId:userObj.pzh_state.sessionId});
@@ -168,6 +171,7 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
             runCallback(userObj.pzh_state.sessionId, userObj.pzh_otherManager.getInitModules());
         }
     }
+
     function registerServices(conn, obj, userObj) {
         if (userObj.pzh_state.sessionId !== obj.message.at) {
             var msg =  {"type"  : "prop", "from" : userObj.pzh_state.sessionId, "to"   : obj.message.at,
@@ -199,19 +203,20 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
             "provider" : "provider-cert-data",
             "server"   : userObj.config.cert.internal.master.cert
         };
-        untrustedCert[obj.user] = {};
         sendMsg(conn, obj.user, result);
     }
 
     // Second step
     // Connecting PZH stores certificates retrieved from another PZH
-    function setExpectedExternal(conn, obj, userObj) {
-        logger.log(obj.user.displayName + " is now expecting external connection from " + obj.message);
+    function storeExternalCert(conn, obj, userObj) {
+        logger.log(obj.user.displayName + " is now expecting external connection from " + obj.message.externalEmail);
         if (!userObj.config.cert.external.hasOwnProperty(obj.message.externalEmail)) {
             userObj.config.cert.external[obj.message.externalEmail] = {externalPzh: obj.message.externalPzh,
-                externalCerts: obj.message.externalCerts};
+                externalCerts: obj.message.externalCerts.server};
             userObj.config.storeCertificate(userObj.config.cert.external, "external");
-        }
+            userObj.setConnParam(function(certificateParam){
+                refreshPzh("address"+"_"+userObj.config.userData.email, certificateParam);
+            });        }
         if (userObj.config.trustedList.pzh.hasOwnProperty(obj.message.externalEmail)) {
             userObj.config.trustedList.pzh[obj.message.externalEmail] = {};
             userObj.config.storeTrustedList(userObj.config.trustedList);
@@ -223,14 +228,14 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
     // Third step
     // The PZH we are trying to connect calls this presumably this should return something unique
     function requestAddFriend(conn, obj, userObj) {
-        var utilities = require("util");
         logger.log("PZH TLS Server is now aware that the user " +
-            obj.message.externalUser.email + " with PZH details : " + utilities.inspect(obj.message.externalPzh) +
+            obj.message.externalUser.email + " with PZH details : " + obj.message.externalPzh.externalPZHUrl +
             " has been authenticated and would like to be added to the list of trusted users to " +
             obj.user + "'s zone");
 
-        var result = untrustedCert[obj.message.externalUser.email]? true: false;
-        sendMsg(conn, obj.user, result);
+        untrustedCert[obj.message.externalUser.email] = {externalPzh: require("url").parse(obj.message.externalPzh.externalPZHUrl).host,
+            externalCerts: obj.message.externalPzh.pzhCerts.server};
+        sendMsg(conn, obj.user, true);
     }
 
     // Fourth Step
@@ -240,6 +245,8 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
             obj.message.externalUser.email + "? ... Yes");
         if(untrustedCert.hasOwnProperty(obj.message.externalUser.email)) {
             sendMsg(conn, obj.user, true);
+        } else {
+            sendMsg(conn, obj.user, false);
         }
     }
 
@@ -247,6 +254,18 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
         if (untrustedCert.hasOwnProperty(obj.message.externalUser.email)) {
             logger.log("Approving friend request by " + obj.message.externalUser.email + " for " + obj.user);
             // Store Certificates
+            if (!userObj.config.cert.external.hasOwnProperty(obj.message.externalUser.email)) {
+                userObj.config.cert.external[obj.message.externalUser.email] = {externalPzh: obj.message.externalPzh,
+                    externalCerts: obj.message.externalCerts.server};
+                userObj.config.storeCertificate(userObj.config.cert.external, "external");
+                userObj.setConnParam(function(certificateParam){
+                    refreshPzh("address"+"_"+userObj.config.userData.email, certificateParam);
+                });
+            }
+            if (userObj.config.trustedList.pzh.hasOwnProperty(obj.message.externalEmail.email)) {
+                userObj.config.trustedList.pzh[obj.message.externalEmail.email] = {};
+                userObj.config.storeTrustedList(userObj.config.trustedList);
+            }
             delete untrustedCert[obj.message.externalUser.email];
         }
     }
@@ -338,8 +357,6 @@ var pzhWI = function(pzhs, hostname, addPzh, refreshPzh) {
 
     function validateMessage(obj) {
         //quick check - TODO: integrate with proper schema checking.
-        logger.log(obj);
-
         var valid = obj.hasOwnProperty("user") && obj.hasOwnProperty("message") && obj.message !== undefined && obj.message !== null;
         if (!valid) {
             logger.log("No 'user' or 'message' field in message from web interface");

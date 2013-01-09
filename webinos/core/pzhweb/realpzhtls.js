@@ -4,7 +4,7 @@ var logger = util.webinosLogging(__filename) || console;
 
 var PzhWebTLSCommunicator = exports;
 var connection = "";
-var callbackStorage = [];
+var callbackStorage = {};
 
 PzhWebTLSCommunicator.init = function(config, webOptions, handler, cb) {
     "use strict";
@@ -36,6 +36,7 @@ PzhWebTLSCommunicator.init = function(config, webOptions, handler, cb) {
         util.webinosMsgProcessing.readJson(this, _buffer, function(obj) {
             if(callbackStorage.hasOwnProperty(obj.user.identifier)) {
                 callbackStorage[obj.user.identifier].success(obj.payload);
+                delete callbackStorage[obj.user.identifier];
             }
         });
     });

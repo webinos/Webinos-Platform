@@ -136,11 +136,20 @@ var Provider = function(_hostname, _friendlyName) {
         config.storeTrustedList(config.trustedList);
     }
 
+    function getAllPzhList(userId) {
+        var myKey, list = [];
+        for (myKey in config.trustedList.pzh) {
+            if(config.trustedList.pzh.hasOwnProperty(myKey) && myKey !== userId) {
+                list.push({url: myKey, username: pzhs[myKey].config.userData.name, email:pzhs[myKey].config.userData.email[0].value });
+            }
+        }
+        return list;
+    }
 
     function isWebInterface(conn, data) {
         //TODO: Validate the certificate from the connection data.
         if (webInterface === null) {
-            webInterface = new pzh_webSession(pzhs, hostname, addPzhDetails, refreshCert);
+            webInterface = new pzh_webSession(pzhs, hostname, addPzhDetails, refreshCert, getAllPzhList);
         }
 
         return webInterface.helloIsItYouImLookingFor(conn, data);

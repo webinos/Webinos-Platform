@@ -1,6 +1,5 @@
-exports.getCertsFromHostDirect = function(externalCertUrl, successCB, errorCB) {
-    console.log(externalCertUrl);
-    var innerReq = require("https").get(externalCertUrl, function(innerRes) {
+exports.getCertsFromHostDirect = function(options, successCB, errorCB) {
+    var innerReq = require("https").request(options, function(innerRes) {
         var data = "";
         innerRes.on('data', function(d) {
             data += d;
@@ -11,7 +10,7 @@ exports.getCertsFromHostDirect = function(externalCertUrl, successCB, errorCB) {
         });
         innerRes.on('error', function(err) {
             errorCB(err);
-        });                                                                   g
+        });
     });
     innerReq.on('error', function(err) {
         console.log(require("util").inspect(err));
@@ -21,6 +20,12 @@ exports.getCertsFromHostDirect = function(externalCertUrl, successCB, errorCB) {
 };
 
 exports.getCertsFromHost = function(hostEmail, hostDomain, successcb, errorcb) {
-    var externalCertUrl = "https://" + hostDomain + "/main/" + encodeURIComponent(hostEmail) + "/certificates/";
-    exports.getCertsFromHostDirect(externalCertUrl, successcb, errorcb);
+    var options = {
+        host: hostDomain.split(":")[0],
+        port: parseInt(hostDomain.split(":")[1]) || 443,
+        path: "/main/"+encodeURIComponent(hostEmail)+"/certificates/",
+        method: "GET"
+
+    };
+    exports.getCertsFromHostDirect(options, successcb, errorcb);
 };

@@ -6,22 +6,23 @@ var dependency = require("find-dependencies")(__dirname),
 var fs = require("fs");
 
 var starter = exports;
-var address;
 
 starter.startWS = function (hostname, config, callback) {
     "use strict";
     loadWebServerCertificates(config, function (status, connParam) {
         logger.log("starting the web server on " + config.userPref.ports.provider_webServer);
-        pzhproviderweb.startWebServer(hostname, address, config.userPref.ports.provider_webServer,
-            connParam, config, function (status, value) {
-            if (status) {
-                logger.log("Personal zone provider web server started");
-                return callback(true);
-            } else {
-                logger.log("Personal zone provider web server failed to start on port " +
-                    config.userPref.ports.provider_webServer + ", " + value);
-                return callback(false, value);
-            }
+        util.webinosHostname.getHostName(hostname, function (address) {
+            pzhproviderweb.startWebServer(hostname, address, config.userPref.ports.provider_webServer,
+                connParam, config, function (status, value) {
+                if (status) {
+                    logger.log("Personal zone provider web server started");
+                    return callback(true);
+                } else {
+                    logger.log("Personal zone provider web server failed to start on port " +
+                        config.userPref.ports.provider_webServer + ", " + value);
+                    return callback(false, value);
+                }
+            });
         });
     });
 };
@@ -34,9 +35,6 @@ function loadWebServerCertificates(config, callback) {
                 config.generateSignedCertificate(value, 2, function (status, value) {
                     if (status) {
                         config.cert.internal.web.cert = value;
-                        fs.writeFile("certificate_web.pem", value, function(status){
-                            console.log(status);
-                        });
                         config.storeCertificate(config.cert.internal, "internal");
                         setParam(config, function (status, wss) {
                             if (status) {
@@ -73,7 +71,7 @@ function setParam(config, callback) {
                 cert: config.cert.internal.web.cert,
                 ca: config.cert.internal.master.cert,
                 requestCert: true,
-                rejectUnauthorised: true //TODO
+                rejectUnauthorized: false //TODO
             });
         } else {
             callback(false)
@@ -86,10 +84,9 @@ function setParam(config, callback) {
 starter.start = function(hostname, friendlyName) {
     var config = new util.webinosConfiguration();
     util.webinosHostname.getHostName(hostname, function (address_) {
-        address = address_;
         var inputConfig = {
         "friendlyName": friendlyName,
-        "sessionIdentity": address
+        "sessionIdentity": address_
         };
         config.setConfiguration("PzhP", inputConfig, function (status, value) {
             if (!status) {

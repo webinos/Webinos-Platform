@@ -103,7 +103,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
             app.use(express.methodOverride());
             app.use(express.cookieParser());
             var sessionSecret = crypto.randomBytes(40).toString("base64");
-            app.use(express.session({ secret: sessionSecret, store: new MemStore({reapInterval: 6000 * 10}) }));
+            app.use(express.session({ secret: sessionSecret }));//, store: new MemStore({reapInterval: 6000 * 10})
             app.use(passport.initialize());
             app.use(passport.session());
             app.use(app.router);

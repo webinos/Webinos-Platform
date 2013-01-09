@@ -18,13 +18,15 @@
                 }
                 $("#provider").hide();
 
-                $('#main').html('<article class="module width_full">' +
+                window.open("https://"+value+"/login?isPzp=true");
+
+/*                $('#main').html('<article class="module width_full">' +
                         '<header><h3> Login to your personal zone hub - '+(value)+' </h3></header>' +
                         '<div class="module_content">' +
-                        '<iframe frameborder="0" width="100%" height="100%" src="https://'+value+'?isPzp=true"></iframe>' +
+                        '<a href= target="_blank"/>'+
                         '</div>' +
                         '</article>');
-
+  */
                 function load(event) {
                     if(event.origin === "https://"+value){
                         var msg = event.data, options;

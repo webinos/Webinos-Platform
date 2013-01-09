@@ -2,7 +2,7 @@ module.exports = function(app, address, port) {
     var openid     = require('openid');
     var dependency = require("find-dependencies")(__dirname),
         logger     = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console,
-        pzhadaptor = require('../pzhadaptor.js'),
+        pzhAdaptor = require('../pzhadaptor.js'),
         helper     = require('./helper.js');
 
     var attr = new openid.AttributeExchange({
@@ -27,9 +27,7 @@ module.exports = function(app, address, port) {
         var externalCertUrl = req.query.certUrl;
         var externalPZHUrl = req.query.pzhInfo;
 
-        res.render('login-remote',
-            {externalCertUrl: encodeURIComponent(externalCertUrl),
-                externalPZHUrl: encodeURIComponent(externalPZHUrl)});
+        res.render('login-remote', {externalCertUrl: encodeURIComponent(externalCertUrl), externalPZHUrl: encodeURIComponent(externalPZHUrl)});
     });
 
     app.get('/main/:useremail/request-access-authenticate', function(req, res) {
@@ -40,9 +38,7 @@ module.exports = function(app, address, port) {
         //UI: External user must then present an OpenID account credential...
 
         var externalRelyingParty = new openid.RelyingParty(
-            'https://'+address+':'+port +'/main/' +
-                encodeURIComponent(req.params.useremail) +
-                '/request-access-verify',
+            'https://'+address+':'+port +'/main/'+encodeURIComponent(req.params.useremail)+'/request-access-verify',
             null, false, false, [attr]);
 
         //'&externalCertUrl=' + encodeURIComponent(req.query.externalCertUrl) +  '&externalPZHUrl=' +  encodeURIComponent(req.query.externalPZHUrl)
@@ -51,18 +47,13 @@ module.exports = function(app, address, port) {
             'http://open.login.yahooapis.com/openid20/www.yahoo.com/xrds';
 
         externalRelyingParty.authenticate(identifierUrl, false, function(error, authUrl) {
-            if (error)
-            {
+            if (error) {
                 res.writeHead(200);
                 res.end('Authentication failed: ' + error.message);
-            }
-            else if (!authUrl)
-            {
+            } else if (!authUrl) {
                 res.writeHead(200);
                 res.end('Authentication failed');
-            }
-            else
-            {
+            } else {
                 //this data needs to come with us on the next attempt...
                 req.session.expectedExternalAuth = {
                     internalUser            : req.params.useremail,
@@ -85,8 +76,7 @@ module.exports = function(app, address, port) {
         //UI: Present some confirmation
 
         var externalRelyingParty = new openid.RelyingParty(
-            'https://'+address+':'+port +'/main/' + encodeURIComponent(req.params.useremail)
-                + '/request-access-verify',
+            'https://'+address+':'+port +'/main/' + encodeURIComponent(req.params.useremail) + '/request-access-verify',
             null, false, false, [attr]);
 
         externalRelyingParty.verifyAssertion(req, function(error, result) {
@@ -94,7 +84,7 @@ module.exports = function(app, address, port) {
                 res.writeHead(200);
                 res.end('Authentication failed');
             } else {
-                logger.log("Successfully authenticated external user: " + util.inspect(result) +
+                logger.log("Successfully authenticated external user: " + result.email +
                     "who claims to have: " + req.session.expectedExternalAuth.externalCertUrl +
                     " and " + req.session.expectedExternalAuth.externalPZHUrl);
 
@@ -102,24 +92,57 @@ module.exports = function(app, address, port) {
                     res.writeHead(200);
                     res.end('Failed to read cookies');
                 }
+                var session = req.session.expectedExternalAuth;
+                var externalUrl = require("url").parse(req.session.expectedExternalAuth.externalCertUrl);
+                // Parse out the address and port out of the external URL
+                var options = {
+                    host: externalUrl.hostname,
+                    port: externalUrl.port || 443,
+                    path: "/main/"+encodeURIComponent(result.email)+"/certificates/",
+                    method: "GET"
 
-                var externalUrl = req.session.expectedExternalAuth.externalCertUrl;
-                helper.getCertsFromHostDirect(externalUrl, function(certs) {
+                };
+
+                helper.getCertsFromHostDirect(options, function(certs) {
                     var pzhData = {
                         pzhCerts                : certs,
-                        externalCertUrl         : req.session.expectedExternalAuth.externalCertUrl,
-                        externalPZHUrl          : req.session.expectedExternalAuth.externalPZHUrl,
-                        externalRelyingParty    : req.session.expectedExternalAuth.externalRelyingParty,
-                        externalAuthUrl         : req.session.expectedExternalAuth.externalAuthUrl
+                        externalCertUrl         : session.externalCertUrl,
+                        externalPZHUrl          : session.externalPZHUrl,
+                        externalRelyingParty    : session.externalRelyingParty,
+                        externalAuthUrl         : session.externalAuthUrl
                     };
-                    pzhadaptor.setRequestingExternalUser(req.params.useremail, result, pzhData);
+                    pzhAdaptor.requestAddFriend(session.internalUser, result, pzhData, res);
                     //TODO: Check we're dealing with the same _internal_ user
                     // This is for the same user...
-
+                    // This is redirecting to the originator of request... but url is  pointing to the request-verify.. what to do?
                     res.render("external-request-success" ,
-                        {externaluser: result, user: req.params.useremail,
-                            externalPzhUrl: req.session.expectedExternalAuth.externalPZHUrl});
-                    res.redirect(redirectUrl);
+                        {externaluser: result, user: session.internalUser,
+                            externalPzhUrl: session.externalPZHUrl});
+
+                    // At this redirect current pzh to the approve - user page
+                    var options = {
+                        host: address,
+                        port: port,
+                        path: "/main/"+encodeURIComponent(session.internalUser)+"/approve-user/"+encodeURIComponent(result.email)+"/",
+                        method: 'GET'
+                    };
+
+                    var req = require("https").request(options, function(res) {
+                        res.on("data", function(data){
+                           console.log(data.toString());
+                        });
+                        res.on("error", function(err){
+                            console.log(err);
+                        });
+
+                    });
+                    req.on("error", function(err) {
+                        // This should trigger email here
+                        console.log(err);
+                    });
+                    req.end();
+
+
                 }, function(err) {
                     res.writeHead(200);
                     res.end('Failed to retrieve certificate from remote host');

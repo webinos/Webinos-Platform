@@ -8,7 +8,7 @@ module.exports = function(app, address, port, state) {
 
     app.get('/', ensureAuthenticated, function(req, res){
         if(req.session.isPzp) {
-            pzhadaptor.fromWeb(req.user, {payload:{status:"authCode"}},res);
+            pzhadaptor.fromWeb(req.user, {payload:{status:"authCode"}}, res);
             req.session.isPzp = "";
         } else {
             res.redirect('/main/' + getUserPath(req.user) + "/");
@@ -31,8 +31,7 @@ module.exports = function(app, address, port, state) {
 
     // Arbitrary query interface.
     app.post('/main/:user/query', ensureAuthenticated, function(req, res) {
-        var util = require("util");
-        logger.log("Body: " + util.inspect(req.body));
+        logger.log("Body: " + require("util").inspect(req.body));
         pzhadaptor.fromWeb(req.user, req.body, res);
     });
 
@@ -48,7 +47,7 @@ module.exports = function(app, address, port, state) {
     // present certificates to an external party.
     app.all('/main/:useremail/certificates/', function(req, res) {
         //return a JSON object containing all the certificates.
-        pzhadaptor.fromWebUnauth(req.params.useremail, {type:"certificates"}, res);
+        pzhadaptor.fromWebUnauth(req.params.useremail, {type:"getCertificates"}, res);
     });
 
     //Certificate exchange...
@@ -63,7 +62,7 @@ module.exports = function(app, address, port, state) {
         //get those certificates
         //"https://" + externalPZH + "/main/" + encodeURIComponent(externalEmail) + "/certificates/"
         helper.getCertsFromHost(externalEmail, externalPZH, function(certs) {
-            pzhadaptor.setExpectedExternalUser(req.user, externalEmail, externalPZH, certs);
+            pzhadaptor.storeExternalUserCert(req.user, externalEmail, externalPZH, certs, res);
             //get my details from somewhere
             var myCertificateUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/certificates/";
             var myPzhUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/";
@@ -110,9 +109,9 @@ module.exports = function(app, address, port, state) {
         logger.log(util.inspect(req.user));
         if (req.body.useremail && req.body.decision && req.user) {
             if (req.body.decision === "approve") {
-                pzhadaptor.approveFriend(req.user, req.body.useremail);
+                pzhadaptor.approveFriend(req.user, req.body.useremail, res);
             } else {
-                pzhadaptor.rejectFriend(req.user, req.body.useremail);
+                pzhadaptor.rejectFriend(req.user, req.body.useremail, res);
             }
             res.redirect('../');
         } else {
@@ -176,7 +175,7 @@ module.exports = function(app, address, port, state) {
     //   the request will proceed.  Otherwise, the user will be redirected to the
     //   login page.
     function ensureAuthenticated(req, res, next) {
-      console.log(req.path);
+        console.log("request received");
         if(req.query.isPzp) {
             req.session.isPzp = true;
         }

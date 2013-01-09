@@ -342,7 +342,7 @@ var RevokePzh = function(_parent) {
                 _parent.pzh_state.logger.log("revocation success! " + _pzpid + " should not be able to connect anymore ");
                 _parent.config.crl = crl;
                 delete _parent.config.cert.internal.signedCert[_pzpid] ;
-                delete parent.config.trustedList.pzp[_pzpid] ;
+                delete _parent.config.trustedList.pzp[_pzpid] ;
                 _parent.config.cert.internal.revokedCert[_pzpid] = crl;
                 _parent.config.storeAll();
                 if (_parent.pzh_state.connectedPzp[_pzpid]){

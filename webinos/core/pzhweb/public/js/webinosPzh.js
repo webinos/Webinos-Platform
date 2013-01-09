@@ -57,6 +57,9 @@ var webinosPZH = {
           case 'listUnregServices':
             if (typeof webinosPZH.callbacks.listUnregServices === 'function') webinosPZH.callbacks.listUnregServices(msg.payload);
             break;
+          case 'getAllPzh':
+            if (typeof webinosPZH.callbacks.getAllPzh === 'function') webinosPZH.callbacks.getAllPzh(msg.payload);
+            break;
         }
       }
     }
@@ -82,7 +85,8 @@ var webinosPZH = {
     pzhPzh: null,
     listPzp: null,
     revokePzp: null,
-    listAllServices: null
+    listAllServices: null,
+    getAllPzh: null
   },
   commands: {
     authenticate: {
@@ -165,6 +169,10 @@ var webinosPZH = {
     },
     restartPzh: function(){
       webinosPZH.send({payload:{status:'restartPzh'}});
+    },
+    getAllPzh: function(callback) {
+      webinosPZH.callbacks.getAllPzh = callback;
+      webinosPZH.send({payload:{status:'getAllPzh'}});
     }
   }
 };
