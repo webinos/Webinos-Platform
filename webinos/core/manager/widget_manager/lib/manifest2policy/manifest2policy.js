@@ -122,7 +122,30 @@
             return '';
         }
 
-        console.log(util.inspect(dhp, false, null));
+        // ProvisionalActions
+        if (manifest.ProvisionalActions !== null &&
+            manifest.ProvisionalActions !== undefined) {
+            var pa = manifest.ProvisionalActions;
+            for (var i = 0; i < pa[0].ProvisionalAction.length; i++) {
+                for (var j = 0;
+                     j < pa[0].ProvisionalAction[i].AttributeValue.length;
+                     j++) {
+                    for (var k = 0; k < dhpId.length; k++) {
+                        if (pa[0].ProvisionalAction[i].AttributeValue[j] ===
+                            dhpId[k].oldId) {
+
+                            pa[0].ProvisionalAction[i].AttributeValue[j] =
+                                dhpId[k].newId;
+                        }
+                    }
+                }
+            }
+        } else {
+            colsole.log('ProvisionalActions are missing');
+            return '';
+        }
+
+        console.log(util.inspect(pa, false, null));
 
     };
 
