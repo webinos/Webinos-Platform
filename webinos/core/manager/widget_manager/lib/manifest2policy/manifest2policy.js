@@ -75,7 +75,37 @@
         }*/
         target[0].subject[0] = {'subject-match' : subjectMatch};
 
-        console.log(util.inspect(target, false, null));
+        // rule
+        var rule = [];
+        // 'permit' rule
+        rule[0] = {};
+        rule[0].$ = {'effect' : 'permit'};
+        rule[0].condition = [];
+        rule[0].condition[0] = {};
+        rule[0].condition[0].$ = {'combine' : 'or'};
+        rule[0].condition[0]['resource-match'] = [];
+
+        if (manifest.feature !== null && manifest.feature !== undefined) {
+            for (var i = 0; i < manifest.feature.length; i++) {
+                if (manifest.feature[i].$.required === 'true' ||
+                    (manifest.feature[i].$.required === 'false' &&
+                    features !== null && features !== undefined &&
+                    features.indexOf(manifest.feature[i].$.name) >= 0)) {
+
+                    rule[0].condition[0]['resource-match'].push({
+                        '$' : {'attr' : 'api-feature',
+                        'match' : manifest.feature[i].$.name}});
+                }
+            }
+        } else {
+            colsole.log('features are missing');
+            return false;
+        }
+        // default 'deny' rule
+        rule[1] = {};
+        rule[1].$ = {'effect' : 'deny'};
+
+        console.log(util.inspect(rule, false, null));
 
     };
 
