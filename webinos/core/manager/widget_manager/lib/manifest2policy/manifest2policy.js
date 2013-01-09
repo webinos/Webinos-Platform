@@ -24,7 +24,8 @@
 
     var fs = require('fs');
     var xml2js = require('xml2js');
-    var util = require('util');
+    var convert2xml = require('data2xml')({attrProp : '$', valProp : '_'});
+    //var util = require('util');
 
     /**
     * Translate from manifest to XACML policy
@@ -145,8 +146,23 @@
             return '';
         }
 
-        console.log(util.inspect(pa, false, null));
+        var policy = {};
+        policy.target = target;
+        policy.rule = rule;
+        policy.DataHandlingPreferences = dhp;
+        policy.ProvisionalActions = pa;
 
+        try {
+            var data = convert2xml('policy', policy);
+            data = data.replace('<?xml version=\"1.0\" encoding=\"utf-8\"?>\n',
+                                '');
+            //fs.writeFileSync('./outputPolicyFile.xml', data);
+        } catch (error) {
+            console.log(error);
+            return '';
+        }
+        //console.log(util.inspect(data, false, null));
+        return data;
     };
 
     exports.manifest2policy = manifest2policy;
