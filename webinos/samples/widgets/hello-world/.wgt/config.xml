@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget xmlns="http://www.w3.org/ns/widgets" id="http://webinos.org/apps/hello-world" version="0.0.1" height="300">  
+ 	<name>Hello World</name>  
+  
+  	<description>A webinos demonstration widget.</description>
+    
+  	<author email="toby.ealden@gmail.com">Toby Ealden</author>
+  	  
+  	<content src="index.html"/>  
+  	<icon src="unsigned-icon.png"/>
+  	  
+</widget>
