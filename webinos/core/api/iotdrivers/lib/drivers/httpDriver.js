@@ -35,6 +35,12 @@ var elementsList = new Array();
 // Module dependencies.
 var express = require('express');
 var http = require("http");
+var fs = require("fs");
+var path = require("path");
+
+var port;
+
+
 
 (function () {
     'use strict';
@@ -54,8 +60,29 @@ var http = require("http");
         console.log('HTTP driver init - id is ' + dId);
         driverId = dId;
         registerFunc = regFunc;
-        callbackFunc = cbkFunc;        
-        app.listen(PZP_IOT_PORT);
+        callbackFunc = cbkFunc;
+        try{
+            var filePath = path.resolve(__dirname, "../../../../../../webinos_config.json");
+            fs.readFile(filePath, function(err,data) {
+            if (!err) {
+                var key, userPref = JSON.parse(data.toString());
+                port = userPref.ports.iot;
+                if(port === undefined){
+                    port = PZP_IOT_PORT;
+                }
+            }
+            else{
+                port = PZP_IOT_PORT;
+            }
+            app.listen(port);
+            console.log("HTTP driver is listening at port "+port);
+});
+
+}catch(err){
+    console.log("Error : "+err);
+}
+
+        
     };
 
     /*
