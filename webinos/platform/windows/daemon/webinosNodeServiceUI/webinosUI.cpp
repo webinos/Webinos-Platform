@@ -2,13 +2,22 @@
 #include "resource.h"
 #include "WebinosUI.h"
 #include <wtsapi32.h>
+#include "ServiceRunner.h"
 #include "..\webinosNodeServiceManager\StringStuff.h"
 
 #define ID_TRAY_APP_ICON                5000
 #define ID_TRAY_EXIT_CONTEXT_MENU_ITEM  3000
 #define ID_POLL_TIMER						1000
-#define SERVICE_POLL_INTERVAL 1000
+#define SERVICE_POLL_INTERVAL 750
 #define SERVICE_HEARTBEAT_TIMEOUT 10
+
+CWebinosUI::CWebinosUI() :
+	m_restartingPzh(0),
+	m_restartingPzp(0),
+	m_confirmingExit(false),
+	m_runner(NULL)
+{
+}
 
 LRESULT CWebinosUI::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
@@ -57,14 +66,12 @@ void CWebinosUI::Initialise()
 	// Register to receive session-change notifications.
 	WTSRegisterSessionNotification(m_hWnd, NOTIFY_FOR_THIS_SESSION);
 
-	// Set user info for this session (this will initialise m_user_params).
-	SetSession();
-
 	// Initialise the node services we are interested in.
 	m_pzh_params.serviceName = WEBINOS_PZH;
 	m_pzp_params.serviceName = WEBINOS_PZP;
 
 	CServiceManager mgr;
+	mgr.GetUserParameters(m_user_params);
 
 	// Get PZH parameters.
 	mgr.GetServiceParameters(m_user_params,m_pzh_params);
@@ -76,6 +83,8 @@ void CWebinosUI::Initialise()
 	SetDlgItemText(IDC_PATH_TO_NODE_EDIT,m_pzp_params.nodePath.c_str());
 	SetDlgItemText(IDC_PATH_TO_WEBINOS_EDIT,m_pzp_params.workingDirectoryPath.c_str());
 
+	CheckDlgButton(IDC_OUTPUT_CHECK, m_pzp_params.showOutput);
+
 	// Parse node arguments to extract PZP specific params.
   std::vector<std::string> toks = webinos::split(m_pzp_params.nodeArgs.c_str(),' ');
   for (std::vector<std::string>::iterator it = toks.begin(); it != toks.end(); it++)
@@ -83,12 +92,6 @@ void CWebinosUI::Initialise()
     std::string tok = *it;
     if (tok.length() == 0)
       continue;
-
-		std::string argVal;
-		if (ParseArg(tok,_T("--auth-code=\""),argVal))
-			SetDlgItemText(IDC_AUTH_CODE_EDIT,argVal.c_str());
-		else if (ParseArg(tok,_T("--pzh-name=\""),argVal))
-			SetDlgItemText(IDC_PZH_NAME_EDIT,argVal.c_str());
   }
 
 	// Re-set PZH service parameters.
@@ -98,6 +101,9 @@ void CWebinosUI::Initialise()
 	// Re-set PZP service parameters.
 	m_pzp_params.instance = 0;
 	mgr.SetServiceParameters(m_user_params,m_pzp_params);
+
+	m_runner = new CServiceRunner(WEBINOS_PZP);
+	m_runner->Run(); 
 
 	// Start timer to poll for status
 	SetTimer(ID_POLL_TIMER,SERVICE_POLL_INTERVAL,NULL);
@@ -118,23 +124,6 @@ bool CWebinosUI::ParseArg(std::string& arg, std::string argName, std::string& ar
 	}
 
 	return found;
-}
-
-void CWebinosUI::SetSession()
-{
-	// Set the current AppData folder for the webinos PZP service to reflect the current user name.
-	TCHAR appData[MAX_PATH];
-	::GetEnvironmentVariable(_T("AppData"), appData, _countof(appData));
-	m_user_params.appDataPath = appData;
-
-	CServiceManager mgr;
-	mgr.SetUserParameters(m_user_params);
-}
-
-void CWebinosUI::ClearSession()
-{
-	CServiceManager mgr;
-	mgr.ClearUserParameters();
 }
 
 LRESULT CWebinosUI::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
@@ -167,28 +156,9 @@ LRESULT CWebinosUI::OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL&
 		m_pzp_params.nodePath = m_pzh_params.nodePath;
 		m_pzp_params.workingDirectoryPath = m_pzh_params.workingDirectoryPath;
 
-		// Get PZP specific node args.
-		CString authCode;
-		GetDlgItemText(IDC_AUTH_CODE_EDIT, authCode);
-
-		CString pzhName;
-		GetDlgItemText(IDC_PZH_NAME_EDIT, pzhName);
-
 		// Build PZP node argument string.
 		TCHAR nodeArgs[MAX_PATH];
 		m_pzp_params.nodeArgs = _T("webinos_pzp.js --widgetServer ");
-
-		if (authCode.GetLength() > 0)
-		{
-			_stprintf_s(nodeArgs,_countof(nodeArgs),_T("--auth-code=\"%s\" "),(LPCTSTR)authCode);
-			m_pzp_params.nodeArgs += nodeArgs;
-		}
-
-		if (pzhName.GetLength() > 0)
-		{
-			_stprintf_s(nodeArgs,_countof(nodeArgs),_T("--pzh-name=\"%s\" "),(LPCTSTR)pzhName);
-			m_pzp_params.nodeArgs += nodeArgs;
-		}
 
 		// Set PZP parameters.
 		mgr.SetServiceParameters(m_user_params,m_pzp_params);
@@ -274,9 +244,10 @@ LRESULT CWebinosUI::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
 
 LRESULT CWebinosUI::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	WTSUnRegisterSessionNotification(m_hWnd);
+	delete m_runner;
+	m_runner = NULL;
 
-	ClearSession();
+	WTSUnRegisterSessionNotification(m_hWnd);
 
 	Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
 
@@ -359,19 +330,21 @@ LRESULT CWebinosUI::OnBnClickedWebinosPathBrowseBtn(WORD /*wNotifyCode*/, WORD /
 	return 0;
 }
 
-void CWebinosUI::ShowServiceStatus(int& restarting, CServiceParameters& params, int statusCtl, int resetCtl)
+void CWebinosUI::ShowServiceStatus(int& restarting, CServiceParameters& params, int statusCtl, int resetCtl, int outputCtl)
 {
 	CServiceManager mgr;
 	if (restarting == 0 && mgr.GetNodeHeartbeatTime(m_user_params,params) < SERVICE_HEARTBEAT_TIMEOUT)
 	{
 		SetDlgItemText(statusCtl,_T("running"));
 		GetDlgItem(resetCtl).EnableWindow(TRUE);
+		GetDlgItem(outputCtl).EnableWindow(TRUE);
 	}
 	else 
 	{
 		if (restarting > 0)
 			restarting--;
 		GetDlgItem(resetCtl).EnableWindow(FALSE);
+		GetDlgItem(outputCtl).EnableWindow(FALSE);
 
 		if (mgr.GetServiceHeartbeatTime(params) < SERVICE_HEARTBEAT_TIMEOUT)
 		{
@@ -388,9 +361,9 @@ void CWebinosUI::ShowServiceStatus(int& restarting, CServiceParameters& params, 
 LRESULT CWebinosUI::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	//ShowServiceStatus(m_restartingPzh, m_pzh_params, IDC_PZH_STATUS_STATIC, IDC_PZH_RESET_BUTTON);
-	ShowServiceStatus(m_restartingPzp, m_pzp_params, IDC_STATUS_STATIC, IDC_RESET_BUTTON);
+	ShowServiceStatus(m_restartingPzp, m_pzp_params, IDC_STATUS_STATIC, IDC_RESET_BUTTON, IDC_OUTPUT_CHECK);
 
-  CheckForLaunchRequests();
+	CheckForLaunchRequests();
 
 	return 0;
 }
@@ -400,12 +373,12 @@ LRESULT CWebinosUI::OnSessionChange(UINT uMsg, WPARAM wParam, LPARAM lParam, BOO
 	switch( wParam )
 	{
 	case WTS_CONSOLE_CONNECT:
-//		MessageBox(TEXT("WTS_CONSOLE_CONNECT"), TEXT("WM_WTSSESSION_CHANGE"), MB_OK );
-		SetSession();
+		m_runner = new CServiceRunner(WEBINOS_PZP);
+		m_runner->Run(); 
 		break;
 	case WTS_CONSOLE_DISCONNECT:
-		ClearSession();
-//		MessageBox(TEXT("WTS_CONSOLE_DISCONNECT"), TEXT("WM_WTSSESSION_CHANGE"), MB_OK );
+		delete m_runner;
+		m_runner = NULL;
 		break;
 	case WTS_SESSION_LOCK:
 		//MessageBox(TEXT("WTS_SESSION_LOCK"), TEXT("WM_WTSSESSION_CHANGE"), MB_OK );
@@ -424,11 +397,13 @@ LRESULT CWebinosUI::OnBnClickedResetButton(WORD /*wNotifyCode*/, WORD /*wID*/, H
 {
 	CServiceManager mgr;
 	m_pzp_params.instance++;
+	m_pzp_params.showOutput = IsDlgButtonChecked(IDC_OUTPUT_CHECK) == BST_CHECKED ? 1 : 0;
 	mgr.SetServiceParameters(m_user_params,m_pzp_params);
 
 	m_restartingPzp = 5;
 
 	GetDlgItem(IDC_RESET_BUTTON).EnableWindow(FALSE);
+	GetDlgItem(IDC_OUTPUT_CHECK).EnableWindow(FALSE);
 
 	return 0;
 }
@@ -455,6 +430,14 @@ LRESULT CWebinosUI::OnNMClickSyslink(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHa
 {
 	PNMLINK link = (PNMLINK) pNMHDR;
 	ShellExecuteW(NULL, L"open", link->item.szUrl, NULL, NULL, SW_SHOWNORMAL);
+
+	return 0;
+}
+
+LRESULT CWebinosUI::OnNMClickWRTlink(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/)
+{
+	std::string browserPath = m_pzp_params.workingDirectoryPath + "\\bin\\wrt\\webinosBrowser.exe";
+	ShellExecute(NULL, NULL, browserPath.c_str(), NULL, NULL, SW_SHOWNORMAL);
 
 	return 0;
 }

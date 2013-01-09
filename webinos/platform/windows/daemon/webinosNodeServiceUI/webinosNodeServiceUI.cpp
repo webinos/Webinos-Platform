@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "WebinosUI.h"
 #include "..\webinosNodeServiceManager\ServiceManager.h"
+#include "EventLogger.h"
 
 CAppModule _Module;
 
@@ -47,6 +48,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 		hRes = _Module.Init(NULL, hInstance);
 		ATLASSERT(SUCCEEDED(hRes));
+
+		CEventLogger::Initialise("webinosNodeServiceUI.exe");
 
 		nRet = Run(lpstrCmdLine, nCmdShow);
 
