@@ -99,13 +99,30 @@
             }
         } else {
             colsole.log('features are missing');
-            return false;
+            return '';
         }
         // default 'deny' rule
         rule[1] = {};
         rule[1].$ = {'effect' : 'deny'};
 
-        console.log(util.inspect(rule, false, null));
+        // DataHandlingPolicy
+        if (manifest.DataHandlingPolicy !== null &&
+            manifest.DataHandlingPolicy !== undefined) {
+
+            var dhp = manifest.DataHandlingPolicy;
+            var dhpId = [];
+            for (var i = 0; i < dhp.length; i++) {
+                dhpId[i] = {};
+                dhpId[i].oldId = dhp[i].$.PolicyId;
+                dhp[i].$.PolicyId = dhp[i].$.PolicyId + '-' + appId;
+                dhpId[i].newId = dhp[i].$.PolicyId;
+            }
+        } else {
+            colsole.log('DataHandlingPolicy is missing');
+            return '';
+        }
+
+        console.log(util.inspect(dhp, false, null));
 
     };
 
