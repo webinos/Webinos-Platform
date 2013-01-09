@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="webinos" default="gen-webinos" basedir="../../../..">
+
+	<!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
+
+	<target name="gen-webinos">
+
+		<!-- Copy only files required to run webinos -->
+		<copy toDir="./webinos/platform/linux/installer/usr/local/share/Webinos-Platform">
+			<fileset dir="${basedir}" 
+			includes="
+				webinos_pzp.js,
+				webinos_config.json,
+				node_modules/ansi/,
+                                node_modules/coffee-script/,
+				node_modules/connect/,
+				node_modules/crypt/,
+                                node_modules/data2xml/,
+				node_modules/ejs/,
+                                node_modules/express/,
+                                node_modules/find-dependencies/,
+                                node_modules/inherits/,
+                                node_modules/jade/,
+                                node_modules/mdns/,
+                                node_modules/mkdirp/,
+                                node_modules/node-expat/,
+                                node_modules/node-uuid/,
+                                node_modules/now/,
+				node_modules/openid/,
+                                node_modules/qrcode/,
+				node_modules/sax/,
+				node_modules/schema/,
+				node_modules/seq/,
+                                node_modules/webinos-jsonrpc2/,
+				node_modules/websocket/,
+				node_modules/xml2js/,
+				node_modules/xml2json/,
+				node_modules/zipfile/,
+				node_modules/expat2.js,
+				node_modules/xmldigsig.js,
+				node_modules/inherits/,
+				node_modules/mkdirp/,
+				node_modules/node-uuid/,
+				webinos/web_root/webinos.js,
+				webinos/" 
+			excludes="
+				webinos/platform/,
+				webinos/core/pzh/,
+				webinos/core/wrt/,
+				
+				webinos/web_root/test_frameworks/,
+				webinos/web_root/api_test_specs/,
+				webinos/web_root/apps/,
+				webinos/web_root/*.html,
+				webinos/web_root/*.xml,
+				webinos/web_root/*.json,
+				
+				
+				webinos/core/api/**/test/,
+				webinos/core/**/test/,
+				webinos/core/pzp/test/,
+				webinos/core/pzh/test/,		        
+	
+				**/build/,
+				**/deps/,
+				**/.gitignore" />
+		</copy>
+
+	</target>
+
+</project>

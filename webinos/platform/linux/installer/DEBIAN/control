@@ -1,0 +1,14 @@
+Package: webinos
+Priority: optional
+Section: main
+Version: 0.7
+Homepage: https://developer.webinos.org
+Architecture: all
+Maintainer: Webinos
+Depends: build-essential, openjdk-7-jdk, libopenobex1-dev, libobexftp0-dev, bluetooth, libpam0g-dev, libcairo2-dev, libjpeg8-dev, libgif-dev, libavahi-compat-libdnssd-dev, libgnome-keyring-dev, ant, sqlite3, libsqlite3-dev
+Description: webinos
+Installed-Size: 162426
+
+
+
+

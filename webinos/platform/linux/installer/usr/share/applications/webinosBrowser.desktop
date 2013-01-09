@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=webinos browser
+Comment=Webinos Browser
+Type=Application
+Exec=webinosBrowser %U
+Icon=/usr/share/pixmaps/webinos/webinos.png
+Terminal=false
+MimeType=application/webinos-widget
+Categories=Other;

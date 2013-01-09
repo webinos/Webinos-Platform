@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=webinos PZH
+Comment=Webinos Framework
+Type=Application
+Exec=webinos_pzh
+Icon=/usr/share/pixmaps/webinos/webinos.png
+Terminal=true
+Categories=Other;

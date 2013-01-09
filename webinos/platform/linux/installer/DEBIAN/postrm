@@ -1,0 +1,9 @@
+#!/bin/sh
+
+for user in `ls /home |grep -v lost`
+do
+  if [ -d "/home/${user}/.webinos" ];
+  then
+    rm -r /home/${user}/.webinos
+  fi
+done
