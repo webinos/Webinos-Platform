@@ -64,14 +64,14 @@
         if (appId !== null && appId !== undefined) {
             subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
         } else {
-            colsole.log('appId is missing');
+            console.log('appId is missing');
             return '';
         }
         // subject-match on user ID, assuming to receive it as a parameter
         /*if (userId !== null && userId !== undefined) {
             subjectMatch.push({'$' : {'attr' : 'user-id', 'match' : userId}});
         } else {
-            colsole.log('userId is missing');
+            console.log('userId is missing');
             return '';
         }*/
         target[0].subject[0] = {'subject-match' : subjectMatch};
@@ -99,7 +99,7 @@
                 }
             }
         } else {
-            colsole.log('features are missing');
+            console.log('features are missing');
             return '';
         }
         // default 'deny' rule
@@ -119,7 +119,7 @@
                 dhpId[i].newId = dhp[i].$.PolicyId;
             }
         } else {
-            colsole.log('DataHandlingPolicy is missing');
+            console.log('DataHandlingPolicy is missing');
             return '';
         }
 
@@ -142,7 +142,7 @@
                 }
             }
         } else {
-            colsole.log('ProvisionalActions are missing');
+            console.log('ProvisionalActions are missing');
             return '';
         }
 
