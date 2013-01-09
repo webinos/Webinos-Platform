@@ -152,6 +152,22 @@ final class NfcManager {
     }
     triggerFilterMonitor();
   }
+  
+  private Object mSharedTag;
+  private Object mSharedTagLock = new Object();
+  
+  public void setSharedTag(Object sharedTag) {
+    synchronized (mSharedTagLock) {
+      mSharedTag = sharedTag;
+      triggerFilterMonitor();
+    }
+  }
+  
+  public Object getSharedTag() {
+    synchronized (mSharedTagLock) {
+      return mSharedTag;
+    }
+  }
 
   static interface FilterMonitor {
     void onListenersUpdated();

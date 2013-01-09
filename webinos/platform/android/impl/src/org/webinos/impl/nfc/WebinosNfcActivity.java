@@ -13,6 +13,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -73,6 +74,12 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
 
   public void createAndSetFilter() {
     if (mNfcAdapter != null) {
+      Object sharedTag = NfcManager.getInstance().getSharedTag();
+      if (sharedTag instanceof NdefMessage) {
+        mNfcAdapter.enableForegroundNdefPush(this, (NdefMessage)sharedTag);
+      } else {
+        mNfcAdapter.disableForegroundNdefPush(this);
+      }
       if (mFilters != null) {
         mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, mFilters,
             null);
@@ -91,6 +98,7 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
   public void onPause() {
     super.onPause();
     if (mNfcAdapter != null) {
+      mNfcAdapter.disableForegroundNdefPush(this);
       mNfcAdapter.disableForegroundDispatch(this);
     }
     isResumed = false;

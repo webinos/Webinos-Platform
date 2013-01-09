@@ -35,9 +35,8 @@ public abstract class NfcTagTechnologyNdef extends NfcTagTechnology {
   public abstract NdefRecord[] readCachedNdefMessage();
 
   public abstract PendingOperation readNdefMessage(
-      SuccessCallback successCallback, ErrorCallback errorCallback);
+      ReadNdefMessageCallback readCallback, ErrorCallback errorCallback);
 
-  public abstract PendingOperation writeNdefMessage(
-      SuccessCallback successCallback, ErrorCallback errorCallback,
-      NdefRecord[] message);
+  public abstract PendingOperation writeNdefMessage(NdefRecord[] ndefMessage,
+      SuccessCallback successCallback, ErrorCallback errorCallback);
 }

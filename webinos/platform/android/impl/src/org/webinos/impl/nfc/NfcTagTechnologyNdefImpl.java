@@ -11,13 +11,80 @@ import org.webinos.api.PendingOperation;
 import org.webinos.api.SuccessCallback;
 import org.webinos.api.nfc.NdefRecord;
 import org.webinos.api.nfc.NfcTagTechnologyNdef;
+import org.webinos.api.nfc.ReadNdefMessageCallback;
+
+import android.nfc.FormatException;
 
 public class NfcTagTechnologyNdefImpl extends NfcTagTechnologyNdef {
 
+  private Object readWriteLock = new Object();
+  
+  private class ReadOperation implements Runnable {
+
+    private ReadNdefMessageCallback readCallback;
+    private ErrorCallback errorCallback;
+    
+    public ReadOperation(ReadNdefMessageCallback readCallback,
+        ErrorCallback errorCallback) {
+      this.readCallback = readCallback;
+      this.errorCallback = errorCallback;
+    }
+    
+    @Override
+    public void run() {
+      try {
+        synchronized (readWriteLock) {
+          if (!isConnected()) {
+            androidNdefTech.connect();
+          }
+          readCallback.onMessage(createNdefMessage(androidNdefTech
+              .getNdefMessage()));
+        }
+      } catch (IOException e) {
+        errorCallback.onerror(new DeviceAPIError(DeviceAPIError.IO_ERR, e.getMessage()));
+      } catch (FormatException e) {
+        errorCallback.onerror(new DeviceAPIError(DeviceAPIError.IO_ERR, e.getMessage()));
+      }
+    }
+  }
+  
+  private class WriteOperation implements Runnable {
+
+    private NdefRecord[] ndefMessage;
+    private SuccessCallback successCallback;
+    private ErrorCallback errorCallback;
+
+    public WriteOperation(NdefRecord[] ndefMessage,
+        SuccessCallback successCallback, ErrorCallback errorCallback) {
+      this.ndefMessage = ndefMessage;
+      this.successCallback = successCallback;
+      this.errorCallback = errorCallback;
+    }
+
+    @Override
+    public void run() {
+      try {
+        synchronized (readWriteLock) {
+          if (!isConnected()) {
+            androidNdefTech.connect();
+          }
+          androidNdefTech.writeNdefMessage(createNdefMessage(ndefMessage));
+        }
+      } catch (IOException e) {
+        errorCallback.onerror(new DeviceAPIError(DeviceAPIError.IO_ERR, e
+            .getMessage()));
+      } catch (FormatException e) {
+        errorCallback.onerror(new DeviceAPIError(DeviceAPIError.IO_ERR, e
+            .getMessage()));
+      }
+      successCallback.onsuccess();
+    }
+  }
+  
   private class PendingOperationImpl extends PendingOperation {
     @Override
     public void cancel() {
-      close();
+      close(null);
     }
   }
 
@@ -32,7 +99,7 @@ public class NfcTagTechnologyNdefImpl extends NfcTagTechnologyNdef {
   public PendingOperation makeReadOnly(SuccessCallback successCallback,
       ErrorCallback errorCallback) {
     if (errorCallback != null) {
-      errorCallback.onerror(new DeviceAPIError(NfcException.UNSUPPORTED_ERR,
+      errorCallback.onerror(new DeviceAPIError(DeviceAPIError.NOT_SUPPORTED_ERR,
           "Not implemented"));
     }
     return new PendingOperationImpl();
@@ -44,44 +111,56 @@ public class NfcTagTechnologyNdefImpl extends NfcTagTechnologyNdef {
   }
 
   @Override
-  public PendingOperation readNdefMessage(SuccessCallback successCallback,
+  public PendingOperation readNdefMessage(ReadNdefMessageCallback readCallback,
       ErrorCallback errorCallback) {
-    if (errorCallback != null) {
-      errorCallback.onerror(new DeviceAPIError(NfcException.UNSUPPORTED_ERR,
-          "Not implemented"));
-    }
+    new Thread(new ReadOperation(readCallback, errorCallback)).start();
     return new PendingOperationImpl();
   }
 
   @Override
-  public PendingOperation writeNdefMessage(SuccessCallback successCallback,
-      ErrorCallback errorCallback, NdefRecord[] message) {
-    if (errorCallback != null) {
-      errorCallback.onerror(new DeviceAPIError(NfcException.UNSUPPORTED_ERR,
-          "Not implemented"));
-    }
+  public PendingOperation writeNdefMessage(NdefRecord[] ndefMessage, SuccessCallback successCallback,
+      ErrorCallback errorCallback) {
+
+    // TODO: Remove this
+    ndefMessage = new NdefRecord[] { Util.createTextNdefRecord("en",
+        "hello world 2") };
+
+    new Thread(new WriteOperation(ndefMessage, successCallback, errorCallback)).start();
     return new PendingOperationImpl();
   }
 
   @Override
-  public void close() {
+  public void close(ErrorCallback errorCallback) {
     try {
       androidNdefTech.close();
     } catch (IOException e) {
+      if (errorCallback != null) {
+        errorCallback.onerror(new DeviceAPIError(DeviceAPIError.IO_ERR, e
+            .getMessage()));
+      }
     }
   }
 
-  private static NdefRecord[] createNdefMessage(
+  @Override
+  public boolean isConnected() {
+    return androidNdefTech.isConnected();
+  }
+
+  static NdefRecord[] createNdefMessage(
       android.nfc.NdefMessage androidNdefMsg) {
-    NdefRecord[] result = new NdefRecord[androidNdefMsg.getRecords().length];
-    int i = 0;
-    for (android.nfc.NdefRecord androidNdefRecord : androidNdefMsg.getRecords()) {
-      result[i++] = createNdefRecord(androidNdefRecord);
+    NdefRecord[] result = null;
+    if (androidNdefMsg != null) {
+      result = new NdefRecord[androidNdefMsg.getRecords().length];
+      int i = 0;
+      for (android.nfc.NdefRecord androidNdefRecord : androidNdefMsg
+          .getRecords()) {
+        result[i++] = createNdefRecord(androidNdefRecord);
+      }
     }
     return result;
   }
 
-  private static NdefRecord createNdefRecord(
+  static NdefRecord createNdefRecord(
       android.nfc.NdefRecord androidNdefRecord) {
     NdefRecord result = new NdefRecord();
     result.id = new String(androidNdefRecord.getId());
@@ -108,5 +187,26 @@ public class NfcTagTechnologyNdefImpl extends NfcTagTechnologyNdef {
     }
 
     return result;
+  }
+  
+  static android.nfc.NdefMessage createNdefMessage(NdefRecord[] ndefMsg) {
+    android.nfc.NdefMessage result = null;
+    if (ndefMsg != null) {
+      android.nfc.NdefRecord[] ndefRecords = new android.nfc.NdefRecord[ndefMsg.length];
+      int i = 0;
+      for (NdefRecord ndefRecord : ndefMsg) {
+        ndefRecords[i++] = createNdefRecord(ndefRecord);
+      }
+      result = new android.nfc.NdefMessage(ndefRecords);
+    }
+    return result;
+  }
+  
+  static android.nfc.NdefRecord createNdefRecord(NdefRecord ndefRecord) {
+    byte[] payload = new byte[ndefRecord.payload.getLength()];
+    for (int i = 0; i < payload.length; i++) {
+      payload[i] = ndefRecord.payload.getElement(i);
+    }
+    return new android.nfc.NdefRecord((short)ndefRecord.TNF, ndefRecord.type.getBytes(), ndefRecord.id.getBytes(), payload);
   }
 }

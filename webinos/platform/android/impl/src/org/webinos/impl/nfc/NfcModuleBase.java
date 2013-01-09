@@ -1,5 +1,6 @@
 package org.webinos.impl.nfc;
 
+import org.meshpoint.anode.js.JSObjectArray;
 import org.webinos.api.DeviceAPIError;
 import org.webinos.api.ErrorCallback;
 import org.webinos.api.nfc.NdefRecord;
@@ -90,6 +91,35 @@ public abstract class NfcModuleBase extends NfcModule implements
     if (!isNfcAvailable()) {
       throw new NfcException(NfcException.UNSUPPORTED_ERR,
           "NFC is not supported on this device");
+    }
+  }
+  
+  @Override
+  public void shareTag(NdefRecord[] ndefMessage,  ErrorCallback fail) {
+    try {
+      checkNfcPushAvailability();
+      setSharedTag(ndefMessage);
+    } catch (NfcException e) {
+      fail.onerror(translateException(e));
+    }
+  }
+
+  @Override
+  public void unshareTag(ErrorCallback fail) {
+    try {
+      checkNfcPushAvailability();
+      setSharedTag(null);
+    } catch (NfcException e) {
+      fail.onerror(translateException(e));
+    }
+  }
+  
+  protected abstract void setSharedTag(NdefRecord[] ndefMessage);
+  
+  private void checkNfcPushAvailability() throws NfcException {
+    if (!isNfcAvailable()) {
+      throw new NfcException(NfcException.UNSUPPORTED_ERR,
+          "NFC push is not supported on this device");
     }
   }
 

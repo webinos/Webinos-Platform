@@ -42,10 +42,13 @@
         });
 
         this.rpcHandler = rpcHandler;
-        this.listeners = {};
-        this.handle = 1;
         
-        this.moduleListener = new NfcModuleListener(this.listeners);
+        this.listeners = {};
+        this.listenerHandle = 1;
+        
+        this.currentTag = null;
+        
+        this.moduleListener = new NfcModuleListener(this);
 
         this.androidNfcModule = null;
         if (process.platform == 'android') {
@@ -62,30 +65,27 @@
         return mimeType.match(re) != null;
     }
     
-    NfcModuleListener = function(listeners) {
-        this.listeners = listeners;
+    NfcModuleListener = function(service) {
+        this.service = service;
         
-        this.handleEvent = function(event) {
+        this.handleEvent = function(tag) {
+            service.currentTag = tag;
             var urlparser = require('url');
-            var ndefMsg = event.tech.readCachedNdefMessage();
+            var ndefMsg = tag.tech.readCachedNdefMessage();
             var tagEvent = {};
-            tagEvent.ndefMessage = [];
+            tagEvent.tech = tag.tech.getType();
+            tagEvent.ndefMessage = ndefMsg;
             var listenersToTrigger = [];
-            for (var i = 0; i < ndefMsg.length; i++) {
-                var ndefRecord = {};
-                ndefRecord.id = ndefMsg[i].id;
-                ndefRecord.TNF = ndefMsg[i].TNF;
-                ndefRecord.type = ndefMsg[i].type;
-                ndefRecord.info = ndefMsg[i].info;
-                ndefRecord.payload = [];
-                for ( var j = 0; j < ndefMsg[i].payload.length; j++) {
-                    ndefRecord.payload[j] = ndefMsg[i].payload[j];
+            for (var i = 0; i < tagEvent.ndefMessage.length; i++) {
+                var ndefRecord = tagEvent.ndefMessage[i];
+                var payload = [];
+                for ( var j = 0; j < ndefRecord.payload.length; j++) {
+                    payload[j] = ndefRecord.payload[j];
                 }
-                tagEvent.ndefMessage[i] = ndefRecord;
-                
+                ndefRecord.payload = payload;         
                 var j = 0;
-                for (var handle in this.listeners) {
-                    var listenerWrapper = this.listeners[handle];
+                for (var listenerHandle in this.service.listeners) {
+                    var listenerWrapper = this.service.listeners[listenerHandle];
                     if (listenerWrapper.type == ListenerType.TEXT && ndefRecord.TNF == 1 && ndefRecord.type == "T") {
                         listenersToTrigger[j++] = listenerWrapper.listener;
                     }
@@ -124,8 +124,8 @@
         if (process.platform == 'android') {
             this.androidNfcModule.addTextTypeFilter(function(err) {errorCB(err)});
         }
-        this.listeners[this.handle] = new ListenerWrapper(ListenerType.TEXT, null, new Listener(this.rpcHandler, objectRef));
-        successCB(this.handle++);
+        this.listeners[this.listenerHandle] = new ListenerWrapper(ListenerType.TEXT, null, new Listener(this.rpcHandler, objectRef));
+        successCB(this.listenerHandle++);
     };
     
     NfcService.prototype.addUriTypeListener = function(params, successCB,
@@ -133,8 +133,8 @@
         if (process.platform == 'android') {
             this.androidNfcModule.addUriTypeFilter(params[0], function(err) {errorCB(err)});
         }
-        this.listeners[this.handle] = new ListenerWrapper(ListenerType.URI, params[0], new Listener(this.rpcHandler, objectRef));
-        successCB(this.handle++);
+        this.listeners[this.listenerHandle] = new ListenerWrapper(ListenerType.URI, params[0], new Listener(this.rpcHandler, objectRef));
+        successCB(this.listenerHandle++);
     };
     
     NfcService.prototype.addMimeTypeListener = function(params, successCB,
@@ -142,11 +142,11 @@
         if (process.platform == 'android') {
             this.androidNfcModule.addMimeTypeFilter(params[0], function(err) {errorCB(err)});
         }
-        this.listeners[this.handle] = new ListenerWrapper(ListenerType.MIME, params[0], new Listener(this.rpcHandler, objectRef));
-        successCB(this.handle++);
+        this.listeners[this.listenerHandle] = new ListenerWrapper(ListenerType.MIME, params[0], new Listener(this.rpcHandler, objectRef));
+        successCB(this.listenerHandle++);
     };
     
-    NfcService.prototype.removeListener = function(params, successCB, errorCB){
+    NfcService.prototype.removeListener = function(params, successCB, errorCB) {
         var listenerWrapper = this.listeners[params[0]];
         if (listenerWrapper != null) {
             if (process.platform == 'android') {
@@ -162,12 +162,73 @@
         }
     };
     
+
+    NfcService.prototype.read = function(params, successCB, errorCB) {
+        this.currentTag.tech.readNdefMessage(function(ndefMsg) {
+            for ( var i = 0; i < ndefMsg.length; i++) {
+                var payload = [];
+                for ( var j = 0; j < ndefMsg[i].payload.length; j++) {
+                    payload[j] = ndefMsg[i].payload[j];
+                }
+                ndefMsg[i].payload = payload;
+            }
+            successCB(ndefMsg);
+        }, function(err) {
+            errorCB(err);
+        });
+    };
+    
+
+    NfcService.prototype.write = function(params, successCB, errorCB) {
+        this.currentTag.tech.writeNdefMessage(params[0], function() {
+            successCB();
+        }, function(err) {
+            errorCB(err);
+        });
+    };
+
+    NfcService.prototype.close = function(params, successCB, errorCB) {
+        this.currentTag.tech.close(function(err) {
+            errorCB(err);
+        });
+    };
+    
+
+    NfcService.prototype.shareTag = function(params, successCB, errorCB) {
+        if (process.platform == 'android') {
+            this.androidNfcModule.shareTag(params[0], function(err) {errorCB(err);});
+        }
+    };
+    
+    NfcService.prototype.unshareTag = function(params, successCB, errorCB) {
+        if (process.platform == 'android') {
+            this.androidNfcModule.unshareTag(function(err) {errorCB(err);});
+        }
+    };
+    
     SimulatedNdefTech = function(ndefMsg) {
         this.ndefMessage = ndefMsg;
         
+        this.getType = function() {
+            return "NDEF";
+        }
+        
         this.readCachedNdefMessage = function() {
            return this.ndefMessage;
-        } 
+        }
+        
+        this.readNdefMessage = function(readCB, errorCB) {
+            readCB(this.ndefMessage);
+        }
+        
+        this.writeNdefMessage = function(ndefMessage, successCB, errorCB) {
+            this.ndefMessage = ndefMessage;
+            successCB();
+        }
+        
+        this.close = function(errorCB) {
+            
+        }
     }
 
     NfcService.prototype.dispatchEvent = function(params, successCB, errorCB) {

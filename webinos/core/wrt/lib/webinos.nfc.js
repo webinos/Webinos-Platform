@@ -18,6 +18,8 @@
         this.base(obj);
 
         this.listeners = {};
+        
+        this.currentTag = null;
     };
 
     NfcModule.prototype = new WebinosService;
@@ -32,6 +34,8 @@
         this.removeTextTypeListener = removeTextTypeListener;
         this.removeUriTypeListener = removeUriTypeListener;
         this.removeMimeTypeListener = removeMimeTypeListener;
+        this.shareTag = shareTag;
+        this.unshareTag = unshareTag;
         this.dispatchEvent = dispatchEvent;
         if (typeof bindCB.onBind === 'function') {
             bindCB.onBind(this);
@@ -114,8 +118,56 @@
                         "addMimeTypeListener", [ extra ]);
             }
 
-            rpc.onEvent = function(obj) {
-                listener(obj);
+            rpc.onEvent = function(tag) {
+                
+                tag.read = function(success, fail) {
+                    if (this != nfcModule.currentTag) {
+                        fail("invalid tag");
+                    }
+                    var rpc = webinos.rpcHandler.createRPC(nfcModule,
+                            "read");
+                    webinos.rpcHandler.executeRPC(rpc, function(params) {                       
+                        if (typeof success !== 'undefined') {
+                            success(params);
+                        }
+                    }, function(error) {
+                        if (typeof fail !== 'undefined') {
+                            fail();
+                        }
+                    });
+                }
+                
+                tag.write = function(ndefmessage, success, fail) {
+                    if (this != nfcModule.currentTag) {
+                        fail("invalid tag");
+                    }
+                    var rpc = webinos.rpcHandler.createRPC(nfcModule,
+                            "write", [ ndefmessage ]);
+                    webinos.rpcHandler.executeRPC(rpc, function(params) {                       
+                        if (typeof success !== 'undefined') {
+                            success();
+                        }
+                    }, function(error) {
+                        if (typeof fail !== 'undefined') {
+                            fail();
+                        }
+                    });
+                }
+                
+                tag.close = function(fail) {
+                    if (this != nfcModule.currentTag) {
+                        fail("invalid tag");
+                    }
+                    var rpc = webinos.rpcHandler.createRPC(nfcModule, "close");
+                    webinos.rpcHandler.executeRPC(rpc, null, function(error) {
+                        if (typeof fail !== 'undefined') {
+                            fail();
+                        }
+                    });
+                }               
+                
+                nfcModule.currentTag = tag;
+                listener(tag);
             };
 
             webinos.rpcHandler.registerCallbackObject(rpc);
@@ -168,6 +220,34 @@
 
     function removeMimeTypeListener(mimeType, listener) {
         removeListener(this, ListenerType.MIME, mimeType, listener);
+    }
+    
+
+    function shareTag(message, success, fail) {
+        var rpc = webinos.rpcHandler.createRPC(this, "shareTag",
+                [ message ]);
+        webinos.rpcHandler.executeRPC(rpc, function() {
+            if (typeof success !== 'undefined') {
+                success();
+            }
+        }, function(err) {
+            if (typeof fail !== 'undefined') {
+                fail();
+            }
+        });
+    }
+    
+    function unshareTag(success, fail) {
+        var rpc = webinos.rpcHandler.createRPC(this, "unshareTag");
+        webinos.rpcHandler.executeRPC(rpc, function() {
+            if (typeof success !== 'undefined') {
+                success();
+            }
+        }, function(err) {
+            if (typeof fail !== 'undefined') {
+                fail();
+            }
+        });
     }
 
     function dispatchEvent(event) {

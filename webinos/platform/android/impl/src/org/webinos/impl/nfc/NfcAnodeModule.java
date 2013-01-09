@@ -6,6 +6,7 @@ import java.util.List;
 import org.meshpoint.anode.AndroidContext;
 import org.meshpoint.anode.module.IModule;
 import org.meshpoint.anode.module.IModuleContext;
+import org.webinos.api.nfc.NdefRecord;
 import org.webinos.api.nfc.NfcTag;
 import org.webinos.api.nfc.NfcTagTechnology;
 import org.webinos.api.nfc.NfcTagTechnologyNdef;
@@ -43,7 +44,12 @@ public class NfcAnodeModule extends NfcModuleBase implements IModule {
 
   @Override
   public boolean isNfcAvailable() {
-    return (mNfcAdapter != null);
+    return (mNfcAdapter != null && mNfcAdapter.isEnabled());
+  }
+  
+  @Override
+  public boolean isNfcPushAvailable() {
+    return isNfcAvailable();
   }
 
   @Override
@@ -74,5 +80,16 @@ public class NfcAnodeModule extends NfcModuleBase implements IModule {
         mNfcEventListener.handleEvent(event);
       }
     }
+  }
+
+  @Override
+  protected void setSharedTag(NdefRecord[] ndefMessage) {
+
+    // TODO: Remove this
+    ndefMessage = new NdefRecord[] { Util.createTextNdefRecord("en",
+        "shared tag 2") };
+
+    nfcMgr
+        .setSharedTag(NfcTagTechnologyNdefImpl.createNdefMessage(ndefMessage));
   }
 }

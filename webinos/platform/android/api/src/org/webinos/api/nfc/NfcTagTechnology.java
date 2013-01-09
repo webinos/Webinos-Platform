@@ -21,6 +21,7 @@ package org.webinos.api.nfc;
 
 import org.meshpoint.anode.bridge.Env;
 import org.meshpoint.anode.java.Base;
+import org.webinos.api.ErrorCallback;
 
 public abstract class NfcTagTechnology extends Base {
   private static short classId = Env.getInterfaceId(NfcTagTechnology.class);
@@ -29,29 +30,26 @@ public abstract class NfcTagTechnology extends Base {
     super(classId, env);
   }
 
-  protected NfcTagTechnology(Env env, int type) {
+  protected NfcTagTechnology(Env env, String type) {
     this(env);
     mType = type;
   }
 
-  protected int mType;
-  protected boolean mConnected;
+  protected String mType;
+  
+  public static final String TECH_OTHERS = "OTHERS";
+  public static final String TECH_NFCA = "NFCA";
+  public static final String TECH_NFCB = "NFCB";
+  public static final String TECH_NFCF = "NFCF";
+  public static final String TECH_NFCV = "NFCV";
+  public static final String TECH_ISODEP = "ISODEP";
+  public static final String TECH_NDEF = "NDEF";
 
-  public static final int TECH_OTHERS = 0;
-  public static final int TECH_NFCA = 1;
-  public static final int TECH_NFCB = 2;
-  public static final int TECH_NFCF = 3;
-  public static final int TECH_NFCV = 4;
-  public static final int TECH_ISODEP = 5;
-  public static final int TECH_NDEF = 6;
-
-  public int getType() {
+  public String getType() {
     return mType;
   }
 
-  public boolean isConnected() {
-    return mConnected;
-  }
+  public abstract boolean isConnected();
 
-  public abstract void close();
+  public abstract void close(ErrorCallback errorCallback);
 }

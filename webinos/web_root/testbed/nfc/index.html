@@ -52,6 +52,8 @@
                             });
                         });
 
+                var lastReceivedEvent = null;
+                
                 var printEvent = function(name, event) {
                     if (typeof event.ndefMessage[0] !== 'undefined') {
                     	$('#out').append(name + ":<br>");
@@ -74,9 +76,11 @@
                 
                 var listener1 = function(event) {
                     printEvent("listener1", event);
+                    lastReceivedEvent = event;
                 }
                 var listener2 = function(event) {
                     printEvent("listener2", event);
+                    lastReceivedEvent = event;
                 }
 
                 $('#addTextListener1').bind('click', function() {
@@ -144,6 +148,50 @@
                     ndefMsg[0] = recentService.mimeRecord("text/plain", string2byteArray("hello world"));
                     recentService.dispatchEvent(ndefMsg);
                 });
+                
+                $('#read').bind('click', function() {
+                    lastReceivedEvent.read(function(ndefMessage) {
+                        var event = {};
+                        event.ndefMessage = ndefMessage;
+                        printEvent("read", event);
+                    }, function(err) {
+                        $('#out').append("read:<br>");
+                        $('#out').append("Could not read Ndef message: " + err);
+                        $('#out').append("<br><br>");
+                    });
+                });
+                
+                $('#write').bind('click', function() {
+                    var ndefMsg = [];
+                    ndefMsg[0] = recentService.textRecord("hello world 2", "en");
+                    lastReceivedEvent.write(ndefMsg, function() {
+                        $('#out').append("write:<br>");
+                        $('#out').append("Ndef message written");
+                        $('#out').append("<br><br>");
+                    }, function(err) {
+                        $('#out').append("write:<br>");
+                        $('#out').append("Could not write Ndef message: " + err);
+                        $('#out').append("<br><br>");
+                    });
+                });
+                
+                $('#close').bind('click', function() {
+                    lastReceivedEvent.close(function(err) {
+                        $('#out').append("close:<br>");
+                        $('#out').append("Could not close: " + err);
+                        $('#out').append("<br><br>");
+                    });
+                });
+                
+                $('#shareTag').bind('click', function() {
+                    var ndefMsg = [];
+                    ndefMsg[0] = recentService.textRecord("shared tag", "en");
+                    recentService.shareTag(ndefMsg);
+                });
+                
+                $('#unshareTag').bind('click', function() {
+                    recentService.unshareTag();
+                });
 
             });
 </script>
@@ -171,6 +219,11 @@
 		<tr><td><button id="removeListener" class="button">Remove Listener</button></td></tr>
 		<tr><td><button id="clearEvents" class="button">Clear events</button></td></tr>
 		<tr><td><button id="dispatch" class="button">Dispatch</button></td></tr>
+		<tr><td><button id="read" class="button">Read</button></td></tr>
+		<tr><td><button id="write" class="button">Write</button></td></tr>
+		<tr><td><button id="close" class="button">Close</button></td></tr>
+		<tr><td><button id="shareTag" class="button">Share Tag</button></td></tr>
+		<tr><td><button id="unshareTag" class="button">Unshare Tag</button></td></tr>
 	</table>
 	<div id="out"></div>
 </body>

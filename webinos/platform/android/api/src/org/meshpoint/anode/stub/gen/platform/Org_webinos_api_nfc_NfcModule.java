@@ -31,31 +31,45 @@ public class Org_webinos_api_nfc_NfcModule {
 		case 3: /* isNfcAvailable */
 			result = org.meshpoint.anode.js.JSValue.asJSBoolean(inst.isNfcAvailable());
 			break;
-		case 4: /* log */
+		case 4: /* isNfcPushAvailable */
+			result = org.meshpoint.anode.js.JSValue.asJSBoolean(inst.isNfcPushAvailable());
+			break;
+		case 5: /* log */
 			inst.log(
 				(String)args[0]
 			);
 			break;
-		case 5: /* removeMimeTypeFilter */
+		case 6: /* removeMimeTypeFilter */
 			inst.removeMimeTypeFilter(
 				(String)args[0],
 				(org.webinos.api.ErrorCallback)args[1]
 			);
 			break;
-		case 6: /* removeTextTypeFilter */
+		case 7: /* removeTextTypeFilter */
 			inst.removeTextTypeFilter(
 				(org.webinos.api.ErrorCallback)args[0]
 			);
 			break;
-		case 7: /* removeUriTypeFilter */
+		case 8: /* removeUriTypeFilter */
 			inst.removeUriTypeFilter(
 				(String)args[0],
 				(org.webinos.api.ErrorCallback)args[1]
 			);
 			break;
-		case 8: /* setListener */
+		case 9: /* setListener */
 			inst.setListener(
 				(org.webinos.api.nfc.NfcEventListener)args[0]
+			);
+			break;
+		case 10: /* shareTag */
+			inst.shareTag(
+				(org.webinos.api.nfc.NdefRecord[])args[0],
+				(org.webinos.api.ErrorCallback)args[1]
+			);
+			break;
+		case 11: /* unshareTag */
+			inst.unshareTag(
+				(org.webinos.api.ErrorCallback)args[0]
 			);
 			break;
 		default:

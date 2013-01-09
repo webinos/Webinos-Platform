@@ -2,6 +2,7 @@ package org.webinos.api.nfc;
 
 import org.meshpoint.anode.bridge.Env;
 import org.meshpoint.anode.java.Base;
+import org.meshpoint.anode.js.JSObjectArray;
 import org.webinos.api.ErrorCallback;
 
 public abstract class NfcModule extends Base {
@@ -14,6 +15,8 @@ public abstract class NfcModule extends Base {
   public abstract void setListener(NfcEventListener listener);
 
   public abstract boolean isNfcAvailable();
+  
+  public abstract boolean isNfcPushAvailable();
 
   public abstract void addTextTypeFilter(ErrorCallback fail);
 
@@ -28,7 +31,9 @@ public abstract class NfcModule extends Base {
   public abstract void removeMimeTypeFilter(String mimeType,
       ErrorCallback fail);
 
+  public abstract void shareTag(NdefRecord[] ndefMessage,  ErrorCallback fail);
   
+  public abstract void unshareTag(ErrorCallback fail);
 
   public abstract void log(String message);
 

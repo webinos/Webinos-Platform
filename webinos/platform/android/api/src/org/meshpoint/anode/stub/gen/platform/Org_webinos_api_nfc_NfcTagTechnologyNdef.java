@@ -22,15 +22,15 @@ public class Org_webinos_api_nfc_NfcTagTechnologyNdef {
 			break;
 		case 2: /* readNdefMessage */
 			result = inst.readNdefMessage(
-				(org.webinos.api.SuccessCallback)args[0],
+				(org.webinos.api.nfc.ReadNdefMessageCallback)args[0],
 				(org.webinos.api.ErrorCallback)args[1]
 			);
 			break;
 		case 3: /* writeNdefMessage */
 			result = inst.writeNdefMessage(
-				(org.webinos.api.SuccessCallback)args[0],
-				(org.webinos.api.ErrorCallback)args[1],
-				(org.webinos.api.nfc.NdefRecord[])args[2]
+				(org.webinos.api.nfc.NdefRecord[])args[0],
+				(org.webinos.api.SuccessCallback)args[1],
+				(org.webinos.api.ErrorCallback)args[2]
 			);
 			break;
 		default:
