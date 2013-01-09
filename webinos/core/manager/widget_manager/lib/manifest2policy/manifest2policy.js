@@ -54,7 +54,28 @@
             return '';
         }
 
-        console.log(util.inspect(manifest, false, null));
+        // target
+        var target = [];
+        target[0] = {};
+        target[0].subject = [];
+        var subjectMatch = [];
+        // subject-match on application ID
+        if (appId !== null && appId !== undefined) {
+            subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
+        } else {
+            colsole.log('appId is missing');
+            return '';
+        }
+        // subject-match on user ID, assuming to receive it as a parameter
+        /*if (userId !== null && userId !== undefined) {
+            subjectMatch.push({'$' : {'attr' : 'user-id', 'match' : userId}});
+        } else {
+            colsole.log('userId is missing');
+            return '';
+        }*/
+        target[0].subject[0] = {'subject-match' : subjectMatch};
+
+        console.log(util.inspect(target, false, null));
 
     };
 
