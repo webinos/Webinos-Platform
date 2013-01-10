@@ -28,7 +28,7 @@
     //var util = require('util');
 
     /**
-    * Translate from manifest to XACML policy
+    * Translate from manifest to policy
     * @function
     * @param manifestFile Application manifest
     * @param appId Application ID
