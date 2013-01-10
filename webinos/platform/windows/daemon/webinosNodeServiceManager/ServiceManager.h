@@ -15,13 +15,20 @@ struct CUserParameters
 
 struct CServiceParameters
 {
+	CServiceParameters()
+	{
+		instance = 0;
+		showOutput = false;
+	}
+
 	std::string serviceName;
 	std::string nodePath;
 	std::string workingDirectoryPath;
 	std::string nodeArgs;
 	unsigned long instance;
+	unsigned long showOutput;
 
-	int operator==(const CServiceParameters& other) const { return serviceName == other.serviceName && nodePath == other.nodePath && workingDirectoryPath == other.workingDirectoryPath && nodeArgs == other.nodeArgs && instance == other.instance; }
+	int operator==(const CServiceParameters& other) const { return serviceName == other.serviceName && nodePath == other.nodePath && workingDirectoryPath == other.workingDirectoryPath && nodeArgs == other.nodeArgs && instance == other.instance && showOutput == other.showOutput; }
 	int operator!=(const CServiceParameters& other) const { return !operator==(other); }
 };
 
@@ -33,6 +40,7 @@ private:
 	static const std::string pathToAppDataKey;
 	static const std::string nodeArgsKey;
 	static const std::string instanceKey;
+	static const std::string showOutputKey;
   static const std::string trimChars;
   static const char jsonParamDelim;
 
@@ -48,11 +56,8 @@ public:
 	~CServiceManager(void);
 
 	bool GetUserParameters(CUserParameters& params);
-	bool SetUserParameters(std::string);
-	bool SetUserParameters(CUserParameters& params);
 	bool GetServiceParameters(CUserParameters&,CServiceParameters&);
 	bool SetServiceParameters(CUserParameters&,CServiceParameters&);
-	bool ClearUserParameters();
 	void WriteServiceHeartbeat(const CServiceParameters& params);
 	void WriteNodeHeartbeat(const CUserParameters& user,const CServiceParameters& params);
 	unsigned long GetServiceHeartbeatTime(const CServiceParameters& params);

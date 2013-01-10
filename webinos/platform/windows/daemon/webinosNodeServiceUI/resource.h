@@ -36,6 +36,8 @@
 #define IDC_PZP_SYSLINK                 1017
 #define IDC_PZH_SYSLINK                 1018
 #define IDC_VERSION_STATIC              1019
+#define IDC_WRT_SYSLINK                 1020
+#define IDC_OUTPUT_CHECK								1021
 #define ID_CONFIGURE_EXIT               32775
 #define ID_CONTEXT_EXIT                 32776
 #define ID_CONTEXT_CONFIGURE            32777
@@ -49,7 +51,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         32781
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

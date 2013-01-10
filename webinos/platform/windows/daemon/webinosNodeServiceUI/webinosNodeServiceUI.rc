@@ -40,6 +40,11 @@ END
 
 3 TEXTINCLUDE 
 BEGIN
+    "#include ""messages.rc\0"
+END
+
+4 TEXTINCLUDE 
+BEGIN
     "\0"
 END
 
@@ -150,12 +155,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "webinos node service UI Module"
-            VALUE "FileVersion", "0, 6, 0, 9"
+            VALUE "FileVersion", "0, 7, 0, 0"
             VALUE "InternalName", "webinosNodeServiceUI"
-            VALUE "LegalCopyright", "Copyright 2012"
+            VALUE "LegalCopyright", "Copyright 2013"
             VALUE "OriginalFilename", "webinosNodeServiceUI.exe"
             VALUE "ProductName", "webinos"
-            VALUE "ProductVersion", "0, 6, 0, 9"
+            VALUE "ProductVersion", "0, 7, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -271,40 +276,32 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 // Dialog
 //
 
-IDD_UIDIALOG DIALOGEX 0, 0, 316, 179
+IDD_UIDIALOG DIALOGEX 0, 0, 316, 149
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "webinos"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Configuration",IDC_STATIC,7,4,302,82
+    GROUPBOX        "Configuration",IDC_STATIC,7,4,302,62
     LTEXT           "Path to node",IDC_STATIC,11,16,42,8
     EDITTEXT        IDC_PATH_TO_NODE_EDIT,68,13,185,14,ES_AUTOHSCROLL | ES_READONLY | WS_DISABLED
     PUSHBUTTON      "Browse...",IDC_NODE_PATH_BROWSE_BTN,257,13,50,14
     LTEXT           "Path to webinos",IDC_STATIC,11,34,56,8
     EDITTEXT        IDC_PATH_TO_WEBINOS_EDIT,68,31,185,14,ES_AUTOHSCROLL | ES_READONLY | WS_DISABLED
     PUSHBUTTON      "Browse...",IDC_WEBINOS_PATH_BROWSE_BTN,257,31,50,14
-    LTEXT           "PZH name",IDC_STATIC,11,50,33,8
-    EDITTEXT        IDC_PZH_NAME_EDIT,68,48,185,14,ES_AUTOHSCROLL
-    LTEXT           "Auth code",IDC_STATIC,11,68,34,8
-    EDITTEXT        IDC_AUTH_CODE_EDIT,68,65,185,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Save",IDOK,257,65,50,14
-    GROUPBOX        "PZP status",IDC_STATIC,7,86,302,24
+    PUSHBUTTON      "Save",IDOK,257,50,50,14
+    GROUPBOX        "PZP status",IDC_STATIC,7,66,302,38
+    CONTROL         "<a href=""http://localhost:53510"">widget runtime</a>",IDC_WRT_SYSLINK,
+                    "SysLink",WS_TABSTOP,258,90,50,12
     CONTROL         "<a href=""http://localhost:8080/testbed/client.html"">pzp testbed</a>",IDC_PZP_SYSLINK,
-                    "SysLink",WS_TABSTOP,217,95,40,12
-    PUSHBUTTON      "Restart PZP",IDC_RESET_BUTTON,257,93,50,14
-    /*
-    GROUPBOX        "PZH status (local)",IDC_STATIC,7,110,302,24
-    LTEXT           "",IDC_PZH_STATUS_STATIC,11,120,205,8
-    CONTROL         "<a href=""https://localhost:9000"">pzh admin</a>",IDC_PZH_SYSLINK,
-                    "SysLink",WS_TABSTOP,217,120,37,12
-    PUSHBUTTON      "Restart PZH",IDC_PZH_RESET_BUTTON,257,117,50,14
-    */
-    CONTROL         203,IDC_STATIC,"Static",SS_BITMAP,0,141,333,37
-    LTEXT           "runtime v0.6.09  ©2012 · ",IDC_VERSION_STATIC,102,160,80,10
+                    "SysLink",WS_TABSTOP,215,90,40,12
+    PUSHBUTTON      "Restart PZP",IDC_RESET_BUTTON,257,73,50,14
+    CHECKBOX        "Show PZP console",IDC_OUTPUT_CHECK,11,90,80,12,BS_AUTOCHECKBOX | WS_TABSTOP
+    CONTROL         IDB_BANNER_BITMAP,IDC_STATIC,"Static",SS_BITMAP,0,111,333,37
+    LTEXT           "runtime v0.7.00  ©2013 · ",IDC_VERSION_STATIC,102,130,80,10
     CONTROL         "<a href=""http://webinos.org"">webinos.org</a>",IDC_SYSLINK,
-                    "SysLink",WS_TABSTOP,183,160,41,9
-    LTEXT           "",IDC_STATUS_STATIC,11,96,205,8
-    PUSHBUTTON      "Shutdown",IDC_SHUTDOWN_BTN,257,156,50,14
+                    "SysLink",WS_TABSTOP,183,130,41,9
+    LTEXT           "",IDC_STATUS_STATIC,11,76,205,8
+    PUSHBUTTON      "Shutdown",IDC_SHUTDOWN_BTN,257,126,50,14
 END
 
 
@@ -326,6 +323,14 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "messages.rc"
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -350,6 +355,4 @@ END
 IDB_BANNER_BITMAP       BITMAP                  "res\\banner.bmp"
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
-
-
 

@@ -22,6 +22,7 @@ const std::string CServiceManager::pathToWorkingDirectoryKey = "workingDirectory
 const std::string CServiceManager::pathToAppDataKey = "appDataPath";
 const std::string CServiceManager::nodeArgsKey = "nodeArgs";
 const std::string CServiceManager::instanceKey = "instance";
+const std::string CServiceManager::showOutputKey = "showOutput";
 const char CServiceManager::jsonParamDelim = ',';
 const std::string CServiceManager::trimChars = "\r\n\t \"";
 
@@ -168,6 +169,13 @@ bool CServiceManager::GetServiceParameters(CUserParameters& user, CServiceParame
         std::string inst = webinos::trim(tmp,trimChars);
 				params.instance = atol(inst.c_str());
 			}
+
+			if (kvTok == showOutputKey)
+			{
+				tmp = tok.substr(kvPos+1);
+				std::string showOutput = webinos::trim(tmp,trimChars);
+				params.showOutput = atol(showOutput.c_str());
+			}
 		}
 
 		ok = true;
@@ -208,11 +216,14 @@ bool CServiceManager::SetServiceParameters(CUserParameters& user,CServiceParamet
       webinos::replace(fix,std::string("\""),std::string("\\\""));
       WriteJSONKey(fs,nodeArgsKey,fix);
 
-			char inst[256];
-			sprintf(inst,"%ld",params.instance);
-			WriteJSONKey(fs,instanceKey,inst,true);
+			char val[256];
+			sprintf(val,"%ld",params.instance);
+			WriteJSONKey(fs,instanceKey,val);
 	
-      fs << "}";
+			sprintf(val,"%ld",params.showOutput);
+			WriteJSONKey(fs,showOutputKey,val,true);
+
+			fs << "}";
 
       fs.close();
 
@@ -230,52 +241,15 @@ bool CServiceManager::GetUserParameters(CUserParameters& params)
 {
 	bool ok = false;
 
-  // Get the path to the common data area.
-	std::string serviceConfigPath;
-	if (GetCommonSettingsPath(serviceConfigPath))
+	// Get the current AppData folder for the webinos PZP service to reflect the current user name.
+	TCHAR appData[MAX_PATH];
+	if (0 != ::GetEnvironmentVariable(_T("AppData"), appData, _countof(appData)))
 	{
-    // Build the path to the configuration file.
-		serviceConfigPath += pathSeparator + WEBINOS_SERVER_EXE + std::string(".dat");
-    params.appDataPath = ReadFile(serviceConfigPath);
-    webinos::trim(params.appDataPath,"\n");
+		params.appDataPath = appData;
 		ok = true;
 	}
 
 	return ok;
-}
-
-bool CServiceManager::SetUserParameters(std::string appDataPath)
-{
-	bool ok = false;
-
-	std::string serviceConfigPath;
-	if (GetCommonSettingsPath(serviceConfigPath))
-	{
-		serviceConfigPath += pathSeparator + WEBINOS_SERVER_EXE + std::string(".dat");
-
-    CreateSharedFile(serviceConfigPath.c_str());
-
-    std::ofstream fs(serviceConfigPath.c_str());
-
-    if (fs)
-    {
-      fs << appDataPath;
-      fs.close();
-			ok = true;
-    }
-  }
-
-	return ok;
-}
-
-bool CServiceManager::SetUserParameters(CUserParameters& params)
-{
-  return SetUserParameters(params.appDataPath);
-}
-
-bool CServiceManager::ClearUserParameters()
-{
-  return SetUserParameters("");
 }
 
 void CServiceManager::WriteJSONKey(std::ofstream& fs, std::string keyName, std::string keyVal, bool final)
