@@ -17,16 +17,17 @@ class CWebinosUI : public CDialogImpl<CWebinosUI>, public CUpdateUI<CWebinosUI>,
 	int m_restartingPzp;
 	bool m_confirmingExit;
 	NOTIFYICONDATA m_trayIcon;
+	class CServiceRunner* m_runner;
 
 	void Initialise();
 	void ConfirmExit();
-	void SetSession();
-	void ClearSession();
   bool ParseArg(std::string& arg, std::string argName, std::string& argVal);
-	void ShowServiceStatus(int& restarting, CServiceParameters& params, int statusCtl, int resetCtl);
+	void ShowServiceStatus(int& restarting, CServiceParameters& params, int statusCtl, int resetCtl, int outputCtl);
   void CheckForLaunchRequests();
 
 public:
+	CWebinosUI();
+
 	enum { IDD = IDD_UIDIALOG };
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg)
@@ -52,9 +53,11 @@ public:
 		COMMAND_HANDLER(IDC_WEBINOS_PATH_BROWSE_BTN, BN_CLICKED, OnBnClickedWebinosPathBrowseBtn)
 		COMMAND_HANDLER(IDC_RESET_BUTTON, BN_CLICKED, OnBnClickedResetButton)
 		COMMAND_HANDLER(IDC_PZH_RESET_BUTTON, BN_CLICKED, OnBnClickedPzhResetButton)
+		COMMAND_HANDLER(IDC_OUTPUT_CHECK, BN_CLICKED, OnBnClickedResetButton)
 		NOTIFY_HANDLER(IDC_SYSLINK, NM_CLICK, OnNMClickSyslink)
 		NOTIFY_HANDLER(IDC_PZP_SYSLINK, NM_CLICK, OnNMClickSyslink)
 		NOTIFY_HANDLER(IDC_PZH_SYSLINK, NM_CLICK, OnNMClickSyslink)
+		NOTIFY_HANDLER(IDC_WRT_SYSLINK, NM_CLICK, OnNMClickWRTlink)
 		COMMAND_HANDLER(IDC_SHUTDOWN_BTN, BN_CLICKED, OnBnClickedShutdownBtn)
 	END_MSG_MAP()
 
@@ -77,5 +80,6 @@ public:
 	LRESULT OnBnClickedResetButton(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedPzhResetButton(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnNMClickSyslink(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/);
+	LRESULT OnNMClickWRTlink(int /*idCtrl*/, LPNMHDR pNMHDR, BOOL& /*bHandled*/);
 	LRESULT OnBnClickedShutdownBtn(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

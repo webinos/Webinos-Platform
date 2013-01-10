@@ -5,8 +5,6 @@
 class CServiceRunner
 {
 private:
-	SERVICE_STATUS m_status;
-	SERVICE_STATUS_HANDLE m_serviceHandler;
 	HANDLE m_processHandle;
 	HANDLE m_waitHandle;
 	HANDLE m_restartTimer;
@@ -24,10 +22,8 @@ private:
 	void KillProcess();
 	void KillProcessTree(DWORD procID, DWORD dwTimeout);
 
-	DWORD ControlHandler(unsigned long control, unsigned long event, void *data);
 	void ProcessStopped();
 
-	friend DWORD WINAPI globalControlHandler(unsigned long control, unsigned long event, void *data, void *context);
 	friend void CALLBACK globalServiceEnded(void* context, BOOLEAN TimerOrWaitFired);
 	friend DWORD WINAPI MonitorThread(LPVOID lpParam);
 	
