@@ -3,249 +3,234 @@
 <title>PZP Testbed</title>
 <meta charset="utf-8"/>
 <title>PZP Dashboard</title>
-<link rel="icon" href="vehicle/webinos.ico" type="image/x-icon">
-<link rel="stylesheet" href="css/layout.css" type="text/css" media="screen" />
-<link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
-<script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
+<link rel="icon" href="vehicle/general/webinos.ico" type="image/x-icon">
+<link rel="stylesheet" href="css/layout.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="css/style.css" type="text/css" media="screen"/>
+<script type="text/javascript" src="./jquery-1.8.2.min.js"></script>
 <script type="text/javascript" src="js/hideshow.js"></script>
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="../webinos.js"></script>
 <script type="text/javascript">
-    $(document).ready(function() {
-      function setPage(type, page){
-        var port = window.location.port;
-        if (typeof port === "undefined") {
-          port = 8080;
-        }
-        var fetch = 'http://'+window.location.hostname+':'+ port+'/client/'+page;
-        $.get(page, {}, function(reply) {
-          $('#main').html('<article class="module width_full"><header><h3>' + type +
-            '</h3></header><div class="module_content">'+ reply + '</div></article><div class="spacer"></div>');
-          //$('.column').equalHeight(); // Fix height
-        }, "html");
-      }
-      function logMessage(msg) {
-        if (msg) {
-          $('#message').append('<li>' + msg + '</li>');
-        }
-      }
-      function setEnrolling() {
-        var pzpId = webinos.session.getPZPId();
-        if (pzpId && pzpId.indexOf('/') === -1) {
-          $('#enableLogin').html("<a href='#login' id='login'> Connect to Your PZH </a>");
-          $("#login").click(function(){
-            setPage("Login to your PZH", "login.html");
-          });
-        } else {
-          console.log(webinos.session.isConnected());
-          if(webinos.session.isConnected()){
-            $('#enableLogin').html("Connected to " + webinos.session.getPZHId());
-          } else {
-            $('#enableLogin').html("Enrolled to " + webinos.session.getPZHId() + "(Not Connected)");
-          }
-        }
-      }
-      function webinosVersion(msg){
-        var currentVersion =msg.payload.message.split("-")[0];
-        var sha1 = msg.payload.message.split("-")[2];
-        $("#webinosVersion").html("<ul align=\"right\"> Webinos Version-"+currentVersion + " (Commit ID-" + sha1 +") </ul>");
-      }
-      webinos.session.addListener('webinosVersion', webinosVersion);
-      function pzhDisconnected(){
-        setEnrolling();
-        logMessage("pzp disconnected from pzh, will try connecting back");
-      }
-      webinos.session.addListener('pzhDisconnected', pzhDisconnected);
-      function connectedDetails() {
-        var pzhId, connectedPzh = [] , connectedPzp = [];
-        connectedPzp = webinos.session.getOtherPZP(); // all connected pzp
-        connectedPzh = webinos.session.getOtherPZH(); // all connected pzh
-        $("#enumConnectedPzh").html("");
-        $("#enumConnectedPzp").html("");
-        var pzhText = "", pzpText = "",style="connected";
-        for ( var i = 0 ; i < connectedPzh.length; i += 1){
-          if (webinos.session.getPZHId() === connectedPzh[i]) {
-            pzhText+= "<li><a class='"+ style +"'>"+connectedPzh[i] + " (Your PZH) </a></li>";
-          }
-          else {
-            pzhText+= "<li><a class='"+ style +"'>"+connectedPzh[i] + "</a></li>";
-          }
-        }
-        $("#enumConnectedPzh").html(pzhText);
-        for (i = 0 ; i < connectedPzp.length; i += 1){
-          pzpText+= "<li><a class='"+ style +"'>"+connectedPzp[i] + "</a></li>";
-        }
-        pzpText+= "<li><a class='connected'>"+ webinos.session.getPZPId() + " (This DEVICE) </a></li>";
-        $("#enumConnectedPzp").html(pzpText);
-        setEnrolling();
-      }
-      function fillPZAddrs() {
-        logMessage('registeredBrowser msg from ' + webinos.session.getPZPId());
-        connectedDetails();
-        $("#userId").html(webinos.session.getPZPId());
-          //$('.column').equalHeight(); // Fix height
-      }
-      webinos.session.addListener('registeredBrowser', fillPZAddrs);
-      function updatePZAddrs(data) {
-        connectedDetails();
-      }
-      webinos.session.addListener('update', updatePZAddrs);
-      function printInfo(data) {
-        logMessage(data.payload.message);
-      }
-      webinos.session.addListener('info', printInfo);
-      $("#testapi").click(function(){
-        setPage("Test API Demo", "client42.html");
-      });
-      $("#events").click(function(){
-        setPage("Events Demo", "events/events.html");
-      });
-      $("#geo").click(function(){
-       setPage("Gelocation Demo", "geolocation/geolocation.html");
-      });
-      $("#file").click(function(){
-       setPage("File Demo", "file/file.html");
-      });
-      $("#contacts").click(function(){
-       setPage("Contacts Demo", "contacts/contacts.html");
-      });
-      $("#disco_hrm").click(function(){
-       setPage("Discovery HRM Demo", "discovery/Android/bluetooth_hrm.html");
-      });
-      $("#disco_ft").click(function(){
-       setPage("Discovery File Transfer Demo", "discovery/Linux/bluetooth_filetransfer.html");
-      });
-      $("#disco_ui").click(function(){
-       setPage("Discovery UI Demo", "discovery/discoveryUI.html");
-      });
-      $("#sensor").click(function(){
-       setPage("Sensor Demo", "sensor/sensor.html");
-      });
-      $("#actuator").click(function(){
-       setPage("Actuator Demo", "actuator/actuator.html");
-      });
-      $("#payment").click(function(){
-       setPage("Payment Demo", "payment/payment.html");
-      });
-      $("#applaunch").click(function(){
-       setPage("AppLauncher Demo", "applauncher/index.html");
-      });
-      $("#webnotification").click(function(){
-          setPage("W3C Webnotification Demo", "webnotification/wn.html");
-         });
-      $("#tv").click(function(){
-       setPage("TV Demo", "tv/client.html");
-      });
-      $("#oauth").click(function(){
-       setPage("OAuth Demo", "oAuth/client.html");
-      });
-      $("#context").click(function(){
-       setPage("Context Demo", "context/context.html");
-      });
-      $("#auth").click(function(){
-       setPage("Authentication Demo", "authentication/test_auth.html");
-      });
-      $("#deviceorientation").click(function(){
-          setPage("Device Orientation Demo", "deviceorientation/index.html");
-         });
-      $("#devicestatus").click(function(){
-       setPage("Device Status Demo", "devicestatus/client.html");
-      });
-      $("#vehicle").click(function(){
-       setPage("Vehicle API Testbed", "vehicle/testbed/index.html");
-      });
-      $("#mediaContent").click(function(){
-       setPage("Media Content API Testbed", "mediaContent/index.html");
-      });
-      $("#login").click(function(){
-       setPage("Login to your PZH", "login.html");
-      });
-      $('#logout').bind('click', function() {
-        var options = {type: 'prop', payload: {status:'disconnectPzp'}};
-        webinos.session.message_send(options);
-      });
-      $('#status').mouseenter(function(){
-        var that = $(this);
-        var right = that.css("right");
-        that.css("right",(right==="0px")?"":"0px");
-      });
-      $('#apitests').click(function() {
-        setPage("apitests", "../tests/api_tests/apitests.html");
-      });
-      $('#widgettests').click(function() {
-        setPage("widgettests", "../tests/widget_tests/Overview.html");
-      });
-      $('#friendlyName').click(function() {
-        setPage("Add FriendlyName", "friendlyName.html");
-      });
-      $('#infoLog').click(function() {
-        var options = {type: 'prop', payload: {status:'infoLog'}};
-        webinos.session.message_send(options);
-      });
-      $('#errorLog').click(function() {
-        var options = {type: 'prop', payload: {status:'errorLog'}};
-        webinos.session.message_send(options);
-      });
-      function logs(msg) {
-        $('#main').html('<article class="module width_full"><header><h3>Logs</h3></header>' +
-        '<div class="module_content">'+ msg.payload.message +'</div></article>' +
-        '<div class="spacer"></div>');
-      }
-      webinos.session.addListener('infoLog', logs);
-      webinos.session.addListener('errorLog', logs);
-      // This is added here as we intend to get response back here
-      function authStatus(msg) {
-        if (msg.payload.message.connected === "true") {
-          var pzhProvider = msg.payload.message.pzhId.substr(0,msg.payload.message.pzhId.indexOf("_"));
-          var userAccount = msg.payload.message.pzhId.substr(msg.payload.message.pzhId.indexOf("_")+1);
-          var confirmText = "Your device will now be enrolled with the following personal zone provider: \n\t" + pzhProvider + "\n For the following user account: \n\t" + userAccount;
-          var existPzh = confirm(confirmText) ;
-          if (existPzh === true) {
-            var options = {"type": 'prop', "payload": { "status": "enrollPzp", message: msg.payload.message.authCode }};
-            webinos.session.message_send(options, msg.payload.message.pzhId);
-          } else {
-            alert ("Connecting your device with a personal zone hub was cancelled.");
-          }
-        } else {
-          var createPzh = confirm(" Create PZH - " + msg.payload.message.pzhId ) ;
-          if (createPzh === true) {
-             var options ={"type": 'prop', "payload": { "status": "registerPzh" }};
-             webinos.session.message_send(options, msg.payload.message.pzhId);
-          } else  {
-            alert ("connection with a personal zone hub cancelled");
-          }
-        }
-      }
-      webinos.session.addListener('authStatus', authStatus);
-      function error(msg) {
-        alert(msg.payload.message);
-      }
-      webinos.session.addListener('error', error);
+$ (document).ready (function () {
+  function setPage (type, page) {
+    var port = window.location.port;
+    if (typeof port === "undefined") {
+      port = 8080;
+    }
+    var fetch = 'http://' + window.location.hostname + ':' + port + '/client/' + page;
+    $.get (page, {}, function (reply) {
+      $ ('#main').html ('<article class="module width_full"><header><h3>' + type +
+              '</h3></header><div class="module_content">' + reply + '</div></article><div class="spacer"></div>');
       //$('.column').equalHeight(); // Fix height
-    });
-    </script>
+    }, "html");
+  }
+  function logMessage (msg) {
+    if (msg) {
+      $ ('#message').append ('<li>' + msg + '</li>');
+    }
+  }
+  function setEnrolling () {
+    var pzpId = webinos.session.getPZPId();
+    if (pzpId && pzpId.indexOf ('/') === -1) {
+      $ ('#enableLogin').html ("<a href='#login' id='login'> Connect to Your PZH </a>");
+      $ ("#login").click (function () {
+        setPage ("Login to your PZH", "login.html");
+      });
+    } else {
+      if (webinos.session.isConnected ()) {
+        $ ('#enableLogin').html ("Connected to " + webinos.session.getPZHId ());
+      } else {
+        $ ('#enableLogin').html ("Enrolled to " + webinos.session.getPZHId () + "(Not Connected)");
+      }
+    }
+  }
+  function webinosVersion (msg) {
+    var currentVersion = msg.payload.message.split ("-")[0];
+    var sha1 = msg.payload.message.split ("-")[2];
+    $ ("#webinosVersion").html ("<ul align=\"right\"> Webinos Version-" + currentVersion + " (Commit ID-" + sha1 + ") </ul>");
+  }
+  webinos.session.addListener ('webinosVersion', webinosVersion);
+  function pzhDisconnected () {
+    setEnrolling ();
+    logMessage ("pzp disconnected from pzh, will try connecting back");
+  }
+  webinos.session.addListener ('pzhDisconnected', pzhDisconnected);
+  function connectedDetails () {
+    var pzhId, connectedPzh = [] , connectedPzp = [];
+    connectedPzp = webinos.session.getOtherPZP (); // all connected pzp
+    connectedPzh = webinos.session.getOtherPZH (); // all connected pzh
+    $ ("#enumConnectedPzh").html ("");
+    $ ("#enumConnectedPzp").html ("");
+    var pzhText = "", pzpText = "", style = "connected";
+    for (var i = 0; i < connectedPzh.length; i += 1) {
+      if (webinos.session.getPZHId () === connectedPzh[i]) {
+        pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + " (Your PZH) </a></li>";
+      }
+      else {
+        pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + "</a></li>";
+      }
+    }
+    $ ("#enumConnectedPzh").html (pzhText);
+    for (i = 0; i < connectedPzp.length; i += 1) {
+      pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + "</a></li>";
+    }
+    pzpText += "<li><a class='connected'>" + webinos.session.getPZPId () + " (This DEVICE) </a></li>";
+    $ ("#enumConnectedPzp").html (pzpText);
+    setEnrolling ();
+  }
+  function fillPZAddrs () {
+    logMessage ('registeredBrowser msg from ' + webinos.session.getPZPId ());
+    connectedDetails ();
+    $ ("#userId").html (webinos.session.getPZPId ());
+    //$('.column').equalHeight(); // Fix height
+  }
+  webinos.session.addListener ('registeredBrowser', fillPZAddrs);
+  function updatePZAddrs (data) {
+    connectedDetails ();
+  }
+  webinos.session.addListener ('update', updatePZAddrs);
+  function printInfo (data) {
+    logMessage (data.payload.message);
+  }
+  webinos.session.addListener ('info', printInfo);
+  $ ("#testapi").click (function () {
+    setPage ("Test API Demo", "client42.html");
+  });
+  $ ("#events").click (function () {
+    setPage ("Events Demo", "events/events.html");
+  });
+  $ ("#geo").click (function () {
+    setPage ("Gelocation Demo", "geolocation/geolocation.html");
+  });
+  $ ("#file").click (function () {
+    setPage ("File Demo", "file/file.html");
+  });
+  $ ("#contacts").click (function () {
+    setPage ("Contacts Demo", "contacts/contacts.html");
+  });
+  $ ("#disco_hrm").click (function () {
+    setPage ("Discovery HRM Demo", "discovery/Android/bluetooth_hrm.html");
+  });
+  $ ("#disco_ft").click (function () {
+    setPage ("Discovery File Transfer Demo", "discovery/Linux/bluetooth_filetransfer.html");
+  });
+  $ ("#disco_ui").click (function () {
+    setPage ("Discovery UI Demo", "discovery/discoveryUI.html");
+  });
+  $ ("#sensor").click (function () {
+    setPage ("Sensor Demo", "sensor/sensor.html");
+  });
+  $("#actuator").click(function(){
+    setPage("Actuator Demo", "actuator/actuator.html");
+  });
+  $ ("#payment").click (function () {
+    setPage ("Payment Demo", "payment/payment.html");
+  });
+  $ ("#applaunch").click (function () {
+    setPage ("AppLauncher Demo", "applauncher/index.html");
+  });
+  $ ("#webnotification").click (function () {
+    setPage ("W3C Webnotification Demo", "webnotification/wn.html");
+  });
+  $ ("#tv").click (function () {
+    setPage ("TV Demo", "tv/client.html");
+  });
+  $ ("#oauth").click (function () {
+    setPage ("OAuth Demo", "oAuth/client.html");
+  });
+  $ ("#context").click (function () {
+    setPage ("Context Demo", "context/context.html");
+  });
+  $ ("#auth").click (function () {
+    setPage ("Authentication Demo", "authentication/test_auth.html");
+  });
+  $ ("#deviceorientation").click (function () {
+    setPage ("Device Orientation Demo", "deviceorientation/index.html");
+  });
+  $ ("#devicestatus").click (function () {
+    setPage ("Device Status Demo", "devicestatus/client.html");
+  });
+  $ ("#vehicle").click (function () {
+    setPage ("Vehicle API Testbed", "vehicle/testbed/index.html");
+  });
+  $("#mediaContent").click(function(){
+    setPage("Media Content API Testbed", "mediaContent/index.html");
+  });
+  $ ("#login").click (function () {
+    setPage ("Login to your PZH", "login.html");
+  });
+  $ ('#logout').bind ('click', function () {
+    var options = {type:'prop', payload:{status:'disconnectPzp'}};
+    webinos.session.message_send (options);
+  });
+  $ ('#status').mouseenter (function () {
+    var that = $ (this);
+    var right = that.css ("right");
+    that.css ("right", (right === "0px") ? "" : "0px");
+  });
+  $('#apitests').click(function() {
+    setPage("apitests", "../tests/api_tests/apitests.html");
+  });
+  $('#widgettests').click(function() {
+    setPage("widgettests", "../tests/widget_tests/Overview.html");
+  });
+  $ ('#friendlyName').click (function () {
+    setPage ("Add FriendlyName", "friendlyName.html");
+  });
+  $ ('#infoLog').click (function () {
+    var options = {type:'prop', payload:{status:'infoLog'}};
+    webinos.session.message_send (options);
+  });
+  $ ('#errorLog').click (function () {
+    var options = {type:'prop', payload:{status:'errorLog'}};
+    webinos.session.message_send (options);
+  });
+  function logs (msg) {
+    $ ('#main').html ('<article class="module width_full"><header><h3>Logs</h3></header>' +
+            '<div class="module_content">' + msg.payload.message + '</div></article>' +
+            '<div class="spacer"></div>');
+  }
+
+  webinos.session.addListener ('infoLog', logs);
+  webinos.session.addListener ('errorLog', logs);
+  function error (msg) {
+    alert (msg.payload.message);
+  }
+
+  webinos.session.addListener ('error', error);
+  //$('.column').equalHeight(); // Fix height
+});
+</script>
 </head>
 <body>
-  <header id="header">
-    <hgroup>
-      <h1 class="site_title"><img src="images/webinosWithBorder.png">PZP TestBed</h1>
-      <h2 class="section_title">Dashboard</h2><div class="btn_view_site"><a href="#logout">Disconnect</a></div>
-    </hgroup>
-  </header> <!-- end of header bar -->
-  <section id="secondary_bar">
-    <div class="user">
-      <p id="userId">Not Connected</p>
-    </div>
-    <div class="breadcrumbs_container">
-      <article class="breadcrumbs"><a href="client.html">Webinos Pzp</a> <div class="breadcrumb_divider"></div> <a class="current">Dashboard</a></article>
-       <div id="webinosVersion"></div>
-    </div>
-  </section><!-- end of secondary bar -->
+<header id="header">
+  <hgroup>
+    <h1 class="site_title"><img src="images/webinosWithBorder.png">PZP TestBed</h1>
 
-  <aside id="sidebar" class="column">
-    <h3>
+    <h2 class="section_title">Dashboard</h2>
+
+    <div class="btn_view_site"><a href="#logout">Disconnect</a></div>
+  </hgroup>
+</header>
+<!-- end of header bar -->
+<section id="secondary_bar">
+  <div class="user">
+    <p id="userId">Not Connected</p>
+  </div>
+  <div class="breadcrumbs_container">
+    <article class="breadcrumbs"><a href="client.html">Webinos Pzp</a>
+
+      <div class="breadcrumb_divider"></div>
+      <a class="current">Dashboard</a></article>
+    <div id="webinosVersion"></div>
+  </div>
+</section>
+<!-- end of secondary bar -->
+
+<aside id="sidebar" class="column">
+  <h3>
     <ul class="toggle" style="display: block;">
-        <div id="enableLogin"> </div>
+      <div id="enableLogin"></div>
     </ul>
     </h3>
     <h3>Connected Personal Zones</h3>
@@ -295,18 +280,22 @@
     </footer>
   </aside><!-- end of sidebar -->
 
-  <section id="main" class="column">
-    <article class="module width_full">
-      <header><h3>Webinos PZP</h3></header>
-        <div class="module_content">
-          <h1>Welcome to your PZP</h1>
-          <p>This is the main test page for you pzp. You can also enroll you pzp to your pzh through this page if you have not already connected to one.</p>
-          <p><b>Please select one of the actions on the left menu</b></p>
-      </div>
-    </article><!-- end of styles article -->
-    <div class="spacer"></div>
-    <div id="status"> STATUS: <span id="message"></span></div>
-  </section>
+<section id="main" class="column">
+  <article class="module width_full">
+    <header><h3>Webinos PZP</h3></header>
+    <div class="module_content">
+      <h1>Welcome to your PZP</h1>
+
+      <p>This is the main test page for you pzp. You can also enroll you pzp to your pzh through this page if you have
+        not already connected to one.</p>
+
+      <p><b>Please select one of the actions on the left menu</b></p>
+    </div>
+  </article>
+  <!-- end of styles article -->
+  <div class="spacer"></div>
+  <div id="status"> STATUS: <span id="message"></span></div>
+</section>
 
 </body>
 </html>

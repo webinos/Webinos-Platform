@@ -350,7 +350,7 @@ var PzpClient = function (_parent) {
 
     this.connectPeer = function (msg) {
         _parent.setConnParam (function (options) {
-            var client = tls.connect (_parent.port, msg.address, options, function () {
+            var client = require("tls").connect (_parent.port, msg.address, options, function () {
                 if (client.authorized) {
                     pzpClient_Authorized (msg, client);
                 } else {
@@ -382,7 +382,6 @@ var ConnectHub = function (_parent) {
     var self = this;
     var logger = util.webinosLogging (__filename + "_ConnectHub") || console;
     var pzpServer = new PzpServer (_parent);
-
     /**
      * If PZP fails to connect to PZH, this tries to connect back to PZH
      */
@@ -395,7 +394,6 @@ var ConnectHub = function (_parent) {
             }, 60000);//increase time limit to suggest when it should retry connecting back to the PZH
         }
     }
-
     /**
      * PZH connected details are stored in this function
      * @param conn - connection object of the tls client
@@ -474,7 +472,7 @@ var ConnectHub = function (_parent) {
                     if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
                         logger.error ("Connect  attempt to YOUR PZH " + _parent.config.metaData.pzhId + " failed.");
                         _parent.webinos_manager.startOtherManagers ();
-                        if (_parent.pzp_state.mode === _parent.modes[1]) {
+                        if (_parent.pzp_state.enrolled) {
                             var os = require ("os");
                             if (os.type ().toLowerCase () == "windows_nt") {
                                 //Do nothing until WinSockWatcher works
@@ -520,7 +518,7 @@ var EnrollPzp = function (_parent, hub) {
         _parent.config.storeMetaData (_parent.config.metaData);
         _parent.config.storeAll ();
 
-        _parent.pzp_state.mode = true; // Moved from Virgin mode to hub mode
+        _parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
         hub.connect (function (status) {
             if (status) {
