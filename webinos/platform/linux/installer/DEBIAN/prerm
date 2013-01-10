@@ -1,0 +1,11 @@
+#!/bin/sh
+
+for i in `ps aux | grep webinos_pzp | grep -v grep | awk {'print $2;'}`
+do
+   kill -9 $i;
+done
+
+rm -r /usr/local/share/Webinos-Platform;
+#rm -r /usr/bin/webinos;
+#rm /usr/share/applications/webinos.desktop;
+rm -r /usr/share/pixmaps/webinos/;

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/local/share/Webinos-Platform/bin/node /usr/local/share/Webinos-Platform/webinos_pzp.js --widgetServer $@

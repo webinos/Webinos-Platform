@@ -1,0 +1,39 @@
+#!/bin/sh
+
+update-mime-database /usr/share/mime
+
+echo "application/webinos-widget=webinosBrowser.desktop" >> /usr/share/applications/defaults.list
+
+for user in /home/*
+do
+	if [ "${user}" == "/home/lost" ]
+	then
+		continue
+	fi
+	if [ -d "${user}/.webinos" ];
+	then
+		echo ".webinos exists"
+	else
+		mkdir ${user}/.webinos
+		chmod og+w ${user}/.webinos
+		mkdir ${user}/.webinos/wrt
+		chmod og+w ${user}/.webinos/wrt
+	fi	
+	echo "{
+\"nodePath\": \"/usr/local/share/Webinos-Platform/bin\",
+\"workingDirectoryPath\": \"/usr/local/share/Webinos-Platform\",
+\"nodeArgs\": \"webinos_pzp.js --widgetServer\",
+\"instance\": 0
+}" >> ${user}/.webinos/wrt/webinos_pzp.json 
+	echo "[Desktop Entry]
+Name=Webinos PZP
+Comment=Startup for the webinos PZP.
+Exec=/usr/local/share/Webinos-Platform/bin/wrt/webinosDaemon
+Terminal=false
+Type=Application
+StartupNotify=true
+Icon=utilities-system-monitor
+Categories=GNOME;System;
+X-GNOME-Autostart-enabled=true" >> ${user}/.config/autostart/webinos-PZP.desktop
+done
+
