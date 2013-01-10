@@ -1,9 +1,13 @@
+// The file webinos.servicedisco.js is modified by Wei Guo 29-12-2012
+// Move functionalities to WRT side as possible:
+// -- onError TimeoutError functionality
+
 (function() {
+    var isOnNode = function() {
+        return typeof module === "object" ? true : false;
+    };
 
-        var isOnNode = function() {
-                return typeof module === "object" ? true : false;
-        };
-
+    // ServiceDiscovery constructor, constructed within ./webinos.js
     var ServiceDiscovery = function(rpcHandler) {
         this.rpcHandler = rpcHandler;
         this.registeredServices = 0;
@@ -11,50 +15,58 @@
         this._webinosReady = false;
 
         if (isOnNode()) {
-                return;
+            return;
         }
+        
         // further code only runs in the browser
 
         var that = this;
         webinos.session.addListener('registeredBrowser', function() {
-                that._webinosReady = true;
+            that._webinosReady = true;
 
-                finishCallers();
+            finishCallers();
         });
     };
 
-        /**
-         * Export definitions for node.js
-         */
-        if (isOnNode()) {
-                exports.ServiceDiscovery = ServiceDiscovery;
-        } else {
-                // this adds ServiceDiscovery to the window object in the browser
-                this.ServiceDiscovery = ServiceDiscovery;
-        }
+    /**
+     * Export definitions for node.js
+     */
+    if (isOnNode()) {
+        exports.ServiceDiscovery = ServiceDiscovery;
+    } else {
+        // this adds ServiceDiscovery to the window object in the browser
+        this.ServiceDiscovery = ServiceDiscovery;
+    }
 
-        var callerCache = [];
+    var callerCache = [];
 
-        var finishCallers = function() {
-                for (var i = 0; i < callerCache.length; i++) {
-                        var caller = callerCache[i];
-                        webinos.discovery.findServices(caller.serviceType, caller.callback, caller.options, caller.filter);
-                }
-                callerCache = [];
-        }
+    var finishCallers = function() {
+        for (var i = 0; i < callerCache.length; i++) {
+            var caller = callerCache[i];
+            webinos.discovery.findServices(
+            	caller.serviceType, caller.callback, caller.options, caller.filter
+            );
+        }        
+        callerCache = [];
+    };
 
     ServiceDiscovery.prototype.findServices = function (serviceType, callback, options, filter) {
-        var that = this;
+        var that = this; // The prototype of ServiceDiscovery.
+        var timeOut = false;
+        var found = false;
 
         if (!isOnNode() && !this._webinosReady) {
-                callerCache.push({serviceType: serviceType, callback: callback, options: options, filter: filter});
-                return;
+            callerCache.push(
+            		{serviceType: serviceType, callback: callback, options: options, filter: filter}
+            );
+            return;
         }
 
         // pure local services..
-        if (serviceType == "BlobBuilder"){
+        if (serviceType == "BlobBuilder") {
             var tmp = new BlobBuilder();
             this.registeredServices++;
+            found = true;
             callback.onFound(tmp);
             return;
         }
@@ -109,6 +121,7 @@
                 // elevate baseServiceObj to usable local WebinosService object
                 var service = new ServiceConstructor(baseServiceObj, that.rpcHandler);
                 this.registeredServices++;
+                found = true;
                 callback.onFound(service);
             } else {
                 var serviceErrorMsg = 'Cannot instantiate webinos service.';
@@ -117,29 +130,55 @@
                     callback.onError(new DiscoveryError(102, serviceErrorMsg));
                 }
             }
-        }
+        } // End of function success
 
-        var id = Math.floor(Math.random()*1001);
-        var rpc = this.rpcHandler.createRPC("ServiceDiscovery", "findServices", [serviceType, options, filter]);
-
+        // var id = Math.floor(Math.random()*1001);
+        var rpc = this.rpcHandler.createRPC('ServiceDiscovery', 'findServices',
+        		[serviceType, options, filter]);
+        // The RPC invokes the Method findServices on PZP.
+        
+        // The core of findService.
         rpc.onservicefound = function (params) {
-            // params
-            success(params);
+            // TODO params is not a good name for the argument. 
+        	if (!timeOut) {
+        		success(params);
+        	}
         };
         this.rpcHandler.registerCallbackObject(rpc);
 
         var serviceAddress;
         if (typeof this.rpcHandler.parent !== 'undefined') {
-                serviceAddress = this.rpcHandler.parent.config.pzhId;
+            serviceAddress = this.rpcHandler.parent.config.pzhId;
         } else {
-                serviceAddress = webinos.session.getServiceLocation();
+            serviceAddress = webinos.session.getServiceLocation();
         }
-
         rpc.serviceAddress = serviceAddress;
+        
         this.rpcHandler.executeRPC(rpc);
-
+        
+        // Set timeout in WRT.
+		setTimeout(function () {
+				timeOut = true;
+				
+				// If no results return TimeoutError.
+				if (!found && callback.onError) {
+					callback.onError('TimeoutError');
+				}
+			},
+			options && typeof options.timeout !== 'undefined' ? options.timeout : 120000
+			// Default: 120 secs
+		);
+        
         return;
     };
+    // ServiceDiscovery.prototype.findServices function ends.
+    // It should return an array of found services.
+    // It provides the FindCallBack of onFound, onError, and onLost.
+    // onError:
+    //		TimeoutError is implemented.
+    // 		SecurityError is not implemented: need to check with Policy.
+    //		AbortError is not implemented: need to implement Cancel first.
+    // onLost is not implemented.
 
     var DiscoveryError = function(code, message) {
         this.code = code;
@@ -162,21 +201,15 @@
 
     WebinosService.prototype.state = "";
 
-
 //    WebinosService.prototype.api = "";
-
 
 //    WebinosService.prototype.id = "";
 
-
 //    WebinosService.prototype.displayName = "";
-
 
 //    WebinosService.prototype.description = "";
 
-
     WebinosService.prototype.icon = "";
-
 
     // stub implementation in case a service module doesn't provide its own bindService
     WebinosService.prototype.bindService = function(bindCB) {
@@ -194,5 +227,4 @@
             channel = null;
         }
     };
-
 }());
