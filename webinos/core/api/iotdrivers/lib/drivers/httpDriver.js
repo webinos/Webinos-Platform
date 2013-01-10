@@ -64,25 +64,23 @@ var port;
         try{
             var filePath = path.resolve(__dirname, "../../../../../../webinos_config.json");
             fs.readFile(filePath, function(err,data) {
-            if (!err) {
-                var key, userPref = JSON.parse(data.toString());
-                port = userPref.ports.iot;
-                if(port === undefined){
+                if (!err) {
+                    var key, userPref = JSON.parse(data.toString());
+                    port = userPref.ports.iot;
+                    if(port === undefined){
+                        port = PZP_IOT_PORT;
+                    }
+                }
+                else{
                     port = PZP_IOT_PORT;
                 }
-            }
-            else{
-                port = PZP_IOT_PORT;
-            }
-            app.listen(port);
-            console.log("HTTP driver is listening at port "+port);
-});
-
-}catch(err){
-    console.log("Error : "+err);
-}
-
-        
+                app.listen(port);
+                console.log("HTTP driver is listening on port "+port);
+            });
+        }
+        catch(err){
+            console.log("Error : "+err);
+        }   
     };
 
     /*
@@ -99,18 +97,16 @@ var port;
             case 'cfg':
                 //In this case cfg data are transmitted to the sensor/actuator
                 //this data is in json(???) format
-
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
                 var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
                 var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
-                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);  
+                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);
                 break;
             case 'start':                                 
                 //In this case the sensor should start data acquisition
                 //the parameter data has value 'fixed' (in case of fixed interval
                 // acquisition) or 'change' (in case od acquisition on value change)
-            
                 console.log('Received start command from API. Element : '+eId+', mode : '+data);
                 var mode = (data === "fixed") ? FIXEDINTERVAL_MODE : VALUECHANGE_MODE;                
                 makeHTTPRequest(boards[board_id].ip, boards[board_id].port, START_LISTENING_CMD, native_element_id, mode);
@@ -118,14 +114,14 @@ var port;
             case 'stop':
                 //In this case the sensor should stop data acquisition
                 //the parameter data can be ignored
-                
                 console.log('Received stop command from API. Element : '+eId);
-                makeHTTPRequest(boards[i].ip, boards[i].port, STOP_LISTENING_CMD, native_element_id, NO_VALUE);                                
+                makeHTTPRequest(boards[i].ip, boards[i].port, STOP_LISTENING_CMD, native_element_id, NO_VALUE);
                 break;
             case 'value':
                 //In this case the actuator should store the value
                 //the parameter data is the value to store                
-                console.log('Received value for element '+eId+'; value is '+data);
+                console.log('Sent value for actuatur '+eId+'; value is '+data);
+                makeHTTPRequest(boards[i].ip, boards[i].port, SET_ACTUATOR_VALUE_CMD, native_element_id, data);
                 break;
             default:
                 console.log('HTTP driver 1 - unrecognized cmd');
@@ -229,7 +225,7 @@ var port;
                     console.log("data.cmd : " + data.cmd);
                     if(data.cmd === GET_ELEMENTS_CMD){
                         console.log("Received response for cmd=ele");                
-                        boards[data.id].elements = data.elements;                      
+                        boards[data.id].elements = data.elements;
                         for(var i=0; i<data.elements.length ;i++){   
                             console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
@@ -238,10 +234,17 @@ var port;
                                 tmp_ele.element.description = "ELEMENT_DESCR";
                                 var id = registerFunc(driverId, tmp_ele.element.sa, JSON.stringify(tmp_ele.element));   
                                 elementsList[id] = tmp_ele;
+                                console.log("Adding element with id " + id);
                             }
                             else
                                 console.log("Element is already registered");
-                        }        
+                        }
+
+                        //FIXME
+                        //----------------------------------
+                        //setTimeout(simulateActuator, 3000);
+                        //----------------------------------
+
                     }
                     else if(data.cmd === CONFIGURE_CMD){
                         console.log("Configuring element " + data.id);                            
@@ -274,5 +277,18 @@ var port;
         
         console.log("Making HTTP request to " + ip + ":" + port + ", cmd: " + cmd + ", id: " + id + ", data: " + data);
         req.end();
+    }
+
+
+    function simulateActuator(){
+        console.log("simulate actuator");
+        for(var ele in elementsList){
+            console.log(ele);
+            console.log(elementsList[ele].element.sa);
+            if(elementsList[ele].element.sa === "1"){
+                console.log("Send http request. id : "+ ele);
+                break;
+            }
+        }
     }
 }());

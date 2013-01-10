@@ -179,7 +179,19 @@ void getInfoFromSD(boolean check_for_elements){
                                 elements[num_elements]->ad = !field.equals("0");
                             }
                             else if(counter == 3){  // ELEMENT PIN
-                                elements[num_elements]->pin = field.toInt();
+                                int pin = field.toInt();
+                                elements[num_elements]->pin = pin;
+                                Serial.print("Set pin ");
+                                Serial.print(pin);
+                                Serial.print(" mode = ");
+                                if(elements[num_elements]->ad == 0){
+                                    pinMode(pin,INPUT);
+                                    Serial.println("INPUT");
+                                }
+                                else{
+                                    pinMode(pin,OUTPUT);
+                                    Serial.println("OUTPUT");
+                                }
                             }
                             else if(counter == 4){  // ELEMENT MAXIMUMRANGE
                                 client.print("\"maximumRange\":\"");
@@ -247,6 +259,20 @@ int getValueFromSensor(bool ad, int pin){
     return value;
 }
 
+void setValueToActuator(bool ad, int pin, int value){
+    if(ad == 0){ //analog actuator
+        Serial.println("Analog actuator");
+        ;
+    }
+    else{ //digital actuator
+        Serial.println("Digital actuator");
+        if(value == 0)
+            digitalWrite(pin,LOW);
+        else if(value == 1)
+            digitalWrite(pin,HIGH);
+    }
+}
+
 void sendDataToAPI(int id_ele, bool check_value_is_changed){
     bool senddata = true;
     int val = getValueFromSensor(elements[id_ele]->ad, elements[id_ele]->pin);
@@ -277,6 +303,16 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
     elements[id_ele]->lastValue = val;
 }
 
+void err_SD(){
+    digitalWrite(13,HIGH);
+    delay(300);
+    digitalWrite(12,LOW);
+    delay(300);
+    digitalWrite(13,HIGH);
+    delay(300);
+    digitalWrite(12,LOW);
+    delay(1000);
+}
 void setup(){
     Serial.begin(9600);
     
@@ -284,7 +320,8 @@ void setup(){
     
     while(board_id == NULL){
          Serial.println("Please disconnect and reconnect the board");
-         delay(2000);
+         err_SD();
+         getInfoFromSD(false);
     }
     
     if(mac == NULL){
@@ -411,13 +448,17 @@ void loop(){
                         }
                         else if(strcmp(cmd,"get")==0){
                             int pin = -1;
+                            bool ad;
                             for(int i=0; i<num_elements;i++){
-                                if(strcmp(elements[i]->id, id)==0){
+                                //if(strcmp(elements[i]->id, id)==0){ // should be eid instead of id-> TEST IT
+                                if(strcmp(elements[i]->id, eid)==0){
                                     pin = elements[i]->pin;
+                                    ad = elements[i]->ad;
                                     break;
                                 }
                             }
-                            int value = analogRead(pin);
+                            int value = getValueFromSensor(ad,pin);
+                            //int value = analogRead(pin);
                             client.print("{\"cmd\":\"get\",\"eid\":\"");
                             client.print(board_id);
                             client.print("_");
@@ -446,7 +487,7 @@ void loop(){
                             else{ 
                                 client.println("{\"cmd\":\"stp\"}");
                                 for(int i=0; i<num_elements; i++){
-                                    if(strcmp(elements[i]->id, id) == 0)
+                                    if(strcmp(elements[i]->id, eid) == 0)
                                         elements[i]->active = false;
                                 }
                             }
@@ -479,6 +520,36 @@ void loop(){
                             client.print("{\"cmd\":\"cfg\",");
                             client.print("\"id\":\"");
                             client.print(eid);
+                            client.println("\"}");
+                        }
+                        else if(strcmp(cmd,"set")==0){
+                            Serial.println("Dentro set");
+                            int pin = -1;
+                            bool ad;
+                            for(int i=0; i<num_elements;i++){
+                                Serial.print("-->");
+                                Serial.println(elements[i]->id);
+                                if(strcmp(elements[i]->id, eid)==0){
+                                    pin = elements[i]->pin;
+                                    ad = elements[i]->ad;
+                                    
+                                    String sdat = dat;
+                                    Serial.println("--");
+                                    Serial.println(pin);
+                                    Serial.println(sdat);
+                                    Serial.println(ad);
+                                    setValueToActuator(ad, pin, sdat.toInt());
+                                    break;
+                                }
+                            }
+                            
+                            
+                            client.print("{\"cmd\":\"set\",\"eid\":\"");
+                            client.print(board_id);
+                            client.print("_");
+                            client.print(id);
+//                            client.print("\",\"dat\":\"");
+//                            client.print(value);
                             client.println("\"}");
                         }
                         break;
