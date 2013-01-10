@@ -43,7 +43,7 @@
      * @param listener listener of the sensor/actuator api to be called when needed
      */
     var driverInterface = function(sensorActuator, listener) {
-        console.log('Driver Interface constructor');
+        console.log('Driver Interface constructor - sa is '+sensorActuator);
         if(!initialized) {
             loadDrivers();
             initialized = true;
@@ -88,6 +88,7 @@
          * @param type the type of sensor/actuator (eg light, temperature, ...)
          */
         function register(driverId, sensorActuator, type) {
+            console.log('driverInterface register - did '+driverId+', sa '+sensorActuator+', type '+type);
             var newElement = {};
             newElement.driverId = driverId;
             newElement.sensorActuator = sensorActuator;

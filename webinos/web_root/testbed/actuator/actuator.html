@@ -1,0 +1,124 @@
+<html>
+<head>
+    <title>webinos rpc</title>
+    <script type='text/javascript' src='./webinos.js'></script>
+    <script type='text/javascript' src='./jquery-1.8.2.min.js' ></script>
+    <script type='text/javascript'>
+
+    function logObj(obj, name){
+        for (var myKey in obj){
+            console.log(name + '['+myKey +'] = '+obj[myKey]);
+            if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + '.' + myKey);
+        }
+    }
+    
+    var counter = 0;
+
+    $(document).ready(function() {
+                
+        function printInfo(data) {
+            $('#message').append('<li>'+data.payload.message+'</li>');
+        }
+        webinos.session.addListener('info', printInfo);
+        actuators = [];
+        $('<option value=\'linearmotor\'>linearmotor</option>').appendTo('#actuatorTypeList');
+        $('<option value=\'switch\'>switch</option>').appendTo('#actuatorTypeList');
+        $('<option value=\'rotationalmotor\'>rotationalmotor</option>').appendTo('#actuatorTypeList');
+
+        $('#findService').bind('click', function() {
+
+            $('#pzh_pzp_list').empty();
+            $('<option></option>').appendTo('#pzh_pzp_list');
+            $('#messages').empty();
+            counter = 0;
+            webinos.discovery.findServices(new ServiceType('http://webinos.org/api/actuators.'+$('#actuatorTypeList option:selected').val()), 
+                {onFound: function (service) {
+                    $('<option value=' + service.id + ' >' + counter +':' +service.serviceAddress + '</option>').appendTo('#pzh_pzp_list');
+                    actuators[service.id] = service;
+                    $('#messages').append('<li> New Actuator found: ' + service.api + '</li>');
+                    logObj(service, 'Service');
+                    counter++;
+            }});
+        });
+                    
+        $('#cls').bind('click', function() {
+            $('#messages').html('');
+        }); 
+                    
+        $('#bind').bind('click', function() {
+            actuatorToUse = actuators[$('#pzh_pzp_list option:selected').val()];
+            actuatorToUse.bind({onBind:function(){
+                logObj(actuators,'actuators');
+                $('#messages').append('<li> Actuator ' + actuatorToUse.api + ' bound.</li>');
+               <!-- $('#messages').append('<li> Max Range: ' + actuatorToUse.maximumRange + '</li>'); -->
+                $('#messages').append('<li> Min Delay: ' + actuatorToUse.minDelay + '</li>');
+                $('#messages').append('<li> Power: ' + actuatorToUse.power + '</li>');
+                $('#messages').append('<li> Resolution: ' + actuatorToUse.resolution + '</li>');
+                $('#messages').append('<li> Vendor: ' + actuatorToUse.vendor + '</li>');  
+                $('#messages').append('<li> Version: ' + actuatorToUse.version + '</li>'); 
+            }});
+        }); 
+                    
+        $('#configure').bind('click', function() {
+            actuatorToUse.configureActuator({timeout: 120, rate: 5000, eventFireMode: "valuechange"}, function(){
+                $('#messages').append('<li> Actuator ' + actuatorToUse.api + ' configured.</li>');
+                },
+                function (){
+                    $('#messages').append('<li> Error configuring Actuator ' + actuatorToUse.api + '</li>');
+            });
+        });
+                    
+        $('#register').bind('click', function() {
+            actuatorToUse.addEventListener('linearmotor', function(event){
+                if ($('#actuatorResult')!=null) {//If there is the element
+                    $('#actuatorResult').html('');
+                    $('#actuatorResult').append('<li> Actuator Event from: ' + actuatorToUse.api + '</li>');
+                    $('#actuatorResult').append('<li> Actuator Type: ' + event.actuatorType + '</li>');
+                    $('#actuatorResult').append('<li> Actuator Id: ' + event.actuatorId + '</li>');
+                    $('#actuatorResult').append('<li> Accuracy: ' + event.accuracy + '</li>');
+                    $('#actuatorResult').append('<li> Rate: ' + event.rate + '</li>');
+                    $('#actuatorResult').append('<li> Interrupt: ' + event.interrupt + '</li>');
+                    $('#actuatorResult').append('<li> Absolute Temp: ' + event.actuatorValues[0] + '</li>');
+                    $('#actuatorResult').append('<li> Normalized Temp: ' + event.actuatorValues[1] + '</li>');
+                }else{
+                } } , false
+            );
+        }); 
+
+        $('#unregister').bind('click', function() {
+            try {
+                actuatorToUse.removeEventListener('linearmotor', function(){}, false);
+            }
+            catch(e) {
+                alert('cannot unregister: '+e.message);
+            }
+        }); 
+
+    });
+</script>
+     
+</head>
+<body>
+    <div >
+        <div >
+            <p>
+                <div> Actuator type <select id='actuatorTypeList'> <option> </option> </select></div>
+                <br><br>
+                <div> Found Actuator APIs @ <select id='pzh_pzp_list'> <option> </option> </select>  <span>Click find to fill this</span><br> </div>
+                <button id='findService'>Find Actuators</button>
+                <button id='cls'>Clear</button>
+                <button id='bind'>Bind Actuator</button>
+                <button id='configure'>Configure Actuator</button>
+                <button id='register'>Register</button>
+                <button id='unregister'>Unregister</button>
+            </p>
+            <br><br>
+            <div id='messages'>
+            </div>
+            <br><br>
+            <div id='actuatorResult'>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
