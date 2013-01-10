@@ -1,0 +1,35 @@
+html {
+	font-family: sans-serif;
+	font-size: 16px;
+}
+
+body, html {
+	background-color: #006d88;
+	color: white;
+}
+
+header {
+	background-image: url('../webinos.png');
+	background-repeat: no-repeat;
+	width: 100px;
+	height: 40px;
+}
+
+a {
+	color: #9FC6D0;
+}
+
+#content {
+	margin-top: 20px;
+	font-size: 12px;
+}
+
+#serviceList {
+	margin-top: 20px;
+}
+
+#serviceList span {
+	padding-left: 20px;
+	font-weight: bold;
+	color: white;
+}
