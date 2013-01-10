@@ -52,7 +52,14 @@ function handleMessage() {
             'resourceInfo' : { 'apiFeature': apiFeature }
         };
 
-
+        //Extract feature parameters (if needed)
+        switch(apiFeature) {
+            case 'http://webinos.org/api/discovery':
+                request.resourceInfo['paramFeature'] = arguments[0]['params'][0]['api'];
+                break;
+            default:
+        }
+ 
         if (pm.enforceRequest(request, sessionId) == 0) {
             //request is allowed by policy manager
             return true;
