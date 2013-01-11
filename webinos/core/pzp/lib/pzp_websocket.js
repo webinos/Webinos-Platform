@@ -134,6 +134,11 @@ var PzpWSS = function(_parent) {
         var msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
         self.sendConnectedApp(msg.from, msg1);
       }
+      else if(msg.payload.status === "pzpStatus")
+      {
+        var msg3 = prepMsg(parent.pzp_state.sessionId, msg.from, "pzpStatus", parent.pzp_state.mode);
+        self.sendConnectedApp(msg.from, msg3);
+      } 
       else if (msg.payload.status === "infoLog") {
         getWebinosLog("info", function(value) {
           msg1 = prepMsg(parent.pzp_state.sessionId, msg.from, "infoLog", value);
@@ -253,7 +258,7 @@ var PzpWSS = function(_parent) {
   }
 
   function connectedApp(connection) {
-    var appId, tmp, payload, key, msg, msg2;
+    var appId, tmp, payload, key, msg, msg2, msg3;
     if (connection) {
       appId = parent.pzp_state.sessionId+ "/"+ sessionWebApp;
       sessionWebApp  += 1;
@@ -270,7 +275,10 @@ var PzpWSS = function(_parent) {
           self.sendConnectedApp(appId, msg2);
         });
       }
-
+      
+      msg3 = prepMsg(parent.pzp_state.sessionId, appId, "pzpStatus", parent.pzp_state.mode);
+      self.sendConnectedApp(appId, msg3); //send pzp status
+      
       self.sendConnectedApp(appId, msg);
     } else {
       for (key in connectedWebApp) {
