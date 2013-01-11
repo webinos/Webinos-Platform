@@ -44,7 +44,7 @@ var Pzp_OtherManager = function (_parent) {
    * Any entity connecting to PZP has to register its address with other end point
    */
   function registerMessaging(pzhId) {
-    if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.mode === _parent.modes[1]) {
+    if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
       var msg = self.messageHandler.registerSender(_parent.pzp_state.sessionId, pzhId);
       _parent.sendMessage(msg, pzhId);
     }
@@ -128,7 +128,7 @@ var Pzp_OtherManager = function (_parent) {
    */
   this.registerServicesWithPzh = function() {
     var pzhId = _parent.config.metaData.pzhId;
-    if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.mode === _parent.modes[1]) {
+    if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
       var localServices = self.discovery.getRegisteredServices();
       var msg = {"type" : "prop", "from" : _parent.pzp_state.sessionId, "to": pzhId, "payload":{"status":"registerServices",
         "message":{services:localServices, from: _parent.pzp_state.sessionId}}};
