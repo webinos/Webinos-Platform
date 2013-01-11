@@ -33,7 +33,7 @@ GET /newboard?jsondata={"id":"00001","protocol":"HTTP","name":"ARDUINO_MEGA","ip
 
 Once the connection has been estabilished, if the board was successfully registered, the board sends back to the PZP an ack message with a payload containing the json string *{"ack":"newboard"}*.
 
-![hello](figures/hello.png)
+![hello](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/hello.png)
 
 The PZP driver can send requests to board server (listening at board_ip:board_port) using the following parameters:
 
@@ -52,7 +52,7 @@ http://board_ip:board_port/?cmd=ele&eid=000&dat=000
 
 The parameters **eid** and **dat** are not relevant for this kind of request and assume the null value 000.
 
-![get_elements](figures/ele.png)
+![get_elements](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/ele.png)
 
 The board replies sending back to the PZP Driver the same command of the request (ele), the board id (00001) and a list of elements as an array of JSON object. For example an object returned inside the *elements* array may have the following form:
 
@@ -71,7 +71,7 @@ http://board_ip:board_port/?cmd=str&eid=001&dat=vch
 
 Where **eid** represents the ID of the element to start and **dat** can assume values *"vch"* (valuechange) or *"fix"* (fixedinterval) and represents the eventFireMode described by Generic Sensors API.
 
-![start_element](figures/str.png)
+![start_element](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/str.png)
 
 The board replies sending back to the PZP Driver the same command of the request (str) and the element id which has been started (00001_001).
 
@@ -86,7 +86,7 @@ http://board_ip:board_port/?cmd=stp&eid=001&dat=000
 
 Where **eid** represents the ID of the element to stop. The **dat** parameter is set with the null value 000.
 
-![stop_element](figures/stp.png)
+![stop_element](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/stp.png)
 
 The board replies sending back to the PZP Driver the same command of the request (stp) and the element id which has been stopped (00001_001).
 
@@ -105,7 +105,7 @@ Where **eid** represents the ID of the element to configure and the **dat** para
 * **rate** is the requested rate of the sensor data. It is the time interval before a new event is generated. The value is expressed in ms. If the interval is too small for the sensor (that is it is unable to generate data at the selected rate) it shall use the maximum rate it can support. 
 * **eventfiremode** is the requested sensor event fire mode. It can assume two values: **fix** (is an abbreviation for *fixedinterval*) means that the sensor will send to the API its current value every a fixed time, **vch** (is an abbreviation for *valuechange*) means that the sensor will send its value every time this changes.
 
-![configure_element](figures/cfg.png)
+![configure_element](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/cfg.png)
 
 The board replies sending back to the PZP Driver the same command of the request (cfg) and the element id which has been configured (00001_001).
 
@@ -113,11 +113,11 @@ The board replies sending back to the PZP Driver the same command of the request
 
 After a sensors has been started, it sends the read value to the PZP. The way in which this communication takes place depends on the eventfiremode set for the sensor. If the eventfiremode is "fixedinterval" the sensor will send periodically the current value to the PZP.
 
-![configure_element](figures/get2.png)
+![configure_element](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/get2.png)
 
 Otherwise if eventfiremode is set to "valuechange" the board will notifiy the PZP only when the sensor's value changes.
 
-![configure_element](figures/get1.png)
+![configure_element](https://raw.github.com/glatorre/Webinos-Platform/WP-671/webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/docs/figures/get1.png)
 
 ###Setting value for an actuator
 TBD
@@ -201,3 +201,7 @@ ELEMENT 	002:0:1:1:0.44:200:0.013:0.04:temperature:parallax:1.2
 Note: The steps order can be whatever.
 
 On startup the board reads the file config.txt to configure the main parameters. If the BRDIPAD parameter is defined the board will use it as IP address. Otherwise the board tries to obtain an address contacting the PZP's DHCP server, if the request fails the board's IP will be a default one (192.168.1.120).
+
+##KNOWN PROBLEMS
+
+* Sometimes Arduino might fail to initialize the SD card module. In this case the status led (pin 13, which normally is turned off) will blink twice cyclically. To solve this problem is usually enough to turn off and on the board.
