@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=webinos PZP
+Comment=Webinos Framework
+Type=Application
+Exec=webinos_pzp
+Icon=/usr/share/pixmaps/webinos/webinos.png
+Terminal=true
+Categories=Other;

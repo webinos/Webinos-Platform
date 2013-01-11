@@ -95,7 +95,7 @@
       if (err.code === "EADDRINUSE") {
         runtimeServerPort++;
         logger.log("runtimeWebServer address in use, now trying port " + runtimeServerPort);
-        app.listen(runtimeServerPort, "localhost");
+        server.listen(runtimeServerPort, "localhost");
       }
     });
     

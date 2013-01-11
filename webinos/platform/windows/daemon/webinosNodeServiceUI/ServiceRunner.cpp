@@ -6,7 +6,6 @@
 #define HEARTBEAT_INTERVAL 2500
 
 CServiceRunner::CServiceRunner(const TCHAR* serviceName) :
-	m_serviceHandler(NULL),
 	m_processHandle(NULL),
 	m_waitHandle(NULL),
 	m_pid(0),
@@ -21,43 +20,16 @@ CServiceRunner::CServiceRunner(const TCHAR* serviceName) :
 
 CServiceRunner::~CServiceRunner(void)
 {
+	Exit(0);
 }
 
 void CServiceRunner::Run()
 {
-  // Register the control handler.
-	m_serviceHandler = RegisterServiceCtrlHandlerEx(m_parameters.serviceName.c_str(), globalControlHandler, this);
-	if (!m_serviceHandler) 
-	{
-		CEventLogger::Get().Log(EVENTLOG_ERROR_TYPE, WEBINOS_SERVER_EVENT_REGISTERSERVICECTRLHANDER_FAILED, CEventLogger::Get().LookupError(GetLastError()), 0);
-	}
-	else
-	{
-		// Initialise service status.
-		ZeroMemory(&m_status, sizeof(m_status));
-		m_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS;
-		m_status.dwControlsAccepted = SERVICE_ACCEPT_SHUTDOWN | SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE;
-		m_status.dwWin32ExitCode = NO_ERROR;
-		m_status.dwServiceSpecificExitCode = 0;
-		m_status.dwCheckPoint = 0;
-		m_status.dwWaitHint = 3000;
-		m_status.dwCurrentState = SERVICE_START_PENDING;
-		m_status.dwWaitHint = 3000;
-		SetServiceStatus(m_serviceHandler, &m_status);
-	}
-
 	// Create a timer used to wait before restarting node process.
 	m_restartTimer = CreateWaitableTimer(0, 1, 0);
 	if (!m_restartTimer) 
 	{
 		CEventLogger::Get().Log(EVENTLOG_WARNING_TYPE, WEBINOS_SERVER_EVENT_CREATEWAITABLETIMER_FAILED, m_parameters.serviceName.c_str(), CEventLogger::Get().LookupError(GetLastError()), 0);
-	}
-
-	if (m_serviceHandler)
-	{
-		// Update service status.
-		m_status.dwCurrentState = SERVICE_RUNNING;
-		SetServiceStatus(m_serviceHandler, &m_status);
 	}
 
 	Start();
@@ -94,12 +66,6 @@ int CServiceRunner::StartProcess()
 
 	if (m_restartAttempts > 0)
 	{
-		if (m_serviceHandler)
-		{
-			m_status.dwCurrentState = SERVICE_PAUSED;
-			SetServiceStatus(m_serviceHandler, &m_status);
-		}
-
 		DWORD restartWait = min(300000,m_restartAttempts * 5000);
 
 		if (m_restartTimer)
@@ -162,7 +128,8 @@ int CServiceRunner::StartProcess()
 
   delete[] currentPath;
 
-	if (!CreateProcess(0, cmd, 0, 0, false, 0, NULL, m_parameters.workingDirectoryPath.c_str(), &si, &pi)) 
+	DWORD processFlags = m_parameters.showOutput == 0 ? CREATE_NO_WINDOW : 0;
+	if (!CreateProcess(0, cmd, 0, 0, false, processFlags, NULL, m_parameters.workingDirectoryPath.c_str(), &si, &pi)) 
 	{
 		unsigned long error = GetLastError();
 		if (error == ERROR_INVALID_PARAMETER) 
@@ -176,13 +143,6 @@ int CServiceRunner::StartProcess()
 	// Process created - cache handles.
 	m_processHandle = pi.hProcess;
 	m_pid = pi.dwProcessId;
-
-	if (m_serviceHandler)
-	{
-		// Update service status.
-		m_status.dwCurrentState = SERVICE_RUNNING;
-		SetServiceStatus(m_serviceHandler, &m_status);
-	}
 
 	CEventLogger::Get().Log(EVENTLOG_INFORMATION_TYPE, WEBINOS_SERVER_EVENT_STARTED_SERVICE, m_parameters.serviceName.c_str(), 0);
 
@@ -212,14 +172,6 @@ int CServiceRunner::Exit(unsigned long exitcode)
 {
 	m_exiting = true;
 
-	if (m_serviceHandler)
-	{
-		// Update service status
-		m_status.dwCurrentState = SERVICE_STOP_PENDING;
-		m_status.dwWaitHint = 3000;
-		SetServiceStatus(m_serviceHandler, &m_status);
-	}
-
 	// Clean up.
 	if (m_pid)
 	{
@@ -228,59 +180,9 @@ int CServiceRunner::Exit(unsigned long exitcode)
 		m_pid = 0;
 	}
 
-	if (m_serviceHandler)
-	{
-		m_status.dwCurrentState = SERVICE_STOPPED;
-		if (exitcode) 
-		{
-			m_status.dwWin32ExitCode = ERROR_SERVICE_SPECIFIC_ERROR;
-			m_status.dwServiceSpecificExitCode = exitcode;
-		}
-		else 
-		{
-			m_status.dwWin32ExitCode = NO_ERROR;
-			m_status.dwServiceSpecificExitCode = 0;
-		}
-		SetServiceStatus(m_serviceHandler, &m_status);
-	}
-
 	WaitForSingleObject(m_monitorThreadHandle, INFINITE);
 
 	return exitcode;
-}
-
-DWORD CServiceRunner::ControlHandler(unsigned long control, unsigned long event, void *data) 
-{
-	switch (control) 
-	{
-	case SERVICE_CONTROL_SHUTDOWN:
-	case SERVICE_CONTROL_STOP:
-		Exit(0);
-		return NO_ERROR;
-
-	case SERVICE_CONTROL_CONTINUE:
-		if (!m_restartTimer)
-			return ERROR_CALL_NOT_IMPLEMENTED;
-
-		// Force waitable timer to exit.
-		ZeroMemory(&m_restartTime, sizeof(m_restartTime));
-		SetWaitableTimer(m_restartTimer, &m_restartTime, 0, 0, 0, 0);
-
-		if (m_serviceHandler)
-		{
-			// Re-set service status.
-			m_status.dwCurrentState = SERVICE_CONTINUE_PENDING;
-			m_status.dwWaitHint = 5000;
-			CEventLogger::Get().Log(EVENTLOG_INFORMATION_TYPE, WEBINOS_SERVER_EVENT_RESET_THROTTLE, m_parameters.serviceName.c_str(), 0);
-			SetServiceStatus(m_serviceHandler, &m_status);
-		}
-		return NO_ERROR;
-
-	case SERVICE_CONTROL_PAUSE:
-		return ERROR_CALL_NOT_IMPLEMENTED;
-	}
-
-	return ERROR_CALL_NOT_IMPLEMENTED;
 }
 
 // This is called when the service process exits.
@@ -369,12 +271,6 @@ void CServiceRunner::ForceRestart()
 
 	// Kill Process and wait for ProcessStopped to be called.
 	KillProcess();
-}
-
-DWORD WINAPI globalControlHandler(unsigned long control, unsigned long event, void *data, void *context)
-{
-	CServiceRunner* runner = reinterpret_cast<CServiceRunner*>(context);
-	return runner->ControlHandler(control,event,data);
 }
 
 void CALLBACK globalServiceEnded(void* context, BOOLEAN TimerOrWaitFired)
