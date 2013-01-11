@@ -73,8 +73,8 @@ function pzpResponder (user, port, address, res) {
                 }
             }
 
+            logger.log ("redirecting back ...............................");
             res.redirect ("http://localhost:8080/testbed/client.html");
-            res.end ();
             var WebSocketClient = require ('websocket').client;
             var client = new WebSocketClient ();
 

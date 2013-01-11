@@ -1,10 +1,12 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>PZH Login</title>
-<link rel="stylesheet" type="text/css" href="/css/reset.css">
-<link rel="stylesheet" type="text/css" href="/css/structure.css">
-<link rel="stylesheet" type="text/css" href="/css/login.css">
+<title>PZH Successful Certificate Exchange</title>
+<script type="text/javascript">
+  setTimeout(function() {
+    window.location.href = "<%=externalPzhUrl%>";
+  }, 5000);
+</script>
 </head>
 <body>
     <h1>Successfully requested access to <%=user%>'s personal zone</h1>
@@ -19,6 +21,8 @@
             <%}%>
             <li>PZH URL : <a href="<%=externalPzhUrl%>"><%=externalPzhUrl%></a></li>
         </ul>
+    </p>
+    <p> You will be redirected to your Personal Zone or click <a href="<%=externalPzhUrl%>">here</a> to go manually
     </p>
 <footer id="main">
   <a href="http://wwww.webinos.org">Powered by webinos</a> | <a href="http://developer.webinos.org">Developer resources on webinos</a>

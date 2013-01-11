@@ -183,7 +183,7 @@ var Pzp = function () {
                 if (self.pzp_state.connectedPzh.hasOwnProperty (key) && key === _id) {
                     logger.log ("pzh - " + key + " details removed");
                     self.pzp_state.state["hub"] = "not_connected";
-                    delete self.pzp_state.connectedPzh[key];
+                   delete self.pzp_state.connectedPzh[key];
                 }
             }
             self.pzpWebSocket.updateApp ();
@@ -394,6 +394,7 @@ var ConnectHub = function (_parent) {
             }, 60000);//increase time limit to suggest when it should retry connecting back to the PZH
         }
     }
+
     /**
      * PZH connected details are stored in this function
      * @param conn - connection object of the tls client
@@ -457,6 +458,11 @@ var ConnectHub = function (_parent) {
                 pzpClient = tls.connect (_parent.config.userPref.ports.provider, _parent.config.metaData.serverName, options, function (conn) {
                     handleAuthorization (pzpClient, _callback);
                 });
+                pzpClient = tls.connect (_parent.config.userPref.ports.provider,
+                    _parent.config.metaData.serverName,
+                    options, function (conn) {
+                        handleAuthorization (pzpClient, _callback);
+                    });
 
                 pzpClient.on ("data", function (buffer) {
                     _parent.handleMsg (pzpClient, buffer);

@@ -36,8 +36,8 @@
   }
   function displayQRCode(payload){
       var text = "<center>";
-      text += "<p> <img src=" + payload.img + "> </img> </p> ";
-      text += "<p> <h2 class='authCode'>" +payload.code +"</h2> </p>";
+      text += "<p> <img src=" + payload.payload.img + "> </img> </p> ";
+      text += "<p> <h2 class='authCode'>" +payload.payload.code +"</h2> </p>";
       text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
       setArticle("Temporary access code",text);
   }
@@ -48,15 +48,18 @@
   function pzhList(payload) {
     var text = "";
     if (payload.length !== 0) {
-      text = "Connect to zone:<br/> <select id='pzh_list'>"
+      text = "Connect to personal zone(inside same provider):<br/> <select id='pzh_list'>"
       for (var i = 0; i < payload.length; i = i +1) {
         text += "<option value="+payload[i].url+">"+ payload[i].username +"</option>";
       }
       text += "</select>";
       text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
-    } else {
-      text = "No other personal zone in the personal zone provider";
+      text += "<p></p> <p> or Enter Details Manually</p>"
     }
+    text += "<input type='text' id='connectPzhId' value=''/>";
+    text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
+    text += "<p>The address should be of of form hostname/email eg: pzh.webinos.org/bob@gmail.com</p>";
+
     setArticle("Connect to another personal zone",text);
   }
   function connectPzh(){
@@ -66,7 +69,8 @@
     window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(id[1]) + "&externalpzh=" + encodeURIComponent(id[0]) ;
   }
   function pzpRevokeResult(payload){
-    setArticle("Device removed from personal zone", "<p>" + payload + " device removed.</p>");
+    console.log(JSON.stringify(payload));
+    setArticle("Device removed from personal zone", "<p>" + payload.payload + " device removed.</p>");
   }
   function listPzpsToRevoke(payload){
       var i, id;
@@ -77,7 +81,9 @@
         "<input id=\'"+payload.signedCert[i].url+"\' type=\'button\' onclick=\'webinosPZH.commands.revokePzp(id,pzpRevokeResult)\'; value =\'"+id+"\' />  </td> </tr>" ;
       }
       text += '</table> </p>';
-      text += " <p> <h3 align=center> Remove a device from your personal zone</h3> </p><p>This page will allow you to remove a device from your personal zone.</p> <p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
+      text += " <p> <h3 align=center> Remove a device from your personal zone</h3> </p>";
+      text += "<p>This page will allow you to remove a device from your personal zone.</p>";
+      text += "<p> <table border=2 align='center' bgcolor='#000099' font-color='#FFFFFF'>";
       for (i = 0; i < payload.revokedCert.length; i += 1 ) {
         id = payload.revokedCert[i].id;
         text += "<tr>  <td> " + payload.revokedCert[i].url + "</td> </td> </tr>" ;
