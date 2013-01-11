@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Code contributed to the webinos project
+ * Code contributed to the webinos project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,19 +27,19 @@
 	 * @function
 	 * @private
 	 */
-	var getNextID = function(sessionId) {
+	var getNextID = function (sessionId) {
 		if (idCount == Number.MAX_VALUE) idCount = 0;
 		idCount++;
 		return sessionId + idCount;
-	}
+	};
 
 	/**
-	 * Webinos ServiceDiscovery service constructor (server side).
+	 * Webinos ServiceDiscovery service constructor (PZP/PZH side).
 	 * @constructor
 	 * @alias Discovery
 	 * @param rpcHandler A handler for functions that use RPC to deliver their result.
 	 */
-	var Discovery = function(rpcHandler, params) {
+	var Discovery = function (rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -67,21 +67,18 @@
 		/**
 		 * Holds callbacks for findServices callbacks from the PZH
 		 */
-		this.remoteServicesFoundCallbacks = {};
+		this.remoteServicesFoundCallbacks = {};	// Array-like object.
 
 		if (typeof this.rpcHandler.parent !== 'undefined') {
 			var that = this;
-
-			// add listener to pzp object, to be called when remote services
-			// are returned by the pzh
+			// Add listener to PZP object, to be called when remote services
+			// are returned by the PZH
 			this.rpcHandler.parent.webinos_manager.addRemoteServiceListener(function (payload) {
  				var callback = that.remoteServicesFoundCallbacks[payload.id];
-
 				if (!callback) {
 					logger.log("ServiceDiscovery: no findServices callback found for id: " + payload.id);
 					return;
 				}
-
 				callback(payload.message, payload.id);
 			});
 		}
@@ -89,19 +86,176 @@
 		/**
 		 * Call a listener for each found service.
 		 * @param params Array, first item being the service type to search.
-		 * @param successCB Success callback.
-		 * @param errorCB Error callback.
+		 * @param successCB Success callback. Feed RPC method call.		
+		 * @param errorCB Error callback. Feed RPC method call.
 		 * @param objectRef RPC object reference.
 		 */
 		this.findServices = function (params, successCB, errorCB, objectRef) {
-			var serviceType = params[0];
-			var options = params[1];
-			var filter = params[2];
+			var serviceType  = params[0];
+			var options      = params[1];
+			var filter       = params[2];
+			var permission   = params[3];
 
-			var callback;
-			search.call(this, serviceType, callback, options, filter);
+			// 
+			// Create a service error RPC and execute it to handle
+			// SecurityErrors.
+			//
+			// Wei Guo 11-01-2013
+			//	
+			if (!permission) {
+				var rpc = rpcHandler.createRPC(objectRef, 'onSecurityError');
+				rpcHandler.executeRPC(rpc);		
+				return;
+			}			
+			
+			/**
+			 * Used by the ServiceDiscovery to search for registered services.
+			 * @param serviceType ServiceType object to search for.
+			 * @param callback Callback to call with results.
+			 * @param options Timeout, optional.
+			 * @param filter Filters based on location, name, description, optional.
+			 * @private
+			 * @function
+			 */
+			var search = function (serviceType, callback, options, filter) {
+				logger.log('INFO: [Discovery] search: searching for ServiceType: ' + serviceType.api);
+				var results = [];
+				var cstar = serviceType.api.indexOf("*");
+				if (cstar !== -1) {
+					//*c*
+					if (serviceType.api.lastIndexOf("*") !== 0) {
+						var len = serviceType.api.length - 1;
+						var midString = serviceType.api.substring(1, len);
+						for (var i in this.registry.getRegisteredObjectsMap()) {
+							if (i.indexOf(midString) != -1) {
+								for (var j = 0; j < this.registry.getRegisteredObjectsMap()[i].length; j++) {
+									results.push(this.registry.getRegisteredObjectsMap()[i][j]);
+								}
+							}
+						}
+					} else {
+						//*, *c
+						if(serviceType.api.length == 1) {
+							for (var i in this.registry.getRegisteredObjectsMap()){
+								for( var j = 0; j <this.registry.getRegisteredObjectsMap()[i].length;j++){
+									results.push(this.registry.getRegisteredObjectsMap()[i][j]);
+								}
+							}
+						} else {
+							var restString = serviceType.api.substr(1);
+							for (var i in this.registry.getRegisteredObjectsMap()) {
+								if (i.indexOf(restString, i.length - restString.length) !== -1)	{
+									for (var j = 0; j < this.registry.getRegisteredObjectsMap()[i].length; j++) {
+										results.push(this.registry.getRegisteredObjectsMap()[i][j]);
+									}
+								}
+							}
+						}
+					}
+					callback(results);
+				} else {
+					// Precise search with the API name.
+					function deliverResults(r) {
+						function isDuplicate(sv, pos) {
+							var cnt = 0;
+							for (var i = 0; i < r.length; i++) {
+								if (sv.id === r[i].id & sv.serviceAddress === r[i].serviceAddress) {
+									if (i === pos && cnt === 0) {
+										return true;
+									}
+									cnt += 1;
+								}
+							}
+							return false;
+						}
+						r = r.filter(isDuplicate);
 
-			function callback(services) {
+						// filter results for zoneId
+						if (filter && typeof filter.zoneId === 'object') {
+							function hasZoneId(sv) {
+								for (var i = 0; i < filter.zoneId.length; i++) {
+									var found = sv.serviceAddress.indexOf(filter.zoneId[i]) !== -1 ? true : false;
+									if (found) return true;
+								}
+								return false;
+							}
+							r = r.filter(hasZoneId);
+						}
+
+						// finally return results
+						callback(r);
+					}
+
+					for (var i in this.registry.getRegisteredObjectsMap()) {
+						if (i === serviceType.api) {
+							logger.log('INFO: [Discovery] search: found matching service(s) for ServiceType: ' + serviceType.api);
+							results = this.registry.getRegisteredObjectsMap()[i];
+							// results.push(this.registry.getRegisteredObjectsMap()[i]);
+							break;
+						}
+					}
+
+					// Add address where this service is available, namely this
+					// pzp/pzh sessionid
+					for (var i = 0; i < results.length; i++) {
+						results[i].serviceAddress = this.rpcHandler.sessionId;
+						// This is source address, it is used by messaging for returning back
+					}
+					
+					// Reference counter of all entities (PZPs/PZHs connected to
+					// the PZH) we expect services back from
+					// Not in peer mode and connected
+					var entityRefCount =
+						Object.keys(this.rpcHandler.parent.pzp_state.connectedPzp).length +
+						Object.keys(this.rpcHandler.parent.pzp_state.connectedPzh).length;
+					
+					// No connection to a PZH or other connected peers, don't ask
+					// for remote services
+					if (!this.rpcHandler.parent || entityRefCount === 0) {
+						deliverResults(results);
+						return;
+					}
+
+					// Each callbackId corresponds to a remote call sent out.
+					var callbackId = getNextID(this.rpcHandler.sessionId);
+					var that = this;
+
+					// Deliver results once timeout kicks in. It is not a
+					// TimeoutError
+					setTimeout(
+						function () {
+							if (that.remoteServicesFoundCallbacks[callbackId]) {
+								that.remoteServicesFoundCallbacks[callbackId]([], callbackId, true);
+							}
+						},
+						options && typeof options.timeout !== 'undefined' ? options.timeout : 120000
+						// Default: 120 secs
+					);
+
+					// Store callback in map for lookup on returned remote results
+					this.remoteServicesFoundCallbacks[callbackId] = (function (res, refCnt) {
+						return function (remoteServices, cId, ignoreCnt) {
+							function isServiceType(el) {
+								return el.api === serviceType.api ? true : false;
+							}
+							res = res.concat(remoteServices.filter(isServiceType));
+							refCnt -= 1;
+							if (refCnt < 1 || ignoreCnt) {
+								// Entity reference counter is zero, got all
+								// answers, so continue
+								deliverResults(res);
+								delete that.remoteServicesFoundCallbacks[cId];
+							}
+						};
+					})(results, entityRefCount);
+					
+					// PZP sends out remote call "findServices" to all
+					// connected entities.
+					this.rpcHandler.parent.sendMessageAll('findServices', {id: callbackId});
+				} // End of precise search with the API name.
+			}; // End of var search function.
+			
+			var callback = function (services) {
 				services = services || [];
 
 				function stripFuncs(el) {
@@ -112,143 +266,14 @@
 				for (var i = 0; i < services.length; i++) {
 					logger.log('findServices: calling found callback for ' + services[i].id);
 					var rpc = rpcHandler.createRPC(objectRef, 'onservicefound', services[i]);
-					rpcHandler.executeRPC(rpc);
+					rpcHandler.executeRPC(rpc);					
 				}
-			}
-		};
-
-		/**
-		 * Used by the ServiceDiscovery to search for registered services.
-		 * @param serviceType ServiceType object to search for.
-		 * @param callback Callback to call with results.
-		 * @param options Timeout, optional.
-		 * @param filter Filters based on location, name, description, optional.
-		 * @private
-		 * @function
-		 */
-		var search = function (serviceType, callback, options, filter) {
-			logger.log('INFO: [Discovery] '+"search: searching for ServiceType: " + serviceType.api);
-			var results = [];
-			var cstar = serviceType.api.indexOf("*");
-			if(cstar !== -1){
-				//*c*
-				if(serviceType.api.lastIndexOf("*") !== 0){
-					var len = serviceType.api.length - 1;
-					var midString = serviceType.api.substring(1, len);
-					for (var i in this.registry.getRegisteredObjectsMap()){
-						if(i.indexOf(midString) != -1) {
-							for( var j = 0; j <this.registry.getRegisteredObjectsMap()[i].length; j++){
-								results.push(this.registry.getRegisteredObjectsMap()[i][j]);
-							}
-						}
-					}
-				}
-				//*, *c
-				else {
-					if(serviceType.api.length == 1) {
-						for (var i in this.registry.getRegisteredObjectsMap()){
-							for( var j = 0; j <this.registry.getRegisteredObjectsMap()[i].length;j++){
-								results.push(this.registry.getRegisteredObjectsMap()[i][j]);
-							}
-						}
-					}
-					else {
-						var restString = serviceType.api.substr(1);
-						for (var i in this.registry.getRegisteredObjectsMap()) {
-							if(i.indexOf(restString, i.length - restString.length) !== -1)	{
-								for( var j = 0; j <this.registry.getRegisteredObjectsMap()[i].length; j++){
-									results.push(this.registry.getRegisteredObjectsMap()[i][j]);
-								}
-							}
-						}
-					}
-				}
-				callback(results);
-
-			}
-			else {
-				function deliverResults(r) {
-					function isDuplicate(sv, pos) {
-						var cnt = 0;
-						for (var i=0; i<r.length; i++) {
-							if (sv.id === r[i].id & sv.serviceAddress === r[i].serviceAddress) {
-								if (i === pos && cnt === 0) {
-									return true;
-								}
-								cnt += 1;
-							}
-						}
-						return false;
-					}
-					r = r.filter(isDuplicate);
-
-					// filter results for zoneId
-					if (filter && typeof filter.zoneId === 'object') {
-						function hasZoneId(sv) {
-							for (var i=0; i<filter.zoneId.length; i++) {
-								var found = sv.serviceAddress.indexOf(filter.zoneId[i]) !== -1 ? true : false;
-								if (found) return true;
-							}
-							return false;
-						}
-						r = r.filter(hasZoneId);
-					}
-
-					// finally return results
-					callback(r);
-				}
-
-				for (var i in this.registry.getRegisteredObjectsMap()) {
-					if (i === serviceType.api) {
-						logger.log('INFO: [Discovery] '+"search: found matching service(s) for ServiceType: " + serviceType.api);
-						results = this.registry.getRegisteredObjectsMap()[i];
-					}
-				}
-
-				// add address where this service is available, namely this pzp/pzh sessionid
-				for (var i=0; i<results.length; i++) {
-					results[i].serviceAddress = this.rpcHandler.sessionId; // This is source address, it is used by messaging for returning back
-				}
-				// reference counter of all entities we expect services back from
-				// Not in peer mode and connected
-				var entityRefCount =  Object.keys(this.rpcHandler.parent.pzp_state.connectedPzp).length + Object.keys(this.rpcHandler.parent.pzp_state.connectedPzh).length;
-				// no connection to a PZH & other connected Peers, don't ask for remote services
-				if (!this.rpcHandler.parent || entityRefCount === 0) {
-					deliverResults(results);
-					return;
-				}
-
-				var callbackId = getNextID(this.rpcHandler.sessionId);
-				var that = this;
-
-				// deliver results once timeout kicks in
-				setTimeout(function() {
-					if (that.remoteServicesFoundCallbacks[callbackId]) {
-						that.remoteServicesFoundCallbacks[callbackId]([], callbackId, true);
-					}
-				}, options && typeof options.timeout !== 'undefined' ? options.timeout : 120000); // default: 120 secs
-
-				// store callback in map for lookup on returned remote results
-				this.remoteServicesFoundCallbacks[callbackId] = (function(res, refCnt) {
-					return function(remoteServices, cId, ignoreCnt) {
-
-						function isServiceType(el) {
-							return el.api === serviceType.api ? true : false;
-						}
-						res = res.concat(remoteServices.filter(isServiceType));
-						refCnt -= 1;
-
-						if (refCnt < 1 || ignoreCnt) {
-							// entity reference counter is zero, got all answers, so continue
-							deliverResults(res);
-							delete that.remoteServicesFoundCallbacks[cId];
-						}
-					}
-				})(results, entityRefCount);
-				this.rpcHandler.parent.sendMessageAll('findServices', {id: callbackId});
-			}
-		};
-	};
+			};
+		
+			// Search this PZP/PZH now.
+			search.call(this, serviceType, callback, options, filter);
+		}; // End of findServices method.
+	}; // End of Discovery constructor.
 
 	Discovery.prototype = new RPCWebinosService;
 
@@ -256,9 +281,12 @@
 	 * Add services to internal array. Used by PZH.
 	 * @param services Array of services to be added.
 	 */
-	Discovery.prototype.addRemoteServiceObjects = function(msg) {
+	Discovery.prototype.addRemoteServiceObjects = function (msg) {
 		var services = msg.services;
-		logger.log('INFO: [Discovery] '+"addRemoteServiceObjects: found " + (services && services.length) || 0 + " services.");
+		if (services !== null) {
+			logger.log('INFO: [Discovery] addRemoteServiceObjects: found ' +
+					services.length + " services.");
+		}
 		this.remoteServiceObjects[msg.from] = services;
 	};
 
@@ -266,7 +294,7 @@
 	 * Remove services from internal array. Used by PZH.
 	 * @param address Remove all services for this address.
 	 */
-	Discovery.prototype.removeRemoteServiceObjects = function(address) {
+	Discovery.prototype.removeRemoteServiceObjects = function (address) {
 		var count = this.remoteServiceObjects[address].length;
 		delete this.remoteServiceObjects[address];
 		logger.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
@@ -277,7 +305,7 @@
 	 * @returns Array with said objects.
 	 * @private
 	 */
-	Discovery.prototype.getRegisteredServices = function() {
+	Discovery.prototype.getRegisteredServices = function () {
 		var that = this;
 		var results = [];
 
@@ -294,14 +322,14 @@
 	};
 
 	/**
-	 * Get an array of all known services, including local and remote
-	 * services. Used by PZH.
+	 * Get an array of all known services, including local and remote services.
+	 * Used by PZH.
 	 * @param exceptAddress Address of services that match will be excluded from
 	 * results.
 	 * @returns Array with known services.
 	 * @private
 	 */
-	Discovery.prototype.getAllServices = function(exceptAddress) {
+	Discovery.prototype.getAllServices = function (exceptAddress) {
 		var that = this;
 		var results = [];
 		Object.keys(this.remoteServiceObjects).map(function(address) {
@@ -315,5 +343,4 @@
 	};
 
 	exports.Service = Discovery;
-
 })();
