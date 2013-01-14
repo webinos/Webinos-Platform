@@ -1,22 +1,58 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *  
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Author: Giuseppe La Torre - University of Catania
+ * 
+ ******************************************************************************/
+
 #include <SPI.h>
 #include <Ethernet.h>
 
-#define NUM_ELEMENTS   2
-
-#define BOARD_ID         "00001"
-//#define BOARD_LANGUAGE "webinos"
-//#define BOARD_PROTOCOL "HTTP"
-//#define BOARD_NAME     "ARDUINO_UNO"
-#define BOARD_IP         192,168,1,120
-#define BOARD_PORT       80
-
-#define PZP_IP           192,168,1,130
-#define PZP_PORT         1984
+//----------Begin Configuration Parameters-----------------------------
+#define NUM_ELEMENTS    2
+#define BOARDID        "00001"
+#define BRDNAME        "ARDUINO_UNO"
+#define BRDIPAD        192,168,1,120
+#define BRDPORT        80
+#define PZPIPAD        192,168,1,130
+#define PZPPORT        3000
+#define MACADDR        { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }
 
 //NB sa -> 0=sensor, 1=actuator
 //NB ad -> 0=analog, 1=digital
-#define ELEMENTS_RES "{\"bid\":\"00001\",\"cmd\":\"ele\",\"elements\":[{\"id\":\"00001_000\", \"element\": {\"sa\":\"0\",\"maximumRange\":\"0.1\",\"minDelay\":\"500\",\"power\":\"0.02\",\"resolution\":\"0.001\",\"type\":\"temperature\",\"vendor\":\"apple_temp\",\"version\":\"1\"}},{\"id\":\"00001_001\", \"element\":{\"sa\":\"0\",\"maximumRange\":\"0.1\",\"minDelay\":\"500\",\"power\":\"0.02\",\"resolution\":\"0.001\",\"type\":\"proximity\",\"vendor\":\"apple_prox\",\"version\":\"1\"}}]}"
-#define HELLO_REQ "GET /newboard?jsondata={\"id\":\"00001\",\"protocol\":\"HTTP\",\"name\":\"ARDUINO_UNO\",\"ip\":\"192.168.1.120\",\"port\":\"80\"} HTTP/1.0"
+#define ELEMENTS_RES "{\"id\":\""BOARDID"\",\"cmd\":\"ele\",\"elements\":[\
+                          {\"id\":\""BOARDID"_000\",\"element\": {\
+                              \"sa\":\"0\",\
+                              \"maximumRange\":\"0.1\",\
+                              \"minDelay\":\"500\",\
+                              \"power\":\"0.02\",\
+                              \"resolution\":\"0.001\",\
+                              \"type\":\"temperature\",\
+                              \"vendor\":\"apple_temp\",\
+                              \"version\":\"1\"}},\
+                          {\"id\":\""BOARDID"_001\", \"element\":{\
+                              \"sa\":\"0\",\
+                              \"maximumRange\":\"0.1\",\
+                              \"minDelay\":\"500\",\
+                              \"power\":\"0.02\",\
+                              \"resolution\":\"0.001\",\
+                              \"type\":\"proximity\",\
+                              \"vendor\":\"apple_prox\",\
+                              \"version\":\"1\"}}\
+                      ]}"
+//----------End Configuration Parameters-----------------------------
 
 
 typedef struct {
@@ -34,20 +70,29 @@ typedef struct {
 IOElement * elements[NUM_ELEMENTS];
 
 
-//Ethernet stuff
-byte mac[] = {  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress pzp_ip(PZP_IP);
-IPAddress arduino_ip(BOARD_IP);
+char* board_id = BOARDID;
+byte mac[] = MACADDR;
+IPAddress pzp_ip(PZPIPAD);
+IPAddress arduino_ip(BRDIPAD);
 EthernetClient client;
-EthernetServer server(BOARD_PORT);
+EthernetServer server(BRDPORT);
 
 boolean boardconnected = false;
+
+
+void sayHello(){
+    client.print("GET /newboard?jsondata={\"id\":\"");
+    client.print(board_id);
+    client.print("\",\"protocol\":\"HTTP\",\"name\":\"ARDUINO_UNO\",\"ip\":\"");
+    client.print(Ethernet.localIP());
+    client.println("\",\"port\":\"80\"} HTTP/1.0");
+}
 
 void setup(){
     Serial.begin(9600);
     
     elements[0] = new IOElement();
-    elements[0]->id = "00001_000";
+    elements[0]->id = BOARDID"_000";
     elements[0]->sa = 0;
     elements[0]->ad = 0;
     elements[0]->pin = 0;
@@ -57,7 +102,7 @@ void setup(){
     elements[0]->rate = 1000;
   
     elements[1] = new IOElement();
-    elements[1]->id = "00001_001";
+    elements[1]->id = BOARDID"_001";
     elements[1]->sa = 0;
     elements[1]->ad = 1;
     elements[1]->pin = 1;
@@ -88,7 +133,7 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
       if(val == elements[id_ele]->lastValue)
         senddata = false;
     }
-    if (senddata && client.connect(pzp_ip, PZP_PORT)) {
+    if (senddata && client.connect(pzp_ip, PZPPORT)) {
         Serial.println(val);
         Serial.println(elements[id_ele]->lastValue);
         Serial.print("Send data id : ");
@@ -109,8 +154,8 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
 void loop(){
     if(!boardconnected){
         Serial.println("Try connecting to PZP");   
-        if (client.connect(pzp_ip, PZP_PORT)) {
-            client.println(HELLO_REQ);
+        if (client.connect(pzp_ip, PZPPORT)) {
+            sayHello();
             client.println();
 
             String s;
@@ -121,8 +166,7 @@ void loop(){
             int i=0;
             int num_spaces=0;
             while(client.available() > 0){
-                char c = client.read();
-//              Serial.print(c);  
+                char c = client.read();  
                 if(num_spaces == 4){
                     vet[i++] = c;
                     if(i==19){
@@ -191,9 +235,9 @@ void loop(){
                         client.println("Connnection: keep-alive");
                         client.println();
                     
-                        int len = strlen(BOARD_ID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
+                        int len = strlen(BOARDID) + 1 + strlen(pin);  // BOARD_ID + _ + pin
                         char eid[len+1];
-                        strcpy(eid,BOARD_ID);
+                        strcpy(eid,BOARDID);
                         strcat(eid,"_");
                         strcat(eid,pin);
                         strcat(eid,'\0');
@@ -206,7 +250,7 @@ void loop(){
                             int ipin = atoi(pin);
                             int value = analogRead(ipin);
                             client.print("{\"cmd\":\"get\",\"eid\":\"");
-                            client.print(BOARD_ID);
+                            client.print(BOARDID);
                             client.print("_");
                             client.print(ipin);
                             client.print("\",\"dat\":\"");
