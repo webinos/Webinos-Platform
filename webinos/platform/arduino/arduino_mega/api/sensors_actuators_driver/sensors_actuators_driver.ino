@@ -305,17 +305,18 @@ void sendDataToAPI(int id_ele, bool check_value_is_changed){
 
 void err_SD(){
     digitalWrite(13,HIGH);
-    delay(300);
-    digitalWrite(12,LOW);
+    delay(800);
+    digitalWrite(13,LOW);
     delay(300);
     digitalWrite(13,HIGH);
-    delay(300);
-    digitalWrite(12,LOW);
+    delay(800);
+    digitalWrite(13,LOW);
     delay(1000);
 }
+
 void setup(){
     Serial.begin(9600);
-    
+    pinMode(13, OUTPUT);
     getInfoFromSD(false);
     
     while(board_id == NULL){
