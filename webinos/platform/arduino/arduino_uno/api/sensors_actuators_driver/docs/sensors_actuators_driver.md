@@ -1,13 +1,13 @@
-#HTTP DRIVER FOR ARDUINO MEGA BOARD
+#HTTP DRIVER FOR ARDUINO UNO BOARD
 
-This HTTP driver allows the Arduino MEGA board to exchange sensors' and actuators' control information with the PZP through RESTfull Web Services. The driver is separated in two files:
+This HTTP driver allows the Arduino UNO board to exchange sensors' and actuators' control information with the PZP through RESTfull Web Services. The driver is separated in two files:
 
 * One representing the PZP driver (located in webinos/core/api/iotdrivers/lib/drivers/httpDriver.js)
-* One representing the board (Arduino) driver (located in webinos/platform/arduino/arduino_mega/api/sensors_actuators_driver/sensors_actuators_driver.ino)
+* One representing the board (Arduino) driver (located in webinos/platform/arduino/arduino_uno/api/sensors_actuators_driver/sensors_actuators_driver.ino)
 
 The hardware required by the HTTP driver is:
 
-* [Arduino MEGA board](http://arduino.cc/en/Main/ArduinoBoardMega)
+* [Arduino UNO board](http://arduino.cc/en/Main/arduinoBoardUno)
 * [Arduino Ethernet Shield](http://www.arduino.cc/en/Main/ArduinoEthernetShield)
 
 
@@ -123,73 +123,133 @@ Otherwise if eventfiremode is set to "valuechange" the board will notifiy the PZ
 TBD
 
 ##HOW TO CONFIGURE HTTP DRIVER
-The configuration file must be named **config.txt** and it must be placed in the **root folder** of the SD card. The configuration file contains a series of lines each one containing both a parameter name and a parameter value separated by spaces or tabs. A configuration line can be commented with the character '#'. 
-Each configuration line must end with a carriage return.
+
+To edit the configuration parameters for the Arduino UNO board some customizations of the source code are necessary. The driver source code is placed in WEBINOS_ROOT/webinos/platform/arduino/arduino_uno/api/sensors_actuators_driver/sensors_actuators_driver.ino.
+The code section which contains the configuration parameters is the following:
+
+	//----------Begin Configuration Parameters-----------------------------
+	#define NUM_ELEMENTS    2
+	#define BOARDID        "00001"
+	#define BRDNAME        "ARDUINO_UNO"
+	#define BRDIPAD        192,168,1,120
+	#define BRDPORT        80
+	#define PZPIPAD        192,168,1,130
+	#define PZPPORT        3000
+	#define MACADDR        { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }
+	#define ELEMENTS_RES "{\"id\":\""BOARDID"\",\"cmd\":\"ele\",\"elements\":[\
+                          {\"id\":\""BOARDID"_000\",\"element\": {\
+                              \"sa\":\"0\",\
+                              \"maximumRange\":\"0.1\",\
+                              \"minDelay\":\"500\",\
+                              \"power\":\"0.02\",\
+                              \"resolution\":\"0.001\",\
+                              \"type\":\"temperature\",\
+                              \"vendor\":\"apple_temp\",\
+                              \"version\":\"1\"}},\
+                          {\"id\":\""BOARDID"_001\", \"element\":{\
+                              \"sa\":\"0\",\
+                              \"maximumRange\":\"0.1\",\
+                              \"minDelay\":\"500\",\
+                              \"power\":\"0.02\",\
+                              \"resolution\":\"0.001\",\
+                              \"type\":\"proximity\",\
+                              \"vendor\":\"apple_prox\",\
+                              \"version\":\"1\"}}\
+                      ]}"
+	//----------End Configuration Parameters-----------------------------
+	
+
 
 It is possibile to configure the following parameters:
 
-* **BOARDID**	Is followed by the board ID. [MANDATORY, e.g. 00001]
-* **PZPIPAD**	Is followed by the PZP IP address [MANDATORY, e.g. 192.168.1.130]
-* **PZPPORT**	Is followed by the PZP port where the express server is listening [MANDATORY, e.g. 1984]
-* **BRDIPAD**	Is followed by the board's IP address. If not defined, the board tries to obtain an address through DHCP server. If there is not any DHCP server the default board IP address will be 192.168.1.120 [OPTIONAL]
-* **BRDPORT** Is followed by the board's port where the server will be listening. If not defined, the default board's port will be 80. [OPTIONAL]
-* **MACADDR** Is followed by the board's MAC address expressed in a colon-separated form. [MANDATORY, e.g. AA:AD:BE:EF:FE:BB]
-* **ELEMENT** is followed by a 'colon-separated' tuple containing the following information for each element
+* **NUM_ELEMENTS** represents the number of sensors and actuators connected to the board
+* **BOARDID**	represents the board ID. [MANDATORY, e.g. 00001]
+* **PZPIPAD**	represents the PZP IP address [MANDATORY, e.g. 192.168.1.130]
+* **PZPPORT**	represents the PZP port where the express server is listening [MANDATORY, e.g. 1984]
+* **BRDIPAD**	represents the board's IP address. [MANDATORY, e.g. 192.168.1.120]
+* **BRDPORT** 	represents the board's port where the server will be listening.[MANDATORY, e.g. 80]
+* **MACADDR** represents the board's MAC address expressed in a colon-separated form. [MANDATORY, e.g. AA:AD:BE:EF:FE:BB]
+* **ELEMENT_RES** represents a JSON array with a series of information for each element connected to the board. These information is described in the table below:
 
 <table>
   <tr>
     <th>ID</th><th>Parameters</th><th>Type</th><th>Meaning</th><th>Example</th>
   </tr>
   <tr>
-    <td>1</td><td>ID element</td><td>char[3]
-    </td><td>The element ID. Must be unique for the board</td><td>001</td>
+    <td>1</td><td>id</td><td>string
+    </td><td>The element ID. Is in the form BOARDID_ELEMENTID where ELEMENTID is an array of three characters.</td><td>00001_001</td>
   </tr>
   <tr>
-    <td>2</td><td>SA</td><td>boolean</td><td>A boolean which values is 0 if the element is a sensor otherwise 1 if it is an actuator.</td><td>0</td>
+    <td>2</td><td>sa</td><td>boolean</td><td>A boolean which values is 0 if the element is a sensor otherwise 1 if it is an actuator.</td><td>0</td>
   </tr>
   <tr>
-    <td>3</td><td>AD</td><td>boolean</td><td>A boolean which values is 0 if the element is analog otherwise 1 if it is digital.</td><td>0</td>
+    <td>3</td><td>ad</td><td>boolean</td><td>A boolean which values is 0 if the element is analog otherwise 1 if it is digital.</td><td>0</td>
   </tr>
   <tr>
-    <td>4</td><td>PIN</td><td>integer</td><td>Represents the number of the pin where the element is attached to</td><td>5</td>
+    <td>4</td><td>pin</td><td>integer</td><td>Represents the number of the pin where the element is attached to</td><td>5</td>
   </tr>
   <tr>
-    <td>5</td><td>MAXIMUMRANGE</td><td>real</td><td>Represents the max range of sensor in the sensors unit.</td><td>0.22</td>
+    <td>5</td><td>maximumrange</td><td>real</td><td>Represents the max range of sensor in the sensors unit.</td><td>0.22</td>
   </tr>
   <tr>
-    <td>6</td><td>MINDELAY</td><td>integer</td><td>Represents the min delay of sensor allowed between two events in microsecond or zero if this sensor only returns a value when the data it's measuring changes.</td><td>600</td>
+    <td>6</td><td>mindelay</td><td>integer</td><td>Represents the min delay of sensor allowed between two events in microsecond or zero if this sensor only returns a value when the data it's measuring changes.</td><td>600</td>
   </tr>
   <tr>
-    <td>7</td><td>POWER</td><td>real</td><td>Represents the power consumption of sensor in mA used by this sensor while in use.</td><td>0.02</td>
+    <td>7</td><td>power</td><td>real</td><td>Represents the power consumption of sensor in mA used by this sensor while in use.</td><td>0.02</td>
   </tr>
   <tr>
-    <td>8</td><td>RESOLUTION</td><td>real</td><td>Represents the resolution of the sensor in the sensors unit.</td><td>0.003</td>
+    <td>8</td><td>resolution</td><td>real</td><td>Represents the resolution of the sensor in the sensors unit.</td><td>0.003</td>
   </tr>
   <tr>
-    <td>9</td><td>TYPE</td><td>string</td><td>Represents the type of the element.</td><td>Allowed types are: light, noise, temperature, pressure, proximity, humidity, heartratemonitor</td>
+    <td>9</td><td>type</td><td>string</td><td>Represents the type of the element.</td><td>Allowed types are: light, noise, temperature, pressure, proximity, humidity, heartratemonitor</td>
   </tr>
   <tr>
-    <td>10</td><td>VENDOR</td><td>string</td><td>Represents the vendor string of the element.</td><td>parallax</td>
+    <td>10</td><td>vendor</td><td>string</td><td>Represents the vendor string of the element.</td><td>parallax</td>
   </tr>
   <tr>
-    <td>11</td><td>VERSION</td><td>real</td><td>Represents the version of the element's module.</td><td>1.0</td>
+    <td>11</td><td>version</td><td>real</td><td>Represents the version of the element's module.</td><td>1.0</td>
   </tr>
 </table>
 
-An example of configuration file is the following:
-<pre>
-BOARDID		00001
-PZPIPAD		192.168.1.3
-PZPPORT		1984
-BRDIPAD		192.168.1.120
-BRDPORT		80
-MACADDR		AA:AD:BE:EF:FE:BB
-ELEMENT 	001:0:0:0:0.22:600:0.02:0.003:light:parallax:1.0
-ELEMENT 	002:0:1:1:0.44:200:0.013:0.04:temperature:parallax:1.2
+Each element is stored into memory using the following data structure:
 
-</pre>
+	typedef struct {
+    	char* id;
+    	bool sa;      // 0=sensor, 1=actuator
+    	bool ad;      // 0=analog, 1=digital
+    	int pin;
+    	bool active;
+    	bool mode;    // 0=valuechange, 1=fixedinterval
+    	long rate;
+    	int lastValue;
+    	long lastConnectionTime;
+	} IOElement;
+	
+The list of available elements is statically initialized in the **setup** function:
 
-**Note: Each configuration line must terminate with a carriage return.**
+	void setup(){
+		…
+		elements[0] = new IOElement();
+    	elements[0]->id = BOARDID"_000";
+    	elements[0]->sa = 0;
+    	elements[0]->ad = 0;
+    	elements[0]->pin = 0;
+    	elements[0]->active = 0;
+    	elements[0]->mode = 1;
+    	elements[0]->lastValue = -1;
+    	elements[0]->rate = 1000;
+    	
+    	elements[1] = new IOElement();
+    	elements[1]->id = BOARDID"_001";
+    	elements[1]->sa = 0;
+    	elements[1]->ad = 1;
+    	elements[1]->pin = 1;
+    	elements[1]->active = 0;
+    	elements[1]->mode = 0;
+    	elements[1]->lastValue = -1;
+    	elements[1]->rate = 3500;
+    	…
+	}
 
 
 ##HOW TO TEST HTTP DRIVER
@@ -200,8 +260,3 @@ ELEMENT 	002:0:1:1:0.44:200:0.013:0.04:temperature:parallax:1.2
 
 Note: The steps order can be whatever.
 
-On startup the board reads the file config.txt to configure the main parameters. If the BRDIPAD parameter is defined the board will use it as IP address. Otherwise the board tries to obtain an address contacting the PZP's DHCP server, if the request fails the board's IP will be a default one (192.168.1.120).
-
-##KNOWN PROBLEMS
-
-* Sometimes Arduino might fail to initialize the SD card module. In this case the status led (pin 13, which normally is turned off) will blink twice cyclically. To solve this problem is usually enough to turn off and on the board.
