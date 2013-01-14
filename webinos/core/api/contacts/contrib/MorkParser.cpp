@@ -6,6 +6,10 @@
 ///   All rights reserved. 
 /// 
 ///   Authors: Yuriy Soroka <ysoroka@scalingweb.com>
+///
+///   Modified for webinos to correct the line continuation parsing
+///   on deferent platforms. (2013/01/15)
+///   
 ///////////////////////////////////////////////////////////////////
 
 
@@ -52,6 +56,13 @@ bool MorkParser::open( const string &path )
 
 	while (getline(infile, line, '\n'))
 	{
+		// On *Nix systems the getline leaves a trailing \r.
+		// On Windows it doesn't.
+		// Instead of asuming a \r\n while parsing the lines later on,
+		// we just make sure it only has \n.
+		if(!line.empty() && *line.rbegin() == '\r') {
+			line.erase( line.length()-1, 1);
+		}
 		morkData_.append(line);
 		morkData_.append("\n");
 	}
@@ -295,13 +306,19 @@ bool MorkParser::parseCell()
 			break;
 		case '\\':
 			{
-				// Get next two chars
+				// Get next char
 				char NextChar= nextChar();
+				// Normally we should not find a \r character.
+				// Moreover based on Mork file specs, \ should escape
+				// only the following chars: \, $ or ).
+				// https://developer.mozilla.org/en/docs/Mork_Structure
 				if ( '\r' != NextChar && '\n' != NextChar )
 				{
 					Text += NextChar;
 				}
-				else nextChar();
+				// The following line, which preexisted, was assuming a two-byte
+				// linebreak, which was fixed above when reading the file.
+				//else nextChar();
 			}
 			break;
 		case '$':
