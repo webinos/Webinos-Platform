@@ -23,7 +23,8 @@
     path = require("path"),
     child_process = require("child_process").exec,
     fs = require("fs"),
-    WebinosMediaContentModule;
+    WebinosMediaContentModule,
+    RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
   function fetchMediaInfo(directoryPath, id, callback) {
     var xml2js = require('xml2json'), result;
