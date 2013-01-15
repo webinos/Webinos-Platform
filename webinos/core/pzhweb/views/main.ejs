@@ -69,7 +69,6 @@
     window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(id[1]) + "&externalpzh=" + encodeURIComponent(id[0]) ;
   }
   function pzpRevokeResult(payload){
-    console.log(JSON.stringify(payload));
     setArticle("Device removed from personal zone", "<p>" + payload.payload + " device removed.</p>");
   }
   function listPzpsToRevoke(payload){
@@ -122,6 +121,24 @@
   }
   function showInfoLog(payload){
       setArticle("Info Log", payload);
+  }
+  function approveUser(payload) {
+      var text = "";
+      if (payload) {
+          text = "<h3>Would you like to approve or reject the request?</h3>";
+          text += "<p><form name='approve-user' action='/main/<%=user%>/make-user-decision/' method='post'> <table>";
+          for (var i = 0; i < payload.length; i = i+1) {
+              text += "<tr> <td> <input type='checkbox' name='decision' value="+payload[i].name+">";
+              text += payload[i].name+"</input></td>";
+              text += "<td>"+payload[i].url +"</td>";
+              text += "<td><input type='submit' value='Accept'></td></tr>";
+          }
+
+          text += "</table></form></p>";
+      } else {
+          text = "No users to approve";
+      }
+      setArticle("Approve User List", text);
   }
   function listUserDetails(payload){
       var text = "";
@@ -180,9 +197,12 @@
     $("#serviceConfig").click(function(){
       webinosPZH.commands.listAllServices(listAllServices);
     });
+    $("#approveUser").click(function(){
+      webinosPZH.commands.approveUser(approveUser);
+    });
     $('.column').equalHeight(); // Fix height
     });
-    </script>
+ </script>
 </head>
 <body>
   <header id="header">
@@ -209,9 +229,8 @@
       </ul>
       <ul class="" style="" id="connectToAnotherPZHLink">
         <li> <a href="#connectPzh" id="connectPzh">Connect to another personal zone... </a> </li>
+        <li> <a href="#approveUser" id='approveUser'>Approve other PZH... </a> </li>
       </ul>
-      
-      
       <h3>Connected devices</h3>
       <ul class="" style="display: block;" id="enumConnectedPzp">
       </ul>
@@ -219,7 +238,6 @@
         <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
         <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>
       </ul>
-      
       <h3>Personal zone admin</h3>
       <ul class="" style="">
         <li> <a href="#userDetails" id="userDetails">About you </a> </li>

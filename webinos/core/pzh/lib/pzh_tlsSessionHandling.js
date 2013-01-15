@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2012-2013  Samsung Electronics (UK) Ltd
- * AUTHOR: Habib Virji
+ * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
+ * Author: Habib Virji (habib.virji@samsung.com)
  *******************************************************************************/
 
 /**
@@ -85,9 +85,11 @@ var Pzh = function () {
             self.pzh_state.connectedPzh[_pzhId] = {"socket":_conn, "address":_conn.socket.remoteAddress};
             _conn.id = _pzhId;
 
-            msg = self.pzh_otherManager.messageHandler.registerSender (self.config.metaData.serverName, _pzhId);
-            self.sendMessage (msg, _pzhId);
-
+            setTimeout (function () {
+                msg = self.pzh_otherManager.messageHandler.registerSender (self.config.metaData.serverName, _pzhId);
+                self.sendMessage (msg, _pzhId);
+                self.pzh_otherManager.registerServices (_pzhId);
+            }, 3000);
         } else {
             self.pzh_state.logger.log ("pzh -" + _pzhId + " already connected");
         }
@@ -149,7 +151,7 @@ var Pzh = function () {
             var jsonString = JSON.stringify (_message);
             var buf = util.webinosMsgProcessing.jsonStr2Buffer (jsonString);
 
-            self.pzh_state.logger.log ("send to " + _address + " _message " + jsonString);
+            self.pzh_state.logger.log ("send to " + _address + " message " + jsonString + " and len- " + buf.length);
 
             try {
                 if (self.pzh_state.connectedPzh.hasOwnProperty (_address)) {// If it is connected to pzh it will land here
@@ -190,8 +192,8 @@ var Pzh = function () {
 
                 for (key in self.config.cert.external) {
                     if (self.config.cert.external.hasOwnProperty (key)) {
-                        caList.push (self.config.cert.external[key].cert);
-                        crlList.push (self.config.cert.external[key].crl);
+                        caList.push (self.config.cert.external[key].externalCerts);
+                        crlList.push (self.config.cert.external[key].externalCrl);
                     }
                 }
                 // Certificate parameters that will be added in SNI context of farm
@@ -199,7 +201,7 @@ var Pzh = function () {
                     key               :value,
                     cert              :self.config.cert.internal.conn.cert,
                     ca                :caList,
-                    crl               :crlList,
+                    //crl               :crlList,
                     requestCert       :true,
                     rejectUnauthorized:true
                 });
@@ -263,11 +265,10 @@ var Pzh = function () {
                     self.pzh_state.logger.addId (self.config.userData.email[0].value);
                     self.pzh_otherManager = new pzh_otherManager (self);
                     self.pzh_pzh = new Pzh_Pzh (self);
-                    self.revoke = new RevokePzh (self);
+                    self.revoke = new RevokePzp (self);
                     self.enroll = new AddPzp (self);
                     self.pzh_otherManager.setMessageHandler_RPC ();
                     self.setConnParam (function (status, options) {
-                        self.pzh_pzh.connect_ConnectedPzh (options);
                         return _callback (true, options, _uri);
                     });
                 } else {
@@ -283,26 +284,30 @@ module.exports = Pzh;
 
 var Pzh_Pzh = function (_parent) {
     var self = this;
-
     this.connect_ConnectedPzh = function (options) {
         var myKey;
         for (myKey in  _parent.config.trustedList.pzh) {
             if (!_parent.pzh_state.connectedPzh.hasOwnProperty (myKey) && _parent.pzh_state.sessionId !== myKey) {
-                self.connectOtherPZH (myKey, options, function (status, errorDetails) {
-                    if (!status) {
-                        _parent.pzh_state.logger.error ("connecting to pzh failed - due to" + errorDetails);
-                    }
-                });
+                self.connectOtherPZH (myKey, options);
             }
         }
     };
 
-    this.connectOtherPZH = function (_to, _options, _callback) {
+    this.connectOtherPZH = function (_to, _options) {
         try {
-            var connPzh, serverName = _to.split ("_")[0];
-            var tls = require ("tls")
-            _options.servername = _to;
-            connPzh = tls.connect (_parent.config.userPref.ports.provider, serverName, _options, function () {
+            var pzhDetails = _parent.config.cert.external[_to];
+
+            var connPzh;
+            var tls = require ("tls"), host = pzhDetails.host;
+            if (parseInt (pzhDetails.port) !== 443) {
+                host = pzhDetails.host + ":" + pzhDetails.port;
+            }
+            var options = _options;
+            options.servername = host + "_" + _to;
+            options.host = pzhDetails.host;
+            options.port = 80; //parseInt(pzhDetails.port);
+            _parent.pzh_state.logger.log ("connection from " + _parent.pzh_state.sessionId + " - to " + _options.servername + " initiated");
+            connPzh = tls.connect (options, function () {
                 _parent.pzh_state.logger.log ("connection status : " + connPzh.authorized);
                 if (connPzh.authorized) {
                     _parent.pzh_state.logger.log ("connected to " + _to);
@@ -310,7 +315,6 @@ var Pzh_Pzh = function (_parent) {
                 } else {
                     _parent.pzh_state.logger.error ("connection authorization Failed - " + connPzh.authorizationError);
                 }
-                if (_callback) {_callback ({cmd:'pzhPzh', to:_parent.config.metaData.serverName, payload:connPzh.authorized});}
             });
             connPzh.on ("data", function (buffer) {
                 _parent.handleData (connPzh, buffer);
@@ -323,12 +327,11 @@ var Pzh_Pzh = function (_parent) {
             });
         } catch (err) {
             _parent.pzh_state.logger.error ("connecting other pzh failed in setting configuration " + err);
-            _callback (false, err);
         }
     };
 };
 
-var RevokePzh = function (_parent) {
+var RevokePzp = function (_parent) {
     /**
      * Removes a PZP from the PZH
      * @param _pzpid

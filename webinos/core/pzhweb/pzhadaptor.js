@@ -1,3 +1,21 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
+ * Author: Habib Virji (habib.virji@samsung.com)
+ *******************************************************************************/
 var webinos = require ("find-dependencies") (__dirname),
     logger = webinos.global.require (webinos.global.util.location, "lib/logging.js") (__filename) || logger,
     pzhTLS = require ('./realpzhtls.js');
@@ -151,9 +169,6 @@ PzhAdaptor.fromWebUnauth = function (userEmail, body, res) {
                 case "getCertificates":
                     pzhTLS.send (result, {type:"getCertificates"}, responseCertHandler (res));
                     break;
-                case "authCode":
-                    pzhTLS.send (result, {type:"authCode"}, res);
-                    break;
                 default:
                     res.writeHead (200);
                     res.end ('Request failed: ' + err);
@@ -218,6 +233,9 @@ function manageStatus (payload, user, res) {
             break;
         case 'getAllPzh':
             pzhTLS.send (user, {type:"getAllPzh"}, responseHandler (payload.status, res));
+            break;
+        case 'approveUser':
+            pzhTLS.send (user, {type:"approveUser"}, responseHandler (payload.status, res));
             break;
     }
 }

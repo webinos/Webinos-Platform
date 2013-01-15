@@ -200,7 +200,7 @@ var PzpWSS = function (_parent) {
             logger.log ("httpServer listening at port " + parent.config.userPref.ports.pzp_webSocket + " and hostname localhost");
             return callback (true, httpserver);
         });
-        httpserver.listen (parent.config.userPref.ports.pzp_webSocket, "0.0.0.0");
+        httpserver.listen (parent.config.userPref.ports.pzp_webSocket, "localhost");
     }
 
     function startAndroidWRT () {
