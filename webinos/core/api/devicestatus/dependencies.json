@@ -1,4 +1,5 @@
-{ "root": {
+{ "_comment": "The Path/location of the Device Status Files situated",
+    "root": {
     "location": "../../" 
   }
 }

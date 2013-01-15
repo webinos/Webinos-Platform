@@ -36,7 +36,7 @@ string WiFiHardware::status(string res)
     res = Utils::WmiParam(L"Status", "SELECT * FROM Win32_NetworkAdapter");
 	string res1; 
 	size_t pos;
-	pos = res.find("-");
+	pos = res.find("\n");
 	res1 = res.substr (10,10);
         	
     //string res = Utils::WmiParam(L"ConnectionState", "SELECT * FROM Win32_NetworkConnection");
@@ -44,6 +44,6 @@ string WiFiHardware::status(string res)
 	//string res3 = Utils::WmiParam(L"Name", "SELECT * FROM Win32_NetworkAdapter");
 	//string res = Utils::WmiParam(L"AdapterType", "SELECT * FROM Win32_NetworkAdapter");
 	//string res = res1 + res2 + res3;
-	return res1;
+	return res;
 	//return "language";
 }

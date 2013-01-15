@@ -1,5 +1,5 @@
 #include "../../input_device.h"
-//#include "../../../utils.h"
+#include "../../../utils.h"
 
 #include <windows.h>
 #include <iostream>
@@ -36,13 +36,17 @@ string InputDevice::getPropertyValue(string * property, string * component)
 
 string InputDevice::type(string type)
 {
-    //string res = Utils::WmiParam(L"CIM_LogicalDevice", "SELECT * FROM Win32_PNPDeviceID");
-	//string res = Utils::WmiParam(L"NetConnectionStatus", "SELECT * FROM Win32_NetworkAdapter");
-	//return res;
+     string res1 = Utils::WmiParam(L"Name", "SELECT * FROM Win32_Keyboard");
+	 string res2 = Utils::WmiParam(L"DeviceID", "SELECT * FROM Win32_MemoryDevice");
+	 string res3 = Utils::WmiParam(L"Name", "SELECT * FROM Win32_PnPEntity");
+	 string res4 = Utils::WmiParam(L"PnPDeviceID", "SELECT * FROM Win32_PnPEntity");
+	// string res = res1 + res2 + res3 + res4;
+	 string res = res1;
+	 return res;
 	//return "language";
 	//cout << "USB Device Lister." << endl;
  
-    UINT nDevices = 0;
+  /* UINT nDevices = 0;
     GetRawInputDeviceList( NULL, &nDevices, sizeof( RAWINPUTDEVICELIST ) );
  
     if( nDevices < 1 )
@@ -133,7 +137,8 @@ string InputDevice::type(string type)
             cout << "Mouse ID: " << rdiDeviceInfo.mouse.dwId << endl;
             cout << "Mouse buttons: " << rdiDeviceInfo.mouse.dwNumberOfButtons << endl;
             cout << "Mouse sample rate (Data Points): " << rdiDeviceInfo.mouse.dwSampleRate << endl;
-            if( rdiDeviceInfo.mouse.fHasHorizontalWheel )
+           // return wcDeviceName;           
+		   if( rdiDeviceInfo.mouse.fHasHorizontalWheel )
             {
                 cout << "Mouse has horizontal wheel" << endl;
             }
@@ -155,6 +160,7 @@ string InputDevice::type(string type)
             cout << "Number of keys total: " << rdiDeviceInfo.keyboard.dwNumberOfKeysTotal << endl;
             cout << "Type of the keyboard: " << rdiDeviceInfo.keyboard.dwType << endl;
             cout << "Subtype of the keyboard: " << rdiDeviceInfo.keyboard.dwSubType << endl;
+			//return wcDeviceName;
         }
  
         // Some HID
@@ -169,18 +175,19 @@ string InputDevice::type(string type)
             cout << "Usage for the device: " << rdiDeviceInfo.hid.usUsage << endl;
             cout << "Usage Page for the device: " << rdiDeviceInfo.hid.usUsagePage << endl;
         }
- 
+       // string res = wcDeviceName;
+       // return res;
         // Delete Name Memory!
         delete [] wcDeviceName;
     }
- 
+    //return pRawInputDeviceList;
     // Clean Up - Free Memory
     delete [] pRawInputDeviceList;
  
     // Exit
    // cout << endl << "Finnished.";
     //cin.get();
-    //return res;
-
+    //return 0;
+*/
 	
 }

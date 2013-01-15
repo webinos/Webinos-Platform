@@ -1,4 +1,5 @@
 #include "../../device.h"
+#include "../../../utils.h"
 
 AspectsRegister Device::aspectsRegister("Device", getInstance());
 
@@ -20,7 +21,7 @@ vector<string> Device::getComponents()
 
 bool Device::isSupported(string * property)
 {
-	return false;
+	return true;
 }
 
 string Device::getPropertyValue(string * property, string * component)
@@ -39,23 +40,32 @@ string Device::getPropertyValue(string * property, string * component)
 
 }
 
-string Device::imei(string deviceName)
+string Device::imei(string deviceimei)
 {
-	return "imei";
+    string res1 = Utils::WmiParam(L"SerialNumber", "SELECT * FROM CIM_PhysicalElement");
+	string res2 = "(No IMEI in PC so showing SerialNumber)";
+	string res = res1 + res2;
+	return res;
+	//return "Specific to Windows PC: No IMEI number";
 }
 
-string Device::model(string deviceName)
+string Device::model(string devicemodel)
 {
-	return "model";
+    string res = Utils::WmiParam(L"Model", "SELECT * FROM CIM_PhysicalElement");
+	return res;
+	//return "model";
 }
 
-string Device::vendor(string deviceName)
+string Device::version(string deviceversion)
 {
-	return "vendor";
+	string res = Utils::WmiParam(L"Version", "SELECT * FROM CIM_PhysicalElement");
+	return res;
+	//return "version";
 }
 
-string Device::version(string deviceName)
+string Device::vendor(string devicevendor)
 {
-	return "version";
+    string res = Utils::WmiParam(L"Manufacturer", "SELECT * FROM CIM_PhysicalElement");
+	return res;
+	//return "vendor";
 }
-
