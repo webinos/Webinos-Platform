@@ -114,16 +114,17 @@ var Pzh_RPC = function(_parent) {
   this.syncStart = function(_pzpId) {
     var policy, policyPath, list, result, myKey, msg;
     policyPath= path.join(_parent.config.metaData.webinosRoot, "policies","policy.xml");
-    policy = sync.parseXMLFile(policyPath);
-    list = {trustedList: _parent.config.trustedList, _crl: _parent.config.crl, cert: _parent.config.cert.external, policy: policy};
-    result = sync.getFileHash(list);
+    sync.parseXMLFile(policyPath, function(value) {
+        list = {trustedList: _parent.config.trustedList, crl: _parent.config.crl, cert: _parent.config.cert.external, policy: value};
+        result = sync.getFileHash(list);
 
-    for (myKey in _parent.pzh_state.connectedPzp) {
-      if (_parent.pzh_state.connectedPzp.hasOwnProperty(myKey)) { // Sync with everyone.
-        msg = _parent.prepMsg(_parent.pzh_state.sessionId, myKey, "sync_hash", result);
-        _parent.sendMessage(msg, myKey);
-      }
-    }
+        for (myKey in _parent.pzh_state.connectedPzp) {
+          if (_parent.pzh_state.connectedPzp.hasOwnProperty(myKey)) { // Sync with everyone.
+            msg = _parent.prepMsg(_parent.pzh_state.sessionId, myKey, "sync_hash", result);
+            _parent.sendMessage(msg, myKey);
+          }
+        }
+    });
   };
 
   this.syncUpdateHash = function(_pzpId, rcvdMsg) {
