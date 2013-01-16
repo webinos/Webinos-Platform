@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="./jquery-1.8.2.min.js"></script>
+  <script type="text/javascript" src="./webinos.js"></script>
+  <script type="text/javascript">
+    $('#serviceList').empty ();
+    $(document).ready (function () {
+      function printInfo (data) {
+        $('#message').append ('<li>' + data.payload.message + '</li>');
+      }
+      webinos.session.addListener ('info', printInfo);
+      jQuery("#btnFind").click(findService);
+      jQuery("#btnBind").click(bindService);
+      jQuery("#btnGetLocalFolders").click(getLocalFolders);
+      jQuery("#btnFindItems").click(findItemInFolders);
+      jQuery("#btnDisplayContents").click(displayMedia)
+      jQuery('#btnDisplayAllPictures').click(displayAllPictures);
+    });
+
+    var mediaContentService = null;
+    var mediaContentServices =[];
+    var mediaContent = null;
+
+    function findService() {
+      "use strict";
+      webinos.discovery.findServices(new ServiceType ('http://webinos.org/api/mediacontent'), {onFound:function (service) {
+        $('#serviceList').append ($ ('<option>' + service.serviceAddress + '</option>'));
+        mediaContentServices[service.serviceAddress] = service;
+        document.getElementById('position').innerHTML = "MediaContent service found";
+      }});
+    }
+
+    function bindService() {
+      "use strict";
+      mediaContentService = mediaContentServices[$ ('#serviceList option:selected').val ()];
+      mediaContentService.bindService ({onBind:function (service) {
+        document.getElementById('position').innerHTML = "Bound MediaContent service";
+      }});
+    }
+
+    function handle_errors() {
+    }
+
+    function folderDetails(folderDetails) {
+      "use strict";
+      var i;
+      document.getElementById('displayDetails').innerHTML = "";
+      var folderData = "<table border=2 cellpadding='2' cellspacing='2'>";
+      folderData += "<tr><th>ID</th><th>Path</th><th>Name</th><th>Type</th><th>Date</th></tr>";
+      for (i = 0; i < folderDetails.length; i = i + 1) {
+        folderData += "<tr><td>" + folderDetails[i].id + "</td>";
+        folderData += "<td>" + folderDetails[i].folderURI + "</td>";
+        folderData += "<td>" + folderDetails[i].title + "</td>";
+        folderData += "<td>" + folderDetails[i].storageType + "</td>";
+        folderData += "<td>" + folderDetails[i].modifiedDate + "</td></tr>";
+      }
+      folderData += "</table>";
+      document.getElementById('displayDetails').innerHTML = folderData;
+    }
+
+    function itemDetails(folderDetails) {
+      "use strict";
+      var i;
+      document.getElementById('displayDetails').innerHTML = "";
+      var folderData = "<table border=2 cellpadding='2' cellspacing='2'><tr>";
+      folderData += "<th>Title</th><th>Path</th><th>Type</th><th>Size</th><th>Date</th>";
+      folderData += "<th>Album</th><th>Artists</th><th>Duration</th><th>Width</th><th>Height</th>";
+      folderData += "<th>TrackNumber</th><th>BitRate</th>";
+      folderData += "</tr>";
+      for (i = 0; i < folderDetails.length; i = i + 1) {
+        /*if (folderDetails[i].type === "Image") { folderData += "<tr>"+createObjectURL(folderDetails[i])+"</tr>";}*/
+        folderData += "<tr> <td>" + folderDetails[i].title + "</td>";
+        folderData += "<td>" + folderDetails[i].itemURI + "</td>";
+        folderData += "<td>" + folderDetails[i].type + " ("+ folderDetails[i].mimeType + ")</td>";
+        folderData += "<td>" + folderDetails[i].size + "</td>";
+        folderData += "<td>" + folderDetails[i].modifiedDate + "</td>";
+        if (folderDetails[i].type === "Video") {
+          folderData += "<td>" + folderDetails[i].album + "</td>";
+          folderData += "<td>" + folderDetails[i].artists + "</td>";
+          folderData += "<td>" + folderDetails[i].duration + "</td>";
+          folderData += "<td>" + folderDetails[i].width + "</td>";
+          folderData += "<td>" + folderDetails[i].height + "</td>";
+        }
+        else if (folderDetails[i].type === "Audio") {
+          folderData += "<td>" + folderDetails[i].album + "</td>";
+          folderData += "<td>" + folderDetails[i].artists + "</td>";
+          folderData += "<td>" + folderDetails[i].duration + "</td>";
+          folderData += "<td></td><td></td>";
+          folderData += "<td>" + folderDetails[i].trackNumber + "</td>";
+          folderData += "<td>" + folderDetails[i].bitrate + "</td>";
+        }
+        else if (folderDetails[i].type === "Image") {
+          folderData += "<td></td><td></td><td></td>";
+          folderData += "<td>" + folderDetails[i].width + "</td>";
+          folderData += "<td>" + folderDetails[i].height + "</td>";
+          folderData += "<td></td><td></td>";
+        }
+        folderData += "</tr>";
+      }
+      folderData += "</table>";
+      document.getElementById('displayDetails').innerHTML = folderData;
+    }
+
+      function getLocalFolders() {
+      if(mediaContentService) {
+        mediaContentService.getLocalFolders(folderDetails, handle_errors);
+      }
+    }
+
+    function findItemInFolders() {
+      if(mediaContentService) {
+        var params = {};
+        if ($('#txtFolderId').val() !== "") {
+          params.folderId = $('#txtFolderId').val();
+        }
+        if ($('#txtOffset').val() !== "") {
+          params.offset = $('#txtOffset').val();
+        }
+        if ($('#txtCount').val() !== "") {
+          params.count = $('#txtCount').val();
+        }
+        mediaContentService.findItem(itemDetails, handle_errors, params);
+      }
+    }
+
+    function displayMedia() {
+      if(mediaContentService) {
+        var params = {};
+        if ($('#txtFileName').val() !== "") {
+          params.fileName = $('#txtFileName').val();
+        }
+        document.getElementById('displayDetails').innerHTML = "";
+        mediaContentService.getContents(function(contents) {
+          if (contents.contents) {
+            var ext = params.fileName.substr(params.fileName.lastIndexOf(".")), type;
+            type = ext.substr(1, ext.length);
+            console.log(type)
+            if (ext === ".gif" || ext === ".jpg" || ext === ".png" || ext === ".svg") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<img src='data:image/"+type+";base64,"+contents.contents+"'/>" ;
+            } else if (ext === ".mp3" || ext === ".ogg") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<audio controls src='data:audio/"+type+";base64,"+contents.contents+"'/>" ;
+            } else if (ext === ".wav" || ext === ".mp4") {
+              document.getElementById('displayDetails').innerHTML +=
+                      "<video source src='data:video/"+type+";base64,"+contents.contents+"'/>" ;
+
+            }
+          }
+        }, handle_errors, params);
+      }
+    }
+
+    function displayAllPictures() {
+      if(mediaContentService) {
+        mediaContentService.getLocalFolders(function(folderDetails) {
+          var i;
+          for (i = 0 ; i < folderDetails.length; i = i + 1) {
+            if (folderDetails[i].title === "Pictures" || folderDetails[i].title === "My Pictures") {
+              var params = {};
+              params.folderId = folderDetails[i].id;
+              mediaContentService.findItem(function(folderDetails) {
+                for (var i = 0; i < folderDetails.length; i = i + 1) {
+                  params = {};
+                  params.fileName = folderDetails[i].title;
+                  document.getElementById('displayDetails').innerHTML = "";
+                  mediaContentService.getContents(function(contents) {
+                    if (contents.contents) {
+                      document.getElementById('displayDetails').innerHTML +=
+                              "<img src='data:image/png;base64,"+contents.contents+"'/>" ;
+                    }
+                  }, handle_errors, params);
+                }
+              }, handle_errors, params);
+            }
+          }
+        }, handle_errors);
+      }
+    }
+  </script>
+</head>
+<body>
+
+<div style="background-color:#b0c4de; border:1px solid black; color:#f0f8ff;"><p>
+  PZH PZP LIST :
+  <select id="serviceList">
+    <option></option>
+  </select>
+  </p>
+
+  <p>
+  <button id="btnFind">Find MediaContent Service</button>
+  <button id="btnBind">Bind MediaContent Service</button>
+  </p>
+</div>
+<div style="background-color:#191970; border:1px solid black; color:#f0f8ff;">
+  <p> Display folders   <button id="btnGetLocalFolders"> Get Local Folder</button></p>
+  <p> Find contents in folders:
+    <label> FolderID </label> <input type="text" id="txtFolderId"/>
+    <label> Offset   </label> <input type="text" id="txtOffset"/>
+    <label> Count    </label> <input type="text" id="txtCount"/>
+    <button id="btnFindItems"> FindContents in Folder</button>
+  </p>
+  <p> Find contents in folders:
+    <label> Enter Valid FileName </label> <input type="text" id="txtFileName"/>
+    <button id="btnDisplayContents"> DisplayContents </button>
+  </p>
+  <p> <button id="btnDisplayAllPictures"> Display All Pictures </button> </p>
+</div>
+<p><div id="position"></div></p>
+<p><div id="displayDetails"></div></p>
+
+</body>
+</html>
