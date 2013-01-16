@@ -1,9 +1,17 @@
-// The file webinos.servicedisco.js is modified by Wei Guo 11-01-2013
-// -- FindCallBack onError TimeoutError functionality
-// -- FindCallBack onError SecurityError functionality
-
+// Webinos-Platform/webinos/core/wrt/lib/webinos.servicedisco.js
+// Maintenance records:
+// These inline comments should be incorporated in release notes and removed
+// from here when releasing new versions.
+//
+// Modified by Wei Guo 16-01-2013
+// Modification implements
+// -- Interface FindCallBack
+//      void onError(DOMError error)
+// -- Interface PendingOperation
+//      void cancel()
+//
 (function() {
-    var isOnNode = function() {
+    var isOnNode = function () {
         return typeof module === "object" ? true : false;
     };
 
@@ -11,23 +19,35 @@
     var ServiceDiscovery = function (rpcHandler) {
         this.rpcHandler = rpcHandler;
         this.registeredServices = 0;
-        
-        this._timeout = false;
         this._found = false;
-
+        this._pending = false;
+        this._errorCallback = null;
         this._webinosReady = false;
+
+        /**
+         * Interface PendingOperation
+         * Cancel the pending discovery. Returns AbortError.
+         */
+        this.cancel = function () {
+            if (this._pending) {
+                this._pending = false;
+                if (typeof this._errorCallback === 'function') {
+                    this._errorCallback('AbortError');
+                }
+            }
+        };
 
         if (isOnNode()) {
             return;
         }
         
         // further code only runs in the browser
-
+       
         var that = this;
         webinos.session.addListener('registeredBrowser', function () {
             that._webinosReady = true;
             finishCallers();
-        });
+        });        
     };
 
     /**
@@ -42,7 +62,7 @@
 
     var callerCache = [];
 
-    var finishCallers = function() {
+    var finishCallers = function () {
         for (var i = 0; i < callerCache.length; i++) {
             var caller = callerCache[i];
             webinos.discovery.findServices(
@@ -56,23 +76,25 @@
     };
 
     ServiceDiscovery.prototype.findServices = function (serviceType, callback, options, filter) {
-    	// The prototype of ServiceDiscovery. Used when common functionalities
-    	// of the prototype are needed, i.e. rpcHandler, in function success().
         var that = this;
+        
+        this._pending = true;   // Discovery starts.
+        
+        if (callback && typeof callback.onError === 'function') {
+            this._errorCallback = callback.onError;
+        }
 
         if (!isOnNode() && !this._webinosReady) {
-            callerCache.push(
-            		{
-            			serviceType: serviceType,
-            			callback:    callback,
-            			options:     options,
-            			filter:      filter
-            		}
-            );
+            callerCache.push({
+            	serviceType: serviceType,
+            	callback:    callback,
+            	options:     options,
+            	filter:      filter
+            });
             return;
         }
 
-        // pure local services..
+        // Pure local services.
         if (serviceType == "BlobBuilder") {
             var tmp = new BlobBuilder();
             this.registeredServices++;
@@ -169,18 +191,18 @@
         // The core of findService.
         rpc.onservicefound = function (params) {
             // params is the parameters needed by the API method.
-        	if (!this._timeout) {
-        		success(params);
-        	}
+            if (that._pending) {
+                success(params);
+            }
         };
         
         // Refer to the call in
         // Webinos-Platform/webinos/core/api/servicedisco/lib/rpc_servicediso.js.
         // Wei Guo 11-01-2013
         rpc.onSecurityError = function (params) {
-        	if (typeof callback.onError === 'function') {
-        		callback.onError('SecurityError');
-        	}
+            if (that._pending && typeof callback.onError === 'function') {
+                callback.onError('SecurityError');
+            }
         };
         
         this.rpcHandler.registerCallbackObject(rpc);
@@ -202,12 +224,14 @@
         // Set timeout in WRT.
 		setTimeout(
 			function () {
-				this._timeout = true;
-				
-				// If no results return TimeoutError.
-				if (!this._found && typeof callback.onError === 'function') {
-					callback.onError('TimeoutError');
-				}
+                if (that._pending) {
+                    that._pending = false;  // Discovery finishes.
+    				
+    				// If no results return TimeoutError.
+    				if (!that._found && typeof callback.onError === 'function') {
+    					callback.onError('TimeoutError');
+    			    }
+			    }
 			},
 			options && typeof options.timeout !== 'undefined' ? options.timeout : 120000
 			// Default: 120 secs
@@ -217,13 +241,11 @@
     }; // ServiceDiscovery.prototype.findServices function ends.
     // It should return an array of found services.
     // It provides the FindCallBack of onFound, onError, and onLost.
-    // onError:
-    //		TimeoutError is implemented.
-    // 		SecurityError is implemented.
-    //		AbortError is not implemented: need to implement Cancel first.
+    // onError is implemented.
     // onLost is not implemented.
 
-    var DiscoveryError = function(code, message) {
+    // TODO Decide how to deal with it.
+    var DiscoveryError = function (code, message) {
         this.code = code;
         this.message = message;
     };
@@ -231,7 +253,7 @@
     DiscoveryError.prototype.FIND_SERVICE_TIMEOUT = 102;
     DiscoveryError.prototype.PERMISSION_DENIED_ERROR = 103;
 
-    ///////////////////// WEBINOS SERVICE INTERFACE ///////////////////////////////
+    ///////////////////// WEBINOS SERVICE INTERFACE ///////////////////////////
 
     // TODO decide what to do with this class.
     WebinosService = function (obj) {
