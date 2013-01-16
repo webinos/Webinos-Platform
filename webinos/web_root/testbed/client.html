@@ -166,6 +166,12 @@
         var right = that.css("right");
         that.css("right",(right==="0px")?"":"0px");
       });
+      $('#apitests').click(function() {
+        setPage("apitests", "../tests/api_tests/apitests.html");
+      });
+      $('#widgettests').click(function() {
+        setPage("widgettests", "../tests/widget_tests/Overview.html");
+      });
       $('#friendlyName').click(function() {
         setPage("Add FriendlyName", "friendlyName.html");
       });
@@ -268,6 +274,11 @@
         <li> <a href="#vehicle" id="vehicle">  Vehicle API </a> </li>
         <li> <a href="#mediaContent" id="mediaContent">  Media Content API </a> </li>
       </ul>
+      <h3> Monitor Tests </h3>
+      <ul class="toggle" style="">
+        <li><a href="#apitests" id="apitests"> API Jasmine Tests </a></li>
+        <li><a href="#widgettests" id="widgettests"> Widget Tests </a></li>
+       </ul>
       <h3> PZP Details</h3>
       <ul class="toggle" style="">
         <li><a href="#friendlyName" id="friendlyName"> PZP Friendly Name </a></li>
