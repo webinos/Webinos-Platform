@@ -17,28 +17,46 @@
 *******************************************************************************/
 
 var pzp   = require("./webinos/core/pzp/lib/pzp");
-__EnablePolicyEditor = false;
+var __EnablePolicyEditor = false;
 
 var argv = require('optimist')
     .usage('Starts webinos PZP \nUsage: $0')
-    .describe({"pzhHost": "set the ip-address of the pzh provider",
-        "pzhName": "sets The email id of the pzh you intend to connect",
-        "friendlyName": "sets the name assigned to the PZP such as PC/Mobile/TV",
-        "forcedDeviceName": "Forced PZP device name that you assign instead of the default PZP name",
-        "widgetServer": "starts widget server",
-        "policyEditor": "starts policy editor server",
-        "signedWidgetOnly": "only allow signed widgets",
-        "enforceWidgetCSP": "enforce content security policy on the widgets",
-        "help": "to get this help menu"})
-    .default ({'pzhHost': "0.0.0.0",
-            'pzhName': "",
-            'friendlyName': "",
-            'forcedDeviceName':"",
-            'widgetServer':false,
-            'policyEditor':false,
-            'signedWidgetOnly':false,
-            'enforceWidgetCSP':false,
-            'help': false})
+    .options({
+    "pzhHost": {
+        describe: "set the ip-address of the pzh provider",
+        default: "0.0.0.0"
+    },
+    "pzhName": {
+        describe: "sets The email id of the pzh you intend to connect",
+        default: ""
+    },
+    "friendlyName": {
+        describe: "sets the name assigned to the PZP such as PC/Mobile/TV",
+        default: ""
+    },
+    "forcedDeviceName": {
+        describe: "Forced PZP device name that you assign instead of the default PZP name",
+        default: ""
+    },
+    "widgetServer": {
+        describe: "starts widget server",
+        default: false
+    },
+    "policyEditor": {
+        describe: "starts policy editor server",
+        default: false
+    },
+    "signedWidgetOnly": {
+        describe: "only allow signed widgets",
+        default: false
+    },
+    "enforceWidgetCSP": {
+        describe: "enforce content security policy on the widgets",
+        default: false
+    },
+    "help": {
+        describe: "to get this help menu"
+    }})
     .argv;
 
 if(argv.help) {
@@ -77,9 +95,11 @@ require("fs").readFile(require("path").join(__dirname, "config-pzp.json"), funct
     var config = {};
     if (!err) {
       config = JSON.parse(data);
-    } else {
-      config = argv;
     }
+
+    // overwrite config file options with cli options
+    config = require('./webinos/core/util/lib/helpers').extend(config, argv);
+
     if (config.pzhName !== "") {
       config.hostname = config.pzhHost+'/'+config.pzhName;
     } else {
