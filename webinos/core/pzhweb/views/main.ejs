@@ -57,7 +57,7 @@
       text += "<p></p> <p> or Enter Details Manually</p>"
     }
     text += "<input type='text' id='connectPzhId' value=''/>";
-    text += "<input type='button' onclick='connectPzh()' value='Connect Pzh'/>";
+    text += "<input type='button' onclick='connectPzh_manual()' value='Connect Pzh'/>";
     text += "<p>The address should be of of form hostname/email eg: pzh.webinos.org/bob@gmail.com</p>";
 
     setArticle("Connect to another personal zone",text);
@@ -67,6 +67,14 @@
     var id = e.options[e.selectedIndex].value;
     id = id.split("_");
     window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(id[1]) + "&externalpzh=" + encodeURIComponent(id[0]) ;
+  }
+  function connectPzh_manual() {
+    var e = document.getElementById('connectPzhId').value;
+    if (e) {
+      e = e.split("/");
+      alert(e);
+      window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(e[1]) + "&externalpzh=" + encodeURIComponent(e[0]);
+    }
   }
   function pzpRevokeResult(payload){
     setArticle("Device removed from personal zone", "<p>" + payload.payload + " device removed.</p>");
