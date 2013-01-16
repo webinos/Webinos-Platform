@@ -36,7 +36,7 @@
 
                 var config = {};
                 // the namespace is an URN which uniquely defines the channel in the personal zone
-                config.namespace = "urn:org-webinos:example";
+                config.namespace = $("#txtNamespace").val();
                 config.properties = properties;
                 // we can attach application-specific information to the channel
                 config.appInfo = {};
@@ -82,12 +82,26 @@
                 );
             });
 
-            $("#btnClientConnectToChannel").click(function() {
-                if (typeof creatorChannelProxy === "undefined") {
-                    alert("First create a channel using Application A.");
+            $("#btnClientSendMessage").click(function() {
+                if (typeof clientChannelProxy === "undefined") {
+                    alert("You first have to connect to the channel.");
                     return;
                 }
 
+                // send message to all connected clients (in our example this is only one)
+                clientChannelProxy.send(
+                        "client.ping",
+                        // callback invoked when the message is accepted for processing
+                        function(success) {
+                            // ok, but no action needed in our example
+                        },
+                        function(error) {
+                            alert("Could not send message: " + error.message);
+                        }
+                );
+            });
+
+            $("#btnClientConnectToChannel").click(function() {
                 if (typeof clientChannelProxy !== "undefined") {
                     alert("Already connected to the channel.");
                     return;
@@ -96,7 +110,7 @@
                 app2app.searchForChannels(
                         // the namespace to search for (can include a wildcard "*" instead of "example"
                         // to search for all channels with prefix "org-webinos")
-                        "urn:org-webinos:example",
+                        $("#txtNamespace").val(),
                         // no other zones need to be searched, only its own personal zone
                         [],
                         // callback invoked on each channel found, we expect it to be called at most once
@@ -166,10 +180,12 @@
                 To be able to send messages first a channel has to be created. The creator of the channel
                 sets its configuration,  determines who is allowed to connect to the channel, and can close
                 the channel.
-                Here we create a channel with namespace <code>urn:org-webinos:example</code>, which is
+                Here we create a channel with namespace <code>urn:org-webinos:example</code> (can be changed in the
+                text field, should be a valid URN), which is
                 enforced to be unique in the personal zone. The channel we use here is configured to allow
                 both sending and receiving from all connected clients.
             </p>
+            <label for="txtNamespace">Namespace</label><input type="text" id="txtNamespace" value="urn:webinos-org:example">
             <button type="button" id="btnCreatorCreateChannel">Create channel</button>
             <p>
                 After creating a channel, other applications can find it and request to connect to it.
@@ -185,6 +201,7 @@
                 respond with a "pong" message on each received message (after the connect succeeded).
             </p>
             <button type="button" id="btnClientConnectToChannel">Connect to channel</button>
+            <button type="button" id="btnClientSendMessage">Send message</button>
 
         </div>
     </article>

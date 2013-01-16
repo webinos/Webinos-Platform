@@ -34,7 +34,7 @@
 
   App2AppModule.prototype = new RPCWebinosService();
 
-  var CHANNEL_NAMESPACE_REGEXP = /^(urn:[a-z0-9][a-z0-9-]{0,31}:)([a-z0-9()+,\-.:=@;$_!*'%/?#]+)$/i;
+  var CHANNEL_NAMESPACE_REGEXP = /^(urn:[a-z0-9][a-z0-9\-]{0,31}:)([a-z0-9()+,\-.:=@;$_!*'%/?#]+)$/i;
   var CHANNEL_NAMESPACE_WILDCARD = "*";
 
   var MODE_SEND_RECEIVE = "send-receive";
@@ -67,7 +67,8 @@
       if (registeredPeers.hasOwnProperty(peerId)) {
         console.log("Unregister peer with id " + peerId);
 
-        Object.keys(registeredChannels).forEach(function(channel) {
+        Object.keys(registeredChannels).forEach(function(namespace) {
+          var channel = registeredChannels[namespace];
           if (channel.creator.peerId === peerId) {
             // remove all channels where the creator runs on the peer to unregister
             delete registeredChannels[channel.namespace];
@@ -195,7 +196,8 @@
       return;
     }
 
-    var peerRef = registeredPeers[connectRequest.from.peerId];
+    // send connect request to channel creator
+    var peerRef = registeredPeers[channel.creator.peerId];
 
     var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
     this.rpcHandler.executeRPC(rpc,
@@ -243,6 +245,8 @@
 
     // check if we should broadcast or unicast
     var toClients = (typeof to === "undefined" ? channel.clients : [to]);
+
+    console.log("Sending on channel " + namespace + " which has " + channel.clients.length + " connected clients (including the channel creator)");
 
     // all ok; send to connected clients
     toClients.forEach(function(toClient) {
