@@ -16,71 +16,38 @@
 *
 *******************************************************************************/
 
-var fs = require("fs"),
-    path = require("path");
-
-var options = {};
-var pzpInstance;
 var pzp   = require("./webinos/core/pzp/lib/pzp");
 __EnablePolicyEditor = false;
 
-function help() {
-  console.log("Usage: webinos_pzp [options]");
-  console.log("Options:");
-  console.log("--pzh-host=[ipaddress]   host of the pzh (default localhost)");
-  console.log("--pzh-name=[name]        name of the pzh (default \"\")");
-  console.log("--friendly-name=[name]   friendly name (currently unused)");
-  console.log("--widgetServer           start widget server");
-  console.log("--policyEditor           start policy editor server");
-  console.log("--signedWidgetOnly       only allow signed widgets");
-  console.log("--enforceWidgetCSP       enforce content security policy on widgets");
-  process.exit();
-}
+var argv = require('optimist')
+    .usage('Starts webinos PZP \nUsage: $0')
+    .describe({"pzhHost": "set the ip-address of the pzh provider",
+        "pzhName": "sets The email id of the pzh you intend to connect",
+        "friendlyName": "sets the name assigned to the PZP such as PC/Mobile/TV",
+        "forcedDeviceName": "Forced PZP device name that you assign instead of the default PZP name",
+        "widgetServer": "starts widget server",
+        "policyEditor": "starts policy editor server",
+        "signedWidgetOnly": "only allow signed widgets",
+        "enforceWidgetCSP": "enforce content security policy on the widgets",
+        "help": "to get this help menu"})
+    .default ({'pzhHost': "0.0.0.0",
+            'pzhName': "",
+            'friendlyName': "",
+            'forcedDeviceName':"",
+            'widgetServer':false,
+            'policyEditor':false,
+            'signedWidgetOnly':false,
+            'enforceWidgetCSP':false,
+            'help': false})
+    .argv;
 
-process.argv.forEach(function (arg) {
-  var parts;
-  if (arg.indexOf("--") > -1) {
-    parts = arg.split("=");
-    if (parts.length > 1) {
-      switch (parts[0]) {
-      case "--pzh-host":
-        options.pzhHost = parts[1];
-        break;
-      case "--pzh-name":
-        options.pzhName = parts[1];
-        break;
-      case "--friendly-name":
-        options.friendlyName = parts[1];
-        break;
-      case "--force-device-name":
-        options.forcedDeviceName = parts[1];
-        break;
-      default:
-        console.log("unknown option: " + parts[0]);
-        break;
-      }
-    }
-    else {
-      switch (parts[0]) {
-        case "--help":
-          help();
-          break;
-        case "--widgetServer":
-          options.startWidgetServer = true;
-          break;
-        case "--signedWidgetOnly":
-          options.signedWidgetOnly = true;
-          break;
-        case "--enforceWidgetCSP":
-          options.enforceWidgetCSP = true;
-          break;
-        case "--policyEditor":
-          __EnablePolicyEditor = true;
-          break;
-      }
-    }
-  }
-});
+if(argv.help) {
+    require('optimist').showHelp();
+    process.exit();
+}
+if(argv.policyEditor) {
+    __EnablePolicyEditor = true;
+}
 
 var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } },
   pzpModules = [
@@ -106,36 +73,12 @@ var fileParams = { getPath: function() { return pzp.session.getWebinosPath(); } 
   {name: "mediacontent", params: {}}
 ];
 
-fs.readFile(path.join(__dirname, "config-pzp.json"), function(err, data) {
-    var config;
-
-    if (err) {
-      config = {};
-    }
-    else {
+require("fs").readFile(require("path").join(__dirname, "config-pzp.json"), function(err, data) {
+    var config = {};
+    if (!err) {
       config = JSON.parse(data);
-    }
-
-    if (!config.pzhHost) {
-      config.pzhHost = "localhost";
-    }
-    if (!config.pzhName) {
-      config.pzhName = "";
-    }
-    if (!config.friendlyName) {
-      config.friendlyName = "";
-    }
-    if (options.pzhHost) {
-      config.pzhHost = options.pzhHost;
-    }
-    if (options.pzhName) {
-      config.pzhName = options.pzhName;
-    }
-    if (options.friendlyName) {
-      config.friendlyName = options.friendlyName;
-    }
-    if (options.forcedDeviceName) {
-      config.forcedDeviceName = options.forcedDeviceName;
+    } else {
+      config = argv;
     }
     if (config.pzhName !== "") {
       config.hostname = config.pzhHost+'/'+config.pzhName;
@@ -150,14 +93,16 @@ function initializeWidgetServer() {
   var wrt = require("./webinos/core/manager/widget_manager/lib/ui/widgetServer");
   if (typeof wrt !== "undefined") {
     // Attempt to start the widget server.
-    wrt.start(options.signedWidgetOnly, options.enforceWidgetCSP, pzp.session.getWebinosPorts().pzp_webSocket, function (msg, wrtPort) {
+    wrt.start(argv.signedWidgetOnly, argv.enforceWidgetCSP, pzp.session.getWebinosPorts().pzp_webSocket,
+    function (msg, wrtPort) {
       if (msg === "startedWRT") {
         // Write the websocket and widget server ports to file so the renderer can pick them up.
         var wrtConfig = {};
         wrtConfig.runtimeWebServerPort = wrtPort;
         wrtConfig.pzpWebSocketPort = pzp.session.getWebinosPorts().pzp_webSocket;
         wrtConfig.pzpPath = pzp.session.getWebinosPath();
-        fs.writeFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_runtime.json')), JSON.stringify(wrtConfig, null, ' '), function (err) {
+        require("fs").writeFile((require("path").join(pzp.session.getWebinosPath(),'../wrt/webinos_runtime.json')),
+            JSON.stringify(wrtConfig, null, ' '), function (err) {
           if (err) {
             console.log('error saving runtime configuration file: ' + err);
           } else {
@@ -174,7 +119,7 @@ function initializeWidgetServer() {
 function initializePzp(config, pzpModules) {
   pzp.session.initializePzp(config, pzpModules, function(status, result) {
     if (status) {
-      if (options.startWidgetServer)
+      if (argv.startWidgetServer)
         initializeWidgetServer();
     } else {
       console.log("unsuccessful in starting PZP" + result);
