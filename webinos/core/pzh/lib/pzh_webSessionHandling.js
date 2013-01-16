@@ -74,9 +74,9 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
         var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh);
         for (i = 0; i < list.length; i = i + 1) {
             if (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i])) {
-                pzhs.push ({id:list[i], url:list[i], isConnected:true});
+                pzhs.push ({id:list[i].split("_")[1], url:list[i], isConnected:true});
             } else {
-                pzhs.push ({id:list[i], url:list[i], isConnected:false});
+                pzhs.push ({id:list[i].split("_")[1], url:list[i], isConnected:false});
             }
         }
         pzhs.push ({id:_instance.config.userData.email[0].value + " (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
@@ -211,13 +211,14 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
     // Connecting PZH stores certificates retrieved from another PZH
     function storeExternalCert (conn, obj, userObj) {
         logger.log (obj.user.displayName + " is now expecting external connection from " + obj.message.externalEmail);
-        if (!userObj.config.cert.external.hasOwnProperty (obj.message.externalEmail)) {
-            var url = require ("url").parse ("https://" + obj.message.externalPzh);
-            userObj.config.cert.external[obj.message.externalEmail] = {url:"https://" + obj.message.externalPzh + "/main/" + obj.message.externalEmail + "/",
-                host                                                      :url.hostname,
-                port                                                      :url.port ? url.port : 443,
-                externalCerts                                             :obj.message.externalCerts.server,
-                externalCrl                                               :obj.message.externalCerts.crl
+        var url = require ("url").parse ("https://" + obj.message.externalPzh);
+        if (!userObj.config.cert.external.hasOwnProperty (url.hostname+"_"+obj.message.externalEmail)) {
+            userObj.config.cert.external[url.hostname+"_"+obj.message.externalEmail] = {
+                url:"https://" + obj.message.externalPzh + "/main/" + obj.message.externalEmail + "/",
+                host:url.hostname,
+                port:url.port ? url.port : 443,
+                externalCerts:obj.message.externalCerts.server,
+                externalCrl:obj.message.externalCerts.crl
             };
             userObj.config.storeCertificate (userObj.config.cert.external, "external");
             userObj.setConnParam (function (status, certificateParam) {// refresh your own certs
@@ -226,8 +227,8 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
                 }
             });
         }
-        if (!userObj.config.trustedList.pzh.hasOwnProperty (obj.message.externalEmail)) {
-            userObj.config.trustedList.pzh[obj.message.externalEmail] = {};
+        if (!userObj.config.trustedList.pzh.hasOwnProperty (url.hostname+"_"+obj.message.externalEmail)) {
+            userObj.config.trustedList.pzh[url.hostname+"_"+obj.message.externalEmail] = {};
             userObj.config.storeTrustedList (userObj.config.trustedList);
         }
         sendMsg (conn, obj.user, true);
@@ -243,11 +244,12 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
             obj.user + "'s zone");
 
         var url = require ("url").parse (obj.message.externalPzh.externalPZHUrl);
-        userObj.config.untrustedCert[obj.message.externalUser.email] = {host:url.hostname,
-            port                                                            :url.port ? url.port : 443,
-            url                                                             :obj.message.externalPzh.externalPZHUrl,
-            externalCerts                                                   :obj.message.externalPzh.pzhCerts.server,
-            externalCrl                                                     :obj.message.externalPzh.pzhCerts.crl };
+        userObj.config.untrustedCert[obj.message.externalUser.email] = {
+            host:url.hostname,
+            port:url.port ? url.port : 443,
+            url:obj.message.externalPzh.externalPZHUrl,
+            externalCerts: obj.message.externalPzh.pzhCerts.server,
+            externalCrl: obj.message.externalPzh.pzhCerts.crl };
         userObj.config.storeUntrustedCert (userObj.config.untrustedCert);
         sendMsg (conn, obj.user, true);
     }
@@ -264,7 +266,6 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
             }
             return list;
         }
-
         sendMsg (conn, obj.user, userList ());
     }
 
@@ -285,18 +286,19 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
         if (userObj.config.untrustedCert.hasOwnProperty (obj.message.externalEmail)) {
             logger.log ("Approving friend request for " + obj.message.externalEmail + " by " + obj.user.emails[0].value);
             // Store Certificates
-            if (!userObj.config.cert.external.hasOwnProperty (obj.message.externalEmail)) {
-                userObj.config.cert.external[obj.message.externalEmail] = userObj.config.untrustedCert[obj.message.externalEmail];
+            var details = userObj.config.untrustedCert[obj.message.externalEmail];
+            if (!userObj.config.cert.external.hasOwnProperty (details.host+"_"+obj.message.externalEmail)) {
+                userObj.config.cert.external[details.host+"_"+obj.message.externalEmail] = details;
                 userObj.config.storeCertificate (userObj.config.cert.external, "external");
                 userObj.setConnParam (function (status, certificateParam) {
                     if (status) {
                         refreshPzh (hostname + "_" + userObj.config.userData.email[0].value, certificateParam);
-                        userObj.pzh_pzh.connectOtherPZH (obj.message.externalEmail, certificateParam);
+                        userObj.pzh_pzh.connectOtherPZH (details.host+"_"+obj.message.externalEmail, certificateParam);
                     }
                 });
             }
-            if (!userObj.config.trustedList.pzh.hasOwnProperty (obj.message.externalEmail)) {
-                userObj.config.trustedList.pzh[obj.message.externalEmail] = {};
+            if (!userObj.config.trustedList.pzh.hasOwnProperty(details.host+"_"+obj.message.externalEmail)) {
+                userObj.config.trustedList.pzh[details.host+"_"+obj.message.externalEmail] = {};
                 userObj.config.storeTrustedList (userObj.config.trustedList);
             }
             delete userObj.config.untrustedCert[obj.message.externalEmail];

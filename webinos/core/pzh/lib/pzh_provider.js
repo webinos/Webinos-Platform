@@ -139,8 +139,8 @@ var Provider = function (_hostname, _friendlyName) {
     function getAllPzhList (userId, userObj) {
         var myKey, list = [];
         for (myKey in config.trustedList.pzh) {
-            if (config.trustedList.pzh.hasOwnProperty (myKey) && myKey !== userId
-                && !userObj.config.trustedList.pzh.hasOwnProperty (myKey.split ("_")[1])) {
+            if (config.trustedList.pzh.hasOwnProperty(myKey) && myKey !== userId
+                && !userObj.config.trustedList.pzh.hasOwnProperty (myKey)) {
                 list.push ({url:myKey,
                     username   :pzhs[myKey].config.userData.name,
                     email      :pzhs[myKey].config.userData.email[0].value });

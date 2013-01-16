@@ -80,18 +80,20 @@ var Pzh = function () {
      */
     this.handlePzhAuthorization = function (_pzhId, _conn) {
         var otherPzh = [], msg, localServices;
-        if (!self.pzh_state.connectedPzh.hasOwnProperty (_pzhId)) {
-            self.pzh_state.logger.log ("pzh " + _pzhId + " connected");
-            self.pzh_state.connectedPzh[_pzhId] = {"socket":_conn, "address":_conn.socket.remoteAddress};
-            _conn.id = _pzhId;
+        if (_pzhId) {
+            if (!self.pzh_state.connectedPzh.hasOwnProperty (_pzhId)) {
+                self.pzh_state.logger.log ("pzh " + _pzhId + " connected");
+                self.pzh_state.connectedPzh[_pzhId] = {"socket":_conn, "address":_conn.socket.remoteAddress};
+                _conn.id = _pzhId;
 
-            setTimeout (function () {
-                msg = self.pzh_otherManager.messageHandler.registerSender (self.config.metaData.serverName, _pzhId);
-                self.sendMessage (msg, _pzhId);
-                self.pzh_otherManager.registerServices (_pzhId);
-            }, 3000);
-        } else {
-            self.pzh_state.logger.log ("pzh -" + _pzhId + " already connected");
+                setTimeout (function () {
+                    msg = self.pzh_otherManager.messageHandler.registerSender (self.config.metaData.serverName, _pzhId);
+                    self.sendMessage (msg, _pzhId);
+                    self.pzh_otherManager.registerServices(_pzhId);
+                }, 3000);
+            } else {
+                self.pzh_state.logger.log ("pzh -" + _pzhId + " already connected");
+            }
         }
     };
     /**
@@ -287,7 +289,7 @@ var Pzh_Pzh = function (_parent) {
     this.connect_ConnectedPzh = function (options) {
         var myKey;
         for (myKey in  _parent.config.trustedList.pzh) {
-            if (!_parent.pzh_state.connectedPzh.hasOwnProperty (myKey) && _parent.pzh_state.sessionId !== myKey) {
+            if (!_parent.pzh_state.connectedPzh.hasOwnProperty(myKey) && _parent.pzh_state.sessionId !== myKey) {
                 self.connectOtherPZH (myKey, options);
             }
         }
@@ -296,18 +298,17 @@ var Pzh_Pzh = function (_parent) {
     this.connectOtherPZH = function (_to, _options) {
         try {
             var pzhDetails = _parent.config.cert.external[_to];
-
             var connPzh;
             var tls = require ("tls"), host = pzhDetails.host;
             if (parseInt (pzhDetails.port) !== 443) {
                 host = pzhDetails.host + ":" + pzhDetails.port;
             }
-            var options = _options;
-            options.servername = host + "_" + _to;
-            options.host = pzhDetails.host;
-            options.port = 80; //parseInt(pzhDetails.port);
-            _parent.pzh_state.logger.log ("connection from " + _parent.pzh_state.sessionId + " - to " + _options.servername + " initiated");
-            connPzh = tls.connect (options, function () {
+            var connDetails = _options;
+            connDetails.servername = _to;
+            connDetails.host = pzhDetails.host;
+            connDetails.port = 80; //parseInt(pzhDetails.port);
+            _parent.pzh_state.logger.log ("connection from " + _parent.pzh_state.sessionId + " - to " + connDetails.servername + " initiated");
+            connPzh = tls.connect (connDetails, function () {
                 _parent.pzh_state.logger.log ("connection status : " + connPzh.authorized);
                 if (connPzh.authorized) {
                     _parent.pzh_state.logger.log ("connected to " + _to);

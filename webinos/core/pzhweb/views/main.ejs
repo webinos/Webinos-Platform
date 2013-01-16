@@ -22,13 +22,13 @@
       if(payload && payload.pzhs) {
         for (var i = 0 ; i < payload.pzhs.length; i += 1){
           var style = payload.pzhs[i].isConnected?"connected":"disconnected";
-          text+= "<li><a class='"+ style +"'>"+payload.pzhs[i].id + "</a></li>";
+          text+= "<li><a class='"+ style +"' title='"+payload.pzhs[i].url+"'>"+payload.pzhs[i].id + "</a></li>";
         }
         $("#enumConnectedPzh").html(text);
         text = "";
         for (i = 0 ; i < payload.pzps.length; i += 1){
           var style = payload.pzps[i].isConnected?"connected":"disconnected";
-          text+= "<li><a class='"+ style +"'>"+payload.pzps[i].id + "</a></li>";
+          text+= "<li><a class='"+ style +"' title='"+payload.pzhs[i].url+"'>"+payload.pzps[i].id + "</a></li>";
         }
         $("#enumConnectedPzp").html(text);
       }
