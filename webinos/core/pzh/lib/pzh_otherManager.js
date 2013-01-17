@@ -100,6 +100,23 @@ var Pzh_RPC = function (_parent) {
         _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
     };
 
+    function sendUpdateServiceToAllPzh(from) {
+        var localServices = self.discovery.getAllServices ();
+        for (var key in _parent.pzh_state.connectedPzh) {
+            if (key !== from && _parent.pzh_state.connectedPzh.hasOwnProperty(key)) {
+                var msg = {"type":"prop",
+                    "from":_parent.pzh_state.sessionId,
+                    "to":key,
+                    "payload":{"status":"registerServices",
+                        "message":{services:localServices,
+                            from:_parent.pzh_state.sessionId}}};
+                _parent.sendMessage (msg, key);
+                _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + key);
+            }
+        }
+
+
+    }
     this.getInitModules = function () {
         return _parent.config.serviceCache;
     };
@@ -161,6 +178,7 @@ var Pzh_RPC = function (_parent) {
                 switch (validMsgObj.payload.status) {
                     case "registerServices":
                         self.discovery.addRemoteServiceObjects (validMsgObj.payload.message);
+                        sendUpdateServiceToAllPzh(validMsgObj.from);
                         break;
                     case "findServices":
                         self.sendFoundServices (validMsgObj);
