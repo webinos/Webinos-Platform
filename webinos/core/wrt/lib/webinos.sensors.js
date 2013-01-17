@@ -59,11 +59,14 @@
 
     };
     
-    Sensor.prototype.configureSensor = function(options) {
-        var rpc = webinos.rpcHandler.createRPC(this, 'configureSensor', options);
-        
-        webinos.rpcHandler.registerCallbackObject(rpc);
-        webinos.rpcHandler.executeRPC(rpc);
+    Sensor.prototype.configureSensor = function(params, successHandler, errorHandler){
+        var rpc = webinos.rpcHandler.createRPC(this, 'configureSensor', params);
+        webinos.rpcHandler.executeRPC(rpc, function () {
+                successHandler();
+            },
+            function (error) {
+                errorHandler(error);
+            });
     };
 
     Sensor.prototype.addEventListener = function(eventType, eventHandler, capture) {
