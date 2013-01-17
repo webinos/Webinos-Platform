@@ -330,7 +330,7 @@ bool TriggersSet::evaluate(vector< map<string, string> > trig){
 				LOGD("TriggerPersonalDataAccessedForPurpose evaluation");
 				purpose_satisfied = true;
 				for(unsigned int i = 0; i<arraysize(ontology_vector); i++){
-					LOGD("Trigger purpose %d is %c for the user and %c for the applications", i, (*triggers_it)[purposeTag][i], (*it)[purposeTag][i])
+					LOGD("Trigger purpose %d is %c for the user and %c for the applications", i, (*triggers_it)[purposeTag][i], (*it)[purposeTag][i]);
 					if ((*triggers_it)[purposeTag][i] > (*it)[purposeTag][i]){
 						purpose_satisfied = false;
 						break;
