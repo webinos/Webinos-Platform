@@ -26,7 +26,7 @@ module.exports = function (app, address, port, state) {
 
     app.get ('/', ensureAuthenticated, function (req, res) {
         if (req.session.isPzp) {
-            pzhadaptor.fromWeb (req.user, {payload:{status:"authCode", address:address, port:port}}, res);
+            pzhadaptor.fromWeb (req.user, {payload:{status:"authCode", address:address, port:port, user: getUserPath (req.user)}}, res);
             req.session.isPzp = "";
         } else {
             res.redirect ('/main/' + getUserPath (req.user) + "/");
@@ -66,6 +66,18 @@ module.exports = function (app, address, port, state) {
     app.all ('/main/:useremail/certificates/', function (req, res) {
         //return a JSON object containing all the certificates.
         pzhadaptor.fromWebUnauth (req.params.useremail, {type:"getCertificates"}, res);
+    });
+
+    app.post('/main/:user/pzpEnroll', ensureAuthenticated, function(req, res) {
+        var dataSend = {
+            payload:{
+                status: "csrAuthCodeByPzp",
+                from: req.body.from,
+                csr: req.body.csr,
+                code: req.body.authCode
+            }
+        };
+        pzhadaptor.fromWeb(req.user, dataSend, res);
     });
 
     //Certificate exchange...

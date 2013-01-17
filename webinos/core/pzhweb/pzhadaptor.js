@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
+ * Copyright 2012 - 2013 University of Oxford
  * Author: Habib Virji (habib.virji@samsung.com)
  *******************************************************************************/
 var webinos = require ("find-dependencies") (__dirname),
@@ -41,7 +42,7 @@ function resultRspHandler (res) {
 function resultCbHandler (cb) {
     return {
         err    :function (err) {
-            console.log (err);
+            logger.error (err);
             cb (false);
         },
         success:function (val) {
@@ -57,8 +58,7 @@ function responseCertHandler (res) {
             res.status (500);
         },
         success:function (val) {
-            var result = val;
-            res.json (result);
+            res.json (val);
         }
     }
 }
@@ -81,44 +81,15 @@ function responseHandler (status, res) {
 function pzpResponder (user, port, address, res) {
     return {
         success:function (authCode) {
-            function pzpEnrollResponder (connection) {
-                return {
-                    success:function (payload) {
-                        logger.log (payload);
-                        connection.send (JSON.stringify (payload));
+            res.render("enroll-pzp",{address: address, port: port, authCode:authCode, user: user});
+        }
+    }
+}
 
-                    }
-                }
-            }
-
-            logger.log ("redirecting back ...............................");
-            res.redirect ("http://localhost:8080/testbed/client.html");
-            var WebSocketClient = require ('websocket').client;
-            var client = new WebSocketClient ();
-
-            client.on ('connectFailed', function (error) {
-                logger.error ("Connect Error: " + error.toString ());
-            });
-
-            client.on ('connect', function (connection) {
-                connection.on ('error', function (error) {
-                    logger.error ("Connection Error: " + error.toString ());
-                });
-                connection.on ('close', function () {
-                    logger.log ("PZP Connection Closed");
-                });
-                connection.on ('message', function (message) {
-                    var data = JSON.parse (message.utf8Data);
-                    if (data.payload && data.payload.status === "csrAuthCodeByPzp") {
-                        pzhTLS.send (user, {type:data.payload.status, from:data.from, csr:data.payload.csr,
-                            code                :data.payload.authCode}, pzpEnrollResponder (connection));
-                    }
-                });
-                connection.send (JSON.stringify ({type:"prop", payload:{status:"authCodeByPzh", authCode:authCode, providerDetails:((port !== 443) ? (address + ":" + port) : address)}}));
-            });
-
-            client.connect ("ws://localhost:8080/");
-
+function pzpEnrollment(res) {
+    return {
+        success: function(result) {
+            res.json(result);
         }
     }
 }
@@ -229,13 +200,16 @@ function manageStatus (payload, user, res) {
             pzhTLS.send (user, {type:"unregisterService", at:payload.at, svId:payload.svId, svAPI:payload.svAPI }, responseHandler (payload.status, res));
             break;
         case 'authCode':
-            pzhTLS.send (user, {type:"authCode"}, pzpResponder (user, payload.port, payload.address, res));
+            pzhTLS.send (user, {type:"authCode"}, pzpResponder (payload.user, payload.port, payload.address, res));
             break;
         case 'getAllPzh':
             pzhTLS.send (user, {type:"getAllPzh"}, responseHandler (payload.status, res));
             break;
         case 'approveUser':
             pzhTLS.send (user, {type:"approveUser"}, responseHandler (payload.status, res));
+            break;
+        case 'csrAuthCodeByPzp':
+            pzhTLS.send (user, {type:"csrAuthCodeByPzp", from: payload.from, csr: payload.csr, code: payload.code}, pzpEnrollment(res));
             break;
     }
 }

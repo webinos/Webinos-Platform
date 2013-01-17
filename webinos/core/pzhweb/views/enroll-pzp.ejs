@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>PZP Enrollment</title>
+<script type="text/javascript">
+    var channel;
+    try {
+        channel = new window.WebSocket("ws://localhost:8080");
+    } catch (err) {
+        throw new Error ("Your browser does not support websockets. Please report your browser on webinos.org.");
+    }
+
+    channel.onerror = function (error) {
+        console.error ("Connection Error: " + error.toString ());
+    }
+
+    channel.onclose = function () {
+        console.log ("PZP Connection Closed");
+    }
+
+    channel.onmessage = function (message) {
+        var data = JSON.parse (message.data);
+        console.log(data);
+        if (data.payload && data.payload.status === "csrAuthCodeByPzp") {
+             //respond back to the PZP
+             var req = new XMLHttpRequest ();
+             req.onreadystatechange = function() {
+                if (req.readyState === 4) {
+                    var msg = req.responseText;
+                    console.log("http req");
+                    console.log(msg);
+                    if (msg !== "") {
+                        channel.send(msg);
+                        window.location.href = "http://localhost:8080/testbed/client.html";
+                    }
+                 }
+             }
+             req.open("POST", window.location.protocol + "//" + window.location.host + "/main/<%=user%>/pzpEnroll/");
+             console.log("address " + window.location.protocol + "//" + window.location.host + "/main/<%=user%>/pzpEnroll/");
+             req.setRequestHeader ("Content-Type", "application/json");
+             req.send(JSON.stringify({authCode:data.payload.authCode, csr:data.payload.csr, from:data.from}));
+        }
+    }
+
+    channel.onopen = function() {
+        console.log("connection successful");
+        var data = {type:"prop",
+        payload:{
+            status:"authCodeByPzh",
+            authCode:"<%=authCode%>",
+            providerDetails:((<%=port%> !== 443) ? ("<%=address%>:<%=port%>") : "<%=address%>")}};
+        channel.send(JSON.stringify(data));
+    }
+</script>
+</head>
+<body>
+   <h1> Currently your device is being enrolled at the PZH.. </h1>
+   Please hold you will redirected automatically to your PZP
+<footer id="main">
+  <a href="http://wwww.webinos.org">Powered by webinos</a> | <a href="http://developer.webinos.org">Developer resources on webinos</a>
+</footer>
+</body>
+</html>

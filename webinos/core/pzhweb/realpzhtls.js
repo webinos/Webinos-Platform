@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
+ * Copyright 2012 - 2013 University of Oxford
  * Author: Habib Virji (habib.virji@samsung.com)
  *******************************************************************************/
 var dependency = require ("find-dependencies") (__dirname);
