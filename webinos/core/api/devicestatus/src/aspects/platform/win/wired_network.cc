@@ -43,18 +43,19 @@ string WiredNetwork::networkStatus(string networkStatus)
     string res = Utils::WmiParam(L"ConnectionState", "SELECT * FROM Win32_NetworkConnection");
 	//string res = Utils::WmiParam(L"NetConnectionStatus", "SELECT * FROM Win32_NetworkAdapter");
 	//size_t pos;
-	//pos = res1.find("-");
-	//res = res1.substr (10,10);
+	//pos = res1.find("\n");
+	//res = res1.substr (70,10);
 	return res;
 }
 
 string WiredNetwork::ipAddress(string ipAddress)
 {
-    string res; 
+   // string res; 
 	string res1 = Utils::WmiParam(L"IPAddress", "SELECT * FROM Win32_NetworkAdapterConfiguration");
+	//string res2 = res1;
 	size_t pos;
-	pos = res1.find("-");
-	res = res1.substr (0,12);
+	pos = res1.find("\n");
+	string res = res1.substr (30,12);
 	//string res = Utils::WmiParam(L"Manufacturer", "SELECT * FROM Win32_NetworkAdapter");
 	return res;
 }
@@ -65,7 +66,7 @@ string WiredNetwork::macAddress(string macAddress)
 	string res1 = Utils::WmiParam(L"MACAddress", "SELECT * FROM Win32_NetworkAdapter");
 	size_t pos;
 	pos = res1.find("-");
-	res = res1.substr (76,20);
+	res = res1.substr (76,19);
 	return res;
 }
 

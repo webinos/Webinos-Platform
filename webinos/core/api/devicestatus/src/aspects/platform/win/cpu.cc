@@ -40,11 +40,12 @@ string CPU::model(string processorName)
 {
     string res = Utils::WmiParam(L"DeviceID", "SELECT * FROM Win32_Processor");
 	return res;
+	//return ProcessorName
 }
 
 string CPU::currentLoad(string processorLoad)
 {
-	//return "currentLoad";	 
+	//return "currentLoad";	//Returns the Current Load of the Processor 
 	string res = Utils::WmiParam(L"LoadPercentage", "SELECT * FROM Win32_Processor");
     return res;
-	}
+}
