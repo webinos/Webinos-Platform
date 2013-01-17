@@ -62,10 +62,6 @@
 					, "_default"
 					]
 		},
-		InputDevice:{
-			Properties:	[ "type" ],
-			Components:	[ "_default" ]
-		},
 		MemoryUnit:{
 			Properties:	[ "size"
 					, "removable"
@@ -123,5 +119,9 @@
 					],
 			Components:	[ "_active"
 					, "_default" ]
+		},
+		InputDevice:{
+			Properties:	[ "type" ],
+			Components:	[ "_default" ]
 		}
 	};

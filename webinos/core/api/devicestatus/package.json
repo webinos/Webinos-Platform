@@ -1,4 +1,5 @@
-{ "name": "devicestatus"
+{ "_comment": "The Device Status Uses the http://wacapps.net as the attribute value in the Policy.xml File"
+,"name": "devicestatus"
 , "publishConfig": { "tag": "alpha" }
 , "description": "DeviceStatus API"
 , "keywords": [ "webinos", "device", "status", "API"]
