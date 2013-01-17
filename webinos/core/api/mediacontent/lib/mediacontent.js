@@ -27,11 +27,15 @@
     RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
   function fetchMediaInfo(directoryPath, id, callback) {
-    var xml2js = require('xml2json'), result;
+    var xml2js = require('xml2js');
     child_process("mediainfo --Output=XML " + directoryPath, function (error, stderr, stdout) {
       if (!error) {
-        result = xml2js.toJson(stderr);
-        callback(id, result);
+        var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
+        xmlParser.parseString(stderr, function(err, xmlData) {
+          if(!err){
+            callback(id, xmlData);
+          }
+        });
       }
     });
   }
@@ -111,57 +115,59 @@
         } else {
           dirName = list[i].folderURI;
         }
-        fetchMediaInfo(dirName, list[i].id, function (id, info) {
+        fetchMediaInfo(dirName, list[i].id, function (id, result) {
           var i = 0, mediaItem,  title, result, current, data, track;
           if (params.offset) {
             i = parseInt(params.offset, 10);
           }
-          result = JSON.parse(info);
           while (i < result.Mediainfo.File.length) {
             current =  result.Mediainfo.File[i];
             track = current.track[0] || current.track;
             i = i + 1;
             mediaItem = new MediaType.MediaItem();
             mediaItem.id = id;
-            mediaItem.type = (current.track[1] && current.track[1].type) || "";
-            mediaItem.mimeType = track.format || "";
-            title = track.Complete_name.slice(track.Complete_name.lastIndexOf("/") + 1, track.Complete_name.length) || "";
-            mediaItem.title = title && title.replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(n); }) || "";
-            mediaItem.itemURI = track.Complete_name.replace(/&#(\d+);/g,
-              function (m, n) { return String.fromCharCode(n); }) || "";
+            mediaItem.type = (current.track && current.track[1] && current.track[1].$["type"]) ||
+                (track.Format && track.Format[0]) ||
+                (current.track && current.track[1]&& current.track[1].Format && current.track[1].Format[0]) ||
+                "";
+            mediaItem.mimeType = (track.Format && track.Format[0]) || "";
+            title = track.Complete_name && track.Complete_name[0].slice(track.Complete_name[0].lastIndexOf("/") + 1, track.Complete_name[0].length) || "";
+            mediaItem.title = title || "";
+            mediaItem.itemURI = (track.Complete_name && track.Complete_name[0]) || "";
+              //.replace(/&#(\d+);/g,function (m, n) { return String.fromCharCode(n); })
             mediaItem.thumbnailURIs = "";
-            mediaItem.releaseDate = track.Tagged_date || 0;
-            mediaItem.modifiedDate = track.Encoded_date || 0;
-            mediaItem.size = track.File_size || 0;
-            mediaItem.description = track.Comment || "";
+            mediaItem.releaseDate = (track.Recorded_date && track.Recorded_date[0]) || 0;
+            mediaItem.modifiedDate = (track.Encoded_date && track.Encoded_date[0])|| 0;
+            mediaItem.size = (track.File_size && track.File_size[0]) || 0;
+            mediaItem.description = (track.Comment && track.Comment[0])|| "";
             mediaItem.rating = "";
-            if (current.track[1] && current.track[1].type === "Audio") {
-              mediaItem.album = track.Album || "";
+            if (current.track && current.track[1] && current.track[1].$["type"] === "Audio") {
+              mediaItem.album = (track.Album && track.Album[0]) || "";
               mediaItem.genres = "";
-              mediaItem.artists = track.Performer || "";
-              mediaItem.composers = track.Performer || "";
+              mediaItem.artists = (track.Performer && track.Performer[0]) || "";
+              mediaItem.composers = (track.Performer && track.Performer[0]) || "";
               mediaItem.lyrics = "";
               mediaItem.copyright = "";
-              mediaItem.bitrate = track.Bit_rate || "";
-              mediaItem.trackNumber = track.Track_name_Position || "";
-              mediaItem.duration = (current.track[1] && current.track[1].Duration) || "";
+              mediaItem.bitrate = (track.Overall_bit_rate && track.Overall_bit_rate[0]) || "";
+              mediaItem.trackNumber = (track.Track_name_Position && track.Track_name_Position[0]) || "";
+              mediaItem.duration = (track.Duration && track.Duration[0]) || "";
               mediaItem.playedTime = 0;
               mediaItem.playCount = 0;
               mediaItem.editableAttributes = [mediaItem.playedTime, mediaItem.playCount];
-            } else if (current.track[1] && current.track[1].type === "Video") {
+            } else if (current.track && current.track[1] && current.track[1].$["type"] === "Video") {
               mediaItem.geolocation = "";
-              mediaItem.album = track.Album || '';
-              mediaItem.artists = track.Performer || '';
-              mediaItem.duration = (current.track[1] &&current.track[1].Duration )|| '';
-              mediaItem.width = (current.track[1] && current.track[1].Width) || 0;
-              mediaItem.height = (current.track[1] && current.track[1].Height) || 0;
+              mediaItem.album = (track.Album && track.Album[0]) || '';
+              mediaItem.artists = (track.Performer && track.Performer[0]) || '';
+              mediaItem.duration = (current.track && current.track[1] && current.track[1].Duration)|| '';
+              mediaItem.width = (current.track && current.track[1] && current.track[1].Width) || 0;
+              mediaItem.height = (current.track && current.track[1] && current.track[1].Height) || 0;
               mediaItem.playedTime = 0;
               mediaItem.playCount = 0;
               mediaItem.editableAttributes = [mediaItem.playedTime, mediaItem.playCount];
-            } else if (current.track[1] && current.track[1].type === "Image") {
+            } else if (current.track && current.track[1] && current.track[1].$["type"] === "Image") {
               mediaItem.geolocation = "";
-              mediaItem.width = (current.track[1] && current.track[1].Width) || 0;
-              mediaItem.height = (current.track[1] && current.track[1].Height) || 0;
+              mediaItem.width = (current.track && current.track[1] && current.track[1].Width[0]) || 0;
+              mediaItem.height = (current.track && current.track[1] && current.track[1].Height[0]) || 0;
               mediaItem.editableAttributes = [];
             }
             listSend.push(mediaItem);
