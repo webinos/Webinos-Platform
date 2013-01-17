@@ -49,27 +49,27 @@ var Sync = function() {
 
   this.syncFileMissing = function(remoteJsonObject) {
     var myKey, diff = {}, update, update1, syncdata, updatedData = {};
-    console.log(remoteJsonObject);
     for( myKey in jsonObject) {
       if (jsonObject.hasOwnProperty(myKey) && remoteJsonObject.hasOwnProperty(myKey)) {
         update = sync_.detectUpdates(jsonObject[myKey], jsonObject[myKey]);
         update1 = sync_.detectUpdates(jsonObject[myKey], remoteJsonObject[myKey]);
         syncdata = sync_.reconcile([update1, update]);
-        console.log(jsonObject[myKey]);
         sync_.applyCommands(jsonObject[myKey], syncdata.propagations[0]);
-        console.log(syncdata.propagations[0])
         updatedData[myKey] = jsonObject[myKey];
-        console.log(jsonObject[myKey]);
       }
     }
     return updatedData;
   };
 
-  this.parseXMLFile= function(fileName) {
-    var xml2js = require('xml2json');
+  this.parseXMLFile= function(fileName, callback) {
+    var xml2js = require('xml2js');
+    var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
     var data = fs.readFileSync(fileName);
-    var result = xml2js.toJson(data.toString());
-    return result;
+    var result = xmlParser.parseString(data, function(err, xmlData) {
+        if(!err) {
+            callback(xmlData);
+        }
+    });
   }
 };
 module.exports = Sync;
