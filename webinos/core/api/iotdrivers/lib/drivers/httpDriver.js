@@ -230,9 +230,9 @@ var port;
                             console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
                             if(!isAlreadyRegistered(tmp_ele.id)){
-                                tmp_ele.element.name = "ELEMENT_NAME";
-                                tmp_ele.element.description = "ELEMENT_DESCR";
-                                var id = registerFunc(driverId, tmp_ele.element.sa, JSON.stringify(tmp_ele.element));   
+                                tmp_ele.element.name = tmp_ele.element.type+' sensor';
+                                tmp_ele.element.description = 'A webinos '+tmp_ele.element.type+' sensor on '+boards[data.id].name + " [" + data.id + "]";
+                                var id = registerFunc(driverId, tmp_ele.element.sa, tmp_ele.element);
                                 elementsList[id] = tmp_ele;
                                 console.log("Adding element with id " + id);
                             }

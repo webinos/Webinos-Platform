@@ -57,10 +57,10 @@
 
     function intReg() {
         console.log('\nFake driver 2 - register new elements');
-        registerFunc(driverId, 0, 'light');
-        registerFunc(driverId, 1, 'linearmotor');
-        registerFunc(driverId, 1, 'switch');
-        registerFunc(driverId, 0, 'proximity');
+        registerFunc(driverId, 0, {type:'light'});
+        registerFunc(driverId, 1, {type:'linearmotor'});
+        registerFunc(driverId, 1, {type:'switch'});
+        registerFunc(driverId, 0, {type:'proximity'});
     }
 
 }());

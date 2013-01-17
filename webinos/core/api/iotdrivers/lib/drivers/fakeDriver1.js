@@ -128,7 +128,7 @@
         console.log('\nFake driver 1 - register new elements');
         for(var i in elementsList) {
             var json_info = {type:elementsList[i].type, name:elementsList[i].name, description:elementsList[i].description};
-            elementsList[i].id = registerFunc(driverId, elementsList[i].sa, JSON.stringify(json_info));
+            elementsList[i].id = registerFunc(driverId, elementsList[i].sa, json_info);
             //elementsList[i].id = registerFunc(driverId, elementsList[i].sa, elementsList[i].type);
         };
     }
