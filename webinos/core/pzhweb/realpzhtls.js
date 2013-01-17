@@ -29,7 +29,6 @@ PzhWebTLSCommunicator.init = function (config, webOptions, handler, cb) {
     "use strict";
     var tls = require ('tls');
     webOptions.rejectUnauthorized = false;
-    console.log(webOptions);
     connection = tls.connect (config.userPref.ports.provider,
         config.metaData.serverName,
         webOptions, function () {

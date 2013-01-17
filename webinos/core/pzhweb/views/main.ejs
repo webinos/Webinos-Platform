@@ -28,7 +28,7 @@
         text = "";
         for (i = 0 ; i < payload.pzps.length; i += 1){
           var style = payload.pzps[i].isConnected?"connected":"disconnected";
-          text+= "<li><a class='"+ style +"' title='"+payload.pzhs[i].url+"'>"+payload.pzps[i].id + "</a></li>";
+          text+= "<li><a class='"+ style +"' title='"+payload.pzps[i].url+"'>"+payload.pzps[i].id + "</a></li>";
         }
         $("#enumConnectedPzp").html(text);
       }
