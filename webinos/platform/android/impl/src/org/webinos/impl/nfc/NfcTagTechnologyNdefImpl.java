@@ -120,11 +120,6 @@ public class NfcTagTechnologyNdefImpl extends NfcTagTechnologyNdef {
   @Override
   public PendingOperation writeNdefMessage(NdefRecord[] ndefMessage, SuccessCallback successCallback,
       ErrorCallback errorCallback) {
-
-    // TODO: Remove this
-    ndefMessage = new NdefRecord[] { Util.createTextNdefRecord("en",
-        "hello world 2") };
-
     new Thread(new WriteOperation(ndefMessage, successCallback, errorCallback)).start();
     return new PendingOperationImpl();
   }

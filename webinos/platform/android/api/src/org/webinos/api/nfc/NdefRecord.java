@@ -23,14 +23,14 @@ import org.meshpoint.anode.idl.Dictionary;
 import org.w3c.dom.ByteArray;
 
 public class NdefRecord implements Dictionary {
-  public static final short TNF_EMPTY = 0x00;
-  public static final short TNF_WELL_KNOWN = 0x01;
-  public static final short TNF_MIME_MEDIA = 0x02;
-  public static final short TNF_ABSOLUTE_URI = 0x03;
-  public static final short TNF_EXTERNAL_TYPE = 0x04;
-  public static final short TNF_UNKNOWN = 0x05;
-  public static final short TNF_UNCHANGED = 0x06;
-  public static final short TNF_RESERVED = 0x07;
+  public static final int TNF_EMPTY = 0x00;
+  public static final int TNF_WELL_KNOWN = 0x01;
+  public static final int TNF_MIME_MEDIA = 0x02;
+  public static final int TNF_ABSOLUTE_URI = 0x03;
+  public static final int TNF_EXTERNAL_TYPE = 0x04;
+  public static final int TNF_UNKNOWN = 0x05;
+  public static final int TNF_UNCHANGED = 0x06;
+  public static final int TNF_RESERVED = 0x07;
 
   public static final byte[] RTD_TEXT = { 0x54 }; // "T"
   public static final byte[] RTD_URI = { 0x55 }; // "U"
@@ -43,7 +43,6 @@ public class NdefRecord implements Dictionary {
   public int TNF;
   public String type;
   public String id;
-  // public byte[] payload;
   public ByteArray payload;
   public String info;
 }

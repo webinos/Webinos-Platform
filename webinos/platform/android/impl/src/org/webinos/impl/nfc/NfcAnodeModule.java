@@ -84,11 +84,6 @@ public class NfcAnodeModule extends NfcModuleBase implements IModule {
 
   @Override
   protected void setSharedTag(NdefRecord[] ndefMessage) {
-
-    // TODO: Remove this
-    ndefMessage = new NdefRecord[] { Util.createTextNdefRecord("en",
-        "shared tag 2") };
-
     nfcMgr
         .setSharedTag(NfcTagTechnologyNdefImpl.createNdefMessage(ndefMessage));
   }
