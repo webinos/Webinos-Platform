@@ -43,29 +43,30 @@ string MemoryUnit::getPropertyValue(string * property, string * component)
 string MemoryUnit::size(string size)
 {
     //string res1 = Utils::WmiParam(L"Name", "SELECT * FROM Win32_MemoryDevice");  //PhysicalMemory- Capacity, MemoryType, Name
-    string res2 = Utils::WmiParam(L"BlockSize", "SELECT * FROM Win32_MemoryDevice");
+    string res2 = Utils::WmiParam(L"BlockSize", "SELECT * FROM CIM_PhysicalMemory");
 	//string res3 = Utils::WmiParam(L"Availability", "SELECT * FROM Win32_MemoryDevice");
 	//string res = res1 + res2 + res3;
-	return res2;
+	string res = "hello";
+	return res;
 }
 
 string MemoryUnit::removable(string removable)
 {
-    string res = Utils::WmiParam(L"Removable", "SELECT * FROM Win32_PhysicalMemory");
+    string res = Utils::WmiParam(L"Removable", "SELECT * FROM CIM_PhysicalMemory");
 	//string res = Utils::WmiParam(L"NetConnectionStatus", "SELECT * FROM Win32_NetworkAdapter");
 	return res;
 }
 
 string MemoryUnit::availableSize(string availableSize)
 {
-    string res = Utils::WmiParam(L"ConnectionState", "SELECT * FROM Win32_NetworkConnection");
+    string res = Utils::WmiParam(L"TotalWidth", "SELECT * FROM CIM_PhysicalMemory");
 	//string res = Utils::WmiParam(L"NetConnectionStatus", "SELECT * FROM Win32_NetworkAdapter");
 	return res;
 }
 
 string MemoryUnit::volatil(string volatil)
 {    
-    string res = Utils::WmiParam(L"ConnectionState", "SELECT * FROM Win32_NetworkConnection");
+    string res = Utils::WmiParam(L"MemoryType", "SELECT * FROM CIM_PhysicalMemory");
 	//string res = Utils::WmiParam(L"NetConnectionStatus", "SELECT * FROM Win32_NetworkAdapter");
 	return res;
 }

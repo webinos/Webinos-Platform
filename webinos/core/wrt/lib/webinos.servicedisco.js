@@ -68,7 +68,16 @@
             if (typeof webinos.file !== 'undefined' && typeof webinos.file.Service !== 'undefined')
                 typeMap['http://webinos.org/api/file'] = webinos.file.Service;
             if (typeof TestModule !== 'undefined') typeMap['http://webinos.org/api/test'] = TestModule;
-            if (typeof ActuatorModule !== 'undefined') typeMap['http://webinos.org/api/actuator'] = ActuatorModule;
+            if (typeof ActuatorModule !== 'undefined') {
+                typeMap['http://webinos.org/api/actuators'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.linearmotor'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.switch'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.rotationalmotor'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.vibratingmotor'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.servomotor'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.swivelmotor'] = ActuatorModule;
+                typeMap['http://webinos.org/api/actuators.thermostat'] = ActuatorModule;
+            }
             if (typeof WebNotificationModule !== 'undefined') typeMap['http://webinos.org/api/webnotification'] = WebNotificationModule;
             if (typeof oAuthModule!== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
             if (typeof WebinosGeolocation !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/geolocation'] = WebinosGeolocation;
@@ -82,6 +91,10 @@
                 typeMap['http://webinos.org/api/sensors.temperature'] = Sensor;
                 typeMap['http://webinos.org/api/sensors.light'] = Sensor;
                 typeMap['http://webinos.org/api/sensors.proximity'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.noise'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.pressure'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.humidity'] = Sensor;
+                typeMap['http://webinos.org/api/sensors.heartratemonitor'] = Sensor;
             }
             if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
             if (typeof UserProfileIntModule !== 'undefined') typeMap['UserProfileInt'] = UserProfileIntModule;
@@ -92,6 +105,7 @@
             //if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/manager/discovery/bluetooth'] = DiscoveryModule;
             if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/api/discovery'] = DiscoveryModule;
             if (typeof AuthenticationModule !== 'undefined') typeMap['http://webinos.org/api/authentication'] = AuthenticationModule;
+            if (typeof MediaContentModule !== 'undefined') typeMap['http://webinos.org/api/mediacontent'] = MediaContentModule;
 
             if (isOnNode()) {
                 var path = require('path');

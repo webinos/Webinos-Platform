@@ -121,6 +121,9 @@
       $("#sensor").click(function(){
        setPage("Sensor Demo", "sensor/sensor.html");
       });
+      $("#actuator").click(function(){
+       setPage("Actuator Demo", "actuator/actuator.html");
+      });
       $("#payment").click(function(){
        setPage("Payment Demo", "payment/payment.html");
       });
@@ -151,6 +154,9 @@
       $("#vehicle").click(function(){
        setPage("Vehicle API Testbed", "vehicle/testbed/index.html");
       });
+      $("#mediaContent").click(function(){
+       setPage("Media Content API Testbed", "mediaContent/index.html");
+      });
       $("#login").click(function(){
        setPage("Login to your PZH", "login.html");
       });
@@ -162,6 +168,12 @@
         var that = $(this);
         var right = that.css("right");
         that.css("right",(right==="0px")?"":"0px");
+      });
+      $('#apitests').click(function() {
+        setPage("apitests", "../tests/api_tests/apitests.html");
+      });
+      $('#widgettests').click(function() {
+        setPage("widgettests", "../tests/widget_tests/Overview.html");
       });
       $('#friendlyName').click(function() {
         setPage("Add FriendlyName", "friendlyName.html");
@@ -249,6 +261,7 @@
         <li> <a href="#file" id="file">  File </a> </li>
         <li> <a href="#geo" id="geo">  Geolocation </a> </li>
         <li> <a href="#sensor" id="sensor">  Sensor </a> </li>
+        <li> <a href="#actuator" id="actuator">  Actuator </a> </li>
         <li> <a href="#payment" id="payment">  Payment </a> </li>
         <li> <a href="#applaunch" id="applaunch">  AppLauncher </a> </li>
         <li> <a href="#tv" id="tv">  TV </a> </li>
@@ -263,7 +276,13 @@
         <li> <a href="#disco_ui" id="disco_ui">  Discovery UI </a> </li>
         <li> <a href="#contacts" id="contacts">  Contacts </a> </li>
         <li> <a href="#vehicle" id="vehicle">  Vehicle API </a> </li>
+        <li> <a href="#mediaContent" id="mediaContent">  Media Content API </a> </li>
       </ul>
+      <h3> Monitor Tests </h3>
+      <ul class="toggle" style="">
+        <li><a href="#apitests" id="apitests"> API Jasmine Tests </a></li>
+        <li><a href="#widgettests" id="widgettests"> Widget Tests </a></li>
+       </ul>
       <h3> PZP Details</h3>
       <ul class="toggle" style="">
         <li><a href="#friendlyName" id="friendlyName"> PZP Friendly Name </a></li>
