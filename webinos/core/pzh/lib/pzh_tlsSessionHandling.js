@@ -313,6 +313,7 @@ var Pzh_Pzh = function (_parent) {
             connDetails.host = pzhDetails.host;
             connDetails.port = pzhDetails.serverPort; //parseInt(pzhDetails.port);
             _parent.pzh_state.logger.log("connection from " + _parent.pzh_state.sessionId + " - to " + connDetails.servername + " initiated");
+            _parent.pzh_state.logger.log("connection at " + connDetails.host + " and port " + connDetails.port);
             connPzh = tls.connect(connDetails, function () {
                 _parent.pzh_state.logger.log("connection status : " + connPzh.authorized);
                 if (connPzh.authorized) {

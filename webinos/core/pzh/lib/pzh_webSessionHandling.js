@@ -212,7 +212,7 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
         logger.log(obj.user.displayName + " is now expecting external connection from " + obj.message.externalEmail);
         var url = require("url").parse("https://" + obj.message.externalPzh);
         var name = url.hostname + "_" + obj.message.externalEmail;
-        if (parseInt(url.port) !== 443) {
+        if (url.port && parseInt(url.port) !== 443) {
             name = url.hostname + ":" + url.port + "_" + obj.message.externalEmail;
         }
 
@@ -302,8 +302,8 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
             logger.log("Approving friend request for " + obj.message.externalEmail + " by " + obj.user.emails[0].value);
             // Store Certificates
             var details = userObj.config.untrustedCert[obj.message.externalEmail], name = details.host + "_" + obj.message.externalEmail;
-            if (parseInt(details.port) !== 443) {
-                name = details.host + ":" + details.port + "_" + obj.message.externalEmail
+            if (details.port && parseInt(details.port) !== 443) {
+                name = details.host + ":" + details.port + "_" + obj.message.externalEmail;
             }
             if (!userObj.config.cert.external.hasOwnProperty(name)) {
                 userObj.config.cert.external[name] = details;
