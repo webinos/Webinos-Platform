@@ -167,35 +167,35 @@
       text += "<p><h3> Authenticator:"+ payload.authenticator+"</h3></p>";
       setArticle("About you", text);
       $("#userId").html(payload.name);
-      webinosPZH.commands.listDevices(DisplayListOfDevices);
+      webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
   }
   $(document).ready(function() {
     webinosPZH.init(function(){
-      webinosPZH.commands.userDetails(listUserDetails);
+      webinosPZH.commands.getUserDetails(listUserDetails);
       setTimeout(function() {
-        webinosPZH.commands.listDevices(DisplayListOfDevices);
+        webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
       }, 3000);
     });
     $("#addPzp").click(function(){
-      webinosPZH.commands.addPzp(displayQRCode);
+      webinosPZH.commands.authCode(displayQRCode);
     });
     $("#connectPzh").click(function(){
       webinosPZH.commands.getAllPzh(pzhList);
     });
     $("#revokeCert").click(function(){
-      webinosPZH.commands.listPzp(listPzpsToRevoke);
+      webinosPZH.commands.getPzps(listPzpsToRevoke);
     });
     $("#refresh").click(function(){
-       webinosPZH.commands.listDevices(DisplayListOfDevices);
+       webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
     });
     $("#crashLog").click(function(){
-      webinosPZH.commands.crashLog(showCrashLog);
+      webinosPZH.commands.getCrashLog(showCrashLog);
     });
     $("#infoLog").click(function(){
-      webinosPZH.commands.infoLog(showInfoLog);
+      webinosPZH.commands.getInfoLog(showInfoLog);
     });
     $("#userDetails").click(function(){
-      webinosPZH.commands.userDetails(listUserDetails);
+      webinosPZH.commands.getUserDetails(listUserDetails);
     });
     $("#restartPzh").click(function(){
       webinosPZH.commands.restartPzh();

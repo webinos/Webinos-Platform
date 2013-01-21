@@ -183,7 +183,7 @@ var Pzp = function () {
                 if (self.pzp_state.connectedPzh.hasOwnProperty (key) && key === _id) {
                     logger.log ("pzh - " + key + " details removed");
                     self.pzp_state.state["hub"] = "not_connected";
-                   delete self.pzp_state.connectedPzh[key];
+                    delete self.pzp_state.connectedPzh[key];
                 }
             }
             self.pzpWebSocket.updateApp ();

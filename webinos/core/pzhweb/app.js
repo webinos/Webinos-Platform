@@ -17,31 +17,28 @@
  * Copyright 2012 - 2013 University of Oxford
  * Author: Habib Virji (habib.virji@samsung.com)
  *******************************************************************************/
-var PzhProviderWeb      = exports;
+var PzhProviderWeb = exports;
 
-PzhProviderWeb.startWebServer = function(host, address, port, options, config, cb) {
+PzhProviderWeb.startWebServer = function (host, address, port, options, config, cb) {
     "use strict";
     try {
-        var express         = require('express'),
-            util            = require('util'),
-            path            = require('path'),
-            crypto          = require('crypto'),
-            https           = require('https'),
-            fs              = require('fs'),
-            passport        = require('passport'),
-            YahooStrategy   = require('passport-yahoo').Strategy,
-            GoogleStrategy  = require('passport-google').Strategy;
+        var express = require('express'),
+            util = require('util'),
+            path = require('path'),
+            crypto = require('crypto'),
+            https = require('https'),
+            fs = require('fs'),
+            passport = require('passport'),
+            YahooStrategy = require('passport-yahoo').Strategy,
+            GoogleStrategy = require('passport-google').Strategy;
     } catch (err) {
         console.log("missing modules in pzh webserver, please run npm install and try again");
     }
-    var state = {
-        expectedExternalAuth : []
-    };
 
     var tlsConnectionAttempts = 0;
 
     var dependency = require('find-dependencies')(__dirname),
-        logger   = dependency.global.require(dependency.global.util.location, 'lib/logging.js')(__filename) || console,
+        logger = dependency.global.require(dependency.global.util.location, 'lib/logging.js')(__filename) || console,
         webTlsCommunicator = require('./realpzhtls.js');
 
     function createServer(port, host, address, options, config, next) {
@@ -51,7 +48,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         passport = createPassport("https://" + address + ':' + port);
 
         //connect to the TLS Server
-        makeTLSServerConnection(config, options, function(status, value) {
+        makeTLSServerConnection(config, options, function (status, value) {
             if (status) {
                 //configure the express app middleware
                 if (!server) {
@@ -61,7 +58,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
                     server = https.createServer(options, app).listen(port);
                     handleAppStart(app, server, next);
                 } else {
-                   next(value);
+                    next(value);
                 }
             } else {
                 logger.error("Failed to connect to the PZH Provider's TLS server");
@@ -78,26 +75,30 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         webTlsCommunicator.init(
             config,
             webOptions,
-            function(data) {
+            function (data) {
                 cb(true, data);
             },
-            function(status, value) {
+            function (status, value) {
                 if (status) {
                     tlsConnectionAttempts++;
                     webTlsCommunicator.send("NO USER", "WEB SERVER INIT", {
-                        err : function(error) { console.log("Error: " + error); },
-                        success : function() { console.log("Sent."); }
+                        err:function (error) {
+                            console.log("Error: " + error);
+                        },
+                        success:function () {
+                            console.log("Sent.");
+                        }
                     });
                     if (tlsConnectionAttempts === 1) {
                         // don't bother with success callbacks if it works
                         // after the first time.
-                        cb(status,value);
+                        cb(status, value);
                     }
                     tlsConnectionAttempts = 1; //reset
                 } else {
                     tlsConnectionAttempts++;
-                    if (tlsConnectionAttempts < 10){
-                        setTimeout( function() {
+                    if (tlsConnectionAttempts < 10) {
+                        setTimeout(function () {
                             makeTLSServerConnection(config, webOptions, cb);
                         }, 1000);
                     } else {
@@ -113,7 +114,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         var app = express();
         app.options = options;
         var MemStore = express.session.MemoryStore;
-        app.configure(function() {
+        app.configure(function () {
             app.set('views', __dirname + '/views');
             app.set('view engine', 'ejs');
 //      app.use(express.logger()); // turn on express logging for every page
@@ -121,7 +122,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
             app.use(express.methodOverride());
             app.use(express.cookieParser());
             var sessionSecret = crypto.randomBytes(40).toString("base64");
-            app.use(express.session({ secret: sessionSecret }));//, store: new MemStore({reapInterval: 6000 * 10})
+            app.use(express.session({ secret:sessionSecret }));//, store: new MemStore({reapInterval: 6000 * 10})
             app.use(passport.initialize());
             app.use(passport.session());
             app.use(app.router);
@@ -129,11 +130,11 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         });
 
         // An environment variable will switch between these two, but we don't yet.
-        app.configure('development', function(){
-            app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+        app.configure('development', function () {
+            app.use(express.errorHandler({ dumpExceptions:true, showStack:true }));
         });
 
-        app.configure('production', function(){
+        app.configure('production', function () {
             app.use(express.errorHandler());
         });
 
@@ -143,11 +144,11 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
     function createPassport(serverUrl) {
         "use strict";
         /* No clever user handling here yet */
-        passport.serializeUser(function(user, done) {
+        passport.serializeUser(function (user, done) {
             done(null, user);
         });
 
-        passport.deserializeUser(function(obj, done) {
+        passport.deserializeUser(function (obj, done) {
             done(null, obj);
         });
 
@@ -157,10 +158,10 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         //   credentials (in this case, an OpenID identifier and profile), and invoke a
         //   callback with a user object.
         passport.use(new GoogleStrategy({
-                returnURL: serverUrl + '/auth/google/return',
-                realm: serverUrl + '/'
+                returnURL:serverUrl + '/auth/google/return',
+                realm:serverUrl + '/'
             },
-            function(identifier, profile, done) {
+            function (identifier, profile, done) {
                 "use strict";
                 // asynchronous verification, for effect...
                 process.nextTick(function () {
@@ -178,10 +179,10 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
         ));
 
         passport.use(new YahooStrategy({
-                returnURL: serverUrl + '/auth/yahoo/return',
-                realm: serverUrl + '/'
+                returnURL:serverUrl + '/auth/yahoo/return',
+                realm:serverUrl + '/'
             },
-            function(identifier, profile, done) {
+            function (identifier, profile, done) {
                 "use strict";
                 process.nextTick(function () {
                     profile.internal = true;
@@ -195,7 +196,7 @@ PzhProviderWeb.startWebServer = function(host, address, port, options, config, c
     }
 
 
-    function setRoutes(app, address, port, state) {
+    function setRoutes(app, address, port) {
         "use strict";
         require('./routes')(app, address, port);
         require('./routes/peerPzhAuth.js')(app, address, port);

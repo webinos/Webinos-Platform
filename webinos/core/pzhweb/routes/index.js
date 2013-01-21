@@ -18,93 +18,104 @@
  *******************************************************************************/
 module.exports = function (app, address, port, state) {
     "use strict";
-    var dependency = require ("find-dependencies") (__dirname),
-        logger = dependency.global.require (dependency.global.util.location, "lib/logging.js") (__filename) || console,
-        pzhadaptor = require ('../pzhadaptor.js'),
-        passport = require ('passport'),
-        helper = require ('./helper.js');
+    var dependency = require("find-dependencies")(__dirname),
+        logger = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console,
+        pzhadaptor = require('../pzhadaptor.js'),
+        passport = require('passport'),
+        helper = require('./helper.js');
 
-    app.get ('/', ensureAuthenticated, function (req, res) {
+    app.get('/', ensureAuthenticated, function (req, res) {
         if (req.session.isPzp) {
-            pzhadaptor.fromWeb (req.user, {payload:{status:"authCode", address:address, port:port, user: getUserPath (req.user)}}, res);
+            pzhadaptor.fromWeb(req.user, {payload:{status:"enrollPzpAuthCode", address:address, port:port, pzpPort:req.session.pzpPort, user:getUserPath(req.user)}}, res);
             req.session.isPzp = "";
+            req.session.pzpPort = "";
         } else {
-            res.redirect ('/main/' + getUserPath (req.user) + "/");
+            res.redirect('/main/' + getUserPath(req.user) + "/");
         }
     });
 
-    app.post ('/main/:user/enrollPzp/', function (req, res) { // to use ensure authenticated, for some reason req.isAuthenticated retuns false
-        pzhadaptor.fromWeb (req.params.user,
+    app.post('/main/:user/enrollPzp/', function (req, res) { // to use ensure authenticated, for some reason req.isAuthenticated retuns false
+        pzhadaptor.fromWeb(req.params.user,
             {payload:{status:"enrollPzp", csr:req.body.csr, authCode:req.body.authCode, from:req.body.from}}, res);
     });
 
-    app.get ('/main/:user/', ensureAuthenticated, function (req, res) {
-        if (encodeURIComponent (req.params.user) !== getUserPath (req.user)) {
-            logger.log (encodeURIComponent (req.params.user) + " does not equal " + getUserPath (req.user));
-            res.redirect ('/login');
+    app.get('/main/:user/', ensureAuthenticated, function (req, res) {
+        if (encodeURIComponent(req.params.user) !== getUserPath(req.user)) {
+            logger.log(encodeURIComponent(req.params.user) + " does not equal " + getUserPath(req.user));
+            res.redirect('/login');
         } else {
-            res.render ('main', { user:req.user });
+            res.render('main', { user:req.user });
         }
     });
 
     // Arbitrary query interface.
-    app.post ('/main/:user/query', ensureAuthenticated, function (req, res) {
-        logger.log ("Body: " + require ("util").inspect (req.body));
-        pzhadaptor.fromWeb (req.user, req.body, res);
+    app.post('/main/:user/query', ensureAuthenticated, function (req, res) {
+        logger.log("Body: " + require("util").inspect(req.body));
+        pzhadaptor.fromWeb(req.user, req.body, res);
     });
 
     // A couple of unused REST interfaces
-    app.post ('/main/:user/zonestatus/', ensureAuthenticated, function (req, res) {
-        pzhadaptor.getZoneStatus (req.user, res);
+    app.post('/main/:user/zonestatus/', ensureAuthenticated, function (req, res) {
+        pzhadaptor.getZoneStatus(req.user, res);
     });
 
-    app.all ('/main/:user/about-me/', ensureAuthenticated, function (req, res) {
-        res.json (req.user);
+    app.all('/main/:user/about-me/', ensureAuthenticated, function (req, res) {
+        res.json(req.user);
     });
 
     // present certificates to an external party.
-    app.all ('/main/:useremail/certificates/', function (req, res) {
+    app.all('/main/:useremail/certificates/', function (req, res) {
         //return a JSON object containing all the certificates.
-        pzhadaptor.fromWebUnauth (req.params.useremail, {type:"getCertificates"}, res);
+        pzhadaptor.fromWebUnauth(req.params.useremail, {type:"getCertificates"}, res);
     });
 
-    app.post('/main/:user/pzpEnroll', ensureAuthenticated, function(req, res) {
+    app.post('/main/:user/pzpEnroll', ensureAuthenticated, function (req, res) {
         var dataSend = {
             payload:{
-                status: "csrAuthCodeByPzp",
-                from: req.body.from,
-                csr: req.body.csr,
-                code: req.body.authCode
+                status:"csrAuthCodeByPzp",
+                from:req.body.from,
+                csr:req.body.csr,
+                code:req.body.authCode
             }
         };
         pzhadaptor.fromWeb(req.user, dataSend, res);
     });
 
     //Certificate exchange...
-    app.get ('/main/:user/connect-friend', ensureAuthenticated, function (req, res) {
+    app.get('/main/:user/connect-friend', ensureAuthenticated, function (req, res) {
         //Args: The external user's email address and PZH provider
         //Auth: User must have logged into their PZH
         //UI: NONE
         //Actions: adds the friend's details to the list of 'waiting for approval', redirects the user to the external PZH
         var externalEmail = req.query.externalemail;
         var externalPZH = req.query.externalpzh;
-        logger.log ("External: " + externalEmail + " - " + externalPZH);
-        //get those certificates
-        //"https://" + externalPZH + "/main/" + encodeURIComponent(externalEmail) + "/certificates/"
-        helper.getCertsFromHost (externalEmail, externalPZH, function (certs) {
-            pzhadaptor.storeExternalUserCert (req.user, externalEmail, externalPZH, certs, res);
-            //get my details from somewhere
-            var myCertificateUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/certificates/";
-            var myPzhUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/";
-            //where are we sending people
-            var redirectUrl = "https://" + externalPZH + "/main/" + encodeURIComponent (externalEmail) +
-                "/request-access-login?certUrl=" + encodeURIComponent (myCertificateUrl) +
-                "&pzhInfo=" + encodeURIComponent (myPzhUrl);
-            res.redirect (redirectUrl);
-        }, function (err) {
-            res.writeHead (200);
-            res.end ('Failed to retrieve certificate from remote host');
-        });
+        logger.log("External: " + externalEmail + " - " + externalPZH);
+        if (externalEmail === req.user.emails[0].value) {
+            res.writeHead(200);
+            res.end('Cannot register own PZH ' + externalEmail);
+        } else {
+            //get those certificates
+            //"https://" + externalPZH + "/main/" + encodeURIComponent(externalEmail) + "/certificates/"
+            helper.getCertsFromHost(externalEmail, externalPZH, function (certs) {
+                pzhadaptor.storeExternalUserCert(req.user, externalEmail, externalPZH, certs.message, function (status) {
+                    if (status.message) {//get my details from somewhere
+                        var myCertificateUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/certificates/";
+                        var myPzhUrl = "https://" + address + ":" + port + "/main/" + req.params.user + "/";
+                        //where are we sending people
+                        var redirectUrl = "https://" + externalPZH + "/main/" + encodeURIComponent(externalEmail) +
+                            "/request-access-login?certUrl=" + encodeURIComponent(myCertificateUrl) +
+                            "&pzhInfo=" + encodeURIComponent(myPzhUrl) + "&ownEmailId=" + encodeURIComponent(req.params.user);
+                        res.redirect(redirectUrl);
+                    } else {
+                        res.writeHead(200);
+                        res.end('Certificate already exchanged');
+                    }
+                });
+            }, function (err) {
+                res.writeHead(200);
+                res.end('Failed to retrieve certificate from remote host');
+            });
+        }
 
         // technically this is a problem.
         // someone could change the URI in transit to transfer different certificates
@@ -124,9 +135,14 @@ module.exports = function (app, address, port, state) {
     //Action: add this user to the trusted list
     //    });
 
-    app.get ('/main/:user/approve-user/:externalemail/', ensureAuthenticated, function (req, res) {
-        pzhadaptor.getRequestingExternalUser (req.user, req.params.externalemail, function (answer) {
-            res.render ("approve-user", {user:req.user, externalUser:req.params.externalemail});
+    app.get('/main/:user/approve-user/:externalemail/', ensureAuthenticated, function (req, res) {
+        pzhadaptor.getRequestingExternalUser(req.user, req.params.externalemail, function (answer) {
+            if (answer.message) {
+                res.render("approve-user", {user:req.user, externalUser:req.params.externalemail});
+            } else {
+                res.writeHead(200);
+                res.end('Failed to approve user ' + req.params.externalemail);
+            }
         });
         //Args: None
         //Auth: PZH login required
@@ -134,30 +150,31 @@ module.exports = function (app, address, port, state) {
         //Actions: have a button that, once approved, add the external user's certificate details to the trusted list.
     });
 
-    app.post ('/main/:user/make-user-decision/', ensureAuthenticated, function (req, res) {
+    app.post('/main/:user/make-user-decision/', ensureAuthenticated, function (req, res) {
         if (req.body.decision && req.user) {
-            pzhadaptor.approveFriend (req.user, req.body.decision, res);
+            pzhadaptor.approveFriend(req.user, req.body.decision, res);
         } else {
-            pzhadaptor.rejectFriend (req.user, req.body.decision, res);
+            pzhadaptor.rejectFriend(req.user, req.body.decision, res);
         }
-        res.redirect ('/');
+        res.redirect('/');
     });
 
-    app.get ('/login', function (req, res) {
+    app.get('/login', function (req, res) {
         if (req.query.isPzp) {
             req.session.isPzp = true;
+            req.session.pzpPort = req.query.port;
         }
-        res.render ('login', { user:req.user });
+        res.render('login', { user:req.user });
     });
     // GET /auth/google
     //   Use passport.authenticate() as route middleware to authenticate the
     //   request.  The first step in Google authentication will involve redirecting
     //   the user to google.com.  After authenticating, Google will redirect the
     //   user back to this application at /auth/google/return
-    app.get ('/auth/google',
-        passport.authenticate ('google', { failureRedirect:'/login' }),
+    app.get('/auth/google',
+        passport.authenticate('google', { failureRedirect:'/login' }),
         function (req, res) {
-            res.redirect ('/');
+            res.redirect('/');
         }
     );
 
@@ -166,33 +183,33 @@ module.exports = function (app, address, port, state) {
     //   request.  If authentication fails, the user will be redirected back to the
     //   login page.  Otherwise, the primary route function function will be called,
     //   which, in this example, will redirect the user to the home page.
-    app.get ('/auth/google/return',
-        passport.authenticate ('google', { failureRedirect:'/login' }),
+    app.get('/auth/google/return',
+        passport.authenticate('google', { failureRedirect:'/login' }),
         function (req, res) {
-            res.redirect ('/');
+            res.redirect('/');
         }
     );
 
-    app.get ('/logout', function (req, res) {
-        req.logout ();
+    app.get('/logout', function (req, res) {
+        req.logout();
         //window.open('https://www.google.com/accounts/Logout');
         //window.open('https://login.yahoo.com/config/login?logout=1');
-        res.redirect ('/');
+        res.redirect('/');
     });
 
-    app.get ('/auth/yahoo',
-        passport.authenticate ('yahoo'),
+    app.get('/auth/yahoo',
+        passport.authenticate('yahoo'),
         function (req, res) {
             // The request will be redirected to Yahoo for authentication, so
             // this function will not be called.
         }
     );
 
-    app.get ('/auth/yahoo/return',
-        passport.authenticate ('yahoo', { failureRedirect:'/login' }),
+    app.get('/auth/yahoo/return',
+        passport.authenticate('yahoo', { failureRedirect:'/login' }),
         function (req, res) {
             // Successful authentication, redirect home.
-            res.redirect ('/');
+            res.redirect('/');
         }
     );
 
@@ -201,14 +218,14 @@ module.exports = function (app, address, port, state) {
     //   the request is authenticated (typically via a persistent login session),
     //   the request will proceed.  Otherwise, the user will be redirected to the
     //   login page.
-    function ensureAuthenticated (req, res, next) {
-        if (req.isAuthenticated ()) {
-            return next ();
+    function ensureAuthenticated(req, res, next) {
+        if (req.isAuthenticated()) {
+            return next();
         }
-        res.redirect ('/login');
+        res.redirect('/login');
     }
 
-    function getUserPath (user) {
-        return encodeURIComponent (user.emails[0].value);
+    function getUserPath(user) {
+        return encodeURIComponent(user.emails[0].value);
     }
 };
