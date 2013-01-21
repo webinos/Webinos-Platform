@@ -18,7 +18,7 @@
 (function() {
   "use strict";
   webinos.session = {};
-  var sessionId = null, pzpId, pzhId, otherPzp = [], otherPzh = [], isConnected = false;
+  var sessionId = null, pzpId, pzhId, otherPzp = [], otherPzh = [], isConnected = false, enrolled = false, mode;
   var serviceLocation;
   var listenerMap = {};
   var channel;
@@ -43,7 +43,12 @@
     if(typeof to === "undefined") {
       to = pzpId;
     }
-    var message = {"type":type, "id":id, "from":webinos.session.getSessionId(), "to":to, "resp_to":webinos.session.getSessionId(), "payload":rpc};
+    var message = {"type":type,
+      "id":id,
+      "from":webinos.session.getSessionId(),
+      "to":to,
+      "resp_to":webinos.session.getSessionId(),
+      "payload":rpc};
     if(rpc.register !== "undefined" && rpc.register === true) {
       console.log(rpc);
       channel.send(JSON.stringify(rpc));
@@ -79,6 +84,13 @@
   webinos.session.getOtherPZH = function() {
     return (otherPzh || []);
   };
+  webinos.session.getPzpModeState = function (mode_name) {
+    if (enrolled && mode[mode_name] === "connected") {
+      return true;
+    } else {
+      return false;
+    }
+  };
   webinos.session.addListener = function(statusType, listener) {
     var listeners = listenerMap[statusType] || [];
     listeners.push(listener);
@@ -106,13 +118,12 @@
     var msg = webinos.messageHandler.registerSender(sessionId, pzpId);
     webinos.session.message_send(msg, pzpId);
   }
-  function setIsConnected() {
-    isConnected = (otherPzh.indexOf(pzhId) !== -1) ? true: false;
-  }
   function updateConnected(message){
     otherPzh = message.connectedPzh;
     otherPzp = message.connectedPzp;
-    setIsConnected();
+    isConnected = (otherPzh.indexOf (pzhId) !== -1) ? true : false;
+    enrolled = message.enrolled;
+    mode = message.mode;
   }
   function setWebinosSession(data){
     sessionId = data.to;
