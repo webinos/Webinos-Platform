@@ -146,6 +146,8 @@ void getInfoFromSD(boolean check_for_elements){
                     else{
                         client.print(",");
                     }
+                    
+                    bool isActuator = false;
                     for(int i=0; i<tmp.length(); i++){
                         if(tmp.charAt(i) == ':' || tmp.charAt(i) == '\n'){
                             field = tmp.substring(colon_pos,i);
@@ -174,6 +176,8 @@ void getInfoFromSD(boolean check_for_elements){
                                 client.print(field);
                                 client.print("\",");
                                 elements[num_elements]->sa = !field.equals("0");
+                                if(elements[num_elements]->sa == 1)
+                                    isActuator = 1;
                             }
                             else if(counter == 2){  // ELEMENT AD
                                 elements[num_elements]->ad = !field.equals("0");
@@ -193,40 +197,74 @@ void getInfoFromSD(boolean check_for_elements){
                                     Serial.println("OUTPUT");
                                 }
                             }
-                            else if(counter == 4){  // ELEMENT MAXIMUMRANGE
-                                client.print("\"maximumRange\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 4){
+                                if(isActuator){  // ACTUATOR TYPE
+                                    client.print("\"type\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
+                                else{ // SENSOR MAXIMUMRANGE
+                                    client.print("\"maximumRange\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 5){  // ELEMENT MINDELAY
-                                client.print("\"minDelay\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 5){  
+                                if(isActuator){  // ACTUATOR RANGE
+                                    client.print("\"range\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
+                                else{ // SENSOR MINDELAY
+                                    client.print("\"minDelay\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 6){  // ELEMENT POWER
-                                client.print("\"power\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 6){
+                                if(isActuator){ // ACTUATOR VENDOR 
+                                    client.print("\"vendor\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
+                                else{ // SENSOR POWER
+                                    client.print("\"power\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 7){  // ELEMENT RESOLUTION
-                                client.print("\"resolution\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 7){
+                                if(isActuator){ // ACTUATOR VERSION
+                                    client.print("\"version\":\"");
+                                    client.print(field);
+                                    client.print("\"}}");
+                                }
+                                else{ // SENSOR RESOLUTION
+                                    client.print("\"resolution\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 8){  // ELEMENT TYPE
-                                client.print("\"type\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 8){
+                                if(!isActuator){ // SENSOR TYPE
+                                    client.print("\"type\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 9){  // ELEMENT VENDOR
-                                client.print("\"vendor\":\"");
-                                client.print(field);
-                                client.print("\",");
+                            else if(counter == 9){  // SENSOR VENDOR
+                                if(!isActuator){
+                                    client.print("\"vendor\":\"");
+                                    client.print(field);
+                                    client.print("\",");
+                                }
                             }
-                            else if(counter == 10){  // ELEMENT VERSION
-                                client.print("\"version\":\"");
-                                client.print(field);
-                                client.print("\"}}");
+                            else if(counter == 10){  // SENSOR VERSION
+                                if(!isActuator){
+                                    client.print("\"version\":\"");
+                                    client.print(field);
+                                    client.print("\"}}");
+                                }
                             }
                             counter++;
                             colon_pos = i+1;
@@ -262,7 +300,7 @@ int getValueFromSensor(bool ad, int pin){
 void setValueToActuator(bool ad, int pin, int value){
     if(ad == 0){ //analog actuator
         Serial.println("Analog actuator");
-        ;
+        analogWrite(pin, value);
     }
     else{ //digital actuator
         Serial.println("Digital actuator");
@@ -451,7 +489,6 @@ void loop(){
                             int pin = -1;
                             bool ad;
                             for(int i=0; i<num_elements;i++){
-                                //if(strcmp(elements[i]->id, id)==0){ // should be eid instead of id-> TEST IT
                                 if(strcmp(elements[i]->id, eid)==0){
                                     pin = elements[i]->pin;
                                     ad = elements[i]->ad;
@@ -498,18 +535,18 @@ void loop(){
                         }
                         else if(strcmp(cmd,"cfg")==0){
                             String tmp = dat;
-                            int last_tp_pos=0;
+                            int last_colon_pos=0;
                             String s;
-                            int tp_pos = tmp.indexOf(':');
-                            s = tmp.substring(0, tp_pos);                          
-                            last_tp_pos = tp_pos + 1;
-                            tp_pos = tmp.indexOf(':', last_tp_pos);
-                            s = tmp.substring(last_tp_pos, tp_pos);
+                            int colon_pos = tmp.indexOf(':');
+                            s = tmp.substring(0, colon_pos);                          
+                            last_colon_pos = colon_pos + 1;
+                            colon_pos = tmp.indexOf(':', last_colon_pos);
+                            s = tmp.substring(last_colon_pos, colon_pos);
                             for(int i=0; i<num_elements; i++)
                                 if(strcmp(elements[i]->id, eid) == 0)
                                     elements[i]->rate = s.toInt();                                                    
-                            last_tp_pos = tp_pos + 1;
-                            s = tmp.substring(last_tp_pos);
+                            last_colon_pos = colon_pos + 1;
+                            s = tmp.substring(last_colon_pos);
                             for(int i=0; i<num_elements; i++){
                                 if(strcmp(elements[i]->id, eid) == 0){
                                     if(s.equals("fix"))
@@ -524,33 +561,24 @@ void loop(){
                             client.println("\"}");
                         }
                         else if(strcmp(cmd,"set")==0){
-                            Serial.println("Dentro set");
                             int pin = -1;
                             bool ad;
                             for(int i=0; i<num_elements;i++){
-                                Serial.print("-->");
-                                Serial.println(elements[i]->id);
                                 if(strcmp(elements[i]->id, eid)==0){
                                     pin = elements[i]->pin;
                                     ad = elements[i]->ad;
-                                    
                                     String sdat = dat;
-                                    Serial.println("--");
-                                    Serial.println(pin);
-                                    Serial.println(sdat);
-                                    Serial.println(ad);
                                     setValueToActuator(ad, pin, sdat.toInt());
                                     break;
                                 }
                             }
                             
-                            
-                            client.print("{\"cmd\":\"set\",\"eid\":\"");
+                            client.print("{\"cmd\":\"set\",\"id\":\"");
                             client.print(board_id);
                             client.print("_");
                             client.print(id);
 //                            client.print("\",\"dat\":\"");
-//                            client.print(value);
+//                            client.print(dat);
                             client.println("\"}");
                         }
                         break;

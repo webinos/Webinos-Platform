@@ -115,13 +115,14 @@ var port;
                 //In this case the sensor should stop data acquisition
                 //the parameter data can be ignored
                 console.log('Received stop command from API. Element : '+eId);
-                makeHTTPRequest(boards[i].ip, boards[i].port, STOP_LISTENING_CMD, native_element_id, NO_VALUE);
+                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, STOP_LISTENING_CMD, native_element_id, NO_VALUE);
                 break;
             case 'value':
                 //In this case the actuator should store the value
                 //the parameter data is the value to store                
                 console.log('Sent value for actuatur '+eId+'; value is '+data);
-                makeHTTPRequest(boards[i].ip, boards[i].port, SET_ACTUATOR_VALUE_CMD, native_element_id, data);
+                //makeHTTPRequest(boards[board_id].ip, boards[board_id].port, SET_ACTUATOR_VALUE_CMD, native_element_id, data);
+                makeHTTPRequest(boards[board_id].ip, boards[board_id].port, SET_ACTUATOR_VALUE_CMD, native_element_id, data[0]);
                 break;
             default:
                 console.log('HTTP driver 1 - unrecognized cmd');
@@ -144,9 +145,7 @@ var port;
                 }
             }            
             callbackFunc('data', index, req.param('data'));
-            console.log("Received data from sensor");
-            console.log("id : " + req.param('id'));
-            console.log("data : " + req.param('data'));
+            console.log("Received data from sensor. id : " + req.param('id') + ", data : " + req.param('data'));
             res.end();
         }
         catch(err){
@@ -230,8 +229,13 @@ var port;
                             console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
                             if(!isAlreadyRegistered(tmp_ele.id)){
-                                tmp_ele.element.name = tmp_ele.element.type+' sensor';
-                                tmp_ele.element.description = 'A webinos '+tmp_ele.element.type+' sensor on '+boards[data.id].name + " [" + data.id + "]";
+                                var str_type = (tmp_ele.element.sa == 0) ? "sensor" : "actuator";
+                                //tmp_ele.element.name = tmp_ele.element.type + " " + str_type;
+                                tmp_ele.element.description = "A webinos " + tmp_ele.element.type + " "  + str_type + " on " + boards[data.id].name + " [" + data.id + "]";
+
+                                try{
+                                    tmp_ele.element.range = [tmp_ele.element.range.split("-")];
+                                }catch(e){}
                                 var id = registerFunc(driverId, tmp_ele.element.sa, tmp_ele.element);
                                 elementsList[id] = tmp_ele;
                                 console.log("Adding element with id " + id);
@@ -239,12 +243,6 @@ var port;
                             else
                                 console.log("Element is already registered");
                         }
-
-                        //FIXME
-                        //----------------------------------
-                        //setTimeout(simulateActuator, 3000);
-                        //----------------------------------
-
                     }
                     else if(data.cmd === CONFIGURE_CMD){
                         console.log("Configuring element " + data.id);                            
@@ -260,6 +258,9 @@ var port;
                         for(var i in elementsList)
                             if(elementsList[i].id === data.id)
                                 elementsList[i].running = false;
+                    }
+                    else if(data.cmd === SET_ACTUATOR_VALUE_CMD){
+                        console.log("Setting value on actuator " + data.id);
                     }
                     else{
                         console.log("Unrecognized command");
@@ -277,18 +278,5 @@ var port;
         
         console.log("Making HTTP request to " + ip + ":" + port + ", cmd: " + cmd + ", id: " + id + ", data: " + data);
         req.end();
-    }
-
-
-    function simulateActuator(){
-        console.log("simulate actuator");
-        for(var ele in elementsList){
-            console.log(ele);
-            console.log(elementsList[ele].element.sa);
-            if(elementsList[ele].element.sa === "1"){
-                console.log("Send http request. id : "+ ele);
-                break;
-            }
-        }
     }
 }());
