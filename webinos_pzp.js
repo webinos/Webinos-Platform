@@ -17,7 +17,7 @@
 *******************************************************************************/
 
 var pzp   = require("./webinos/core/pzp/lib/pzp");
-var __EnablePolicyEditor = false;
+__EnablePolicyEditor = false;
 
 var argv = require('optimist')
     .usage('Starts webinos PZP \nUsage: $0')
@@ -139,7 +139,7 @@ function initializeWidgetServer() {
 function initializePzp(config, pzpModules) {
   pzp.session.initializePzp(config, pzpModules, function(status, result) {
     if (status) {
-      if (argv.startWidgetServer)
+      if (argv.widgetServer)
         initializeWidgetServer();
     } else {
       console.log("unsuccessful in starting PZP" + result);
