@@ -52,6 +52,7 @@
      *
      */
     exports.execute = function(cmd, eId, data) {
+        console.log("fakeDriver2 - cmd : " + cmd + " eId : " + eId + " data : "+data);
     }
 
 

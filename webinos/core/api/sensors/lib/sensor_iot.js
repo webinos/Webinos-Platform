@@ -38,7 +38,9 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         var type;
         var name;
         var description;
-  
+        
+        console.log("Called sensor ctor with params " + JSON.stringify(data));
+
         if(data.type) {
             type = data.type;
         }
@@ -82,7 +84,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         }
 
         var sensorEvent = {};
-        sensorEvent.sensorType = type;
+        sensorEvent.sensorType = "http://webinos.org/api/sensors."+type;
         sensorEvent.sensorId = this.id;
         sensorEvent.accuracy = 0;
         sensorEvent.rate = 0;
