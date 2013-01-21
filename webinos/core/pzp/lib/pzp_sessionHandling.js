@@ -31,11 +31,9 @@ var WebinosManager = require("./pzp_otherManager.js");
 var Pzp = function () {
   "use strict";
   var self = this;
-  self.states= ["NOT_CONNECTED", "CONNECTING", "CONNECTED", "DISCONNECTING"];
-  self.modes = ["VIRGIN", "HUB", "PEER"];
   self.pzp_state = {  // Dynamic state of PZP
-   state : self.states[0], // State is applicable for hub mode but for peer mode, we need to check individually
-   mode  : self.modes[0], //  3 modes a pzp can be, for peer mode, each PZP needs to be checked if it is connected
+   enrolled    :false,
+   state       :{"hub":"not_connected", "peer":"not_connected"}, // State is applicable for hub mode but for peer mode, we need to check individually
    connectedPzp: [], // Stores PZH server details
    connectedPzh: [], // Stores connected PZP information
    sessionId: ""};
@@ -54,9 +52,9 @@ var Pzp = function () {
   function checkMode() {
     // Check if it is virgin mode
     if (self.config && (self.config.cert.internal.master.cert && self.config.metaData.pzhId)) {
-      self.pzp_state.mode = self.modes[1]; // Hub mode
+      self.pzp_state.enrolled = true; // Hub mode
     } else {
-      self.pzp_state.mode  = self.modes[0]; // Virgin mode
+      self.pzp_state.mode  = false; // Virgin mode
     }
   }
 
@@ -84,7 +82,7 @@ var Pzp = function () {
     var options ;
     self.config.fetchKey(self.config.cert.internal.conn.key_id, function(status, value) {
       if (status) {
-        if (self.pzp_state.mode === self.modes[1]) { // Hub Mode
+        if (self.pzp_state.enrolled) { // Hub Mode
           options = {
             key : value,
             cert: self.config.cert.internal.conn.cert,
@@ -133,17 +131,19 @@ var Pzp = function () {
     if (_message && _address){
       var jsonString = JSON.stringify(_message);
       var buf = Session.common.jsonStr2Buffer(jsonString);
-      logger.log('send to '+ _address + ' message ' + jsonString +' and mode '+ self.pzp_state.mode);
+      logger.log('send to '+ _address + ' message ' + jsonString);
 
       try {
-        if (self.pzp_state.connectedPzp.hasOwnProperty(_address) && self.pzp_state.connectedPzp[_address].state === self.states[2]) {
-          self.pzp_state.connectedPzp[_address].socket.pause();
-          self.pzp_state.connectedPzp[_address].socket.write(buf);
-          self.pzp_state.connectedPzp[_address].socket.resume();
-        } else if(self.pzp_state.connectedPzh.hasOwnProperty(_address) && self.pzp_state.connectedPzh[_address].state === self.states[2] && self.pzp_state.mode === self.modes[1]){
-          self.pzp_state.connectedPzh[_address].socket.pause();
-          self.pzp_state.connectedPzh[_address].socket.write(buf);
-          self.pzp_state.connectedPzh[_address].socket.resume();
+        if (self.pzp_state.connectedPzp.hasOwnProperty(_address)
+            && self.pzp_state.state["peer"] === "connected") {
+          self.pzp_state.connectedPzp[_address].pause();
+          self.pzp_state.connectedPzp[_address].write(buf);
+          self.pzp_state.connectedPzp[_address].resume();
+        } else if(self.pzp_state.connectedPzh.hasOwnProperty(_address)
+            && self.pzp_state.enrolled && self.pzp_state.state["hub"] === "connected"){
+          self.pzp_state.connectedPzh[_address].pause();
+          self.pzp_state.connectedPzh[_address].write(buf);
+          self.pzp_state.connectedPzh[_address].resume();
         } else { // sending to the app
           self.pzpWebSocket.sendConnectedApp(_address, _message);
         }
@@ -181,12 +181,14 @@ var Pzp = function () {
       for (key in self.pzp_state.connectedPzp) {
         if (self.pzp_state.connectedPzp.hasOwnProperty(key) && key === _id){
           logger.log("pzp - " + key + " details removed");
+          if (Object.keys(self.pzp_state.connectedPzp) <= 1) self.pzp_state.state["peer"] = "not_connected";
           delete self.pzp_state.connectedPzp[key];
         }
       }
       for (key in self.pzp_state.connectedPzh) {
         if (self.pzp_state.connectedPzh.hasOwnProperty(key) && key === _id){
           logger.log("pzh - " + key + " details removed");
+          self.pzp_state.state["hub"] = "not_connected";
           delete self.pzp_state.connectedPzh[key];
         }
       }
@@ -238,7 +240,7 @@ var Pzp = function () {
           if (status) {
             self.webinos_manager.initializeRPC_Message(modules); // Initializes RPC
             logger.log("successfully started pzp websocket server ");
-            if (self.pzp_state.mode === self.modes[1]) {
+            if (self.pzp_state.enrolled) {
               hub.connect(function(status, value) {  // connects hub
                 if (status){
                   logger.log(value);
@@ -274,7 +276,8 @@ var PzpServer = function(_parent) {
     var msg, text, clientSessionId;
     text = decodeURIComponent(conn.getPeerCertificate().subject.CN);
     clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1]; // Assuming in 1 zone;
-    _parent.pzp_state.connectedPzp[clientSessionId]= {state: _parent.states[2], socket: _conn};
+    _parent.pzp_state.connectedPzp[clientSessionId]= _conn;
+    _parent.pzp_state.state["peer"]= "connected";
     _conn.id  = clientSessionId;
     msg = _parent.webinos_manager.messageHandler.registerSender(_parent.pzp_state.sessionId, clientSessionId);
     _parent.sendMessage(msg, clientSessionId);
@@ -333,7 +336,8 @@ var PzpClient = function (_parent) {
   function pzpClient_Authorized(_msg, _client) {
     var peerSessionId = _msg.name;
     logger.log("authorized & connected to PZP: "+ peerSessionId);
-    _parent.pzp_state.connectedPzp[msg.name] = {state: _parent.states[2], socket: _client};
+    _parent.pzp_state.connectedPzp[msg.name] = _client;
+    _parent.pzp_state.state["peer"]= "connected";
     _client.id = _msg.name;
     var msg1 = _parent.webinos_manager.messageHandler.registerSender(_parent.pzp_state.sessionId, _msg.name);
     _parent.sendMessage(msg1, _msg.name);
@@ -376,7 +380,7 @@ var ConnectHub = function(_parent) {
    * If PZP fails to connect to PZH, this tries to connect back to PZH
    */
    function retryConnecting() {
-    if (_parent.pzp_state.mode === _parent.modes[1]) {
+    if (_parent.pzp_state.enrolled) {
       setTimeout(function(){
         self.connect(function(status){
           logger.log("retrying to connect back to the PZH " + (status ? "successful": "failed"));
@@ -392,7 +396,8 @@ var ConnectHub = function(_parent) {
   function authenticated(conn, callback) {
     if(!_parent.pzp_state.connectedPzh.hasOwnProperty(_parent.pzp_state.sessionId)) {
       _parent.setSessionId();
-      _parent.pzp_state.connectedPzh[_parent.config.metaData.pzhId] = {socket: conn, state: _parent.states[2]};
+      _parent.pzp_state.connectedPzh[_parent.config.metaData.pzhId] = conn;
+      _parent.pzp_state.state["hub"]= "connected";
       conn.id = _parent.config.metaData.pzhId;
       _parent.webinos_manager.startOtherManagers();
       pzpServer.startServer();
@@ -460,7 +465,7 @@ var ConnectHub = function(_parent) {
           pzpServer.startServer();
           if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
             logger.error("Connect  attempt to YOUR PZH "+ _parent.config.metaData.pzhId+" failed.");
-            if(_parent.pzp_state.mode === _parent.modes[1]){
+            if(_parent.pzp_state.enrolled){
               if(os.type().toLowerCase() == "windows_nt")
               {
                 //Do nothing until WinSockWatcher works
@@ -501,7 +506,7 @@ var EnrollPzp = function(_parent, hub){
     _parent.config.storeMetaData(_parent.config.metaData);
     _parent.config.storeAll();
 
-    _parent.pzp_state.mode      = _parent.modes[1]; // Moved from Virgin mode to hub mode
+    _parent.pzp_state.mode      = true; // Moved from Virgin mode to hub mode
 
     hub.connect(function(status) {
       if (status){
