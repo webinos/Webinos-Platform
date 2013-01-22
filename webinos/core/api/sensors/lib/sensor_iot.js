@@ -129,29 +129,39 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             return sensorEvent;
         }
         
+        var CmdErrorHandler = function(rpcErrorCB) {
+            this.rpcErrorCB = rpcErrorCB;      
+            this.errorCB = function(message) {
+                rpcErrorCB(message);
+            };
+        };
+        
         /**
         * Configures a sensor.
         * @param params
         * @param successCB
         * @param errorCB
         */
-        this.configureSensor = function (params, successCB, errorCB){
-            console.log("configuring temperature sensor with params : "+params);
-            driverInterface.sendCommand('cfg', sensorEvent.sensorId, params);
-            successCB(); //TODO probably successCB should be passed to sendCommand and called by driver
+        this.configureSensor = function(params, successCB, errorCB) {
+            console.log("configuring temperature sensor with params : "
+                    + params);
+            driverInterface.sendCommand('cfg', sensorEvent.sensorId, params,
+                    new CmdErrorHandler(errorCB).errorCB);
         };
         
-        this.addEventListener = function (eventType, successHandler, errorHandler, objectRef) {
+        this.addEventListener = function (eventType, successCB, errorCB, objectRef) {
             console.log('Sensor '+sensorEvent.sensorId+': addEventListener');
             this.objRef = objectRef;
             this.listenerActive = true;
-            driverInterface.sendCommand('start', sensorEvent.sensorId, 'fixed');
-        }
+            driverInterface.sendCommand('start', sensorEvent.sensorId, null,
+                    new CmdErrorHandler(errorCB).errorCB);
+        };
 
-        this.removeEventListener = function (eventType, successHandler, errorHandler, objectRef) {
+        this.removeEventListener = function (eventType, successCB, errorCB, objectRef) {
             this.listenerActive = false;
-            driverInterface.sendCommand('stop', sensorEvent.sensorId, null);
-        }
+            driverInterface.sendCommand('stop', sensorEvent.sensorId, null,
+                    new CmdErrorHandler(errorCB).errorCB);
+        };
     }
 
 

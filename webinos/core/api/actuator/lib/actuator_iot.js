@@ -86,14 +86,22 @@
             successCB(tmp);
         };
         
+        var CmdErrorHandler = function(rpcErrorCB) {
+            this.rpcErrorCB = rpcErrorCB;      
+            this.errorCB = function(message) {
+                rpcErrorCB(message);
+            };
+        };
 
         this.setValue = function(value, successCB, errorCB) {
             console.log('actuator.setValue');
-            driverInterface.sendCommand('value', actuatorEvent.actuatorId, value);
-            //TODO wait a callback from driver before sending the callback?
+            driverInterface.sendCommand('value', actuatorEvent.actuatorId,
+                    value, new CmdErrorHandler(errorCB).errorCB);
+            // If driver haven't called the error callback before returning
+            // from it is assumed that everything went ok.
             actuatorEvent.avtualValue = value;
             successCB(actuatorEvent);
-        }
+        };
 
     }
 
