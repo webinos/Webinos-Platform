@@ -42,6 +42,11 @@ function handleMessage() {
             apiFeature = rpcRequest.method.substring(0, idx);
         }
 
+        //If no feature is associated to the request, then allow
+        if(apiFeature == null) {
+            console.log('Policy manager: no feature found');
+            return true;
+        }
 
         var userAndRequestor = arguments[1].split("_")[1].split("/");
         var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
