@@ -30,7 +30,7 @@
 				node_modules/inherits/,
 				node_modules/mkdirp/,
 				node_modules/node-uuid/,
-                                node_modules/optimist/,
+				node_modules/optimist/,
 				webinos/web_root/webinos.js,
 				webinos/" 
 			excludes="
