@@ -260,7 +260,11 @@ var PzpWSS = function(_parent) {
       connectedWebApp[appId] = connection;
       connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-      payload = { "pzhId": parent.config.metaData.pzhId, "connectedPzp": getConnectedPzp(), "connectedPzh": getConnectedPzh()};
+      payload = { "pzhId":parent.config.metaData.pzhId,
+        "connectedPzp" :getConnectedPzp (),
+        "connectedPzh" :getConnectedPzh (),
+        "state"        :parent.pzp_state.state,
+        "enrolled"     :parent.pzp_state.enrolled};
       msg = prepMsg(parent.pzp_state.sessionId, appId, "registeredBrowser", payload);
       self.sendConnectedApp(appId, msg);
 
@@ -281,7 +285,11 @@ var PzpWSS = function(_parent) {
           key = parent.pzp_state.sessionId+ "/" + key.split("/")[1];
           tmp.id = key;
           connectedWebApp[key] = tmp;*/
-          payload = {"pzhId": parent.config.metaData.pzhId, "connectedPzp":  getConnectedPzp(),"connectedPzh":  getConnectedPzh()};
+          payload = { "pzhId":parent.config.metaData.pzhId,
+            "connectedPzp" :getConnectedPzp (),
+            "connectedPzh" :getConnectedPzh (),
+            "state"        :parent.pzp_state.state,
+            "enrolled"     :parent.pzp_state.enrolled};
           msg = prepMsg(parent.pzp_state.sessionId, key, "update", payload);
           self.sendConnectedApp(key, msg);
         }
