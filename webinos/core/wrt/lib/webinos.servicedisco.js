@@ -26,7 +26,6 @@
         this.registeredServices = 0;
         this._webinosReady = false;
         this.callerCache = [];
-        this.timer = null;
 
         if (isOnNode()) {
             return;
@@ -39,8 +38,8 @@
             that._webinosReady = true;
             // finishCallers(that);
             for (var i = 0; i < that.callerCache.length; i++) {
-                var caller = that.callerCache[i];
-                that.rpcHandler.executeRPC(caller.rpc);
+                var req = that.callerCache[i];
+                that.rpcHandler.executeRPC(req);
             }
             that.callerCache = [];
         });
@@ -61,24 +60,33 @@
      * PendingOperation findServices(ServiceType serviceType, FindCallBack findCallBack, Options options, Filter filter)
      */
     ServiceDiscovery.prototype.findServices = function (serviceType, callback, options, filter) {
-        
-        
-        var searchParams = {
-                serviceType: serviceType,
-                callback:    callback,
-                options:     options,
-                filter:      filter
-        };
+        var that = this;
+        var findOp;
         
         var rpc = this.rpcHandler.createRPC('ServiceDiscovery', 'findServices',
                 [serviceType, options, filter]);
         
-        var findHandle = new PendingOperation(this, rpc, searchParams);
-        if (callback && typeof callback.onError === 'function') {
-            findHandle.errorCallback = callback.onError;
-        }
+        var timer = setTimeout(function () {
+            that.rpcHandler.unregisterCallbackObject(rpc);
+            // If no results return TimeoutError.
+            if (!findOp.found && typeof callback.onError === 'function') {
+                callback.onError(new DOMError('TimeoutError', ''));
+            }
+        }, options && typeof options.timeout !== 'undefined' ?
+                    options.timeout : 120000 // default timeout 120 secs
+        );
         
-        var that = this;
+        findOp = new PendingOperation(function() {
+            // remove waiting ops from callerCache
+            var index = that.callerCache.indexOf(findOp);
+            if (index >= 0) {
+                that.callerCache.splice(index, 1);
+            }
+            that.rpcHandler.unregisterCallbackObject(rpc);
+            if (typeof callback.onError === 'function') {
+                callback.onError(new DOMError('AbortError', ''));
+            }
+        }, timer);
         
         function success(params) {
             var baseServiceObj = params;
@@ -159,7 +167,7 @@
                 // elevate baseServiceObj to usable local WebinosService object
                 var service = new ServiceConstructor(baseServiceObj, that.rpcHandler);
                 this.registeredServices++;
-                findHandle.found = true;
+                findOp.found = true;
                 callback.onFound(service);
             } else {
                 var serviceErrorMsg = 'Cannot instantiate webinos service.';
@@ -173,16 +181,14 @@
         // The core of findService.
         rpc.onservicefound = function (params) {
             // params is the parameters needed by the API method.
-            if (typeof findHandle !== 'undefined') {
-                success(params);
-            }
+            success(params);
         };
         
         // Refer to the call in
         // Webinos-Platform/webinos/core/api/servicedisco/lib/rpc_servicediso.js.
         rpc.onSecurityError = function (params) {
-            if (typeof findHandle !== 'undefined' && typeof callback.onError === 'function') {
-                callback.onError(DOMError('SecurityError', ''));
+            if (typeof findOp !== 'undefined' && typeof callback.onError === 'function') {
+                callback.onError(new DOMError('SecurityError', ''));
             }
         };
         
@@ -195,20 +201,6 @@
             rpc.serviceAddress = webinos.session.getServiceLocation();
         }
         
-        this.timer = setTimeout(function () {
-                if (typeof findHandle !== 'undefined') {
-                    that.rpcHandler.unregisterCallbackObject(rpc);
-                    // If no results return TimeoutError.
-                    if (!findHandle.found && typeof callback.onError === 'function') {
-                        callback.onError(DOMError('TimeoutError', ''));
-                    }
-                    delete findHandle;
-                }
-            },
-            options && typeof options.timeout !== 'undefined' ? options.timeout : 120000
-            // Default: 120 secs
-        );
-        
         // TODO Need to check how to handle it. The serviceType BlobBuilder is
         // not in the API spec.
         // Pure local services.
@@ -217,48 +209,34 @@
             var tmp = new BlobBuilder();
             this.registeredServices++;
             callback.onFound(tmp);
-            return findHandle;
+            return findOp;
         }
         
         if (!isOnNode() && !this._webinosReady) {
-            this.callerCache.push(findHandle);
+            this.callerCache.push(rpc);
         } else {
             // Only do it when _webinosReady is true.
             this.rpcHandler.executeRPC(rpc);
         }
         
-        return findHandle;
+        return findOp;
     };  // End of findServices.
     
     /**
      * Interface PendingOperation
      */
-    function PendingOperation(serviceDiscoveryInterface, rpc, searchParams) {
-        this.rpc = rpc;
-        this.searchParams = searchParams;
+    function PendingOperation(cancelFunc, timer) {
         this.found = false;
-        this.errorCallback = null;
         
-        var that = this;
         this.cancel = function () {
-            // Check serviceDiscoveryInterface.callerCache and remove the call.
-            var index = serviceDiscoveryInterface.callerCache.indexOf(that);
-            if (index >= 0) {
-                serviceDiscoveryInterface.callerCache.splice(index, 1);
-            }
-            serviceDiscoveryInterface.rpcHandler.unregisterCallbackObject(rpc);
-            clearTimeout(serviceDiscoveryInterface.timer);
-            if (typeof that.errorCallback === 'function') {
-                that.errorCallback(DOMError('AbortError', ''));
-            }
-            delete that;
-            return;
+            clearTimeout(timer);
+            cancelFunc();
         };
     }
     
-    function DOMError(type, message) {
+    function DOMError(name, message) {
         return {
-            type: type,
+            name: name,
             message: message
         };
     }
