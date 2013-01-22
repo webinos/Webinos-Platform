@@ -66,7 +66,6 @@ var PzpWSS = function (_parent) {
             var msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", data);
             self.sendConnectedApp (from, msg);
         }
-
         var os = require ("os");
         var child_process = require ("child_process").exec;
         if (os.platform ().toLowerCase () !== "android") {
@@ -247,12 +246,8 @@ var PzpWSS = function (_parent) {
             self.sendConnectedApp(appId, msg);
 
             if(Object.keys(connectedWebApp).length == 1 ) {
-                getVersion(function(value){
-                    msg2 = prepMsg(parent.pzp_state.sessionId, appId, "webinosVersion", value);
-                    self.sendConnectedApp(appId, msg2);
-                });
+                getVersion(appId);
             }
-            self.sendConnectedApp (appId, msg);
         } else {
             for (key in connectedWebApp) {
                 if (connectedWebApp.hasOwnProperty (key)) {

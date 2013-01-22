@@ -458,11 +458,6 @@ var ConnectHub = function (_parent) {
                 pzpClient = tls.connect (_parent.config.userPref.ports.provider, _parent.config.metaData.serverName, options, function (conn) {
                     handleAuthorization (pzpClient, _callback);
                 });
-                pzpClient = tls.connect (_parent.config.userPref.ports.provider,
-                    _parent.config.metaData.serverName,
-                    options, function (conn) {
-                        handleAuthorization (pzpClient, _callback);
-                    });
 
                 pzpClient.on ("data", function (buffer) {
                     _parent.handleMsg (pzpClient, buffer);
