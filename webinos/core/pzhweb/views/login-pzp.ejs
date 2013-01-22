@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>PZH Login</title>
+<link rel="stylesheet" type="text/css" href="./css/reset.css">
+<link rel="stylesheet" type="text/css" href="./css/structure.css">
+<link rel="stylesheet" type="text/css" href="./css/login.css">
+<script type="text/javascript" src="../webinos.js"></script>
+<script type="text/javascript">
+  function loginGoogle() {
+     var options = {"type": 'prop', "payload":{"status": "authenticate", "message": "google"}};
+     webinos.session.message_send(options);
+  }
+  function loginYahoo() {
+    var options = {"type": 'prop', "payload":{"status": "authenticate", "message": "yahoo"}};
+    webinos.session.message_send(options);
+  }
+  function authenticate(msg){
+    console.log(msg);
+    window.location.href=msg.payload.message;
+  }
+  webinos.session.addListener('authenticate', authenticate);
+</script>
+</head>
+<body>
+<form class="box login">
+  <header>
+    <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png" width="100px">
+    <label>Request access to this zone: login</label>
+    <!-- <label>Please login to you personal zone hub using one of the following methods.</label> -->
+    <!-- TODO: "If you do not have an account, click..." -->
+    <!-- TODO: Fix stylesheet so that addition text can be added here if necessary -->
+  </header>
+  <fieldset class="boxBody">
+    <label>Request access using your Google ID</label>
+    <img src='https://ssl.gstatic.com/images/logos/google_logo_41.png' width="100px"/>
+    <input type="button" class="btnLogin" onclick="loginGoogle()" value="Login via Google">
+    <label>Request access using your Yahoo! ID</label>
+    <img src='http://l.yimg.com/a/images/ww/met/slimheader/yahoo-logo-sm-png8.png' width="100px"/>
+    <input type="button" class="btnLogin" onclick="loginYahoo()" value="Login via Yahoo!">
+  </fieldset>
+</form>
+<footer id="main">
+  <a href="http://wwww.webinos.org">Powered by webinos</a> | <a href="http://developer.webinos.org">Developer resources on webinos</a>
+</footer>
+</body>
+</html>

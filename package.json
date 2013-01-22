@@ -30,12 +30,16 @@
   , "mkdirp" : "0.3.x"
   , "connect" : "2.6.x"
   , "grunt-contrib-clean" : "~0.3.x"
-  , "express": "3.x"
+  , "optimist" : "x.x.x"
   }
 , "optionalDependencies" :
   { "sqlite3" : "2.1.x"
   , "qrcode" : "0.x.x"
   , "openid" : "0.x.x"
+  , "express" : "3.x.x"
+  , "passport" : "x.x.x"
+  , "passport-yahoo" : "x.x.x"
+  , "passport-google" : "x.x.x"
   }
 , "engines" :
   { "node" : ">= 0.6.0"
