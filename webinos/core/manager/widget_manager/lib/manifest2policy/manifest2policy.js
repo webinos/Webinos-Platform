@@ -35,8 +35,6 @@
     * @param features Optional features allowed by the user
     */
     var manifest2policy = function(manifestFile, features) {
-        var manifest = null;
-
         try {
             var xmlManifest = fs.readFileSync(manifestFile);
             // Load xml parser
@@ -44,17 +42,32 @@
             // Parse manifest
             xmlParser.parseString(xmlManifest, function(err, data) {
                 if (err === undefined || err === null) {
-                    manifest = data['widget'];
+                    if (data.widget !== null && data.widget !== undefined) {
+                        var policy = policyGeneration(data.widget, features);
+                        return true;
+                    } else {
+                        console.log('Root tag not found');
+                        return false;
+                    }
                 } else {
                     console.log(err);
-                    return '';
+                    return false;
                 }
             });
         } catch (error) {
             console.log(error);
-            return '';
+            return false;
         }
 
+    };
+
+    /**
+    * Generate the new application policy
+    * @function
+    * @param manifest Parsed application manifest
+    * @param features Optional features allowed by the user
+    */
+    var policyGeneration = function (manifest, features) {
         // target
         var target = [];
         target[0] = {};
