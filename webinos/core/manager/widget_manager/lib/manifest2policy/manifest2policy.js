@@ -34,7 +34,7 @@
     * @param appId Application ID
     * @param features Optional features allowed by the user
     */
-    var manifest2policy = function(manifestFile, appId, features) {
+    var manifest2policy = function(manifestFile, features) {
         var manifest = null;
 
         try {
@@ -60,13 +60,18 @@
         target[0] = {};
         target[0].subject = [];
         var subjectMatch = [];
-        // subject-match on application ID
-        if (appId !== null && appId !== undefined) {
-            subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
+        // appId defined as author-name
+        if (manifest.author !== null && manifest.author !== undefined &&
+            manifest.name !== null && manifest.name !== undefined &&
+            manifest.author[0].length > 0 && manifest.name[0].length > 0) {
+                
+            var appId = manifest.author[0]+'-'+manifest.name[0];
         } else {
-            console.log('appId is missing');
+            console.log('It is not possible to define appId');
             return '';
         }
+        // subject-match on application ID
+        subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
         // subject-match on user ID, assuming to receive it as a parameter
         /*if (userId !== null && userId !== undefined) {
             subjectMatch.push({'$' : {'attr' : 'user-id', 'match' : userId}});
