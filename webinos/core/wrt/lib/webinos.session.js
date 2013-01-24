@@ -224,7 +224,7 @@
         case "showHashQR":
           callListenerForMsg(data);
           break;
-	case "addPzpQR":
+        case "addPzpQR":
           callListenerForMsg(data);
           break;	
         case "requestRemoteScanner":

@@ -155,7 +155,7 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
 
   //write it to PEM format
   if (!(err = PEM_write_bio_X509_REQ(mem, req))) {
-	BIO_free(mem);
+    BIO_free(mem);
     BIO_free(bmem);
     return err;
   }

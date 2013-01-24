@@ -79,32 +79,30 @@ var Pzp = function () {
         var options;
         self.config.fetchKey (self.config.cert.internal.conn.key_id, function (status, value) {
             if (status) {
-
-	  
-        var caList = [], crlList = [], key;
-        caList.push(self.config.cert.internal.master.cert);
-        crlList.push(self.config.crl );
+                var caList = [], crlList = [], key;
+                caList.push(self.config.cert.internal.master.cert);
+		crlList.push(self.config.crl );
       
-        for ( key in self.config.cert.external) {
-          if(self.config.cert.external.hasOwnProperty(key)) {
-            caList.push(self.config.cert.external[key].cert);
-            crlList.push(self.config.cert.external[key].crl);
-	  }
-        }
-        options = {
-          key : value,
-          cert: self.config.cert.internal.conn.cert,
-          crl : crlList,
-          ca  : caList,
-          servername: self.config.metaData.pzhId,
-          rejectUnauthorized: true,
-          requestCert: true    
-        }; 
+                for ( key in self.config.cert.external) {
+                    if(self.config.cert.external.hasOwnProperty(key)) {
+                        caList.push(self.config.cert.external[key].cert);
+                        crlList.push(self.config.cert.external[key].crl);
+	            }
+		}
+                options = {
+                    key : value,
+                    cert: self.config.cert.internal.conn.cert,
+                    crl : crlList,
+                    ca  : caList,
+		    servername: self.config.metaData.pzhId,
+		    rejectUnauthorized: true,
+                    requestCert: true    
+                }; 
        
-        return callback(options)
-      }
-    });
-  };
+                return callback(options)
+            }
+        });
+    };
 
     /**
      * Prepares webinos internal message to be sent between webinos endpoints
@@ -286,12 +284,12 @@ var PzpServer = function (_parent) {
         // check if in the same zone
         var zoneId = _parent.config.metaData.pzhId;
         if(zoneId.indexOf(cn) !=-1)
-          var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1]; 
+            var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1]; 
         else
         {
-          var clientSessionId = _parent.config.exCertList.exPZP;
-          //clean exPZP
-          _parent.config.exCertList.exPZP = "";
+            var clientSessionId = _parent.config.exCertList.exPZP;
+            //clean exPZP
+            _parent.config.exCertList.exPZP = "";
         }
         logger.log("Authorised session " + clientSessionId);
     
@@ -366,67 +364,67 @@ var PzpClient = function (_parent) {
         _parent.pzpWebSocket.updateApp ();
     }
   
-  function pzpClient_PeerCleanup() {
-    var path = require("path");
-    var fs = require("fs");
-    logger.log("Clean up SiB leftovers");
-    var own = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
-    var other = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
-    var exlist = path.join(_parent.config.metaData.webinosRoot, "exCertList.json");
-    if(path.existsSync(own)) {
-      fs.unlink(own, function(err){
-        if(err) throw err;
-        logger.log("removed" + own);
-      });
+    function pzpClient_PeerCleanup() {
+        var path = require("path");
+        var fs = require("fs");
+        logger.log("Clean up SiB leftovers");
+	var own = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
+	var other = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
+        var exlist = path.join(_parent.config.metaData.webinosRoot, "exCertList.json");
+        if(path.existsSync(own)) {
+            fs.unlink(own, function(err){
+                if(err) throw err;
+                logger.log("removed" + own);
+            });
+        }
+        if(path.existsSync(other)) {
+            fs.unlink(other, function(err){
+                if(err) throw err;
+                logger.log("removed" + other);
+            });
+        }
+        if(path.existsSync(exlist)) {
+            fs.unlink(exlist, function(err){
+                if(err) throw err;
+                logger.log("removed" + exlist);
+	    });
+        }
+        _parent.pzp_state.connectingPeerAddr = "";    
     }
-    if(path.existsSync(other)) {
-      fs.unlink(other, function(err){
-        if(err) throw err;
-        logger.log("removed" + other);
-      });
-    }
-    if(path.existsSync(exlist)) {
-      fs.unlink(exlist, function(err){
-        if(err) throw err;
-        logger.log("removed" + exlist);
-      });
-    }
-    _parent.pzp_state.connectingPeerAddr = "";    
-  }
 
     this.connectPeer = function (msg) {
         _parent.setConnParam (function (options) {
-      var name = msg.name;
-      var n;
-      if(name && (n = name.indexOf("/")))
-      {
-        options.servername = name.substring(0, n);
-        logger.log("servername: " + options.servername);
-      }
+            var name = msg.name;
+            var n;
+            if(name && (n = name.indexOf("/")))
+            {
+                options.servername = name.substring(0, n);
+                logger.log("servername: " + options.servername);
+            }
       
-      var servername = msg.address;
-      var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
-        if (client.authorized) {
-	  pzpClient_Authorized(msg, client);
-	  pzpClient_PeerCleanup();  
-        } else {
-          logger.error("pzp client - connection failed, " + client.authorizationError);
-        }
-      });
+	    var servername = msg.address;
+            var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
+                if (client.authorized) {
+                    pzpClient_Authorized(msg, client);
+                    pzpClient_PeerCleanup();  
+                } else {
+                    logger.error("pzp client - connection failed, " + client.authorizationError);
+                }
+            });
 
-      client.on("data", function (buffer) {
-        _parent.handleMsg(client, buffer);
-      });
+	    client.on("data", function (buffer) {
+                _parent.handleMsg(client, buffer);
+            });
 
-      client.on("end", function () {
-        _parent.cleanUp(client.id);
-      });
+	    client.on("end", function () {
+                _parent.cleanUp(client.id);
+            });
 
-      client.on("error", function (err) {
-        logger.error("pzp client - " + err.message);
-      });
-    });
-  }
+            client.on("error", function (err) {
+                logger.error("pzp client - " + err.message);
+            });
+        });
+    }
 };
 
 /**
@@ -529,16 +527,6 @@ var ConnectHub = function (_parent) {
                     if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
                         logger.error ("Connect  attempt to YOUR PZH " + _parent.config.metaData.pzhId + " failed.");
                         _parent.webinos_manager.startOtherManagers ();
-                        if (_parent.pzp_state.enrolled) {
-                            var os = require ("os");
-                            if (os.type ().toLowerCase () == "windows_nt") {
-                                //Do nothing until WinSockWatcher works
-                            }
-                            else {
-			    logger.log("comment out discovery");
-                //_parent.webinos_manager.peerDiscovery.findPzp(self,'zeroconf', _parent.config.userPref.ports.pzp_tlsServer, _parent.config.metaData.pzhId, function(data){});
-                            }
-                        }
                     } else {
                         logger.error (err);
                     }
