@@ -87,16 +87,16 @@
          * @param sensorActuator specify if it's a sensor(0) or an actuator(1)
          * @param type the type of sensor/actuator (eg light, temperature, ...)
          */
-        function register(driverId, sensorActuator, type) {
-            console.log('driverInterface register - did '+driverId+', sa '+sensorActuator+', type '+type);
+        function register(driverId, sensorActuator, info) {
+            console.log('driverInterface register - did '+driverId+', sa '+sensorActuator+', type '+info.type);
             var newElement = {};
             newElement.driverId = driverId;
             newElement.sensorActuator = sensorActuator;
-            newElement.type = type;
+            newElement.type = info.type;
             elementList[newElementId] = newElement;
             //Sending up the register command; in this case data is the type of sensor/actuator
             if(apiListener[sensorActuator] != null) {
-                (apiListener[sensorActuator])('register', newElementId, type);
+                (apiListener[sensorActuator])('register', newElementId, info);
                 return newElementId++;
             }
             else {
