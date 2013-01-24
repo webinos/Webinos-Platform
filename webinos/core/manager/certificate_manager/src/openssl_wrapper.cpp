@@ -15,6 +15,7 @@
 *
 * Copyright 2011 University of Oxford
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+* Copyright 2012 Ziran Sun, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 #include "openssl_wrapper.h"
 #include <openssl/rsa.h>
@@ -24,8 +25,14 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 /*
  * Note: you CANT use STL in this module - it breaks the Android build.
  */
@@ -148,7 +155,7 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
 
   //write it to PEM format
   if (!(err = PEM_write_bio_X509_REQ(mem, req))) {
-    BIO_free(mem);
+	BIO_free(mem);
     BIO_free(bmem);
     return err;
   }
@@ -161,6 +168,96 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
   BIO_free(bmem);
   BIO_free(mem);
   return 0;
+}
+
+int getHash(char* filename, char *pointer){
+  struct stat           sb;
+  unsigned char       * buff;
+  int                   fd;
+  ssize_t               len;
+  BIO                 * bio;
+  X509                * x;
+  unsigned              err;
+  char                  errmsg[1024];
+  const EVP_MD        * digest;
+  unsigned char         md[EVP_MAX_MD_SIZE];
+  unsigned int          n;
+  int j;
+
+  // checks file
+  if ((stat(filename, &sb)) == -1)
+  {
+    perror("getHash: stat()");
+    return(1);
+  };
+  len = (sb.st_size * 2);
+
+  // allocates memory
+  if (!(buff = (unsigned char*)malloc(len)))
+  {
+    fprintf(stderr, "getHash: out of virtual memory\n");
+    return(1);
+  };
+
+  // opens file for reading
+  if ((fd = open(filename, O_RDONLY)) == -1)
+  {
+    perror("getHash: open()");
+    free(buff);
+    return(1);
+  };
+
+  // reads file
+  if ((len = read(fd, buff, len)) == -1)
+  {
+    perror("getHash: read()");
+    free(buff);
+    return(1);
+  };
+
+  // closes file
+  close(fd);
+
+  // initialize OpenSSL
+  SSL_library_init();
+  SSL_load_error_strings();
+  
+  // creates BIO buffer
+  bio = BIO_new_mem_buf(buff, len);
+
+  // decodes buffer
+  if (!(x = PEM_read_bio_X509(bio, NULL, 0L, NULL)))
+  {
+    while((err = ERR_get_error()))
+    {
+      errmsg[1023] = '\0';
+      ERR_error_string_n(err, errmsg, 1023);
+      fprintf(stderr, "peminfo: %s\n", errmsg);
+    };
+    BIO_free(bio);
+    free(buff);
+    return(1); 
+  };
+  
+  digest = EVP_get_digestbyname("sha1");
+  if(X509_digest(x, digest, md, &n) && n > 0) {
+    static const char hexcodes[] = "0123456789ABCDEF";
+    for (j = 0; j < (int) n; j++) {
+      pointer[j * 3] = hexcodes[(md[j] & 0xf0) >> 4U];
+      pointer[(j * 3) + 1] = hexcodes[(md[j] & 0x0f)];
+      if (j + 1 != (int) n) {
+        pointer[(j * 3) + 2] = ':';
+      } 
+      else {
+        pointer[(j * 3) + 2] = '\0';
+      }
+    }
+  }
+    
+  BIO_free(bio);
+  free(buff);
+
+  return(0);
 }
 
 ASN1_INTEGER* getRandomSN()
@@ -404,7 +501,6 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   }
   strcpy(str, "caIssuers;");
   strcat(str, url);
-
 
   if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_info_access, (char*)str))) {
     free(str);

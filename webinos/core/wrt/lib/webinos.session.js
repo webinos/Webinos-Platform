@@ -215,6 +215,30 @@
           setWebinosSession(data);
           callListenerForMsg(data);
           break;
+        case "pzpFindPeers":
+          callListenerForMsg(data);
+          break;
+        case "pubCert":
+          callListenerForMsg(data);
+          break;
+        case "showHashQR":
+          callListenerForMsg(data);
+          break;
+	case "addPzpQR":
+          callListenerForMsg(data);
+          break;	
+        case "requestRemoteScanner":
+            callListenerForMsg(data);
+          break;	
+        case "checkHashQR":
+          callListenerForMsg(data);
+          break;	  
+        case "sendCert":
+          callListenerForMsg(data);
+          break;
+        case "connectPeers":
+          callListenerForMsg(data);
+          break;  
         case "update":
           updateConnected(data.payload.message);
           callListenerForMsg(data);
@@ -223,9 +247,6 @@
           callListenerForMsg(data);
           break;
         case "errorLog":
-          callListenerForMsg(data);
-          break;
-        case "addPzpQR":
           callListenerForMsg(data);
           break;
         case "error":

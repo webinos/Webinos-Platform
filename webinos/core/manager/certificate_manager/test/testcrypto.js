@@ -62,6 +62,10 @@ var crlWithKey = null;
 crlWithKey = certman.addToCRL(caKey, crl, pzpCert);
 if (debug) console.log("PZP Certificate revoked, new CRL: \n[" + crlWithKey + "]\n");
 
+var hash = null; 
+hash = certman.getHash("./conn.pem");
+if (debug) console.log("PZP public hash key, hash: \n[" + hash + "]\n");
+
  
 
 

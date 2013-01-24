@@ -14,19 +14,21 @@
  *
  * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
  * Author: Habib Virji (habib.virji@samsung.com)
+ *         Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 var dependency = require ("find-dependencies") (__dirname);
 var keystore = dependency.global.require (dependency.global.manager.keystore.location);
 
 var Certificate = function () {
     var logger = dependency.global.require (dependency.global.util.location, "lib/logging.js") (__filename);
-    keystore.call (this);
-
-    this.cert = {};
-    this.cert.internal = {};
-    this.cert.external = {};
-    this.cert.internal = {master:{}, conn:{}, web:{}};
-    var self = this;
+  keystore.call(this);
+  this.cert         = {};
+  this.cert.internal= {};
+  this.cert.external= {};
+  this.cert.internal= {master: {}, conn: {}, web: {}};
+  this.keys = {};
+  this.keys.conn = {}; 
+  var self = this;
 
     this.generateSelfSignedCertificate = function (type, cn, callback) {
         var certman, obj = {}, key_id, cert_type, conn_key;
@@ -107,6 +109,7 @@ var Certificate = function () {
                     self.generateSignedCertificate (self.cert.internal.conn.csr, 1, function (status, value) {
                         if (status) {
                             self.cert.internal.conn.cert = value;
+                            self.keys.conn = value;
                             return callback (true, conn_key);
                         } else {
                             return callback (status, value);
@@ -114,6 +117,7 @@ var Certificate = function () {
                     });
                 } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
                     self.cert.internal.conn.cert = obj.cert;
+                    self.keys.conn = obj.cert;
                     self.cert.internal.conn.csr = obj.csr;
                     if (type === "Pzp") {
                         self.crl = obj.crl;
@@ -125,13 +129,31 @@ var Certificate = function () {
             }
         });
     };
-    Certificate.prototype.generateSignedCertificate = function (csr, cert_type, callback) {
-        var certman, self = this;
-        try {
-            certman = require ("certificate_manager");
-        } catch (err) {
-            return callback (false, err);
-        }
+  
+  Certificate.prototype.getKeyHash = function(path, callback){
+    var certman, self = this;
+    try {
+      certman = require("certificate_manager");
+    }catch (err) {
+      return callback(false, err);
+    }
+    try{  
+      var hash = certman.getHash(path);
+      logger.log("Key Hash is" + hash);
+      return callback(true, hash);
+    } catch (err) {
+      logger.log("get certificate manager error" + err);
+      return callback(false, err);
+    }
+  };
+  
+  Certificate.prototype.generateSignedCertificate = function(csr, cert_type,  callback) {
+    var certman, self = this;
+    try {
+      certman = require("certificate_manager");
+    } catch (err) {
+      return callback(false, err);
+    }
 
         try {
             self.fetchKey (self.cert.internal.master.key_id, function (status, value) {

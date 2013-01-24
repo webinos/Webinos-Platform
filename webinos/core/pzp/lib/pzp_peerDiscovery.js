@@ -29,7 +29,6 @@ var PzpPeerDiscovery = function(_parent){
    * @param port. Port for advertisement. Use 4321 if not configured
    */
   this.advertPzp = function(discoveryMethod, port) {
-    
     if(typeof port == "undefined")
       port = 4321;
     this.localconnectionManager.advertPeers('pzp', discoveryMethod, port);
@@ -40,18 +39,39 @@ var PzpPeerDiscovery = function(_parent){
    * @param parent. PZP instance
    * @param discoveryMethod. DiscoveryMethod used
    * @param tlsServerPort. TLS port for TLS peer connection
-   * @param pzhId. PZH identity
+   * @param options. Other options specified by the user, e.g timeout
+   * @param callback. 
    */
-  this.findPzp = function(parent, discoveryMethod, tlsServerPort, pzhId){
-  
-    var connectPeerFunction = function (msg) {
-        "use strict";
-        // Don't connect yet - this requires certificate check  
-        //_parent.pzpClient.connectPeer(msg);
-      };
-      
-    this.localconnectionManager.setConnectPeersfunction(connectPeerFunction);
-    this.localconnectionManager.findPeers('pzp', discoveryMethod, tlsServerPort, pzhId);
+  this.findPzp = function(parent, discoveryMethod, tlsServerPort, options, callback){
+    this.localconnectionManager.findPeers('pzp', discoveryMethod, tlsServerPort, options, function(msg){
+      _parent.pzp_state.discoveredPzp[msg.name] = msg;
+      logger.log("parent.pzp_state.discoveredPzp[" + msg.name + "]");
+      logger.log(msg);
+       
+      //Filter out self
+      logger.log("own session id: "  + parent.pzp_state.sessionId);
+      var pzpname = msg.name + "_Pzp";
+      logger.log("pzpname: " + pzpname);
+      //TODO: Should also check PZH ID
+           
+      if(parent.pzp_state.sessionId.indexOf(pzpname) != -1)
+      {
+        logger.log(parent.pzp_state.sessionId);
+        parent.pzp_state.networkAddr = msg.address;  //store  own network address for later use
+        logger.log("own address: " + parent.pzp_state.networkAddr);
+      }
+      else
+      {
+        //filter out already connected msg
+        if (parent.pzp_state.connectedPzp.hasOwnProperty(msg.address) && 
+        self.pzp_state.connectedPzp[msg.address].state === self.states[2])
+          msg.connected = true; 
+        else
+          msg.connected = false; 
+        callback(msg);
+      }
+    } );
   }; 
+  
 };
 module.exports = PzpPeerDiscovery;
