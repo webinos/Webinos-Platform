@@ -24,26 +24,50 @@
 
     var fs = require('fs');
     var xml2js = require('xml2js');
+    var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
     var convert2xml = require('data2xml')({attrProp : '$', valProp : '_'});
-    //var util = require('util');
+    var util = require('util');
 
     /**
     * Translate from manifest to policy
     * @function
     * @param manifestFile Application manifest
-    * @param appId Application ID
+    * @param policyFile output file for the application policy
     * @param features Optional features allowed by the user
     */
-    var manifest2policy = function(manifestFile, features) {
+    var manifest2policy = function(manifestFile, policyFile, features) {
         try {
             var xmlManifest = fs.readFileSync(manifestFile);
-            // Load xml parser
-            var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
             // Parse manifest
             xmlParser.parseString(xmlManifest, function(err, data) {
                 if (err === undefined || err === null) {
                     if (data.widget !== null && data.widget !== undefined) {
-                        var policy = policyGeneration(data.widget, features);
+                        // appId is defined as author-name
+                        if (data.widget.author !== null && 
+                            data.widget.author !== undefined &&
+                            data.widget.name !== null && 
+                            data.widget.name !== undefined &&
+                            util.isArray(data.widget.author) &&
+                            util.isArray(data.widget.name) &&
+                            data.widget.author[0].length > 0 && 
+                            data.widget.name[0].length > 0) {
+                                
+                            var appId = data.widget.author[0] + '-' +
+                                data.widget.name[0];
+                        } else {
+                            console.log('It is not possible to define appId');
+                            return false;
+                        }
+
+                        var policy = policyGeneration(data.widget, appId, 
+                                                      features);
+                        if (Object.keys(policy).length > 0) {
+                            return writePolicy(policy, appId, policyFile);
+                        }
+                        else {
+                            console.log('policy generation failed');
+                            return false;
+                        }
                         return true;
                     } else {
                         console.log('Root tag not found');
@@ -58,31 +82,21 @@
             console.log(error);
             return false;
         }
-
     };
 
     /**
     * Generate the new application policy
     * @function
     * @param manifest Parsed application manifest
+    * @param appId Application identifier
     * @param features Optional features allowed by the user
     */
-    var policyGeneration = function (manifest, features) {
+    var policyGeneration = function (manifest, appId, features) {
         // target
         var target = [];
         target[0] = {};
         target[0].subject = [];
         var subjectMatch = [];
-        // appId defined as author-name
-        if (manifest.author !== null && manifest.author !== undefined &&
-            manifest.name !== null && manifest.name !== undefined &&
-            manifest.author[0].length > 0 && manifest.name[0].length > 0) {
-                
-            var appId = manifest.author[0]+'-'+manifest.name[0];
-        } else {
-            console.log('It is not possible to define appId');
-            return '';
-        }
         // subject-match on application ID
         subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
         // subject-match on user ID, assuming to receive it as a parameter
@@ -170,17 +184,78 @@
         policy.DataHandlingPreferences = dhp;
         policy.ProvisionalActions = pa;
 
+        return policy;
+    };
+
+    /**
+    * Write the new application policy
+    * @function
+    * @param appPolicy Generated application policy
+    * @param appId Application identifier
+    * @param features Output file for the application policy
+    */
+    var writePolicy = function (appPolicy, appId, policyFile) {
+        var policySet = {};
+        policySet.policy = [];
+        if (appPolicy !== null && appPolicy !== undefined) {
+            policySet.policy.push(appPolicy);
+        } else {
+            console.log('appPolicy is missing');
+            return false;
+        }
+
+        if (fs.existsSync(policyFile) === true) {
+            try {
+                var policy = fs.readFileSync(policyFile);
+                // Parse manifest
+                xmlParser.parseString(policy, function(err, data) {
+                    if (err === undefined || err === null) {
+                        if (data['policy-set'] !== null &&
+                            data['policy-set'] !== undefined &&
+                            data['policy-set'].policy !== null && 
+                            data['policy-set'].policy !== undefined &&
+                            util.isArray(data['policy-set'].policy)) {
+
+                            policySet = insertPolicy (policySet, appId,
+                                data['policy-set'].policy);
+                        } else {
+                            console.log('Invalid policy syntax in file ' +
+                                    policyFile);
+                            return false;
+                        }
+                    } else {
+                        console.log(err);
+                        return false;
+                    }
+                });
+            } catch (error) {
+                console.log(error);
+                return false;
+            }
+        }
+
         try {
-            var data = convert2xml('policy', policy);
-            data = data.replace('<?xml version=\"1.0\" encoding=\"utf-8\"?>\n',
+            var xml = convert2xml('policy-set', policySet);
+            xml = xml.replace('<?xml version=\"1.0\" encoding=\"utf-8\"?>\n',
                                 '');
-            //fs.writeFileSync('./outputPolicyFile.xml', data);
+            fs.writeFileSync(policyFile, xml);
         } catch (error) {
             console.log(error);
-            return '';
+            return false;
         }
-        //console.log(util.inspect(data, false, null));
-        return data;
+
+    };
+
+    /**
+    * Add old application policies into the new policy-set if appId is different
+    * @function
+    * @param policySet The new policy-set
+    * @param appId Application identifier
+    * @param parsedPolicy Policies already existing in the output file
+    */
+    var insertPolicy = function (policySet, appId, parsedPolicy) {
+        // TODO
+        return policySet;
     };
 
     exports.manifest2policy = manifest2policy;
