@@ -41,7 +41,9 @@ describe("Manager.WidgetManager.manifest2policy", function() {
     });
 
     it("Optional features allowed", function() {
-        fs.unlinkSync(outputFile);
+        if (fs.existsSync(outputFile)) {
+            fs.unlinkSync(outputFile);
+        }
         runs(function() {
             expect(m2p.manifest2policy(manifest1, outputFile, optionalFeature))
                 .toEqual(true);
@@ -53,7 +55,9 @@ describe("Manager.WidgetManager.manifest2policy", function() {
 	});
 
     it("Optional features denied", function() {
-        fs.unlinkSync(outputFile);
+        if (fs.existsSync(outputFile)) {
+            fs.unlinkSync(outputFile);
+        }
         runs(function() {
             expect(m2p.manifest2policy(manifest1, outputFile, ''))
                 .toEqual(true);
