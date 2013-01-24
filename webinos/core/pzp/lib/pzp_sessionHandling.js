@@ -81,21 +81,21 @@ var Pzp = function () {
             if (status) {
                 var caList = [], crlList = [], key;
                 caList.push(self.config.cert.internal.master.cert);
-		crlList.push(self.config.crl );
+                crlList.push(self.config.crl );
       
                 for ( key in self.config.cert.external) {
                     if(self.config.cert.external.hasOwnProperty(key)) {
                         caList.push(self.config.cert.external[key].cert);
                         crlList.push(self.config.cert.external[key].crl);
-	            }
-		}
+                    }
+                }
                 options = {
                     key : value,
                     cert: self.config.cert.internal.conn.cert,
                     crl : crlList,
                     ca  : caList,
-		    servername: self.config.metaData.pzhId,
-		    rejectUnauthorized: true,
+                    servername: self.config.metaData.pzhId,
+                    rejectUnauthorized: true,
                     requestCert: true    
                 }; 
        
@@ -368,8 +368,8 @@ var PzpClient = function (_parent) {
         var path = require("path");
         var fs = require("fs");
         logger.log("Clean up SiB leftovers");
-	var own = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
-	var other = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
+        var own = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
+        var other = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
         var exlist = path.join(_parent.config.metaData.webinosRoot, "exCertList.json");
         if(path.existsSync(own)) {
             fs.unlink(own, function(err){
@@ -402,7 +402,7 @@ var PzpClient = function (_parent) {
                 logger.log("servername: " + options.servername);
             }
       
-	    var servername = msg.address;
+            var servername = msg.address;
             var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
                 if (client.authorized) {
                     pzpClient_Authorized(msg, client);
@@ -412,11 +412,11 @@ var PzpClient = function (_parent) {
                 }
             });
 
-	    client.on("data", function (buffer) {
+            client.on("data", function (buffer) {
                 _parent.handleMsg(client, buffer);
             });
 
-	    client.on("end", function () {
+            client.on("end", function () {
                 _parent.cleanUp(client.id);
             });
 
