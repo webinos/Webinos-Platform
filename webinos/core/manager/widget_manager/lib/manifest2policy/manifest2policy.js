@@ -37,6 +37,15 @@
     * @param features Optional features allowed by the user
     */
     var manifest2policy = function(manifestFile, policyFile, features) {
+
+        if (manifestFile === null || manifestFile === undefined) {
+            console.log('manifest file parameter is missing');
+            return false;
+        }
+        if (policyFile === null || policyFile === undefined) {
+            console.log('policy file parameter is missing');
+            return false;
+        }
         try {
             var xmlManifest = fs.readFileSync(manifestFile);
             // Parse manifest
