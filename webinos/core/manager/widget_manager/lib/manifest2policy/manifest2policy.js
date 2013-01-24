@@ -27,6 +27,7 @@
     var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
     var convert2xml = require('data2xml')({attrProp : '$', valProp : '_'});
     var util = require('util');
+    var data;
 
     /**
     * Translate from manifest to policy
@@ -39,47 +40,36 @@
         try {
             var xmlManifest = fs.readFileSync(manifestFile);
             // Parse manifest
-            xmlParser.parseString(xmlManifest, function(err, data) {
-                if (err === undefined || err === null) {
-                    if (data.widget !== null && data.widget !== undefined) {
-                        // appId is defined as author-name
-                        if (data.widget.author !== null && 
-                            data.widget.author !== undefined &&
-                            data.widget.name !== null && 
-                            data.widget.name !== undefined &&
-                            util.isArray(data.widget.author) &&
-                            util.isArray(data.widget.name) &&
-                            data.widget.author[0].length > 0 && 
-                            data.widget.name[0].length > 0) {
-                                
-                            var appId = data.widget.author[0] + '-' +
-                                data.widget.name[0];
-                        } else {
-                            console.log('It is not possible to define appId');
-                            return false;
-                        }
-
-                        var policy = policyGeneration(data.widget, appId, 
-                                                      features);
-                        if (Object.keys(policy).length > 0) {
-                            return writePolicy(policy, appId, policyFile);
-                        }
-                        else {
-                            console.log('Policy generation failed');
-                            return false;
-                        }
-                        return true;
-                    } else {
-                        console.log('Root tag not found');
-                        return false;
-                    }
-                } else {
-                    console.log(err);
-                    return false;
-                }
-            });
+            parseFile(xmlManifest);
         } catch (error) {
             console.log(error);
+            return false;
+        }
+        if (data.widget !== null && data.widget !== undefined) {
+            // appId is defined as author-name
+            if (data.widget.author !== null && data.widget.author !== undefined
+                && data.widget.name !== null && data.widget.name !== undefined
+                && util.isArray(data.widget.author) &&
+                util.isArray(data.widget.name) &&
+                data.widget.author[0].length > 0 &&
+                data.widget.name[0].length > 0) {
+
+                var appId = data.widget.author[0] + '-' + data.widget.name[0];
+            } else {
+                console.log('It is not possible to define appId');
+                return false;
+            }
+            var policy = policyGeneration(data.widget, appId, features);
+            if (Object.keys(policy).length > 0) {
+                return writePolicy(policy, appId, policyFile);
+            }
+            else {
+                console.log('Policy generation failed');
+                return false;
+            }
+            return true;
+        } else {
+            console.log('Root tag not found');
             return false;
         }
     };
@@ -208,28 +198,23 @@
             try {
                 var policy = fs.readFileSync(policyFile);
                 // Parse manifest
-                xmlParser.parseString(policy, function(err, data) {
-                    if (err === undefined || err === null) {
-                        if (data['policy-set'] !== null &&
-                            data['policy-set'] !== undefined &&
-                            data['policy-set'].policy !== null && 
-                            data['policy-set'].policy !== undefined &&
-                            util.isArray(data['policy-set'].policy)) {
-
-                            policySet = insertPolicy (policySet, appId,
-                                data['policy-set'].policy);
-                        } else {
-                            console.log('Invalid policy syntax in file ' +
-                                    policyFile);
-                            return false;
-                        }
-                    } else {
-                        console.log(err);
-                        return false;
-                    }
-                });
+                data = null;
+                parseFile(policy);
             } catch (error) {
                 console.log(error);
+                return false;
+            }
+
+            if (data !== null && data['policy-set'] !== null &&
+                data['policy-set'] !== undefined &&
+                data['policy-set'].policy !== null &&
+                data['policy-set'].policy !== undefined &&
+                util.isArray(data['policy-set'].policy)) {
+
+                policySet = insertPolicy (policySet, appId,
+                    data['policy-set'].policy);
+            } else {
+                console.log('Invalid policy syntax in file ' + policyFile);
                 return false;
             }
         }
@@ -243,6 +228,7 @@
             console.log(error);
             return false;
         }
+        return true;
 
     };
 
@@ -255,7 +241,7 @@
     */
     var insertPolicy = function (policySet, appId, parsedPolicy) {
         for (var i = 0; i < parsedPolicy.length; i++) {
-            if (parsedPolicy[i].target !== null && 
+            if (parsedPolicy[i].target !== null &&
                 parsedPolicy[i].target !== undefined &&
                 util.isArray(parsedPolicy[i].target) &&
                 parsedPolicy[i].target[0].subject !== null &&
@@ -272,7 +258,7 @@
                             subject['subject-match'][j].$ !== undefined &&
                             subject['subject-match'][j].$.attr === 'id' &&
                             subject['subject-match'][j].$.match !== appId) {
-                            
+
                             // insert the policy of another application
                             policySet.policy.push(parsedPolicy[i]);
                         }
@@ -281,6 +267,22 @@
             }
         }
         return policySet;
+    };
+
+    /**
+    * Parse XML file
+    * @function
+    * @param xmlFile XML file to parse
+    */
+    var parseFile = function (xmlFile) {
+        xmlParser.parseString(xmlFile, function(err, parsedData) {
+            if (err === undefined || err === null) {
+                data = parsedData;
+            } else {
+                console.log(err);
+                return false;
+            }
+        });
     };
 
     exports.manifest2policy = manifest2policy;
