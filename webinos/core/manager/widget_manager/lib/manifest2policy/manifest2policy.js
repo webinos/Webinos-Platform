@@ -65,7 +65,7 @@
                             return writePolicy(policy, appId, policyFile);
                         }
                         else {
-                            console.log('policy generation failed');
+                            console.log('Policy generation failed');
                             return false;
                         }
                         return true;
@@ -192,7 +192,7 @@
     * @function
     * @param appPolicy Generated application policy
     * @param appId Application identifier
-    * @param features Output file for the application policy
+    * @param policyFile Output file for the application policy
     */
     var writePolicy = function (appPolicy, appId, policyFile) {
         var policySet = {};
@@ -254,7 +254,32 @@
     * @param parsedPolicy Policies already existing in the output file
     */
     var insertPolicy = function (policySet, appId, parsedPolicy) {
-        // TODO
+        for (var i = 0; i < parsedPolicy.length; i++) {
+            if (parsedPolicy[i].target !== null && 
+                parsedPolicy[i].target !== undefined &&
+                util.isArray(parsedPolicy[i].target) &&
+                parsedPolicy[i].target[0].subject !== null &&
+                parsedPolicy[i].target[0].subject !== undefined &&
+                util.isArray(parsedPolicy[i].target[0].subject)) {
+
+                var subject = parsedPolicy[i].target[0].subject[0];
+                if (subject['subject-match'] !== null &&
+                    subject['subject-match'] !== undefined &&
+                    util.isArray(subject['subject-match'])) {
+
+                    for (var j = 0 ; j < subject['subject-match'].length; j++) {
+                        if (subject['subject-match'][j].$ !== null &&
+                            subject['subject-match'][j].$ !== undefined &&
+                            subject['subject-match'][j].$.attr === 'id' &&
+                            subject['subject-match'][j].$.match !== appId) {
+                            
+                            // insert the policy of another application
+                            policySet.policy.push(parsedPolicy[i]);
+                        }
+                    }
+                }
+            }
+        }
         return policySet;
     };
 
