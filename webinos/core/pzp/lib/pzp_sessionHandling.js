@@ -605,7 +605,6 @@ var EnrollPzp = function (_parent, hub) {
         }
         _parent.config.storeMetaData (_parent.config.metaData);
         _parent.config.storeAll ();
-
         _parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
         hub.connect (function (status) {

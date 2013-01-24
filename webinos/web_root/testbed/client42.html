@@ -30,6 +30,7 @@
                 webinos.discovery.findServices(new ServiceType('http://webinos.org/api/test'),
                         {onFound:function (service) {
                             test[service.serviceAddress] = service;
+                            console.log(service);
                             $('#get42Services').append($('<option>' + service.serviceAddress + '</option>'));
                         }});
             });

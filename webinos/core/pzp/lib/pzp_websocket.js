@@ -41,25 +41,49 @@ var PzpWSS = function (_parent) {
         }
     }
 
-    function prepMsg (from, to, status, message) {
-        "use strict";
+    function prepMsg(from, to, status, message) {
         return {
-            "type"   :"prop",
-            "from"   :from,
-            "to"     :to,
-            "payload":{
-                "status" :status,
-                "message":message
+            "type": "prop",
+            "from": from,
+            "to": to,
+            "payload": {
+                "status": status,
+                "message": message
             }
         };
     }
 
-    function getConnectedPzp () {
-        return Object.keys (parent.pzp_state.connectedPzp);
+    function getConnectedPzp() {
+        var list = [];
+        for (var key in parent.pzp_state.connectedPzp) {
+            if(parent.pzp_state.connectedPzp.hasOwnProperty(key)) {
+                if(parent.pzp_state.connectedPzp[key].friendlyName) {
+                    list.push(parent.pzp_state.connectedPzp[key].friendlyName);
+                } else {
+                    list.push(key);
+                }
+            }
+        }
+        list.push(parent.config.metaData.friendlyName + " (This Device)")
+        return list;
     }
 
-    function getConnectedPzh () {
-        return Object.keys (parent.pzp_state.connectedPzh);
+    function getConnectedPzh(){
+        var list = [];
+        for (var key in parent.pzp_state.connectedPzh) {
+            if(parent.pzp_state.connectedPzh.hasOwnProperty(key)) {
+                if(parent.pzp_state.connectedPzh[key].friendlyName) {
+                    if(key === parent.config.metaData.pzhId) {
+                        list.push(parent.pzp_state.connectedPzh[key].friendlyName +" (Your PZH)");
+                    } else {
+                        list.push(parent.pzp_state.connectedPzh[key].friendlyName);
+                    }
+                } else {
+                    list.push(key);
+                }
+            }
+        }
+        return list;
     }
 
     function getVersion (from) {
@@ -615,15 +639,6 @@ var PzpWSS = function (_parent) {
             }
         }
     }
-
-    function handleData (cmd, data) {
-        var msg = {type:"prop", from:parent.pzp_state.sessionId, to:"", payload:{ status:cmd, message:data}};
-        for (var id in connectedWebApp) {
-            msg.to = id;
-            connectedWebApp[id].sendUTF (JSON.stringify (msg));
-        }
-    }
-
 
     function approveRequest (request) {
         var requestor = request.host.split (":")[0]; // don't care about port.

@@ -50,34 +50,25 @@ var Pzp_OtherManager = function (_parent) {
      */
     function registerMessaging (pzhId) {
         if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
-            var msg = self.messageHandler.registerSender (_parent.pzp_state.sessionId, pzhId);
+            var msg = self.messageHandler.registerSender(_parent.pzp_state.sessionId, pzhId);
             _parent.sendMessage (msg, pzhId);
         }
     }
 
-
-    function setFoundService(validMsgObj){
-        var services = self.discovery.getAllServices(validMsgObj.from);
-        var msg = {"type" : "prop",
-            "from" : _parent.pzp_state.sessionId,
-            "to"   : validMsgObj.from,
-            "payload":{"status":"foundServices",
-                "message": services,
-                "id" : validMsgObj.payload.message.id }
-        };
-        _parent.sendMessage(msg, validMsgObj.from);
-    }
-
-    function syncHash(receivedMsg) {
-        var policyPath = path.join(_parent.config.metaData.webinosRoot, "policies","policy.xml");
-        sync.parseXMLFile(policyPath, function(value) {
-            var list = {trustedList: _parent.config.trustedList, exCertList: _parent.config.exCertList, crl: _parent.config.crl, cert: _parent.config.cert.external, policy: value};
-            var result = sync.compareFileHash(list, receivedMsg);
-            if (Object.keys(result).length >= 1) {
-                _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "sync_compare", result);
+    function syncHash (receivedMsg) {
+        var policyPath = path.join (_parent.config.metaData.webinosRoot, "policies", "policy.xml");
+        sync.parseXMLFile (policyPath, function (value) {
+            var list = {trustedList:_parent.config.trustedList,
+                crl                :_parent.config.crl,
+                cert               :_parent.config.cert.external,
+                exCertList         : _parent.config.exCertList,
+                policy             :value};
+            var result = sync.compareFileHash (list, receivedMsg);
+            if (Object.keys (result).length >= 1) {
+                _parent.prepMsg (_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "sync_compare", result);
             }
             else {
-                logger.log("All Files are already synchronized");
+                logger.log ("All Files are already synchronized");
             }
         });
     }
@@ -195,8 +186,13 @@ var Pzp_OtherManager = function (_parent) {
         var pzhId = _parent.config.metaData.pzhId;
         if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
             var localServices = self.discovery.getRegisteredServices ();
-            var msg = {"type":"prop", "from":_parent.pzp_state.sessionId, "to":pzhId, "payload":{"status":"registerServices",
-                "message"                                                                                :{services:localServices, from:_parent.pzp_state.sessionId}}};
+            var msg = {"type":"prop",
+                "from"       :_parent.pzp_state.sessionId,
+                "to"         :pzhId,
+                "payload"    :{"status":"registerServices",
+                    "message"          :{services:localServices,
+                        from                     :_parent.pzp_state.sessionId,
+                        friendlyName             :_parent.config.metaData.friendlyName}}};
             _parent.sendMessage (msg, pzhId);
             logger.log ("sent msg to register local services with pzh");
         }

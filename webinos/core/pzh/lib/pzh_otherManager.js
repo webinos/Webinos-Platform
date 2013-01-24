@@ -72,8 +72,8 @@ var Pzh_RPC = function (_parent) {
      */
     this.sendFoundServices = function (validMsgObj) {
         _parent.pzh_state.logger.log ("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
-        var services = self.discovery.getAllServices (validMsgObj.from);
-        var msg = _parent.prepMsg (_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
+        var services = self.discovery.getAllServices(validMsgObj.from);
+        var msg = _parent.prepMsg(_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
         msg.payload.id = validMsgObj.payload.message.id;
         _parent.sendMessage (msg, validMsgObj.from);
         _parent.pzh_state.logger.log ("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
@@ -178,7 +178,8 @@ var Pzh_RPC = function (_parent) {
                 switch (validMsgObj.payload.status) {
                     case "registerServices":
                         self.discovery.addRemoteServiceObjects (validMsgObj.payload.message);
-                        sendUpdateServiceToAllPzh (validMsgObj.from);
+                        _parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
+                        sendUpdateServiceToAllPzh(validMsgObj.from);
                         break;
                     case "findServices":
                         self.sendFoundServices (validMsgObj);

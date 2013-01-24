@@ -28,12 +28,12 @@
   webinos.session.setChannel = function(_channel) {
     channel = _channel;
   };
-    webinos.session.setPzpPort = function (port_) {
-        port = port_;
-    };
-    webinos.session.getPzpPort = function () {
-        return port;
-    };
+  webinos.session.setPzpPort = function (port_) {
+    port = port_;
+  };
+  webinos.session.getPzpPort = function () {
+    return port;
+ };
   webinos.session.message_send_messaging = function(msg, to) {
     msg.resp_to = webinos.session.getSessionId();
     channel.send(JSON.stringify(msg));

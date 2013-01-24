@@ -572,6 +572,8 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
     var self = this;
     var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
+        self.metaData.webinosType = webinosType;
+        self.metaData.serverName = inputConfig.sessionIdentity;
         self.metaData.webinosName = deviceName;
         self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
         self.createDirectories (function (status) {
@@ -590,17 +592,11 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userPref.ports.pzp_webSocket = userPref.ports.pzp_webSocket;
                 self.userPref.ports.pzp_tlsServer = userPref.ports.pzp_tlsServer;
                 self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
-
-                if (self.userData.name === "") {
-                    self.userData.country = userPref.certConfiguration.country;
-                    self.userData.email = userPref.certConfiguration.email;
-                }
                 self.userData.state = userPref.certConfiguration.state;
                 self.userData.city = userPref.certConfiguration.city;
                 self.userData.orgName = userPref.certConfiguration.orgname;
                 self.userData.orgUnit = userPref.certConfiguration.orgunit;
                 self.userData.cn = userPref.certConfiguration.cn;
-
                 if (webinosType === "Pzh") {
                     for (key in userPref.pzhDefaultServices) {
                         self.serviceCache.push ({"name":userPref.pzhDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
@@ -628,9 +624,6 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userData.orgUnit = "";
                 self.userData.cn = "";
             }
-            self.metaData.friendlyName = inputConfig.friendlyName;
-            self.metaData.webinosType = webinosType;
-            self.metaData.serverName = inputConfig.sessionIdentity;
             self.createPolicyFile (self);
             self.storeMetaData (self.metaData);
             self.storeUserData (self.userData);
