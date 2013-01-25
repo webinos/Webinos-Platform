@@ -55,7 +55,7 @@ else{
 //currently VLC will transcode to and MP3 and OGG stream
 var type = "MP3&OGG";
 
-var VLC_IP_ADDRESS = "0.0.0.0"
+var VLC_IP_ADDRESS = "0.0.0.0";
 
 (function() {
 
