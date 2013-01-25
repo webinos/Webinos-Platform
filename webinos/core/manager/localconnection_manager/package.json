@@ -4,7 +4,7 @@
 , "keywords": [ "webinos", "Local", "Peer", "Discovery", "Connection", "Manager"]
 , "version": "0.0.1"
 , "homepage": "http://webinos.org/"
-, "author": "Ziran Sun <ziran.sun@samsung.com>
+, "author": "Ziran Sun <ziran.sun@samsung.com>"
 , "repository":
   { "type": "git"
   , "url": "https://github.com/webinos/Webinos-Platform.git"
