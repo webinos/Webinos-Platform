@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Choose a peer to Auth</title>
+<link rel="stylesheet" type="text/css" href="css/reset.css">
+<link rel="stylesheet" type="text/css" href="css/structure.css">
+<script type="text/javascript" src="./jquery-1.8.2.min.js" ></script>
+<script type="text/javascript" src="./webinos.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#Auth").click( function() {
+      if (document.getElementById("man_peer") && document.getElementById("man_peer").value !== "undefined" && document.getElementById("man_peer").value !== "") {
+        value = document.getElementById("man_peer").value;
+      } else {
+        value = $("#peer_list option:selected").val();
+      }
+      var options = {type: 'prop', payload: {status:'pzhCert', message:{peer: value}}};
+      webinos.session.message_send(options);
+    });
+
+    function pzhCert(msg){
+      logger.log("listener pzhCert");
+    }
+    webinos.session.addListener('pzhCert', pzhCert);
+
+  });
+</script>
+
+</head>
+<body>
+<form class="box login">
+  <header>
+    <img src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png" width="100px">
+    <label>Select Peer to Connect </label>
+  </header>
+  <fieldset class="boxBody">
+    <label>Select Peer to Connect</label>
+    <select value="peer_list" id="peer_list">
+      <option value="127.0.0.1"> peer1 </option>
+    </select>
+    <label> (Or) Enter Peer address</label>
+      <input type="text" value="" id="man_peer"> </input>
+    <input type="button" class="btnLogin" id="Auth" value="Authenticate and conncet!">
+    <submit> </submit>
+  </fieldset>
+</form>
+<footer id="main">
+  <a href="http://wwww.webinos.org">Powered by webinos</a> | <a href="http://developer.webinos.org">Developer resources on webinos</a>
+</footer>
+</body>
+</html>

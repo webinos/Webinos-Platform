@@ -15,6 +15,7 @@
  *
  * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
  * Author: Habib Virji (habib.virji@samsung.com)
+ *         Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 
 var Pzp_OtherManager = function (_parent) {
@@ -30,6 +31,7 @@ var Pzp_OtherManager = function (_parent) {
     var RPCHandler = rpc.RPCHandler;
     var Registry = rpc.Registry;
     var PzpDiscovery = require ("./pzp_peerDiscovery");
+    var PzpSib   = require("./pzp_SIB_auth");
     var path = require ("path");
     var os = require ('os');
 
@@ -39,6 +41,7 @@ var Pzp_OtherManager = function (_parent) {
     this.discovery;
     this.messageHandler;
     this.peerDiscovery;
+    this.Sib = new PzpSib(_parent);;
     var self = this;
     var sync = new Sync();
     logger.addId(_parent.config.metaData.webinosName);
@@ -52,11 +55,18 @@ var Pzp_OtherManager = function (_parent) {
         }
     }
 
-    function setFoundService (validMsgObj) {
-        var msg = { from:_parent.pzp_state.sessionId, to:validMsgObj.from, payload:{"status":"foundServices", message:self.discovery.getAllServices (validMsgObj.from)}};
-        msg.payload.id = validMsgObj.payload.message.id;
-        _parent.sendMessage (msg, validMsgObj.from);
-    }
+ 
+  function setFoundService(validMsgObj){  
+    var services = self.discovery.getAllServices(validMsgObj.from);
+    var msg = {"type" : "prop",
+      "from" : _parent.pzp_state.sessionId,
+      "to"   : validMsgObj.from,
+      "payload":{"status":"foundServices",
+        "message": services,
+        "id" : validMsgObj.payload.message.id }
+    };
+    _parent.sendMessage(msg, validMsgObj.from);
+  };
 
   function getInitModules() {
     return this.loadedModules;
@@ -65,7 +75,7 @@ var Pzp_OtherManager = function (_parent) {
   function syncHash(receivedMsg) {
     var policyPath = path.join(_parent.config.metaData.webinosRoot, "policies","policy.xml");
     sync.parseXMLFile(policyPath, function(value) {
-        var list = {trustedList: _parent.config.trustedList, crl: _parent.config.crl, cert: _parent.config.cert.external, policy: value};
+        var list = {trustedList: _parent.config.trustedList, exCertList: _parent.config.exCertList, crl: _parent.config.crl, cert: _parent.config.cert.external, policy: value};
         var result = sync.compareFileHash(list, receivedMsg);
         if (Object.keys(result).length >= 1) {
           _parent.prepMsg(_parent.pzp_state.sessionId, _parent.config.metaData.pzhId, "sync_compare", result);

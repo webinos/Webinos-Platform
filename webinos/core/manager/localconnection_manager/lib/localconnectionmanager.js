@@ -17,26 +17,21 @@
 ******************************************************************************/
 
 (function ()	{
- 
+
   var os = require('os');
   var webinos_= require("find-dependencies")(__dirname);
   var logger  = webinos_.global.require(webinos_.global.util.location, "lib/logging.js")(__filename);
   
-  var mdns = null;
-  var bridge = null;
-  var connectPeers = null;
-  
   var localconnectionManager = function () {
-
     // Load zeroconf mdns module 
-		if(os.platform().toLowerCase() == "android")  {
+    if(os.platform().toLowerCase() == "android")  {
       try{
         this.bridge = require('bridge');
         this.mdns = this.bridge.load('org.webinos.impl.discovery.DiscoveryMdnsImpl', this);
       } catch(e) {
         logger.error("Android Zeroconf mdns module could not be loaded!" + e);
       }
-		}
+    }
     else {
       try {
         this.mdns = require('mdns');
@@ -44,26 +39,12 @@
         logger.error("Zeroconf mdns module could not be loaded!" + e);
       }
     }
- };
+  };
 
-	/**
-	 * Set the connectPeers function that should be used to connect other peers around.
-	 * Developers use this function to call different connectPeers APIs under
-	 * different working scenrios. 
-	 * @param connectPeersFunction A function that used for connecting other peers.
-	 */
-	localconnectionManager.prototype.setConnectPeersfunction = function (connectPeersFunction) {
-	 	connectPeers = connectPeersFunction;
-	};
-
-	localconnectionManager.prototype.connectPeers = function (msg) {
-	  connectPeers(msg);
-	}; 
-  
   /**
-	 * Register and advertise Peer services in the underlayer discovery scheme specified. 
+   * Register and advertise Peer services in the underlayer discovery scheme specified. 
    * @param serviceType. Service type string. e.g. for PZP using "pzp". 
-	 * @param discoveryMethod. Discovery scheme prefered. Call this function every
+   * @param discoveryMethod. Discovery scheme prefered. Call this function every
    * time if prefer multiple discovery schemes.
    * @param port. Port used for advertising the service. 
    * TODO: DiscoveryMethod as an array so to support multiple methods; replace 
@@ -105,18 +86,17 @@
         }
         break;
     }
-	};  
+  };  
   
    /**
-	 * Find other PZP Peers and try to connect to the found peers. 
+   * Find other PZP Peers and try to connect to the found peers. 
    * @param serviceType. service type string. e.g. for PZP using "pzp". 
-	 * @param discoveryMethod. Discovery scheme prefered. 
+   * @param discoveryMethod. Discovery scheme prefered. 
    * @prarm port. TLS port used for establishing connections.  
    * @param option. Other options specified by particular connection scheme. Specify it as
    * pzh id if serviceType is as "pzp"
    */
-  localconnectionManager.prototype.findPeers = function(serviceType, discoveryMethod, port, option){
-    
+  localconnectionManager.prototype.findPeers = function(serviceType, discoveryMethod, port, option, callback){
     switch(discoveryMethod)
     {
       case 'upnp':
@@ -136,11 +116,9 @@
                 var msg ={};
                 var nm = service.deviceNames[i];
                 
-                //Remove the IP address part of Android name
                 if(nm.search("/") !== -1) {
-                  //Fetch name of the android device
                   var index = nm.indexOf('/');
-                  msg.name = nm.slice(0, index);
+                  msg.name = nm.slice(0, index);  //Fetch name of the android device
                 }
                 else
                   msg.name    = service.deviceNames[i];
@@ -148,14 +126,7 @@
                 msg.address = service.deviceAddresses[i];
                 logger.log("found peer address:" + msg.address);
                 msg.port    = port;
-                
-                //Webinos - to compromise PZP name defined in core
-                if(serviceType === "pzp")
-                {
-                  msg.name    = option + "/" + msg.name + '_Pzp'; //override peer name with PZP specific
-                  logger.log("Connecting to peer: " + msg.name);
-                }
-                connectPeers(msg);
+                callback(msg);
               } 
             }
           }
@@ -208,20 +179,11 @@
               else
               {
               	msg.name    = nm;
-              	logger.log("Found peer name:" + msg.name);
               	msg.address = service.addresses[0];
-              	logger.log("Found peer address:" + msg.address);
               }	
               logger.log("check mdns discovery list");
-              var hostname = os.hostname();
-              
-              if(msg.name !== os.hostname()) {
-                logger.log("found other host");
-		
-                if(serviceType === "pzp")
-                  msg.name = option + "/" + msg.name + "_Pzp";
-                connectPeers(msg);
-              }
+
+              callback(msg);
             });
 
             browser.on('serviceDown', function(service) {
