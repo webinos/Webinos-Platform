@@ -1,0 +1,86 @@
+#Screencast Readme
+
+Martin Prins, TNO
+
+Last update: 01-23-2013
+
+##About
+The TV platform implementation uses VLC as the component to capture, transcode and stream TV channels.
+VLC can also be used to capture the desktop and/or audio output, and thus create screencasts or audiocasts (see: http://jira.webinos.org/browse/APPPARTY-14). This README describes how this can be used in the TV implementation
+
+##Overview
+Screencasting uses VLC as a means to capture the audio (via the pulse:// module) and/or the screen-output (via the screen:// module), transcode to different media formats, and offer as HTTP media streams.
+ 
+## Requirements
+Screencasting requires:
+1. The Webinos TV platform implementation (Linux based)
+2. Enabling internal audio capture
+
+####1. The Webinos TV platform implementation
+See the install instructions at <u>https://developer.webinos.org/platform/tv</u>
+Note: it does not require a DVB card or creation of a channel.conf
+
+####2. Enabling interal audio capture 
+Internal audio capture may be disabled or muted by default; in this case VLC will not capture any audio being played by the system.
+This can be solved with the following steps:
+
+    1. Open a terminal
+    2. Install pavucontrol: sudo apt-get install pavucontrol
+    3. Type pavucontrol. A window opens.
+    4. Go to the tap Input Devices. At the bottom, set View to All Input Devices
+    Find Monitor of Built-in Audio Analog Stereo and make sure it is not muted and set it as fallback (click the green icon). This is what made it work for me!
+Source: <u>http://blog.zadco.me/2012/06/21/recording-internal-sound-in-ubuntu-12-04/</u>
+
+This blog post provides more usefull information regarding capture sound.
+
+To test if VLC can capture the audio correctly it can be tested with the following command:
+   
+	vlc --intf dummy pulse:// :live-caching=300 :sout='#transcode{acodec=vorb,ab=128,channels=2,samplerate=44100}:std{access=http,mux=ogg,dst='localhost:9000/ogg'}'
+
+The stream can then be opened with another vlc instance: 
+	
+	vlc http://localhost:9000/ogg
+
+Note: this may lead to an audio feedback loop (the audio played by the 2nd vlc instance is recorded by the 1st, which then is played again by the 2nd, etc).
+
+##Instructions
+###Configuration
+The screencast functionality can be started by changing the TV-api paramters in webinos_pzp.js:
+
+ 	{name: "tv", params: {impl:"vlcscreencast"}}
+
+which will then use the webinos.service_tv.vlcscreencast.js functionality in the lib folder.
+
+The stream urls, at which the screencasts will be available are described in the "screencast-channels-template.json" file in the /tv/tools directory.
+The urls in this file are in template format. 
+The HOST and PORT strings will be replaced at runtime by the host and portnummers VLC is available at. E.g. "channelURL":"http://HOST:PORT/mp3" will be replaced by "channelURL":"http://192.168.9.1:3000/mp3"
+
+
+Note: as alternative, an external tool can be used for capturing screencasts. Then the configuration should be: 
+
+{name: "tv", params: {impl:"screencast"}}
+
+which will then use the webinos.service_tv.screencast.js functionality in the lib folder.
+This will then use the "screencast-channels.json" channels file found in the /tv/tools directory.
+The URLs should be updated to reflect the URL's at which the streams are available.
+
+###Usage
+After starting the PZP, go to the PZP test-page (default: http://localhost:8080/testbed/client.html),
+select TV from the APIS menu. Press "FIND SERVICE" -> "GET TV SOURCES", which will show two channels: (Screencast (audio/mp3) and Screencast (audio/ogg). Based on browser capabilities, one of the two streams may be eligible for playback.
+
+
+ 
+
+
+##Known issues and limitations
+- Local playback of the screencast streams may lead to an audio feedback loop (the audio played by the 2nd vlc instance is recorded by the 1st, which then is played again by the 2nd, etc).
+
+- The screencast service will start capturing all audio once getTVSources has been called and will continue untill the pzp is shutdown. 
+
+- Currently only audio capture is enabled, although screencapture has been tested; to enable screen-capture, the VLC command needs to be changed in the webinos.service_tv.vlcscreencast.js file.
+
+- The TV api does not support multiple stream urls for the same channel; the current workaround is creating different channels for the same content.
+
+- Currently the host address is still hardcoded (0.0.0.0) this needs to be updated to be able to access the streams from a remote system.
+
+
