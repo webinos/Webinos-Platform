@@ -59,7 +59,7 @@ if (type == "MP3&OGG"){
     VLC_COMMANDLINE   = "cvlc --intf dummy pulse:// :live-caching=300 :sout='#duplicate{dst={transcode{acodec=mp3,ab=128,channels=2,samplerate=44100}:std{access=http,mux=mp3,dst='"+VLC_IP_ADDRESS+":"+VLC_STREAM_PORT+"/mp3'}},dst={transcode{acodec=vorb,ab=128,channels=2,samplerate=44100}:std{access=http,mux=ogg,dst='"+VLC_IP_ADDRESS+":"+VLC_STREAM_PORT+"/ogg'}}}'"
 }
 else{
-    VLC_COMMANDLINE = "404";
+    console.log( "No valid option given to start VLC");
 }
 
 
