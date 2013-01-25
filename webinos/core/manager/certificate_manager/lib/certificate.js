@@ -26,8 +26,7 @@ var Certificate = function () {
     this.cert.internal= {};
     this.cert.external= {};
     this.cert.internal= {master: {}, conn: {}, web: {}};
-    this.keys = {};
-    this.keys.conn = {}; 
+
     var self = this;
 
     this.generateSelfSignedCertificate = function (type, cn, callback) {
@@ -109,7 +108,6 @@ var Certificate = function () {
                     self.generateSignedCertificate (self.cert.internal.conn.csr, 1, function (status, value) {
                         if (status) {
                             self.cert.internal.conn.cert = value;
-                            self.keys.conn = value;
                             return callback (true, conn_key);
                         } else {
                             return callback (status, value);
@@ -117,7 +115,6 @@ var Certificate = function () {
                     });
                 } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
                     self.cert.internal.conn.cert = obj.cert;
-                    self.keys.conn = obj.cert;
                     self.cert.internal.conn.csr = obj.csr;
                     if (type === "Pzp") {
                         self.crl = obj.crl;
@@ -129,7 +126,7 @@ var Certificate = function () {
             }
         });
     };
-  
+
     Certificate.prototype.getKeyHash = function(path, callback){
         var certman, self = this;
         try {
@@ -137,7 +134,7 @@ var Certificate = function () {
         }catch (err) {
             return callback(false, err);
         }
-        try{  
+        try{
             var hash = certman.getHash(path);
             logger.log("Key Hash is" + hash);
             return callback(true, hash);
@@ -146,7 +143,7 @@ var Certificate = function () {
             return callback(false, err);
         }
     };
-  
+
     Certificate.prototype.generateSignedCertificate = function(csr, cert_type,  callback) {
         var certman, self = this;
         try {

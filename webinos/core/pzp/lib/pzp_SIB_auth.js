@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2011 Ziran Sun, Samsung Electronics (UK) Ltd
+ * Copyright 2012 - 2013 Samsung Electronics (UK) Ltd
+ * AUTHORS: Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 var os = require("os");
 var https = require('https');
@@ -23,78 +24,78 @@ var logger  = webinos.global.require(webinos.global.util.location, "lib/logging.
 
 var PzpSIBAuth = function(_parent){
 
-  /**
-   * Create QR image using public key Hash
-   * @param infile. Path for the public key certificate
-   * @param outfile. Path for the generate QR image file (Android only)
-   * @param width. Width of QR image to be generated (Android only)
-   * @param height. Height of QR image to be generated (Android only)
-   * @param cb. Callback when QR image generated
-   */
-  this.createQRHash = function(infile, outfile, width, height, cb) {
-    _parent.config.getKeyHash(infile, function(status, value){  
-      if(status)
-      {
-        logger.log("get hash: " + value);
-        if(os.platform().toLowerCase() == "android") {
-          try {
-            var bridge = require('bridge');
-            QRencode = bridge.load('org.webinos.impl.QRImpl', this);
-            QRencode.enCode(value, width, height, outfile, function(outfile){
-              cb(outfile);
-            });
-          }
-          catch(e) {
-            logger.error("Android QRencode - error: "+e.message);
-          }
-        }
-        else
-        {
-          try {
-            var QRCode = require("qrcode");
-            QRCode.toDataURL(value, function(err, value) {
-              logger.log("created url: " + value);
-              cb(err, value);
-            });
-          } catch (err) {
-            logger.log("create QR failed: " + err); 
-          } 
-        } 
-      }  
-      else
-        logger.log("get hash err: " + value); 
-    });  
-  };  
-  
-   /**
-   * Compare hash from the scanned QR code with Hash stored locally
-   * @param filepath. path for other party's public key certificate
-   * @param hash.  Locally stored hash code
-   * @param cb. Callback when comprison is done   
-   */
-  this.checkQRHash = function(filename, hash, cb) {
-    _parent.config.getKeyHash(filename, function(status, value){  
-      if(status)
-      {
-        logger.log("hash passed over is: " + hash);
-        
-        logger.log("get hash of the other party: " + value)
-        if(hash == value){
-          logger.log("correct hash key");
-          cb(true);
-        }  
-        else
-        {
-          logger.log("Wrong Hash Key");
-          cb(false);
-        }  
-      }  
-      else
-      {
-        logger.log("get hash err: " + value); 
-      }  
-    });  
-  };
+    /**
+     * Create QR image using public key Hash
+     * @param infile. Path for the public key certificate
+     * @param outfile. Path for the generate QR image file (Android only)
+     * @param width. Width of QR image to be generated (Android only)
+     * @param height. Height of QR image to be generated (Android only)
+     * @param cb. Callback when QR image generated
+     */
+    this.createQRHash = function(infile, outfile, width, height, cb) {
+        _parent.config.getKeyHash(infile, function(status, value){
+            if(status)
+            {
+                logger.log("get hash: " + value);
+                if(os.platform().toLowerCase() == "android") {
+                    try {
+                        var bridge = require('bridge');
+                        QRencode = bridge.load('org.webinos.impl.QRImpl', this);
+                        QRencode.enCode(value, width, height, outfile, function(outfile){
+                            cb(outfile);
+                        });
+                    }
+                    catch(e) {
+                        logger.error("Android QRencode - error: "+e.message);
+                    }
+                }
+                else
+                {
+                    try {
+                        var QRCode = require("qrcode");
+                        QRCode.toDataURL(value, function(err, value) {
+                            logger.log("created url: " + value);
+                            cb(err, value);
+                        });
+                    } catch (err) {
+                        logger.log("create QR failed: " + err);
+                    }
+                }
+            }
+            else
+                logger.log("get hash err: " + value);
+        });
+    };
+
+    /**
+     * Compare hash from the scanned QR code with Hash stored locally
+     * @param filepath. path for other party's public key certificate
+     * @param hash.  Locally stored hash code
+     * @param cb. Callback when comprison is done
+     */
+    this.checkQRHash = function(filename, hash, cb) {
+        _parent.config.getKeyHash(filename, function(status, value){
+            if(status)
+            {
+                logger.log("hash passed over is: " + hash);
+
+                logger.log("get hash of the other party: " + value)
+                if(hash == value){
+                    logger.log("correct hash key");
+                    cb(true);
+                }
+                else
+                {
+                    logger.log("Wrong Hash Key");
+                    cb(false);
+                }
+            }
+            else
+            {
+                logger.log("get hash err: " + value);
+            }
+        });
+    };
 }
 
-  module.exports = PzpSIBAuth;
+module.exports = PzpSIBAuth;

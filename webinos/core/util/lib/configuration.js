@@ -285,18 +285,18 @@ Config.prototype.storeCrl = function (data) {
  * @param dir
  */
 Config.prototype.storeKeys = function (keys, name) {
-  var self = this;
-  var filePath = path.join(self.metaData.webinosRoot, "keys", name+".pem");
-  fs.writeFile(path.resolve(filePath), keys, function(err) {
-    if(err) {
-      logger.error("failed saving " + name +".pem");
-    } else {
-      logger.log("saved " + name +".pem");
-      //calling get hash
-     // self.getKeyHash(filePath);
-    }
-  });
-};  
+    var self = this;
+    var filePath = path.join(self.metaData.webinosRoot, "keys", name+".pem");
+    fs.writeFile(path.resolve(filePath), keys, function(err) {
+        if(err) {
+            logger.error("failed saving " + name +".pem");
+        } else {
+            logger.log("saved " + name +".pem");
+            //calling get hash
+            // self.getKeyHash(filePath);
+        }
+    });
+};
 
 /**
  *
@@ -336,15 +336,15 @@ Config.prototype.storeTrustedList = function (data) {
  * @param data
  */
 Config.prototype.storeExCertList = function (data) {
-  var self = this;
-  var filePath = path.join(self.metaData.webinosRoot,"exCertList.json");
-  fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
-    if(err) {
-      logger.error("failed saving pzh/pzp in the external certificate list");
-    } else {
-      logger.log("saved pzp/pzh in the external list");
-    }
-  });
+    var self = this;
+    var filePath = path.join(self.metaData.webinosRoot,"exCertList.json");
+    fs.writeFile(path.resolve(filePath), JSON.stringify(data, null, " "), function(err) {
+        if(err) {
+            logger.error("failed saving pzh/pzp in the external certificate list");
+        } else {
+            logger.log("saved pzp/pzh in the external list");
+        }
+    });
 };
 
 
@@ -401,16 +401,16 @@ Config.prototype.fetchUntrustedCert = function (callback) {
  * @param callback
  */
 Config.prototype.fetchExCertList = function (callback) {
-  var self = this;
-  var filePath = path.join(self.metaData.webinosRoot, "exCertList.json");
-  fs.readFile(path.resolve(filePath), function(err, data) {
-    if(err) {
-      logger.error("configuration files for external cert list are corrupted, retrying again to create fresh configuration");
-      callback(false);
-    } else {
-      processData(data,callback);
-    }
-  });
+    var self = this;
+    var filePath = path.join(self.metaData.webinosRoot, "exCertList.json");
+    fs.readFile(path.resolve(filePath), function(err, data) {
+        if(err) {
+            logger.error("configuration files for external cert list are corrupted, retrying again to create fresh configuration");
+            callback(false);
+        } else {
+            processData(data,callback);
+        }
+    });
 };
 /**
  *

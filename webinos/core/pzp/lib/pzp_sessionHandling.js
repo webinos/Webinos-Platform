@@ -79,26 +79,36 @@ var Pzp = function () {
         var options;
         self.config.fetchKey (self.config.cert.internal.conn.key_id, function (status, value) {
             if (status) {
-                var caList = [], crlList = [], key;
-                caList.push(self.config.cert.internal.master.cert);
-                crlList.push(self.config.crl );
-      
-                for ( key in self.config.cert.external) {
-                    if(self.config.cert.external.hasOwnProperty(key)) {
-                        caList.push(self.config.cert.external[key].cert);
-                        crlList.push(self.config.cert.external[key].crl);
+                if (self.pzp_state.enrolled) { // enrolled to Hub 
+                    var caList = [], crlList = [], key;
+                    caList.push(self.config.cert.internal.master.cert);
+                    crlList.push(self.config.crl );
+
+                    for ( key in self.config.cert.external) {
+                        if(self.config.cert.external.hasOwnProperty(key)) {
+                            caList.push(self.config.cert.external[key].cert);
+                            crlList.push(self.config.cert.external[key].crl);
+                        }
                     }
+                    options = {
+                        key : value,
+                        cert: self.config.cert.internal.conn.cert,
+                        crl : crlList,
+                        ca  : caList,
+                        servername: self.config.metaData.pzhId,
+                        rejectUnauthorized: true,
+                        requestCert: true
+                    };
                 }
-                options = {
-                    key : value,
-                    cert: self.config.cert.internal.conn.cert,
-                    crl : crlList,
-                    ca  : caList,
-                    servername: self.config.metaData.pzhId,
-                    rejectUnauthorized: true,
-                    requestCert: true    
-                }; 
-       
+                else {
+                    options = {
+                        key               :value,
+                        cert              :self.config.cert.internal.conn.cert,
+                        servername        :self.config.metaData.serverName,
+                        rejectUnauthorized:true,
+                        requestCert       :true
+                    };
+                }
                 return callback(options)
             }
         });
@@ -284,7 +294,7 @@ var PzpServer = function (_parent) {
         // check if in the same zone
         var zoneId = _parent.config.metaData.pzhId;
         if(zoneId.indexOf(cn) !=-1)
-            var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1]; 
+            var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1];
         else
         {
             var clientSessionId = _parent.config.exCertList.exPZP;
@@ -292,7 +302,7 @@ var PzpServer = function (_parent) {
             _parent.config.exCertList.exPZP = "";
         }
         logger.log("Authorised session " + clientSessionId);
-    
+
         _parent.pzp_state.connectedPzp[clientSessionId] = _conn;
         _parent.pzp_state.state["peer"] = "connected";
         _conn.id = clientSessionId;
@@ -363,7 +373,7 @@ var PzpClient = function (_parent) {
         _parent.sendMessage (msg1, _msg.name);
         _parent.pzpWebSocket.updateApp ();
     }
-  
+
     function pzpClient_PeerCleanup() {
         var path = require("path");
         var fs = require("fs");
@@ -387,9 +397,9 @@ var PzpClient = function (_parent) {
             fs.unlink(exlist, function(err){
                 if(err) throw err;
                 logger.log("removed" + exlist);
-	    });
+            });
         }
-        _parent.pzp_state.connectingPeerAddr = "";    
+        _parent.pzp_state.connectingPeerAddr = "";
     }
 
     this.connectPeer = function (msg) {
@@ -401,12 +411,12 @@ var PzpClient = function (_parent) {
                 options.servername = name.substring(0, n);
                 logger.log("servername: " + options.servername);
             }
-      
+
             var servername = msg.address;
             var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
                 if (client.authorized) {
                     pzpClient_Authorized(msg, client);
-                    pzpClient_PeerCleanup();  
+                    pzpClient_PeerCleanup();
                 } else {
                     logger.error("pzp client - connection failed, " + client.authorizationError);
                 }
