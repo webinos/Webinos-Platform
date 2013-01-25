@@ -26,7 +26,7 @@
 //   {name: "tv", params: {impl:"vlcdvb", path:"/path/to/channels.conf"}}
 var CHANNELS_CONF_FILE = __dirname + '/../tools/screencast-channels-template.json';
 
-// port for dvb streams
+// port for vlc streams
 var VLC_STREAM_PORT = 8888;
 
 // playback url for transcoded dvb stream
@@ -38,11 +38,23 @@ var VLC_TRANSCODE_BITRATE = '400'; //kbps
 // vlc http interface port
 var VLC_HTTP_PORT = 8020;
 
+// vlc listen address 
+var VLC_IP_ADDRESS = "127.0.0.1";
+var VLC_STREAM_ADDRESS = "127.0.0.1"
+
 // vlc http interface playlist offset, playlist items start at 5
 var VLC_PLAYLIST_OFFSET = 4;
 
 // command line to invoke vlc in transcoding and streaming mode
 var VLC_COMMANDLINE = '';
+
+
+
+//screencast output type
+//currently VLC will transcode to and MP3 and OGG stream
+var type = "MP3&OGG";
+
+
 if (type == "MP3&OGG"){
     VLC_COMMANDLINE   = "cvlc --intf dummy pulse:// :live-caching=300 :sout='#duplicate{dst={transcode{acodec=mp3,ab=128,channels=2,samplerate=44100}:std{access=http,mux=mp3,dst='"+VLC_IP_ADDRESS+":"+VLC_STREAM_PORT+"/mp3'}},dst={transcode{acodec=vorb,ab=128,channels=2,samplerate=44100}:std{access=http,mux=ogg,dst='"+VLC_IP_ADDRESS+":"+VLC_STREAM_PORT+"/ogg'}}}'"
 }
@@ -50,12 +62,6 @@ else{
     VLC_COMMANDLINE = "404";
 }
 
-
-//screencast output type
-//currently VLC will transcode to and MP3 and OGG stream
-var type = "MP3&OGG";
-
-var VLC_IP_ADDRESS = "0.0.0.0";
 
 (function() {
 
@@ -193,7 +199,7 @@ console.log(CHANNELS_CONF_FILE+' '+readChannels);process.exit();
 		if(readChannels && readChannels.sourceName && readChannels.channelList){
 			for(var i=0; i<readChannels.channelList.length; i++){
 			    //change port and host 
-			    srcURL = readChannels.channelList[i].channelURL.replace("HOST",VLC_IP_ADDRESS).replace("PORT",VLC_STREAM_PORT);
+			    srcURL = readChannels.channelList[i].channelURL.replace("HOST",VLC_STREAM_ADDRESS).replace("PORT",VLC_STREAM_PORT);
 			    console.log("srcURL = "+srcURL);
 				channelList.push(new Channel(
 									0,
