@@ -15,6 +15,7 @@
 *
 * Copyright 2011 University of Oxford
 * Copyright 2011 Habib Virji, Samsung Electronics (UK) Ltd
+* Copyright 2012 Ziran Sun, Samsung Electronics (UK) Ltd
 *******************************************************************************/
 
 int genRsaKey(const int bits, char * privkey);
@@ -23,4 +24,5 @@ int selfSignRequest(char* pemRequest, int days, char* pemCAKey, int certType, ch
 int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  int certType, char *url, char* result);
 int createEmptyCRL(char* pemSigningKey, char* pemCaCert, int crldays, int crlhours, char* result);
 int addToCRL(char* pemSigningKey, char* pemOldCrl, char* pemRevokedCert, char* result);
+int getHash(char* filename, char *pointer);
 

@@ -12,13 +12,9 @@ public class Org_webinos_api_qrencoder_EncodeCallback extends org.meshpoint.anod
 
 	private static Object[] __args = new Object[1];
 
-	public void onError() {
-		__invoke(classId, 0, __args);
-	}
-
 	public void onSuccess(String arg0) {
 		__args[0] = arg0;
-		__invoke(classId, 1, __args);
+		__invoke(classId, 0, __args);
 	}
 
 }

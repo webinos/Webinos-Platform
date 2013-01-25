@@ -21,6 +21,6 @@ package org.webinos.api.qrencoder;
 
 public interface EncodeCallback {
 	 public void onSuccess(String filename);        
-     public void onError();
+     //public void onError();
 }
 
