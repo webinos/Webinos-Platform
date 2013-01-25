@@ -1,5 +1,5 @@
 {
-  "ports":{
+  "ports"             :{
     "provider"          :80,
     "provider_webServer":443,
     "pzp_webSocket"     :8080,
@@ -7,14 +7,115 @@
     "pzp_zeroConf"      :4321,
     "iot"               :3000
   },
-  "pzhDefaultServices": ["context", "events", "get42", "app2app"],
-  "certConfiguration": {
-    "country": "UK",
-    "state"  : "MX",
-    "city"   : "London",
-    "orgname": "Webinos",
-    "orgunit": "WP4",
-    "cn"     : "",
-    "email"  : "hello@webinos.org"
+  "pzhDefaultServices":[
+    {
+      "name"  :"context",
+      "params":{}
+    },
+    {
+      "name"  :"events",
+      "params":{}
+    },
+    {
+      "name"  :"test",
+      "params":{}
+    },
+    {
+      "name"  :"app2app",
+      "params":{}
+    }
+  ],
+  "pzpDefaultServices":[
+    {
+      "name"  :"test",
+      "params":{
+        "num":"21"
+      }
+    },
+    {
+      "name"  :"zap-and-shake",
+      "params":{}
+    },
+    {
+      "name"  :"actuator",
+      "params":{}
+    },
+    {
+      "name"  :"webnotification",
+      "params":{}
+    },
+    {
+      "name"  :"file",
+      "params":{}
+    },
+    {
+      "name"  :"geolocation",
+      "params":{
+        "connector":"geoip"
+      }
+    },
+    {
+      "name"  :"applauncher",
+      "params":{}
+    },
+    {
+      "name"  :"sensors",
+      "params":{}
+    },
+    {
+      "name"  :"payment",
+      "params":{}
+    },
+    {
+      "name"  :"tv",
+      "params":{}
+    },
+    {
+      "name"  :"oauth",
+      "params":{}
+    },
+    {
+      "name"  :"deviceorientation",
+      "params":{}
+    },
+    {
+      "name"  :"vehicle",
+      "params":{
+        "connector":"simulator"
+      }
+    },
+    {
+      "name"  :"context",
+      "params":{}
+    },
+    {
+      "name"  :"authentication",
+      "params":{}
+    },
+    {
+      "name"  :"contacts",
+      "params":{}
+    },
+    {
+      "name"  :"devicestatus",
+      "params":{}
+    },
+    {
+      "name"  :"discovery",
+      "params":{}
+    },
+    {
+      "name"  :"mediacontent",
+      "params":{}
+    }
+  ],
+  "certConfiguration" :{
+    "country":"UK",
+    "state"  :"MX",
+    "city"   :"London",
+    "orgname":"Webinos",
+    "orgunit":"WP4",
+    "cn"     :"",
+    "email"  :"hello@webinos.org"
   }
 }
