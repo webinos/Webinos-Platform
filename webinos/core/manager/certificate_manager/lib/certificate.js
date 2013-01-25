@@ -80,7 +80,7 @@ var Certificate = function () {
                 }
 
                 try {
-                    var server;
+                    var server = self.metaData.serverName;
                     if (require ("net").isIP (server)) {
                         server = "IP:" + self.metaData.serverName;
                     } else {

@@ -33,6 +33,39 @@ describe("Discovery API", function() {
 		expect(ServiceType).toEqual(jasmine.any(Function));
 	});
 
+	it("returns a PendingOperation object from findServices", function() {
+		var pendingOp = webinos.discovery.findServices(new ServiceType("non-existing service"), {
+			onFound: function () {}
+		});
+
+		expect(pendingOp).toBeDefined();
+		expect(pendingOp).toEqual(jasmine.any(Object));
+		expect(pendingOp.cancel).toEqual(jasmine.any(Function));
+	});
+
+	it("can cancel a findServices PendingOperation", function() {
+		var error;
+
+		var pendingOp = webinos.discovery.findServices(new ServiceType("*"), {
+			onFound: function (service) {},
+			onLost: function (service) {},
+			onError: function (err) {
+				error = err;
+			}
+		});
+
+		pendingOp.cancel();
+
+		waitsFor(function() {
+			return !!error;
+		});
+
+		runs(function() {
+			expect(error).toBeDefined();
+			expect(error.name).toEqual("AbortError");
+		});
+	});
+
 	it("can find any services", function() {
 		var found;
 
@@ -52,16 +85,23 @@ describe("Discovery API", function() {
 	});
 
 	it("will timeout if no service is found", function() {
-		var found = false;
+		var error;
 
 		webinos.discovery.findServices(new ServiceType("non-existing service"), {
-			onFound: function (service) {
-				found = true;
+			onFound: function (service) {},
+			onLost: function (service) {},
+			onError: function (err) {
+				error = err;
 			}
 		}, {timeout: 0});
 
+		waitsFor(function() {
+			return !!error;
+		});
+
 		runs(function() {
-			expect(found).toEqual(false);
+			expect(error).toBeDefined();
+			expect(error.name).toEqual("TimeoutError");
 		});
 	});
 });

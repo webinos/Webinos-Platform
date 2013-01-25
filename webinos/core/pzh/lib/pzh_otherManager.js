@@ -189,6 +189,10 @@ var Pzh_RPC = function (_parent) {
                     case "sync_compare":
                         self.syncUpdateHash (validMsgObj.from, validMsgObj.payload.message);
                         break;
+                    case "unregisterService":
+                        self.registry.unregisterObject({id:validMsgObj.payload.message.svId, api:validMsgObj.payload.message.svAPI});
+                        sendUpdateServiceToAllPzh();
+                        break;
                 }
             } else {
                 try {

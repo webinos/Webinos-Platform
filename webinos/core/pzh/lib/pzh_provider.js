@@ -240,7 +240,7 @@ var Provider = function (_hostname, _friendlyName) {
      */
     this.startProvider = function (callback) {
         "use strict";
-        util.webinosHostname.getHostName("", function (_hostname) {
+        util.webinosHostname.getHostName(hostname, function (_hostname) {
             hostname = _hostname;
             loadSession(function (status, value) {
                 if (status) { // pzh provider TLS server started

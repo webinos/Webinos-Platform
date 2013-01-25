@@ -27,42 +27,57 @@
         var driverInterface = drvInt;
         this.objRef = null;
         var type = data;
-        var name = type+' actuator';
-        var description = 'A webinos '+type+' actuator';
+
+        var name;
+        var description;
         
         this.range = null;
         this.unit = null;
         this.vendor = null;  
         this.version = null;
+        this.elementId = id;
 
         var type;
-        try {
-            var tmp = JSON.parse(data);
-            console.log("Data : "+data);
+        console.log("Called actuator ctor with params " + JSON.stringify(data));
 
-            if(tmp.type) {
-                type = tmp.type;
-            }
-            if(tmp.range){
-                this.range = tmp.range;
-            }
-            if(tmp.unit){
-                this.unit = tmp.unit;
-            }
-            if(tmp.vendor){
-                this.vendor = tmp.vendor;
-            }
-            if(tmp.version){
-                this.version = tmp.version;
-            }
+        if(data.type) {
+            type = data.type;
         }
-        catch(e) {
-            console.log('ActuatorService constructor - error parsing data');
+
+        if(data.name) {
+            name = data.name;
+        }
+        else{
+            name = type+' actuator';
+        }
+    
+        if(data.description) {
+            description = data.description;
+        }
+        else{
+            description = 'A webinos '+type+' actuator';
+        }
+        
+        if(data.range){
+            this.range = data.range;
+        }
+
+        if(data.unit){
+            this.unit = data.unit;
+        }
+
+        if(data.vendor){
+            this.vendor = data.vendor;
+        }
+
+        if(data.version){
+            this.version = data.version;
         }
 
         var actuatorEvent = {};
-        actuatorEvent.actuatorType = type;
-        actuatorEvent.actuatorId = id;
+        actuatorEvent.actuatorType = 'http://webinos.org/api/actuators.' + type;
+        actuatorEvent.actuatorId = this.id;
+
         actuatorEvent.actualValue = null;
         
         this.base({
@@ -92,17 +107,15 @@
                 rpcErrorCB(message);
             };
         };
-
         this.setValue = function(value, successCB, errorCB) {
-            console.log('actuator.setValue');
-            driverInterface.sendCommand('value', actuatorEvent.actuatorId,
+            driverInterface.sendCommand('value', this.elementId,
                     value, new CmdErrorHandler(errorCB).errorCB);
+            actuatorEvent.actualValue = value;
+            actuatorEvent.actuatorId = this.id;
             // If driver haven't called the error callback before returning
             // from it is assumed that everything went ok.
-            actuatorEvent.avtualValue = value;
             successCB(actuatorEvent);
         };
-
     }
 
 

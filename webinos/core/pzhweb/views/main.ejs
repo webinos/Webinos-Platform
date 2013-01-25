@@ -109,7 +109,7 @@
       for (var i = 0; i < payload.services.length; i += 1 ) {
         var sv = payload.services[i];
         text += "<li> " + sv.api + " @ " + sv.serviceAddress +
-          "<input type='button' value='unregister' onclick='webinosPZH.commands.unregisterService(\"" + sv.serviceAddress + "\",\"" + sv.id + "\",\"" + sv.api + "\")'></li>";
+          "<input type='button' value='unregister' onclick='webinosPZH.commands.unregisterService(\"" + sv.serviceAddress + "\",\"" + sv.id + "\",\"" + sv.api + "\", listAllServices)'></li>";
       }
       text += '</ul>';
       setArticle("Services", text);
@@ -118,7 +118,7 @@
       var text = '<h3 align=center>Original Services from ' + payload.pzEntityId + '</h3><ul>';
       for (var i = 0; i < payload.modules.length; i += 1) {
         var mod = payload.modules[i];
-          text += '<li>' + mod.name + '<input type="button" value="register" onclick="webinosPZH.commands.registerService(\'' + payload.pzEntityId + '\',\'' + mod.name + '\')"></li>';
+          text += '<li>' + mod.name + '<input type="button" value="register" onclick="webinosPZH.commands.registerService(\'' + payload.pzEntityId + '\',\'' + mod.name + '\', listAllServices)"></li>';
       }
       text += '</ul>';
       setArticle("unregistered Services", text);

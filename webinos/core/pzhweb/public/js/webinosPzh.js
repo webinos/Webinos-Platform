@@ -48,6 +48,12 @@ var webinosPZH = {
                     case 'listUnregServices':
                         if (typeof webinosPZH.callbacks.listUnregServices === 'function') webinosPZH.callbacks.listUnregServices(msg.message);
                         break;
+                    case 'unregisterService':
+                        if (typeof webinosPZH.callbacks.unregisterService === 'function') webinosPZH.callbacks.unregisterService(msg.message);
+                        break;
+                    case 'registerService':
+                        if (typeof webinosPZH.callbacks.registerService === 'function') webinosPZH.callbacks.registerService(msg.message);
+                        break;
                     case 'getAllPzh':
                         if (typeof webinosPZH.callbacks.getAllPzh === 'function') webinosPZH.callbacks.getAllPzh(msg.message);
                         break;
@@ -80,6 +86,9 @@ var webinosPZH = {
         getPzps:null,
         revokePzp:null,
         listAllServices:null,
+        listUnregServices:null,
+        registerService:null,
+        unregisterService:null,
         getAllPzh:null,
         approveUser:null
     },
