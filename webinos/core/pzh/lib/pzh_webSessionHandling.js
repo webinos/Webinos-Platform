@@ -154,7 +154,7 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
                 "pzEntityId":pzEntityId,
                 "modules":modules
             };
-            sendMsg(conn, obj.user, { type:"listUnRegisterServices", message:result });
+            sendMsg(conn, obj.user, { type:"listUnregServices", message:result });
         }
 
         if (userObj.pzh_state.sessionId !== obj.message.at) {
@@ -180,7 +180,13 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
                 userObj.pzh_otherManager.registry,
                 userObj.pzh_otherManager.rpcHandler);
         }
-        sendMsg(conn, obj.user, { type:"registerServices", message:true });
+        var result = { pzEntityList:[] }, connectedPzp = getConnectedPzp(userObj), key;
+        result.pzEntityList.push({pzId:userObj.pzh_state.sessionId});
+        for (key = 0; key < connectedPzp.length; key = key + 1) {
+            result.pzEntityList.push({pzId:connectedPzp[key].url});
+        }
+        result.services = userObj.pzh_otherManager.discovery.getAllServices();
+        sendMsg(conn, obj.user, { type:"registerService", message:result });
     }
 
     function unregisterService(conn, obj, userObj) {
@@ -191,7 +197,13 @@ var pzhWI = function (pzhs, hostname, port, addPzh, refreshPzh, getAllPzh) {
         } else {
             userObj.pzh_otherManager.registry.unregisterObject({id:obj.message.svId, api:obj.message.svAPI});
         }
-        sendMsg(conn, obj.user, { type:"unregisterService", message:true });
+        var result = { pzEntityList:[] }, connectedPzp = getConnectedPzp(userObj), key;
+        result.pzEntityList.push({pzId:userObj.pzh_state.sessionId});
+        for (key = 0; key < connectedPzp.length; key = key + 1) {
+            result.pzEntityList.push({pzId:connectedPzp[key].url});
+        }
+        result.services = userObj.pzh_otherManager.discovery.getAllServices();
+        sendMsg(conn, obj.user, { type:"unregisterService", message:result });
     }
 
     // First step in connect friend
