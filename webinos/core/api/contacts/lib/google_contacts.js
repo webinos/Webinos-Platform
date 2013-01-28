@@ -25,10 +25,6 @@ var fs = require('fs');
 
 var util = require('util');
 
-//Use npm to install the following dependencies
-var xml2js = require('xml2js'); //XML parser
-
-
 var path = require('path');
 
 //Webinos contact definition
@@ -46,8 +42,6 @@ var auth = require('./authentication_module');
 var TOKEN = "";
 var USERNAME = "";
 
-//XML parser object
-var xmlParser = new xml2js.Parser(xml2js.defaults["0.1"]);
 
 /*
  * function Contact(_id, _displayName, _name, _nickname, _phonenumbers, _emails,
@@ -62,7 +56,7 @@ var xmlParser = new xml2js.Parser(xml2js.defaults["0.1"]);
 function newContact(i, item, picture, callback)
 {
 	"use strict";
-	var id = item.id;
+	var id = item.id["$t"];
     var contactIndex = i;
 	var displayName = item.title["$t"];
 	var j;
@@ -72,7 +66,8 @@ function newContact(i, item, picture, callback)
 		item['gd$name']['gd$givenName'], item['gd$name']['gd$middleName'], item['gd$name']['gd$namePrefix'],
 		item['gd$name']['gd$nameSuffix']);
 
-	var nickname = item['gContact$nickname'];
+    if(item['gContact$nickname'])
+        var nickname = item['gContact$nickname']["$t"];
 	var phonenumbers = [];
 	if (item['gd$phoneNumber'] !== undefined) //contact has email
 	{
@@ -87,32 +82,6 @@ function newContact(i, item, picture, callback)
 				pref = j==0?true:false;
 				phonenumbers.push(new ContactField(num, type, pref));
 			}
-			
-			/*
-			j = 0;
-			num = item['gd$phoneNumber'][j]['#'];
-			type = item['gd$phoneNumber'][j].rel === undefined ? 'other' :item['gd$phoneNumber'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-			pref = 'true';
-			phonenumbers.push(new ContactField(num, type, pref));
-			j+=1;
-			while (j < item['gd$phoneNumber'].length)
-			{
-				num = item['gd$phoneNumber'][j]['#'];
-				type =	item['gd$phoneNumber'][j].rel === undefined ? 'other' : item['gd$phoneNumber'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-				pref = false; //TODO check
-				phonenumbers.push(new ContactField(num, type, pref));
-				j+=1;
-			}*/
-		//}
-		
-		/*else
-		//single number
-		{
-			num = item['gd$phoneNumber']['#'];
-			type = item['gd$phoneNumber'].rel === undefined ? 'other' : item['gd$phoneNumber'].rel.substr(('http://schemas.google.com/g/2005#').length);
-			pref = true;
-			phonenumbers.push(new ContactField(num, type, pref));
-		}*/
 	}
 
 	var emails = [];
@@ -127,30 +96,6 @@ function newContact(i, item, picture, callback)
 				pref = item['gd$email'][j].primary;
 				emails.push(new ContactField(addr, type, pref));
 			}
-			/*
-			j = 0;
-			addr = item['gd$email'][j].address;
-			type = item['gd$email'][j].rel === undefined ? 'other' :item['gd$email'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-			pref = item['gd$email'][j].primary;
-			emails.push(new ContactField(addr, type, pref));
-			j++;
-			while (j < item['gd$email'].length)
-			{
-				addr = item['gd$email'][j].address;
-				type = item['gd$email'][j].rel === undefined ? 'other' : item['gd$email'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-				pref = item['gd$email'][j].primary;
-				emails.push(new ContactField(addr, type, pref));
-				j++;
-			}*/
-		//}
-		/*else
-		//single address
-		{
-			addr = item['gd$email'].address;
-			type = item['gd$email'].rel === undefined ? 'other' : item['gd$email'].rel.substr(('http://schemas.google.com/g/2005#').length);
-			pref = item['gd$email'].primary;
-			emails.push(new ContactField(addr, type, pref));
-		}*/
 	}
 	/*
 	 * 'gd$structuredPostalAddress': [ { 'gd$pobox': '12223',
@@ -173,50 +118,49 @@ function newContact(i, item, picture, callback)
 	{
 		if (item['gd$structuredPostalAddress'].length !== undefined) //if is an array
 		{
-			//TODO rewrite with for loop
-			j = 0;
-
-			formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'];
-			type = item['gd$structuredPostalAddress'][j].rel === undefined ? 'other' : item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-			street = item['gd$structuredPostalAddress'][j]['gd$street'];
-			pref = true;
-			locality = item['gd$structuredPostalAddress'][j]['gd$city'];
-			region = item['gd$structuredPostalAddress'][j]['gd$region'];
-			postCode = item['gd$structuredPostalAddress'][j]['gd$postcode'];
-			country = item['gd$structuredPostalAddress'][j]['gd$country'];
-
-			addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
-			j++;
-			while (j < item['gd$structuredPostalAddress'].length)
+            
+            for (j=0; j<item['gd$email'].length; j++)
 			{
-				formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'];
+                if (formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'])
+                    formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress']["$t"];
 				type = 'other';
-				if(item['gd$structuredPostalAddress'][j].rel !==undefined) //TODO add checks everywhere?
+				if(item['gd$structuredPostalAddress'][j].rel !==undefined)
 				 {
 					 type = item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
 				 }
-				street = item['gd$structuredPostalAddress'][j]['gd$street'];
-				pref = false;
-				locality = item['gd$structuredPostalAddress'][j]['gd$city'];
-				region = item['gd$structuredPostalAddress'][j]['gd$region'];
-				postCode = item['gd$structuredPostalAddress'][j]['gd$postcode'];
-				country = item['gd$structuredPostalAddress'][j]['gd$country'];
+                if(item['gd$structuredPostalAddress'][j]['gd$street'])
+                    street = item['gd$structuredPostalAddress'][j]['gd$street']["$t"];
+				
+                j==0?pref=true:pref=false;
+                if(item['gd$structuredPostalAddress'][j]['gd$city'])
+                    locality = item['gd$structuredPostalAddress'][j]['gd$city']["$t"];
+                if(item['gd$structuredPostalAddress'][j]['gd$region'])
+                    region = item['gd$structuredPostalAddress'][j]['gd$region']["$t"];
+                if(item['gd$structuredPostalAddress'][j]['gd$postcode'])
+                    postCode = item['gd$structuredPostalAddress'][j]['gd$postcode']["$t"];
+                if(item['gd$structuredPostalAddress'][j]['gd$country'])
+                    country = item['gd$structuredPostalAddress'][j]['gd$country']["$t"];
 
 				addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
-				j++;
 			}
 		}
 		else
 		//single address
 		{
-			formatted = item['gd$structuredPostalAddress']['gd$formattedAddress'];
+            if (item['gd$structuredPostalAddress'][j]['gd$formattedAddress'])
+                formatted = item['gd$structuredPostalAddress']['gd$formattedAddress']["$t"];
 			type = item['gd$structuredPostalAddress'].rel === undefined ? 'other' : item['gd$structuredPostalAddress'].rel.substr(('http://schemas.google.com/g/2005#').length);
-			street = item['gd$structuredPostalAddress']['gd$street'];
+			if(item['gd$structuredPostalAddress'][j]['gd$street'])
+                street = item['gd$structuredPostalAddress']['gd$street']["$t"];
 			pref = true;
-			locality = item['gd$structuredPostalAddress']['gd$city'];
-			region = item['gd$structuredPostalAddress']['gd$region'];
-			postCode = item['gd$structuredPostalAddress']['gd$postcode'];
-			country = item['gd$structuredPostalAddress']['gd$country'];
+            if(item['gd$structuredPostalAddress']['gd$city'])
+                locality = item['gd$structuredPostalAddress']['gd$city']["$t"];
+            if(item['gd$structuredPostalAddress']['gd$region'])
+                region = item['gd$structuredPostalAddress']['gd$region']["$t"];
+            if(item['gd$structuredPostalAddress']['gd$postcode'])
+                postCode = item['gd$structuredPostalAddress']['gd$postcode']["$t"];
+            if(item['gd$structuredPostalAddress']['gd$country'])
+                country = item['gd$structuredPostalAddress']['gd$country']["$t"];
 
 			addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
 		}
@@ -329,21 +273,15 @@ function newContact(i, item, picture, callback)
 this.logIn = function(username, password, callback)
 {
 	"use strict";
-	//USERNAME = full username, e.g. your_username@gmail.com
-	//if (username.search('@gmail.com') === -1)
-	//{
-	//	USERNAME = username+'@gmail.com';
-	//}
-	//else
-	//{
-		USERNAME = username;
-	//}
+	
+    USERNAME = username;
+        
 	var tokenRequirementData = {
 		accountType : "GOOGLE",
 		service: "cp",
 		credentials : {
-		username : USERNAME,
-		password: password
+            username : USERNAME,
+            password: password
 		}
 	};
 
@@ -389,10 +327,7 @@ this.getContacts = function(successCB, errorCB)
     // Get the contact list
     var contactsGet = {
         host:"www.google.com",
-        //This is how to use it with json format.
         path:'/m8/feeds/contacts/' + encodeURI(USERNAME) + '/full?v=3.0&max-results=9999&alt=json',
-        //This is how to use it with xml format.
-        //path:'/m8/feeds/contacts/' + encodeURI(USERNAME) + '/full?v=3.0&max-results=9999',
         port:443,
         method:"GET",
         headers:{
@@ -411,18 +346,9 @@ this.getContacts = function(successCB, errorCB)
                 }
             );
             res.on('end', function () {
-                //This is how to use it with json format.
-                //buffer = JSON.parse(buffer);
-                //processRawContacts(buffer.feed.entry);
-                //This is how to use it with xml format.
                 var jsonObj = eval ("(" + buffer +")");
-                //console.log(jsonObj.feed.entry);
                 
                 that.processJsonContacts(jsonObj.feed.entry);
-                
-                //xmlParser.parseString(buffer, function(err, result){
-                 //   that.processRawContacts(result.entry);
-                //});
             });
         }else{
             console.log("Error getting contact list from Google. Error Code:"+ res.statusCode);
@@ -431,6 +357,7 @@ this.getContacts = function(successCB, errorCB)
     get_contacts_req.end();
     get_contacts_req.on('error', function (e) {
         console.error(e);
+        errorCB(e);
     });
 
     /**

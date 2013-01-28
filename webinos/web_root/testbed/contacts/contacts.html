@@ -68,31 +68,18 @@
         }});
     });
 
-//  function authenticate_cb()
-  $('#btnAuthenticate').bind('click', function()
+//  function syncGoogleContacts_cb()
+  $('#btnSyncGoogle').bind('click', function()
   {
     if(recentService) //(contactsService[0])
     {
-      parameters = {};
-      if ($("input[name='contactType']:checked").val() == 'remote')
-      {
+        var parameters = {};
         usr = $('#usernameText').val();
         pwd = $('#passwordText').val();
         parameters.usr = usr;
         parameters.pwd = pwd;
-        parameters.type = "remote";
-
-      }
-      else if ($("input[name='contactType']:checked").val() == 'local')
-      {
-        addressBookName = $('#addressBookNameText').val();
-        parameters.addressBookName = addressBookName;
-        parameters.type = "local";
-      }
-     
-      //contactsService[0]
-      recentService.authenticate(parameters, auth_SuccessCB, auth_ErrorCB)
-
+        //contactsService[0]
+        recentService.syncGoogleContacts(parameters, auth_SuccessCB, auth_ErrorCB)
     }
     else
     {
@@ -100,77 +87,35 @@
     }
   });
 
-  //function get_contact_list_cb()
-  $('#btnContacts').bind('click', function()
-  {
-    parameters = {};
-    var result = false;
-    if (recentService) //(contactsService[0])
-    {
-      if ($("input[name='contactType']:checked").val() == 'remote')
-      {
-        parameters.type = "remote";
-        //contactsService[0].
-        recentService.isAlreadyAuthenticated(parameters, function(result)
-        {
-          //contactsService[0].
-          recentService.getAllContacts(parameters, print_contact_list);
-        });
-      }
-      else if ($("input[name='contactType']:checked").val() == 'local')
-      {
-        parameters.type = "local";
-        //contactsService[0].
-        recentService.isAlreadyAuthenticated(parameters, function(result)
-        {
-          //contactsService[0]
-          recentService.getAllContacts(parameters, print_contact_list);
-        });
-      }
-    }
-  });
-
   //function find_contacts_cb()
   $('#btnFindServiceContacts').bind('click', function()
-  {
-    parameters = {};
-    var result = false;
-    if (recentService)//(contactsService[0])
     {
-        parameters.fields = {};
-        if ($('#findContactName').val() != "")
-          parameters.fields["name"] = $('#findContactName').val();
-        if ($('#findContactEmail').val() != "")
-          parameters.fields["emails"] = $('#findContactEmail').val();
-        if ($('#findContactAddress').val() != "")
-          parameters.fields["addresses"] = $('#findContactAddress').val();
-        if ($('#findContactPhone').val() != "")
-          parameters.fields["phoneNumbers"] = $('#findContactPhone').val();
-          
-      if ($("input[name='contactType']:checked").val() == 'remote')
-      {
-        parameters.type = "remote";
-
-        //contactsService[0]
-	recentService.isAlreadyAuthenticated(parameters, function(result)
+        console.log("FindContacts clicked");
+        var parameters = {};
+        var result = false;
+        if (recentService)//(contactsService[0])
         {
-          //contactsService[0]
-	  recentService.find(parameters, print_contact_list);
-        });
-      }
-      else if ($("input[name='contactType']:checked").val() == 'local')
-      {
-        parameters.type = "local";
-        
-        //contactsService[0]
-	recentService.isAlreadyAuthenticated(parameters, function(result)
-        {
-          //contactsService[0]
-	  recentService.find(parameters, print_contact_list);
-        });
-      }
-    }
-  });
+            parameters.fields = {};
+            if ($('#findContactName').val() != "")
+              parameters.fields.displayName = $('#findContactName').val();
+            if ($('#findContactEmail').val() != "")
+            {
+                parameters.fields.emails = $('#findContactEmail').val();
+            }
+            if ($('#findContactAddress').val() != "")
+            {
+                parameters.fields.addresses = {};
+                parameters.fields.addresses.formatted = $('#findContactAddress').val();
+            }
+            if ($('#findContactPhone').val() != "")
+            {
+                parameters.fields.phoneNumbers = $('#findContactPhone').val();
+            }
+            parameters.type = "local";
+            
+            recentService.find(parameters.fields, print_contact_list);
+        }
+    });
 
      function auth_SuccessCB() {
           if ($("input[name='contactType']:checked").val() == 'remote')
@@ -289,31 +234,19 @@
           <br>
           <select id="getContactsServices" size="5"></select>
           <br><button id="btnBindService" class="button">Bind Service</button>
-            <p>
-              <input type="radio" name="contactType" value="remote"
-                id="cnt_remote" checked="checked">Remote
-              Contacts (GMail) <br> <input type="radio"
-                name="contactType" value="local" id="cnt_local">Local
-              Contacts (Address Book) <br>
-              <label
-                for="addressBookNameText">Local Address Book: </label>
+            <p> 
               <!-- We'd better put an "open file" form -->
-              <input type="text" id="addressBookNameText" size="40"
-                placeholder="<path_to_your_Thunderbird_.mab file>" />
-              <br> <label for="usernameText">Username: </label> <input
-                type="text" id="usernameText"
-                placeholder="enter username" /> <br> <label
-                for="passwordText">Password: </label> <input
-                type="password" id="passwordText"
-                placeholder="enter password" /> <br>
-	
+              <label for="usernameText">Username: </label> 
+              <input type="text" id="usernameText" placeholder="enter username" /> <br> 
+              <label for="passwordText">Password: </label> 
+              <input type="password" id="passwordText" placeholder="enter password" /> <br>
             </p>
           </div>
 
           <div style="background-color:lightgray; border:1px solid black">
-            <button id="btnAuthenticate" class="button">Authenticate/Open</button>
+            <button id="btnSyncGoogle" class="button">Synch Google Contacts</button>
             <br>
-            <button id="btnFindServiceContacts" class="button" title="Leave search fields empty to get the whole contacts list">Find Contact!</button>
+            <button id="btnFindServiceContacts" class="button" title="Leave search fields empty to get the whole contacts list">Find Local Contact!</button>
           </div>
 
           <div id="html_contacts" style="background-color:lightgray; border:1px solid black">

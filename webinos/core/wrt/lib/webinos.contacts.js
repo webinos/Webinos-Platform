@@ -20,8 +20,7 @@
 		this.base = WebinosService;
 		this.base(obj);
 		
-		this.authenticate = authenticate;
-		this.isAlreadyAuthenticated = isAlreadyAuthenticated;
+		this.syncGoogleContacts = syncGoogleContacts;
 		this.getAllContacts = getAllContacts;
 		this.find = find;
   };
@@ -30,8 +29,7 @@
 
   Contacts.prototype.bindService = function (bindCB, serviceId) {
 	  // actually there should be an auth check here or whatever, but we just always bind
-	  this.authenticate = authenticate;
-	  this.isAlreadyAuthenticated = isAlreadyAuthenticated;
+	  this.syncGoogleContacts = syncGoogleContacts;
 	  this.getAllContacts = getAllContacts;
 	  this.find = find;
 
@@ -47,9 +45,9 @@
    * or a valid address book file could be open
    * TODO this method has to be removed when user profile will handle this
    * */
-  function authenticate(attr, successCB,errorCB)
+  function syncGoogleContacts(attr, successCB,errorCB)
   {
-    var rpc = webinos.rpcHandler.createRPC(this, "authenticate", [ attr ]); // RPCservicename,
+    var rpc = webinos.rpcHandler.createRPC(this, "syncGoogleContacts", [ attr ]); // RPCservicename,
     // function
     webinos.rpcHandler.executeRPC(rpc, function(params)
     {
@@ -60,48 +58,7 @@
 	errorCB(error);
     });
   };
-  
-  
-  /**
-   * returns true if contacts service is already authenticated with GMail
-   * or a valid address book file is aready open
-   * TODO this method has to be removed when user profile will handle this
-   * */
-  function isAlreadyAuthenticated(attr,successCB,errorCB)
-  {
-    var rpc = webinos.rpcHandler.createRPC(this, "isAlreadyAuthenticated", [ attr ]); // RPCservicename,
-    // function
-    webinos.rpcHandler.executeRPC(rpc, function(params)
-    {
-      successCB(params);
-    }, function(error)
-    {
-      if (typeof(errorCB) !== 'undefined')
-        errorCB(error);
-    });
-  };
-
-  /**
-   * returns a list of all contact
-   * TODO remove once debugging and testing are successfull
-   * */
-   function getAllContacts(attr,successCB, errorCB)
-   {
-     var rpc = webinos.rpcHandler.createRPC(this, "getAllContacts", [ attr ]); 
-   //RPCservicename,
-   // function
-     webinos.rpcHandler.executeRPC(rpc, function(params)
-     {
-     successCB(params);
-     }, function(error)
-     {
-       if (typeof(errorCB) !== 'undefined')
-         errorCB(error);
-     });
-   };
-
-  
-
+     
 
   /**
    * return a list of contacts matching some search criteria
