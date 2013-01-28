@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>PZH Login</title>
+<link rel="stylesheet" type="text/css" href="/css/reset.css">
+<link rel="stylesheet" type="text/css" href="/css/structure.css">
+<link rel="stylesheet" type="text/css" href="/css/login.css">
+</head>
+<body>
+    <h1><%=externalUser%> has requested access to your personal zone</h1>
+    <p>Would you like to approve or reject the request?</p>
+    <p>
+       <!-- Create a form POSTing to "make-user-decision" with the user name --> 
+        <form name="approve-user" action="../../make-user-decision/" method="post">
+            <input type="hidden" value="<%=externalUser%>" name="useremail" />
+            <input type="checkbox" name="decision" value="approve">Approve</input>
+            <input type="submit" value="Submit">
+        </form>
+    </p>
+
+</body>
+</html>

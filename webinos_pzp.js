@@ -101,9 +101,9 @@ require("fs").readFile(require("path").join(__dirname, "config-pzp.json"), funct
     config = require('./webinos/core/util/lib/helpers').extend(config, argv);
 
     if (config.pzhName !== "") {
-      config.hostname = config.pzhHost+'/'+config.pzhName;
+      config.sessionIdentity = config.pzhHost+'/'+config.pzhName;
     } else {
-      config.hostname = config.pzhHost;
+      config.sessionIdentity = config.pzhHost;
     }
     initializePzp(config, pzpModules);
 });

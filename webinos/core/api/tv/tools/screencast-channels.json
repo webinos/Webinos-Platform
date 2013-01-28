@@ -1,0 +1,17 @@
+{
+	"sourceName":"Test Source",
+	"channelList":[
+		{
+			"channelName":"Screencast (audio/mp3)",
+			"channelURL":"http://localhost:9999/mp3"
+		},
+		{
+			"channelName":"Screencast (audio/ogg)",
+			"channelURL":"http://localhost:9999/ogg"
+		},
+		{
+			"channelName":"Screencast (audio/HLS)",
+			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/windowsill.webm"
+		} 
+	]
+}

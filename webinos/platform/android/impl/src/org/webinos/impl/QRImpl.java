@@ -75,7 +75,7 @@ public class QRImpl extends QRManager implements IModule {
       encodeCallBack.onSuccess(filename);
     } catch (Exception e) {
       e.printStackTrace();
-      encodeCallBack.onError();
+      //encodeCallBack.onError();
     }
   }	
 /*****************************

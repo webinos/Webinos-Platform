@@ -1,0 +1,13 @@
+{
+	"sourceName":"Screencast",
+	"channelList":[
+		{
+			"channelName":"Screencast (audio/mp3)",
+			"channelURL":"http://HOST:PORT/mp3"
+		},
+		{
+			"channelName":"Screencast (audio/ogg)",
+			"channelURL":"http://HOST:PORT/ogg"
+		}
+	]
+}

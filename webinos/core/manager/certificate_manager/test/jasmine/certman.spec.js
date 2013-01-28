@@ -122,4 +122,10 @@ describe("Proper error handling", function() {
     });
 });    
     
-
+describe("get hash", function() {
+    it("can get hash of public certificate", function() {       
+        hash = certman.getHash("../conn.pem");
+        expect(hash).not.toBeNull();
+        expect(hash).not.toEqual("");
+    });
+});
