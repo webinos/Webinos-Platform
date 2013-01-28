@@ -71,31 +71,25 @@ function newContact(i, item, picture, callback)
 	var phonenumbers = [];
 	if (item['gd$phoneNumber'] !== undefined) //contact has email
 	{
-		
-		//if (item['gd$phoneNumber'].length !== undefined) //if is an array
-		//{
-			//TODO rewrite with for loop
-			for (j=0; j<item['gd$phoneNumber'].length; j++)
-			{
-				num = item['gd$phoneNumber'][j]["$t"];
-				type = item['gd$phoneNumber'][j].rel === undefined ? 'other' :item['gd$phoneNumber'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-				pref = j==0?true:false;
-				phonenumbers.push(new ContactField(num, type, pref));
-			}
+        for (j=0; j<item['gd$phoneNumber'].length; j++)
+        {
+            num = item['gd$phoneNumber'][j]["$t"];
+            type = item['gd$phoneNumber'][j].rel === undefined ? 'other' :item['gd$phoneNumber'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
+            pref = j==0?true:false;
+            phonenumbers.push(new ContactField(num, type, pref));
+        }
 	}
 
 	var emails = [];
 	if (item['gd$email'] !== undefined) //contact has email
 	{
-		//if (item['gd$email'].length !== undefined) //if is an array
-		//{
-			for (j=0; j<item['gd$email'].length; j++)
-			{
-				addr = item['gd$email'][j].address;
-				type = item['gd$email'][j].rel === undefined ? 'other':item['gd$email'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-				pref = item['gd$email'][j].primary;
-				emails.push(new ContactField(addr, type, pref));
-			}
+        for (j=0; j<item['gd$email'].length; j++)
+        {
+            addr = item['gd$email'][j].address;
+            type = item['gd$email'][j].rel === undefined ? 'other':item['gd$email'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
+            pref = item['gd$email'][j].primary;
+            emails.push(new ContactField(addr, type, pref));
+        }
 	}
 	/*
 	 * 'gd$structuredPostalAddress': [ { 'gd$pobox': '12223',
@@ -118,28 +112,38 @@ function newContact(i, item, picture, callback)
 	{
 		if (item['gd$structuredPostalAddress'].length !== undefined) //if is an array
 		{
-            
             for (j=0; j<item['gd$email'].length; j++)
 			{
                 if (formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'])
+                {
                     formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress']["$t"];
+                }
 				type = 'other';
 				if(item['gd$structuredPostalAddress'][j].rel !==undefined)
-				 {
-					 type = item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-				 }
+                {
+                    type = item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
+                }
                 if(item['gd$structuredPostalAddress'][j]['gd$street'])
+                {
                     street = item['gd$structuredPostalAddress'][j]['gd$street']["$t"];
-				
+                }
                 j==0?pref=true:pref=false;
                 if(item['gd$structuredPostalAddress'][j]['gd$city'])
+                {
                     locality = item['gd$structuredPostalAddress'][j]['gd$city']["$t"];
+                }
                 if(item['gd$structuredPostalAddress'][j]['gd$region'])
+                {
                     region = item['gd$structuredPostalAddress'][j]['gd$region']["$t"];
+                }
                 if(item['gd$structuredPostalAddress'][j]['gd$postcode'])
+                {
                     postCode = item['gd$structuredPostalAddress'][j]['gd$postcode']["$t"];
+                }
                 if(item['gd$structuredPostalAddress'][j]['gd$country'])
+                {
                     country = item['gd$structuredPostalAddress'][j]['gd$country']["$t"];
+                }
 
 				addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
 			}
@@ -426,7 +430,7 @@ this.getContacts = function(successCB, errorCB)
                 newContact(contactId, contact, "", self.getWebinosContact);
             }
         };
-        // This is used in  order to check when we have finished processing all the contacts so that we can return them
+        // This is used in    order to check when we have finished processing all the contacts so that we can return them
         var processedContacts = 0;
         /**
          * It will collect all the processed contacts and store them in the right order (the one we recieved them.
@@ -465,14 +469,14 @@ this.getContacts = function(successCB, errorCB)
             //This is how to use it with json format.
             //if (contact.link[0] && contact.link[0]['gd$etag']) {
             //This is how to use it with xml format.
-            if (contact.link[0] && contact.link[0]["gd$etag"]) { // Check if the contact has photo
+            if (contact.link[0] && contact.link[0]["gd$etag"]) 
+            { // Check if the contact has photo
                 var googleName = "https://www.google.com";
                 //This is how to use it with json format.
                 //var photo_url = contact.link[0].href.substr(googleName.length);
                 //This is how to use it with xml format.
                 var photo_url = contact.link[0].href.substr(googleName.length);
-                var photoGet =
-                {
+                var photoGet = {
                     host:"www.google.com",
                     path:photo_url,
                     port:443,
@@ -482,7 +486,8 @@ this.getContacts = function(successCB, errorCB)
                     }
                 };
                 var get_photo = https.request(photoGet, function (response) {
-                    if (response.statusCode === 200) { // Check if it is ok or we have to backoff.
+                    if (response.statusCode === 200) 
+                    { // Check if it is ok or we have to backoff.
                         // We need the entire image in binary in order to correctly convert it to base64.
                         response.setEncoding('binary');
                         var buffer = "";
@@ -497,19 +502,23 @@ this.getContacts = function(successCB, errorCB)
                         });
                         response.on("close", function () {
                         });
-                    } else { // We need to backoff due to service restriction.
+                    } 
+                    else
+                    { // We need to backoff due to service restriction.
                         // Give some time to retry.
                         // This should work like this: http://googleappsdeveloper.blogspot.gr/2011/12/documents-list-api-best-practices.html
                         setTimeout(function () {self.safelyGetImages(contactId);}, 1000);
                     }
                 });
                 get_photo.end();
-            }else{ // Contact doesn't have a photo.
+            }
+            else
+            { // Contact doesn't have a photo.
                 //Pass it on for further processing.
                 newContact(contactId, contact, "", self.getWebinosContact);
             }
         };
-        // This is used in  order to check when we have finished processing all the contacts so that we can return them
+        // This is used in    order to check when we have finished processing all the contacts so that we can return them
         var processedContacts = 0;
         /**
          * It will collect all the processed contacts and store them in the right order (the one we recieved them.
@@ -520,16 +529,15 @@ this.getContacts = function(successCB, errorCB)
         self.getWebinosContact = function(contactIndex, contact){
             self.contact_list[contactIndex] = contact;
             processedContacts++;
-            if (processedContacts == self.totalContacts){ // if we collected everything, return the list to the successCB.
+            if (processedContacts == self.totalContacts)
+            { // if we collected everything, return the list to the successCB.
                 successCB(self.contact_list);
             }
         };
         // Asynchronously get all the contacts' images.
-        for (var k = 0; k < contacts.length; k++) {
+        for (var k = 0; k < contacts.length; k++)
+        {
             self.safelyGetImages(k);
         }
 	}
 };
-
-
-
