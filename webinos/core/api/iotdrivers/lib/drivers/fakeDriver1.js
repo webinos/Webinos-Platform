@@ -92,8 +92,6 @@
                 break;
             case 'start':
                 //In this case the sensor should start data acquisition
-                //the parameter data has value 'fixed' (in case of fixed interval
-                // acquisition) or 'change' (in case od acquisition on value change)
                 console.log('Received start for element '+eId+', mode is '+data);
                 var index = -1;
                 for(var i in elementsList) {
