@@ -21,7 +21,6 @@
 		this.base(obj);
 		
 		this.syncGoogleContacts = syncGoogleContacts;
-		this.getAllContacts = getAllContacts;
 		this.find = find;
   };
   
@@ -30,7 +29,6 @@
   Contacts.prototype.bindService = function (bindCB, serviceId) {
 	  // actually there should be an auth check here or whatever, but we just always bind
 	  this.syncGoogleContacts = syncGoogleContacts;
-	  this.getAllContacts = getAllContacts;
 	  this.find = find;
 
 	  if (typeof bindCB.onBind === 'function') {

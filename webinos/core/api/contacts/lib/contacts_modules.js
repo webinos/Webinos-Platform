@@ -20,7 +20,7 @@
 var webinos = require("find-dependencies")(__dirname);
 var fs = require("fs");
 var path = require("path");
-var sessionID = (require("../../../pzp/lib/pzp_sessionHandling.js").getSessionId());
+var sessionID = webinos.global.require (webinos.global.pzp.location).getSessionId();
 
 var local_contacts = '';
 try {
@@ -84,8 +84,6 @@ else if (process.platform === "linux")
 function createContact (property)
 {
     
-    
-    
     return;
 }
 
@@ -98,9 +96,9 @@ function searchAbook(directory)
 
     for (var i=0; i<dirContent.length; i++)
     {
-       console.log(dirContent[i]);
+        console.log(dirContent[i]);
        
-       var next = dirContent[i];
+        var next = dirContent[i];
        
         if (next === "abook.mab")
         {
@@ -108,7 +106,7 @@ function searchAbook(directory)
         }
         else
         {
-            var l = searchAbook( path.normalize(directory+next+"/"));
+            var l = searchAbook(path.normalize(directory+next+"/"));
             if (l !== null)
                 return l;
         }
@@ -336,10 +334,6 @@ function simpleCallback(par)
  */
 this.findContacts = function(filters, successCB, errorCB)
 {
-    
-    console.log("\n\n\n##############################################################################################");
-    console.log(filters[0]);
-    
 	var cb = successCB;
 	if (cb == null || cb == undefined)
 		throw TypeError("Please provide a success callback");
