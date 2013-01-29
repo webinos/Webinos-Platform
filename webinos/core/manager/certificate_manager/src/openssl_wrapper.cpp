@@ -30,8 +30,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 /*
  * Note: you CANT use STL in this module - it breaks the Android build.
@@ -172,9 +170,9 @@ int createCertificateRequest(char* result, char* keyToCertify, char * country, c
 
 int getHash(char* filename, char *pointer){
   struct stat           sb;
-  unsigned char       * buff;
-  int                   fd;
-  ssize_t               len;
+  char                * buff;
+  FILE                * fd;  
+  size_t                len;
   BIO                 * bio;
   X509                * x;
   unsigned              err;
@@ -193,14 +191,14 @@ int getHash(char* filename, char *pointer){
   len = (sb.st_size * 2);
 
   // allocates memory
-  if (!(buff = (unsigned char*)malloc(len)))
+  if (!(buff = (char*)malloc(len)))
   {
     fprintf(stderr, "getHash: out of virtual memory\n");
     return(1);
   };
 
   // opens file for reading
-  if ((fd = open(filename, O_RDONLY)) == -1)
+  if ((fd = fopen(filename, "r")) == NULL)
   {
     perror("getHash: open()");
     free(buff);
@@ -208,7 +206,7 @@ int getHash(char* filename, char *pointer){
   };
 
   // reads file
-  if ((len = read(fd, buff, len)) == -1)
+  if (fgets(buff, len, fd) == NULL) 
   {
     perror("getHash: read()");
     free(buff);
@@ -216,7 +214,7 @@ int getHash(char* filename, char *pointer){
   };
 
   // closes file
-  close(fd);
+  fclose(fd);
 
   // initialize OpenSSL
   SSL_library_init();
