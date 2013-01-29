@@ -571,64 +571,73 @@ Config.prototype.createPolicyFile = function (self) {
 Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callback) {
     var self = this;
     var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
-
-    fs.readFile (filePath, function (err, data) {
-        if (!err) {
-            var key, userPref = JSON.parse (data.toString ());
-            self.userPref.ports = {};
-            self.userPref.ports.provider = userPref.ports.provider;
-            self.userPref.ports.provider_webServer = userPref.ports.provider_webServer;
-            self.userPref.ports.pzp_webSocket = userPref.ports.pzp_webSocket;
-            self.userPref.ports.pzp_tlsServer = userPref.ports.pzp_tlsServer;
-            self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
-
-            if (self.userData.name === "") {
-                self.userData.country = userPref.certConfiguration.country;
-                self.userData.email = userPref.certConfiguration.email;
+    wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
+        self.metaData.webinosName = deviceName;
+        self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
+        self.createDirectories (function (status) {
+            if (status) {
+                logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
+            } else {
+                callback (false, "failed creating directories");
             }
-            self.userData.state = userPref.certConfiguration.state;
-            self.userData.city = userPref.certConfiguration.city;
-            self.userData.orgName = userPref.certConfiguration.orgname;
-            self.userData.orgUnit = userPref.certConfiguration.orgunit;
-            self.userData.cn = userPref.certConfiguration.cn;
+        });
+        fs.readFile (filePath, function (err, data) {
+            if (!err) {
+                var key, userPref = JSON.parse (data.toString ());
+                self.userPref.ports = {};
+                self.userPref.ports.provider = userPref.ports.provider;
+                self.userPref.ports.provider_webServer = userPref.ports.provider_webServer;
+                self.userPref.ports.pzp_webSocket = userPref.ports.pzp_webSocket;
+                self.userPref.ports.pzp_tlsServer = userPref.ports.pzp_tlsServer;
+                self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
 
-            for (key in userPref.pzhDefaultServices) {
-                self.serviceCache.push ({"name":userPref.pzhDefaultServices[key], "params":{}});
-            }
-        } else { // We failed in reading configuration file, assign defaults
-            self.userPref.ports = {};
-            self.userPref.ports.provider = 80;
-            self.userPref.ports.provider_webServer = 443;
-            self.userPref.ports.pzp_webSocket = 8080;
-            self.userPref.ports.pzp_tlsServer = 8040;
-            self.userPref.ports.pzp_zeroConf = 4321;
-            self.userData.country = "UK";
-            self.userData.email = "hello@webinos.org";
-            self.userData.state = "";
-            self.userData.city = "";
-            self.userData.orgName = "";
-            self.userData.orgUnit = "";
-            self.userData.cn = "";
-        }
-        self.metaData.friendlyName = inputConfig.friendlyName;
-        self.metaData.webinosType = webinosType;
-        self.metaData.serverName = inputConfig.sessionIdentity;
-        wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
-            self.metaData.webinosName = deviceName;
-            self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
-            self.createDirectories (function (status) {
-                if (status) {
-                    self.createPolicyFile (self);
-                    self.storeMetaData (self.metaData);
-                    self.storeUserData (self.userData);
-                    self.storeUserPref (self.userPref);
-                    self.storeServiceCache (self.serviceCache);
-                    self.storeUntrustedCert (self.untrustedCert);
-                    callback (true);
-                } else {
-                    callback (false, "failed creating directories");
+                if (self.userData.name === "") {
+                    self.userData.country = userPref.certConfiguration.country;
+                    self.userData.email = userPref.certConfiguration.email;
                 }
-            });
+                self.userData.state = userPref.certConfiguration.state;
+                self.userData.city = userPref.certConfiguration.city;
+                self.userData.orgName = userPref.certConfiguration.orgname;
+                self.userData.orgUnit = userPref.certConfiguration.orgunit;
+                self.userData.cn = userPref.certConfiguration.cn;
+
+                if (webinosType === "Pzh") {
+                    for (key in userPref.pzhDefaultServices) {
+                        self.serviceCache.push ({"name":userPref.pzhDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
+                    }
+                } else if (webinosType === "Pzp") {
+                    for (key = 0; key < userPref.pzpDefaultServices.length; key = key + 1) {
+                        if (userPref.pzpDefaultServices[key].name === "file") {
+                            userPref.pzpDefaultServices[key].params = { getPath:function () { return self.metaData.webinosRoot; } };
+                        }
+                        self.serviceCache.push ({"name":userPref.pzpDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
+                    }
+                }
+            } else { // We failed in reading configuration file, assign defaults
+                self.userPref.ports = {};
+                self.userPref.ports.provider = 80;
+                self.userPref.ports.provider_webServer = 443;
+                self.userPref.ports.pzp_webSocket = 8080;
+                self.userPref.ports.pzp_tlsServer = 8040;
+                self.userPref.ports.pzp_zeroConf = 4321;
+                self.userData.country = "UK";
+                self.userData.email = "hello@webinos.org";
+                self.userData.state = "";
+                self.userData.city = "";
+                self.userData.orgName = "";
+                self.userData.orgUnit = "";
+                self.userData.cn = "";
+            }
+            self.metaData.friendlyName = inputConfig.friendlyName;
+            self.metaData.webinosType = webinosType;
+            self.metaData.serverName = inputConfig.sessionIdentity;
+            self.createPolicyFile (self);
+            self.storeMetaData (self.metaData);
+            self.storeUserData (self.userData);
+            self.storeUserPref (self.userPref);
+            self.storeServiceCache (self.serviceCache);
+            self.storeUntrustedCert (self.untrustedCert);
+            callback (true);
         });
     });
 };

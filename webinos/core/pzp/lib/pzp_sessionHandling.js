@@ -227,10 +227,9 @@ var Pzp = function () {
      * Initializes PZP WebSocket Server and then tries connecting with the PZH hub
      * Starting PZP means starting web socket server
      * @param inputConfig - the input configuration includes Provider address, authCode and PZH address
-     * @param modules - Default modules to load when starting PZP
      * @param callback - true or false depending on startup status
      */
-    this.initializePzp = function (inputConfig, modules, callback) {
+    this.initializePzp = function (inputConfig, callback) {
         try {
             util.webinosHostname.getHostName (inputConfig.sessionIdentity, function (_hostname) {
                 inputConfig.sessionIdentity = _hostname;
@@ -251,7 +250,7 @@ var Pzp = function () {
 
                         self.pzpWebSocket.startWebSocketServer (function (status, value) {
                             if (status) {
-                                self.webinos_manager.initializeRPC_Message (modules); // Initializes RPC
+                                self.webinos_manager.initializeRPC_Message (); // Initializes RPC
                                 logger.log ("successfully started pzp websocket server ");
                                 if (self.pzp_state.enrolled) {
                                     hub.connect (function (status, value) {  // connects hub
@@ -446,6 +445,7 @@ var ConnectHub = function (_parent) {
     var self = this;
     var logger = util.webinosLogging (__filename + "_ConnectHub") || console;
     var pzpServer = new PzpServer (_parent);
+
     /**
      * If PZP fails to connect to PZH, this tries to connect back to PZH
      */
