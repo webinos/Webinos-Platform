@@ -139,29 +139,38 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             return sensorEvent;
         }
         
+        var CmdErrorHandler = function(rpcErrorCB) {
+            this.rpcErrorCB = rpcErrorCB;      
+            this.errorCB = function(message) {
+                rpcErrorCB(message);
+            };
+        };
+        
         /**
         * Configures a sensor.
         * @param params
         * @param successCB
         * @param errorCB
         */
-        this.configureSensor = function (params, successHandler, errorHandler){
+        this.configureSensor = function(params, successCB, errorCB) {
             console.log("Configuring sensor with params : "+JSON.stringify(params));
-            driverInterface.sendCommand('cfg', this.elementId, params);
-            successHandler(); //TODO probably successCB should be passed to sendCommand and called by driver
+            driverInterface.sendCommand('cfg', this.elementId, params,
+                    new CmdErrorHandler(errorCB).errorCB);
         };
         
-        this.addEventListener = function (eventType, successHandler, errorHandler, objectRef) {
+        this.addEventListener = function (eventType, successCB, errorCB, objectRef) {
             console.log('Sensor '+sensorEvent.sensorId+': addEventListener');
             this.objRef = objectRef;
             this.listenerActive = true;
-            driverInterface.sendCommand('start', this.elementId, 'fixed');
-        }
+            driverInterface.sendCommand('start', this.elementId, null,
+                    new CmdErrorHandler(errorCB).errorCB);
+        };
 
-        this.removeEventListener = function (eventType, successHandler, errorHandler, objectRef) {
+        this.removeEventListener = function (eventType, successCB, errorCB, objectRef) {
             this.listenerActive = false;
-            driverInterface.sendCommand('stop', this.elementId, null);
-        }
+            driverInterface.sendCommand('stop', this.elementId, null,
+                    new CmdErrorHandler(errorCB).errorCB);
+        };
     }
 
     SensorService.prototype = new RPCWebinosService;

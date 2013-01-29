@@ -40,7 +40,6 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
         if (impl == 'iot') {
             dilib = require(__dirname+'/../../iotdrivers/lib/driverInterface.js');
             actlib = require(__dirname+'/actuator_iot.js');
-            driverInterface = new dilib.driverInterface(1, driverListener);
         }
         else if (impl == 'old') {
             actlib = require(__dirname+'/actuator_old.js');
@@ -51,7 +50,11 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
             console.log('Init old actuator service');
             regFunc = register;
             unregFunc = unregister;
-            if (impl == 'old') {
+            if (impl == 'iot') {
+                driverInterface = new dilib.driverInterface();
+                driverInterface.connect(1, driverListener);
+            }
+            else if (impl == 'old') {
                 var service = new actlib.ActuatorService(rpcHandler);
                 regFunc(service);
             }

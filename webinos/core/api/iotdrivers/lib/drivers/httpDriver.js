@@ -108,7 +108,7 @@ var port;
                 //the parameter data has value 'fixed' (in case of fixed interval
                 // acquisition) or 'change' (in case od acquisition on value change)
                 console.log('Received start command from API. Element : '+eId+', mode : '+data);
-                var mode = (data === "fixed") ? FIXEDINTERVAL_MODE : VALUECHANGE_MODE;                
+                var mode = FIXEDINTERVAL_MODE;                
                 makeHTTPRequest(boards[board_id].ip, boards[board_id].port, START_LISTENING_CMD, native_element_id, mode);
                 break;
             case 'stop':
