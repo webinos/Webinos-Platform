@@ -153,10 +153,6 @@ function ContactAddress(_formatted, _type, _street, _pref, _locality, _region, _
   {
     this.type = _type;
   }
-  if (_formatted)
-  {
-    this.formatted = _formatted;
-  }
   if (_street)
   {
     this.streetAddress = _street;
@@ -176,6 +172,10 @@ function ContactAddress(_formatted, _type, _street, _pref, _locality, _region, _
   if (_country)
   {
     this.country = _country;
+  }
+  if(_formatted)
+  {
+    this.formatted = _formatted;//this.streetAddress+", "+this.postalCode+", "+this.locality+", "+this.region+", "+this.country;  
   }
 }
 
