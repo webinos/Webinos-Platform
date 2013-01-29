@@ -40,7 +40,6 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
         if (impl == 'iot') {
             dilib = require(__dirname+'/../../iotdrivers/lib/driverInterface.js');
             sslib = require(__dirname+'/sensor_iot.js');
-            driverInterface = new dilib.driverInterface(0, driverListener);
         }
         else if (impl == 'fake') {
             sslib = require(__dirname+'/sensor_fake.js');
@@ -50,7 +49,11 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
         this.init = function(register, unregister) {
             regFunc = register;
             unregFunc = unregister;
-            if (impl == 'fake') {
+            if (impl == 'iot') {
+                driverInterface = new dilib.driverInterface();
+                driverInterface.connect(0, driverListener);
+            }
+            else if (impl == 'fake') {
                 var service = new sslib.SensorService(rpcHandler);
                 regFunc(service);
             }
