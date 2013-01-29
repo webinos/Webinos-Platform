@@ -1,155 +1,155 @@
 {
-  "api": {
-    "applauncher": {
-      "name": "Applauncher module",
-      "location": "api/applauncher/"
+  "api"    :{
+    "applauncher"      :{
+      "name"    :"Applauncher module",
+      "location":"api/applauncher/"
     },
-    "actuator": {
-      "name": "Actuator API",
-      "location": "api/actuator/"
+    "actuator"         :{
+      "name"    :"Actuator API",
+      "location":"api/actuator/"
     },
-    "webnotification": {
-      "name": "WebNotification",
-      "location": "api/webnotification/"
-     },
-    "authentication": {
-      "name": "Authentication",
-      "location": "api/authentication/"
-     },
-    "contacts": {
-      "name": "contacts",
-      "location": "api/contacts/"
+    "webnotification"  :{
+      "name"    :"WebNotification",
+      "location":"api/webnotification/"
     },
-    "context": {
-      "name": "Context",
-      "location": "api/context/"
+    "authentication"   :{
+      "name"    :"Authentication",
+      "location":"api/authentication/"
     },
-    "events": {
-      "name": "Events API",
-      "location": "api/events/"
+    "contacts"         :{
+      "name"    :"contacts",
+      "location":"api/contacts/"
     },
-    "app2app": {
-      "name": "App2App Messaging API",
-      "location": "api/app2app/"
+    "context"          :{
+      "name"    :"Context",
+      "location":"api/context/"
     },
-    "zap-and-shake": {
-      "name": "Zap and Shake (hack)",
-      "location": "api/zap-and-shake/"
+    "events"           :{
+      "name"    :"Events API",
+      "location":"api/events/"
     },
-    "file": {
-      "name": "File API",
-      "location": "api/file/"
+    "app2app"          :{
+      "name"    :"App2App Messaging API",
+      "location":"api/app2app/"
     },
-    "geolocation": {
-      "name": "Geolocation",
-      "location": "api/geolocation/"
+    "zap-and-shake"    :{
+      "name"    :"Zap and Shake (hack)",
+      "location":"api/zap-and-shake/"
     },
-    "get42": {
-      "name": "get42",
-      "location": "api/get42/"
+    "file"             :{
+      "name"    :"File API",
+      "location":"api/file/"
     },
-    "sensors": {
-      "name": "Sensors",
-      "location": "api/sensors/"
+    "geolocation"      :{
+      "name"    :"Geolocation",
+      "location":"api/geolocation/"
     },
-    "tv": {
-      "name": "TV",
-      "location": "api/tv/"
+    "test"             :{
+      "name"    :"Get42 Test API",
+      "location":"api/get42/"
     },
-    "oauth": {
-      "name": "oAuth",
-      "location": "api/oauth/"
+    "sensors"          :{
+      "name"    :"Sensors",
+      "location":"api/sensors/"
     },
-    "vehicle": {
-      "name": "Vehicle",
-      "location": "api/vehicle/"
+    "tv"               :{
+      "name"    :"TV",
+      "location":"api/tv/"
     },
-    "deviceorientation": {
-      "name": "Deviceorientation",
-      "location": "api/deviceorientation/"
+    "oauth"            :{
+      "name"    :"oAuth",
+      "location":"api/oauth/"
     },
-    "service_discovery": {
-      "name": "ServiceDiscovery",
-      "location": "api/servicedisco/"
+    "vehicle"          :{
+      "name"    :"Vehicle",
+      "location":"api/vehicle/"
     },
-    "devicestatus": {
-      "name": "DeviceStatus",
-      "location": "api/devicestatus/"
+    "deviceorientation":{
+      "name"    :"Deviceorientation",
+      "location":"api/deviceorientation/"
     },
-    "payment": {
-      "name": "Payment",
-      "location": "api/payment/"
+    "service_discovery":{
+      "name"    :"ServiceDiscovery",
+      "location":"api/servicedisco/"
     },
-    "discovery": {
-      "name": "Discovery",
-      "location": "api/discovery/"
+    "devicestatus"     :{
+      "name"    :"DeviceStatus",
+      "location":"api/devicestatus/"
     },
-    "mediacontent": {
-      "name": "MediaContent",
+    "payment"          :{
+      "name"    :"Payment",
+      "location":"api/payment/"
+    },
+    "discovery"        :{
+      "name"    :"Discovery",
+      "location":"api/discovery/"
+    },
+    "mediacontent"     :{
+      "name"    :"MediaContent",
       "location":"api/mediacontent/"
     }
   },
-  "manager": {
-    "certificate_manager": {
-      "name": "Certificate manager",
-      "location": "manager/certificate_manager/"
+  "manager":{
+    "certificate_manager"    :{
+      "name"    :"Certificate manager",
+      "location":"manager/certificate_manager/"
     },
-    "context_manager": {
-      "name": "Context manager",
-      "location": "manager/context_manager/"
+    "context_manager"        :{
+      "name"    :"Context manager",
+      "location":"manager/context_manager/"
     },
-    "localconnection_manager": {
-      "name": "local connection manager",
-      "location": "manager/localconnection_manager/"
+    "localconnection_manager":{
+      "name"    :"local connection manager",
+      "location":"manager/localconnection_manager/"
     },
-    
-    "messaging": {
-      "name": "Messaging Manager",
-      "location": "manager/messaging/"
+
+    "messaging"              :{
+      "name"    :"Messaging Manager",
+      "location":"manager/messaging/"
     },
-    "synchronisation_manager": {
-       "name": "Synchronisation Manager",
-       "location": "manager/synchronisation_manager/"
+    "synchronisation_manager":{
+      "name"    :"Synchronisation Manager",
+      "location":"manager/synchronisation_manager/"
     },
-    "policy_manager": {
-      "name": "Policy Manager",
-      "location": "manager/policy_manager/"
+    "policy_manager"         :{
+      "name"    :"Policy Manager",
+      "location":"manager/policy_manager/"
     },
-    "keystore": {
-      "name": "Key Store",
-      "location": "manager/keystore/"
+    "keystore"               :{
+      "name"    :"Key Store",
+      "location":"manager/keystore/"
     },
-    "widget_manager": {
-        "name": "Widget Manager",
-        "location": "manager/widget_manager"
+    "widget_manager"         :{
+      "name"    :"Widget Manager",
+      "location":"manager/widget_manager"
     }
   },
-  "util": {
-    "name":"Webinos utility",
-    "location": "util/"
+  "util"   :{
+    "name"    :"Webinos utility",
+    "location":"util/"
   },
-  "xmpppzp": {
-    "name": "xmpp-pzp",
-    "location": "xmpp-pzp/"
+  "xmpppzp":{
+    "name"    :"xmpp-pzp",
+    "location":"xmpp-pzp/"
   },
-  "xmpppzh": {
-    "name": "xmpp-pzh",
-    "location": "xmpp-pzh/"
+  "xmpppzh":{
+    "name"    :"xmpp-pzh",
+    "location":"xmpp-pzh/"
   },
-  "pzp": {
-    "name": "PZP",
-    "location": "pzp/"
+  "pzp"    :{
+    "name"    :"PZP",
+    "location":"pzp/"
   },
-  "pzh": {
-    "name": "PZH",
-    "location": "pzh/"
+  "pzh"    :{
+    "name"    :"PZH",
+    "location":"pzh/"
   },
-  "wrt": {
-    "name": "wrt",
-    "location": "wrt/"
+  "wrt"    :{
+    "name"    :"wrt",
+    "location":"wrt/"
   },
-  "test": {
-    "name": "test",
-    "location": "test/"
+  "test"   :{
+    "name"    :"test",
+    "location":"test/"
   }
 }
