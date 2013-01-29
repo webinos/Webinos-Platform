@@ -31,6 +31,7 @@ function handleMessage() {
         if (typeof id === 'undefined') return;
 
         var apiFeatureID, apiFeature, apiFeaturesMap = {'ServiceDiscovery':'http://webinos.org/api/discovery'};
+        var serviceId = null;
 
         var idx = rpcRequest.method.lastIndexOf('@');
 
@@ -40,6 +41,9 @@ function handleMessage() {
             apiFeature = apiFeaturesMap[apiFeatureID];
         } else {
             apiFeature = rpcRequest.method.substring(0, idx);
+            serviceId = rpcRequest.method.substring(idx+1);
+            idx = serviceId.indexOf('.');
+            serviceId = serviceId.substring(0, idx);
         }
 
         //If no feature is associated to the request, then allow
@@ -54,7 +58,7 @@ function handleMessage() {
         var request = {
             'subjectInfo' : { 'userId' : userAndRequestor[0] },
             'deviceInfo'  : { 'requestorId' : userAndRequestor[1] },
-            'resourceInfo' : { 'apiFeature': apiFeature }
+            'resourceInfo' : { 'apiFeature': apiFeature, 'serviceId': serviceId }
         };
 
         //Extract feature parameters (if needed)
