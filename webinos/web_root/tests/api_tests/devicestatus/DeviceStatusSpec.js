@@ -18,19 +18,13 @@
 describe("DeviceStatus API", function() {
 	var devicestatusService;
 
+	webinos.discovery.findServices(new ServiceType("http://wacapps.net/api/devicestatus"), {
+		onFound: function (service) {
+			devicestatusService = service;
+		}
+	});
+
 	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://wacapps.net/api/devicestatus"), {
-			onFound: function (service) {
-				devicestatusService = service;
-			}
-		});
-
 		waitsFor(function() {
 			return !!devicestatusService;
 		}, "The discovery didn't find a DeviceStatus service", 5000);
@@ -41,7 +35,7 @@ describe("DeviceStatus API", function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(devicestatusService).toHaveProp("state");
+		expect(devicestatusService.state).toBeDefined();
 		expect(devicestatusService.api).toEqual(jasmine.any(String));
 		expect(devicestatusService.id).toEqual(jasmine.any(String));
 		expect(devicestatusService.displayName).toEqual(jasmine.any(String));

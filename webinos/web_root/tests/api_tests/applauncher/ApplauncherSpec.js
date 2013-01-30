@@ -1,22 +1,16 @@
 describe('Applauncher API', function() {
 	var applauncherService;
 
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/applauncher"), {
+		onFound: function (service) {
+			applauncherService = service;
+		}
+	});
+
 	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/applauncher"), {
-			onFound: function (service) {
-				applauncherService = service;
-			}
-		});
-
 		waitsFor(function() {
 			return !!applauncherService;
-		}, "The discovery didn't find an Applauncher service", 5000);
+		}, "finding Applauncher service", 5000);
 	});
 
 	it("should be available from the discovery", function() {
@@ -24,18 +18,12 @@ describe('Applauncher API', function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(applauncherService).toHaveProp("state");
-		expect(applauncherService).toHaveProp("api");
+		expect(applauncherService.state).toBeDefined();
 		expect(applauncherService.api).toEqual(jasmine.any(String));
-		expect(applauncherService).toHaveProp("id");
 		expect(applauncherService.id).toEqual(jasmine.any(String));
-		expect(applauncherService).toHaveProp("displayName");
 		expect(applauncherService.displayName).toEqual(jasmine.any(String));
-		expect(applauncherService).toHaveProp("description");
 		expect(applauncherService.description).toEqual(jasmine.any(String));
-		expect(applauncherService).toHaveProp("icon");
 		expect(applauncherService.icon).toEqual(jasmine.any(String));
-		expect(applauncherService).toHaveProp("bindService");
 		expect(applauncherService.bindService).toEqual(jasmine.any(Function));
 	});
 
@@ -57,9 +45,9 @@ describe('Applauncher API', function() {
 	});
 
 	it("has the necessary properties and functions as Applauncher API service", function() {
-		expect(applauncherService).toHaveProp("launchApplication");
+		expect(applauncherService.launchApplication).toBeDefined();
 		expect(applauncherService.launchApplication).toEqual(jasmine.any(Function));
-		expect(applauncherService).toHaveProp("appInstalled");
+		expect(applauncherService.appInstalled).toBeDefined();
 		expect(applauncherService.appInstalled).toEqual(jasmine.any(Function));
 	});
 

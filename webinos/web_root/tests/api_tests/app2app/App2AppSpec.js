@@ -2,14 +2,6 @@ describe("app2app messaging api", function () {
   var TIMEOUT = 1000;
   var app2appService;
 
-  function addMatchers() {
-    this.addMatchers({
-      toHaveProp:function (expected) {
-        return typeof this.actual[expected] !== "undefined"
-      }
-    })
-  }
-
   function findService() {
     runs(function () {
       webinos.discovery.findServices(
@@ -22,7 +14,7 @@ describe("app2app messaging api", function () {
 
     waitsFor(function () {
       return !!app2appService
-    }, "the service to be discovered", TIMEOUT)
+    }, "the service to be discovered")
   }
 
   function bindService() {
@@ -88,19 +80,18 @@ describe("app2app messaging api", function () {
   });
 
   describe("contract", function () {
-    beforeEach(addMatchers);
     beforeEach(findService);
     beforeEach(bindService);
     afterEach(clearService);
 
     it("has the necessary generic service methods and properties", function () {
-      expect(app2appService).toHaveProp("state");
+      expect(app2appService.state).toBeDefined();
       expect(app2appService.api).toEqual(jasmine.any(String));
       expect(app2appService.id).toEqual(jasmine.any(String));
       expect(app2appService.displayName).toEqual(jasmine.any(String));
       expect(app2appService.description).toEqual(jasmine.any(String));
       expect(app2appService.icon).toEqual(jasmine.any(String));
-      expect(app2appService.bindService).toEqual(jasmine.any(Function))
+      expect(app2appService.bindService).toEqual(jasmine.any(Function));
     });
 
     it("has the necessary api methods and properties", function () {
@@ -110,7 +101,6 @@ describe("app2app messaging api", function () {
   });
 
   describe("basic channel usage", function () {
-    beforeEach(addMatchers);
     beforeEach(findService);
     beforeEach(bindService);
     afterEach(clearService);
@@ -148,10 +138,10 @@ describe("app2app messaging api", function () {
 
 
       runs(function () {
-        expect(createdChannel).toHaveProp("client");
-        expect(createdChannel).toHaveProp("namespace");
-        expect(createdChannel).toHaveProp("properties");
-        expect(createdChannel).toHaveProp("appInfo");
+        expect(createdChannel.client).toBeDefined();
+        expect(createdChannel.namespace).toBeDefined();
+        expect(createdChannel.properties).toBeDefined();
+        expect(createdChannel.appInfo).toBeDefined();
         expect(createdChannel.connect).toEqual(jasmine.any(Function));
         expect(createdChannel.send).toEqual(jasmine.any(Function));
         expect(createdChannel.disconnect).toEqual(jasmine.any(Function));
@@ -182,10 +172,10 @@ describe("app2app messaging api", function () {
       });
 
       runs(function () {
-        expect(foundChannel).toHaveProp("client");
-        expect(foundChannel).toHaveProp("namespace");
-        expect(foundChannel).toHaveProp("properties");
-        expect(foundChannel).toHaveProp("appInfo");
+        expect(foundChannel.client).toBeDefined();
+        expect(foundChannel.namespace).toBeDefined();
+        expect(foundChannel.properties).toBeDefined();
+        expect(foundChannel.appInfo).toBeDefined();
         expect(foundChannel.connect).toEqual(jasmine.any(Function));
         expect(foundChannel.send).toEqual(jasmine.any(Function));
         expect(foundChannel.disconnect).toEqual(jasmine.any(Function))
@@ -225,7 +215,6 @@ describe("app2app messaging api", function () {
   })
 
   describe("channel search", function () {
-    beforeEach(addMatchers);
     beforeEach(findService);
     beforeEach(bindService);
     afterEach(clearService);
@@ -308,7 +297,6 @@ describe("app2app messaging api", function () {
   })
 
   describe("sending to single client", function () {
-    beforeEach(addMatchers);
     beforeEach(findService);
     beforeEach(bindService);
     afterEach(clearService);
