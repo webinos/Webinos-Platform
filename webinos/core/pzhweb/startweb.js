@@ -28,11 +28,16 @@ var starter = exports;
 
 starter.startWS = function (hostname, config, callback) {
     "use strict";
-    loadWebServerCertificates(config, function (status, connParam) {
+    loadWebServerCertificates(config, function (status) {
+        if (!status) {
+            logger.log("Failed to create web server certificates");
+            callback(false);
+            return;
+        }
         logger.log("starting the web server on " + config.userPref.ports.provider_webServer);
         util.webinosHostname.getHostName(hostname, function (address) {
             pzhproviderweb.startWebServer(hostname, address, config.userPref.ports.provider_webServer,
-                connParam, config, function (status, value) {
+                config, function (status, value) {
                 if (status) {
                     logger.log("Personal zone provider web server started");
                     return callback(true);
@@ -45,57 +50,46 @@ starter.startWS = function (hostname, config, callback) {
         });
     });
 };
-
+/* load the web server's client and SSL certificates.
+ */
 function loadWebServerCertificates(config, callback) {
-    if (!config.cert.internal.web.cert) {
-        var cn = "PzhWS" + ":" + config.metaData.serverName;
-        config.generateSelfSignedCertificate("PzhWS", cn, function (status, value) {
+    "use strict";
+    loadWSCertificate(config, "webssl", "PzhSSL", function(success) {
+        if (success) {
+            loadWSCertificate(config, "webclient", "PzhWS", function(success) {
+                callback(success);
+            });
+        } else {
+            callback(success);
+        }
+    });
+}
+
+/* Generic "make me a certificate" function.
+ * certName should be either "webssl" or "webclient"
+ * certLabel should be either "PzhSSL" or "PzhWS"
+ */
+function loadWSCertificate(config, certName, certLabel, callback) {
+    if (!config.cert.internal[certName] || !config.cert.internal[certName].cert) {
+        var cn = certLabel + ":" + config.metaData.serverName;
+        config.generateSelfSignedCertificate(certLabel, cn, function (status, value) {
             if (status) {
                 config.generateSignedCertificate(value, 2, function (status, value) {
                     if (status) {
-                        config.cert.internal.web.cert = value;
+                        config.cert.internal[certName].cert = value;
                         config.storeCertificate(config.cert.internal, "internal");
-                        setParam(config, function (status, wss) {
-                            if (status) {
-                                return callback(true, wss);
-                            } else {
-                                return callback(false);
-                            }
-                        });
+                        return callback(status);
                     } else {
-                        return callback(false, value);
+                        return callback(false);
                     }
                 });
-            } else {
-                return callback(false, value);
-            }
-        });
-    } else {
-        setParam(config, function (status, wss) {
-            if (status) {
-                return callback(true, wss);
             } else {
                 return callback(false);
             }
         });
+    } else {
+        return callback(true);
     }
-}
-
-function setParam(config, callback) {
-    var key_id = config.cert.internal.web.key_id;
-    config.fetchKey(key_id, function (status, value) {
-        if (status) {
-            callback(true, {
-                key:  value,
-                cert: config.cert.internal.web.cert,
-                ca:   config.cert.internal.master.cert,
-                requestCert: true,
-                rejectUnauthorized: true //TODO
-            });
-        } else {
-            callback(false)
-        }
-    });
 }
 
 starter.start = function(hostname, friendlyName) {

@@ -19,8 +19,9 @@
  *******************************************************************************/
 var PzhProviderWeb = exports;
 
-PzhProviderWeb.startWebServer = function (host, address, port, options, config, cb) {
+PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
     "use strict";
+       
     try {
         var express = require('express'),
             util = require('util'),
@@ -40,30 +41,66 @@ PzhProviderWeb.startWebServer = function (host, address, port, options, config, 
     var dependency = require('find-dependencies')(__dirname),
         logger = dependency.global.require(dependency.global.util.location, 'lib/logging.js')(__filename) || console,
         webTlsCommunicator = require('./realpzhtls.js');
+    
+    // define the options for the SSL server
+    function getSSLOptions(config, callback) {
+        var key_id = config.cert.internal.webssl.key_id;
+        config.fetchKey(key_id, function (status, value) {
+            var options = {
+                key:  value,
+                ca:   config.cert.internal.webssl.intermediate,                
+                requestCert: false,
+                rejectUnauthorized:false,
+                cert: config.cert.internal.webssl.cert
+            };
+            callback(options);
+        });
+    }
+    
+    //define the options for the client connection to the PZH TLS Server
+    function getTLSClientOptions(config, callback) {
+        var key_id = config.cert.internal.webclient.key_id;        
+        config.fetchKey(key_id, function (status, value) {
+            var options = {
+                key:  value,
+                cert: config.cert.internal.webclient.cert,
+                ca:   config.cert.internal.master.cert,
+                requestCert: true,
+                rejectUnauthorized: true //We're only prepared to talk to the TLS server.
+            };
+            callback(options);
+        });
+    }
 
-    function createServer(port, host, address, options, config, next) {
+    function createServer(port, host, address, config, next) {
         var app, routes, server;
 
         //configure the authentication engine and user binding
         passport = createPassport("https://" + address + ':' + port);
 
-        //connect to the TLS Server
-        makeTLSServerConnection(config, options, function (status, value) {
-            if (status) {
-                //configure the express app middleware
-                if (!server) {
-                    app = createApp(options, passport);
-                    routes = setRoutes(app, address, port);
-                    //actually start the server
-                    server = https.createServer(options, app).listen(port);
-                    handleAppStart(app, server, next);
-                } else {
-                    next(value);
-                }
-            } else {
-                logger.error("Failed to connect to the PZH Provider's TLS server");
-                handleAppStart(app, null, next);
-            }
+
+        getSSLOptions(config, function(sslOptions) {
+            getTLSClientOptions(config, function(tlsClientOptions) {
+            //connect to the TLS Server
+                makeTLSServerConnection(config, tlsClientOptions, function (status, value) {
+                    if (status) {
+                        //configure the express app middleware
+                        if (!server) {
+                            app = createApp(passport);
+                            routes = setRoutes(app, address, port);
+                            //actually start the server
+                            console.log("Starting SSL server with options: " + util.inspect(sslOptions));
+                            server = https.createServer(sslOptions, app).listen(port);
+                            handleAppStart(app, server, next);
+                        } else {
+                            next(value);
+                        }
+                    } else {
+                        logger.error("Failed to connect to the PZH Provider's TLS server");
+                        handleAppStart(app, null, next);
+                    }
+                });
+            });
         });
     }
 
@@ -71,10 +108,10 @@ PzhProviderWeb.startWebServer = function (host, address, port, options, config, 
      * of 10 times (ok, more like 8).
      *
      */
-    function makeTLSServerConnection(config, webOptions, cb) {
+    function makeTLSServerConnection(config, tlsClientOptions, cb) {
         webTlsCommunicator.init(
             config,
-            webOptions,
+            tlsClientOptions,
             function (data) {
                 cb(true, data);
             },
@@ -99,7 +136,7 @@ PzhProviderWeb.startWebServer = function (host, address, port, options, config, 
                     tlsConnectionAttempts++;
                     if (tlsConnectionAttempts < 10) {
                         setTimeout(function () {
-                            makeTLSServerConnection(config, webOptions, cb);
+                            makeTLSServerConnection(config, tlsClientOptions, cb);
                         }, 1000);
                     } else {
                         cb(false, "Failed to reconnect to TLS server");
@@ -109,10 +146,9 @@ PzhProviderWeb.startWebServer = function (host, address, port, options, config, 
     }
 
 
-    function createApp(options, passport) {
+    function createApp(passport) {
         "use strict";
         var app = express();
-        app.options = options;
         var MemStore = express.session.MemoryStore;
         app.configure(function () {
             app.set('views', __dirname + '/views');
@@ -217,7 +253,7 @@ PzhProviderWeb.startWebServer = function (host, address, port, options, config, 
     logger.log("Port:    " + port)
     logger.log("Host:    " + host)
     logger.log("Address: " + address)
-    createServer(port, host, address, options, config, cb);
+    createServer(port, host, address, config, cb);
 };
 
 
