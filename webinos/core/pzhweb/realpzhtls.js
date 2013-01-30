@@ -28,7 +28,6 @@ var callbackStorage = {};
 PzhWebTLSCommunicator.init = function (config, webOptions, handler, cb) {
     "use strict";
     var tls = require('tls');
-    console.log("Starting TLS client with options: " + JSON.stringify(webOptions));
     webOptions.rejectUnauthorized = false;
     connection = tls.connect(config.userPref.ports.provider,
         config.metaData.serverName,

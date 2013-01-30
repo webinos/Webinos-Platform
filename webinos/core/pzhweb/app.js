@@ -89,7 +89,6 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
                             app = createApp(passport);
                             routes = setRoutes(app, address, port);
                             //actually start the server
-                            console.log("Starting SSL server with options: " + util.inspect(sslOptions));
                             server = https.createServer(sslOptions, app).listen(port);
                             handleAppStart(app, server, next);
                         } else {
