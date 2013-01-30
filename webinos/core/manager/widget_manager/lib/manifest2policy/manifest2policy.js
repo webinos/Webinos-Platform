@@ -34,7 +34,8 @@
     * @function
     * @param manifestFile Application manifest
     * @param policyFile output file for the application policy
-    * @param features Optional features allowed by the user
+    * @param features Array of {name, permit} elements related to not denied
+    * features 
     * @param userId User identifier
     * @param requestorId Requestor identifier
     */
@@ -94,7 +95,8 @@
     * @function
     * @param manifest Parsed application manifest
     * @param appId Application identifier
-    * @param features Optional features allowed by the user
+    * @param features Array of {name, permit} elements related to not denied
+    * features 
     * @param userId User identifier
     * @param requestorId Requestor identifier
     */
@@ -120,54 +122,48 @@
         }
         target[0].subject[0] = {'subject-match' : subjectMatch};
 
-        // rule
+        // rules
         var rule = [];
-        // 'permit' rule
-        rule[0] = {};
-        rule[0].$ = {'effect' : 'permit'};
-        rule[0].condition = [];
-        rule[0].condition[0] = {};
-        rule[0].condition[0].$ = {'combine' : 'or'};
-        rule[0].condition[0]['resource-match'] = [];
 
-        if (manifest.feature) {
-            for (var i = 0; i < manifest.feature.length; i++) {
-                var done = false;
-                if (manifest.feature[i].$.required === 'true' ||
-                    (manifest.feature[i].$.required === 'false' && features &&
-                    features.indexOf(manifest.feature[i].$.name) >= 0)) {
-                    
-                    if (manifest.feature[i].param) {
-                        for (var j = 0; j < manifest.feature[i].param.length;
-                             j++) {
-                            if (manifest.feature[i].param[j].$ &&
-                                manifest.feature[i].param[j].$.name === 'label'
-                                && manifest.feature[i].param[j].$.value) {
-
-                                rule[0].condition[0]['resource-match']
-                                    .push({'$' : {'attr' : 'api-feature',
-                                    'match' : manifest.feature[i].$.name,
-                                    'label' : manifest.feature[i].param[j].$
-                                    .value}});
-                                done = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (done === false) {
-                        rule[0].condition[0]['resource-match'].push({
-                            '$' : {'attr' : 'api-feature',
-                            'match' : manifest.feature[i].$.name}});
-                    }
+        if (manifest.feature && features) {
+            // permit rule
+            for (var i = 0; i < features.length; i++) {
+                if (features[i].effect === 'permit') {
+                    rule.push(addRule(manifest.feature, features, 'permit'));
+                    break;
                 }
-            }
+            } 
+            // prompt-blanket rule
+            for (var i = 0; i < features.length; i++) {
+                if (features[i].effect === 'prompt-blanket') {
+                    rule.push(addRule(manifest.feature, features,
+                                      'prompt-blanket'));
+                    break;
+                }
+            } 
+            // permit rule
+            for (var i = 0; i < features.length; i++) {
+                if (features[i].effect === 'prompt-session') {
+                    rule.push(addRule(manifest.feature, features,
+                                      'prompt-session'));
+                    break;
+                }
+            } 
+            // permit rule
+            for (var i = 0; i < features.length; i++) {
+                if (features[i].effect === 'prompt-oneshot') {
+                    rule.push(addRule(manifest.feature, features,
+                                      'prompt-oneshot'));
+                    break;
+                }
+            } 
         } else {
             console.log('features are missing');
             return '';
         }
+
         // default 'deny' rule
-        rule[1] = {};
-        rule[1].$ = {'effect' : 'deny'};
+        rule.push({'$' : {'effect' : 'deny'}});
 
         // DataHandlingPolicy
         if (manifest.DataHandlingPolicy) {
@@ -313,6 +309,55 @@
                 return false;
             }
         });
+    };
+
+    /**
+    * Generate a new rule
+    * @function
+    * @param manifest Parsed application manifest
+    * @param features Array of {name, permit} elements related to not denied
+    * features 
+    * @param effect Rule effect (permit, prompt-blanket, prompt-session,
+    * prompt-oneshot)
+    */
+    var addRule = function (manFeature, features, effect) {
+        var rule = {};
+        rule.$ = {'effect' : effect};
+        rule.condition = [];
+        rule.condition[0] = {};
+        rule.condition[0].$ = {'combine' : 'or'};
+        rule.condition[0]['resource-match'] = [];
+
+        for (var i = 0; i < manFeature.length; i++) {
+            for (var j = 0; j < features.length; j++) {
+                if (features[j].name === manFeature[i].$.name &&
+                    features[j].effect === effect) {
+
+                    var done = false;
+                    if (manFeature[i].param) {
+                        for (var k = 0; k < manFeature[i].param.length; k++) {
+                            if (manFeature[i].param[k].$ &&
+                                manFeature[i].param[k].$.name === 'label'
+                                && manFeature[i].param[k].$.value) {
+
+                                rule.condition[0]['resource-match']
+                                    .push({'$' : {'attr' : 'api-feature',
+                                    'match' : manFeature[i].$.name,
+                                    'label' : manFeature[i].param[k].$.value}});
+                                done = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (done === false) {
+                        rule.condition[0]['resource-match'].push({
+                            '$' : {'attr' : 'api-feature',
+                            'match' : manFeature[i].$.name}});
+                    }
+                }
+            }
+        }
+        return rule;
     };
 
     exports.manifest2policy = manifest2policy;
