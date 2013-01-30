@@ -132,13 +132,33 @@
 
         if (manifest.feature) {
             for (var i = 0; i < manifest.feature.length; i++) {
+                var done = false;
                 if (manifest.feature[i].$.required === 'true' ||
                     (manifest.feature[i].$.required === 'false' && features &&
                     features.indexOf(manifest.feature[i].$.name) >= 0)) {
+                    
+                    if (manifest.feature[i].param) {
+                        for (var j = 0; j < manifest.feature[i].param.length;
+                             j++) {
+                            if (manifest.feature[i].param[j].$ &&
+                                manifest.feature[i].param[j].$.name === 'label'
+                                && manifest.feature[i].param[j].$.value) {
 
-                    rule[0].condition[0]['resource-match'].push({
-                        '$' : {'attr' : 'api-feature',
-                        'match' : manifest.feature[i].$.name}});
+                                rule[0].condition[0]['resource-match']
+                                    .push({'$' : {'attr' : 'api-feature',
+                                    'match' : manifest.feature[i].$.name,
+                                    'label' : manifest.feature[i].param[j].$
+                                    .value}});
+                                done = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (done === false) {
+                        rule[0].condition[0]['resource-match'].push({
+                            '$' : {'attr' : 'api-feature',
+                            'match' : manifest.feature[i].$.name}});
+                    }
                 }
             }
         } else {
