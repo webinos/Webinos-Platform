@@ -64,6 +64,12 @@ reports
 # allow eclipse project files in linux-specific folders.
 !webinos/platform/linux/*/*.project
 
+# intellij idea project files
+.idea
+*.iml
+*.ipr
+*.iws
+
 # vstudio prj files
 *.sln
 *.vcxproj*
