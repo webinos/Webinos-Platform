@@ -109,8 +109,34 @@ describe ("test readJson", function () {
 
             ref++;
             if (ref === 2) {
-                done ();
+            	done ();
             }
+        });
+    });
+
+    it("must read two json objects, each split into two buffers, from different instances", function(done) {
+        var part = oStr.substr(0, 30);
+        var strByteLen = Buffer.byteLength(oStr, 'utf8');
+
+        var buf1a = new Buffer(4 + Buffer.byteLength(part), 'utf8');
+        buf1a.writeUInt32LE(strByteLen, 0);
+        buf1a.write(part, 4);
+        var buf1b = new Buffer(oStr.substr(30));
+
+        var buf2a = new Buffer(4 + Buffer.byteLength(part), 'utf8');
+        buf2a.writeUInt32LE(strByteLen, 0);
+        buf2a.write(part, 4);
+        var buf2b = new Buffer(oStr.substr(30));
+
+        session_common.readJson("instanceMock", buf1a);
+        session_common.readJson("instanceMock2", buf2a);
+        session_common.readJson("instanceMock", buf1b, function(obj) {
+            expect(JSON.stringify(obj)).toEqual(oStr);
+            done();
+        });
+        session_common.readJson("instanceMock2", buf2b, function(obj) {
+            expect(JSON.stringify(obj)).toEqual(oStr);
+            done();
         });
     });
 });

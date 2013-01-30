@@ -41,7 +41,7 @@ ProcessWebinosMsg.jsonStr2Buffer = function(jsonString) {
 /**
  * Read in JSON objects from buffer and call objectHandler for each parsed
  * object.
- * @param instance PZH/PZP instance.
+ * @param instance reference to the connection the message was receive on.
  * @param buffer Buffer instance containing JSON serialized objects.
  * @param objectHandler Callback for parsed object.s
  */
