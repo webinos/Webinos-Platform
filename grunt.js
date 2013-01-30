@@ -57,6 +57,7 @@ module.exports = function(grunt) {
           'webinos/core/wrt/lib/webinos.sensors.js',
           'webinos/core/wrt/lib/webinos.events.js',
           'webinos/core/wrt/lib/webinos.app2app.js',
+          'webinos/core/wrt/lib/webinos.appstatesync.js',
           'webinos/core/wrt/lib/webinos.applauncher.js',
           'webinos/core/wrt/lib/webinos.vehicle.js',
           'webinos/core/wrt/lib/webinos.deviceorientation.js',
