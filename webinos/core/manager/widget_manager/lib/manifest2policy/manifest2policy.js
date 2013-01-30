@@ -76,7 +76,7 @@
             }
             var policy = policyGeneration(data.widget, appId, features, userId,
                                           requestorId);
-            if (Object.keys(policy).length > 0) {
+            if (policy !== '' && Object.keys(policy).length > 0) {
                 return writePolicy(policy, appId, policyFile);
             }
             else {
@@ -126,6 +126,25 @@
         var rule = [];
 
         if (manifest.feature && features) {
+            // check that required features are not missing
+            for (var i = 0; i < manifest.feature.length; i++) {
+                if (manifest.feature[i].$ &&
+                    manifest.feature[i].$.required === 'true') {
+                    
+                    var missingFeature = true;
+                    for (var j = 0; j < features.length; j++) {
+                        if (manifest.feature[i].$.name === features[j].name) {
+                            missingFeature = false;
+                            break;
+                        }
+                    }
+                    if (missingFeature === true) {
+                        console.log('Required feature ' +
+                            manifest.feature[i].$.name + ' is missing');
+                        return '';
+                    }
+                }
+            }
             // permit rule
             for (var i = 0; i < features.length; i++) {
                 if (features[i].effect === 'permit') {
