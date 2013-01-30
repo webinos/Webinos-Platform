@@ -37,6 +37,8 @@ function load(mod, modDesc, registry, rpcHandler) {
 			var Service = mod.Service;
 			var s = new Service(rpcHandler, modDesc.params);
 			registry.registerObject(s);
+		} else {
+			throw new Error("no Service or Module property");
 		}
 	} catch (error) {
 		logger.error("Could not load module " + modDesc.name + " with message: " + error);
@@ -45,7 +47,12 @@ function load(mod, modDesc, registry, rpcHandler) {
 
 exports.loadServiceModules = function(modulesDesc, registry, rpcHandler) {
 	var mods = modulesDesc.map(function(m) {
-		return deps.global.require(deps.global.api[m.name].location);
+		try {
+			return deps.global.require(deps.global.api[m.name].location);
+		} catch(e) {
+			logger.error("module require for " + m.name + " failed: " + e);
+			return m;
+		}
 	});
 	for (var i=0; i<mods.length; i++) {
 		load(mods[i], modulesDesc[i], registry, rpcHandler);
