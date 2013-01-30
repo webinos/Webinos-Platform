@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<widget xmlns="http://www.w3.org/ns/widgets" 
-  id="http://webinos.org/proximityreminders" version="0.2.0">
+<widget xmlns="http://www.w3.org/ns/widgets" version="0.2.0">
    <name>Proximity Reminders</name>
    <description>
      Create reminders based on where you are and what time it is.
