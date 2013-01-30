@@ -25,7 +25,6 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <stdlib.h>
 #include <string.h>
@@ -217,8 +216,6 @@ int getHash(char* filename, char *pointer){
   fclose(fd);
 
   // initialize OpenSSL
-  SSL_library_init();
-  SSL_load_error_strings();
   
   // creates BIO buffer
   bio = BIO_new_mem_buf(buff, len);
