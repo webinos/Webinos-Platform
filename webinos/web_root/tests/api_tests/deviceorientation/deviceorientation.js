@@ -21,34 +21,20 @@ var testService;
 
 // Specs tests
 describe('deviceorientation follows specs', function(){
-	beforeEach(function() {
-		this.addMatchers({
-			toBeFunction: function() {
-				return typeof this.actual === 'function';
-			},
-			toBeObject: function() {
-				return typeof this.actual === 'object';
-			},
-			toBeString: function() {
-				return typeof this.actual === 'string';
-			},
-			toBeNumber: function() {
-				return typeof this.actual === 'number';
-			}
-		});
-		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/deviceorientation"), {
-			onFound: function (service) {
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/deviceorientation"), {
+		onFound: function (service) {
 			testService = service;
-		}});
-		
+		}
+	});
+
+	beforeEach(function() {
 		waitsFor(function() {
 			return !!testService;
 		}, "The discovery didn't find an Device Orientation API", 5000);
-		
 	});
 	
 	it('has funtion bindService', function() {
-		expect(testService.bindService).toBeFunction();
+		expect(testService.bindService).toEqual(jasmine.any(Function));
 	});
 	
 	it("can be bound", function() {
@@ -69,11 +55,11 @@ describe('deviceorientation follows specs', function(){
 	});
 	
 	it('has funtion addEventListener', function() {
-		expect(testService.addEventListener).toBeFunction();
+		expect(testService.addEventListener).toEqual(jasmine.any(Function));
 	});
 	
 	it('has funtion removeEventListener', function() {
-		expect(testService.removeEventListener).toBeFunction();
+		expect(testService.removeEventListener).toEqual(jasmine.any(Function));
 	});
 	
 	it('api equals to "http://webinos.org/api/deviceorientation"', function() {
@@ -81,11 +67,11 @@ describe('deviceorientation follows specs', function(){
 	});
 	
 	it('displayName is string', function() {
-		expect(testService.displayName).toBeString();
+		expect(testService.displayName).toEqual(jasmine.any(String));
 	});
 	
 	it('description is string', function() {
-		expect(testService.description).toBeString();
+		expect(testService.description).toEqual(jasmine.any(String));
 	});
 		
 });

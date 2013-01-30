@@ -19,28 +19,18 @@
 describe("Events API", function() {
 	var eventsService;
 
-	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/events"), {
-			onFound: function (unboundService) {
-				unboundService.bindService({onBind: function(service) {
-					eventsService = service;
-				}});
-			}
-		});
-
-		waitsFor(function() {
-			return !!eventsService;
-		}, "Could not find or bind Events service", 5000);
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/events"), {
+		onFound: function (unboundService) {
+			unboundService.bindService({onBind: function(service) {
+				eventsService = service;
+			}});
+		}
 	});
 
-	afterEach(function() {
-		eventsService = undefined;
+	beforeEach(function() {
+		waitsFor(function() {
+			return !!eventsService;
+		}, "finding Events service", 5000);
 	});
 
 	it("could be found and be bound", function() {
@@ -48,7 +38,7 @@ describe("Events API", function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(eventsService).toHaveProp("state");
+		expect(eventsService.state).toBeDefined();
 		expect(eventsService.api).toEqual(jasmine.any(String));
 		expect(eventsService.id).toEqual(jasmine.any(String));
 		expect(eventsService.displayName).toEqual(jasmine.any(String));
@@ -65,10 +55,10 @@ describe("Events API", function() {
 
 	it("can create an event", function() {
 		var ev = eventsService.createWebinosEvent("testtype", {to: [{id: "to"}], source: {id: "from"}});
-		expect(ev).toHaveProp("type");
-		expect(ev).toHaveProp("addressing");
-		expect(ev).toHaveProp("id");
-		expect(ev).toHaveProp("timeStamp");
+		expect(ev.type).toBeDefined();
+		expect(ev.addressing).toBeDefined();
+		expect(ev.id).toBeDefined();
+		expect(ev.timeStamp).toBeDefined();
 		expect(ev.dispatchWebinosEvent).toEqual(jasmine.any(Function));
 		expect(ev.forwardWebinosEvent).toEqual(jasmine.any(Function));
 	});

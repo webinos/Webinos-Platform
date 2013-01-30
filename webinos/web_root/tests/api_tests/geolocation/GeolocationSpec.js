@@ -25,14 +25,6 @@ function checkPosition(position) {
 	expect(coords.accuracy).toEqual(jasmine.any(Number));
 }
 
-beforeEach(function() {
-	this.addMatchers({
-		toHaveProp: function(expected) {
-			return typeof this.actual[expected] !== "undefined";
-		}
-	});
-});
-
 describe("Geolocation API", function() {
 	var geolocationService;
 
@@ -53,7 +45,7 @@ describe("Geolocation API", function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(geolocationService).toHaveProp("state");
+		expect(geolocationService.state).toBeDefined();
 		expect(geolocationService.api).toEqual(jasmine.any(String));
 		expect(geolocationService.id).toEqual(jasmine.any(String));
 		expect(geolocationService.displayName).toEqual(jasmine.any(String));
