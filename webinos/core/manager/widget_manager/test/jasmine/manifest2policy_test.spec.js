@@ -28,7 +28,53 @@ var manifest2 = 'manifestExample2.xml';
 var manifest3 = 'manifestExample3.xml';
 var manifest4 = 'manifestExample4.xml';
 var outputFile = 'outputFile.xml';
-var optionalFeature = ['http://webinos.org/api/webnotification'];
+var allFeatures = [
+    {
+        name : 'http://webinos.org/feature/internet',
+        effect : 'permit'
+    },
+    {
+        name : 'http://webinos.org/api/webnotification',
+        effect : 'permit'
+    },
+    {
+        name : 'http://webinos.org/api/file',
+        effect : 'permit'
+    },
+    {
+        name : 'http://www.w3.org/ns/api-perms/geolocation',
+        effect : 'permit'
+    }];
+var requiredFeatures = [
+    {
+        name : 'http://webinos.org/feature/internet',
+        effect : 'permit'
+    },
+    {
+        name : 'http://webinos.org/api/file',
+        effect : 'permit'
+    },
+    {
+        name : 'http://www.w3.org/ns/api-perms/geolocation',
+        effect : 'permit'
+    }];
+var promptFeatures = [
+    {
+        name : 'http://webinos.org/feature/internet',
+        effect : 'permit'
+    },
+    {
+        name : 'http://webinos.org/api/webnotification',
+        effect : 'prompt-session'
+    },
+    {
+        name : 'http://webinos.org/api/file',
+        effect : 'prompt-oneshot'
+    },
+    {
+        name : 'http://www.w3.org/ns/api-perms/geolocation',
+        effect : 'prompt-session'
+    }];
 
 describe("Manager.WidgetManager.manifest2policy", function() {
 
@@ -47,7 +93,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             fs.unlinkSync(outputFile);
         }
         runs(function() {
-            expect(m2p.manifest2policy(manifest1, outputFile, optionalFeature))
+            expect(m2p.manifest2policy(manifest1, outputFile, allFeatures))
                 .toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
@@ -61,7 +107,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             fs.unlinkSync(outputFile);
         }
         runs(function() {
-            expect(m2p.manifest2policy(manifest1, outputFile, ''))
+            expect(m2p.manifest2policy(manifest1, outputFile, requiredFeatures))
                 .toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
@@ -72,7 +118,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
 
     it("Add a new policy", function() {
         runs(function() {
-            expect(m2p.manifest2policy(manifest2, outputFile, optionalFeature))
+            expect(m2p.manifest2policy(manifest2, outputFile, allFeatures))
                 .toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
@@ -86,7 +132,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             fs.unlinkSync(outputFile);
         }
         runs(function() {
-            expect(m2p.manifest2policy(manifest3, outputFile, optionalFeature))
+            expect(m2p.manifest2policy(manifest3, outputFile, allFeatures))
                 .toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
@@ -100,7 +146,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             fs.unlinkSync(outputFile);
         }
         runs(function() {
-            expect(m2p.manifest2policy(manifest3, outputFile, optionalFeature,
+            expect(m2p.manifest2policy(manifest3, outputFile, allFeatures,
                 'Justin', 'Device used by Justin')).toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
@@ -114,12 +160,26 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             fs.unlinkSync(outputFile);
         }
         runs(function() {
-            expect(m2p.manifest2policy(manifest4, outputFile, optionalFeature))
+            expect(m2p.manifest2policy(manifest4, outputFile, allFeatures))
                 .toEqual(true);
             var data = fs.readFileSync(outputFile, 'utf-8');
             data = data.replace(/\r/g, '');
             data = data.replace(/\n/g, '');
             expect(data).toEqual('<policy-set><policy><target><subject><subject-match attr="id" match="http://webinos.org/proximityreminders"></subject-match></subject></target><rule effect="permit"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/feature/internet" label="Internet access"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/webnotification" label="Web notification"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/file" label="File access"></resource-match><resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation" label="GPS"></resource-match></condition></rule><rule effect="deny"></rule><DataHandlingPreferences PolicyId="#current-http://webinos.org/proximityreminders"><AuthorizationsSet><AuthzUseForPurpose><Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose></AuthzUseForPurpose></AuthorizationsSet><ObligationsSet></ObligationsSet></DataHandlingPreferences><ProvisionalActions><ProvisionalAction><AttributeValue>http://webinos.org/geolocation</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Geolocation is needed to trigger reminders based on your current          location.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/webnotification</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Notifications are used to alert you when a reminder is valid -          e.g., at a specific time or place.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/file</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Your reminders are stored in files on the file system       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/feature/internet</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Internet access is used to load Google Maps       </DeveloperProvidedDescription></ProvisionalAction></ProvisionalActions></policy></policy-set>');
+		});
+	});
+
+    it("Label attribute usage", function() {
+        if (fs.existsSync(outputFile)) {
+            fs.unlinkSync(outputFile);
+        }
+        runs(function() {
+            expect(m2p.manifest2policy(manifest4, outputFile, promptFeatures))
+                .toEqual(true);
+            var data = fs.readFileSync(outputFile, 'utf-8');
+            data = data.replace(/\r/g, '');
+            data = data.replace(/\n/g, '');
+            expect(data).toEqual('<policy-set><policy><target><subject><subject-match attr="id" match="http://webinos.org/proximityreminders"></subject-match></subject></target><rule effect="permit"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/feature/internet" label="Internet access"></resource-match></condition></rule><rule effect="prompt-session"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/api/webnotification" label="Web notification"></resource-match><resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation" label="GPS"></resource-match></condition></rule><rule effect="prompt-oneshot"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/api/file" label="File access"></resource-match></condition></rule><rule effect="deny"></rule><DataHandlingPreferences PolicyId="#current-http://webinos.org/proximityreminders"><AuthorizationsSet><AuthzUseForPurpose><Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose></AuthzUseForPurpose></AuthorizationsSet><ObligationsSet></ObligationsSet></DataHandlingPreferences><ProvisionalActions><ProvisionalAction><AttributeValue>http://webinos.org/geolocation</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Geolocation is needed to trigger reminders based on your current          location.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/webnotification</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Notifications are used to alert you when a reminder is valid -          e.g., at a specific time or place.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/file</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Your reminders are stored in files on the file system       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/feature/internet</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Internet access is used to load Google Maps       </DeveloperProvidedDescription></ProvisionalAction></ProvisionalActions></policy></policy-set>');
 		});
 	});
 });
