@@ -26,6 +26,7 @@ var m2p = require (path.join(__dirname,
 var manifest1 = 'manifestExample1.xml';
 var manifest2 = 'manifestExample2.xml';
 var manifest3 = 'manifestExample3.xml';
+var manifest4 = 'manifestExample4.xml';
 var outputFile = 'outputFile.xml';
 var optionalFeature = ['http://webinos.org/api/webnotification'];
 
@@ -94,7 +95,7 @@ describe("Manager.WidgetManager.manifest2policy", function() {
 		});
 	});
 
-    it("UserId and requestor id usage", function() {
+    it("UserId and requestorId usage", function() {
         if (fs.existsSync(outputFile)) {
             fs.unlinkSync(outputFile);
         }
@@ -105,6 +106,20 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             data = data.replace(/\r/g, '');
             data = data.replace(/\n/g, '');
             expect(data).toEqual('<policy-set><policy><target><subject><subject-match attr="id" match="http://webinos.org/proximityreminders"></subject-match><subject-match attr="user-id" match="Justin"></subject-match><subject-match attr="requestor-id" match="Device used by Justin"></subject-match></subject></target><rule effect="permit"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/feature/internet"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/webnotification"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/file"></resource-match><resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"></resource-match></condition></rule><rule effect="deny"></rule><DataHandlingPreferences PolicyId="#current-http://webinos.org/proximityreminders"><AuthorizationsSet><AuthzUseForPurpose><Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose></AuthzUseForPurpose></AuthorizationsSet><ObligationsSet></ObligationsSet></DataHandlingPreferences><ProvisionalActions><ProvisionalAction><AttributeValue>http://webinos.org/geolocation</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Geolocation is needed to trigger reminders based on your current          location.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/webnotification</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Notifications are used to alert you when a reminder is valid -          e.g., at a specific time or place.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/file</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Your reminders are stored in files on the file system       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/feature/internet</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Internet access is used to load Google Maps       </DeveloperProvidedDescription></ProvisionalAction></ProvisionalActions></policy></policy-set>');
+		});
+	});
+
+    it("Label attribute usage", function() {
+        if (fs.existsSync(outputFile)) {
+            fs.unlinkSync(outputFile);
+        }
+        runs(function() {
+            expect(m2p.manifest2policy(manifest4, outputFile, optionalFeature))
+                .toEqual(true);
+            var data = fs.readFileSync(outputFile, 'utf-8');
+            data = data.replace(/\r/g, '');
+            data = data.replace(/\n/g, '');
+            expect(data).toEqual('<policy-set><policy><target><subject><subject-match attr="id" match="http://webinos.org/proximityreminders"></subject-match></subject></target><rule effect="permit"><condition combine="or"><resource-match attr="api-feature" match="http://webinos.org/feature/internet" label="Internet access"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/webnotification" label="Web notification"></resource-match><resource-match attr="api-feature" match="http://webinos.org/api/file" label="File access"></resource-match><resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation" label="GPS"></resource-match></condition></rule><rule effect="deny"></rule><DataHandlingPreferences PolicyId="#current-http://webinos.org/proximityreminders"><AuthorizationsSet><AuthzUseForPurpose><Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose></AuthzUseForPurpose></AuthorizationsSet><ObligationsSet></ObligationsSet></DataHandlingPreferences><ProvisionalActions><ProvisionalAction><AttributeValue>http://webinos.org/geolocation</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Geolocation is needed to trigger reminders based on your current          location.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/webnotification</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Notifications are used to alert you when a reminder is valid -          e.g., at a specific time or place.       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/api/file</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Your reminders are stored in files on the file system       </DeveloperProvidedDescription></ProvisionalAction><ProvisionalAction><AttributeValue>http://webinos.org/feature/internet</AttributeValue><AttributeValue>#current-http://webinos.org/proximityreminders</AttributeValue><DeveloperProvidedDescription language="EN">         Internet access is used to load Google Maps       </DeveloperProvidedDescription></ProvisionalAction></ProvisionalActions></policy></policy-set>');
 		});
 	});
 });
