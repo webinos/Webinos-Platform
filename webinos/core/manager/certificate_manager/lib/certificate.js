@@ -25,7 +25,7 @@ var Certificate = function () {
     this.cert         = {};
     this.cert.internal= {};
     this.cert.external= {};
-    this.cert.internal= {master: {}, conn: {}, webclient: {}, webssl: {}};
+    this.cert.internal= {master: {}, conn: {}};
 
     var self = this;
 
@@ -44,11 +44,17 @@ var Certificate = function () {
             ;
             cert_type = 1;
         } else if (type === "PzhWS") {
+            if (typeof this.cert.internal.webclient === 'undefined') {
+                this.cert.internal.webclient = {};
+            }
             key_id = self.cert.internal.webclient.key_id = self.metaData.webinosName + "_webclient";
             ;
             cert_type = 2;
         }
         else if (type === "PzhSSL") {
+            if (typeof this.cert.internal.webssl === 'undefined') {
+                this.cert.internal.webssl = {};
+            }
             key_id = self.cert.internal.webssl.key_id = self.metaData.webinosName + "_webssl";
             ;
             cert_type = 2;
