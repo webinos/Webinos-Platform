@@ -21,12 +21,13 @@ var webinos = require("find-dependencies")(__dirname);
 var fs = require("fs");
 var path = require("path");
 var sessionID = webinos.global.require (webinos.global.pzp.location).getSessionId();
+var wPath = webinos.global.require (webinos.global.pzp.location).getWebinosPath();
 
 var local_contacts = '';
 try {
     if(process.platform!=='android')
     {
-        local_contacts = require('./local_contacts');;
+        local_contacts = require('./local_contacts');
     }
     else //on android
     {
@@ -64,15 +65,7 @@ else
     LocalContacts = local_contacts;
 }
 
-var contactsPath = "";
-if (process.platform === "windows")
-{
-    contactsPath = process.env.HOMEPATH + ".webinos\\" + sessionID + "\\userData\\GContacts.json";
-}
-else if (process.platform === "linux")
-{
-    contactsPath = process.env.HOME + "/.webinos/" + sessionID + "/userData/GContacts.json";
-}
+var contactsPath = wPath + "/userData/GContacts.json";
 
 
 /**
@@ -89,6 +82,7 @@ function createContact (property)
 
 function searchAbook(directory)
 {
+    // TODO: Support multiple *.mab files
     var dirContent;
     try {dirContent = fs.readdirSync(directory);}
     catch(er){return null;}
@@ -121,20 +115,14 @@ function makeW3Ccontacts(successCB, errorCB)
 {
     var contacts_l;
     var rawContacts;
-    var pzpJsonPath = "";
-    
-    if (process.platform === "windows")
-    {
-        pzpJsonPath = process.env.HOMEPATH + ".webinos\\" + sessionID + "\\userData\\" + sessionID + ".json";
-    }
-    else if (process.platform === "linux")
-    {
-        pzpJsonPath = process.env.HOME + "/.webinos/" + sessionID + "/userData/" + sessionID + ".json";
-    }
+    var pzpJsonPath = wPath + "/userData/" + sessionID + ".json";
     var pzp_json = require(pzpJsonPath);
-    if ( !pzp_json.abook )
+    if ( !pzp_json.abook || pzp_json.abook === "")
     {
-        if (process.platform === "windows")
+        // Is this the first time we search for an abook setting?
+        var settingInit = (pzp_json.abook !== "");
+
+        if (process.platform === "win32")
         {
             pzp_json.abook = searchAbook(process.env.AppData + "\\Thunderbird\\Profiles\\");
         }
@@ -142,7 +130,12 @@ function makeW3Ccontacts(successCB, errorCB)
         {
             pzp_json.abook = searchAbook(process.env.HOME + "/.thunderbird/");
         }
-        if (pzp_json.abook !== null)
+        // We failed to locate a mab file, let's add a place holder for manual setting.
+        if (pzp_json.abook === null) {
+            pzp_json.abook = "";
+        }
+        // Update the abook setting with the file path or an empty placeholder just the first time.
+        if (pzp_json.abook !== null && (pzp_json.abook !== "" || settingInit))
         {
             fs.writeFile(pzpJsonPath, JSON.stringify(pzp_json, null, 1), function(arg){
                 if(arg)
@@ -150,9 +143,11 @@ function makeW3Ccontacts(successCB, errorCB)
             });
         }
     }
-    if (pzp_json.abook !== null)
+    if (pzp_json.abook !== null && pzp_json.abook !== "")
     {
-        
+        // TODO: Support multiple *.mab files
+        // TODO: Check if the file exists and update the setting
+
         LocalContacts.open(pzp_json.abook);
         rawContacts = LocalContacts.getAB();
         contacts_l = new Array(rawContacts.length);
