@@ -35,8 +35,11 @@
     * @param manifestFile Application manifest
     * @param policyFile output file for the application policy
     * @param features Optional features allowed by the user
+    * @param userId User identifier
+    * @param requestorId Requestor identifier
     */
-    var manifest2policy = function(manifestFile, policyFile, features) {
+    var manifest2policy = function(manifestFile, policyFile, features, userId,
+                                   requestorId) {
 
         if (manifestFile === null || manifestFile === undefined) {
             console.log('manifest file parameter is missing');
@@ -54,10 +57,12 @@
             console.log(error);
             return false;
         }
-        if (data.widget !== null && data.widget !== undefined) {
+        if (data.widget) {
+            // appId is defined as the widget id
+            if (data.widget.$ && data.widget.$.id && data.widget.$.id !== '') {
+                var appId = data.widget.$.id;
             // appId is defined as author-name
-            if (data.widget.author !== null && data.widget.author !== undefined
-                && data.widget.name !== null && data.widget.name !== undefined
+            } else if (data.widget.author && data.widget.name
                 && util.isArray(data.widget.author) &&
                 util.isArray(data.widget.name) &&
                 data.widget.author[0].length > 0 &&
@@ -68,7 +73,8 @@
                 console.log('It is not possible to define appId');
                 return false;
             }
-            var policy = policyGeneration(data.widget, appId, features);
+            var policy = policyGeneration(data.widget, appId, features, userId,
+                                          requestorId);
             if (Object.keys(policy).length > 0) {
                 return writePolicy(policy, appId, policyFile);
             }
@@ -89,22 +95,29 @@
     * @param manifest Parsed application manifest
     * @param appId Application identifier
     * @param features Optional features allowed by the user
+    * @param userId User identifier
+    * @param requestorId Requestor identifier
     */
-    var policyGeneration = function (manifest, appId, features) {
+    var policyGeneration = function (manifest, appId, features, userId,
+                                     requestorId) {
         // target
         var target = [];
         target[0] = {};
         target[0].subject = [];
         var subjectMatch = [];
-        // subject-match on application ID
+
+        // appId subject-match
         subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
-        // subject-match on user ID, assuming to receive it as a parameter
-        /*if (userId !== null && userId !== undefined) {
+        
+        // userId subject-match
+        if (userId) {
             subjectMatch.push({'$' : {'attr' : 'user-id', 'match' : userId}});
-        } else {
-            console.log('userId is missing');
-            return '';
-        }*/
+        }
+        // requestorId subject-match
+        if (requestorId) {
+            subjectMatch.push({'$' : {'attr' : 'requestor-id',
+                                      'match' : requestorId}});
+        }
         target[0].subject[0] = {'subject-match' : subjectMatch};
 
         // rule
@@ -117,11 +130,10 @@
         rule[0].condition[0].$ = {'combine' : 'or'};
         rule[0].condition[0]['resource-match'] = [];
 
-        if (manifest.feature !== null && manifest.feature !== undefined) {
+        if (manifest.feature) {
             for (var i = 0; i < manifest.feature.length; i++) {
                 if (manifest.feature[i].$.required === 'true' ||
-                    (manifest.feature[i].$.required === 'false' &&
-                    features !== null && features !== undefined &&
+                    (manifest.feature[i].$.required === 'false' && features &&
                     features.indexOf(manifest.feature[i].$.name) >= 0)) {
 
                     rule[0].condition[0]['resource-match'].push({
@@ -138,9 +150,7 @@
         rule[1].$ = {'effect' : 'deny'};
 
         // DataHandlingPolicy
-        if (manifest.DataHandlingPolicy !== null &&
-            manifest.DataHandlingPolicy !== undefined) {
-
+        if (manifest.DataHandlingPolicy) {
             var dhp = manifest.DataHandlingPolicy;
             var dhpId = [];
             for (var i = 0; i < dhp.length; i++) {
@@ -155,8 +165,7 @@
         }
 
         // ProvisionalActions
-        if (manifest.ProvisionalActions !== null &&
-            manifest.ProvisionalActions !== undefined) {
+        if (manifest.ProvisionalActions) {
             var pa = manifest.ProvisionalActions;
             for (var i = 0; i < pa[0].ProvisionalAction.length; i++) {
                 for (var j = 0;
@@ -196,7 +205,7 @@
     var writePolicy = function (appPolicy, appId, policyFile) {
         var policySet = {};
         policySet.policy = [];
-        if (appPolicy !== null && appPolicy !== undefined) {
+        if (appPolicy) {
             policySet.policy.push(appPolicy);
         } else {
             console.log('appPolicy is missing');
@@ -214,11 +223,8 @@
                 return false;
             }
 
-            if (data !== null && data['policy-set'] !== null &&
-                data['policy-set'] !== undefined &&
-                data['policy-set'].policy !== null &&
-                data['policy-set'].policy !== undefined &&
-                util.isArray(data['policy-set'].policy)) {
+            if (data !== null && data['policy-set'] && data['policy-set'].policy
+                && util.isArray(data['policy-set'].policy)) {
 
                 policySet = insertPolicy (policySet, appId,
                     data['policy-set'].policy);
@@ -250,21 +256,16 @@
     */
     var insertPolicy = function (policySet, appId, parsedPolicy) {
         for (var i = 0; i < parsedPolicy.length; i++) {
-            if (parsedPolicy[i].target !== null &&
-                parsedPolicy[i].target !== undefined &&
-                util.isArray(parsedPolicy[i].target) &&
-                parsedPolicy[i].target[0].subject !== null &&
-                parsedPolicy[i].target[0].subject !== undefined &&
+            if (parsedPolicy[i].target && util.isArray(parsedPolicy[i].target)
+                && parsedPolicy[i].target[0].subject &&
                 util.isArray(parsedPolicy[i].target[0].subject)) {
 
                 var subject = parsedPolicy[i].target[0].subject[0];
-                if (subject['subject-match'] !== null &&
-                    subject['subject-match'] !== undefined &&
+                if (subject['subject-match'] &&
                     util.isArray(subject['subject-match'])) {
 
                     for (var j = 0 ; j < subject['subject-match'].length; j++) {
-                        if (subject['subject-match'][j].$ !== null &&
-                            subject['subject-match'][j].$ !== undefined &&
+                        if (subject['subject-match'][j].$ &&
                             subject['subject-match'][j].$.attr === 'id' &&
                             subject['subject-match'][j].$.match !== appId) {
 
