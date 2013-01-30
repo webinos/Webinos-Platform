@@ -19,19 +19,13 @@
 describe("Payment API", function() {
         var paymentService;
 
+        webinos.discovery.findServices(new ServiceType("http://webinos.org/api/payment"), {
+                onFound: function (service) {
+                    paymentService = service;
+                }
+        });
+
         beforeEach(function() {
-                this.addMatchers({
-                        toHaveProp: function(expected) {
-                                return typeof this.actual[expected] !== "undefined";
-                        }
-                });
-
-                webinos.discovery.findServices(new ServiceType("http://webinos.org/api/payment"), {
-                        onFound: function (service) {
-                                paymentService = service;                                
-                        }
-                });
-
                 waitsFor(function() {
                         return !!paymentService;
                 }, "The discovery didn't find a Payment service", 5000);
@@ -42,7 +36,7 @@ describe("Payment API", function() {
         });
 
         it("has the necessary properties as service object", function() {
-                expect(paymentService).toHaveProp("state");
+                expect(paymentService.state).toBeDefined();
                 expect(paymentService.api).toEqual(jasmine.any(String));
                 expect(paymentService.id).toEqual(jasmine.any(String));
                 expect(paymentService.displayName).toEqual(jasmine.any(String));
@@ -161,20 +155,20 @@ describe("Payment API", function() {
                 expect(myBasket.update).toEqual(jasmine.any(Function));
                 expect(myBasket.checkout).toEqual(jasmine.any(Function));
                 expect(myBasket.release).toEqual(jasmine.any(Function));
-                expect(myBasket).toHaveProp("items");
-                expect(myBasket).toHaveProp("extras");
-                expect(myBasket).toHaveProp("totalBill");
+                expect(myBasket.items).toBeDefined();
+                expect(myBasket.extras).toBeDefined();
+                expect(myBasket.totalBill).toBeDefined();
        });
        
 
         it("has the necessary properties and functions for a shopping item", function() {     
                       myItem=new ShoppingItem();
-                      expect(myItem).toHaveProp("productID");
-                      expect(myItem).toHaveProp("description");
-                      expect(myItem).toHaveProp("currency");
-                      expect(myItem).toHaveProp("itemPrice");
-                      expect(myItem).toHaveProp("itemCount");
-                      expect(myItem).toHaveProp("itemsPrice");
+                      expect(myItem.productID).toBeDefined();
+                      expect(myItem.description).toBeDefined();
+                      expect(myItem.currency).toBeDefined();
+                      expect(myItem.itemPrice).toBeDefined();
+                      expect(myItem.itemCount).toBeDefined();
+                      expect(myItem.itemsPrice).toBeDefined();
        });
          
         it("can add an item to a shopping basket",  function() {
