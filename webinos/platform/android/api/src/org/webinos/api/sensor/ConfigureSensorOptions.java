@@ -13,13 +13,15 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 * 
-* Copyright 2012 Sony Mobile Communications
+* Copyright 2013 Sony Mobile Communications
 * 
 ******************************************************************************/
 
 package org.webinos.api.sensor;
 
-public class ConfigureSensorOptions {
+import org.meshpoint.anode.idl.Dictionary;
+
+public class ConfigureSensorOptions implements Dictionary {
     public static final int INFINITE = 0;
     public static final int SENSOR_DELAY_FASTEST = 0;
     public static final int SENSOR_DELAY_GAME = 1;
@@ -28,6 +30,8 @@ public class ConfigureSensorOptions {
     public static final int SENSOR_DELAY_UNDEFINED = 100;
 
     public int timeout;
+    
     public int rate;
-    public boolean interrupt;
+    public String eventFireMode;
+    public GeoPosition position;
 }
