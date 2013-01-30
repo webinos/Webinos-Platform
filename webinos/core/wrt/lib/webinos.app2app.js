@@ -274,7 +274,7 @@
 
     // we only allow a single search at a time
     if (searchCallbacks.hasOwnProperty(module.peerId)) {
-      console.log("There is already a search in progress.");
+      errorCallback(respondWith("There is already a search in progress."));
       return;
     }
 
@@ -299,7 +299,7 @@
 
     var pendingOperation = {};
     pendingOperation.cancel = function() {
-      if (searchCallbacks[module.peerId] === searchCallback) {
+      if (searchCallbacks[module.peerId]) {
         clearTimeout(timeoutId);
         delete searchCallbacks[module.peerId];
       }
