@@ -19,6 +19,6 @@
 
 package org.webinos.api.nfc;
 
-public interface NfcEventListener {
-  public void handleEvent(NfcTag evt);
+public interface NfcErrorCallback {
+  void onError(String error);
 }
