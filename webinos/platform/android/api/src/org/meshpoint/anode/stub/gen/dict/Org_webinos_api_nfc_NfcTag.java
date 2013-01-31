@@ -2,20 +2,20 @@
 
 package org.meshpoint.anode.stub.gen.dict;
 
-public class Org_webinos_api_nfc_NFCTag {
+public class Org_webinos_api_nfc_NfcTag {
 
 	private static Object[] __args = new Object[2];
 
 	public static Object[] __getArgs() { return __args; }
 
-	public static void __import(org.webinos.api.nfc.NFCTag ob, Object[] vals) {
+	public static void __import(org.webinos.api.nfc.NfcTag ob, Object[] vals) {
 		ob.tagId = (byte[])vals[0];
-		ob.techList = (org.webinos.api.nfc.NFCTagTechnology[])vals[1];
+		ob.tech = (org.webinos.api.nfc.NfcTagTechnologyNdef)vals[1];
 	}
 
-	public static Object[] __export(org.webinos.api.nfc.NFCTag ob) {
+	public static Object[] __export(org.webinos.api.nfc.NfcTag ob) {
 		__args[0] = ob.tagId;
-		__args[1] = ob.techList;
+		__args[1] = ob.tech;
 		return __args;
 	}
 

@@ -19,6 +19,23 @@
 
 package org.webinos.api.nfc;
 
-public interface NfcEventListener {
-  public void handleEvent(NfcTag evt);
+import org.meshpoint.anode.bridge.Env;
+import org.webinos.api.PendingOperation;
+import org.webinos.api.SuccessCallback;
+
+public abstract class NfcTagTechnologyNdef extends NfcTagTechnology {
+  protected NfcTagTechnologyNdef(Env env) {
+    super(env, TECH_NDEF);
+  }
+
+  public abstract PendingOperation makeReadOnly(
+      SuccessCallback successCallback);
+
+  public abstract NdefRecord[] readCachedNdefMessage();
+
+  public abstract PendingOperation readNdefMessage(
+      ReadNdefMessageCallback readCallback, NfcErrorCallback errorCallback);
+
+  public abstract PendingOperation writeNdefMessage(NdefRecord[] ndefMessage,
+      SuccessCallback successCallback, NfcErrorCallback errorCallback);
 }

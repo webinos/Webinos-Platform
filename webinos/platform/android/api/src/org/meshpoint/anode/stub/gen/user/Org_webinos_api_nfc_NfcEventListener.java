@@ -12,7 +12,7 @@ public class Org_webinos_api_nfc_NfcEventListener extends org.meshpoint.anode.js
 
 	private static Object[] __args = new Object[1];
 
-	public void handleEvent(org.webinos.api.nfc.NFCTag arg0) {
+	public void handleEvent(org.webinos.api.nfc.NfcTag arg0) {
 		__args[0] = arg0;
 		__invoke(classId, 0, __args);
 	}

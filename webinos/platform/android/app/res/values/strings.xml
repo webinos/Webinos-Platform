@@ -37,4 +37,5 @@
     <string name="menu_uninstall">Uninstall</string>
     <string name="menu_check_for_updates">Check for updates</string>
     <string name="menu_details">Details</string>
+    <string name="nfc_instruction">Tap NFC compatible item with the back of your device</string>
 </resources>
