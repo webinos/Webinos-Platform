@@ -177,13 +177,11 @@
 				if (errorCallback) errorCallback({"message": "couldn't remove, already removed?"});
 				return;
 			}
-			chan.chan.disconnect(function() {
-				successCallback();
-			});
-			chan.ref--;
-			if (chan.ref === 0) {
-				delete _chanMap[id];
-			}
+			chan.chan.disconnect();
+
+			if (chan.ref > 0) chan.ref--;
+			if (chan.ref === 0) delete _chanMap[id];
+
 			successCallback();
 		};
 
@@ -255,6 +253,8 @@
 					errorCallback({message: 'not connected'});
 					return;
 				}
+
+				delete _watchMap[id+prop];
 			};
 		}
 
