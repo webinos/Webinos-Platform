@@ -87,6 +87,10 @@
     "mediacontent"     :{
       "name"    :"MediaContent",
       "location":"api/mediacontent/"
+    },
+    "nfc"     :{
+      "name"    :"nfc",
+      "location":"api/nfc/"
     }
   },
   "manager":{

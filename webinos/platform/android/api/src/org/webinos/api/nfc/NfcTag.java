@@ -19,6 +19,9 @@
 
 package org.webinos.api.nfc;
 
-public interface NfcEventListener {
-  public void handleEvent(NfcTag evt);
+import org.meshpoint.anode.idl.Dictionary;
+
+public class NfcTag implements Dictionary {
+  public byte[] tagId;
+  public NfcTagTechnologyNdef tech;
 }
