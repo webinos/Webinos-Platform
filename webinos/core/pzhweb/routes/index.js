@@ -81,7 +81,33 @@ module.exports = function (app, address, port, state) {
         pzhadaptor.fromWeb(req.user, dataSend, res);
     });
 
+    //TODO: This should be a POST interface, not a GET interface.
+    app.get('/main/:user/connect-friend-local', ensureAuthenticated, function (req, res) {
+        //Args: The external user's email address
+        //Auth: User must have logged into their PZH
+        //UI: NONE
+        //Actions: adds the friend's details to the list of known users
+        //         adds the user's details to the friend's list of 'awaiting approval'
+        var externalEmail = req.query.externalemail;
+        logger.log("External: " + externalEmail);
+        if (externalEmail === req.user.emails[0].value) {
+            res.writeHead(200);
+            res.end('Cannot register own PZH ' + externalEmail);
+        } else {
+            pzhadaptor.requestAddLocalFriend(req.user, externalEmail, function (status) {
+                if (status.message) {
+                    //success, return home.
+                    res.redirect('/');
+                } else {
+                    res.writeHead(200);
+                    res.end('Certificate already exchanged');
+                }
+            });
+        }
+    });
+
     //Certificate exchange...
+    //TODO: This should be a POST interface, not a GET interface.
     app.get('/main/:user/connect-friend', ensureAuthenticated, function (req, res) {
         //Args: The external user's email address and PZH provider
         //Auth: User must have logged into their PZH
