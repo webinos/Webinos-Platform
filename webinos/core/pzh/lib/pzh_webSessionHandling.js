@@ -381,7 +381,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         findExistingUserFromEmail(obj.message.externalEmail, function(status, friendpzh) {
             if (status) {
                 // add the 'friend' to the current user's list of known people.
-                console.log("Adding " + obj.message.externalEmail + " as an external user to " + userObj.config.metaData.webinosName + "'s zone");
+                logger.log("Adding " + obj.message.externalEmail + " as an external user to " + userObj.config.metaData.webinosName + "'s zone");
                 userObj.config.cert.external[friendpzh.config.metaData.serverName] = {
                     url          :"https://" + hostname + "/main/" + obj.message.externalEmail + "/",
                     host         :hostname,
@@ -411,7 +411,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 
                 // add the current user to the friend's list of untrusted people.
                 // the friend will later approve or reject the request.
-                console.log("Adding " + userObj.config.metaData.webinosName + " as an external user to " + obj.message.externalEmail + "'s zone");                
+                logger.log("Adding " + userObj.config.metaData.webinosName + " as an external user to " + obj.message.externalEmail + "'s zone");                
                 friendpzh.config.untrustedCert[userObj.config.metaData.webinosName] = {
                     host         :hostname,
                     port         :port,
