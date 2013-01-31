@@ -152,7 +152,7 @@ var Provider = function (_hostname, _friendlyName) {
     function isWebInterface(conn) {
         //TODO: Validate the certificate from the connection data.
         if (webInterface === null) {
-            webInterface = new pzh_webSession(pzhs, hostname, config.userPref.ports.provider_webServer, addPzhDetails, refreshCert, getAllPzhList);
+            webInterface = new pzh_webSession(pzhs, hostname, config.userPref.ports.provider_webServer, config.userPref.ports.provider, addPzhDetails, refreshCert, getAllPzhList);
         }
         return !!(conn.getPeerCertificate().subject.CN.indexOf("PzhWS") !== -1 && conn.getPeerCertificate().subjectaltname.split(":")[1] === hostname); // Verifies if it is Web Interface Certificate
     }

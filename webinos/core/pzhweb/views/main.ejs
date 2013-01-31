@@ -66,7 +66,7 @@
     var e = document.getElementById('pzh_list');
     var id = e.options[e.selectedIndex].value;
     id = id.split("_");
-    window.location.href = "./connect-friend?externalemail=" + encodeURIComponent(id[1]) + "&externalpzh=" + encodeURIComponent(id[0]) ;
+    window.location.href = "./connect-friend-local?externalemail=" + encodeURIComponent(id[1]);
   }
   function connectPzh_manual() {
     var e = document.getElementById('connectPzhId').value;
@@ -236,7 +236,7 @@
       </ul>
       <ul class="" style="" id="connectToAnotherPZHLink">
         <li> <a href="#connectPzh" id="connectPzh">Connect to another personal zone... </a> </li>
-        <li> <a href="#approveUser" id='approveUser'>Approve other PZH... </a> </li>
+        <li> <a href="#approveUser" id='approveUser'>Approve another user... </a> </li>
       </ul>
       <h3>Connected devices</h3>
       <ul class="" style="display: block;" id="enumConnectedPzp">
