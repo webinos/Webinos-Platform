@@ -19,22 +19,9 @@
 
 package org.webinos.api.sensor;
 
-import org.webinos.api.DeviceAPIError;
+import org.meshpoint.anode.idl.Dictionary;
 
-@SuppressWarnings("serial")
-public class SensorError extends DeviceAPIError {
-  
-  public SensorError(int code) {
-    super(code);
-  }
-
-  public SensorError(int code, String message) {
-    super(code, message);
-  }
-  
-  @Override
-  public String toString() {
-    return message;
-  }
-
+public class GeoPosition implements Dictionary {
+  public long latitude;
+  public long longitude;
 }
