@@ -32,17 +32,11 @@ function add$(success) {
 	document.head.appendChild(script);
 };
 
-beforeEach(function() {
-	this.addMatchers({
-		toHaveProp: function(expected) {
-			return typeof this.actual[expected] !== "undefined";
-		}
-	});
-});
-
 describe("AppState Sync API", function() {
 	var testSyncObj;
 
+	var OBJID = "_testObjId";
+	var OBJIDOTHER = "_testObjIdOtherApp";
 	var PROPVAL = "foo";
 	var PROPVALOTHERAPP = "baz";
 	var objTemplate = {
@@ -61,7 +55,7 @@ describe("AppState Sync API", function() {
 	});
 
 	it("creates a sync object", function() {
-		webinos.sync.create("_testObjId", function(syncObj) {
+		webinos.sync.create(OBJID, function(syncObj) {
 			expect(syncObj).toEqual(jasmine.any(Object));
 			expect(syncObj.watch).toEqual(jasmine.any(Function));
 			expect(syncObj.unwatch).toEqual(jasmine.any(Function));
@@ -81,7 +75,7 @@ describe("AppState Sync API", function() {
 	
 	it("removes a sync object", function() {
 		var removed;
-		webinos.sync.remove("_testObjId", function() {
+		webinos.sync.remove(OBJID, function() {
 			removed = true;
 		});
 
@@ -90,37 +84,9 @@ describe("AppState Sync API", function() {
 		}, "success callback called");
 	});
 
-	it("can sync object between apps", function() {
+	describe("test syncing with other app", function() {
 		var testSyncObjOtherApp;
-		var watched;
 		var appended;
-		var removed;
-
-		webinos.sync.create("_testObjIdOtherApp", function(syncObj) {
-			expect(syncObj).toEqual(jasmine.any(Object));
-			expect(syncObj.watch).toEqual(jasmine.any(Function));
-			expect(syncObj.unwatch).toEqual(jasmine.any(Function));
-			expect(syncObj.data).toEqual(jasmine.any(Object));
-			expect(syncObj.data.prop0).toEqual(PROPVAL);
-			testSyncObjOtherApp = syncObj;
-		}, function(err) {
-			console.log(err);
-		}, { // options
-			referenceObject: objTemplate
-		});
-
-		waitsFor(function() {
-			return !!testSyncObjOtherApp;
-		}, "success callback called");
-		
-		runs(function() {
-			testSyncObjOtherApp.watch("prop0", function(o) {
-				expect(o).toEqual(jasmine.any(Object));
-				expect(o.propertyPath).toEqual("prop0");
-				expect(o.currentValue).toEqual(PROPVALOTHERAPP);
-				watched = true;
-			});
-		});
 
 		runs(function() {
 			add$(function() {
@@ -128,8 +94,9 @@ describe("AppState Sync API", function() {
 					name: "2ndsyncapp",
 					src: "2ndsyncapp.html"
 				}).appendTo("body");
-				appended = true;
 				$("iframe").hide();
+
+				appended = true;
 			});
 		});
 
@@ -137,18 +104,80 @@ describe("AppState Sync API", function() {
 			return appended;
 		});
 
-		waitsFor(function() {
-			return watched;
-		}, "prop watch callback being called");
+		it("creates sync obj", function() {
+			webinos.sync.create(OBJIDOTHER, function(syncObj) {
+				expect(syncObj).toEqual(jasmine.any(Object));
+				expect(syncObj.watch).toEqual(jasmine.any(Function));
+				expect(syncObj.unwatch).toEqual(jasmine.any(Function));
+				expect(syncObj.data).toEqual(jasmine.any(Object));
+				expect(syncObj.data.prop0).toEqual(PROPVAL);
+				testSyncObjOtherApp = syncObj;
+			}, function(err) {
+				console.log(err);
+			}, { // options
+				referenceObject: objTemplate
+			});
 
-		runs(function() {
-			webinos.sync.remove("_testObjIdOtherApp", function() {
-				removed = true;
+			waitsFor(function() {
+				return !!testSyncObjOtherApp;
+			}, "success callback called");
+		});
+
+		it("watching and unwatching a property change", function() {
+			var otherCreated;
+			var watched;
+
+			var propChanged = function(syncProp) {
+				expect(syncProp).toEqual(jasmine.any(Object));
+				expect(syncProp.propertyPath).toEqual("prop0");
+				expect(syncProp.currentValue).toEqual(PROPVALOTHERAPP);
+				watched = true;
+			};
+			testSyncObjOtherApp.watch("prop0", propChanged);
+
+			// create sync obj in other app
+			window.addEventListener("message", function(event) {
+				otherCreated = true;
+				window.removeEventListener("message", this);
+			}, false);
+			$("iframe")[0].contentWindow.postMessage("create:" + OBJIDOTHER, "*");
+
+			waitsFor(function() {
+				return otherCreated;
+			}, "sync obj created in other app");
+
+			runs(function() {
+				$("iframe")[0].contentWindow.postMessage("setprop:" + PROPVALOTHERAPP, "*");
+			});
+
+			waitsFor(function() {
+				return watched;
+			}, "prop watch callback being called");
+
+			runs(function() {
+				watched = false;
+				testSyncObjOtherApp.unwatch("prop0");
+
+				window.postMessage("setprop:" + PROPVAL, "*");
+			})
+
+			waits(3000); // wait some more to see if propChanged is called again
+
+			runs(function() {
+				expect(watched).toEqual(false);
+				$("iframe")[0].contentWindow.postMessage("remove:", "*");
 			});
 		});
 
-		waitsFor(function() {
-			return removed;
-		}, "success callback called");
+		it("remove sync obj", function() {
+			var removed;
+			webinos.sync.remove(OBJIDOTHER, function() {
+				removed = true;
+			});
+
+			waitsFor(function() {
+				return removed;
+			}, "success callback called");
+		});
 	});
 });
