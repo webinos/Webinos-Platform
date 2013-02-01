@@ -73,6 +73,10 @@ PzhAdaptor.storeExternalUserCert = function (user, externalEmail, externalPzh, e
         externalCerts:externalCerts}, responseHandler(res));
 };
 
+PzhAdaptor.requestAddLocalFriend = function(user, externalEmail, res) {
+    pzhTLS.send(user, {type:"requestAddLocalFriend", externalEmail:externalEmail}, responseHandler(res));
+};
+
 //unauthenticated input
 PzhAdaptor.requestAddFriend = function (internaluser, externaluser, externalPzhDetails, res) {
     getUserFromEmail(internaluser, function (user, err) {
