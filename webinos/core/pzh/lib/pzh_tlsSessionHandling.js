@@ -154,7 +154,6 @@ var Pzh = function () {
                 self.pzh_state.logger.error ("exception in reading common name of peer pzh certificate " + err);
                 return;
             }
-
             if (cn[0] === "Pzh") {
                 cn = _conn.getPeerCertificate ().subjectaltname.split (":");
                 if (cn.length > 2) {
@@ -163,7 +162,7 @@ var Pzh = function () {
                     name = cn [1];
                 }
                 self.handlePzhAuthorization (name, _conn);
-            } else if (cn[0] === "Pzp") {
+            } else if (cn[0] === "PzpConn") {
                 handlePzpAuthorization (cn[1], _conn);
             }
         }
@@ -297,9 +296,8 @@ var Pzh = function () {
                 delete self.pzh_state.connectedPzh[_id];
             }
             self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
+            self.sendUpdateToAll(_id);
         }
-        self.sendUpdateToAll(_id);
-        self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
     };
     /**
      * Delete PZH from the trusted list
@@ -358,6 +356,11 @@ var Pzh = function () {
             self.config = new util.webinosConfiguration ();
             self.config.setConfiguration ("Pzh", inputConfig, function (status, value) {
                 if (status) {
+                    if (_user && self.config.userData.name !== _user.displayName) {
+                        self.config.userData = {name : _user.displayName, email: _user.emails, country: _user.country,
+                            image: _user.image, authenticator: _user.from, identifier: _user.identifier};
+                        self.config.storeDetails("userData", null, self.config.userData);
+                    }
                     self.pzh_state.sessionId = _uri;
                     self.pzh_state.logger.addId (self.config.userData.email[0].value);
                     self.pzh_otherManager = new pzh_otherManager (self);
@@ -440,11 +443,14 @@ var RevokePzp = function (parent) {
         parent.config.revokeClientCert (pzpCert, function (status, crl) {
             if (status) {
                 parent.pzh_state.logger.log ("revocation success! " + _pzpid + " should not be able to connect anymore ");
-                parent.config.crl = crl;
+                parent.config.crl.value = crl;
                 delete parent.config.cert.internal.signedCert[_pzpid];
                 delete parent.config.trustedList.pzp[_pzpid];
                 parent.config.cert.internal.revokedCert[_pzpid] = crl;
-                parent.config.storeAll ();
+                parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
+                parent.config.storeDetails(null, "crl", parent.config.crl);
+                parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
+
                 if (parent.pzh_state.connectedPzp[_pzpid]) {
                     parent.pzh_state.connectedPzp[_pzpid].socket.end ();
                     delete parent.pzh_state.connectedPzp[_pzpid];

@@ -31,7 +31,7 @@ var certificate = dependency.global.require (dependency.global.manager.certifica
  *
  * @constructor
  */
-function Config () {
+function Config() {
     "use strict";
     var self = this;
     certificate.call (self);
@@ -155,7 +155,6 @@ function Config () {
         });
     }
 
-
     function storeAll() {
         fileList.forEach (function (name) {
             if (typeof name === "object") {
@@ -172,8 +171,6 @@ function Config () {
         });
     }
 
-
-
     function checkConfigExists(webinosType, inputConfig, callback) {
         var name, i;
         require("./webinosId.js").fetchDeviceName(webinosType, inputConfig, function (webinosName) {
@@ -189,7 +186,6 @@ function Config () {
             }
             return callback(true);
         });
-
     }
     /**
      *
@@ -204,7 +200,7 @@ function Config () {
             if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
             if (!fs.existsSync (webinos_root)) {//If the folder doesn't exist
                 fs.mkdirSync (webinos_root, root_permission);//Create it
-             }
+                }
 
             if (!fs.existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
                 fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
@@ -269,6 +265,8 @@ function Config () {
                     createPolicyFile();
                     storeAll();
                     callback (true);
+
+
                 } else {
                     callback (false, "failed creating webinos default directories");
                 }
@@ -304,7 +302,7 @@ function Config () {
                                     });
                                 } else {
                                     logger.error ("failed generating master certificate -" + value);
-                                    if (callback) {callback (false, value);}
+                                    if (callback) {callback (false, "Error reading default configuration details");}
                                 }
                             });
                         }

@@ -36,7 +36,7 @@ var Certificate = function () {
         var cert_type;
         if (type === "PzhPCA" || type === "PzhCA" || type === "PzpCA") {
             cert_type = certificateType.SERVER;
-        } else if (type === "PzhP" || type === "Pzh" || type === "Pzp" || type === "PzhWS" || type === "PzhSSL" ) {
+        } else if (type === "PzhP" || type === "Pzh" || type === "Pzp" || type === "PzhWS" || type === "PzpWSS" || type ==="PzhSSL") {
             cert_type = certificateType.CLIENT;
         }
         return cert_type;
@@ -48,11 +48,13 @@ var Certificate = function () {
             key_id = self.cert.internal.master.key_id = self.metaData.webinosName + "_master";
         } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
             key_id = self.cert.internal.conn.key_id = self.metaData.webinosName + "_conn";
+        } else if (type === "PzpWSS") {
+            key_id = self.cert.internal.web.key_id = self.metaData.webinosName + "_web";
         } else if (type === "PzhWS") {
-            if(!self.cert.internal.webclient) {self.cert.internal.webclient = {}}
+            if (!self.cert.internal.webclient) self.cert.internal.webclient = {};
             key_id = self.cert.internal.webclient.key_id = self.metaData.webinosName + "_webclient";
         } else if (type === "PzhSSL") {
-            if(!self.cert.internal.webssl) {self.cert.internal.webssl = {}}
+            if (!self.cert.internal.webssl) self.cert.internal.webssl = {};
             key_id = self.cert.internal.webssl.key_id = self.metaData.webinosName + "_webssl";
         }
         return key_id;
@@ -67,11 +69,12 @@ var Certificate = function () {
         } else if (type === "PzpCA") {
             self.cert.internal.pzh = {}
         }
+
         cn = encodeURIComponent (cn);
+
         if (cn.length > 40) {
             cn = cn.substring (0, 40);
         }
-
         self.generateKey (type, key_id, function (status, privateKey) {
             if (!status) {
                 logger.error ("failed generating key " + privateKey);
@@ -123,7 +126,8 @@ var Certificate = function () {
                     self.cert.internal.conn.cert = obj.cert;
                     if (type === "Pzp") { self.cert.internal.conn.csr = obj.csr; }
                     return callback (true, obj.csr);
-                }  else if (type === "PzhWS" || type === "PzhSSL") {
+                } else if (type === "PzhWS" || type === "PzpWSS" ||type === "PzhSSL") {
+                    if (type === "PzpWSS") { self.cert.internal.web.csr = obj.csr;}
                     return callback (true, obj.csr);
                 }
             }
@@ -131,7 +135,7 @@ var Certificate = function () {
     };
 
     this.getKeyHash = function(path, callback){
-        try {
+        try{
             var hash = certificateManager.getHash(path);
             logger.log("Key Hash is" + hash);
             return callback(true, hash);
