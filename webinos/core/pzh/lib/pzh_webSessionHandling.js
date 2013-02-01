@@ -305,6 +305,25 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             obj.message.externalUser.email + " with PZH details : " + obj.message.externalPzh.externalPZHUrl +
             " has been authenticated and would like to be added to the list of trusted users to " +
             obj.user + "'s zone");
+        
+        // notify the user about it.  This may or may not be successful, it doesn't
+        // really matter.  
+        var approveURL = "https://" + hostname + "/main/" + 
+                encodeURIComponent(userObj.config.metaData.webinosName) + 
+                "/approve-user/" + encodeURIComponent(obj.message.externalUser.email) + "/"        
+        notifyUser(
+            userObj.config.metaData.serverName, 
+            { "type" : "connection request", 
+              "url"  : approveURL,
+              "user" : { "email" : obj.message.externalUser.email,
+                         "fullname" : obj.message.externalUser.fullname,
+                         "nickname" : obj.message.externalUser.nickname,
+                         "image" : obj.message.externalUser.image
+                       }
+            },
+            function(id) { /* don't care */ }, 
+            function(id) { /* don't care */ }
+        );
 
         var url = require ("url").parse (obj.message.externalPzh.externalPZHUrl);
         userObj.config.untrustedCert[obj.message.externalUser.email] = {
