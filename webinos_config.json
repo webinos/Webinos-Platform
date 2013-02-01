@@ -35,10 +35,6 @@
       }
     },
     {
-      "name"  :"zap-and-shake",
-      "params":{}
-    },
-    {
       "name"  :"actuator",
       "params":{}
     },

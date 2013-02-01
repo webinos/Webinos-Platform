@@ -23,7 +23,6 @@
     <module>app2app</module>
     <module>applauncher</module>
     <module>webnotification</module>
-    <module>zap-and-shake</module>
     <module>file</module>
     <module>gallery</module>
     <module>geolocation</module>
