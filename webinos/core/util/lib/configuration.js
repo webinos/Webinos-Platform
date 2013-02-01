@@ -607,9 +607,6 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                     }
                 } else if (webinosType === "Pzp") {
                     for (key = 0; key < userPref.pzpDefaultServices.length; key = key + 1) {
-                        if (userPref.pzpDefaultServices[key].name === "file") {
-                            userPref.pzpDefaultServices[key].params = { getPath:function () { return self.metaData.webinosRoot; } };
-                        }
                         self.serviceCache.push ({"name":userPref.pzpDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
                     }
                 }

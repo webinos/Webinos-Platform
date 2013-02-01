@@ -17,7 +17,7 @@
  ******************************************************************************/
 
 describe("File API", function () {
-  var TIMEOUT = 1000
+  var TIMEOUT = 15000
 
   var service
   function findService() {
@@ -68,12 +68,9 @@ describe("File API", function () {
   })
 
   var fileSystem
-  function requestFileSystem(type, size) {
-    var relativeType = type || 1
-      , relativeSize = size || 0
-
+  function requestFileSystem() {
     runs(function () {
-      service.requestFileSystem(relativeType, relativeSize, function (ref) {
+      service.requestFileSystem(null, null, function (ref) {
         fileSystem = ref
       })
     })
@@ -390,6 +387,27 @@ describe("File API", function () {
       runs(function () {
         expect(metadata.modificationTime).toBeDefined()
         // expect(metadata.size).toBeDefined()
+      })
+
+      removeFile()
+    })
+
+    it("should provide a link", function () {
+      createFile()
+
+      var link
+      runs(function () {
+        file.getLink(function (link_) {
+          link = link_
+        })
+      })
+
+      waitsFor(function () {
+        return !!link
+      }, "the link to be returned", TIMEOUT)
+
+      runs(function () {
+        console.log(link)
       })
 
       removeFile()

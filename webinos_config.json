@@ -48,9 +48,32 @@
       "name"  :"webnotification",
       "params":{}
     },
-    {
-      "name"  :"file",
-      "params":{}
+    { "name" : "file"
+    , "params" :
+      { "local" :
+        { "server" :
+          { "port" : 9999
+          , "hostname" : "localhost"
+          }
+        , "shares" :
+          [ { "name" : "desktop"
+            , "path" : "/path/to/desktop"
+            }
+          ]
+        }
+      , "dropbox" :
+        { "access_token" :
+          { "oauth_token_secret" : "..."
+          , "oauth_token" : "..."
+          , "uid" : "..."
+          }
+        , "shares" :
+          [ { "name" : "full"
+            , "path" : "/"
+            }
+          ]
+        }
+      }
     },
     {
       "name"  :"geolocation",

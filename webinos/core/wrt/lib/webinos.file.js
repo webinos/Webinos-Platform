@@ -26,34 +26,21 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   webinos.util.inherits(Service, WebinosService);
   function Service(object, rpc) {
-    Service.parent.call(this, object);
+    Service.super_.call(this, object);
 
     this.rpc = rpc;
   }
 
-  Service.prototype.requestFileSystem = function (type, size, successCallback,
-      errorCallback) {
+  Service.prototype.requestFileSystem = function (type, size, successCallback, errorCallback) {
     var self = this;
-    var request = self.rpc.createRPC(self, "requestFileSystem",
-        { type : type, size : size });
+    var request = self.rpc.createRPC(self, "requestFileSystem");
     self.rpc.executeRPC(request, function (filesystem) {
       successCallback(new FileSystem(self, filesystem.name));
     }, errorCallback);
   };
 
-  Service.prototype.resolveLocalFileSystemURL = function (url, successCallback,
-      errorCallback) {
-    var self = this;
-    var request = self.rpc.createRPC(self, "resolveLocalFileSystemURL",
-        { url : url });
-    self.rpc.executeRPC(request, function (entry) {
-      var filesystem = new FileSystem(self, entry.filesystem.name);
-      if (entry.isDirectory) {
-        successCallback(new DirectoryEntry(filesystem, entry.fullPath));
-      } else {
-        successCallback(new FileEntry(filesystem, entry.fullPath));
-      }
-    }, errorCallback);
+  Service.prototype.resolveLocalFileSystemURL = function (url, successCallback, errorCallback) {
+    webinos.util.async(errorCallback)(new webinos.util.CustomError("NotSupportedError"));
   };
 
   function FileSystem(service, name) {
@@ -88,11 +75,10 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }, errorCallback);
   };
 
-  Entry.prototype.moveTo = function (parent, newName, successCallback,
-      errorCallback) {
+  Entry.prototype.moveTo = function (parent, newName, successCallback, errorCallback) {
     var self = this;
     var request = self.rpc.createRPC(self.service, "moveTo",
-        { source : self, parent : parent, newName : newName });
+      { source : self, parent : parent, newName : newName });
     self.rpc.executeRPC(request, function (entry) {
       if (self.isDirectory) {
         successCallback(new DirectoryEntry(self.filesystem, entry.fullPath));
@@ -102,8 +88,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }, errorCallback);
   };
 
-  Entry.prototype.copyTo = function (parent, newName, successCallback,
-      errorCallback) {
+  Entry.prototype.copyTo = function (parent, newName, successCallback, errorCallback) {
     var self = this;
     var request = self.rpc.createRPC(self.service, "copyTo",
         { source : self, parent : parent, newName : newName });
@@ -117,7 +102,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
   };
 
   Entry.prototype.toURL = function () {
-    return "webinos:" + this.filesystem.name + this.fullPath;
+    throw new webinos.util.CustomError("NotSupportedError");
   };
 
   Entry.prototype.remove = function (successCallback, errorCallback) {
@@ -127,20 +112,20 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   Entry.prototype.getParent = function (successCallback, errorCallback) {
     var self = this;
-    var request = self.rpc.createRPC(self.service, "getParent",
-        { entry : self });
+    var request = self.rpc.createRPC(self.service, "getParent", { entry : self });
     self.rpc.executeRPC(request, function (entry) {
       successCallback(new DirectoryEntry(self.filesystem, entry.fullPath));
     }, errorCallback);
   };
 
   Entry.prototype.toJSON = function () {
-    var json = { name        : this.name
-               , fullPath    : this.fullPath
-               , filesystem  : this.filesystem
-               , isFile      : this.isFile
-               , isDirectory : this.isDirectory
-               };
+    var json =
+      { name        : this.name
+      , fullPath    : this.fullPath
+      , filesystem  : this.filesystem
+      , isFile      : this.isFile
+      , isDirectory : this.isDirectory
+      };
     return json;
   };
 
@@ -151,7 +136,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   webinos.util.inherits(DirectoryEntry, Entry);
   function DirectoryEntry(filesystem, fullPath) {
-    DirectoryEntry.parent.call(this, filesystem, fullPath);
+    DirectoryEntry.super_.call(this, filesystem, fullPath);
   }
 
   DirectoryEntry.prototype.isDirectory = true;
@@ -160,8 +145,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     return new DirectoryReader(this);
   };
 
-  DirectoryEntry.prototype.getFile = function (path, options, successCallback,
-      errorCallback) {
+  DirectoryEntry.prototype.getFile = function (path, options, successCallback, errorCallback) {
     var self = this;
     var request = self.rpc.createRPC(self.service, "getFile",
         { entry : self, path : path, options : options });
@@ -170,8 +154,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }, errorCallback);
   };
 
-  DirectoryEntry.prototype.getDirectory = function (path, options,
-      successCallback, errorCallback) {
+  DirectoryEntry.prototype.getDirectory = function (path, options, successCallback, errorCallback) {
     var self = this;
     var request = self.rpc.createRPC(self.service, "getDirectory",
         { entry : self, path : path, options : options });
@@ -180,10 +163,8 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }, errorCallback);
   };
 
-  DirectoryEntry.prototype.removeRecursively = function (successCallback,
-      errorCallback) {
-    var request = this.rpc.createRPC(this.service, "removeRecursively",
-        { entry : this });
+  DirectoryEntry.prototype.removeRecursively = function (successCallback, errorCallback) {
+    var request = this.rpc.createRPC(this.service, "removeRecursively", { entry : this });
     this.rpc.executeRPC(request, successCallback, errorCallback);
   };
 
@@ -194,8 +175,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     this.rpc = entry.filesystem.service.rpc;
   }
 
-  DirectoryReader.prototype.readEntries = function (successCallback,
-      errorCallback) {
+  DirectoryReader.prototype.readEntries = function (successCallback, errorCallback) {
     var self = this;
 
     function next() {
@@ -207,8 +187,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
     }
 
     if (typeof self.entries === "undefined") {
-      var request = self.rpc.createRPC(self.service, "readEntries",
-          { entry : self.entry });
+      var request = self.rpc.createRPC(self.service, "readEntries", { entry : self.entry });
       self.rpc.executeRPC(request, function (entries) {
         self.entries = entries.map(function (entry) {
           if (entry.isDirectory) {
@@ -225,15 +204,19 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   webinos.util.inherits(FileEntry, Entry);
   function FileEntry(filesystem, fullPath) {
-    FileEntry.parent.call(this, filesystem, fullPath);
+    FileEntry.super_.call(this, filesystem, fullPath);
   }
 
   FileEntry.prototype.isFile = true;
 
+  FileEntry.prototype.getLink = function (successCallback, errorCallback) {
+    var request = this.rpc.createRPC(this.service, "getLink", { entry : this });
+    this.rpc.executeRPC(request, successCallback, errorCallback);
+  };
+
   FileEntry.prototype.createWriter = function (successCallback, errorCallback) {
     var self = this;
-    var request = self.rpc.createRPC(self.service, "getMetadata",
-        { entry : self });
+    var request = self.rpc.createRPC(self.service, "getMetadata", { entry : self });
     self.rpc.executeRPC(request, function (metadata) {
       var writer = new FileWriter(self);
       writer.length = metadata.size;
@@ -244,8 +227,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   FileEntry.prototype.file = function (successCallback, errorCallback) {
     var self = this;
-    var request = self.rpc.createRPC(self.service, "getMetadata",
-        { entry : self });
+    var request = self.rpc.createRPC(self.service, "getMetadata", { entry : self });
     self.rpc.executeRPC(request, function (metadata) {
       var blobParts = [];
 
@@ -291,7 +273,7 @@ if (typeof webinos.file === "undefined") webinos.file = {};
 
   webinos.util.inherits(FileWriter, webinos.util.EventTarget);
   function FileWriter(entry) {
-    FileWriter.parent.call(this);
+    FileWriter.super_.call(this);
 
     this.entry = entry;
 

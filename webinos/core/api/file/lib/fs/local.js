@@ -18,30 +18,33 @@
 
 module.exports = LocalFileSystem
 
+var express = require("express")
 var fs = require("fs")
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 var mkdirp = require("mkdirp")
 var pathModule = require("path")
 var util = require("../util.js")
-var vpath = require("../vpath.js")
+var uuid = require("node-uuid")
+var vpath = require("../virtual-path.js")
 
 var EventEmitter = require("events").EventEmitter
 
 // Map of POSIX error codes to DOM4 error types (and descriptions). Mappings
 // are chromium-based and may not comply with the specification.
-var errorMap = { "EACCES"    : { type : "NoModificationAllowedError" }
-               , "EEXIST"    : { type : "InvalidModificationError" }
-               , "EISDIR"    : { type : "NoModificationAllowedError" }
-               , "EMFILE"    : { type : "InvalidModificationError" }
-               , "ENOENT"    : { type : "NotFoundError" }
-               , "ENOMEM"    : { type : "InvalidModificationError" }
-               , "ENOSPC"    : { type : "QuotaExceededError" }
-               , "ENOTDIR"   : { type : "TypeMismatchError" }
-               , "ENOTEMPTY" : { type : "InvalidModificationError" }
-               , "EPERM"     : { type : "NoModificationAllowedError" }
-               , "EROFS"     : { type : "NoModificationAllowedError" }
-               , "ETXTBSY"   : { type : "InvalidModificationError" }
-               }
+var errorMap =
+  { "EACCES"    : { type : "NoModificationAllowedError" }
+  , "EEXIST"    : { type : "InvalidModificationError" }
+  , "EISDIR"    : { type : "NoModificationAllowedError" }
+  , "EMFILE"    : { type : "InvalidModificationError" }
+  , "ENOENT"    : { type : "NotFoundError" }
+  , "ENOMEM"    : { type : "InvalidModificationError" }
+  , "ENOSPC"    : { type : "QuotaExceededError" }
+  , "ENOTDIR"   : { type : "TypeMismatchError" }
+  , "ENOTEMPTY" : { type : "InvalidModificationError" }
+  , "EPERM"     : { type : "NoModificationAllowedError" }
+  , "EROFS"     : { type : "NoModificationAllowedError" }
+  , "ETXTBSY"   : { type : "InvalidModificationError" }
+  }
 
 // Maps the given error, or, more precisely, its POSIX error code, to a DOM4
 // error type (and description). If provided, the customErrorMap precedes the
@@ -68,6 +71,27 @@ function LocalFileSystem(name, path) {
   this.path = path
 }
 
+var links = {}
+var app = express()
+app.get("/media/:ref", function (request, response) {
+  if (links[request.params.ref]) {
+    response.sendfile(links[request.params.ref])
+  } else {
+    response.send(404)
+  }
+})
+
+LocalFileSystem.port = null
+LocalFileSystem.hostname = null
+
+LocalFileSystem.init = function (port, hostname) {
+  LocalFileSystem.port = port
+  LocalFileSystem.hostname = hostname
+  app.listen(port, hostname)
+}
+
+LocalFileSystem.prototype.type = "local"
+
 LocalFileSystem.prototype.realize = function(path) {
   return pathModule.join(this.path, path)
 }
@@ -76,11 +100,13 @@ LocalFileSystem.prototype.readMetadata = function (path, callback) {
   fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
-    var metadata = { isFile           : stats.isFile()
-                   , isDirectory      : stats.isDirectory()
-                   , size             : stats.size
-                   , modificationTime : stats.mtime
-                   }
+    var metadata =
+      { path             : path
+      , isFile           : stats.isFile()
+      , isDirectory      : stats.isDirectory()
+      , size             : stats.size
+      , modificationTime : stats.mtime
+      }
     callback(null, metadata)
   })
 }
@@ -162,9 +188,15 @@ LocalFileSystem.prototype.fileExists = function (path, callback) {
   })
 }
 
+LocalFileSystem.prototype.createFileLink = function (path, callback) {
+  var ref = uuid.v4()
+  links[ref] = this.realize(path)
+  util.async(callback)(null, "http://" + LocalFileSystem.hostname + ":" + LocalFileSystem.port + "/media/" + ref)
+}
+
 inherits(ReadStreamWrapper, EventEmitter)
 function ReadStreamWrapper(stream) {
-  ReadStreamWrapper.super.call(this)
+  ReadStreamWrapper.super_.call(this)
 
   var self = this
   stream.addListener("open", function () {
@@ -214,7 +246,7 @@ LocalFileSystem.prototype.createReadStream = function (path, options, callback) 
 
 inherits(WriteStreamWrapper, EventEmitter)
 function WriteStreamWrapper(stream) {
-  WriteStreamWrapper.super.call(this)
+  WriteStreamWrapper.super_.call(this)
 
   var self = this
   stream.addListener("open", function () {
@@ -365,9 +397,24 @@ LocalFileSystem.prototype.directoryExists = function (path, callback) {
 }
 
 LocalFileSystem.prototype.readDirectory = function (path, callback) {
-  fs.readdir(this.realize(path), function (error, files) {
+  var self = this
+  fs.readdir(self.realize(path), function (error, files) {
     if (error) return callback(map(error))
-    callback(null, files)
+
+    var metadataz = []
+    ;(function iterate() {
+      var file = files.shift()
+      if (!file) return callback(null, metadataz)
+
+      var fullPath = vpath.join(path, file)
+      self.readMetadata(fullPath, function (error, metadata) {
+        if (error) return callback(error)
+        metadata.path = fullPath
+        metadataz.push(metadata)
+
+        iterate()
+      })
+    })()
   })
 }
 

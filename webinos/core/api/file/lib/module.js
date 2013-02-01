@@ -18,27 +18,35 @@
 
 module.exports = Module
 
+var path = require("path")
+
+var DropboxFileSystem = require("./fs/dropbox.js")
+var LocalFileSystem = require("./fs/local.js")
 var Service = require("./service.js")
 var VirtualFileSystem = require("./fs/virtual.js")
+
+var dependencies = require("find-dependencies")(__dirname)
+var internal = dependencies.global.require(dependencies.global.util.location, "lib/webinosPath.js").webinosPath()
 
 function Module(rpc, params) {
   this.rpc = rpc
   this.params = params
 }
 
-var list = []
-
-Module.addFileSystem = function (fs) {
-  list.push(fs)
-}
-
 Module.prototype.init = function (register, unregister) {
   var self = this
 
-  list.forEach(function (fs) {
-    var params = Object.create(self.params)
-    params.vfs = new VirtualFileSystem(fs)
+  if (self.params.local) {
+    LocalFileSystem.init(self.params.local.server.port, self.params.local.server.hostname)
+    self.params.local.shares.forEach(function (share) {
+      register(new Service(self.rpc, new VirtualFileSystem(new LocalFileSystem(share.name, share.path))))
+    })
+  }
 
-    register(new Service(self.rpc, params))
-  })
+  if (self.params.dropbox) {
+    DropboxFileSystem.init(self.params.dropbox.access_token)
+    self.params.dropbox.shares.forEach(function (share) {
+      register(new Service(self.rpc, new VirtualFileSystem(new DropboxFileSystem(share.name, share.path))))
+    })
+  }
 }

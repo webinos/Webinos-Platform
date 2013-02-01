@@ -16,14 +16,4 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-var Module = require("./lib/module.js")
-
-var path = require("path")
-
-var dependencies = require("find-dependencies")(__dirname)
-var root = dependencies.global.require(dependencies.global.util.location, "lib/webinosPath.js").webinosPath()
-
-var LocalFileSystem = require("./lib/fs/local.js")
-Module.addFileSystem(new LocalFileSystem("default", path.join(root, "file")))
-
-exports.Module = Module
+exports.Module = require("./lib/module.js")

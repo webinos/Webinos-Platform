@@ -32,14 +32,14 @@ if (typeof webinos.util === "undefined") webinos.util = {};
       });
     });
     c.prototype = Object.create(p.prototype, e);
-    c.parent = p;
+    c.super_ = p;
   }
 
   exports.CustomError = CustomError;
 
   inherits(CustomError, Error);
   function CustomError(name, message) {
-    CustomError.parent.call(this, message || name);
+    CustomError.super_.call(this, message || name);
 
     this.name = name;
   }
@@ -103,7 +103,7 @@ if (typeof webinos.util === "undefined") webinos.util = {};
 
   inherits(ProgressEvent, Event);
   function ProgressEvent(type, eventInitDict) {
-    ProgressEvent.parent.call(this, type);
+    ProgressEvent.super_.call(this, type);
 
     eventInitDict = eventInitDict || {};
 

@@ -16,33 +16,35 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
+// [WP-605] Support inter file system entry moving and copying
+// [WP-606] Support inter PZP entry moving and copying
+
 module.exports = Service
 
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 var util = require("./util.js")
 
 var RPCService = require("webinos-jsonrpc2").RPCWebinosService
 
 inherits(Service, RPCService)
-function Service(rpc, params) {
-  Service.super.call(this,
-      { api         : "http://webinos.org/api/file"
-      , displayName : "File API"
-      , description : "File API (incl. Writer, and Directories and System)"
-      })
+function Service(rpc, vfs) {
+  Service.super_.call(this,
+    { api         : "http://webinos.org/api/file"
+    , displayName : "File API (" + vfs.fs.type + ")"
+    , description : vfs.fs.name + ": " + vfs.fs.path
+    })
 
   this.rpc = rpc
-  this.params = params
-
-  this.vfs = params.vfs
+  this.vfs = vfs
 }
 
 Service.prototype.requestFileSystem = function (params, successCallback, errorCallback) {
-  this.vfs.requestFileSystem(params.type, params.size, util.combine(successCallback, errorCallback))
+  // this.vfs.requestFileSystem(params.type, params.size, util.combine(successCallback, errorCallback))
+  this.vfs.requestFileSystem(util.combine(successCallback, errorCallback))
 }
 
 Service.prototype.resolveLocalFileSystemURL = function (params, successCallback, errorCallback) {
-  this.vfs.resolveLocalFileSystemURL(params.url, util.combine(successCallback, errorCallback))
+  errorCallback(new util.CustomError("NotSupportedError"))
 }
 
 Service.prototype.getMetadata = function (params, successCallback, errorCallback) {
@@ -67,6 +69,10 @@ Service.prototype.getParent = function (params, successCallback, errorCallback) 
 
 Service.prototype.getFile = function (params, successCallback, errorCallback) {
   this.vfs.getFile(params.entry, params.path, params.options, util.combine(successCallback, errorCallback))
+}
+
+Service.prototype.getLink = function (params, successCallback, errorCallback) {
+  this.vfs.getLink(params.entry, util.combine(successCallback, errorCallback))
 }
 
 // Service.prototype.createWriter = function (params, successCallback,

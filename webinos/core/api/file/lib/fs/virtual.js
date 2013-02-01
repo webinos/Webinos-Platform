@@ -21,7 +21,7 @@
 module.exports = VirtualFileSystem
 
 var util = require("../util.js")
-var vpath = require("../vpath.js")
+var vpath = require("../virtual-path.js")
 
 var DirectoryEntry = require("../common/directory-entry.js")
 var FileEntry = require("../common/file-entry.js")
@@ -32,33 +32,12 @@ function VirtualFileSystem(fs) {
   this.fs = fs
 }
 
-VirtualFileSystem.prototype.requestFileSystem = function (type, size, callback) {
+VirtualFileSystem.prototype.requestFileSystem = function (callback) {
   util.async(callback)(null, new FileSystem(this.fs.name))
 }
 
 VirtualFileSystem.prototype.resolveLocalFileSystemURL = function (url, callback) {
-  var self = this
-
-  var colon = url.indexOf(":")
-    , slash = url.indexOf("/")
-  var protocol = url.substr(0, colon)
-    , name = url.substr(colon + 1, slash)
-    , fullPath = url.substr(slash)
-
-  if (protocol !== "webinos") {
-    return util.async(callback)(new util.CustomError("EncodingError"))
-  }
-
-  self.fs.readMetadata(fullPath, function (error, metadata) {
-    if (error) return callback(error)
-
-    var filesystem = new FileSystem(self.fs.name)
-    if (metadata.isDirectory) {
-      callback(null, new DirectoryEntry(filesystem, fullPath))
-    } else {
-      callback(null, new FileEntry(filesystem, fullPath))
-    }
-  })
+  util.async(callback)(new util.CustomError("NotSupportedError"))
 }
 
 VirtualFileSystem.prototype.getMetadata = function (entry, callback) {
@@ -157,8 +136,12 @@ VirtualFileSystem.prototype.getFile = function (entry, path, options, callback) 
   }
 }
 
-// exports.createWriter = function (entry, callback) {}
-// exports.file = function (entry, callback) {}
+VirtualFileSystem.prototype.getLink = function (entry, callback) {
+  this.fs.createFileLink(entry.fullPath, callback)
+}
+
+// VirtualFileSystem.prototype.createWriter = function (entry, callback) {}
+// VirtualFileSystem.prototype.file = function (entry, callback) {}
 
 VirtualFileSystem.prototype.createReadStream = function (entry, options, callback) {
   this.fs.createReadStream(entry.fullPath, options, callback)
@@ -207,26 +190,14 @@ VirtualFileSystem.prototype.removeRecursively = function (entry, callback) {
 
 VirtualFileSystem.prototype.readEntries = function (entry, callback) {
   var self = this
-  self.fs.readDirectory(entry.fullPath, function (error, files) {
+  self.fs.readDirectory(entry.fullPath, function (error, metadataz) {
     if (error) return callback(error)
-
-    var entries = []
-    ;(function iterate() {
-      var file = files.shift()
-      if (!file) return callback(null, entries)
-
-      var fullPath = vpath.join(entry.fullPath, file)
-      self.fs.readMetadata(fullPath, function (error, metadata) {
-        if (error) return callback(error)
-
-        if (metadata.isDirectory) {
-          entries.push(new DirectoryEntry(entry.filesystem, fullPath))
-        } else {
-          entries.push(new FileEntry(entry.filesystem, fullPath))
-        }
-
-        iterate()
-      })
-    })()
+    callback(null, metadataz.map(function (metadata) {
+      if (metadata.isDirectory) {
+        return new DirectoryEntry(entry.filesystem, metadata.path)
+      } else {
+        return new FileEntry(entry.filesystem, metadata.path)
+      }
+    }))
   })
 }
