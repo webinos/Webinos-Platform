@@ -119,6 +119,12 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         sendMsg (conn, obj.user, { type:"getUserDetails", message:userObj.config.userData });
     }
 
+    function notifyUser(pzh, notification, idcallback, resultcallback) {
+        logger.log("NotifyUser method with pzh id: " + pzh);
+        var Notifications = dependency.global.require(dependency.global.api.zonenotification.location, "lib/notificationPzh.js");
+        Notifications.sendFromInternal(pzh, notification, idcallback, resultcallback);
+    }
+
     function getZoneStatus (conn, obj, userObj) {
         var result = {pzps:[], pzhs:[]};
         result.pzps = getConnectedPzp (userObj);

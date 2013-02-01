@@ -17,6 +17,10 @@
         "params":{
             "scope":"pzh"
         }
+    },
+    {
+      "name"  :"zonenotification",
+      "params":{}
     }
   ],
   "pzpDefaultServices":[

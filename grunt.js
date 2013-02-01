@@ -49,6 +49,7 @@ module.exports = function(grunt) {
           'webinos/core/api/file/lib/virtual-path.js',
           'webinos/core/wrt/lib/webinos.file.js',
           'webinos/core/wrt/lib/webinos.webnotification.js',
+          'webinos/core/wrt/lib/webinos.zonenotification.js',
           'webinos/core/wrt/lib/webinos.actuator.js',
           'webinos/core/wrt/lib/webinos.tv.js',
           'webinos/core/wrt/lib/webinos.oauth.js',
