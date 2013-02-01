@@ -109,6 +109,10 @@
       "params":{}
     },
     {
+      "name"  :"corePZinformation",
+      "params":{}
+    },
+    {
       "name"  :"nfc",
       "params":{}
     }
