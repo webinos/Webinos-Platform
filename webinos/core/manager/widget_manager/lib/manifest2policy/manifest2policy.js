@@ -35,7 +35,7 @@
     * @param manifestFile Application manifest
     * @param policyFile output file for the application policy
     * @param features Array of {name, permit} elements related to not denied
-    * features 
+    * features
     * @param userId User identifier
     * @param requestorId Requestor identifier
     */
@@ -96,7 +96,7 @@
     * @param manifest Parsed application manifest
     * @param appId Application identifier
     * @param features Array of {name, permit} elements related to not denied
-    * features 
+    * features
     * @param userId User identifier
     * @param requestorId Requestor identifier
     */
@@ -110,7 +110,7 @@
 
         // appId subject-match
         subjectMatch.push({'$' : {'attr' : 'id', 'match' : appId}});
-        
+
         // userId subject-match
         if (userId) {
             subjectMatch.push({'$' : {'attr' : 'user-id', 'match' : userId}});
@@ -126,56 +126,37 @@
         var rule = [];
 
         if (manifest.feature && features) {
-            // check that required features are not missing
-            for (var i = 0; i < manifest.feature.length; i++) {
-                if (manifest.feature[i].$ &&
-                    manifest.feature[i].$.required === 'true') {
-                    
-                    var missingFeature = true;
-                    for (var j = 0; j < features.length; j++) {
-                        if (manifest.feature[i].$.name === features[j].name) {
-                            missingFeature = false;
-                            break;
-                        }
-                    }
-                    if (missingFeature === true) {
-                        console.log('Required feature ' +
-                            manifest.feature[i].$.name + ' is missing');
-                        return '';
-                    }
+            var effect = [false, false, false, false];
+            for (var i = 0; i < features.length; i++) {
+                if (features[i].effect === 'permit') {
+                    effect[0] = true;
+                } else if (features[i].effect === 'prompt-blanket') {
+                    effect[1] = true;
+                } else if (features[i].effect === 'prompt-session') {
+                    effect[2] = true;
+                } else if (features[i].effect === 'prompt-oneshot') {
+                    effect[3] = true;
                 }
             }
             // permit rule
-            for (var i = 0; i < features.length; i++) {
-                if (features[i].effect === 'permit') {
-                    rule.push(addRule(manifest.feature, features, 'permit'));
-                    break;
-                }
-            } 
+            if (effect[0] === true) {
+                rule.push(addRule(manifest.feature, features, 'permit'));
+            }
             // prompt-blanket rule
-            for (var i = 0; i < features.length; i++) {
-                if (features[i].effect === 'prompt-blanket') {
-                    rule.push(addRule(manifest.feature, features,
-                                      'prompt-blanket'));
-                    break;
-                }
-            } 
-            // permit rule
-            for (var i = 0; i < features.length; i++) {
-                if (features[i].effect === 'prompt-session') {
-                    rule.push(addRule(manifest.feature, features,
-                                      'prompt-session'));
-                    break;
-                }
-            } 
-            // permit rule
-            for (var i = 0; i < features.length; i++) {
-                if (features[i].effect === 'prompt-oneshot') {
-                    rule.push(addRule(manifest.feature, features,
-                                      'prompt-oneshot'));
-                    break;
-                }
-            } 
+            if (effect[1] === true) {
+                rule.push(addRule(manifest.feature, features,
+                                  'prompt-blanket'));
+            }
+            // prompt-session rule
+            if (effect[2] === true) {
+                rule.push(addRule(manifest.feature, features,
+                                  'prompt-session'));
+            }
+            // prompt-oneshot rule
+            if (effect[3] === true) {
+                rule.push(addRule(manifest.feature, features,
+                                  'prompt-oneshot'));
+            }
         } else {
             console.log('features are missing');
             return '';
@@ -335,7 +316,7 @@
     * @function
     * @param manifest Parsed application manifest
     * @param features Array of {name, permit} elements related to not denied
-    * features 
+    * features
     * @param effect Rule effect (permit, prompt-blanket, prompt-session,
     * prompt-oneshot)
     */
