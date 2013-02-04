@@ -497,7 +497,7 @@ void loop(){
                             }
                             int value = getValueFromSensor(ad,pin);
                             //int value = analogRead(pin);
-                            client.print("{\"cmd\":\"get\",\"eid\":\"");
+                            client.print("{\"cmd\":\"get\",\"id\":\"");
                             client.print(board_id);
                             client.print("_");
                             client.print(id);
@@ -523,10 +523,13 @@ void loop(){
                                 }
                             }
                             else{ 
-                                client.println("{\"cmd\":\"stp\"}");
+                                client.print("{\"cmd\":\"stp\",");
                                 for(int i=0; i<num_elements; i++){
-                                    if(strcmp(elements[i]->id, eid) == 0)
+                                    if(strcmp(elements[i]->id, eid) == 0){
+                                        Serial.print("stopping ");
+                                        Serial.println(elements[i]->id);
                                         elements[i]->active = false;
+                                    }
                                 }
                             }
                             client.print("\"id\":\"");

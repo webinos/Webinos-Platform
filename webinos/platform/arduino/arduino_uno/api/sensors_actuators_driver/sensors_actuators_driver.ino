@@ -265,7 +265,7 @@ void loop(){
                                 }
                             }
                             int value = getValueFromSensor(ad,pin);
-                            client.print("{\"cmd\":\"get\",\"eid\":\"");
+                            client.print("{\"cmd\":\"get\",\"id\":\"");
                             client.print(board_id);
                             client.print("_");
                             client.print(id);
@@ -275,14 +275,14 @@ void loop(){
                         }
                         else if(strcmp(cmd,"str")==0 || strcmp(cmd,"stp")==0){  
                             if(strcmp(cmd,"str")==0){
-                                client.print("{\"cmd\":\"str\",");                                
+                                client.print("{\"cmd\":\"str\",");
                                 for(int i=0; i<NUM_ELEMENTS; i++){
                                     if(strcmp(elements[i]->id, eid) == 0)
                                         elements[i]->active = true;
                                 }
                             }
                             else{ 
-                                client.println("{\"cmd\":\"stp\"}");
+                                client.print("{\"cmd\":\"stp\",");
                                 for(int i=0; i<NUM_ELEMENTS; i++){
                                     if(strcmp(elements[i]->id, eid) == 0)
                                         elements[i]->active = false;
