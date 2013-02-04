@@ -75,19 +75,6 @@ var promptFeatures = [
         name : 'http://www.w3.org/ns/api-perms/geolocation',
         effect : 'prompt-session'
     }];
-var missingFeature = [
-    {
-        name : 'http://webinos.org/feature/internet',
-        effect : 'permit'
-    },
-    {
-        name : 'http://webinos.org/api/webnotification',
-        effect : 'prompt-session'
-    },
-    {
-        name : 'http://www.w3.org/ns/api-perms/geolocation',
-        effect : 'prompt-session'
-    }];
 
 describe("Manager.WidgetManager.manifest2policy", function() {
 
@@ -100,13 +87,6 @@ describe("Manager.WidgetManager.manifest2policy", function() {
             expect(m2p.manifest2policy(manifest1)).toEqual(false);
         });
     });
-
-    it("Missing required feature", function() {
-        runs(function() {
-            expect(m2p.manifest2policy(manifest1, outputFile, missingFeature))
-                .toEqual(false);
-		});
-	});
 
     it("Optional features allowed", function() {
         if (fs.existsSync(outputFile)) {
