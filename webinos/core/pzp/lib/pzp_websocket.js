@@ -295,12 +295,16 @@ var PzpWSS = function (parent) {
         var key_id = parent.config.cert.internal.web.key_id;
         parent.config.fetchKey(key_id, function (status, privateKey) {
             if (status) {
+                var ca = [parent.config.cert.internal.master.cert];
+                if (parent.pzp_state.enrolled){
+                    ca.push(parent.config.cert.internal.pzh.cert);
+                }
                 callback(true, {
                     key:  privateKey,
                     cert: parent.config.cert.internal.web.cert,
-                    ca:   parent.config.cert.internal.master.cert,
+                    ca: ca,
                     requestCert: true,
-                    rejectUnauthorized: false
+                    rejectUnauthorized: true
                 });
             } else {
                 callback(false)
@@ -318,7 +322,8 @@ var PzpWSS = function (parent) {
                             parent.config.cert.internal.web.cert = signedWebCert;
                             parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
                             setCertParams(callback);
-                           // Ziran : Add your code here
+                            self.storeCertificateBrowser(false);
+                            // Ziran : Add your code here
                         } else {
                             return callback(false);
                         }
@@ -758,7 +763,7 @@ var PzpWSS = function (parent) {
                 var WebSocketServer = require ("websocket").server;
                 parent.pzp_state.wssServer = new WebSocketServer ({
                     httpServer           :httpsServer,
-                    autoAcceptConnections:true
+                    autoAcceptConnections:false
                 });
                 logger.addId (parent.config.metaData.webinosName);
                 parent.pzp_state.wssServer.on("request", function (request) {
@@ -817,7 +822,82 @@ var PzpWSS = function (parent) {
                 self.sendConnectedApp (key, msg);
             }
         }
-    }
+    };
+    this.storeCertificateBrowser = function(enrolled) {
+        function deleteFiles() {
+            fs.unlinkSync("pass.txt");
+            fs.unlinkSync("privatekey.pem");
+            fs.unlinkSync("webkey.pem");
+            fs.unlinkSync("pzpca.pem");
+            fs.unlinkSync("pzp_wss.pem");
+            fs.unlinkSync("cert_ca.p12");
+            fs.unlinkSync("cert_web.p12");
+            if (enrolled) {
+                fs.unlinkSync("pzh_cert.pem");
+            }
+        }
+        function execute(exec, i) {
+            require ("child_process").exec(exec[i], function (error, stderr, stdout) {
+                if (!error) {
+                    logger.log("successfully executed - " + exec[i]);
+                    if ((exec.length-1) === i){
+                        deleteFiles();
+                        return;
+                    }
+                    i = i + 1;
+                    execute(exec, i);
+                } else {
+                    logger.error(error.message);
+                    logger.error(stdout);
+                    logger.error("FAILED IMPORTING CERTIFICATE IN THE BROWSER.")
+                }
+            });
+        }
+        try {
+            var fs = require("fs"), i, j, mozillaDir, fileList, exec = [], wss, ca, pzhca;
+            fs.writeFileSync("pzpca.pem", parent.config.cert.internal.master.cert);
+            fs.writeFileSync("pzp_wss.pem", parent.config.cert.internal.web.cert);
+            fs.writeFileSync("pass.txt", "\n");
+            fileList = fs.readdirSync("../.mozilla/firefox/");
+            for (i = 0 ; i < fileList.length; i = i + 1) {
+                var stat = fs.statSync("../.mozilla/firefox/"+fileList[i]);
+                if(stat.isDirectory() && fileList[i].split(".") && fileList[i].split(".")[1] === "default") {
+                    mozillaDir = fileList[i];
+                    break;
+                }
+            }
+            wss = encodeURIComponent("PzpWSS:"+parent.config.metaData.webinosName);
+            ca = encodeURIComponent("PzpCA:"+parent.config.metaData.webinosName);
+            pzhca = encodeURIComponent("PzhCA:"+parent.config.metaData.webinosName);
+            if(enrolled) {
+                fs.writeFileSync("pzh_cert.pem", parent.config.cert.internal.pzh.cert);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -D -n "+wss);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -D -n "+ca);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -D -n "+ wss);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -D -n "+ ca);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -A -t 'TCu,,' -i pzh_cert.pem -n "+pzhca);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -A -t 'TCu,,' -i pzh_cert.pem -n "+pzhca);
+            }
+            exec.push("openssl pkcs12 -export -in pzpca.pem -inkey privatekey.pem -out cert_ca.p12 -passin pass:\"\" -passout pass:\"\" -name "+ca);
+            exec.push("openssl pkcs12 -export -in pzp_wss.pem -inkey webkey.pem -out cert_web.p12 -passin pass:\"\" -passout pass:\"\" -name "+wss);
+            exec.push("pk12util -d sql:$HOME/.pki/nssdb -i cert_ca.p12 -w pass.txt");
+            exec.push("pk12util -d sql:$HOME/.pki/nssdb -i cert_web.p12 -w pass.txt");
+            exec.push("pk12util -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -i cert_ca.p12 -w pass.txt");
+            exec.push("pk12util -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -i cert_web.p12 -w pass.txt");
+            parent.config.fetchKey(parent.config.cert.internal.master.key_id, function (status, value) {
+                if (status) {
+                    fs.writeFileSync("privatekey.pem", value);
+                    parent.config.fetchKey(parent.config.cert.internal.web.key_id, function (status, value) {
+                        if (status) {
+                            fs.writeFileSync("webkey.pem", value);
+                            execute(exec, 0);
+                        }
+                    });
+                }
+            });
+        } catch (err) {
+            logger.error("failed in importing certificates in the browser");
+        }
+    };
 };
-
 module.exports = PzpWSS;

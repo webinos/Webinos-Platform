@@ -287,7 +287,7 @@ var Pzh = function () {
     this.removeRoute = function (_id) {
         if(_id) {
             logger.log ("removing route for " + _id);
-            if (self.pzh_state.connectedPzp.hasOwnProperty (_id)) {
+            if (self.pzh_state.connectedPzp.hasOwnProperty(_id)) {
                 self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
                 delete self.pzh_state.connectedPzp[_id];
             }

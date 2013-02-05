@@ -660,6 +660,7 @@ var EnrollPzp = function (parent, hub) {
                         parent.config.crl.value = _masterCrl;
                         parent.config.metaData.pzhId = _from;
                         parent.config.metaData.serverName = _from && _from.split ("_")[0];
+
                         if (_from.indexOf (":") !== -1) {
                             parent.config.metaData.serverName = parent.config.metaData.serverName.split (":")[0];
                         }
