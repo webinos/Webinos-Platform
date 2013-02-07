@@ -1,0 +1,25 @@
+{ "name": "corepzinformation"
+, "publishConfig": { "tag": "alpha" }
+, "description": "corePZinformation API"
+, "keywords": [ "webinos", "corePZinformation", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Krishna Bangalore <krishna.bangalore@in.tum.de>"
+, "repository":
+  { "type": "git"
+  , "url": "http://github.com/webinos/Webinos-Platform"
+  }
+, "bugs":
+  { "email": "krishna.bangalore@in.tum.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/corePZinformation.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

@@ -1,0 +1,126 @@
+<html>
+<head>
+    <title>PZP Testbed</title>
+    <link rel="icon" href="vehicle/webinos.ico" type="image/x-icon">
+    <script type="text/javascript" src="./jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="./webinos.js"></script>
+    <script type="text/javascript" src="js/jsrender.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/style.css" media="screen"/>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            function logMessage(msg) {
+                if (msg) {
+                    $('#message').append('<li>' + msg + '</li>');
+                }
+            }
+
+            function printInfo(data) {
+                logMessage(data.payload.message);
+            }
+
+            webinos.session.addListener('info', printInfo);
+
+            var corepzinfo = {};
+            var recentService;
+
+            $('#findService').bind('click', function () {
+                corepzinfo = {};
+                recentService = null;
+                $('#coreServices').empty();
+                webinos.discovery.findServices(new ServiceType('http://webinos.org/api/corePZinformation'),
+                        {onFound:function (service) {
+                            corepzinfo[service.serviceAddress] = service;
+                            $('#coreServices').append($('<option>' + service.serviceAddress + '</option>'));
+                        }});
+            });
+
+            $('#bind').bind('click', function () {
+                recentService = corepzinfo[$('#coreServices option:selected').val()];
+                recentService.bindService({onBind:function (service) {
+                    logMessage('corePZinformation API ' + service.api + ' bound.');
+                }});
+            });
+
+            $('#pzpname').bind('click', function () {
+                recentService.pzpname(function (result) {
+                            alert(result);
+                        },
+                        function (error) {
+                            alert(error.code + " " + error.message);
+                        });
+            });
+
+           $('#pzpstate').bind('click', function () {
+                recentService.pzpstate(function (result) {
+                            alert(result);
+                        },
+                        function (error) {
+                            alert(error.code + " " + error.message);
+                        });
+            });
+
+            $('#pzhname').bind('click', function () {
+                recentService.pzhname(function (result) {
+                            alert(result);
+                        },
+                        function (error) {
+                            alert(error.code + " " + error.message);
+                        });
+            });
+
+            $('#pzpid').bind('click', function () {
+                recentService.pzpid(function (result) {
+                            alert(result);
+                        },
+                        function (error) {
+                            alert(error.code + " " + error.message);
+                        });
+            });
+
+        });
+    </script>
+</head>
+<body>
+<table>
+    <tr>
+        <td>Use "Find Services" to search for available corePZinformation-Services.<br/>
+            Select one, then bind and use. Select another and bind again and use.
+        </td>
+        <td>
+            <button id="findService" class="button">Find Services</button>
+            <br/>
+            <select id="coreServices" size="5"></select>
+        </td>
+    </tr>
+    <tr>
+        <td><p>
+            <i> The selected address means the Service at that address
+                will be used.</i>
+        </p></td>
+    </tr>
+    <tr>
+        <td>
+            <button id="pzpname" class="button">PZP Name</button>
+        </td>
+         <td>
+            <button id="bind" class="button">Bind</button>
+        </td>
+     </tr>
+     <tr>
+        <td>
+            <button id="pzpstate" class="button">PZP State</button>
+        </td>
+    </tr>
+     <tr>
+        <td>
+            <button id="pzhname" class="button">PZH Name</button>
+        </td>
+    </tr>
+ <tr>
+        <td>
+            <button id="pzpid" class="button">PZP ID</button>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

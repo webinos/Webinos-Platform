@@ -68,6 +68,7 @@ module.exports = function(grunt) {
           'webinos/core/wrt/lib/webinos.discovery.js',
           'webinos/core/wrt/lib/webinos.payment.js',
           'webinos/core/wrt/lib/webinos.mediacontent.js',
+          'webinos/core/wrt/lib/webinos.corePZinformation.js',
           'webinos/core/wrt/lib/webinos.nfc.js',
           '<banner:footer>'
         ],
