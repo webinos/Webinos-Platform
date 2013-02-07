@@ -31,7 +31,7 @@
 
     var apiListener = new Array;
 
-    var handlers = new Array();
+    var handlers = {};//new Array();
 
     var newElementId = 0;
     var elementList = new Array;
@@ -150,7 +150,7 @@
         }
 
         function handleError(id, err){
-            handlers[id].eerCB(err);
+            handlers[id].errCB(err);
         }
     };
 

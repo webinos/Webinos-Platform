@@ -40,8 +40,7 @@ var path = require("path");
 
 var port;
 
-var configureSensorSuccessCB;
-var configureSensorErrorCB;
+var handlers = {};
 
 
 (function () {
@@ -101,13 +100,14 @@ var configureSensorErrorCB;
                 //this data is in json(???) format
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
                 
-                configureSensorSuccessCB = successCB;
-                configureSensorErrorCB = errorCB;
+                handlers[elementsList[eId].id] = {"succCB" : successCB, "errCB" : errorCB, "eId" : eId};
                 
                 var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
                 var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
                 makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);
+
+                //successCB(eId);
                 break;
             case 'start':                                 
                 //In this case the sensor should start data acquisition
@@ -252,13 +252,8 @@ var configureSensorErrorCB;
                     }
                     else if(data.cmd === CONFIGURE_CMD){
                         console.log("Configuring element " + data.id);
-                        for(var i in elementsList){
-                            if(elementsList[i].id == data.id){
-                                //console.log("calling succCB for "+data.id);
-                                configureSensorSuccessCB(i);
-                                break;
-                            }
-                        }                      
+                        
+                        handlers[data.id].succCB(handlers[data.id].eId);                      
                     }
                     else if(data.cmd === START_LISTENING_CMD){
                         console.log("Starting element " + data.id);
