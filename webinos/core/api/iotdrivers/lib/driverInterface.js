@@ -31,6 +31,8 @@
 
     var apiListener = new Array;
 
+    var handlers = new Array();
+
     var newElementId = 0;
     var elementList = new Array;
 
@@ -43,14 +45,12 @@
      * @param listener listener of the sensor/actuator api to be called when needed
      */
     var driverInterface = function() {
-        console.log('Driver Interface constructor');
         if(!driversLoaded) {
             loadDrivers();
             driversLoaded = true;
         }
         
         function loadDrivers() {
-            console.log('loadDrivers');
             var fileList = fs.readdirSync(driversLocation);
             for(var i in fileList) {
                 console.log('File found: '+fileList[i]+' - id is '+newDriverId);
@@ -66,7 +66,7 @@
         }
         
         this.connect = function (sensorActuator, listener) {
-            console.log('connect sa is '+sensorActuator);
+//            console.log('connect sa is '+sensorActuator);
             // The listener function (implmeted in the api) has the signature:
             // listener(DOMString cmd, int id, DOMString data) where
             // cmd is the command (register, data, ...)
@@ -91,7 +91,6 @@
         }
         
         function initDrivers() {
-            console.log('initDrivers');
             for(var i in driversList) {
                 try {
                     driversList[i].init(i, register, command);
@@ -103,8 +102,9 @@
         }
  
 
-        this.sendCommand = function(cmd, elementId, data, errorCB) {
-            driversList[elementList[elementId].driverId].execute(cmd, elementId, data, errorCB);
+        this.sendCommand = function(cmd, elementId, data, errorCB, successCB) {
+            handlers[elementId] = {succCB : successCB, errCB : errorCB};
+            driversList[elementList[elementId].driverId].execute(cmd, elementId, data, handleError, handleSuccess);
         }
 
 
@@ -116,7 +116,7 @@
          * @param type the type of sensor/actuator (eg light, temperature, ...)
          */
         function register(driverId, sensorActuator, info) {
-            console.log('driverInterface register - did '+driverId+', sa '+sensorActuator+', type '+info.type);
+//            console.log('driverInterface register - did '+driverId+', sa '+sensorActuator+', type '+info.type);
             var newElement = {};
             newElement.driverId = driverId;
             newElement.sensorActuator = sensorActuator;
@@ -145,6 +145,13 @@
             (apiListener[elementList[id].sensorActuator])(cmd, id, data);
         }
 
+        function handleSuccess(id){
+            handlers[id].succCB();
+        }
+
+        function handleError(id, err){
+            handlers[id].eerCB(err);
+        }
     };
 
     exports.driverInterface = driverInterface;

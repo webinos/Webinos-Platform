@@ -40,6 +40,8 @@ var path = require("path");
 
 var port;
 
+var configureSensorSuccessCB;
+var configureSensorErrorCB;
 
 
 (function () {
@@ -90,7 +92,7 @@ var port;
     * @param data Data of the command
     *
     */
-    exports.execute = function(cmd, eId, data) {
+    exports.execute = function(cmd, eId, data, errorCB, successCB) {
         var native_element_id = elementsList[eId].id.split("_")[1];  //eg nativeid = "000001_001"
         var board_id = elementsList[eId].id.split("_")[0];
         switch(cmd) {
@@ -98,6 +100,10 @@ var port;
                 //In this case cfg data are transmitted to the sensor/actuator
                 //this data is in json(???) format
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
+                
+                configureSensorSuccessCB = successCB;
+                configureSensorErrorCB = errorCB;
+                
                 var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
                 var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
@@ -245,7 +251,14 @@ var port;
                         }
                     }
                     else if(data.cmd === CONFIGURE_CMD){
-                        console.log("Configuring element " + data.id);                            
+                        console.log("Configuring element " + data.id);
+                        for(var i in elementsList){
+                            if(elementsList[i].id == data.id){
+                                //console.log("calling succCB for "+data.id);
+                                configureSensorSuccessCB(i);
+                                break;
+                            }
+                        }                      
                     }
                     else if(data.cmd === START_LISTENING_CMD){
                         console.log("Starting element " + data.id);
