@@ -88,6 +88,10 @@
       "name"    :"MediaContent",
       "location":"api/mediacontent/"
     },
+    "corePZinformation"     :{
+      "name"    :"corePZinformation",
+      "location":"api/corePZinformation/"
+    },
     "nfc"     :{
       "name"    :"nfc",
       "location":"api/nfc/"
