@@ -40,7 +40,8 @@ var path = require("path");
 
 var port;
 
-var handlers = new Array();
+var configureSensorSuccessCB;
+var configureSensorErrorCB;
 
 
 (function () {
@@ -100,8 +101,9 @@ var handlers = new Array();
                 //this data is in json(???) format
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
                 
-                handlers[elementsList[eId].id] = {succCB : successCB, errCB : errorCB};
-
+                configureSensorSuccessCB = successCB;
+                configureSensorErrorCB = errorCB;
+                
                 var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
                 var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
@@ -250,7 +252,13 @@ var handlers = new Array();
                     }
                     else if(data.cmd === CONFIGURE_CMD){
                         console.log("Configuring element " + data.id);
-                        handlers[data.id].succCB();                         
+                        for(var i in elementsList){
+                            if(elementsList[i].id == data.id){
+                                //console.log("calling succCB for "+data.id);
+                                configureSensorSuccessCB(i);
+                                break;
+                            }
+                        }                      
                     }
                     else if(data.cmd === START_LISTENING_CMD){
                         console.log("Starting element " + data.id);
