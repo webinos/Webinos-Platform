@@ -47,6 +47,10 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.provider.Settings.System;
 
+import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
+
 public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 	
   private Context androidContext;
@@ -158,11 +162,21 @@ public class DiscoveryMdnsImpl extends DiscoveryManager implements IModule {
 		// Setup WiFi
 		mWiFiManager = (WifiManager) androidContext.getSystemService(Context.WIFI_SERVICE);
 		if(!mWiFiManager.isWifiEnabled()){
-			if(D) Log.v(TAG, "DiscoveryMdnsImpl: Enable WiFi");
-			mWiFiManager.setWifiEnabled(true);  
-		}
-		return this;
-	}
+			//if(D) Log.v(TAG, "DiscoveryMdnsImpl: Enable WiFi");
+			//mWiFiManager.setWifiEnabled(true);  
+      Handler handler = new Handler(Looper.getMainLooper());
+      handler.post(new Runnable() {
+        @Override
+        public void run() {
+          Toast.makeText(
+            androidContext,
+            "Please turn on WiFi to have ZeroConf PZP peer Discovery Functions",
+            Toast.LENGTH_LONG).show();
+        }
+      }); 
+    }
+    return this;
+  }
 	
 	@Override
 	public void stopModule() {
