@@ -99,7 +99,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         this.base({
             api: 'http://webinos.org/api/sensors.'+type,
             displayName: name,
-            description: description+' - id '+id
+            description: description //+' - id '+id
         });
 
         /**
@@ -136,6 +136,10 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
                         sensorEvent.sensorValues = new Array;
                         sensorEvent.sensorValues[0] = tmp;
                     }
+
+                    sensorEvent.timestamp = new Date().getTime();
+                    console.log("time stamp is " + sensorEvent.timestamp);
+                    
                 }
                 catch(e) {
                     //console.log('Sensor event error: cannot convert data to array of values');

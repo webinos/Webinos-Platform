@@ -40,6 +40,7 @@
   , "passport" : "x.x.x"
   , "passport-yahoo" : "x.x.x"
   , "passport-google" : "x.x.x"
+  , "serialport" : ">= 1.0.6"
   }
 , "engines" :
   { "node" : ">= 0.6.0"
