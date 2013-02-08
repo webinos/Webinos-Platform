@@ -511,28 +511,33 @@ Config.prototype.fetchUserPref = function (callback) {
  * @return {*}
  */
 Config.prototype.createDirectories = function (callback) {
-    var self = this, dirPath, permission = 0777;
+    var self = this, dirPath, root_permission = 0777, internal_permission = 0744;
     try {
         //In case of node 0.6, define the fs existsSync
         if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
-        if (!fs.existsSync (wPath.webinosPath ()))//If the folder doesn't exist
-            fs.mkdirSync (wPath.webinosPath (), permission);//Create it
-        //Set permissions for android
-        if (os.platform ().toLowerCase () !== "android") {
+        if (!fs.existsSync (wPath.webinosPath ())) {//If the folder doesn't exist
+            fs.mkdirSync (wPath.webinosPath (), root_permission);//Create it
+        }
+        if (os.platform ().toLowerCase () !== "android") {//Set permissions for android
             if (process.getuid) {
                 fs.chown (wPath.webinosPath (), process.getuid (), process.getgid ());
-                fs.chmod (wPath.webinosPath (), permission);
+                fs.chmod (wPath.webinosPath (), root_permission);
             }
         }
         if (!fs.existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
-            fs.mkdirSync (self.metaData.webinosRoot, permission);
+            fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
         // webinos root was created, we need the following 1st level dirs
-        var list = [ path.join (wPath.webinosPath (), "logs"), path.join (self.metaData.webinosRoot, "wrt"), path.join (wPath.webinosPath (), "wrt"), path.join (self.metaData.webinosRoot, "policies"),
-            path.join (self.metaData.webinosRoot, "certificates"), path.join (self.metaData.webinosRoot, "userData"), path.join (self.metaData.webinosRoot, "keys"), path.join (self.metaData.webinosRoot, "certificates", "external"),
+        var list = [ path.join (wPath.webinosPath (), "logs"),
+            path.join (wPath.webinosPath (), "wrt"),
+            path.join (self.metaData.webinosRoot, "certificates"),
+            path.join (self.metaData.webinosRoot, "policies"),
+            path.join (self.metaData.webinosRoot, "wrt"),
+            path.join (self.metaData.webinosRoot, "userData"),
+            path.join (self.metaData.webinosRoot, "keys"),
+            path.join (self.metaData.webinosRoot, "certificates", "external"),
             path.join (self.metaData.webinosRoot, "certificates", "internal")];
         list.forEach (function (name) {
-            if (!fs.existsSync (name))
-                fs.mkdirSync (name, permission);
+            if (!fs.existsSync (name)) fs.mkdirSync (name, internal_permission);
         });
         // Notify that we are done
         callback (true);
