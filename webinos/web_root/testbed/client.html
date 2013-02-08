@@ -162,17 +162,33 @@ $ (document).ready (function () {
     $("#connectPeers").click(function(){
         //get selected peer
         list= document.getElementById('peer_list');
-        var peer = document.getElementById('peer_list').value;
-        if(list.length)
+       
+       // if(list.length)
+        if(1)
         {
+        /*	var peer = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].value;
+        	var name = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].text; */
+        	
+        	var peer = "192.168.1.143";
+        	var name= "5daadda51882d367";
             if(!peer)
                 alert("Please choose a peer to connect!");
-            else {
-                alert("communicating selected peer for SiB authentication process");
-                var options = {type: 'prop', payload: {status:'pubCert', message:{peer: peer}}};
-                webinos.session.message_send(options);
-            }
-        }
+            else
+            {    
+            	var display = confirm("Is selected peer in the same zone?");
+            	if (display == true)
+            	{
+               		var options = {type: 'prop', payload: {status:'intraPeer', message:{peer: peer, name: name}}};
+               		webinos.session.message_send(options);
+            	}
+            	else
+            	{
+            		alert("communicating selected peer for SiB authentication process");
+            		var options = {type: 'prop', payload: {status:'pubCert', message:{peer: peer}}};
+                	webinos.session.message_send(options);
+            	}
+        	}
+        }	
         else
         {
             //pop up manual entry form - Add support for manual auth
