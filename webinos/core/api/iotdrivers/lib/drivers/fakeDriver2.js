@@ -55,6 +55,33 @@
         console.log("fakeDriver2 - cmd : " + cmd + " eId : " + eId + " data : "+data);
     }
 
+    exports.execute = function(cmd, eId, data, errorCB, successCB) {
+        //console.log('Fake driver 1 data - element is '+eId+', data is '+data);
+        switch(cmd) {
+            case 'cfg':
+                //In this case cfg data are transmitted to the sensor/actuator
+                //this data is in json(???) format
+                console.log('Fake Driver 2 : Received cfg for element '+eId+', cfg is '+data);
+                successCB(eId);
+                break;
+            case 'start':
+                //In this case the sensor should start data acquisition
+                console.log('Fake Driver 2 : Received start for element '+eId);
+                break;
+            case 'stop':
+                //In this case the sensor should stop data acquisition
+                //the parameter data can be ignored
+                console.log('Fake Driver 2 : Received stop for element '+eId);
+                break;
+            case 'value':
+                //In this case the actuator should store the value
+                //the parameter data is the value to store
+                console.log('Fake Driver 2 : Received value for element '+eId+'; value is '+data);
+                break;
+            default:
+                console.log('Fake driver 1 - unrecognized cmd');
+        }
+    }
 
     function intReg() {
         console.log('\nFake driver 2 - register new elements');

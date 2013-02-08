@@ -38,7 +38,7 @@
         this.elementId = id;
 
         var type;
-        console.log("Called actuator ctor with params " + JSON.stringify(data));
+//        console.log("Called actuator ctor with params " + JSON.stringify(data));
 
         if(data.type) {
             type = data.type;
