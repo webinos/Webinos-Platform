@@ -205,7 +205,7 @@ int getHash(char* filename, char *pointer){
   };
 
   // reads file
-  if (fgets(buff, len, fd) == NULL) 
+  if (!fread(buff, 1, len, fd))  
   {
     perror("getHash: read()");
     free(buff);
