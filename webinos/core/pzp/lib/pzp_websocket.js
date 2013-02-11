@@ -175,11 +175,11 @@ var PzpWSS = function (_parent) {
                     });
                     break;
                 case "intraPeer":
-                    {
-                      connectintra(msg, function(value){
-                          logger.log("connect intra-zone peer: " + value);
-                      });
-                    }
+                {
+                    connectintra(msg, function(value){
+                        logger.log("connect intra-zone peer: " + value);
+                    });
+                }
                     break;
             }
         } else {
@@ -448,18 +448,18 @@ var PzpWSS = function (_parent) {
             }
         }
     }
-    
+
     function connectintra(message, callback) {
         var addr = message.payload.message.peer;
         var name = message.payload.message.name;
         logger.log("connecting to: " + addr + name);
         if(addr !== null)
         {
-        	var msg={};
-        	msg.address = addr;
-        	//fetch PZH id
-        	msg.name = parent.config.metaData.pzhId + "/" + name + "_Pzp";
-        	parent.pzpClient.connectPeer(msg);
+            var msg={};
+            msg.address = addr;
+            //fetch PZH id
+            msg.name = parent.config.metaData.pzhId + "/" + name + "_Pzp";
+            parent.pzpClient.connectPeer(msg);
         }
     }
 

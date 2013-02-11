@@ -290,9 +290,12 @@ var PzpServer = function (_parent) {
         var msg, text, clientSessionId;
         text = decodeURIComponent (_conn.getPeerCertificate ().subject.CN);
         var cn = decodeURIComponent(_conn.getPeerCertificate().issuer.CN);
+        var n = cn.indexOf(":");
+        var cn_part = cn.slice(n + 1);
+
         // check if in the same zone
         var zoneId = _parent.config.metaData.pzhId;
-        if(zoneId.indexOf(cn) !=-1)
+        if(zoneId.indexOf(cn_part) !=-1)
             var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1];
         else
         {
