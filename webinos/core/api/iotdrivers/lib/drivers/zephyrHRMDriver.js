@@ -19,13 +19,15 @@
 (function () {
     'use strict';
 
-    var serialPort = require("serialport").SerialPort;
+//    var serialPort = require("serialport").SerialPort;
+
+    var serialPort = require("serialport2").SerialPort;
     var path = require("path");
     var fs = require("fs");
     //var BT_DEV = "/dev/cu.HXM002536-BluetoothSeri";
     //var BT_SPEED = 115200;
-    var BT_PORT;
-    var BT_RATE;
+    var SERIAL_PORT;
+    var SERIAL_RATE;
 
     var buffer = [];
     var index = 0;
@@ -64,10 +66,6 @@
         driverId = dId;
         registerFunc = regFunc;
         callbackFunc = cbkFunc;
-
-        
-
-
         //intReg();
         setTimeout(intReg, 2000);
     };
@@ -94,98 +92,124 @@
                 };
                 elementsList[elementIndex].running = true;
 
-
                 try{
                     var filePath = path.resolve(__dirname, "./serial_devices.json");
                     fs.readFile(filePath, function(err,data) {
                         if (!err) {
                             var settings = JSON.parse(data.toString());
-                            BT_PORT = settings.bluetooth[0].port;
-                            BT_RATE = settings.bluetooth[0].rate;
+                            SERIAL_PORT = settings.bluetooth[0].port;
+                            SERIAL_RATE = settings.bluetooth[0].rate;
+
+                            try{
+                                serial = new serialPort();
+                                
+                                serial.open(SERIAL_PORT, {
+                                  baudRate: SERIAL_RATE,
+                                  dataBits: 8,
+                                  parity: 'none',
+                                  stopBits: 1
+                                });
+
+                                serial.on('close', function (err) {
+                                    console.log("Serial port ["+SERIAL_PORT+"] was closed");
+                                    //TODO handle board disconnection
+                                    //TODO start listening for incoming boards
+                                });
+
+                                serial.on('error', function (err) {
+                                    if(err.code == "ENOENT" && err.path == SERIAL_PORT){
+                                        console.log("Serial port ["+SERIAL_PORT+"] is not ready");
+                                    }
+                                });
+
+                                serial.on('open', function () {
+                                    start_serial();
+                                });
+
+                                serial.on( "data", function( chunk ) {
+                                    for(var i=0; i<chunk.length; i++){
+                                        if(chunk[i] == STX){
+                                            start = true;
+                                            prevIsStart = true;
+                                            buffer[index++] = chunk[i];
+                                            continue;
+                                        }
+                                        if(start){
+                                            if(prevIsStart){
+                                                if(chunk[i] != MSGID){
+                                                    start = false;
+                                                    prevIsStart = false;
+                                                    prevIsMsgId = false;
+                                                    continue;
+                                                }
+                                                else{
+                                                    buffer[index++] = chunk[i];
+                                                    prevIsStart = false;
+                                                    prevIsMsgId = true;
+                                                }
+                                            }
+                                            else if(prevIsMsgId){
+                                                if(chunk[i] != DLC){
+                                                    start = false;
+                                                    prevIsStart = false;
+                                                    prevIsMsgId = false;
+                                                    continue;
+                                                }
+                                                else{
+                                                    buffer[index++] = chunk[i].toString(16);
+                                                    prevIsMsgId = false;
+                                                    prevIsDlc = true;
+                                                }
+                                            }
+
+                                            else if(prevIsDlc){
+                                                if(counter < 55){
+                                                    buffer[index++] = chunk[i];
+                                                    counter++;
+                                                }
+                                                else{
+                                                    counter = 0;
+                                                    prevIsDlc = false;
+                                                    buffer[index++] = chunk[i];
+                                                    prevIsCrc = true;
+                                                }
+                                            }
+                                            else if(prevIsCrc){
+                                                prevIsCrc = false;
+                                                if(chunk[i] != ETX){
+                                                    continue;
+                                                }
+                                                else{
+                                                    buffer[index++] = chunk[i];
+                                                    start = false;
+                                                    var values = getParsedValues(buffer);
+                                                    if(values != undefined){
+                                                        //console.log("Pars : " + values);
+                                                        elementsList[elementIndex].value = values[8];
+                                                        callbackFunc('data', elementsList[elementIndex].id, elementsList[elementIndex].value);
+                                                    }
+                                                    index = 0;
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                            catch(e){
+                                console.log("catch : " + e);
+                            }
                         }
                     });
                 }
                 catch(err){
                     console.log("Error : "+err);
                 }
-                
-                serial = new serialPort(BT_PORT , { baudrate : BT_RATE });
-
-                serial.on( "data", function( chunk ) {
-                    for(var i=0; i<chunk.length; i++){
-                        if(chunk[i] == STX){
-                            start = true;
-                            prevIsStart = true;
-                            buffer[index++] = chunk[i];
-                            continue;
-                        }
-                        if(start){
-                            if(prevIsStart){
-                                if(chunk[i] != MSGID){
-                                    start = false;
-                                    prevIsStart = false;
-                                    prevIsMsgId = false;
-                                    continue;
-                                }
-                                else{
-                                    buffer[index++] = chunk[i];
-                                    prevIsStart = false;
-                                    prevIsMsgId = true;
-                                }
-                            }
-                            else if(prevIsMsgId){
-                                if(chunk[i] != DLC){
-                                    start = false;
-                                    prevIsStart = false;
-                                    prevIsMsgId = false;
-                                    continue;
-                                }
-                                else{
-                                    buffer[index++] = chunk[i].toString(16);
-                                    prevIsMsgId = false;
-                                    prevIsDlc = true;
-                                }
-                            }
-
-                            else if(prevIsDlc){
-                                if(counter < 55){
-                                    buffer[index++] = chunk[i];
-                                    counter++;
-                                }
-                                else{
-                                    counter = 0;
-                                    prevIsDlc = false;
-                                    buffer[index++] = chunk[i];
-                                    prevIsCrc = true;
-                                }
-                            }
-                            else if(prevIsCrc){
-                                prevIsCrc = false;
-                                if(chunk[i] != ETX){
-                                    continue;
-                                }
-                                else{
-                                    buffer[index++] = chunk[i];
-                                    start = false;
-                                    var values = getParsedValues(buffer);
-                                    if(values != undefined){
-                                        console.log("Pars : " + values);
-                                        elementsList[elementIndex].value = values[8];
-                                        callbackFunc('data', elementsList[elementIndex].id, elementsList[elementIndex].value);
-                                    }
-                                    index = 0;
-                                }
-                            }
-                        }
-                    }
-                });
-
                 break;
             case 'stop':
                 //In this case the sensor should stop data acquisition
                 //the parameter data can be ignored
                 console.log('Zephyr HRM driver - Received stop for element '+eId);
-                serial.close();
+                //serial.close();
                 break;
             case 'value':
                 //In this case the actuator should store the value

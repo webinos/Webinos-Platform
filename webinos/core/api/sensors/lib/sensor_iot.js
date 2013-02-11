@@ -138,7 +138,6 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
                     }
 
                     sensorEvent.timestamp = new Date().getTime();
-                    console.log("time stamp is " + sensorEvent.timestamp);
                     
                 }
                 catch(e) {
