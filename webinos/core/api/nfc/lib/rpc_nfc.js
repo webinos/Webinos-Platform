@@ -247,6 +247,18 @@
         }
     };
     
+    NfcService.prototype.launchScanningUI = function(params, successCB,
+            errorCB, objectRef) {
+        if (process.platform == 'android') {
+            try {
+                this.androidNfcModule.launchScanningActivity(params[0]);
+            } catch (err) {
+                errorCB(err); 
+            }
+        }
+        successCB();
+    };
+    
     SimulatedNdefTech = function(ndefMsg) {
         this.ndefMessage = ndefMsg;
         

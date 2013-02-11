@@ -31,6 +31,7 @@ import org.webinos.api.nfc.NfcTagTechnology;
 import org.webinos.api.nfc.NfcTagTechnologyNdef;
 
 import android.content.Context;
+import android.content.Intent;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.Ndef;
@@ -72,11 +73,6 @@ public class NfcAnodeModule extends NfcModuleBase implements IModule {
   }
 
   @Override
-  public void log(String message) {
-    Log.v(TAG, message);
-  }
-
-  @Override
   public void onTagDiscovered(Object tag) {
     if (tag instanceof Tag) {
       Tag androidTag = (Tag) tag;
@@ -105,5 +101,13 @@ public class NfcAnodeModule extends NfcModuleBase implements IModule {
   protected void setSharedTag(NdefRecord[] ndefMessage) {
     nfcMgr
         .setSharedTag(NfcTagTechnologyNdefImpl.createNdefMessage(ndefMessage));
+  }
+
+  @Override
+  public void launchScanningActivity(boolean autoDismiss) {
+    Intent launchIntent = new Intent(androidContext, WebinosNfcActivity.class);
+    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    launchIntent.putExtra(WebinosNfcActivity.EXTRA_AUTODISMISS, autoDismiss);
+    androidContext.startActivity(launchIntent);
   }
 }
