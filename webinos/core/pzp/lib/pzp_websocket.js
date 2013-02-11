@@ -174,6 +174,13 @@ var PzpWSS = function (_parent) {
                         logger.log("pzhCert Value:" + value);
                     });
                     break;
+                case "intraPeer":
+                {
+                    connectintra(msg, function(value){
+                        logger.log("connect intra-zone peer: " + value);
+                    });
+                }
+                    break;
             }
         } else {
             parent.webinos_manager.messageHandler.onMessageReceived (msg, msg.to);
@@ -439,6 +446,20 @@ var PzpWSS = function (_parent) {
                 req.write(JSON.stringify(msg));
                 req.end();
             }
+        }
+    }
+
+    function connectintra(message, callback) {
+        var addr = message.payload.message.peer;
+        var name = message.payload.message.name;
+        logger.log("connecting to: " + addr + name);
+        if(addr !== null)
+        {
+            var msg={};
+            msg.address = addr;
+            //fetch PZH id
+            msg.name = parent.config.metaData.pzhId + "/" + name + "_Pzp";
+            parent.pzpClient.connectPeer(msg);
         }
     }
 

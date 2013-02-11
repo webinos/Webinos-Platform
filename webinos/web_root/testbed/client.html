@@ -162,15 +162,28 @@ $ (document).ready (function () {
     $("#connectPeers").click(function(){
         //get selected peer
         list= document.getElementById('peer_list');
-        var peer = document.getElementById('peer_list').value;
+
         if(list.length)
         {
+            var peer = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].value;
+            var name = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].text;
+
             if(!peer)
                 alert("Please choose a peer to connect!");
-            else {
-                alert("communicating selected peer for SiB authentication process");
-                var options = {type: 'prop', payload: {status:'pubCert', message:{peer: peer}}};
-                webinos.session.message_send(options);
+            else
+            {
+                var display = confirm("Is selected peer in the same zone?");
+                if (display == true)
+                {
+                    var options = {type: 'prop', payload: {status:'intraPeer', message:{peer: peer, name: name}}};
+                    webinos.session.message_send(options);
+                }
+                else
+                {
+                    alert("communicating selected peer for SiB authentication process");
+                    var options = {type: 'prop', payload: {status:'pubCert', message:{peer: peer}}};
+                    webinos.session.message_send(options);
+                }
             }
         }
         else
@@ -314,11 +327,11 @@ $ (document).ready (function () {
     $("#mediaContent").click(function(){
         setPage("Media Content API Testbed", "mediaContent/index.html");
     });
-     $("#corePZinformation").click(function(){
+    $("#corePZinformation").click(function(){
         setPage("Core PZP Information API Testbed", "corePZinformation/index.html");
     });
     $("#nfc").click(function(){
-       setPage("NFC Demo", "nfc/index.html");
+        setPage("NFC Demo", "nfc/index.html");
     });
     $ ("#login").click (function () {
         setPage ("Login to your PZH", "login.html");
