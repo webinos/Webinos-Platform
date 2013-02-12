@@ -19,10 +19,12 @@
   var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
   var androidLauncher = null;
   var widgetLibrary; 
-  try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
-    
   if (process.platform == 'android') {
     androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
+    /* FIXME: temporarily disable widgetmanager in this isolate */
+    widgetLibrary = null;
+  } else {
+    try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
   }
 
   var dependencies = require("find-dependencies")(__dirname);
