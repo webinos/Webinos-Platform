@@ -30,9 +30,9 @@ public class Org_webinos_api_nfc_NfcModule {
 		case 4: /* isNfcPushAvailable */
 			result = org.meshpoint.anode.js.JSValue.asJSBoolean(inst.isNfcPushAvailable());
 			break;
-		case 5: /* log */
-			inst.log(
-				(String)args[0]
+		case 5: /* launchScanningActivity */
+			inst.launchScanningActivity(
+				((org.meshpoint.anode.js.JSValue)args[0]).getBooleanValue()
 			);
 			break;
 		case 6: /* removeMimeTypeFilter */
@@ -41,9 +41,7 @@ public class Org_webinos_api_nfc_NfcModule {
 			);
 			break;
 		case 7: /* removeTextTypeFilter */
-			inst.removeTextTypeFilter(
-				(org.webinos.api.ErrorCallback)args[0]
-			);
+			inst.removeTextTypeFilter();
 			break;
 		case 8: /* removeUriTypeFilter */
 			inst.removeUriTypeFilter(

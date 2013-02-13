@@ -64,7 +64,7 @@ public abstract class NfcModuleBase extends NfcModule implements
   }
 
   @Override
-  public void removeTextTypeFilter(ErrorCallback fail) {
+  public void removeTextTypeFilter() {
     checkNfcAvailability();
     nfcMgr.removeTextTypeFilter();
   }
@@ -107,10 +107,5 @@ public abstract class NfcModuleBase extends NfcModule implements
       throw new NfcError(DeviceAPIError.NOT_SUPPORTED_ERR,
           "NFC push is not supported on this device");
     }
-  }
-
-  @Override
-  public void log(String message) {
-    System.out.println("[NfcModuleBase] " + message);
   }
 }

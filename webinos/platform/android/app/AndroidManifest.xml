@@ -75,12 +75,9 @@
         </activity>
         <activity
             android:name="org.webinos.impl.nfc.WebinosNfcActivity"
-            android:label="WebinosNfcActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="WebinosNfcActivity"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true" >
         </activity>
         <receiver android:enabled="true" android:label="@string/anode_receiver" android:exported="true" android:description="@string/anode_receiver_description" android:name=".anode.AnodeReceiver">
             <intent-filter>
