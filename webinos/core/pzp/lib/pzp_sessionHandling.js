@@ -39,9 +39,11 @@ var Pzp = function () {
     self.pzpClient = {};
     self.pzpWebSocket = {};
     var hub;
-
+    var stateListeners = [];
 
     // Helper functions
+
+
 
     /**
      * Checks current status of certificate present and set hub or virgin mode accordingly
@@ -54,6 +56,33 @@ var Pzp = function () {
             self.pzp_state.mode = false; // Virgin mode
         }
     }
+
+    this.addStateListener = function (listener) {
+      if (typeof listener !== "undefined") {
+        if (typeof listener.setHubConnected !== "function") {
+          listener.setHubConnected = function(isConnected) {};
+        }
+        if (typeof listener.setPeerConnected !== "function") {
+          listener.setPeerConnected = function(isConnected) {};
+        }
+        stateListeners.push(listener);
+
+        // communicate current state
+        listener.setHubConnected(self.pzp_state.state["hub"] === "connected");
+        listener.setPeerConnected(self.pzp_state.state["peer"] === "connected");
+      }
+    };
+
+    this.setConnectState = function (mode, isConnected) {
+      self.pzp_state.state[mode] = (isConnected ? "connected" : "not_connected");
+      stateListeners.forEach(function(listener) {
+        if (mode === "hub") {
+          listener.setHubConnected(isConnected);
+        } else if (mode === "peer") {
+          listener.setPeerConnected(isConnected);
+        }
+      });
+    };
 
     this.changeFriendlyName = function (name) {
         self.config.metaData.friendlyName = name;
@@ -189,14 +218,14 @@ var Pzp = function () {
             for (key in self.pzp_state.connectedPzp) {
                 if (self.pzp_state.connectedPzp.hasOwnProperty (key) && key === _id) {
                     logger.log ("pzp - " + key + " details removed");
-                    if (Object.keys (self.pzp_state.connectedPzp) <= 1) self.pzp_state.state["peer"] = "not_connected";
+                    if (Object.keys (self.pzp_state.connectedPzp) <= 1) self.setConnectState("peer", false);
                     delete self.pzp_state.connectedPzp[key];
                 }
             }
             for (key in self.pzp_state.connectedPzh) {
                 if (self.pzp_state.connectedPzh.hasOwnProperty (key) && key === _id) {
                     logger.log ("pzh - " + key + " details removed");
-                    self.pzp_state.state["hub"] = "not_connected";
+                    self.setConnectState("hub", false);
                     delete self.pzp_state.connectedPzh[key];
                 }
             }
@@ -306,7 +335,7 @@ var PzpServer = function (_parent) {
         logger.log("Authorised session " + clientSessionId);
 
         _parent.pzp_state.connectedPzp[clientSessionId] = _conn;
-        _parent.pzp_state.state["peer"] = "connected";
+        _parent.setConnectState("peer", true);
         _conn.id = clientSessionId;
         msg = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, clientSessionId);
         _parent.sendMessage (msg, clientSessionId);
@@ -369,7 +398,7 @@ var PzpClient = function (_parent) {
         var peerSessionId = _msg.name;
         logger.log ("authorized & connected to PZP: " + peerSessionId);
         _parent.pzp_state.connectedPzp[_msg.name] = _client;
-        _parent.pzp_state.state["peer"] = "connected";
+        _parent.setConnectState("peer", true);
         _client.id = _msg.name;
         var msg1 = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, _msg.name);
         _parent.sendMessage (msg1, _msg.name);
@@ -471,7 +500,7 @@ var ConnectHub = function (_parent) {
         if (!_parent.pzp_state.connectedPzh.hasOwnProperty (_parent.pzp_state.sessionId)) {
             _parent.setSessionId ();
             _parent.pzp_state.connectedPzh[_parent.config.metaData.pzhId] = conn;
-            _parent.pzp_state.state["hub"] = "connected";
+            _parent.setConnectState("hub", true);
             conn.id = _parent.config.metaData.pzhId;
             _parent.webinos_manager.startOtherManagers ();
             pzpServer.startServer ();

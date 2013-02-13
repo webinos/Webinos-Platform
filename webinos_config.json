@@ -22,7 +22,9 @@
     },
     {
       "name"  :"app2app",
-      "params":{}
+        "params":{
+            "scope":"pzh"
+        }
     }
   ],
   "pzpDefaultServices":[
@@ -39,6 +41,12 @@
     {
       "name"  :"actuator",
       "params":{}
+    },
+    {
+        "name"  :"app2app",
+        "params":{
+            "scope":"pzp"
+        }
     },
     {
       "name"  :"webnotification",
