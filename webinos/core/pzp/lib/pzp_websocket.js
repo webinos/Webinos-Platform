@@ -136,22 +136,24 @@ var PzpWSS = function (_parent) {
     }
 
     function setOriginalId(id) {
-        var matchId= id.split("/")[0], key;
-        if(matchId === parent.config.metaData.friendlyName) {
-            id = parent.pzp_state.sessionId +"/"+ id.split('/')[1];
-        } else {
-            for (key in parent.pzp_state.connectedPzp) {
-                if (parent.pzp_state.connectedPzp.hasOwnProperty(key) &&
-                    parent.pzp_state.connectedPzp[key].friendlyName === matchId) {
-                    id = key;
-                    break;
+        if (id) {
+            var matchId= id.split("/")[0], key;
+            if(matchId === parent.config.metaData.friendlyName) {
+                id = (id.split('/').length > 1) ? (parent.pzp_state.sessionId +"/"+ id.split('/')[1]) : parent.pzp_state.sessionId;
+            } else {
+                for (key in parent.pzp_state.connectedPzp) {
+                    if (parent.pzp_state.connectedPzp.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedPzp[key].friendlyName === matchId) {
+                        id = key;
+                        break;
+                    }
                 }
-            }
-            for (key in parent.pzp_state.connectedPzh) {
-                if (parent.pzp_state.connectedPzh.hasOwnProperty(key) &&
-                    parent.pzp_state.connectedPzh[key].friendlyName === matchId) {
-                    id = key;
-                    break;
+                for (key in parent.pzp_state.connectedPzh) {
+                    if (parent.pzp_state.connectedPzh.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedPzh[key].friendlyName === matchId) {
+                        id = key;
+                        break;
+                    }
                 }
             }
         }
