@@ -194,7 +194,9 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
         //   callback with a user object.
         passport.use(new GoogleStrategy({
                 returnURL:serverUrl + '/auth/google/return',
-                realm:serverUrl + '/'
+                realm:serverUrl + '/',
+                profile:true,
+                pape:{ 'maxAuthAge' : 0 }
             },
             function (identifier, profile, done) {
                 "use strict";
@@ -215,7 +217,9 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
 
         passport.use(new YahooStrategy({
                 returnURL:serverUrl + '/auth/yahoo/return',
-                realm:serverUrl + '/'
+                realm:serverUrl + '/',
+                profile:true,
+                pape:{ 'maxAuthAge' : 0 }
             },
             function (identifier, profile, done) {
                 "use strict";
