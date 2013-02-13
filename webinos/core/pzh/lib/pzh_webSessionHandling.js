@@ -69,28 +69,23 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function getConnectedPzp (_instance) {
-        var i, pzps = [], list = Object.keys (_instance.config.trustedList.pzp);
+        var i, pzps = [], list = Object.keys (_instance.config.trustedList.pzp), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            if (_instance.pzh_state.connectedPzp.hasOwnProperty (list[i])) {
-                pzps.push ({id:list[i].split ("/")[1], url:list[i], isConnected:true});
-            } else {
-                pzps.push ({id:list[i].split ("/")[1], url:list[i], isConnected:false});
-            }
+            isConnected = (_instance.pzh_state.connectedPzp.hasOwnProperty (list[i]))? true: false;
+            id = (_instance.pzh_state.connectedPzp[list[i]] && _instance.pzh_state.connectedPzp[list[i]].friendlyName) || list[i];
+            pzps.push ({id: id, url:list[i], isConnected:isConnected});
         }
         return pzps;
     }
 
     function getConnectedPzh (_instance) {
-        var pzhs = [], id, i, list = Object.keys (_instance.config.trustedList.pzh);
+        var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            id = list[i].substring(list[i].indexOf("_")+1, list[i].length);
-            if (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i])) {
-                pzhs.push ({id:id, url:list[i], isConnected:true});
-            } else {
-                pzhs.push ({id:id, url:list[i], isConnected:false});
-            }
+            isConnected = (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i]))? true: false;
+            id =  (_instance.pzh_state.connectedPzh[list[i]] && _instance.pzh_state.connectedPzh[list[i]].friendlyName) || list[i];
+            pzhs.push ({id: id, url:list[i], isConnected:isConnected});
         }
-        pzhs.push ({id:_instance.config.userData.email[0].value + " (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
+        pzhs.push ({id:_instance.config.metaData.friendlyName+" (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
         return pzhs;
     }
 
@@ -193,7 +188,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 sendMsg (conn, obj.user, { type:"listUnregServices",
                     message                    :{"pzEntityId":obj.message.at, "modules":modules.services} });
             });
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "listUnregServices", {listenerId:id});
+            var msg = userObj.prepMsg (obj.message.at, "listUnregServices", {listenerId:id});
             userObj.sendMessage (msg, obj.message.at);
         } else { // returns all the current serviceCache
             var data = require ("fs").readFileSync ("./webinos_config.json");
@@ -205,7 +200,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     function registerService (conn, obj, userObj) {
         if (userObj.pzh_state.sessionId !== obj.message.at) {
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "registerService",
+            var msg = userObj.prepMsg (obj.message.at, "registerService",
                 {name:obj.message.name, params:{}});
             userObj.sendMessage (msg, obj.message.at);
         } else {
@@ -221,7 +216,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     function unregisterService (conn, obj, userObj) {
         if (userObj.pzh_state.sessionId !== obj.message.at) {
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "unregisterService",
+            var msg = userObj.prepMsg (obj.message.at, "unregisterService",
                 {svId:obj.message.svId, svAPI:obj.message.svAPI})
             userObj.sendMessage (msg, obj.message.at);
         } else {

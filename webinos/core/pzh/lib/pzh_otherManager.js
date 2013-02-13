@@ -73,7 +73,7 @@ var Pzh_RPC = function (_parent) {
     this.sendFoundServices = function (validMsgObj) {
         _parent.pzh_state.logger.log ("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
         var services = self.discovery.getAllServices(validMsgObj.from);
-        var msg = _parent.prepMsg(_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
+        var msg = _parent.prepMsg(validMsgObj.from, "foundServices", services);
         msg.payload.id = validMsgObj.payload.message.id;
         _parent.sendMessage (msg, validMsgObj.from);
         _parent.pzh_state.logger.log ("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
@@ -136,7 +136,7 @@ var Pzh_RPC = function (_parent) {
 
             for (myKey in _parent.pzh_state.connectedPzp) {
                 if (_parent.pzh_state.connectedPzp.hasOwnProperty (myKey)) { // Sync with everyone.
-                    msg = _parent.prepMsg (_parent.pzh_state.sessionId, myKey, "sync_hash", result);
+                    msg = _parent.prepMsg (myKey, "sync_hash", result);
                     _parent.sendMessage (msg, myKey);
                 }
             }
@@ -158,7 +158,7 @@ var Pzh_RPC = function (_parent) {
                 //_parent.config.cert.external = receivedMsg[msg];
                 //_parent.config.storeCertificate(_parent.config.cert.external, "external");
             }
-            var msg = _parent.prepMsg (_parent.pzh_state.sessionId, _pzpId, "update_hash", result);
+            var msg = _parent.prepMsg (_pzpId, "update_hash", result);
             _parent.sendMessage (msg, _pzpId);
         }
         else {

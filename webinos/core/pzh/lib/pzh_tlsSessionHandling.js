@@ -41,6 +41,28 @@ var Pzh = function () {
         logger      :logging (__filename)
     };
 
+    function sendUpdateToPzp() {
+        function getConnectedList(type) {
+            var connList=[], key, list = (type === "pzp") ? self.pzh_state.connectedPzp: self.pzh_state.connectedPzh;
+            for (key in list) {
+                if (list.hasOwnProperty(key) && list[key].friendlyName) {
+                    connList.push(list[key].friendlyName || key);
+                }
+            }
+            return connList;
+        }
+
+        var key, msg;
+        for (key in self.pzh_state.connectedPzp) {
+            if (self.pzh_state.connectedPzp.hasOwnProperty(key)) {
+                msg = self.prepMsg(key, "update",
+                    {friendlyName: self.config.metaData.friendlyName,
+                        connectedPzp: getConnectedList("pzp"),
+                        connectedPzh: getConnectedList("pzh")})
+               self.sendMessage (msg, key);
+            }
+        }
+    }
     /**
      * PZP once authorized, following steps are involved:
      * 1. Details are stored in connectedPZP
@@ -63,7 +85,8 @@ var Pzh = function () {
             _conn.id = _pzpId;
             msg = self.pzh_otherManager.messageHandler.registerSender (self.pzh_state.sessionId, _pzpId);
             self.sendMessage (msg, _pzpId);
-            self.pzh_otherManager.syncStart (_pzpId);
+            sendUpdateToPzp();
+            self.pzh_otherManager.syncStart(_pzpId);
         } else {
             logger.error ("unknown pzp " + _pzpId + " trying to connect")
         }
@@ -88,7 +111,9 @@ var Pzh = function () {
 
                 setTimeout (function () {
                     msg = self.pzh_otherManager.messageHandler.registerSender (self.config.metaData.serverName, _pzhId);
+                    msg.payload = self.config.metaData.friendlyName;
                     self.sendMessage (msg, _pzhId);
+                    sendUpdateToPzp();
                     self.pzh_otherManager.registerServices (_pzhId);
                 }, 3000);
             } else {
@@ -140,9 +165,9 @@ var Pzh = function () {
      * @param _message - Message payload
      * @return {Object} - Message represented in format other end can interpret
      */
-    this.prepMsg = function (_from, _to, _status, _message) {
+    this.prepMsg = function (_to, _status, _message) {
         return {"type":"prop",
-            "from"    :_from,
+            "from"    :self.pzh_state.sessionId,
             "to"      :_to,
             "payload" :{"status":_status, "message":_message}
         };
@@ -248,6 +273,7 @@ var Pzh = function () {
             self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
             delete self.pzh_state.connectedPzh[_id];
         }
+        sendUpdateToPzp();
         self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
     };
     /**
@@ -264,12 +290,12 @@ var Pzh = function () {
             });
             var inputConfig = {
                 "friendlyName"   :_friendlyName,
-                "sessionIdentity":_uri
+                "sessionIdentity":_uri,
+                "user"           :_user
             };
             self.config = new util.webinosConfiguration ();
             self.config.setConfiguration ("Pzh", inputConfig, function (status, value) {
                 if (status) {
-                    self.config.storeUserDetails (_user);
                     self.pzh_state.sessionId = _uri;
                     self.pzh_state.logger.addId (self.config.userData.email[0].value);
                     self.pzh_otherManager = new pzh_otherManager (self);
@@ -305,12 +331,12 @@ var Pzh_Pzh = function (_parent) {
     this.connectOtherPZH = function (_to, _options) {
         try {
             var pzhDetails = _parent.config.cert.external[_to];
-            var connPzh;
+            var connPzh, connDetails;
             var tls = require ("tls"), host = pzhDetails.host;
             if (parseInt (pzhDetails.port) !== 443) {
                 host = pzhDetails.host + ":" + pzhDetails.port;
             }
-            var connDetails = _options;
+            connDetails = _options;
             connDetails.servername = _to;
             connDetails.host = pzhDetails.host;
             connDetails.port = pzhDetails.serverPort; //parseInt(pzhDetails.port);
@@ -385,7 +411,7 @@ var AddPzp = function (_parent) {
         try {
             var pzpId = _parent.pzh_state.sessionId + "/" + _msgRcvd.message.from, msg;
             if (_parent.config.cert.internal.revokedCert[pzpId]) {
-                msg = _parent.prepMsg (_parent.config.metaData.serverName, pzpId, "error", "pzp was previously revoked");
+                msg = _parent.prepMsg(pzpId, "error", "pzp was previously revoked");
                 _callback (false, msg);
                 return;
             }
@@ -402,22 +428,22 @@ var AddPzp = function (_parent) {
                                 }
                                 var payload = {"clientCert":_parent.config.cert.internal.signedCert[pzpId],
                                     "masterCert"           :_parent.config.cert.internal.master.cert, "masterCrl":_parent.config.crl};// Send signed certificate and master certificate to PZP
-                                msg = _parent.prepMsg (_parent.config.metaData.serverName, pzpId, "signedCertByPzh", payload);
+                                msg = _parent.prepMsg(pzpId, "signedCertByPzh", payload);
                                 _callback (true, msg);
                             });
                         } else {
-                            msg = _parent.prepMsg (_parent.config.metaData.serverName, _msgRcvd.message.from, "error", value);
+                            msg = _parent.prepMsg(_msgRcvd.message.from, "error", value);
                             _callback (false, msg);
                         }
                     });
                 } else {
-                    msg = _parent.prepMsg (_parent.config.metaData.serverName, _msgRcvd.message.from, "error", "not expecting new pzp");
+                    msg = _parent.prepMsg(_msgRcvd.message.from, "error", "not expecting new pzp");
                     _callback (false, msg);// Fail message
                 }
             });
         } catch (err) {
             _parent.pzh_state.logger.error ("error signing client certificate" + err);
-            msg = _parent.prepMsg (_parent.config.metaData.serverName, _msgRcvd.message.from, "error", err.message);
+            msg = _parent.prepMsg(_msgRcvd.message.from, "error", err.message);
             _callback (false, msg);
         }
     };

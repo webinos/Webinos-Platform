@@ -29,22 +29,20 @@ var Pzp = function () {
         enrolled    :false,
         state       :{"hub":"not_connected", "peer":"not_connected"}, // State is applicable for hub mode but for peer mode, we need to check individually
         connectedPzp:{}, // Stores PZH server details
-        connectedPzh:{}, // Stores connected PZP information
-        sessionId   :"",
-        discoveredPzp: [], // Store Discovered PZP details
+        connectedPzh:{}, // Stores connected PZP information directly to PZP
+        sessionId   :"", // In virgin mode it is device name, if enrolled it is of from pzhId/deviceName
+        discoveredPzp:[], // Store Discovered PZP details
         networkAddr: "",
-        connectingPeerAddr: ""};
-    self.config = {}; // Persistent information
-    self.webinos_manager = {}; // Communication with other managers
-    self.pzpClient = {};
+        connectingPeerAddr: "",
+        connectedDevicesToPzh: {pzp:[], pzh: []}}; //Stores information about device connected to PZH but not to PZP.
+    self.config = {}; // All data in this structure will be persistent information, set by configuration.js
+    self.webinos_manager = {}; // Hold objects of connected webinos manager
+    self.pzpClient = {}; //
     self.pzpWebSocket = {};
     var hub;
     var stateListeners = [];
 
     // Helper functions
-
-
-
     /**
      * Checks current status of certificate present and set hub or virgin mode accordingly
      */
@@ -56,6 +54,7 @@ var Pzp = function () {
             self.pzp_state.mode = false; // Virgin mode
         }
     }
+
 
     this.addStateListener = function (listener) {
       if (typeof listener !== "undefined") {
@@ -82,11 +81,36 @@ var Pzp = function () {
           listener.setPeerConnected(isConnected);
         }
       });
+    }
+    this.sendUpdateToAll = function() {
+        function getConnectedList(type) {
+            var connList=[],key, list = (type === "pzp") ? self.pzp_state.connectedPzp: self.pzp_state.connectedPzh;
+            for (key in list) {
+                if (list.hasOwnProperty(key)) {
+                    connList.push(list[key].friendlyName || key);
+                }
+            }
+            return connList;
+        }
+        var key,msg;
+        for (key in self.pzp_state.connectedPzp) {
+            if (self.pzh_state.connectedPzp.hasOwnProperty(key)) {
+                msg = self.prepMsg(key, "update",
+                    {friendlyName: self.config.metaData.friendlyName,
+                        connectedPzp: getConnectedList("pzp"),
+                        connectedPzh: getConnectedList("pzh")});
+               self.sendMessage (msg, key);
+            }
+        }
+        if (self.pzp_state.enrolled) {
+            self.sendMessage (msg, self.config.metaData.pzhId);
+        }
     };
 
     this.changeFriendlyName = function (name) {
         self.config.metaData.friendlyName = name;
         self.config.storeMetaData (self.config.metaData);
+        self.sendUpdateToAll();
     };
 
     /**
@@ -150,9 +174,14 @@ var Pzp = function () {
      * @param status - webinos specific command
      * @param message - message payload
      */
-    this.prepMsg = function (from, to, status, message) {
+    this.prepMsg = function (to, status, message) {
+        if (!message) {
+            message = status;
+            status = to;
+            to = self.config.metaData.pzhId;
+        }
         var msg = {"type":"prop",
-            "from"       :from,
+            "from"       :self.pzp_state.sessionId,
             "to"         :to,
             "payload"    :{"status":status,
                 "message"          :message}};
@@ -197,13 +226,13 @@ var Pzp = function () {
         var key, msg;
         for (key in self.pzp_state.connectedPzp) {
             if (self.pzp_state.connectedPzp.hasOwnProperty (key)) {
-                self.prepMsg (self.pzp_state.sessionId, key, command, payload)
+                self.prepMsg(key, command, payload)
             }
         }
 
         for (key in self.pzp_state.connectedPzh) {
             if (self.pzp_state.connectedPzh.hasOwnProperty (key)) {
-                self.prepMsg (self.pzp_state.sessionId, key, command, payload);
+                self.prepMsg(key, command, payload);
             }
         }
     };
@@ -229,7 +258,8 @@ var Pzp = function () {
                     delete self.pzp_state.connectedPzh[key];
                 }
             }
-            self.pzpWebSocket.updateApp ();
+            self.sendUpdateToAll();
+            self.pzpWebSocket.connectedApp ();
             self.pzpWebSocket.pzhDisconnected ();
         }
     };
@@ -324,21 +354,22 @@ var PzpServer = function (_parent) {
 
         // check if in the same zone
         var zoneId = _parent.config.metaData.pzhId;
-        if(zoneId.indexOf(cn_part) !=-1)
-            var clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1];
-        else
-        {
-            var clientSessionId = _parent.config.exCertList.exPZP;
-            //clean exPZP
-            _parent.config.exCertList.exPZP = "";
+
+        if(zoneId.indexOf(cn) !=-1) {
+            clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1];
+        } else {
+            clientSessionId = _parent.config.exCertList.exPZP;
+            _parent.config.exCertList.exPZP = "";  //clean exPZP
         }
         logger.log("Authorised session " + clientSessionId);
 
         _parent.pzp_state.connectedPzp[clientSessionId] = _conn;
         _parent.setConnectState("peer", true);
         _conn.id = clientSessionId;
+
         msg = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, clientSessionId);
         _parent.sendMessage (msg, clientSessionId);
+        _parent.sendUpdateToAll();
         logger.log ("pzp server - " + clientSessionId + " connected");
     }
 
@@ -402,7 +433,8 @@ var PzpClient = function (_parent) {
         _client.id = _msg.name;
         var msg1 = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, _msg.name);
         _parent.sendMessage (msg1, _msg.name);
-        _parent.pzpWebSocket.updateApp ();
+        _parent.sendUpdatesendUpdateToAll();
+        _parent.pzpWebSocket.connectedApp();
     }
 
     function pzpClient_PeerCleanup() {
@@ -504,7 +536,8 @@ var ConnectHub = function (_parent) {
             conn.id = _parent.config.metaData.pzhId;
             _parent.webinos_manager.startOtherManagers ();
             pzpServer.startServer ();
-            _parent.pzpWebSocket.updateApp ();//updates webinos clients
+            _parent.sendUpdateToAll();
+            _parent.pzpWebSocket.connectedApp ();//updates webinos clients
             callback (true, "pzp " + _parent.pzp_state.sessionId + " connected to " + _parent.config.metaData.pzhId);
         } else {
             callback (false, "pzh already connected");
@@ -631,11 +664,12 @@ exports.initializePzp = function (config, callback) {
 exports.getSessionId = function () {
     return pzpInstance.pzp_state.sessionId;
 };
-
+exports.getDeviceName = function () {
+    return pzpInstance.config.metaData.webinosName;
+};
 exports.getWebinosPath = function () {
     return pzpInstance.config.metaData.webinosRoot;
 };
-
 exports.getWebinosPorts = function () {
-    return { pzp_webSocket:pzpInstance.config.userPref.ports.pzp_webSocket }
+    return pzpInstance.config.userPref.ports.pzp_webSocket
 };
