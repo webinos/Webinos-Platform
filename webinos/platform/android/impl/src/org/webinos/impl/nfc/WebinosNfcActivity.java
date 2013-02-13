@@ -40,16 +40,25 @@ import android.view.Menu;
 
 public class WebinosNfcActivity extends Activity implements FilterMonitor {
 
+  private boolean autoDismiss;
+  
   private boolean isResumed;
 
   private NfcAdapter mNfcAdapter;
 
   private PendingIntent mPendingIntent;
   private IntentFilter[] mFilters;
+  
+  public static String EXTRA_AUTODISMISS = "org.webinos.impl.nfc.autoDismiss";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    
+    Intent launchIntent = getIntent();
+    if (launchIntent != null) {
+      autoDismiss = launchIntent.getBooleanExtra(EXTRA_AUTODISMISS, autoDismiss);
+    }
 
     mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -133,9 +142,16 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
   @Override
   public void onNewIntent(Intent intent) {
     Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-    NfcManager nfcMgr = NfcManager.getInstance();
-    if (nfcMgr != null) {
-      nfcMgr.dispatchNfcEvent(tagFromIntent);
+    if (tagFromIntent != null) {
+      if (autoDismiss) {
+        finish();
+      }
+      NfcManager nfcMgr = NfcManager.getInstance();
+      if (nfcMgr != null) {
+        nfcMgr.dispatchNfcEvent(tagFromIntent);
+      }
+    } else {
+      autoDismiss = intent.getBooleanExtra(EXTRA_AUTODISMISS, autoDismiss);
     }
   }
 

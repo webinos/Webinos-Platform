@@ -192,6 +192,10 @@
                 $('#unshareTag').bind('click', function() {
                     recentService.unshareTag();
                 });
+                
+                $('#launchScanningUI').bind('click', function() {
+                    recentService.launchScanningUI(true);
+                });
 
             });
 </script>
@@ -224,6 +228,7 @@
 		<tr><td><button id="close" class="button">Close</button></td></tr>
 		<tr><td><button id="shareTag" class="button">Share Tag</button></td></tr>
 		<tr><td><button id="unshareTag" class="button">Unshare Tag</button></td></tr>
+		<tr><td><button id="launchScanningUI" class="button">Launch Scanning UI</button></td></tr>
 	</table>
 	<div id="out"></div>
 </body>

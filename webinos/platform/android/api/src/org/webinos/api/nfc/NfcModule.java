@@ -42,7 +42,7 @@ public abstract class NfcModule extends Base {
 
   public abstract void addMimeTypeFilter(String mimeType);
 
-  public abstract void removeTextTypeFilter(ErrorCallback fail);
+  public abstract void removeTextTypeFilter();
 
   public abstract void removeUriTypeFilter(String scheme);
 
@@ -51,7 +51,6 @@ public abstract class NfcModule extends Base {
   public abstract void shareTag(NdefRecord[] ndefMessage);
   
   public abstract void unshareTag();
-
-  public abstract void log(String message);
-
+  
+  public abstract void launchScanningActivity(boolean autoDismiss);
 }

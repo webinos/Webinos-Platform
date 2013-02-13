@@ -55,6 +55,7 @@
         this.removeMimeTypeListener = removeMimeTypeListener;
         this.shareTag = shareTag;
         this.unshareTag = unshareTag;
+        this.launchScanningUI = launchScanningUI;
         this.dispatchEvent = dispatchEvent;
         if (typeof bindCB.onBind === 'function') {
             bindCB.onBind(this);
@@ -258,6 +259,20 @@
     
     function unshareTag(success, fail) {
         var rpc = webinos.rpcHandler.createRPC(this, "unshareTag");
+        webinos.rpcHandler.executeRPC(rpc, function() {
+            if (typeof success !== 'undefined') {
+                success();
+            }
+        }, function(err) {
+            if (typeof fail !== 'undefined') {
+                fail();
+            }
+        });
+    }
+    
+    function launchScanningUI(autoDismiss, success, fail) {
+        var rpc = webinos.rpcHandler.createRPC(this, "launchScanningUI",
+                [ autoDismiss ]);
         webinos.rpcHandler.executeRPC(rpc, function() {
             if (typeof success !== 'undefined') {
                 success();
