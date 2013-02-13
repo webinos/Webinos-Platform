@@ -345,8 +345,8 @@ $ (document).ready (function () {
         var right = that.css ("right");
         that.css ("right", (right === "0px") ? "" : "0px");
     });
-    $('#apitests').click(function() {
-        setPage("apitests", "../tests/api_tests/apitests.html");
+    $('#monitortests').click(function() {
+        setPage("monitortests", "../tests/api_tests/monitortests.html");
     });
     $('#widgettests').click(function() {
         setPage("widgettests", "../tests/widget_tests/Overview.html");
@@ -454,7 +454,7 @@ $ (document).ready (function () {
     </ul>
     <h3> Monitor Tests </h3>
     <ul class="toggle" style="">
-        <li><a href="#apitests" id="apitests"> API Jasmine Tests </a></li>
+        <li><a href="#monitortests" id="monitortests"> API Jasmine Tests </a></li>
         <li><a href="#widgettests" id="widgettests"> Widget Tests </a></li>
     </ul>
     <h3> PZP Details</h3>
