@@ -60,6 +60,7 @@
                 }
                 catch(e) {
                     console.log('Error: cannot load driver '+fileList[i]);
+                    console.log(e.message);
                 }
             }
             console.log('loadDrivers: '+driversList.length+' drivers successfully loaded');
@@ -96,7 +97,8 @@
                     driversList[i].init(i, register, command);
                 }
                 catch(e) {
-                    console.log('Error: cannot initialize driver '+ driversList[i]);
+                    console.log('Error: cannot initialize driver '+ JSON.stringify(driversList[i]));
+                    console.log(e.message);
                 }
             }
         }

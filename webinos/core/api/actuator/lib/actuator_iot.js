@@ -83,7 +83,7 @@
         this.base({
             api: 'http://webinos.org/api/actuators.'+type,
             displayName: name,
-            description: description+' - id '+id
+            description: description //+' - id '+id
         });
 
         /**

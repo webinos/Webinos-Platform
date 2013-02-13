@@ -163,6 +163,8 @@ var handlers = {};
         console.log("New board : "+req.param('jsondata'));
         var jsondata = req.param('jsondata').replace(/'/g, "\"");		
         var boardinfo = JSON.parse(jsondata);
+        
+        console.log("\nNew board was connected to local PZP");
         console.log("BOARD ID : " + boardinfo.id);
 //      console.log("BOARD LANGUAGE : " + boardinfo.language);
         console.log("BOARD PROTOCOL : " + boardinfo.protocol);
@@ -217,8 +219,8 @@ var handlers = {};
         var req = http.request(options, function(res) {
             var str = '';
             res.setEncoding('utf8');
-            console.log('STATUS: ' + res.statusCode);
-            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            //console.log('STATUS: ' + res.statusCode);
+            //console.log('HEADERS: ' + JSON.stringify(res.headers));
             
             res.on('data', function (chunk) {
                 str += chunk;
@@ -227,12 +229,12 @@ var handlers = {};
             res.on('end', function () {
                 try{
                     var data = JSON.parse(str);
-                    console.log("data.cmd : " + data.cmd);
+                    //console.log("data.cmd : " + data.cmd);
                     if(data.cmd === GET_ELEMENTS_CMD){
-                        console.log("Received response for cmd=ele");                
+                        //console.log("Received response for cmd=ele");                
                         boards[data.id].elements = data.elements;
                         for(var i=0; i<data.elements.length ;i++){   
-                            console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
+                            //console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
                             if(!isAlreadyRegistered(tmp_ele.id)){
                                 var str_type = (tmp_ele.element.sa == 0) ? "sensor" : "actuator";
@@ -244,7 +246,7 @@ var handlers = {};
                                 }catch(e){}
                                 var id = registerFunc(driverId, tmp_ele.element.sa, tmp_ele.element);
                                 elementsList[id] = tmp_ele;
-                                console.log("Adding element with id " + id);
+                                //console.log("Adding element with id " + id);
                             }
                             else
                                 console.log("Element is already registered");

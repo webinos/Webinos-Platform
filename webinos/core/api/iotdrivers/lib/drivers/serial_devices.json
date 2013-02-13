@@ -1,0 +1,8 @@
+{
+	"usb" : [
+			{"port" : "/dev/cu.usbmodemfd121", "rate" : 9600 }
+	],
+	"bluetooth" :[
+			{"port" : "/dev/cu.HXM002536-BluetoothSeri", "rate" : 115200 }
+	]
+}
