@@ -87,7 +87,7 @@ var Pzp = function () {
             var connList=[],key, list = (type === "pzp") ? self.pzp_state.connectedPzp: self.pzp_state.connectedPzh;
             for (key in list) {
                 if (list.hasOwnProperty(key)) {
-                    connList.push(list[key].friendlyName || key);
+                    connList.push({friendlyName: list[key].friendlyName, key: key});
                 }
             }
             return connList;
@@ -103,7 +103,11 @@ var Pzp = function () {
             }
         }
         if (self.pzp_state.enrolled) {
-            self.sendMessage (msg, self.config.metaData.pzhId);
+            msg = self.prepMsg(self.config.metaData.pzhId, "update",
+                {friendlyName: self.config.metaData.friendlyName,
+                    connectedPzp: getConnectedList("pzp"),
+                    connectedPzh: getConnectedList("pzh")});
+            self.sendMessage(msg, self.config.metaData.pzhId);
         }
     };
 
