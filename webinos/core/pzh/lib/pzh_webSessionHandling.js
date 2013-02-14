@@ -71,9 +71,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     function getConnectedPzp (_instance) {
         var i, pzps = [], list = Object.keys (_instance.config.trustedList.pzp), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            isConnected = (_instance.pzh_state.connectedPzp.hasOwnProperty (list[i]))? true: false;
+            isConnected = !!(_instance.pzh_state.connectedPzp.hasOwnProperty (list[i]));
             id = (_instance.pzh_state.connectedPzp[list[i]] && _instance.pzh_state.connectedPzp[list[i]].friendlyName) || list[i];
             pzps.push ({id: id, url:list[i], isConnected:isConnected});
+        }
+        for (i = 0; i < _instance.pzh_state.connectedDevicesToOtherPzh.pzp.length; i = i + 1) {
+            pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].friendlyName,
+                url:_instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].key, isConnected:true});
         }
         return pzps;
     }
@@ -81,9 +85,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     function getConnectedPzh (_instance) {
         var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            isConnected = (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i]))? true: false;
+            isConnected = !!(_instance.pzh_state.connectedPzh.hasOwnProperty (list[i]));
             id =  (_instance.pzh_state.connectedPzh[list[i]] && _instance.pzh_state.connectedPzh[list[i]].friendlyName) || list[i];
             pzhs.push ({id: id, url:list[i], isConnected:isConnected});
+        }
+        for (i = 0; i < _instance.pzh_state.connectedDevicesToOtherPzh.pzh.length; i = i + 1) {
+            pzhs.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i].friendlyName,
+                url:_instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].key, isConnected:true});
         }
         pzhs.push ({id:_instance.config.metaData.friendlyName+" (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
         return pzhs;
@@ -450,6 +458,9 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             var pzhId = hostname + "_" + userId;
             if (port !== 443) {
                 pzhId = hostname + ":" + port + "_" + userId;
+            }
+            if (pzhs[pzhId]) {
+                return callback(false, "pzh id already exists");
             }
             logger.log ("adding new zone hub - " + pzhId);
             pzhs[pzhId] = new pzh_session ();

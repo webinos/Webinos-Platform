@@ -340,7 +340,7 @@ var Pzp = function () {
 /**
  * Starts PZP server
  */
-var PzpServer = function (_parent) {
+var PzpServer = function (parent) {
     "use strict";
     var logger = util.webinosLogging (__filename + "_PzpServer") || console;
     var tlsServer;
@@ -353,30 +353,30 @@ var PzpServer = function (_parent) {
         var cn_part = cn.slice(n + 1);
 
         // check if in the same zone
-        var zoneId = _parent.config.metaData.pzhId;
+        var zoneId = parent.config.metaData.pzhId;
 
         if(zoneId.indexOf(cn) !=-1) {
-            clientSessionId = _parent.config.metaData.pzhId + "/"+ text.split(":")[1];
+            clientSessionId = parent.config.metaData.pzhId + "/"+ text.split(":")[1];
         } else {
-            clientSessionId = _parent.config.exCertList.exPZP;
-            _parent.config.exCertList.exPZP = "";  //clean exPZP
+            clientSessionId = parent.config.exCertList.exPZP;
+            parent.config.exCertList.exPZP = "";  //clean exPZP
         }
         logger.log("Authorised session " + clientSessionId);
 
-        _parent.pzp_state.connectedPzp[clientSessionId] = _conn;
-        _parent.setConnectState("peer", true);
+        parent.pzp_state.connectedPzp[clientSessionId] = _conn;
+        parent.setConnectState("peer"
         _conn.id = clientSessionId;
 
-        msg = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, clientSessionId);
-        _parent.sendMessage (msg, clientSessionId);
-        _parent.sendUpdateToAll();
+        msg = parent.webinos_manager.messageHandler.registerSender (parent.pzp_state.sessionId, clientSessionId);
+        parent.sendMessage (msg, clientSessionId);
+        parent.sendUpdateToAll();
         logger.log ("pzp server - " + clientSessionId + " connected");
     }
 
     this.startServer = function () {
         var tls = require ("tls");
         if (tlsServer == null) {
-            _parent.setConnParam (function (certConfig) {
+            parent.setConnParam (function (certConfig) {
                 tlsServer = tls.createServer (certConfig, function (conn) {
                     var cn, clientSessionId;
                     if (conn.authorized) {
@@ -386,12 +386,12 @@ var PzpServer = function (_parent) {
                     }
 
                     conn.on ("data", function (buffer) {
-                        _parent.handleMsg (conn, buffer);
+                        parent.handleMsg (conn, buffer);
                     });
 
                     conn.on ("end", function () {
                         logger.log ("pzp server - connection ended with pzp client " + conn.id);
-                        _parent.cleanUp (conn.id);
+                        parent.cleanUp (conn.id);
                     });
 
                     conn.on ("error", function (err) {
@@ -408,9 +408,9 @@ var PzpServer = function (_parent) {
                 });
 
                 tlsServer.on ("listening", function () {
-                    logger.log ("pzp server - listening on port :" + _parent.config.userPref.ports.pzp_tlsServer);
+                    logger.log ("pzp server - listening on port :" + parent.config.userPref.ports.pzp_tlsServer);
                 });
-                tlsServer.listen (_parent.config.userPref.ports.pzp_tlsServer);
+                tlsServer.listen (parent.config.userPref.ports.pzp_tlsServer);
             })
         }
 
@@ -421,29 +421,30 @@ var PzpServer = function (_parent) {
  * Connect Peer PZPs. This is either triggered by PZH sending PZPUpdate message or else from PZP local discovery
  * @param msg - msg is an object containing port, address and name of PZP to be connected
  */
-var PzpClient = function (_parent) {
+var PzpClient = function (parent) {
     "use strict";
     var logger = util.webinosLogging (__filename + "_PzpClient") || console;
 
     function pzpClient_Authorized (_msg, _client) {
         var peerSessionId = _msg.name;
         logger.log ("authorized & connected to PZP: " + peerSessionId);
-        _parent.pzp_state.connectedPzp[_msg.name] = _client;
-        _parent.setConnectState("peer", true);
+
+        parent.pzp_state.connectedPzp[_msg.name] = _client;
+        parent.setConnectState("peer", true);
         _client.id = _msg.name;
-        var msg1 = _parent.webinos_manager.messageHandler.registerSender (_parent.pzp_state.sessionId, _msg.name);
-        _parent.sendMessage (msg1, _msg.name);
-        _parent.sendUpdatesendUpdateToAll();
-        _parent.pzpWebSocket.connectedApp();
+        var msg1 = parent.webinos_manager.messageHandler.registerSender (parent.pzp_state.sessionId, _msg.name);
+        parent.sendMessage (msg1, _msg.name);
+        parent.sendUpdatesendUpdateToAll();
+        parent.pzpWebSocket.connectedApp();
     }
 
     function pzpClient_PeerCleanup() {
         var path = require("path");
         var fs = require("fs");
         logger.log("Clean up SiB leftovers");
-        var own = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
-        var other = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
-        var exlist = path.join(_parent.config.metaData.webinosRoot, "exCertList.json");
+        var own = path.join(parent.config.metaData.webinosRoot, "keys", "conn.pem");
+        var other = path.join(parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
+        var exlist = path.join(parent.config.metaData.webinosRoot, "exCertList.json");
         if(path.existsSync(own)) {
             fs.unlink(own, function(err){
                 if(err) throw err;
@@ -462,11 +463,11 @@ var PzpClient = function (_parent) {
                 logger.log("removed" + exlist);
             });
         }
-        _parent.pzp_state.connectingPeerAddr = "";
+        parent.pzp_state.connectingPeerAddr = "";
     }
 
     this.connectPeer = function (msg) {
-        _parent.setConnParam (function (options) {
+        parent.setConnParam (function (options) {
             var name = msg.name;
             var n;
             if(name && (n = name.indexOf("/")))
@@ -476,7 +477,7 @@ var PzpClient = function (_parent) {
             }
 
             var servername = msg.address;
-            var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
+            var client = require("tls").connect(parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
                 if (client.authorized) {
                     pzpClient_Authorized(msg, client);
                     pzpClient_PeerCleanup();
@@ -486,11 +487,11 @@ var PzpClient = function (_parent) {
             });
 
             client.on("data", function (buffer) {
-                _parent.handleMsg(client, buffer);
+                parent.handleMsg(client, buffer);
             });
 
             client.on("end", function () {
-                _parent.cleanUp(client.id);
+                parent.cleanUp(client.id);
             });
 
             client.on("error", function (err) {
@@ -504,17 +505,17 @@ var PzpClient = function (_parent) {
  * Connects with PZH and handle respective events
  * @param callback is called after connection is useful or fails to inform startPzp
  */
-var ConnectHub = function (_parent) {
+var ConnectHub = function (parent) {
     "use strict";
     var self = this;
     var logger = util.webinosLogging (__filename + "_ConnectHub") || console;
-    var pzpServer = new PzpServer (_parent);
+    var pzpServer = new PzpServer (parent);
 
     /**
      * If PZP fails to connect to PZH, this tries to connect back to PZH
      */
     function retryConnecting () {
-        if (_parent.pzp_state.enrolled) {
+        if (parent.pzp_state.enrolled) {
             setTimeout (function () {
                 self.connect (function (status) {
                     logger.log ("retrying to connect back to the PZH " + (status ? "successful" : "failed"));
@@ -529,16 +530,16 @@ var ConnectHub = function (_parent) {
      * @param callback - returns true or false depending on the PZH connected status
      */
     function authenticated (conn, callback) {
-        if (!_parent.pzp_state.connectedPzh.hasOwnProperty (_parent.pzp_state.sessionId)) {
-            _parent.setSessionId ();
-            _parent.pzp_state.connectedPzh[_parent.config.metaData.pzhId] = conn;
-            _parent.setConnectState("hub", true);
-            conn.id = _parent.config.metaData.pzhId;
-            _parent.webinos_manager.startOtherManagers ();
+        if (!parent.pzp_state.connectedPzh.hasOwnProperty (parent.pzp_state.sessionId)) {
+            parent.setSessionId ();
+            parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] = conn;
+            parent.setConnectState("hub", true);
+            conn.id = parent.config.metaData.pzhId;
+            parent.webinos_manager.startOtherManagers ();
             pzpServer.startServer ();
-            _parent.sendUpdateToAll();
-            _parent.pzpWebSocket.connectedApp ();//updates webinos clients
-            callback (true, "pzp " + _parent.pzp_state.sessionId + " connected to " + _parent.config.metaData.pzhId);
+            parent.sendUpdateToAll();
+            parent.pzpWebSocket.connectedApp ();//updates webinos clients
+            callback (true, "pzp " + parent.pzp_state.sessionId + " connected to " + parent.config.metaData.pzhId);
         } else {
             callback (false, "pzh already connected");
         }
@@ -582,26 +583,26 @@ var ConnectHub = function (_parent) {
         var pzpClient, master, options = {};
         var tls = require ("tls");
         try {
-            _parent.setConnParam (function (options) {
-                options.pzpServerPort = _parent.config.userPref.ports.pzp_tlsServer;
-                pzpClient = tls.connect (_parent.config.userPref.ports.provider, _parent.config.metaData.serverName, options, function (conn) {
+            parent.setConnParam (function (options) {
+                options.pzpServerPort = parent.config.userPref.ports.pzp_tlsServer;
+                pzpClient = tls.connect (parent.config.userPref.ports.provider, parent.config.metaData.serverName, options, function (conn) {
                     handleAuthorization (pzpClient, _callback);
                 });
 
                 pzpClient.on ("data", function (buffer) {
-                    _parent.handleMsg (pzpClient, buffer);
+                    parent.handleMsg (pzpClient, buffer);
                 });
 
                 pzpClient.on ("end", function () {
-                    _parent.cleanUp (pzpClient.id);
+                    parent.cleanUp (pzpClient.id);
                     retryConnecting ();
                 });
 
                 pzpClient.on ("error", function (err) {
                     pzpServer.startServer ();
                     if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
-                        logger.error ("Connect  attempt to YOUR PZH " + _parent.config.metaData.pzhId + " failed.");
-                        _parent.webinos_manager.startOtherManagers ();
+                        logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
+                        parent.webinos_manager.startOtherManagers ();
                     } else {
                         logger.error (err);
                     }
@@ -620,25 +621,25 @@ var ConnectHub = function (_parent) {
  * @param masterCert - PZH master certificate
  * @param masterCrl  -  PZH master CRL
  */
-var EnrollPzp = function (_parent, hub) {
+var EnrollPzp = function (parent, hub) {
     var logger = util.webinosLogging (__filename + "_EnrollPzp") || console;
     this.register = function (_from, _clientCert, _masterCert, _masterCrl) {
         logger.log ("PZP ENROLLED AT  " + _from);    // This message come from PZH web server over websocket
-        _parent.config.cert.internal.conn.cert = _clientCert;
-        _parent.config.cert.internal.master.cert = _masterCert;
-        _parent.config.crl = _masterCrl;
-        _parent.config.metaData.pzhId = _from;
-        _parent.config.metaData.serverName = _from && _from.split ("_")[0];
+        parent.config.cert.internal.conn.cert = _clientCert;
+        parent.config.cert.internal.master.cert = _masterCert;
+        parent.config.crl = _masterCrl;
+        parent.config.metaData.pzhId = _from;
+        parent.config.metaData.serverName = _from && _from.split ("_")[0];
         if (_from.indexOf (":") !== -1) {
-            _parent.config.metaData.serverName = _parent.config.metaData.serverName.split (":")[0];
+            parent.config.metaData.serverName = parent.config.metaData.serverName.split (":")[0];
         }
 
-        if (!_parent.config.trustedList.pzh.hasOwnProperty (_parent.config.metaData.pzhId)) {
-            _parent.config.trustedList.pzh[_parent.config.metaData.pzhId] = {"addr":"", "port":""};
+        if (!parent.config.trustedList.pzh.hasOwnProperty (parent.config.metaData.pzhId)) {
+            parent.config.trustedList.pzh[parent.config.metaData.pzhId] = {"addr":"", "port":""};
         }
-        _parent.config.storeMetaData (_parent.config.metaData);
-        _parent.config.storeAll ();
-        _parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
+        parent.config.storeMetaData (parent.config.metaData);
+        parent.config.storeAll ();
+        parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
         hub.connect (function (status) {
             if (status) {

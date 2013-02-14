@@ -46,14 +46,36 @@ var Pzh_RPC = function (_parent) {
                     "from"       :_parent.pzh_state.sessionId,
                     "to"         :key,
                     "payload"    :{"status":"registerServices",
-                        "message"          :{services:localServices,
-                            from                     :_parent.pzh_state.sessionId}}};
+                        "message":{services:localServices,
+                        "from":_parent.pzh_state.sessionId}}};
                 _parent.sendMessage (msg, key);
                 _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + key);
             }
         }
     }
 
+    function updateDeviceInfo(validMsgObj) {
+        var i;
+        if (_parent.pzh_state.connectedPzh[validMsgObj.from]
+            && !_parent.pzh_state.connectedPzh[validMsgObj.from].friendlyName) {
+            _parent.pzh_state.connectedPzh[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
+        } else if (_parent.pzh_state.connectedPzp[validMsgObj.from]
+            && !_parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName) {
+            _parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
+        }
+        // These are friendlyName... Just for display purpose
+        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i +1) {
+            if(!_parent.pzh_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key)) {
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzp.push(validMsgObj.payload.message.connectedPzp[i]);
+            }
+        }
+        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i +1) {
+            if(!_parent.pzh_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i].key) &&
+                (validMsgObj.payload.message.connectedPzh[i].key) !== _parent.pzh_state.sessionId) {
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzh.push(validMsgObj.payload.message.connectedPzh[i]);
+            }
+        }
+    }
     /**
      * Initialize RPC to enable discovery and rpcHandler
      */
@@ -114,9 +136,13 @@ var Pzh_RPC = function (_parent) {
      */
     this.registerServices = function (pzhId) {
         var localServices = self.discovery.getAllServices ();
-        var msg = {"type":"prop", "from":_parent.pzh_state.sessionId, "to":pzhId, "payload":{"status":"registerServices", "message":{services:localServices, from:_parent.pzh_state.sessionId}}};
+        var msg = {"type":"prop",
+            "from":_parent.pzh_state.sessionId,
+            "to":pzhId,
+            "payload":{"status":"registerServices",
+                "message":{services:localServices,
+                    from:_parent.pzh_state.sessionId}}};
         _parent.sendMessage (msg, pzhId);
-
         _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
     };
 
@@ -178,7 +204,6 @@ var Pzh_RPC = function (_parent) {
                 switch (validMsgObj.payload.status) {
                     case "registerServices":
                         self.discovery.addRemoteServiceObjects (validMsgObj.payload.message);
-                        _parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
                         sendUpdateServiceToAllPzh(validMsgObj.from);
                         break;
                     case "findServices":
@@ -193,6 +218,9 @@ var Pzh_RPC = function (_parent) {
                     case "unregisterService":
                         self.registry.unregisterObject ({id:validMsgObj.payload.message.svId, api:validMsgObj.payload.message.svAPI});
                         sendUpdateServiceToAllPzh ();
+                        break;
+                    case "update":
+                        updateDeviceInfo(validMsgObj);
                         break;
                 }
             } else {

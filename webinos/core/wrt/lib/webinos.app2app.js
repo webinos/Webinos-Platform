@@ -28,12 +28,13 @@
     this.base = WebinosService;
     this.base(params);
 
-    this.peerId = webinos.messageHandler.getOwnId();
+    this.peerId = this.id;
     module = this;
 
     this.createChannel = createChannel;
     this.searchForChannels = searchForChannels;
 
+    console.log("Creating app2app instance with id "+ this.id);
     registerPeer(
       function (success) {
         console.log("Bind succeeded: registered peer.");

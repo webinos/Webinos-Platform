@@ -613,9 +613,12 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
                 if (webinosType === "Pzh" || webinosType === "PzhCA") {
                     self.storeUserDetails(inputConfig.user);
-                    self.metaData.friendlyName = self.userData.name;
+                    self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
                 } else {
                     self.userData.email = userPref.certConfiguration.email;
+                }
+                if (userPref.friendlyName && userPref.friendlyName !== "") {
+                    self.metaData.friendlyName =  userPref.friendlyName;
                 }
                 self.userData.country = userPref.certConfiguration.country;
                 self.userData.state = userPref.certConfiguration.state;

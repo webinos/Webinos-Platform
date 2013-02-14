@@ -150,19 +150,23 @@ var Pzp_OtherManager = function (_parent) {
         if (_parent.pzp_state.connectedPzh[validMsgObj.from]
             && !_parent.pzp_state.connectedPzh[validMsgObj.from].friendlyName) {
             _parent.pzp_state.connectedPzh[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
+            if (_parent.config.metaData.friendlyName.indexOf(validMsgObj.payload.message.friendlyName) === -1) {
+                _parent.config.metaData.friendlyName = validMsgObj.payload.message.friendlyName + "'s " + _parent.config.metaData.friendlyName;
+                _parent.config.storeMetaData(_parent.config.metaData);
+            }
         } else if (_parent.pzp_state.connectedPzp[validMsgObj.from]
             && !_parent.pzp_state.connectedPzp[validMsgObj.from].friendlyName) {
             _parent.pzp_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
         }
         // These are friendlyName... Just for display purpose
         for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i +1) {
-            if(!_parent.pzp_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i])&&
-            (validMsgObj.payload.message.connectedPzp[i]) !== _parent.pzp_state.sessionId) {
+            if(!_parent.pzp_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key)&&
+            (validMsgObj.payload.message.connectedPzp[i].key) !== _parent.pzp_state.sessionId) {
                 _parent.pzp_state.connectedDevicesToPzh.pzp.push(validMsgObj.payload.message.connectedPzp[i]);
             }
         }
         for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i +1) {
-            if(!_parent.pzp_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i])) {
+            if(!_parent.pzp_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i].key)) {
                 _parent.pzp_state.connectedDevicesToPzh.pzh.push(validMsgObj.payload.message.connectedPzh[i]);
             }
         }
@@ -215,9 +219,8 @@ var Pzp_OtherManager = function (_parent) {
                 "from"       :_parent.pzp_state.sessionId,
                 "to"         :pzhId,
                 "payload"    :{"status":"registerServices",
-                    "message"          :{services:localServices,
-                        from                     :_parent.pzp_state.sessionId,
-                        friendlyName             :_parent.config.metaData.friendlyName}}};
+                    "message":{services:localServices,
+                       "from":_parent.pzp_state.sessionId}}};
             _parent.sendMessage (msg, pzhId);
             logger.log ("sent msg to register local services with pzh");
         }

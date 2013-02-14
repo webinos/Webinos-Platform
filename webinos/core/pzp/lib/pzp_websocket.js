@@ -65,9 +65,9 @@ var PzpWSS = function (_parent) {
             }
         }
         for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzp.length; key = key + 1) {
-            list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key]);
+            list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key].friendlyName);
         }
-        list.push(parent.config.metaData.friendlyName + " (This Device)")
+        list.push(parent.config.metaData.friendlyName + " (This Device)");
         return list;
     }
 
@@ -87,7 +87,7 @@ var PzpWSS = function (_parent) {
             }
         }
         for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzh.length; key = key + 1) {
-            list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key]);
+            list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key].friendlyName);
         }
         return list;
     }
@@ -125,19 +125,36 @@ var PzpWSS = function (_parent) {
     }
 
     function setInternalParams(id) {
+        var to, i;
         if(id === parent.pzp_state.sessionId) {
             id = parent.config.metaData.friendlyName; // Special case of findServices
         } else if (parent.pzp_state.connectedPzp.hasOwnProperty(id) && parent.pzp_state.connectedPzp[id].friendlyName) {
             id = parent.pzp_state.connectedPzp[id].friendlyName;
         } else if (parent.pzp_state.connectedPzh.hasOwnProperty(id) && parent.pzp_state.connectedPzh[id].friendlyName) {
             id = parent.pzp_state.connectedPzh[id].friendlyName;
+        } else if (connectedWebApp[id]) {
+            to = (id.split("/") && id.split("/").length === 2) ? id.split("/")[1] : id.split("/")[2];
+            id = parent.config.metaData.friendlyName + "/"+ to;
+        } else {
+            for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzp.length; i = i + 1) {
+                if (parent.pzp_state.connectedDevicesToPzh.pzp[i].key === id)  {
+                    id = parent.pzp_state.connectedDevicesToPzh.pzp[i].friendlyName;
+                    break;
+                }
+            }
+            for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzh.length; i = i + 1) {
+                if (parent.pzp_state.connectedDevicesToPzh.pzh[i].key === id)  {
+                    id = parent.pzp_state.connectedDevicesToPzh.pzh[i].friendlyName;
+                    break;
+                }
+            }
         }
         return id;
     }
 
     function setOriginalId(id) {
         if (id) {
-            var matchId= id.split("/")[0], key;
+            var matchId= id.split("/")[0], key, i;
             if(matchId === parent.config.metaData.friendlyName) {
                 id = (id.split('/').length > 1) ? (parent.pzp_state.sessionId +"/"+ id.split('/')[1]) : parent.pzp_state.sessionId;
             } else {
@@ -152,6 +169,18 @@ var PzpWSS = function (_parent) {
                     if (parent.pzp_state.connectedPzh.hasOwnProperty(key) &&
                         parent.pzp_state.connectedPzh[key].friendlyName === matchId) {
                         id = key;
+                        break;
+                    }
+                }
+                for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzp.length; i = i + 1) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzp[i].friendlyName === matchId)  {
+                        id = parent.pzp_state.connectedDevicesToPzh.pzp[i].key;
+                        break;
+                    }
+                }
+                for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzh.length; i = i + 1) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzh[i].friendlyName === matchId)  {
+                        id = parent.pzp_state.connectedDevicesToPzh.pzh[i].key;
                         break;
                     }
                 }
@@ -175,17 +204,10 @@ var PzpWSS = function (_parent) {
             logger.error ("msg schema is not valid " + JSON.stringify (msg));
         }
         msg.to = setOriginalId(msg.to);
+        msg.from = setOriginalId(msg.from);
+        msg.resp_to = setOriginalId(msg.resp_to);
         if(msg.payload && msg.payload.method && msg.payload.method.indexOf("registerPeer") > -1) {
             msg.payload.params.peerId = setOriginalId(msg.payload.params.peerId);// As javascript is not fully pass by reference..
-        }
-
-        var from = msg.from && msg.from.split("/") && msg.from.split("/")[1];
-        var resp_to = msg.from && msg.from.split("/") && msg.from.split("/")[1];
-        if (connectedWebApp[parent.pzp_state.sessionId + "/" + from]) {
-            msg.from = parent.pzp_state.sessionId + "/" + from;
-        }
-        if (connectedWebApp[parent.pzp_state.sessionId + "/" + resp_to]) {
-            msg.resp_to = parent.pzp_state.sessionId + "/" + resp_to;
         }
         if (msg.type === "prop") {
             switch (msg.payload.status) {
@@ -741,16 +763,10 @@ var PzpWSS = function (_parent) {
     this.sendConnectedApp = function (address, message) {
         if (address && message) {
             if (connectedWebApp.hasOwnProperty (address)) {
-                if (message.from === parent.pzp_state.sessionId) {
-                    message.from = parent.config.metaData.friendlyName;
-                }
-                if (connectedWebApp[message.to]) {
-                    var to = (message.to && message.to.split("/") && message.to.split("/").length === 2) ? message.to.split("/")[1] : message.to.split("/")[2];
-                    message.to = parent.config.metaData.friendlyName + "/"+ to;
-                }
-                if (message.resp_to === parent.pzp_state.sessionId) {
-                    message.resp_to = parent.config.metaData.friendlyName;
-                }
+                message.from = setInternalParams(message.from);
+                message.resp_to = setInternalParams(message.resp_to);
+                message.to = setInternalParams(message.to);
+
                 if(message.payload && message.payload.method && message.payload.method.indexOf("servicefound") > -1) {
                     message.payload.params.serviceAddress = setInternalParams(message.payload.params.serviceAddress);
                 }
