@@ -54,36 +54,24 @@ var PzpWSS = function (_parent) {
     }
 
     function getConnectedPzp() {
-        var list = [];
-        for (var key in parent.pzp_state.connectedPzp) {
+        var list = [], key;
+        for (key in parent.pzp_state.connectedPzp) {
             if(parent.pzp_state.connectedPzp.hasOwnProperty(key)) {
-                if(parent.pzp_state.connectedPzp[key].friendlyName) {
-                    list.push(parent.pzp_state.connectedPzp[key].friendlyName);
-                } else {
-                    list.push(key);
-                }
+                list.push(parent.pzp_state.connectedPzp[key].friendlyName || key);
             }
         }
         for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzp.length; key = key + 1) {
             list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key].friendlyName);
         }
-        list.push(parent.config.metaData.friendlyName + " (This Device)");
+        list.push(parent.config.metaData.friendlyName);
         return list;
     }
 
     function getConnectedPzh(){
-        var list = [];
-        for (var key in parent.pzp_state.connectedPzh) {
+        var list = [], key;
+        for (key in parent.pzp_state.connectedPzh) {
             if(parent.pzp_state.connectedPzh.hasOwnProperty(key)) {
-                if(parent.pzp_state.connectedPzh[key].friendlyName) {
-                    if(key === parent.config.metaData.pzhId) {
-                        list.push(parent.pzp_state.connectedPzh[key].friendlyName +" (Your PZH)");
-                    } else {
-                        list.push(parent.pzp_state.connectedPzh[key].friendlyName);
-                    }
-                } else {
-                    list.push(key);
-                }
+                list.push(parent.pzp_state.connectedPzh[key].friendlyName || key);
             }
         }
         for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzh.length; key = key + 1) {

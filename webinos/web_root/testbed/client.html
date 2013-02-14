@@ -59,11 +59,11 @@ $ (document).ready (function () {
         $ ("#enumConnectedPzp").html ("");
         var pzhText = "", pzpText = "", style = "connected";
         for (var i = 0; i < connectedPzh.length; i += 1) {
-                pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + "</a></li>";
+            pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + (connectedPzh[i] === webinos.session.getPZHId()?" (Your Hub)": "")+"</a></li>";
         }
         $ ("#enumConnectedPzh").html (pzhText);
         for (i = 0; i < connectedPzp.length; i += 1) {
-            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + "</a></li>";
+            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + (connectedPzp[i] === webinos.session.getPZPId()?" (This Device)": "")+ "</a></li>";
         }
         $ ("#enumConnectedPzp").html (pzpText);
         setEnrolling ();
