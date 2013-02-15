@@ -18,8 +18,32 @@
 
 (function() {
   var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
+
+  var App2AppModule = function(rpcHandler, params) {
+    this.rpcHandler = rpcHandler;
+    this.params = params;
+  };
   
-  var App2AppModule = function(rpcHandler) {
+  App2AppModule.prototype.init = function (register, unregister) {
+    var service = new App2AppService(this.rpcHandler, this.params);
+    if (isPzh(this.params)) {
+      // always register service for pzh
+      register(service);
+    } else {
+      this.rpcHandler.parent.addStateListener({
+        setHubConnected: function(isConnected) {
+          if (isConnected) {
+            unregister(service);
+          } else {
+            // only register service for pzp when pzh is not connected
+            register(service);
+          }
+        }
+      });
+    }
+  };
+
+  var App2AppService = function(rpcHandler, params) {
     this.base = RPCWebinosService;
     this.base({
       api: 'http://webinos.org/api/app2app',
@@ -27,12 +51,10 @@
       description: 'The App2App Messaging API for using channel-based communication between applications.'
     });
 
-    this.defaultString = "App2App Messaging API";
-
     this.rpcHandler = rpcHandler;
   };
 
-  App2AppModule.prototype = new RPCWebinosService();
+  App2AppService.prototype = new RPCWebinosService();
 
   var CHANNEL_NAMESPACE_REGEXP = /^(urn:[a-z0-9][a-z0-9\-]{0,31}:)([a-z0-9()+,\-.:=@;$_!*'%/?#]+)$/i;
   var CHANNEL_NAMESPACE_WILDCARD = "*";
@@ -48,7 +70,7 @@
    * a web runtime, which (de)multiplexes callback invocations (e.g., channel requests, messages, search results)
    * to channel clients.
    */
-  App2AppModule.prototype.registerPeer = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.registerPeer = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
     if (peerId === 'undefined' || registeredPeers.hasOwnProperty(peerId)) {
       errorCallback(respondWith("Could not register peer: missing id or already registered."));
@@ -59,7 +81,7 @@
     }
   };
 
-  App2AppModule.prototype.unregisterPeer = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.unregisterPeer = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
     if (typeof peerId === 'undefined') {
       errorCallback(respondWith("Could not unregister peer: missing id."));
@@ -86,7 +108,7 @@
     }
   };
 
-  App2AppModule.prototype.createChannel = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.createChannel = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
     var namespace = params.namespace;
     var properties = params.properties;
@@ -121,7 +143,7 @@
     successCallback(channel);
   };
 
-  App2AppModule.prototype.searchForChannels = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.searchForChannels = function(params, successCallback, errorCallback) {
     var peerId = params.peerId;
     var namespace = params.namespace;
     var zoneIds = params.zoneIds;
@@ -172,7 +194,7 @@
 
   };
 
-  App2AppModule.prototype.connectToChannel = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.connectToChannel = function(params, successCallback, errorCallback, fromObjRef) {
     var connectRequest = {};
     connectRequest.from = params.from;
     connectRequest.namespace = params.namespace;
@@ -211,7 +233,7 @@
     );
   };
 
-  App2AppModule.prototype.sendToChannel = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.sendToChannel = function(params, successCallback, errorCallback) {
     var from = params.from;
     var to = params.to;
     var namespace = params.namespace;
@@ -275,7 +297,7 @@
 
   };
 
-  App2AppModule.prototype.disconnectFromChannel = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.disconnectFromChannel = function(params, successCallback, errorCallback) {
     var from = params.from;
     var namespace = params.namespace;
 
@@ -297,6 +319,10 @@
   };
 
   /* Helpers */
+
+  function isPzh(serviceParams) {
+    return (typeof serviceParams !== "undefined" && serviceParams.scope === "pzh");
+  }
 
   function equalsClient(client1) {
     return function(client2) {
@@ -336,5 +362,5 @@
     return s4() + s4() + s4();
   }
 
-  exports.Service=App2AppModule;
+  exports.Module=App2AppModule;
 })();
