@@ -52,7 +52,7 @@ var Pzh = function () {
         list = (type === "pzp") ? self.pzh_state.connectedDevicesToOtherPzh.pzp:self.pzh_state.connectedDevicesToOtherPzh.pzh;
         for (key in list) {
             if (list.hasOwnProperty(key)) {
-                connList.push({friendlyName: list[key].friendlyName, key: key});
+                connList.push({friendlyName: list[key], key: key});
             }
         }
         return connList;

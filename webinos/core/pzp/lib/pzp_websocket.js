@@ -62,7 +62,7 @@ var PzpWSS = function (_parent) {
         }
         for (key in parent.pzp_state.connectedDevicesToPzh.pzp) {
             if(parent.pzp_state.connectedDevicesToPzh.pzp.hasOwnProperty(key)) {
-                list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key].friendlyName || key);
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key] || key);
             }
         }
         list.push(parent.config.metaData.friendlyName);
@@ -78,7 +78,7 @@ var PzpWSS = function (_parent) {
         }
         for (key in parent.pzp_state.connectedDevicesToPzh.pzh) {
             if(parent.pzp_state.connectedDevicesToPzh.pzh.hasOwnProperty(key)) {
-                list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key].friendlyName || key);
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key] || key);
             }
         }
         return list;
@@ -117,7 +117,7 @@ var PzpWSS = function (_parent) {
     }
 
     function setInternalParams(id) {
-        var to, i;
+        var to;
         if(id === parent.pzp_state.sessionId) {
             id = parent.config.metaData.friendlyName; // Special case of findServices
         } else if (parent.pzp_state.connectedPzp.hasOwnProperty(id) && parent.pzp_state.connectedPzp[id].friendlyName) {
@@ -127,19 +127,10 @@ var PzpWSS = function (_parent) {
         } else if (connectedWebApp[id]) {
             to = (id.split("/") && id.split("/").length === 2) ? id.split("/")[1] : id.split("/")[2];
             id = parent.config.metaData.friendlyName + "/"+ to;
-        } else {
-            for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzp.length; i = i + 1) {
-                if (parent.pzp_state.connectedDevicesToPzh.pzp[i].key === id)  {
-                    id = parent.pzp_state.connectedDevicesToPzh.pzp[i].friendlyName;
-                    break;
-                }
-            }
-            for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzh.length; i = i + 1) {
-                if (parent.pzp_state.connectedDevicesToPzh.pzh[i].key === id)  {
-                    id = parent.pzp_state.connectedDevicesToPzh.pzh[i].friendlyName;
-                    break;
-                }
-            }
+        } else if(parent.pzp_state.connectedDevicesToPzh.pzp[id]) {
+            id = parent.pzp_state.connectedDevicesToPzh.pzp[id];
+        } else if(parent.pzp_state.connectedDevicesToPzh.pzh[id]) {
+            id = parent.pzp_state.connectedDevicesToPzh.pzh[id];
         }
         return id;
     }
@@ -164,15 +155,17 @@ var PzpWSS = function (_parent) {
                         break;
                     }
                 }
-                for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzp.length; i = i + 1) {
-                    if (parent.pzp_state.connectedDevicesToPzh.pzp[i].friendlyName === matchId)  {
-                        id = parent.pzp_state.connectedDevicesToPzh.pzp[i].key;
+                for (key in parent.pzp_state.connectedDevicesToPzh.pzp) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzp.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedDevicesToPzh.pzp[key] === matchId) {
+                        id = key;
                         break;
                     }
                 }
-                for (i = 0; i < parent.pzp_state.connectedDevicesToPzh.pzh.length; i = i + 1) {
-                    if (parent.pzp_state.connectedDevicesToPzh.pzh[i].friendlyName === matchId)  {
-                        id = parent.pzp_state.connectedDevicesToPzh.pzh[i].key;
+                for (key in parent.pzp_state.connectedDevicesToPzh.pzh) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzh.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedDevicesToPzh.pzh[key] === matchId) {
+                        id = key;
                         break;
                     }
                 }
