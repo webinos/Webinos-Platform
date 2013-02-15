@@ -137,7 +137,7 @@ var PzpWSS = function (_parent) {
 
     function setOriginalId(id) {
         if (id) {
-            var matchId= id.split("/")[0], key, i;
+            var matchId= id.split("/") && id.split("/")[0], key, i;
             if(matchId === parent.config.metaData.friendlyName) {
                 id = (id.split('/').length > 1) ? (parent.pzp_state.sessionId +"/"+ id.split('/')[1]) : parent.pzp_state.sessionId;
             } else {
@@ -195,9 +195,7 @@ var PzpWSS = function (_parent) {
         msg.to = setOriginalId(msg.to);
         msg.from = setOriginalId(msg.from);
         msg.resp_to = setOriginalId(msg.resp_to);
-        if(msg.payload && msg.payload.method && msg.payload.method.indexOf("registerPeer") > -1) {
-            msg.payload.params.peerId = setOriginalId(msg.payload.params.peerId);// As javascript is not fully pass by reference..
-        }
+
         if (msg.type === "prop") {
             switch (msg.payload.status) {
                 case "registerBrowser":
