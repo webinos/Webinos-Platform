@@ -75,9 +75,11 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             id = (_instance.pzh_state.connectedPzp[list[i]] && _instance.pzh_state.connectedPzp[list[i]].friendlyName) || list[i];
             pzps.push ({id: id, url:list[i], isConnected:isConnected});
         }
-        for (i = 0; i < _instance.pzh_state.connectedDevicesToOtherPzh.pzp.length; i = i + 1) {
-            pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].friendlyName,
-                url:_instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].key, isConnected:true});
+        for (i in _instance.pzh_state.connectedDevicesToOtherPzh.pzp) {
+            if (_instance.pzh_state.connectedDevicesToOtherPzh.pzp.hasOwnProperty(i)) {
+                pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzp[i] || i,
+                url:i, isConnected:true});
+            }
         }
         return pzps;
     }
@@ -89,9 +91,11 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             id =  (_instance.pzh_state.connectedPzh[list[i]] && _instance.pzh_state.connectedPzh[list[i]].friendlyName) || list[i];
             pzhs.push ({id: id, url:list[i], isConnected:isConnected});
         }
-        for (i = 0; i < _instance.pzh_state.connectedDevicesToOtherPzh.pzh.length; i = i + 1) {
-            pzhs.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i].friendlyName,
-                url:_instance.pzh_state.connectedDevicesToOtherPzh.pzp[i].key, isConnected:true});
+        for (i in _instance.pzh_state.connectedDevicesToOtherPzh.pzh) {
+            if (_instance.pzh_state.connectedDevicesToOtherPzh.pzh.hasOwnProperty(i)) {
+                pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i]|| i,
+                    url:i, isConnected:true});
+            }
         }
         pzhs.push ({id:_instance.config.metaData.friendlyName+" (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
         return pzhs;

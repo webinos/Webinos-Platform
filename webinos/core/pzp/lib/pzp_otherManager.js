@@ -159,15 +159,19 @@ var Pzp_OtherManager = function (_parent) {
             _parent.pzp_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
         }
         // These are friendlyName... Just for display purpose
-        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i +1) {
-            if(!_parent.pzp_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key)&&
-            (validMsgObj.payload.message.connectedPzp[i].key) !== _parent.pzp_state.sessionId) {
-                _parent.pzp_state.connectedDevicesToPzh.pzp.push(validMsgObj.payload.message.connectedPzp[i]);
+        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i + 1) {
+            if(!_parent.pzp_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key) &&
+                validMsgObj.payload.message.connectedPzp[i].key !== _parent.pzp_state.sessionId)
+            {
+                _parent.pzp_state.connectedDevicesToPzh.pzp[validMsgObj.payload.message.connectedPzp[i].key] =
+                    validMsgObj.payload.message.connectedPzp[i] && validMsgObj.payload.message.connectedPzp[i].friendlyName;
             }
         }
-        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i +1) {
+
+        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i + 1) {
             if(!_parent.pzp_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i].key)) {
-                _parent.pzp_state.connectedDevicesToPzh.pzh.push(validMsgObj.payload.message.connectedPzh[i]);
+                _parent.pzp_state.connectedDevicesToPzh.pzh[validMsgObj.payload.message.connectedPzh[i].key]=
+                    validMsgObj.payload.message.connectedPzh[i] && validMsgObj.payload.message.connectedPzh[i].friendlyName;
             }
         }
         _parent.pzpWebSocket.connectedApp();

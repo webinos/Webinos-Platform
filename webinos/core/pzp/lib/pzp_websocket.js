@@ -60,8 +60,10 @@ var PzpWSS = function (_parent) {
                 list.push(parent.pzp_state.connectedPzp[key].friendlyName || key);
             }
         }
-        for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzp.length; key = key + 1) {
-            list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key].friendlyName);
+        for (key in parent.pzp_state.connectedDevicesToPzh.pzp) {
+            if(parent.pzp_state.connectedDevicesToPzh.pzp.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key].friendlyName || key);
+            }
         }
         list.push(parent.config.metaData.friendlyName);
         return list;
@@ -74,8 +76,10 @@ var PzpWSS = function (_parent) {
                 list.push(parent.pzp_state.connectedPzh[key].friendlyName || key);
             }
         }
-        for (key = 0; key < parent.pzp_state.connectedDevicesToPzh.pzh.length; key = key + 1) {
-            list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key].friendlyName);
+        for (key in parent.pzp_state.connectedDevicesToPzh.pzh) {
+            if(parent.pzp_state.connectedDevicesToPzh.pzh.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key].friendlyName || key);
+            }
         }
         return list;
     }
@@ -764,12 +768,13 @@ var PzpWSS = function (_parent) {
                 }
 
                 try {
+                    var jsonString = JSON.stringify(message);
                     connectedWebApp[address].socket.pause ();
-                    connectedWebApp[address].sendUTF(message);
+                    connectedWebApp[address].sendUTF(jsonString);
                 } catch (err) {
                     self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
                 } finally {
-                    logger.log ('send to web app - ' + address + ' message ' + message);
+                    logger.log ('send to web app - ' + address + ' message ' + jsonString);
                     connectedWebApp[address].socket.resume ();
                 }
             } else {

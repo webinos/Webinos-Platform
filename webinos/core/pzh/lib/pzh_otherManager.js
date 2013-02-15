@@ -64,15 +64,17 @@ var Pzh_RPC = function (_parent) {
             _parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
         }
         // These are friendlyName... Just for display purpose
-        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i +1) {
+        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i + 1) {
             if(!_parent.pzh_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key)) {
-                _parent.pzh_state.connectedDevicesToOtherPzh.pzp.push(validMsgObj.payload.message.connectedPzp[i]);
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzp[validMsgObj.payload.message.connectedPzp[i].key] =
+                    validMsgObj.payload.message.connectedPzp[i].friendlyName || undefined;
             }
         }
-        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i +1) {
+        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i + 1) {
             if(!_parent.pzh_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i].key) &&
-                (validMsgObj.payload.message.connectedPzh[i].key) !== _parent.pzh_state.sessionId) {
-                _parent.pzh_state.connectedDevicesToOtherPzh.pzh.push(validMsgObj.payload.message.connectedPzh[i]);
+                validMsgObj.payload.message.connectedPzh[i].key !== _parent.pzh_state.sessionId ) {
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzh[validMsgObj.payload.message.connectedPzh[i].key] =
+                    validMsgObj.payload.message.connectedPzh[i].friendlyName || undefined;
             }
         }
 

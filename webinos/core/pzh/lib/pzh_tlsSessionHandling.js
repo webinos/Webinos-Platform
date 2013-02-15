@@ -39,7 +39,7 @@ var Pzh = function () {
         connectedPzh:{},
         expecting   :"", // Set by auth-code directly
         logger      :logging (__filename),
-        connectedDevicesToOtherPzh: {pzh:[], pzp:[]}
+        connectedDevicesToOtherPzh: {pzh:{}, pzp:{}}
     };
 
     function getConnectedList(type) {
@@ -50,8 +50,10 @@ var Pzh = function () {
             }
         }
         list = (type === "pzp") ? self.pzh_state.connectedDevicesToOtherPzh.pzp:self.pzh_state.connectedDevicesToOtherPzh.pzh;
-        for (key = 0; key < list.length; key = key + 1) {
-            connList.push({friendlyName: list[key].friendlyName, key: list[key].key});
+        for (key in list) {
+            if (list.hasOwnProperty(key)) {
+                connList.push({friendlyName: list[key].friendlyName, key: key});
+            }
         }
         return connList;
     }

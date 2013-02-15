@@ -34,7 +34,7 @@ var Pzp = function () {
         discoveredPzp:[], // Store Discovered PZP details
         networkAddr: "",
         connectingPeerAddr: "",
-        connectedDevicesToPzh: {pzp:[], pzh: []}}; //Stores information about device connected to PZH but not to PZP.
+        connectedDevicesToPzh: {pzp:{}, pzh: {} } }; //Stores information about device connected to PZH but not to PZP.
     self.config = {}; // All data in this structure will be persistent information, set by configuration.js
     self.webinos_manager = {}; // Hold objects of connected webinos manager
     self.pzpClient = {}; //
