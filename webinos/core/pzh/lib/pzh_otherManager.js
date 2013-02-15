@@ -56,11 +56,9 @@ var Pzh_RPC = function (_parent) {
 
     function updateDeviceInfo(validMsgObj) {
         var i;
-        if (_parent.pzh_state.connectedPzh[validMsgObj.from]
-            && !_parent.pzh_state.connectedPzh[validMsgObj.from].friendlyName) {
+        if (_parent.pzh_state.connectedPzh[validMsgObj.from]) {
             _parent.pzh_state.connectedPzh[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
-        } else if (_parent.pzh_state.connectedPzp[validMsgObj.from]
-            && !_parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName) {
+        } else if (_parent.pzh_state.connectedPzp[validMsgObj.from]) {
             _parent.pzh_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
         }
         // These are friendlyName... Just for display purpose
