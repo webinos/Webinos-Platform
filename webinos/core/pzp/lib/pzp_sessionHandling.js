@@ -92,22 +92,15 @@ var Pzp = function () {
             }
             return connList;
         }
-        var key,msg;
+        var key,msg, payload = {friendlyName: self.config.metaData.friendlyName, connectedPzp: getConnectedList("pzp"),
+            connectedPzh: getConnectedList("pzh")};
         for (key in self.pzp_state.connectedPzp) {
-            if (self.pzh_state.connectedPzp.hasOwnProperty(key)) {
-                msg = self.prepMsg(key, "update",
-                    {friendlyName: self.config.metaData.friendlyName,
-                        connectedPzp: getConnectedList("pzp"),
-                        connectedPzh: getConnectedList("pzh")});
-               self.sendMessage (msg, key);
+            if (self.pzp_state.connectedPzp.hasOwnProperty(key)) {
+                self.prepMsg(key, "update", payload);
             }
         }
         if (self.pzp_state.enrolled) {
-            msg = self.prepMsg(self.config.metaData.pzhId, "update",
-                {friendlyName: self.config.metaData.friendlyName,
-                    connectedPzp: getConnectedList("pzp"),
-                    connectedPzh: getConnectedList("pzh")});
-            self.sendMessage(msg, self.config.metaData.pzhId);
+            self.prepMsg(self.config.metaData.pzhId, "update", payload);
         }
     };
 
@@ -201,24 +194,30 @@ var Pzp = function () {
         if (_message && _address) {
             var jsonString = JSON.stringify (_message);
             var buf = util.webinosMsgProcessing.jsonStr2Buffer (jsonString);
-            logger.log ('send to ' + _address + ' message ' + jsonString);
-
-            try {
-                if (self.pzp_state.connectedPzp.hasOwnProperty (_address)
-                    && self.pzp_state.state["peer"] === "connected") {
+            if (self.pzp_state.connectedPzp.hasOwnProperty (_address)
+                && self.pzp_state.state["peer"] === "connected") {
+                try {
                     self.pzp_state.connectedPzp[_address].pause ();
                     self.pzp_state.connectedPzp[_address].write (buf);
+                } catch (err) {
+                    self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
+                } finally {
+                    logger.log ('send to pzp - ' + _address + ' message ' + jsonString);
                     self.pzp_state.connectedPzp[_address].resume ();
-                } else if (self.pzp_state.connectedPzh.hasOwnProperty (_address)
-                    && self.pzp_state.enrolled && self.pzp_state.state["hub"] === "connected") {
+                }
+            } else if (self.pzp_state.connectedPzh.hasOwnProperty (_address)
+                && self.pzp_state.enrolled && self.pzp_state.state["hub"] === "connected") {
+                try {
                     self.pzp_state.connectedPzh[_address].pause ();
                     self.pzp_state.connectedPzh[_address].write (buf);
+                } catch (err) {
+                    self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
+                } finally {
+                    logger.log ('send to hub - ' + _address + ' message ' + jsonString);
                     self.pzp_state.connectedPzh[_address].resume ();
-                } else { // sending to the app
-                    self.pzpWebSocket.sendConnectedApp (_address, _message);
                 }
-            } catch (err) {
-                logger.error ("sending send message" + err);
+            } else { // sending to the app
+                self.pzpWebSocket.sendConnectedApp (_address, _message);
             }
         } else {
             logger.error ("send message called without message and address field");
@@ -539,10 +538,10 @@ var ConnectHub = function (parent) {
             parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] = conn;
             parent.setConnectState("hub", true);
             conn.id = parent.config.metaData.pzhId;
-            parent.webinos_manager.startOtherManagers ();
-            pzpServer.startServer ();
             parent.sendUpdateToAll();
             parent.pzpWebSocket.connectedApp ();//updates webinos clients
+            pzpServer.startServer ();
+            parent.webinos_manager.startOtherManagers ();
             callback (true, "pzp " + parent.pzp_state.sessionId + " connected to " + parent.config.metaData.pzhId);
         } else {
             callback (false, "pzh already connected");
@@ -588,15 +587,20 @@ var ConnectHub = function (parent) {
         var tls = require ("tls");
         try {
             parent.setConnParam (function (options) {
-                options.pzpServerPort = parent.config.userPref.ports.pzp_tlsServer;
                 pzpClient = tls.connect (parent.config.userPref.ports.provider, parent.config.metaData.serverName, options, function (conn) {
                     handleAuthorization (pzpClient, _callback);
                 });
+                pzpClient.setTimeout(100);
 
                 pzpClient.on ("data", function (buffer) {
                     parent.handleMsg (pzpClient, buffer);
                 });
 
+                pzpClient.on ("close", function(had_error) {
+                   if(had_error) {
+                       logger.log("transmission error lead to disconnect");
+                   }
+                });
                 pzpClient.on ("end", function () {
                     parent.cleanUp (pzpClient.id);
                     retryConnecting ();
@@ -607,9 +611,8 @@ var ConnectHub = function (parent) {
                     if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
                         logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
                         parent.webinos_manager.startOtherManagers ();
-                    } else {
-                        logger.error (err);
                     }
+                    logger.error (err);
                 });
             });
         } catch (err) {

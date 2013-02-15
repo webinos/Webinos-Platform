@@ -75,6 +75,9 @@ var Pzh_RPC = function (_parent) {
                 _parent.pzh_state.connectedDevicesToOtherPzh.pzh.push(validMsgObj.payload.message.connectedPzh[i]);
             }
         }
+
+        _parent.sendUpdateToAll(validMsgObj.from);
+
     }
     /**
      * Initialize RPC to enable discovery and rpcHandler
@@ -227,7 +230,7 @@ var Pzh_RPC = function (_parent) {
                 try {
                     self.messageHandler.onMessageReceived (validMsgObj, validMsgObj.to);
                 } catch (err2) {
-                    _parent.pzh_state.logger.error ("error message sending to messaging " + err2.message);
+                    _parent.pzh_state.logger.error ("error processing message in messaging manager - " + err2.message);
                 }
             }
         });

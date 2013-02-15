@@ -49,9 +49,13 @@ var Pzh = function () {
                 connList.push({friendlyName: list[key].friendlyName, key: key});
             }
         }
+        list = (type === "pzp") ? self.pzh_state.connectedDevicesToOtherPzh.pzp:self.pzh_state.connectedDevicesToOtherPzh.pzh;
+        for (key = 0; key < list.length; key = key + 1) {
+            connList.push({friendlyName: list[key].friendlyName, key: list[key].key});
+        }
         return connList;
     }
-    function sendUpdateToAll() {
+    this.sendUpdateToAll = function(from) {
         var key, msg, payload = {friendlyName: self.config.metaData.friendlyName,
             connectedPzp: getConnectedList("pzp"),
             connectedPzh: getConnectedList("pzh")};
@@ -63,12 +67,12 @@ var Pzh = function () {
             }
         }
         for (key in self.pzh_state.connectedPzh) {
-            if (self.pzh_state.connectedPzh.hasOwnProperty(key)) {
+            if (from !== key && self.pzh_state.connectedPzh.hasOwnProperty(key)) {
                 msg = self.prepMsg(key, "update", payload);
                 self.sendMessage (msg, key);
             }
         }
-    }
+    };
     /**
      * PZP once authorized, following steps are involved:
      * 1. Details are stored in connectedPZP
@@ -91,7 +95,7 @@ var Pzh = function () {
             _conn.id = _pzpId;
             msg = self.pzh_otherManager.messageHandler.registerSender (self.pzh_state.sessionId, _pzpId);
             self.sendMessage (msg, _pzpId);
-            sendUpdateToAll();
+            self.sendUpdateToAll(self.pzh_state.sessionId);
             self.pzh_otherManager.syncStart(_pzpId);
         } else {
             logger.error ("unknown pzp " + _pzpId + " trying to connect")
@@ -118,7 +122,7 @@ var Pzh = function () {
                 setTimeout (function () {
                     msg = self.pzh_otherManager.messageHandler.registerSender(self.config.metaData.serverName, _pzhId);
                     self.sendMessage (msg, _pzhId);
-                    sendUpdateToAll();
+                    self.sendUpdateToAll(self.pzh_state.sessionId);
                     self.pzh_otherManager.registerServices (_pzhId);
                 }, 3000);
             } else {
@@ -187,23 +191,28 @@ var Pzh = function () {
         if (_message && _address) {
             var jsonString = JSON.stringify (_message);
             var buf = util.webinosMsgProcessing.jsonStr2Buffer (jsonString);
-
-            self.pzh_state.logger.log ("send to " + _address + " message " + jsonString + " and len- " + buf.length);
-
-            try {
-                if (self.pzh_state.connectedPzh.hasOwnProperty (_address)) {// If it is connected to pzh it will land here
+            if (self.pzh_state.connectedPzh.hasOwnProperty (_address)) {// If it is connected to pzh it will land here
+                try {
                     self.pzh_state.connectedPzh[_address].socket.pause ();
                     self.pzh_state.connectedPzh[_address].socket.write (buf);
+                } catch (err) {
+                    self.pzh_state.logger.error ("exception in sending message to pzh -" + err);
+                } finally {
+                    self.pzh_state.logger.log ("send to pzh - " + _address + " message " + jsonString);
                     self.pzh_state.connectedPzh[_address].socket.resume ();
-                } else if (self.pzh_state.connectedPzp.hasOwnProperty (_address)) {
+                }
+            } else if (self.pzh_state.connectedPzp.hasOwnProperty (_address)) {
+                try {
                     self.pzh_state.connectedPzp[_address].socket.pause ();
                     self.pzh_state.connectedPzp[_address].socket.write (buf);
+                } catch (err) {
+                    self.pzh_state.logger.error ("exception in sending message to pzp " + err);
+                } finally {
+                    self.pzh_state.logger.log ("send to pzp - " + _address + " message " + jsonString);
                     self.pzh_state.connectedPzp[_address].socket.resume ();
-                } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
-                    self.pzh_state.logger.log ("client " + _address + " is not connected");
                 }
-            } catch (err) {
-                self.pzh_state.logger.error ("exception in sending packet " + err);
+            } else {// It is similar to PZP connecting to PZH but instead it is PZH to PZH connection
+                self.pzh_state.logger.log (_address + " is not connected either as pzh or pzp");
             }
         } else {
             self.pzh_state.logger.error ("sendMessage called without proper parameters, message will not be sent");
@@ -260,6 +269,7 @@ var Pzh = function () {
             });
         } catch (err) {
             self.pzh_state.logger.error ("exception in processing received message " + err);
+            _conn.resume();
         } finally {
             _conn.resume ();
         }
@@ -278,7 +288,7 @@ var Pzh = function () {
             self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
             delete self.pzh_state.connectedPzh[_id];
         }
-        sendUpdateToAll();
+        self.sendUpdateToAll(_id);
         self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
     };
     /**

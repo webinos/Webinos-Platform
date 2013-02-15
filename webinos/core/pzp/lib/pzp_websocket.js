@@ -179,17 +179,21 @@ var PzpWSS = function (_parent) {
     function wsMessage (connection, origin, utf8Data) {
         //schema validation
         var key, msg = JSON.parse (utf8Data), invalidSchemaCheck = true;
-        try {
-            invalidSchemaCheck = util.webinosSchema.checkSchema (msg);
-        } catch (err) {
-            logger.error (err);
-        }
-        if (invalidSchemaCheck) {
-            // For debug purposes, we only print a message about unrecognized packet,
-            // in the final version we should throw an error.
-            // Currently there is no a formal list of allowed packages and throw errors
-            // would prevent the PZP from working
-            logger.error ("msg schema is not valid " + JSON.stringify (msg));
+        if (msg && msg.payload && msg.payload.status === "registerBrowser") {
+            // skip schema check as this is first message
+        } else {
+            try {
+                invalidSchemaCheck = util.webinosSchema.checkSchema (msg);
+            } catch (err) {
+                logger.error (err);
+            }
+            if (invalidSchemaCheck) {
+                // For debug purposes, we only print a message about unrecognized packet,
+                // in the final version we should throw an error.
+                // Currently there is no a formal list of allowed packages and throw errors
+                // would prevent the PZP from working
+                logger.error ("msg schema is not valid " + JSON.stringify (msg));
+            }
         }
         msg.to = setOriginalId(msg.to);
         msg.from = setOriginalId(msg.from);
@@ -679,7 +683,7 @@ var PzpWSS = function (_parent) {
             connectedWebApp[appId] = connection;
             connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-            payload = { "pzhId":(parent.config.metaData.pzhId && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId].friendlyName),
+            payload = { "pzhId":(parent.config.metaData.pzhId && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId].friendlyName),
                 "connectedPzp" :getConnectedPzp(),
                 "connectedPzh" :getConnectedPzh(),
                 "state"        :parent.pzp_state.state,
@@ -759,12 +763,15 @@ var PzpWSS = function (_parent) {
                     message.payload.params.serviceAddress = setInternalParams(message.payload.params.serviceAddress);
                 }
 
-                var jsonString = JSON.stringify (message);
-                logger.log ('send to ' + address + ' message ' + jsonString);
-
-                connectedWebApp[address].socket.pause ();
-                connectedWebApp[address].sendUTF (jsonString);
-                connectedWebApp[address].socket.resume ();
+                try {
+                    connectedWebApp[address].socket.pause ();
+                    connectedWebApp[address].sendUTF(message);
+                } catch (err) {
+                    self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
+                } finally {
+                    logger.log ('send to web app - ' + address + ' message ' + message);
+                    connectedWebApp[address].socket.resume ();
+                }
             } else {
                 logger.error ("unknown destination " + address);
             }
