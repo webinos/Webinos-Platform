@@ -25,9 +25,6 @@ var LocalFileSystem = require("./fs/local.js")
 var Service = require("./service.js")
 var VirtualFileSystem = require("./fs/virtual.js")
 
-var dependencies = require("find-dependencies")(__dirname)
-var internal = dependencies.global.require(dependencies.global.util.location, "lib/webinosPath.js").webinosPath()
-
 function Module(rpc, params) {
   this.rpc = rpc
   this.params = params
