@@ -441,6 +441,30 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                         refreshPzh (id, certificateParam);
                     }
                 });
+
+                // notify the user about it.  This may or may not be successful, it doesn't
+                // really matter.  
+                var approveURL = "https://" + hostname + "/main/" + 
+                        encodeURIComponent(friendpzh.config.metaData.webinosName) + 
+                        "/approve-user/" + encodeURIComponent(userObj.config.metaData.webinosName) + "/"        
+                
+                console.log("User data:\n" + require('util').inspect(userObj.config.userData));
+                console.log("Obj data:\n" + require('util').inspect(obj.message));
+                
+                notifyUser(
+                    friendpzh.config.metaData.serverName, 
+                    { "type" : "connection request", 
+                      "url"  : approveURL,
+                      "user" : { "email" : userObj.config.metaData.webinosName,
+                                 "fullname" : userObj.config.userData.fullname,
+                                 "nickname" : userObj.config.userData.nickname,
+                                 "name" : userObj.config.userData.name,
+                                 "image" : userObj.config.userData.image
+                               }
+                    },
+                    function(id) { /* don't care */ }, 
+                    function(id) { /* don't care */ }
+                );
                 
                 // add the current user to the friend's list of untrusted people.
                 // the friend will later approve or reject the request.
