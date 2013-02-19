@@ -147,6 +147,17 @@ function map(request, status, reply) {
   return new util.CustomError(name, reply.error)
 }
 
+// webinos <3 dbox -- Whyever..
+function parseJSON(str) {
+  var obj
+  try {
+    obj = JSON.parse(str)
+  } catch (e) {
+    obj = {}
+  }
+  return obj
+}
+
 var app = dbox.app(
   { app_key : "38j04m9q86j2zva"
   , app_secret : "pzl7f411nu6dy4p"
@@ -239,7 +250,7 @@ DropboxFileSystem.prototype.createFile = function (path, exclusive, callback, is
         } // else: fall-through
       case 404:
         if (!isRetry) {
-          self.client.put(self.realize(path), "", null, function (status2, reply2) {
+          self.client.put(self.realize(path), null, null, function (status2, reply2) {
             if (status2 === 200) {
               if (reply2.path === self.realize(path)) {
                 callback(null)
@@ -318,6 +329,8 @@ function ReadStreamWrapper(stream) {
   })
   stream.addListener("end", function () {
     self.emit("end")
+    // ლ(ಠ益ಠლ) Y U NO EMIT CLOSE, request/dbox?
+    self.emit("close")
   })
   stream.addListener("close", function () {
     self.emit("close")
@@ -380,7 +393,15 @@ WriteStream.prototype.write = function (data, callback) {
 
 WriteStream.prototype.end = function (callback) {
   var self = this
-  self.client.put(self.metadata.path, self.data, { parent_rev : self.metadata.rev }, function (status1, reply1) {
+
+  var body
+  if (self.data.length) {
+    body = self.data
+  } else {
+    body = null
+  }
+
+  self.client.put(self.metadata.path, body, { parent_rev : self.metadata.rev }, function (status1, reply1) {
     if (status1 === 200) {
       if (reply1.path === self.metadata.path) {
         callback(null)
@@ -420,7 +441,14 @@ DropboxFileSystem.prototype.truncate = function (path, size, callback) {
   var self = this
   self.client.get(self.realize(path), function (status1, data1, metadata1) {
     if (status1 === 200) {
-      self.client.put(metadata1.path, data1 ? data1.slice(0, Math.min(data1.length, size)) : null, { parent_rev : metadata1.rev }, function (status2, reply2) {
+      var body
+      if (data1 && data1.length && size) {
+        body = data1.slice(0, Math.min(data1.length, size))
+      } else {
+        body = null
+      }
+
+      self.client.put(metadata1.path, body, { parent_rev : metadata1.rev }, function (status2, reply2) {
         if (status2 === 200) {
           if (reply2.path === metadata1.path) {
             callback(null)
