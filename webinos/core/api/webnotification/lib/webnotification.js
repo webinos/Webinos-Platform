@@ -43,7 +43,7 @@ var WebNotificationModule = function(rpcHandler, params) {
 	// inherit from RPCWebinosService
 	this.base = RPCWebinosService;
 	this.base({
-		api:'http://webinos.org/api/webnotification',
+		api:'http://webinos.org/api/notifications',
 		displayName:'Web Notification',
 		description:'Web Notification API'
 	});
