@@ -120,13 +120,13 @@ var Pzp = function () {
                         }
                     }
                     options = {
-                        key               :value,
-                        cert              :self.config.cert.internal.conn.cert,
+                        key : value,
+                        cert: self.config.cert.internal.conn.cert,
                         crl : crlList,
                         ca  : caList,
-                        servername        :self.config.metaData.pzhId,
-                        rejectUnauthorized:true,
-                        requestCert       :true
+                        servername: self.config.metaData.pzhId,
+                        rejectUnauthorized: true,
+                        requestCert: true
                     };
                 }
                 else {
@@ -138,7 +138,7 @@ var Pzp = function () {
                         requestCert       :true
                     };
                 }
-                return callback (options)
+                return callback(options)
             }
         });
     };
@@ -446,23 +446,23 @@ var PzpClient = function (_parent) {
             var servername = msg.address;
             var client = require("tls").connect(_parent.config.userPref.ports.pzp_tlsServer, servername, options, function () {
                 if (client.authorized) {
-                    pzpClient_Authorized (msg, client);
+                    pzpClient_Authorized(msg, client);
                     pzpClient_PeerCleanup();
                 } else {
-                    logger.error ("pzp client - connection failed, " + client.authorizationError);
+                    logger.error("pzp client - connection failed, " + client.authorizationError);
                 }
             });
 
-            client.on ("data", function (buffer) {
-                _parent.handleMsg (client, buffer);
+            client.on("data", function (buffer) {
+                _parent.handleMsg(client, buffer);
             });
 
-            client.on ("end", function () {
-                _parent.cleanUp (client.id);
+            client.on("end", function () {
+                _parent.cleanUp(client.id);
             });
 
-            client.on ("error", function (err) {
-                logger.error ("pzp client - " + err.message);
+            client.on("error", function (err) {
+                logger.error("pzp client - " + err.message);
             });
         });
     }
@@ -477,6 +477,7 @@ var ConnectHub = function (_parent) {
     var self = this;
     var logger = util.webinosLogging (__filename + "_ConnectHub") || console;
     var pzpServer = new PzpServer (_parent);
+
     /**
      * If PZP fails to connect to PZH, this tries to connect back to PZH
      */
@@ -623,7 +624,7 @@ exports.initializePzp = function (config, callback) {
     pzpInstance.initializePzp (config, function (status, result) {
         if (status) {
             logger.log ("initialized pzp");
-        }
+        } 
         callback(status,result);
     });
 };
