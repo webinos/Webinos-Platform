@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
+ * Author: Giuseppe La Torre - giuseppe.latorre@dieei.unict.it
  * 
  ******************************************************************************/
 
@@ -117,8 +118,8 @@
                                 });
 
                                 serial.on('error', function (err) {
-                                    if(err.code == "ENOENT" && err.path == SERIAL_PORT){
-                                        console.log("Serial port ["+SERIAL_PORT+"] is not ready");
+                                    if(err.path == SERIAL_PORT){
+                                        console.log("Serial port ["+SERIAL_PORT+"] is not ready. Err Code: " + err.code);
                                     }
                                 });
 
