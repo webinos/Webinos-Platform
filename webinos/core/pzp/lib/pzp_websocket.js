@@ -202,7 +202,8 @@ var PzpWSS = function (_parent) {
                     parent.pzpWebSocket.connectedApp(connection, msg.payload.value);
                     break;
                 case "setFriendlyName":
-                    parent.changeFriendlyName (msg.payload.value);
+                    //parent.changeFriendlyName(msg.payload.value);
+                    // THis functionality will be added via webinos core api.
                     break;
                 case "getFriendlyName":
                     var msg1 = prepMsg(msg.from, "friendlyName", parent.config.metaData.friendlyName);
@@ -224,7 +225,9 @@ var PzpWSS = function (_parent) {
                     }
                     break;
                 case "signedCertByPzh":
-                    parent.enrollPzp.register (msg.from, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
+                    if (expectedPzhAddress === (msg.from && msg.from.split("_") && msg.from.split("_")[0])) {
+                        parent.enrollPzp.register (msg.from, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
+                    }
                     break;
                 case "setPzhProviderAddress":
                     setPzhProviderAddress (msg.payload.message);
@@ -261,11 +264,9 @@ var PzpWSS = function (_parent) {
                     });
                     break;
                 case "intraPeer":
-                {
                     connectintra(msg, function(value){
                         logger.log("connect intra-zone peer: " + value);
                     });
-                }
                     break;
             }
         } else {
