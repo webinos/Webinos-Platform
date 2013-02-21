@@ -367,7 +367,7 @@ var PzpServer = function (parent) {
         logger.log("Authorised session " + clientSessionId);
 
         parent.pzp_state.connectedPzp[clientSessionId] = _conn;
-        parent.setConnectState("peer"
+        parent.setConnectState("peer", true);
         _conn.id = clientSessionId;
 
         msg = parent.webinos_manager.messageHandler.registerSender (parent.pzp_state.sessionId, clientSessionId);
