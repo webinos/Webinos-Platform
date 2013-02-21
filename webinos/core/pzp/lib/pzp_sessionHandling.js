@@ -619,15 +619,13 @@ var EnrollPzp = function (_parent, hub) {
 };
 
 var pzpInstance;
-exports.initializePzp = function (config, pzpModules, callback) {
+exports.initializePzp = function (config, callback) {
     pzpInstance = new Pzp ();
-    pzpInstance.initializePzp (config, pzpModules, function (status, result) {
+    pzpInstance.initializePzp (config, function (status, result) {
         if (status) {
             logger.log ("initialized pzp");
-            callback (true);
-        } else {
-            callback (false);
-        }
+        } 
+        callback(status,result);
     });
 };
 
