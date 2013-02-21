@@ -65,8 +65,8 @@
   function connectPzh(){
     var e = document.getElementById('pzh_list');
     var id = e.options[e.selectedIndex].value;
-    id = id.split("_");
-    window.location.href = "./connect-friend-local?externalemail=" + encodeURIComponent(id[1]);
+    id = id.substring(id.indexOf("_")+1, id.length);
+    window.location.href = "./connect-friend-local?externalemail=" + encodeURIComponent(id);
   }
   function connectPzh_manual() {
     var e = document.getElementById('connectPzhId').value;

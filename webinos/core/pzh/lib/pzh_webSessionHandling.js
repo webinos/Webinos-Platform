@@ -81,12 +81,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function getConnectedPzh (_instance) {
-        var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh);
+        var pzhs = [], id, i, list = Object.keys (_instance.config.trustedList.pzh);
         for (i = 0; i < list.length; i = i + 1) {
+            id = list[i].substring(list[i].indexOf("_")+1, list[i].length);
             if (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i])) {
-                pzhs.push ({id:list[i].split ("_")[1], url:list[i], isConnected:true});
+                pzhs.push ({id:id, url:list[i], isConnected:true});
             } else {
-                pzhs.push ({id:list[i].split ("_")[1], url:list[i], isConnected:false});
+                pzhs.push ({id:id, url:list[i], isConnected:false});
             }
         }
         pzhs.push ({id:_instance.config.userData.email[0].value + " (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
