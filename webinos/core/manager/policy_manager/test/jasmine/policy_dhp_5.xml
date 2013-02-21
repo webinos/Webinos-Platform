@@ -63,7 +63,9 @@
 			</subject>
 		</target>
 		<rule effect="permit">
-			<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			<condition>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			</condition>
 		</rule>
 		<rule effect="deny"></rule>
 	</policy>

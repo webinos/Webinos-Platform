@@ -3,7 +3,6 @@
 	<DataHandlingPreferences PolicyId="#DHP_allow_all">
 		<AuthorizationsSet>
 			<AuthzUseForPurpose>
-				<Purpose/>
 			</AuthzUseForPurpose>
 		</AuthorizationsSet>
 	</DataHandlingPreferences>

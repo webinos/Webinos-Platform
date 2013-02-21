@@ -3,7 +3,7 @@
 	<DataHandlingPreferences PolicyId="#DHP_allow_all">
 		<AuthorizationsSet>
 			<AuthzUseForPurpose>
-				<Purpose/>
+					<Purpose>http://www.primelife.eu/purposes/unspecified</Purpose>
 			</AuthzUseForPurpose>
 		</AuthorizationsSet>
 	</DataHandlingPreferences>

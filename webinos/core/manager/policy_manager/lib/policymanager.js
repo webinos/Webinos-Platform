@@ -24,6 +24,12 @@
 	var os = require('os');
 	var promptLib = require('../src/promptMan/promptManager.js');
 	var dslib = require('./decisionstorage.js');
+    var JSV = require('JSV').JSV;
+    var fs = require('fs');
+    var xml2js = require('xml2js');
+    var schema = require('./schema.json');
+    var env = JSV.createEnvironment("json-schema-draft-03");
+    var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
 	var bridge = null;
 	var pmCore = null;
 	var pmNativeLib = null;
@@ -31,8 +37,9 @@
 	var policyFile = null;
 	var decisionStorage = null;
 
+    var json = null;
 
-	var policyManager = function(policyFilename) {
+    var policyManager = function(policyFilename) {
 		// Load the native module
 		try {
 			this.pmNativeLib = require('pm');
@@ -52,9 +59,14 @@
 		}
 		//Policy file location
         	policyFile = policyFilename;
-		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
-		//Loads decision storage module
-		this.decisionStorage = new dslib.decisionStorage(policyFile);
+
+        if (this.isAWellFormedPolicyFile(policyFile)) {
+            this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
+            //Loads decision storage module
+            this.decisionStorage = new dslib.decisionStorage(policyFile);
+        } else{
+            console.log("Policy file is not valid.");
+        }
 	};
 
 	policyManager.prototype.getPolicyFilePath = function() {
@@ -142,11 +154,29 @@
 	};
 
 	policyManager.prototype.reloadPolicy = function() {
-		this.pmCore.reloadPolicy();
+        if (this.isAWellFormedPolicyFile(policyFile)) {
+            this.pmCore.reloadPolicy();
+        } else{
+            console.log("Policy file is not valid.");
+        }
 		return;
 	};
+
+    policyManager.prototype.isAWellFormedPolicyFile = function(policyFilename) {
+        var data = fs.readFileSync(policyFilename);
+
+        xmlParser.parseString(data, function(err, jsonData) {
+            if(!err) {
+                json = jsonData;
+            } else {
+                return false;
+            }
+        });
+
+        var report = env.validate(json, schema)
+        return (report.errors.length === 0);
+    }
 
 	exports.policyManager = policyManager;
 
 }());
-
