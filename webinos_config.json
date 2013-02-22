@@ -9,14 +9,6 @@
   },
   "pzhDefaultServices":[
     {
-      "name"  :"context",
-      "params":{}
-    },
-    {
-      "name"  :"events",
-      "params":{}
-    },
-    {
       "name"  :"test",
       "params":{}
     },
@@ -33,10 +25,6 @@
       "params":{
         "num":"21"
       }
-    },
-    {
-      "name"  :"zap-and-shake",
-      "params":{}
     },
     {
       "name"  :"actuator",
