@@ -429,8 +429,6 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 return;
             }      
         });
-
-        
     }
 
 
