@@ -657,13 +657,7 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userData.orgUnit = "";
                 self.userData.cn = "";
             }
-<<<<<<< HEAD
-            self.createPolicyFile (self);
-=======
-            self.metaData.friendlyName = inputConfig.friendlyName;
-            self.metaData.webinosType = webinosType;
-            self.metaData.serverName = inputConfig.sessionIdentity;
->>>>>>> Separation of folder for PZH and PZP
+
             self.storeMetaData (self.metaData);
             self.storeUserData (self.userData);
             self.storeUserPref (self.userPref);
