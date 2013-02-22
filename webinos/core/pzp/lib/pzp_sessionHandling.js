@@ -636,7 +636,7 @@ var ConnectHub = function (parent) {
  */
 var EnrollPzp = function (parent, hub) {
     var logger = util.webinosLogging (__filename + "_EnrollPzp") || console;
-    this.register = function (_from, _clientCert, _masterCert, _masterCrl) {
+    this.register = function (_from, _to, _clientCert, _masterCert, _masterCrl) {
         logger.log ("PZP ENROLLED AT  " + _from);    // This message come from PZH web server over websocket
         //_parent.config.cert.internal.conn.cert = _clientCert;
         //_parent.config.cert.internal.master.cert = _masterCert;
@@ -663,7 +663,10 @@ var EnrollPzp = function (parent, hub) {
                 parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
                 parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
-
+                // Same PZP name existed in PZ, PZH has assigned a new id to the PZP.
+                if ((_to.split("/") && _to.split("/")[1])!== parent.config.metaData.webinosName) {
+                  parent.config.metaData.pzhAssignedId = _to.split("/")[1];
+                } 
                 hub.connect (function (status) {
                     if (status) {
                         logger.log ("successfully connected to the PZH ")

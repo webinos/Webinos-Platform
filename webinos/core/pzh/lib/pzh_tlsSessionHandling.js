@@ -100,7 +100,8 @@ var Pzh = function () {
             self.sendUpdateToAll(self.pzh_state.sessionId);
             self.pzh_otherManager.syncStart(_pzpId);
         } else {
-            logger.error ("unknown pzp " + _pzpId + " trying to connect")
+            logger.error ("unregistered pzp " + _pzpId + " trying to connect");
+            _conn.socket.end();
         }
     }
 
@@ -438,6 +439,14 @@ var AddPzp = function (parent) {
                 msg = parent.prepMsg(pzpId, "error", "pzp was previously revoked");
                 _callback (false, msg);
                 return;
+            }
+            if (parent.config.trustedList.pzp[pzpId]) {
+                // Either PZP is already registered or else there is a name clash,,
+                // Lets assume there is name clash
+                pzpId = pzpId + Math.round((Math.random() * 100));
+                if (parent.config.trustedList.pzp[pzpId]) {
+                    this.addNewPzpCert(_msgRcvd, _callback); // Random failed to generate something unique, regenerate id
+                }
             }
             parent.pzh_state.expecting.isExpectedCode (_msgRcvd.message.code, function (expected) { // Check QRCode if it is valid ..
                 if (expected) {

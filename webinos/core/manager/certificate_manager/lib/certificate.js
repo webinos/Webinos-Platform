@@ -48,6 +48,7 @@ var Certificate = function () {
             key_id = self.cert.internal.master.key_id = self.metaData.webinosName + "_master";
         } else if (type === "PzhP" || type === "Pzh" || type === "Pzp") {
             key_id = self.cert.internal.conn.key_id = self.metaData.webinosName + "_conn";
+            cert_type = 1;
         } else if (type === "PzhWS") {
             if(!self.cert.internal.webclient) {self.cert.internal.webclient = {}}
             key_id = self.cert.internal.webclient.key_id = self.metaData.webinosName + "_webclient";
