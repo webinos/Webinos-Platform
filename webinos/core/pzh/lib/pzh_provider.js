@@ -183,12 +183,11 @@ var Provider = function (_hostname, _friendlyName) {
         conn.on("data", function (data) {
             if (conn.servername && pzhs[conn.servername]) { // forward message to respective PZH handleData function
                 pzhs[conn.servername].handleData(conn, data);
-            } else if (isWebInterface(conn)) {
-                // Check is user exists and is currently logged in
-                logger.log("Sending it to the web interface...");
+            } else if (isWebInterface(conn)) { // Check is user exists and is currently logged in
                 webInterface.handleData(conn, data);
             } else {
                 logger.error("pzh  -  " + conn.servername + " is not registered in this provider");
+                conn.socket.end();
             }
 
         });

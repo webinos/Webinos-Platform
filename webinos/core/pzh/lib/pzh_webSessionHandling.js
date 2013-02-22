@@ -536,28 +536,33 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             logger.log ("No 'user' or 'message' field in message from web interface");
             return false;
         }
-        valid = obj.message.hasOwnProperty ("type") && obj.message.type !== undefined && obj.message.type !== null &&
-            ( messageType.hasOwnProperty (obj.message.type));
-        if (!valid) {
-            logger.log ("No valid type field in message: " + obj.message.type);
-            return false;
+        if (obj.message !== "WEB SERVER INIT") { // Web server init
+            valid = obj.message.hasOwnProperty ("type") && obj.message.type !== undefined && obj.message.type !== null &&
+                ( messageType.hasOwnProperty (obj.message.type));
+            if (!valid) {
+                logger.log ("No valid type field in message: " + obj.message.type);
+                return false;
+            }
         }
-
         return true;
     }
 
     function processMsg (conn, obj) {
         if (validateMessage (obj)) {
-            if (obj.message.type !== "checkPzh") {
-                findUserFromEmail (obj, function (userObj) {
-                    if (userObj) {
-                        messageType[obj.message.type].apply (this, [conn, obj, userObj]);
-                    } else {
-                        logger.error ("error validating user");
-                    }
-                });
+            if( obj.message === "WEB SERVER INIT") {
+                // Do nothing
             } else {
-                messageType[obj.message.type].apply (this, [conn, obj]);
+                if (obj.message.type !== "checkPzh") {
+                    findUserFromEmail (obj, function (userObj) {
+                        if (userObj) {
+                            messageType[obj.message.type].apply (this, [conn, obj, userObj]);
+                        } else {
+                            logger.error ("error validating user");
+                        }
+                    });
+                } else {
+                    messageType[obj.message.type].apply (this, [conn, obj]);
+                }
             }
         } else {
             sendMsg (conn, obj.user, {type:"error", "message":"not valid msg"});
@@ -565,7 +570,6 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     this.handleData = function (conn, data) {
-        logger.log ("handling Web Interface data");
         try {
             conn.pause ();
             util.webinosMsgProcessing.readJson (this, data, function (obj) {
