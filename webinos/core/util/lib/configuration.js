@@ -102,14 +102,15 @@ function createNewConfiguration (self, webinosType, inputConfig, callback) {
 Config.prototype.setConfiguration = function (webinosType, inputConfig, callback) {
     var self = this, conn_key, cn;
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
-        var webinosRoot = path.join (wPath.webinosPath (), deviceName);
+        var webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
+        var webinosName = path.join (webinos_root, deviceName);
         logger.addType (deviceName); // per instance this should be only set once..
         if (typeof callback !== "function") {
             logger.error ("callback missing");
             return;
         }
 
-        self.fetchMetaData (webinosRoot, deviceName, function (status, value) {
+        self.fetchMetaData (webinosName, deviceName, function (status, value) {
             if (status && value && (value.code === "ENOENT" || value.code === "EACCES")) {//meta data does not exist
                 createNewConfiguration (self, webinosType, inputConfig, callback);
             } else { //metaData not found
@@ -510,29 +511,30 @@ Config.prototype.fetchUserPref = function (callback) {
  * @param callback
  * @return {*}
  */
-Config.prototype.createDirectories = function (callback) {
-    var self = this, dirPath, permission = 0777;
+Config.prototype.createDirectories = function (type, callback) {
+    var self = this, dirPath, root_permission = 0744, internal_permission = 0744;
+    var webinos_root =  (type.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
     try {
         //In case of node 0.6, define the fs existsSync
         if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
-        if (!fs.existsSync (wPath.webinosPath ()))//If the folder doesn't exist
-            fs.mkdirSync (wPath.webinosPath (), permission);//Create it
-        //Set permissions for android
-        if (os.platform ().toLowerCase () !== "android") {
-            if (process.getuid) {
-                fs.chown (wPath.webinosPath (), process.getuid (), process.getgid ());
-                fs.chmod (wPath.webinosPath (), permission);
-            }
+        if (!fs.existsSync (webinos_root)) {//If the folder doesn't exist
+            fs.mkdirSync (webinos_root, root_permission);//Create it
         }
+
         if (!fs.existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
-            fs.mkdirSync (self.metaData.webinosRoot, permission);
+            fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
         // webinos root was created, we need the following 1st level dirs
-        var list = [ path.join (wPath.webinosPath (), "logs"), path.join (self.metaData.webinosRoot, "wrt"), path.join (wPath.webinosPath (), "wrt"), path.join (self.metaData.webinosRoot, "policies"),
-            path.join (self.metaData.webinosRoot, "certificates"), path.join (self.metaData.webinosRoot, "userData"), path.join (self.metaData.webinosRoot, "keys"), path.join (self.metaData.webinosRoot, "certificates", "external"),
+        var list = [ path.join (self.metaData.webinosRoot, "logs"),
+            path.join (webinos_root, "wrt"),
+            path.join (self.metaData.webinosRoot, "certificates"),
+            path.join (self.metaData.webinosRoot, "policies"),
+            path.join (self.metaData.webinosRoot, "wrt"),
+            path.join (self.metaData.webinosRoot, "userData"),
+            path.join (self.metaData.webinosRoot, "keys"),
+            path.join (self.metaData.webinosRoot, "certificates", "external"),
             path.join (self.metaData.webinosRoot, "certificates", "internal")];
         list.forEach (function (name) {
-            if (!fs.existsSync (name))
-                fs.mkdirSync (name, permission);
+            if (!fs.existsSync (name)) fs.mkdirSync (name, internal_permission);
         });
         // Notify that we are done
         callback (true);
@@ -587,15 +589,17 @@ function setFriendlyName(self, friendlyName) {
  * @param callback
  */
 Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callback) {
-    var self = this;
+    var self = this, webinos_root;
     var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
         self.metaData.webinosType = webinosType;
         self.metaData.serverName = inputConfig.sessionIdentity;
         self.metaData.webinosName = deviceName;
-        self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
+
+        webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
+        self.metaData.webinosRoot = webinos_root+ "/" + self.metaData.webinosName;
         setFriendlyName(self, inputConfig.friendlyName);
-        self.createDirectories (function (status) {
+        self.createDirectories (webinosType, function (status) {
             if (status) {
                 logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
             } else {
@@ -653,12 +657,13 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userData.orgUnit = "";
                 self.userData.cn = "";
             }
-            self.createPolicyFile (self);
+
             self.storeMetaData (self.metaData);
             self.storeUserData (self.userData);
             self.storeUserPref (self.userPref);
             self.storeServiceCache (self.serviceCache);
             self.storeUntrustedCert (self.untrustedCert);
+            self.createPolicyFile (self);
             callback (true);
         });
     });

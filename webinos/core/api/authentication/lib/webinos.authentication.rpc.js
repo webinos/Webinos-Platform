@@ -163,10 +163,12 @@
 	var PAMConfFile = ['/etc/pam.d/login', '/etc/pam.d/system-auth', '/etc/pam.conf'], PAMUsage = false;
 	var service, i, unixlib;
 	var webinos_folder, auth_folder;
+	var dependency = require ("find-dependencies") (__dirname);
+	var pzp = dependency.global.require (dependency.global.pzp.location, "lib/pzp_sessionHandling.js");
 
 	if ((os.type().toLowerCase() === 'linux' && os.platform().toLowerCase() === 'linux') || os.type().toLowerCase() === 'darwin') {
 		// linux and mac
-		webinos_folder = path.resolve(process.env.HOME + '/.webinos/');
+		//webinos_folder = path.resolve(process.env.HOME + '/.webinos/')
 		for (i = 0; i < PAMConfFile.length; i + 1) {
 			try {
 				fs.lstatSync(PAMConfFile[i]); // test if file exists
@@ -198,6 +200,7 @@
 		webinos_folder = path.resolve(process.env.appdata + '/webinos/');
 	}
 
+	webinos_folder = pzp.getWebinosPath();
 	if (webinos_folder !== undefined && webinos_folder !== null) {
 		auth_folder = path.join(webinos_folder + '/auth_api/');
 		password_file = path.join(auth_folder + password_filename);

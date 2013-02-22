@@ -49,11 +49,12 @@ function getUserFolder(){
 		break;
 	}
 }
-
+var dependency = require ("find-dependencies") (__dirname);
+var pzp = dependency.global.require (dependency.global.pzp.location, "lib/pzp_sessionHandling.js");
 
 commonPaths = function (){
-	var userFolder = getUserFolder(); 
-	this.getUserFolder = getUserFolder;
+	var userFolder = pzp.getWebinosPath();
+	this.getUserFolder = pzp.getWebinosPath();
 	this.storage = (userFolder!==null) ? (path.resolve(userFolder + '/' + modulePackageName) + '/') : null;
 	this.local = moduleRoot;
 	this.global = webinosRoot;
