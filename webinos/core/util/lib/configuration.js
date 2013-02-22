@@ -562,6 +562,24 @@ Config.prototype.createPolicyFile = function (self) {
     });
 };
 
+function setFriendlyName(self, friendlyName) {
+    if(friendlyName) {
+        self.metaData.friendlyName = friendlyName;
+    } else {
+        if (os.platform() && os.platform().toLowerCase() === "android" ){
+            self.metaData.friendlyName = "Mobile";
+        } else if (process.platform === "win32") {
+            self.metaData.friendlyName = "Windows PC";
+        } else if (process.platform === "darwin") {
+            self.metaData.friendlyName = "MacBook";
+        } else if (process.platform === "linux" || process.platform === "freebsd") {
+            self.metaData.friendlyName = "Linux Device";
+        } else {
+            self.metaData.friendlyName = "Webinos Device";// Add manually
+        }
+    }
+
+}
 /**
  *
  * @param webinosType
@@ -572,8 +590,11 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
     var self = this;
     var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
+        self.metaData.webinosType = webinosType;
+        self.metaData.serverName = inputConfig.sessionIdentity;
         self.metaData.webinosName = deviceName;
         self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
+        setFriendlyName(self, inputConfig.friendlyName);
         self.createDirectories (function (status) {
             if (status) {
                 logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
@@ -590,17 +611,21 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userPref.ports.pzp_webSocket = userPref.ports.pzp_webSocket;
                 self.userPref.ports.pzp_tlsServer = userPref.ports.pzp_tlsServer;
                 self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
-
-                if (self.userData.name === "") {
-                    self.userData.country = userPref.certConfiguration.country;
+                if (webinosType === "Pzh" || webinosType === "PzhCA") {
+                    self.storeUserDetails(inputConfig.user);
+                    self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
+                } else {
                     self.userData.email = userPref.certConfiguration.email;
                 }
+                if (userPref.friendlyName && userPref.friendlyName !== "") {
+                    self.metaData.friendlyName =  userPref.friendlyName;
+                }
+                self.userData.country = userPref.certConfiguration.country;
                 self.userData.state = userPref.certConfiguration.state;
                 self.userData.city = userPref.certConfiguration.city;
                 self.userData.orgName = userPref.certConfiguration.orgname;
                 self.userData.orgUnit = userPref.certConfiguration.orgunit;
                 self.userData.cn = userPref.certConfiguration.cn;
-
                 if (webinosType === "Pzh") {
                     for (key in userPref.pzhDefaultServices) {
                         self.serviceCache.push ({"name":userPref.pzhDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
@@ -628,9 +653,6 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userData.orgUnit = "";
                 self.userData.cn = "";
             }
-            self.metaData.friendlyName = inputConfig.friendlyName;
-            self.metaData.webinosType = webinosType;
-            self.metaData.serverName = inputConfig.sessionIdentity;
             self.createPolicyFile (self);
             self.storeMetaData (self.metaData);
             self.storeUserData (self.userData);
