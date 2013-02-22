@@ -11,15 +11,11 @@
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="../webinos.js"></script>
 <script type="text/javascript">
+
 $ (document).ready (function () {
     function setPage (type, page) {
-        var port = window.location.port;
-        if (typeof port === "undefined") {
-            port = 8080;
-        }
-        var fetch = 'http://' + window.location.hostname + ':' + port + '/client/' + page;
         $.get (page, {}, function (reply) {
-            $ ('#main').html ('<article class="module width_full"><header><h3>' + type +
+            $ ('#main').html('<article class="module width_full"><header><h3>' + type +
                     '</h3></header><div class="module_content">' + reply + '</div></article><div class="spacer"></div>');
             //$('.column').equalHeight(); // Fix height
         }, "html");
@@ -31,16 +27,16 @@ $ (document).ready (function () {
     }
     function setEnrolling () {
         var pzpId = webinos.session.getPZPId();
-        if (pzpId && pzpId.indexOf ('/') === -1) {
+        if (!webinos.session.getPZHId()) {
             $ ('#enableLogin').html ("<a href='#login' id='login'> Connect to Your PZH </a>");
             $ ("#login").click (function () {
                 setPage ("Login to your PZH", "login.html");
             });
         } else {
-            if (webinos.session.isConnected ()) {
-                $ ('#enableLogin').html ("Connected to " + webinos.session.getPZHId ());
+            if (webinos.session.isConnected()) {
+                $ ('#enableLogin').html ("Connected to " + webinos.session.getPZHId());
             } else {
-                $ ('#enableLogin').html ("Enrolled to " + webinos.session.getPZHId () + "(Not Connected)");
+                $ ('#enableLogin').html ("Enrolled to " + webinos.session.getPZHId() + "(Not Connected)");
             }
         }
     }
@@ -63,18 +59,12 @@ $ (document).ready (function () {
         $ ("#enumConnectedPzp").html ("");
         var pzhText = "", pzpText = "", style = "connected";
         for (var i = 0; i < connectedPzh.length; i += 1) {
-            if (webinos.session.getPZHId () === connectedPzh[i]) {
-                pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + " (Your PZH) </a></li>";
-            }
-            else {
-                pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + "</a></li>";
-            }
+            pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + (connectedPzh[i] === webinos.session.getPZHId()?" (Your Hub)": "")+"</a></li>";
         }
         $ ("#enumConnectedPzh").html (pzhText);
         for (i = 0; i < connectedPzp.length; i += 1) {
-            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + "</a></li>";
+            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + (connectedPzp[i] === webinos.session.getPZPId()?" (This Device)": "")+ "</a></li>";
         }
-        pzpText += "<li><a class='connected'>" + webinos.session.getPZPId () + " (This DEVICE) </a></li>";
         $ ("#enumConnectedPzp").html (pzpText);
         setEnrolling ();
     }
