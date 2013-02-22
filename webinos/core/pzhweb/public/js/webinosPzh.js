@@ -24,9 +24,6 @@ var webinosPZH = {
                     case 'getUserDetails':
                         if (typeof webinosPZH.callbacks.getUserDetails === 'function') webinosPZH.callbacks.getUserDetails(msg.message);
                         break;
-                    case 'authCode':
-                        if (typeof webinosPZH.callbacks.authCode === 'function') webinosPZH.callbacks.authCode(msg.message);
-                        break;
                     case 'getCrashLog':
                         if (typeof webinosPZH.callbacks.getCrashLog === 'function') webinosPZH.callbacks.getCrashLog(msg.message);
                         break;
@@ -79,7 +76,6 @@ var webinosPZH = {
     callbacks:{
         getZoneStatus:null,
         getUserDetails:null,
-        authCode:null,
         getCrashLog:null,
         getInfoLog:null,
         pzhPzh:null,
@@ -96,10 +92,6 @@ var webinosPZH = {
         getZoneStatus:function (callback) {
             webinosPZH.callbacks.getZoneStatus = callback;
             webinosPZH.send({payload:{status:"getZoneStatus"}});
-        },
-        authCode:function (callback) {
-            webinosPZH.callbacks.authCode = callback;
-            webinosPZH.send({payload:{status:"authCode"}});
         },
         getPzps:function (callback) {
             webinosPZH.callbacks.getPzps = callback;

@@ -34,13 +34,6 @@
       }
       $('.column').equalHeight(); // Fix height
   }
-  function displayQRCode(payload){
-      var text = "<center>";
-      text += "<p> <img src=" + payload.payload.img + "> </img> </p> ";
-      text += "<p> <h2 class='authCode'>" +payload.payload.code +"</h2> </p>";
-      text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
-      setArticle("Temporary access code",text);
-  }
   function setArticle(header,body){
     $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
     $('.column').equalHeight(); // Fix height
@@ -171,9 +164,6 @@
         webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
       }, 3000);
     });
-    $("#addPzp").click(function(){
-      webinosPZH.commands.authCode(displayQRCode);
-    });
     $("#connectPzh").click(function(){
       webinosPZH.commands.getAllPzh(pzhList);
     });
@@ -237,7 +227,6 @@
       <ul class="" style="display: block;" id="enumConnectedPzp">
       </ul>
       <ul class="" style="">
-        <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
         <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>
       </ul>
       <h3>Personal zone admin</h3>

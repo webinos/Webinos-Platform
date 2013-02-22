@@ -158,9 +158,6 @@ function manageStatus(payload, user, res) {
         case 'unregisterService':
             pzhTLS.send(user, {type:"unregisterService", at:payload.at, svId:payload.svId, svAPI:payload.svAPI }, responseHandler(res));
             break;
-        case 'authCode':
-            pzhTLS.send(user, {type:"authCode"}, responseHandler(res));
-            break;
         case 'getAllPzh':
             pzhTLS.send(user, {type:"getAllPzh"}, responseHandler(res));
             break;
