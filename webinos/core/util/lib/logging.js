@@ -62,7 +62,7 @@ var Log = function (filename) {
         var id = this.id ? " [" + this.id + "] " : " ";
         if (typeof msg === "object") {msg = util.inspect(msg);}
         if (os.type ().toLowerCase () === "windows_nt") { name = this.name.split ("\\").pop (); } else { name = this.name.split ("/").pop ();}
-        var time = date.getDate () + "." + date.getMonth () + "." + date.getFullYear () + " " + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
+        var time = date.getDate () + "." + (date.getMonth() + 1) + "." + date.getFullYear () + " " + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
         var formattedMsg = "[" + time + "] error " + name + "(" + getLineNumber () + ")" + id + msg + "\n";
         cursor.fg.red ().write (formattedMsg);
         cursor.fg.reset ();
@@ -74,7 +74,7 @@ var Log = function (filename) {
         var id = this.id ? " [" + this.id + "]  " : " ";
         if (typeof msg === "object") {msg = util.inspect(msg);}
         if (os.type ().toLowerCase () === "windows_nt") { name = this.name.split ("\\").pop (); } else { name = this.name.split ("/").pop ();}
-        var time = date.getDate () + "." + date.getMonth () + "." + date.getFullYear () + "-" + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
+        var time = date.getDate () + "." + (date.getMonth() + 1) + "." + date.getFullYear () + "-" + date.getHours () + ":" + date.getMinutes () + ":" + date.getSeconds () + ":" + date.getMilliseconds ();
         var formattedMsg = "[" + time + "] info " + name + "(" + getLineNumber () + ")" + id + msg + "\n";
         cursor.fg.cyan ().write (formattedMsg);
         cursor.fg.reset ();
