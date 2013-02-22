@@ -42,28 +42,28 @@
 		var self = this;
 		// Load the native module
 		try {
-			self.pmNativeLib = require('pm');
+			pmNativeLib = require('pm');
 		} catch (err) {
 			console.log("Warning! Policy manager could not be loaded");
 		}
 		// Load the prompt manager
 		if (os.platform()==='android') {
-			self.bridge = require('bridge');
-			self.promptMan = self.bridge.load('org.webinos.impl.PromptImpl', self);
+			bridge = require('bridge');
+			promptMan = bridge.load('org.webinos.impl.PromptImpl', self);
 		}
 		else if (os.platform()==='win32') {
-			self.promptMan = require('promptMan');
+			promptMan = require('promptMan');
 		}
 		else {
-			self.promptMan = new promptLib.promptManager();
+			promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
 		policyFile = policyFilename;
 
 		if (self.isAWellFormedPolicyFile(policyFile)) {
-			self.pmCore = new self.pmNativeLib.PolicyManagerInt(policyFile);
+			pmCore = new pmNativeLib.PolicyManagerInt(policyFile);
 			//Loads decision storage module
-			self.decisionStorage = new dslib.decisionStorage(policyFile);
+			decisionStorage = new dslib.decisionStorage(policyFile);
 		} else{
 			console.log("Policy file is not valid.");
 		}
@@ -74,7 +74,7 @@
 	}
 
 	policyManager.prototype.enforceRequest = function(request, sessionId, noprompt) {
-		var res = self.pmCore.enforceRequest(request);
+		var res = pmCore.enforceRequest(request);
 		var promptcheck = true;
 		if (arguments.length == 3) {
 			if (noprompt == true)
@@ -83,8 +83,8 @@
 
 		if(res>1 && res<5) {
 			// if there is a promptMan then show a message
-			if (self.promptMan && self.decisionStorage && promptcheck) {
-				var storedDecision = self.decisionStorage.checkDecision(request, sessionId);
+			if (promptMan && decisionStorage && promptcheck) {
+				var storedDecision = decisionStorage.checkDecision(request, sessionId);
 				if(storedDecision == 0 || storedDecision == 1) {
 					res = storedDecision;
 				}
@@ -97,13 +97,13 @@
 						choices[0] = "Deny always";
 						choices[1] = "Deny this time";
 						choices[2] = "Allow this time";
-						selected = self.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1)
 							res = 1;
 						if(selected == 2)
 							res = 0;
 						if(selected == 0) {
-							self.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 					}
 					else if(res==3) {
@@ -113,16 +113,16 @@
 						choices[2] = "Deny this time";
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
-						selected = self.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4)
 							res = 0;
 						if(selected == 0) {
-							self.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 						if(selected == 1 || selected == 4) {
-							self.decisionStorage.addDecision(request, sessionId, res, 1);
+							decisionStorage.addDecision(request, sessionId, res, 1);
 						}
 					}
 					else {
@@ -133,16 +133,16 @@
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
 						choices[5] = "Allow always";
-						selected = self.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4 || selected == 5)
 							res = 0;
 						if(selected == 0 || selected == 5) {
-							self.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 						if(selected == 1 || selected == 4) {
-							self.decisionStorage.addDecision(request, sessionId, res, 1);
+							decisionStorage.addDecision(request, sessionId, res, 1);
 						}
 					}
 				}
@@ -155,7 +155,7 @@
 
 	policyManager.prototype.reloadPolicy = function() {
 		if (self.isAWellFormedPolicyFile(policyFile)) {
-			self.pmCore.reloadPolicy();
+			pmCore.reloadPolicy();
 		} else{
 			console.log("Policy file is not valid.");
 		}
