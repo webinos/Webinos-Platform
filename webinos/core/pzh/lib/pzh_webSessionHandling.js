@@ -190,13 +190,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         for (var i = 0; i < userObj.config.serviceCache.length; i = i + 1) {
             if (userObj.config.serviceCache[i].name === name) {
                 userObj.config.serviceCache.splice (i, 1);
-                userObj.config.storeServiceCache (userObj.config.serviceCache);
+                userObj.config.storeDetails("userData", "serviceCache", userObj.config.serviceCache);
                 return;
             }
         }
         if (!remove) {
             userObj.config.serviceCache.splice (i, 0, {"name":name, "params":{} });
-            userObj.config.storeServiceCache (userObj.config.serviceCache);
+            userObj.config.storeDetails("userData", "serviceCache", userObj.config.serviceCache);
         }
     }
 
@@ -250,7 +250,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         var result = {
             "provider"  :"provider-cert-data",
             "server"    :userObj.config.cert.internal.master.cert,
-            "crl"       :userObj.config.crl,
+            "crl"       :userObj.config.crl.value,
             "serverPort":userObj.config.userPref.ports.provider
         };
         sendMsg (conn, obj.user, { type:"getCertificates", message:result });
@@ -278,7 +278,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :obj.message.externalCerts.crl,
                     serverPort   :obj.message.externalCerts.serverPort
                 };
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");
+                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {// refresh your own certs
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -291,7 +291,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.trustedList.pzh.hasOwnProperty (name)) {
                 userObj.config.trustedList.pzh[name] = {};
-                userObj.config.storeTrustedList (userObj.config.trustedList);
+                userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
             }
             sendMsg (conn, obj.user, { type:"storeExternalCert", message:true });
         }
@@ -333,7 +333,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             externalCerts:obj.message.externalPzh.pzhCerts.server,
             externalCrl  :obj.message.externalPzh.pzhCerts.crl,
             serverPort   :obj.message.externalPzh.pzhCerts.serverPort};
-        userObj.config.storeUntrustedCert (userObj.config.untrustedCert);
+        userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
         sendMsg (conn, obj.user, { type:"requestAddFriend", message:true });
     }
 
@@ -376,7 +376,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.cert.external.hasOwnProperty (name)) {
                 userObj.config.cert.external[name] = details;
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");
+                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -390,10 +390,10 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.trustedList.pzh.hasOwnProperty (name)) {
                 userObj.config.trustedList.pzh[name] = {};
-                userObj.config.storeTrustedList (userObj.config.trustedList);
+                userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
             }
             delete userObj.config.untrustedCert[obj.message.externalEmail];
-            userObj.config.storeUntrustedCert (userObj.config.untrustedCert);
+            userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
         }
     }
 
@@ -423,12 +423,12 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :friendpzh.config.crl,
                     serverPort   :80 // TODO
                 };
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");                                
-                
+                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
+
                 //update the actual list.
                 if (!userObj.config.trustedList.pzh.hasOwnProperty (friendpzh.config.metaData.serverName)) {
                     userObj.config.trustedList.pzh[friendpzh.config.metaData.serverName] = {};
-                    userObj.config.storeTrustedList (userObj.config.trustedList);
+                    userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
                 }
                 
                 // refresh your own certificates (I don't exactly know why, but it matters)
@@ -477,7 +477,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :userObj.config.crl,
                     serverPort   :80 // TODO 
                 };
-                userObj.config.storeUntrustedCert (friendpzh.config.untrustedCert);
+                userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
                 sendMsg (conn, obj.user, { type:"requestAddLocalFriend", message:true });
                 return;
             } else {
@@ -496,7 +496,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function csrAuthCodeByPzp (conn, obj, userObj) {
-        userObj.enroll.addNewPZPCert (obj, function (status, payload) {
+        userObj.enroll.addNewPZPCert (obj, refreshPzh, function (status, payload) {
             if (status) {
                 sendMsg (conn, obj.user, { type:"csrAuthCodeByPzp", message:payload });
             }

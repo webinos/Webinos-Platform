@@ -92,7 +92,7 @@ var Pzh = function () {
             self.pzh_state.connectedPzp[_pzpId] = {"socket":_conn, "address":_conn.socket.remoteAddress};
             if (self.config.trustedList.pzp[_pzpId].addr !== _conn.socket.remoteAddress) {
                 self.config.trustedList.pzp[_pzpId].addr = _conn.socket.remoteAddress;
-                self.config.storeTrustedList (self.config.trustedList);
+                self.config.storeDetails(null, "trustedList", self.config.trustedList);
             }
             _conn.id = _pzpId;
             msg = self.pzh_otherManager.messageHandler.registerSender (self.pzh_state.sessionId, _pzpId);
@@ -236,8 +236,12 @@ var Pzh = function () {
                 var caList = [], crlList = [], key;
 
                 caList.push (self.config.cert.internal.master.cert);
-                crlList.push (self.config.crl);
-
+                crlList.push (self.config.crl.value);
+                for (key in self.config.cert.internal.signedCert) {
+                    if (self.config.cert.internal.signedCert.hasOwnProperty (key)) {
+                        caList.push (self.config.cert.internal.signedCert[key]);
+                    }
+                }
                 for (key in self.config.cert.external) {
                     if (self.config.cert.external.hasOwnProperty (key)) {
                         caList.push (self.config.cert.external[key].externalCerts);
@@ -281,14 +285,17 @@ var Pzh = function () {
      * @param _id - sessionId
      */
     this.removeRoute = function (_id) {
-        logger.log ("removing route for " + _id);
-        if (self.pzh_state.connectedPzp.hasOwnProperty (_id)) {
-            self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
-            delete self.pzh_state.connectedPzp[_id];
-        }
-        if (self.pzh_state.connectedPzh.hasOwnProperty (_id)) {
-            self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
-            delete self.pzh_state.connectedPzh[_id];
+        if(_id) {
+            logger.log ("removing route for " + _id);
+            if (self.pzh_state.connectedPzp.hasOwnProperty (_id)) {
+                self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
+                delete self.pzh_state.connectedPzp[_id];
+            }
+            if (self.pzh_state.connectedPzh.hasOwnProperty (_id)) {
+                self.pzh_otherManager.messageHandler.removeRoute (_id, self.config.metaData.serverName);
+                delete self.pzh_state.connectedPzh[_id];
+            }
+            self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
         }
         self.sendUpdateToAll(_id);
         self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
@@ -313,6 +320,11 @@ var Pzh = function () {
             self.config = new util.webinosConfiguration ();
             self.config.setConfiguration ("Pzh", inputConfig, function (status, value) {
                 if (status) {
+                    if (_user && self.config.userData.name !== _user.displayName) {
+                        self.config.userData = {name : _user.displayName, email: _user.emails, country: _user.country,
+                            image: _user.image, authenticator: _user.from, identifier: _user.identifier};
+                        self.config.storeDetails("userData", null, self.config.userData);
+                    }
                     self.pzh_state.sessionId = _uri;
                     self.pzh_state.logger.addId (self.config.userData.email[0].value);
                     self.pzh_otherManager = new pzh_otherManager (self);
@@ -424,7 +436,7 @@ var AddPzp = function (parent) {
      * @param {Object} _msgRcvd It its is an object holding received message.
      * @param {Function} _callback function called once PZP signature are signed
      */
-    this.addNewPZPCert = function (_msgRcvd, _callback) {
+    this.addNewPZPCert = function (_msgRcvd, refreshCert, _callback) {
         try {
             var pzpId = parent.pzh_state.sessionId + "/" + _msgRcvd.message.from, msg;
             if (parent.config.cert.internal.revokedCert[pzpId]) {
@@ -434,20 +446,28 @@ var AddPzp = function (parent) {
             }
             parent.pzh_state.expecting.isExpectedCode (_msgRcvd.message.code, function (expected) { // Check QRCode if it is valid ..
                 if (expected) {
-                    parent.config.generateSignedCertificate (_msgRcvd.message.csr, 2, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
+                    _parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
                         if (status) { // unset expected QRCode
-                            parent.config.cert.internal.signedCert[pzpId] = value;
-                            parent.pzh_state.expecting.unsetExpected (function () {
-                                parent.config.storeCertificate (parent.config.cert.internal, "internal");
-                                if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
-                                    parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
-                                    parent.config.storeTrustedList (parent.config.trustedList);
+                            _parent.config.cert.internal.signedCert[pzpId] = value;
+                            _parent.pzh_state.expecting.unsetExpected (function () {
+                                _parent.config.storeDetails(require("path").join("certificates", "internal"),null, _parent.config.cert.internal);
+                                if (!_parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
+                                    _parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
+                                    _parent.config.storeDetails(null, "trustedList", _parent.config.trustedList);
                                 }
-                                var payload = {"clientCert":parent.config.cert.internal.signedCert[pzpId],
-                                    "masterCert":parent.config.cert.internal.master.cert,
-                                    "masterCrl":parent.config.crl};// Send signed certificate and master certificate to PZP
-                                msg = parent.prepMsg(pzpId, "signedCertByPzh", payload);
-                                _callback (true, msg);
+                                // Add PZP in list of master certificates as PZP will sign connection certificate at its end.
+                                _parent.setConnParam(function(status, options){
+                                    if (status) {
+                                        refreshCert(_parent.pzh_state.sessionId, options);
+                                        // Send signed certificate and master certificate to PZP
+                                        var payload = {"clientCert":_parent.config.cert.internal.signedCert[pzpId],
+                                                    "masterCert":_parent.config.cert.internal.master.cert,
+                                                    "masterCrl" :_parent.config.crl.value};
+                                        msg = _parent.prepMsg (_parent.config.metaData.serverName, pzpId,
+                                            "signedCertByPzh", payload);
+                                        _callback (true, msg);
+                                    }
+                                });
                             });
                         } else {
                             msg = parent.prepMsg(_msgRcvd.message.from, "error", value);
