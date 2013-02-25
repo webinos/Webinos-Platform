@@ -34,7 +34,7 @@
     * @function
     * @param manifestFile Application manifest
     * @param policyFile output file for the application policy
-    * @param features Array of {name, permit} elements related to not denied
+    * @param features Array of {name, effect} elements related to not denied
     * features
     * @param userId User identifier
     * @param requestorId Requestor identifier
@@ -242,8 +242,7 @@
             if (data !== null && data['policy-set'] && data['policy-set'].policy
                 && util.isArray(data['policy-set'].policy)) {
 
-                policySet = insertPolicy (policySet, appId,
-                    data['policy-set'].policy);
+                policySet = insertPolicy (policySet, data['policy-set'].policy);
             } else {
                 console.log('Invalid policy syntax in file ' + policyFile);
                 return false;
@@ -267,10 +266,24 @@
     * Add old application policies into the new policy-set if appId is different
     * @function
     * @param policySet The new policy-set
-    * @param appId Application identifier
     * @param parsedPolicy Policies already existing in the output file
     */
-    var insertPolicy = function (policySet, appId, parsedPolicy) {
+    var insertPolicy = function (policySet, parsedPolicy) {
+        var appId = null;
+        var userId = null;
+        var requestorId = null;
+        var subject = policySet.policy[0].target[0].subject[0];
+
+        for (var i = 0; i < subject['subject-match'].length; i++) {
+            if (subject['subject-match'][i].$.attr === 'id') {
+                appId = subject['subject-match'][i].$.match;
+            } else if (subject['subject-match'][i].$.attr === 'user-id') {
+                userId = subject['subject-match'][i].$.match;
+            } else if (subject['subject-match'][i].$.attr === 'requestor-id') {
+                requestorId = subject['subject-match'][i].$.match;
+            }
+        } 
+
         for (var i = 0; i < parsedPolicy.length; i++) {
             if (parsedPolicy[i].target && util.isArray(parsedPolicy[i].target)
                 && parsedPolicy[i].target[0].subject &&
@@ -280,14 +293,53 @@
                 if (subject['subject-match'] &&
                     util.isArray(subject['subject-match'])) {
 
-                    for (var j = 0 ; j < subject['subject-match'].length; j++) {
-                        if (subject['subject-match'][j].$ &&
-                            subject['subject-match'][j].$.attr === 'id' &&
-                            subject['subject-match'][j].$.match !== appId) {
+                    // if all subject matches are true this policy is
+                    // overwritten by the new one
+                    var subjectMatch = [false, false, false];
+                    var userIdExists = false;
+                    var requestorIdExists = false;
 
-                            // insert the policy of another application
-                            policySet.policy.push(parsedPolicy[i]);
+                    for (var j = 0 ; j < subject['subject-match'].length; j++) {
+                        if (subject['subject-match'][j].$ && appId &&
+                            subject['subject-match'][j].$.attr === 'id' &&
+                            subject['subject-match'][j].$.match === appId) {
+
+                            subjectMatch[0] = true;
+                        } else if (subject['subject-match'][j].$ && userId &&
+                            subject['subject-match'][j].$.attr === 'user-id' &&
+                            subject['subject-match'][j].$.match === userId) {
+
+                            subjectMatch[1] = true;
+                        } else if (subject['subject-match'][j].$ && requestorId
+                            && subject['subject-match'][j].$.attr ===
+                            'requestor-id' &&
+                            subject['subject-match'][j].$.match ===
+                            requestorId) {
+
+                            subjectMatch[2] = true;
                         }
+                        if (subject['subject-match'][j].$ &&
+                            subject['subject-match'][j].$.attr === 'user-id') {
+
+                            userIdExists = true;
+                        } else if (subject['subject-match'][j].$ &&
+                            subject['subject-match'][j].$.attr ===
+                            'requestor-id') {
+
+                            requestorIdExists = true;
+                        }
+                    }
+                    if (userId === null && userIdExists === false) {
+                        subjectMatch[1] = true;
+                    }
+                    if (requestorId === null && requestorIdExists === false) {
+                        subjectMatch[2] = true;
+                    }
+                    if (subjectMatch[0] === false || subjectMatch[1] === false
+                        || subjectMatch[2] === false) {
+
+                        // insert the old policy
+                        policySet.policy.push(parsedPolicy[i]);
                     }
                 }
             }
