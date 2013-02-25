@@ -320,11 +320,6 @@ var Pzh = function () {
             self.config = new util.webinosConfiguration ();
             self.config.setConfiguration ("Pzh", inputConfig, function (status, value) {
                 if (status) {
-                    if (_user && self.config.userData.name !== _user.displayName) {
-                        self.config.userData = {name : _user.displayName, email: _user.emails, country: _user.country,
-                            image: _user.image, authenticator: _user.from, identifier: _user.identifier};
-                        self.config.storeDetails("userData", null, self.config.userData);
-                    }
                     self.pzh_state.sessionId = _uri;
                     self.pzh_state.logger.addId (self.config.userData.email[0].value);
                     self.pzh_otherManager = new pzh_otherManager (self);

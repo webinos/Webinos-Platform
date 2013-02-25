@@ -151,7 +151,7 @@ var Pzp_OtherManager = function (_parent) {
             _parent.pzp_state.connectedPzh[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
             if (_parent.config.metaData.friendlyName.indexOf(validMsgObj.payload.message.friendlyName) === -1) {
                 _parent.config.metaData.friendlyName = validMsgObj.payload.message.friendlyName + "'s " + _parent.config.metaData.friendlyName;
-                _parent.config.storeMetaData(_parent.config.metaData);
+                _parent.config.storeDetails(null, null, _parent.config.metaData);
             }
         } else if (_parent.pzp_state.connectedPzp[validMsgObj.from]) {
             _parent.pzp_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;

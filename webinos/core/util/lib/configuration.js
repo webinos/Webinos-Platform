@@ -128,10 +128,6 @@ function Config () {
             self.userPref.ports = config.ports;
             self.storeDetails("userData", "userPref", self.userPref);
         }
-        if (!compareObjects(config.certConfiguration, self.userData)) {
-            self.userData = config.certConfiguration;
-            self.storeDetails("userData", null, self.userData);
-        }
         if (webinosType === "Pzh" && config.pzhDefaultServices.length !== self.serviceCache.length) {
             self.serviceCache = config.pzhDefaultServices;
             self.storeDetails("userData", "serviceCache", self.serviceCache);
@@ -233,6 +229,13 @@ function Config () {
             return callback (false, err.code);
         }
     }
+    function storeUserData(user){
+        self.userData.name = user.displayName;
+        self.userData.email = user.emails;
+        self.userData.authenticator = user.from;
+        self.userData.identifier = user.identifier;
+
+    }
     /**
      *
      * @param webinosType
@@ -247,7 +250,6 @@ function Config () {
             self.metaData.webinosName = deviceName;
             webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
             self.metaData.webinosRoot = webinos_root+ "/" + self.metaData.webinosName;
-
             setFriendlyName(inputConfig.friendlyName);
 
             createDefaultDirectories(webinosType, function (status) {
@@ -257,10 +259,11 @@ function Config () {
                     self.metaData.webinos_version = defaultConfig.webinos_version;
                     self.userPref.ports = defaultConfig.ports;
                     self.userData = defaultConfig.certConfiguration;
+                    if(inputConfig.user)  storeUserData(inputConfig.user);
                     if (webinosType === "Pzh" || webinosType === "PzhCA") {
                         self.serviceCache = defaultConfig.pzhDefaultServices.slice(0);
                         self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
-                    } else if (webinosType === "Pzp") {
+                    } else if (webinosType === "Pzp" || webinosType === "PzpCA") {
                         self.serviceCache = defaultConfig.pzpDefaultServices.slice(0);
                     }
                     if (defaultConfig.friendlyName && defaultConfig.friendlyName !== "") {

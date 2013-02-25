@@ -30,10 +30,9 @@ var argv = require('optimist')
 var _pzh_provider = new pzh_provider(argv.host, argv.name);
 _pzh_provider.startProvider(function(result, details) {
   if (result) {
-    console.log("ZONE PROVIDER STARTED");
     pzh_web.start(argv.host, argv.name);
   } else {
-    console.error("ZONE PROVIDER FAILED TO START "+ details);
+    console.error("ZONE PROVIDER FAILED TO START "+ details, 'color:red');
   }
 });
 
