@@ -56,7 +56,7 @@ function Config () {
         {folderName:"userData", fileName:"serviceCache", object: self.serviceCache},
         {folderName:"userData", fileName:"userPref", object: self.userPref}];
 
-    function setFriendlyName(self, friendlyName) {
+    function setFriendlyName(friendlyName) {
         if(friendlyName) {
             self.metaData.friendlyName = friendlyName;
         } else {
@@ -141,6 +141,25 @@ function Config () {
         }
     }
 
+    function createPolicyFile() {
+        // policy file
+
+        fs.readFile (path.join (self.metaData.webinosRoot, "policies", "policy.xml"), function (err) {
+            if (err && err.code === "ENOENT") {
+                var data;
+                try {
+                    data = fs.readFileSync (path.resolve (__dirname, "../../manager/policy_manager/defaultpolicy.xml"));
+                }
+                catch (e) {
+                    logger.error ("Default policy not found");
+                    data = "<policy combine=\"first-applicable\" description=\"denyall\">\n<rule effect=\"deny\"></rule>\n</policy>";
+                }
+                fs.writeFileSync (path.join (self.metaData.webinosRoot, "policies", "policy.xml"), data);
+            }
+        });
+    }
+
+
     function storeAll() {
         fileList.forEach (function (name) {
             if (typeof name === "object") {
@@ -162,7 +181,8 @@ function Config () {
     function checkConfigExists(webinosType, inputConfig, callback) {
         var name, i;
         require("./webinosId.js").fetchDeviceName(webinosType, inputConfig, function (webinosName) {
-            self.metaData.webinosRoot = wPath.webinosPath() + "/" + webinosName;
+            var webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
+            self.metaData.webinosRoot = webinos_root + "/" + webinosName;
             self.metaData.webinosName = webinosName;
             for (i = 0; i < fileList.length; i = i + 1) {
                 name = fileList[i];
@@ -225,34 +245,34 @@ function Config () {
             self.metaData.webinosType = webinosType;
             self.metaData.serverName = inputConfig.sessionIdentity;
             self.metaData.webinosName = deviceName;
-
             webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
             self.metaData.webinosRoot = webinos_root+ "/" + self.metaData.webinosName;
-            setFriendlyName(self, inputConfig.friendlyName);
+
+            setFriendlyName(inputConfig.friendlyName);
 
             createDefaultDirectories(webinosType, function (status) {
                 if (status) {
                     logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
+                    var key, defaultConfig = require(filePath);
+                    self.metaData.webinos_version = defaultConfig.webinos_version;
+                    self.userPref.ports = defaultConfig.ports;
+                    self.userData = defaultConfig.certConfiguration;
+                    if (webinosType === "Pzh" || webinosType === "PzhCA") {
+                        self.serviceCache = defaultConfig.pzhDefaultServices.slice(0);
+                        self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
+                    } else if (webinosType === "Pzp") {
+                        self.serviceCache = defaultConfig.pzpDefaultServices.slice(0);
+                    }
+                    if (defaultConfig.friendlyName && defaultConfig.friendlyName !== "") {
+                        self.metaData.friendlyName =  userPref.friendlyName;
+                    }
+                    createPolicyFile();
+                    storeAll();
+                    callback (true);
                 } else {
                     callback (false, "failed creating webinos default directories");
                 }
             });
-            var key, defaultConfig = require(filePath);
-            self.metaData.webinos_version = defaultConfig.webinos_version;
-            self.userPref.ports = defaultConfig.ports;
-            self.userData = defaultConfig.certConfiguration;
-            if (webinosType === "Pzh" || webinosType === "PzhCA") {
-                self.serviceCache = defaultConfig.pzhDefaultServices.slice(0);
-                self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
-            } else if (webinosType === "Pzp") {
-                self.serviceCache = defaultConfig.pzpDefaultServices.slice(0);
-            }
-            if (defaultConfig.friendlyName && defaultConfig.friendlyName !== "") {
-                self.metaData.friendlyName =  userPref.friendlyName;
-            }
-            createPolicyFile();
-            storeAll();
-            callback (true);
         });
     }
 
