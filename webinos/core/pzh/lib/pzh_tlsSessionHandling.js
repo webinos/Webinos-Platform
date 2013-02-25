@@ -441,24 +441,24 @@ var AddPzp = function (parent) {
             }
             parent.pzh_state.expecting.isExpectedCode (_msgRcvd.message.code, function (expected) { // Check QRCode if it is valid ..
                 if (expected) {
-                    _parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
+                    parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
                         if (status) { // unset expected QRCode
-                            _parent.config.cert.internal.signedCert[pzpId] = value;
-                            _parent.pzh_state.expecting.unsetExpected (function () {
-                                _parent.config.storeDetails(require("path").join("certificates", "internal"),null, _parent.config.cert.internal);
-                                if (!_parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
-                                    _parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
-                                    _parent.config.storeDetails(null, "trustedList", _parent.config.trustedList);
+                            parent.config.cert.internal.signedCert[pzpId] = value;
+                            parent.pzh_state.expecting.unsetExpected (function () {
+                                parent.config.storeDetails(require("path").join("certificates", "internal"),null, parent.config.cert.internal);
+                                if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
+                                    parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
+                                    parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
                                 }
                                 // Add PZP in list of master certificates as PZP will sign connection certificate at its end.
-                                _parent.setConnParam(function(status, options){
+                                parent.setConnParam(function(status, options){
                                     if (status) {
-                                        refreshCert(_parent.pzh_state.sessionId, options);
+                                        refreshCert(parent.pzh_state.sessionId, options);
                                         // Send signed certificate and master certificate to PZP
-                                        var payload = {"clientCert":_parent.config.cert.internal.signedCert[pzpId],
-                                                    "masterCert":_parent.config.cert.internal.master.cert,
-                                                    "masterCrl" :_parent.config.crl.value};
-                                        msg = _parent.prepMsg (_parent.config.metaData.serverName, pzpId,
+                                        var payload = {"clientCert":parent.config.cert.internal.signedCert[pzpId],
+                                                    "masterCert":parent.config.cert.internal.master.cert,
+                                                    "masterCrl" :parent.config.crl.value};
+                                        msg = parent.prepMsg (parent.config.metaData.serverName, pzpId,
                                             "signedCertByPzh", payload);
                                         _callback (true, msg);
                                     }
