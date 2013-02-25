@@ -640,28 +640,28 @@ var EnrollPzp = function (parent, hub) {
         logger.log ("PZP ENROLLED AT  " + _from);    // This message come from PZH web server over websocket
         //_parent.config.cert.internal.conn.cert = _clientCert;
         //_parent.config.cert.internal.master.cert = _masterCert;
-        _parent.config.cert.internal.master.cert = _clientCert;
-        _parent.config.cert.internal.pzh.cert    = _masterCert;
+        parent.config.cert.internal.master.cert = _clientCert;
+        parent.config.cert.internal.pzh.cert    = _masterCert;
 
-        _parent.config.generateSignedCertificate(_parent.config.cert.internal.conn.csr, function(status, signedCert) {
+        parent.config.generateSignedCertificate(parent.config.cert.internal.conn.csr, function(status, signedCert) {
             if(status) {
                 logger.log("connection signed certificate by PZP");
-                _parent.config.cert.internal.conn.cert = signedCert;
-                _parent.config.crl.value = _masterCrl;
-                _parent.config.metaData.pzhId = _from;
-                _parent.config.metaData.serverName = _from && _from.split ("_")[0];
+                parent.config.cert.internal.conn.cert = signedCert;
+                parent.config.crl.value = _masterCrl;
+                parent.config.metaData.pzhId = _from;
+                parent.config.metaData.serverName = _from && _from.split ("_")[0];
                 if (_from.indexOf (":") !== -1) {
-                    _parent.config.metaData.serverName = _parent.config.metaData.serverName.split (":")[0];
+                    parent.config.metaData.serverName = parent.config.metaData.serverName.split (":")[0];
                 }
 
-                if (!_parent.config.trustedList.pzh.hasOwnProperty (_parent.config.metaData.pzhId)) {
-                    _parent.config.trustedList.pzh[_parent.config.metaData.pzhId] = {"addr":"", "port":""};
+                if (!parent.config.trustedList.pzh.hasOwnProperty (parent.config.metaData.pzhId)) {
+                    parent.config.trustedList.pzh[parent.config.metaData.pzhId] = {"addr":"", "port":""};
                 }
-                _parent.config.storeDetails(null, null, _parent.config.metaData);
-                _parent.config.storeDetails(null, "crl", _parent.config.crl);
-                _parent.config.storeDetails(null, "trustedList", _parent.config.trustedList);
-                _parent.config.storeDetails(require("path").join("certificates", "internal"), null, _parent.config.cert.internal);
-                _parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
+                parent.config.storeDetails(null, null, parent.config.metaData);
+                parent.config.storeDetails(null, "crl", parent.config.crl);
+                parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
+                parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
+                parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
 
                 hub.connect (function (status) {

@@ -85,10 +85,10 @@ var PzpWSS = function (parent) {
     function getVersion (from) {
         var msg;
         if (parent.config.metaData.webinos_version) {
-            msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", parent.config.metaData.webinos_version);
+            msg = prepMsg (from, "webinosVersion", parent.config.metaData.webinos_version);
         } else {
             var packageValue = require("../../../../package.json")
-            msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", packageValue.version);
+            msg = prepMsg (from, "webinosVersion", packageValue.version);
         }
         self.sendConnectedApp (from, msg);
     }
@@ -226,7 +226,7 @@ var PzpWSS = function (parent) {
                     break;
                 case "showHashQR":
                     getHashQR(function(value){
-                        var msg5 = prepMsg(parent.pzp_state.sessionId, msg.from, "showHashQR", value);
+                        var msg5 = prepMsg(msg.from, "showHashQR", value);
                         sendtoClient(msg5);
                     });
                     break;
@@ -235,7 +235,7 @@ var PzpWSS = function (parent) {
                     var hash = msg.payload.message.hash;
                     logger.log("hash passed from client page is: " + hash);
                     checkHashQR(hash, function(value){
-                        var msg6 = prepMsg(parent.pzp_state.sessionId, msg.from, "checkHashQR", value);
+                        var msg6 = prepMsg(msg.from, "checkHashQR", value);
                         sendtoClient(msg6);
                     });
                     break;

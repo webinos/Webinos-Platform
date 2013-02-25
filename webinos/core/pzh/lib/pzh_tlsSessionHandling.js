@@ -458,8 +458,7 @@ var AddPzp = function (parent) {
                                         var payload = {"clientCert":parent.config.cert.internal.signedCert[pzpId],
                                                     "masterCert":parent.config.cert.internal.master.cert,
                                                     "masterCrl" :parent.config.crl.value};
-                                        msg = parent.prepMsg (parent.config.metaData.serverName, pzpId,
-                                            "signedCertByPzh", payload);
+                                        msg = parent.prepMsg (pzpId,"signedCertByPzh", payload);
                                         _callback (true, msg);
                                     }
                                 });
