@@ -18,7 +18,7 @@
  *         Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 
-var PzpWSS = function (_parent) {
+var PzpWSS = function (parent) {
     "use strict";
     var dependency = require ("find-dependencies") (__dirname);
     var util = dependency.global.require (dependency.global.util.location);
@@ -83,23 +83,14 @@ var PzpWSS = function (_parent) {
     }
 
     function getVersion (from) {
-        function sendVersion (data) {
-            var msg = prepMsg (from, "webinosVersion", data);
-            self.sendConnectedApp (from, msg);
-        }
-        var os = require ("os");
-        var child_process = require ("child_process").exec;
-        if (os.platform ().toLowerCase () !== "android") {
-            child_process ("git describe", function (error, stderr, stdout) {
-                if (!error) {
-                    sendVersion (stderr);
-                } else {
-                    sendVersion ("v0.7"); // Change this or find another way of reading git describe for android
-                }
-            })
+        var msg;
+        if (parent.config.metaData.webinos_version) {
+            msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", parent.config.metaData.webinos_version);
         } else {
-            sendVersion ("v0.7");
+            var packageValue = require("../../../../package.json")
+            msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", packageValue.version);
         }
+        self.sendConnectedApp (from, msg);
     }
 
     function getWebinosLog (type, from) {
