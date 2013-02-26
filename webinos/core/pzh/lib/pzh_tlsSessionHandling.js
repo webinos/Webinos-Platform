@@ -327,6 +327,11 @@ var Pzh = function () {
                 //self.config.storeDetails("certificates/external", null, self.config.certificate.external);
                 logger.log("removed pzh "+ id+" certificate details ");
             }
+            for (var key in self.pzh_state.connectedPzp) {
+                if (self.pzh_state.connectedPzp.hasOwnProperty(key)) {
+                    self.pzh_otherManager.syncStart(key);
+                }
+            }
             callback(true);
         } else {
             callback(false);
