@@ -303,8 +303,8 @@ var PzpWSS = function (parent) {
                     key:  privateKey,
                     cert: parent.config.cert.internal.web.cert,
                     ca: ca,
-                    requestCert: true,
-                    rejectUnauthorized: true
+                    requestCert: false,
+                    rejectUnauthorized: false
                 });
             } else {
                 callback(false)
@@ -322,7 +322,7 @@ var PzpWSS = function (parent) {
                             parent.config.cert.internal.web.cert = signedWebCert;
                             parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
                             setCertParams(callback);
-                            self.storeCertificateBrowser(false);
+                            //self.storeCertificateBrowser(false);
                             // Ziran : Add your code here
                         } else {
                             return callback(false);
