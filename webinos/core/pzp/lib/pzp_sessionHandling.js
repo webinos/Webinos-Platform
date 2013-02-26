@@ -116,7 +116,11 @@ var Pzp = function () {
     this.setSessionId = function () {
         self.pzp_state.sessionId = self.config.metaData.webinosName;
         if (self.pzp_state.enrolled) {
-            self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.webinosName;
+            if (self.config.metaData.pzhAssignedId) {
+                self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.pzhAssignedId;
+            } else {
+                self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.webinosName;
+            }
         }
         logger.addId (self.config.metaData.webinosName);
     };
