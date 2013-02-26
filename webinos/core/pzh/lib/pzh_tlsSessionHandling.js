@@ -301,6 +301,38 @@ var Pzh = function () {
         self.pzh_otherManager.discovery.removeRemoteServiceObjects (_id);
     };
     /**
+     * Delete PZH from the trusted list
+     * @param id
+     */
+    this.removePzh = function(id, refreshCert, callback) {
+        // Disconnection is a special case if PZH is already connected..
+        if (self.pzh_state.connectedPzh[id]) {
+            self.pzh_state.connectedPzh[id].socket.end();
+            logger.log("connection with "+id+" terminated as user wishes to remove this PZH");
+            delete self.pzh_state.connectedPzh[id];
+            self.setConnParam (function (status, options) {
+                if (status) {
+                    refreshCert (self.config.metaData.serverName, options);
+                }
+            });
+        }
+        if (self.config.trustedList.pzh[id]) {
+            delete self.config.trustedList.pzh[id];
+            self.config.storeTrustedList (self.config.trustedList);
+            //self.config.storeDetails(null, "trustedList", self.config.trustedList);
+            logger.log("removed pzh "+ id+" from the trusted list ");
+            if (self.config.cert.external[id]) {
+                delete self.config.cert.external[id];
+                self.config.storeCertificate (self.config.cert.external, "external");
+                //self.config.storeDetails("certificates/external", null, self.config.certificate.external);
+                logger.log("removed pzh "+ id+" certificate details ");
+            }
+            callback(true);
+        } else {
+            callback(false);
+        }
+    };
+    /**
      * ADDs PZH in a provider
      * @param _friendlyName this name is used for creating configuration
      * @param _uri pzh url you want to add, assumption it is of form pzh.webinos.org/bob@webinos.org
