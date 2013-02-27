@@ -59,7 +59,8 @@
   , "webinos_pzp": "webinos_pzp.js"
   }
 , "scripts":
-  { "install": "node-gyp configure build && grunt"
+  { "preinstall" : "npm i -g grunt@0.3 jasmine-node"
+  , "install": "node-gyp configure build && grunt"
   , "test" : "jasmine-node ./webinos/web_root/tests/api_tests/"
   }
 }
