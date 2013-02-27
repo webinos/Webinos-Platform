@@ -35,10 +35,10 @@
       "params":{}
     },
     {
-        "name"  :"app2app",
-        "params":{
-            "scope":"pzp"
-        }
+      "name"  :"app2app",
+      "params":{
+          "scope":"pzp"
+      }
     },
     {
       "name"  :"webnotification",
@@ -126,5 +126,10 @@
     "cn"     :"",
     "email"  :"hello@webinos.org"
   },
-  "friendlyName":""
+  "friendlyName":"",
+  "webinos_version": {
+    "tag": "v0.8.0",
+    "num_commit": "15",
+    "commit_id": "gba7314e"
+  }
 }

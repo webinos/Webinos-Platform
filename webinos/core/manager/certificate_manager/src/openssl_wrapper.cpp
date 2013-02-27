@@ -462,7 +462,7 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   // If there is a small clock difference between machines, it results in cert_not_yet_valid
   // It does set GMT time but is relevant to machine time.
   // A better solution would be to have ntp server contacted to get a proper time.
-  if(certType == 2) {
+  if(certType == 1) {
     X509_gmtime_adj(s, long(0-300));
   }
   else {
@@ -529,18 +529,6 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
     }
 
     if(!(ex = X509V3_EXT_conf_nid(NULL,  &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
-      return ERR_peek_error();
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-  } else if( certType == 2) {
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_basic_constraints, (char*)"critical, CA:FALSE"))) {
-      return ERR_peek_error();
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
       return ERR_peek_error();
     } else {
       X509_add_ext(cert, ex, -1);
