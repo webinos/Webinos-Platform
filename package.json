@@ -61,6 +61,6 @@
 , "scripts":
   { "preinstall" : "npm i grunt-cli jasmine-node"
   , "install": "node-gyp configure build && grunt"
-  , "test" : "jasmine-node ./webinos/web_root/tests/api_tests/"
+  , "test" : "./auto-test.sh"
   }
 }
