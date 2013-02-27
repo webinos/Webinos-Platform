@@ -38,29 +38,28 @@
     "grunt-contrib-uglify": "~0.1.x",
     "grunt-contrib-jshint": "~0.1.x",
     "grunt-contrib-clean": "~0.4.x"
-  }
-, "optionalDependencies" :
-  { "sqlite3" : "2.1.x"
-  , "qrcode" : "0.x.x"
-  , "openid" : "0.x.x"
-  , "express" : "3.x.x"
-  , "passport" : "x.x.x"
-  , "passport-yahoo" : "x.x.x"
-  , "passport-google" : "x.x.x"
-  , "serialport2" : "0.0.5"
-  }
-, "engines" :
-  { "node" : ">= 0.6.0"
-  , "npm" : ">= 1.1.17"
-  }
-, "preferGlobal": true
-, "bin":
-  { "webinos_pzh": "webinos_pzh.js"
-  , "webinos_pzp": "webinos_pzp.js"
-  }
-, "scripts":
-  { "preinstall" : "npm i grunt-cli jasmine-node"
-  , "install": "node-gyp configure build && grunt"
-  , "test" : "./auto-test.sh"
+  },
+  "optionalDependencies": {
+    "sqlite3": "2.1.x",
+    "qrcode": "0.x.x",
+    "openid": "0.x.x",
+    "express": "3.x.x",
+    "passport": "x.x.x",
+    "passport-yahoo": "x.x.x",
+    "passport-google": "x.x.x",
+    "serialport2": "0.0.5"
+  },
+  "engines": {
+    "node": ">= 0.6.0",
+    "npm": ">= 1.1.17"
+  },
+  "preferGlobal": true,
+  "bin": {
+    "webinos_pzh": "webinos_pzh.js",
+    "webinos_pzp": "webinos_pzp.js"
+  },
+  "scripts": {
+    "install": "node-gyp configure build && grunt",
+    "test": "./auto-test.sh"
   }
 }
