@@ -162,7 +162,7 @@ var Pzh = function () {
                     name = cn [1];
                 }
                 self.handlePzhAuthorization (name, _conn);
-            } else if (cn[0] === "PzpConn") {
+            } else if (cn[0] === "Pzp") {
                 handlePzpAuthorization (cn[1], _conn);
             }
         }

@@ -170,6 +170,9 @@
                 case "connectPeers":
                     callListenerForMsg(data);
                     break;
+               case "intraPeer":
+                    callListenerForMsg(data);
+                    break;
                 case "update":
                     updateConnected(data.payload.message);
                     callListenerForMsg(data);
