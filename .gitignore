@@ -1,7 +1,3 @@
-# since webinos_config will be modified locally with version and ports information, it is added in omitted list.
-# but if you add new service, please remember to include file
-webinos_config.json
-
 # generated webinos.js
 webinos/web_root/webinos.js
 
