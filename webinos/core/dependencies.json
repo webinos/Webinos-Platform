@@ -12,6 +12,10 @@
       "name"    :"WebNotification",
       "location":"api/webnotification/"
     },
+    "zonenotification": {
+      "name": "ZoneNotification",
+      "location": "api/zonenotification/"
+    },
     "authentication"   :{
       "name"    :"Authentication",
       "location":"api/authentication/"
