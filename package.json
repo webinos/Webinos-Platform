@@ -60,6 +60,6 @@
   },
   "scripts": {
     "install": "node-gyp configure build && grunt",
-    "test": "./auto-test.sh"
+    "test": "./tools/travis/auto-test.sh"
   }
 }
