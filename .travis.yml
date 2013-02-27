@@ -1,6 +1,8 @@
 language: node_js
 node_js:
+  - 0.6
   - 0.8
+install: npm install --verbose
 before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libopenobex1-dev libobexftp0-dev bluetooth libpam0g-dev libcairo2-dev libjpeg8-dev libgif-dev libavahi-compat-libdnssd-dev libgnome-keyring-dev g++ libssl-dev 
