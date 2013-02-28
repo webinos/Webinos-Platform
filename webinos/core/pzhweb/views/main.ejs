@@ -34,13 +34,6 @@
       }
       $('.column').equalHeight(); // Fix height
   }
-  function displayQRCode(payload){
-      var text = "<center>";
-      text += "<p> <img src=" + payload.payload.img + "> </img> </p> ";
-      text += "<p> <h2 class='authCode'>" +payload.payload.code +"</h2> </p>";
-      text += "<p>This temporary access code can be used to add a new device to your personal zone.</p>";
-      setArticle("Temporary access code",text);
-  }
   function setArticle(header,body){
     $('#main').html('<article class="module width_full"><header><h3>' + header + '</h3></header><div class="module_content">'+ body + '</div></article><div class="spacer"></div>');
     $('.column').equalHeight(); // Fix height
@@ -65,8 +58,8 @@
   function connectPzh(){
     var e = document.getElementById('pzh_list');
     var id = e.options[e.selectedIndex].value;
-    id = id.split("_");
-    window.location.href = "./connect-friend-local?externalemail=" + encodeURIComponent(id[1]);
+    id = id.substring(id.indexOf("_")+1, id.length);
+    window.location.href = "./connect-friend-local?externalemail=" + encodeURIComponent(id);
   }
   function connectPzh_manual() {
     var e = document.getElementById('connectPzhId').value;
@@ -152,19 +145,14 @@
       if (!payload) {
         payload = {
           name: "Connected",
-          country: "Undefined",
           email: "Undefined",
-          servername: "Undefined"
         }
       }
       if (payload.image){
         text += "<p><h3> <img src =  "+ payload.image+"> </img> </h3></p>";
       }
       text += "<p><h3> Name    :     "+ payload.name +"</h3></p>";
-      text += "<p><h3> Country :     "+ payload.country +"</h3></p>";
       text += "<p><h3> Email   :     "+ payload.email[0].value+"</h3></p>";
-      text += "<p><h3> Identifier:   "+ payload.identifier+"</h3></p>";
-      text += "<p><h3> Authenticator:"+ payload.authenticator+"</h3></p>";
       setArticle("About you", text);
       $("#userId").html(payload.name);
       webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
@@ -175,9 +163,6 @@
       setTimeout(function() {
         webinosPZH.commands.getZoneStatus(DisplayListOfDevices);
       }, 3000);
-    });
-    $("#addPzp").click(function(){
-      webinosPZH.commands.authCode(displayQRCode);
     });
     $("#connectPzh").click(function(){
       webinosPZH.commands.getAllPzh(pzhList);
@@ -242,7 +227,6 @@
       <ul class="" style="display: block;" id="enumConnectedPzp">
       </ul>
       <ul class="" style="">
-        <li> <a href="#addPzp" id="addPzp" >Add a new device... </a> </li>   
         <li> <a href="#revokeCert" id='revokeCert'>Remove a device... </a> </li>
       </ul>
       <h3>Personal zone admin</h3>

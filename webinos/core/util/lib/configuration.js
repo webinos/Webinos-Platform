@@ -102,14 +102,15 @@ function createNewConfiguration (self, webinosType, inputConfig, callback) {
 Config.prototype.setConfiguration = function (webinosType, inputConfig, callback) {
     var self = this, conn_key, cn;
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
-        var webinosRoot = path.join (wPath.webinosPath (), deviceName);
+        var webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
+        var webinosName = path.join (webinos_root, deviceName);
         logger.addType (deviceName); // per instance this should be only set once..
         if (typeof callback !== "function") {
             logger.error ("callback missing");
             return;
         }
 
-        self.fetchMetaData (webinosRoot, deviceName, function (status, value) {
+        self.fetchMetaData (webinosName, deviceName, function (status, value) {
             if (status && value && (value.code === "ENOENT" || value.code === "EACCES")) {//meta data does not exist
                 createNewConfiguration (self, webinosType, inputConfig, callback);
             } else { //metaData not found
@@ -510,29 +511,30 @@ Config.prototype.fetchUserPref = function (callback) {
  * @param callback
  * @return {*}
  */
-Config.prototype.createDirectories = function (callback) {
-    var self = this, dirPath, permission = 0777;
+Config.prototype.createDirectories = function (type, callback) {
+    var self = this, dirPath, root_permission = 0744, internal_permission = 0744;
+    var webinos_root =  (type.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
     try {
         //In case of node 0.6, define the fs existsSync
         if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
-        if (!fs.existsSync (wPath.webinosPath ()))//If the folder doesn't exist
-            fs.mkdirSync (wPath.webinosPath (), permission);//Create it
-        //Set permissions for android
-        if (os.platform ().toLowerCase () !== "android") {
-            if (process.getuid) {
-                fs.chown (wPath.webinosPath (), process.getuid (), process.getgid ());
-                fs.chmod (wPath.webinosPath (), permission);
-            }
+        if (!fs.existsSync (webinos_root)) {//If the folder doesn't exist
+            fs.mkdirSync (webinos_root, root_permission);//Create it
         }
+
         if (!fs.existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
-            fs.mkdirSync (self.metaData.webinosRoot, permission);
+            fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
         // webinos root was created, we need the following 1st level dirs
-        var list = [ path.join (wPath.webinosPath (), "logs"), path.join (self.metaData.webinosRoot, "wrt"), path.join (wPath.webinosPath (), "wrt"), path.join (self.metaData.webinosRoot, "policies"),
-            path.join (self.metaData.webinosRoot, "certificates"), path.join (self.metaData.webinosRoot, "userData"), path.join (self.metaData.webinosRoot, "keys"), path.join (self.metaData.webinosRoot, "certificates", "external"),
+        var list = [ path.join (self.metaData.webinosRoot, "logs"),
+            path.join (webinos_root, "wrt"),
+            path.join (self.metaData.webinosRoot, "certificates"),
+            path.join (self.metaData.webinosRoot, "policies"),
+            path.join (self.metaData.webinosRoot, "wrt"),
+            path.join (self.metaData.webinosRoot, "userData"),
+            path.join (self.metaData.webinosRoot, "keys"),
+            path.join (self.metaData.webinosRoot, "certificates", "external"),
             path.join (self.metaData.webinosRoot, "certificates", "internal")];
         list.forEach (function (name) {
-            if (!fs.existsSync (name))
-                fs.mkdirSync (name, permission);
+            if (!fs.existsSync (name)) fs.mkdirSync (name, internal_permission);
         });
         // Notify that we are done
         callback (true);
@@ -562,6 +564,24 @@ Config.prototype.createPolicyFile = function (self) {
     });
 };
 
+function setFriendlyName(self, friendlyName) {
+    if(friendlyName) {
+        self.metaData.friendlyName = friendlyName;
+    } else {
+        if (os.platform() && os.platform().toLowerCase() === "android" ){
+            self.metaData.friendlyName = "Mobile";
+        } else if (process.platform === "win32") {
+            self.metaData.friendlyName = "Windows PC";
+        } else if (process.platform === "darwin") {
+            self.metaData.friendlyName = "MacBook";
+        } else if (process.platform === "linux" || process.platform === "freebsd") {
+            self.metaData.friendlyName = "Linux Device";
+        } else {
+            self.metaData.friendlyName = "Webinos Device";// Add manually
+        }
+    }
+
+}
 /**
  *
  * @param webinosType
@@ -569,12 +589,17 @@ Config.prototype.createPolicyFile = function (self) {
  * @param callback
  */
 Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callback) {
-    var self = this;
+    var self = this, webinos_root;
     var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
     wId.fetchDeviceName (webinosType, inputConfig, function (deviceName) {
+        self.metaData.webinosType = webinosType;
+        self.metaData.serverName = inputConfig.sessionIdentity;
         self.metaData.webinosName = deviceName;
-        self.metaData.webinosRoot = wPath.webinosPath () + "/" + self.metaData.webinosName;
-        self.createDirectories (function (status) {
+
+        webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
+        self.metaData.webinosRoot = webinos_root+ "/" + self.metaData.webinosName;
+        setFriendlyName(self, inputConfig.friendlyName);
+        self.createDirectories (webinosType, function (status) {
             if (status) {
                 logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
             } else {
@@ -590,17 +615,21 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userPref.ports.pzp_webSocket = userPref.ports.pzp_webSocket;
                 self.userPref.ports.pzp_tlsServer = userPref.ports.pzp_tlsServer;
                 self.userPref.ports.pzp_zeroConf = userPref.ports.pzp_zeroConf;
-
-                if (self.userData.name === "") {
-                    self.userData.country = userPref.certConfiguration.country;
+                if (webinosType === "Pzh" || webinosType === "PzhCA") {
+                    self.storeUserDetails(inputConfig.user);
+                    self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
+                } else {
                     self.userData.email = userPref.certConfiguration.email;
                 }
+                if (userPref.friendlyName && userPref.friendlyName !== "") {
+                    self.metaData.friendlyName =  userPref.friendlyName;
+                }
+                self.userData.country = userPref.certConfiguration.country;
                 self.userData.state = userPref.certConfiguration.state;
                 self.userData.city = userPref.certConfiguration.city;
                 self.userData.orgName = userPref.certConfiguration.orgname;
                 self.userData.orgUnit = userPref.certConfiguration.orgunit;
                 self.userData.cn = userPref.certConfiguration.cn;
-
                 if (webinosType === "Pzh") {
                     for (key in userPref.pzhDefaultServices) {
                         self.serviceCache.push ({"name":userPref.pzhDefaultServices[key].name, "params":userPref.pzpDefaultServices[key].params});
@@ -628,15 +657,13 @@ Config.prototype.fetchConfigDetails = function (webinosType, inputConfig, callba
                 self.userData.orgUnit = "";
                 self.userData.cn = "";
             }
-            self.metaData.friendlyName = inputConfig.friendlyName;
-            self.metaData.webinosType = webinosType;
-            self.metaData.serverName = inputConfig.sessionIdentity;
-            self.createPolicyFile (self);
+
             self.storeMetaData (self.metaData);
             self.storeUserData (self.userData);
             self.storeUserPref (self.userPref);
             self.storeServiceCache (self.serviceCache);
             self.storeUntrustedCert (self.untrustedCert);
+            self.createPolicyFile (self);
             callback (true);
         });
     });

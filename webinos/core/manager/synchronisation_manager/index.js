@@ -53,7 +53,7 @@ var Sync = function () {
         var myKey, diff = {}, update, update1, syncdata, updatedData = {};
         for( myKey in jsonObject) {
             if (jsonObject.hasOwnProperty(myKey) && remoteJsonObject.hasOwnProperty(myKey)) {
-                update = sync_.detectUpdates(jsonObject[myKey], jsonObject[myKey]);
+                update = sync_.detectUpdates(jsonObject[myKey], {});
                 update1 = sync_.detectUpdates(jsonObject[myKey], remoteJsonObject[myKey]);
                 syncdata = sync_.reconcile([update1, update]);
                 sync_.applyCommands(jsonObject[myKey], syncdata.propagations[0]);

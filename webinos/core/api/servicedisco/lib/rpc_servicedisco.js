@@ -267,7 +267,7 @@
 	 * @param address Remove all services for this address.
 	 */
 	Discovery.prototype.removeRemoteServiceObjects = function(address) {
-		var count = this.remoteServiceObjects[address].length;
+		var count = this.remoteServiceObjects[address] && this.remoteServiceObjects[address].length;
 		delete this.remoteServiceObjects[address];
 		logger.log("removeRemoteServiceObjects: removed " + count + " services from: " + address);
 	};

@@ -12,16 +12,19 @@
       $ ("#connectPzh").click (function () {
         if (document.getElementById ("own_pzh") && document.getElementById ("own_pzh").value !== "undefined" &&
                 document.getElementById ("own_pzh").value !== "") {
-          value = document.getElementById ("own_pzh").value;
+          value = document.getElementById ("own_pzh").value.trim();
         } else {
-          value = $ ("#pzh_list option:selected").val ();
+          value = $ ("#pzh_list option:selected").val().trim();
         }
-        $ ("#provider").hide ();
+        if (value === "localhost") {
+            alert("Please use PZH IP address to connect. Using localhost is not supported");
+        } else {
+            $ ("#provider").hide ();
+            var options = {type:'prop', payload:{status:'setPzhProviderAddress', message:value}};
+            webinos.session.message_send (options);
 
-        var options = {type:'prop', payload:{status:'setPzhProviderAddress', message:value}};
-        webinos.session.message_send (options);
-
-        window.location.href = "https://" + value + "/login?isPzp=true&port=" + webinos.session.getPzpPort ();
+            window.location.href = "https://" + value + "/login?isPzp=true&port=" + webinos.session.getPzpPort ();
+        }
       });
     });
   </script>

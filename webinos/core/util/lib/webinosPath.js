@@ -27,20 +27,20 @@ exports.webinosPath = function() {
   var webinosDemo;
   switch(os.type().toLowerCase()){
     case "windows_nt":
-      webinosDemo = path.resolve(process.env.appdata + "/webinos/");
+      webinosDemo = path.resolve(process.env.appdata + "/webinos");
       break;
     case "linux":
       switch(os.platform().toLowerCase()){
         case "android":
-          webinosDemo = path.resolve(process.env.EXTERNAL_STORAGE + "/.webinos/");
+          webinosDemo = path.resolve("/data/data/org.webinos.app/webinos");
           break;
         case "linux":
-          webinosDemo = path.resolve(process.env.HOME + "/.webinos/");
+          webinosDemo = path.resolve(process.env.HOME + "/.webinos");
           break;
       }
       break;
     case "darwin":
-      webinosDemo = path.resolve(process.env.HOME + "/.webinos/");
+      webinosDemo = path.resolve(process.env.HOME + "/.webinos");
       break;
   }
   return webinosDemo;

@@ -9,14 +9,6 @@
   },
   "pzhDefaultServices":[
     {
-      "name"  :"context",
-      "params":{}
-    },
-    {
-      "name"  :"events",
-      "params":{}
-    },
-    {
       "name"  :"test",
       "params":{}
     },
@@ -25,6 +17,10 @@
         "params":{
             "scope":"pzh"
         }
+    },
+    {
+      "name"  :"zonenotification",
+      "params":{}
     }
   ],
   "pzpDefaultServices":[
@@ -33,10 +29,6 @@
       "params":{
         "num":"21"
       }
-    },
-    {
-      "name"  :"zap-and-shake",
-      "params":{}
     },
     {
       "name"  :"actuator",
@@ -133,5 +125,6 @@
     "orgunit":"WP4",
     "cn"     :"",
     "email"  :"hello@webinos.org"
-  }
+  },
+  "friendlyName":""
 }
