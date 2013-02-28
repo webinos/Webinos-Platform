@@ -36,7 +36,6 @@
 	var promptMan = null;
 	var policyFile = null;
 	var decisionStorage = null;
-	var json = null;
 
 	var policyManager = function(policyFilename) {
 		var self = this;
@@ -60,13 +59,17 @@
 		//Policy file location
 		policyFile = policyFilename;
 
-		if (self.isAWellFormedPolicyFile(policyFile)) {
-			pmCore = new pmNativeLib.PolicyManagerInt(policyFile);
-			//Loads decision storage module
-			decisionStorage = new dslib.decisionStorage(policyFile);
-		} else{
-			console.log("Policy file is not valid.");
-		}
+		self.isAWellFormedPolicyFile(policyFile
+			, function () {
+				pmCore = new pmNativeLib.PolicyManagerInt(policyFile);
+				//Loads decision storage module
+				decisionStorage = new dslib.decisionStorage(policyFile);
+				console.log("Policy file loaded");
+			}
+			, function () {
+				console.log("Policy file is not valid");
+			}
+		);
 	};
 
 	policyManager.prototype.getPolicyFilePath = function() {
@@ -74,6 +77,10 @@
 	}
 
 	policyManager.prototype.enforceRequest = function(request, sessionId, noprompt) {
+		if (!pmCore) {
+			console.log("Invalid policy file: request denied")
+			return 1;
+		}
 		var res = pmCore.enforceRequest(request);
 		var promptcheck = true;
 		if (arguments.length == 3) {
@@ -153,28 +160,27 @@
 		return (res);
 	};
 
-	policyManager.prototype.reloadPolicy = function() {
-		if (self.isAWellFormedPolicyFile(policyFile)) {
-			pmCore.reloadPolicy();
-		} else{
-			console.log("Policy file is not valid.");
-		}
-		return;
+	policyManager.prototype.reloadPolicy = function () {
+		self.isAWellFormedPolicyFile(policyFile
+			, function () {
+				pmCore.reloadPolicy();
+			}
+			, function () {
+				console.log("Policy file is not valid");
+			}
+		);
 	};
 
-	policyManager.prototype.isAWellFormedPolicyFile = function(policyFilename) {
-	var data = fs.readFileSync(policyFilename);
+	policyManager.prototype.isAWellFormedPolicyFile = function (policyFilename, successCB, errorCB) {
+		var data = fs.readFileSync(policyFilename);
 
-		xmlParser.parseString(data, function(err, jsonData) {
-			if(!err) {
-				json = jsonData;
+		xmlParser.parseString(data, function (err, jsonData) {
+			if (!err) {
+				(env.validate(jsonData, schema).errors.length === 0) ? successCB() : errorCB();
 			} else {
-				return false;
+				errorCB();
 			}
 		});
-
-		var report = env.validate(json, schema)
-		return (report.errors.length === 0);
 	}
 
 	exports.policyManager = policyManager;
