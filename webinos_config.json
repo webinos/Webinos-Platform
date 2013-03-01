@@ -1,7 +1,7 @@
 {
   "ports"             :{
-    "provider"          :6080,
-    "provider_webServer":6443,
+    "provider"          :80,
+    "provider_webServer":443,
     "pzp_webSocket"     :8080,
     "pzp_tlsServer"     :8040,
     "pzp_zeroConf"      :4321,
@@ -17,6 +17,10 @@
         "params":{
             "scope":"pzh"
         }
+    },
+    {
+      "name"  :"zonenotification",
+      "params":{}
     }
   ],
   "pzpDefaultServices":[
