@@ -18,7 +18,7 @@
  *         Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 
-var PzpWSS = function (_parent) {
+var PzpWSS = function (parent) {
     "use strict";
     var dependency = require ("find-dependencies") (__dirname);
     var util = dependency.global.require (dependency.global.util.location);
@@ -27,9 +27,7 @@ var PzpWSS = function (_parent) {
 
     var connectedWebApp = {}; // List of connected apps i.e session with browser
     var sessionWebApp   = 0;
-    var wsServer        = "";
     var self            = this;
-    var parent          = _parent;
     var expectedPzhAddress;
     var wrtServer, pzhProviderAddress;
 
@@ -85,23 +83,14 @@ var PzpWSS = function (_parent) {
     }
 
     function getVersion (from) {
-        function sendVersion (data) {
-            var msg = prepMsg (from, "webinosVersion", data);
-            self.sendConnectedApp (from, msg);
-        }
-        var os = require ("os");
-        var child_process = require ("child_process").exec;
-        if (os.platform ().toLowerCase () !== "android") {
-            child_process ("git describe", function (error, stderr, stdout) {
-                if (!error) {
-                    sendVersion (stderr);
-                } else {
-                    sendVersion ("v0.7"); // Change this or find another way of reading git describe for android
-                }
-            })
+        var msg;
+        if (parent.config.metaData.webinos_version) {
+            msg = prepMsg (from, "webinosVersion", parent.config.metaData.webinos_version);
         } else {
-            sendVersion ("v0.7");
+            var packageValue = require("../../../../package.json")
+            msg = prepMsg (from, "webinosVersion", packageValue.version);
         }
+        self.sendConnectedApp (from, msg);
     }
 
     function getWebinosLog (type, from) {
@@ -221,7 +210,7 @@ var PzpWSS = function (_parent) {
                 case "authCodeByPzh":
                     if (expectedPzhAddress === msg.payload.providerDetails) {
                         connection.sendUTF (JSON.stringify ({"from":parent.config.metaData.webinosName,
-                            "payload":{"status":"csrAuthCodeByPzp", "csr":parent.config.cert.internal.conn.csr, "authCode":msg.payload.authCode}}));
+                            "payload":{"status":"csrAuthCodeByPzp", "csr":parent.config.cert.internal.master.csr, "authCode":msg.payload.authCode}}));
                     }
                     break;
                 case "signedCertByPzh":
@@ -237,7 +226,7 @@ var PzpWSS = function (_parent) {
                     break;
                 case "showHashQR":
                     getHashQR(function(value){
-                        var msg5 = prepMsg(parent.pzp_state.sessionId, msg.from, "showHashQR", value);
+                        var msg5 = prepMsg(msg.from, "showHashQR", value);
                         sendtoClient(msg5);
                     });
                     break;
@@ -246,7 +235,7 @@ var PzpWSS = function (_parent) {
                     var hash = msg.payload.message.hash;
                     logger.log("hash passed from client page is: " + hash);
                     checkHashQR(hash, function(value){
-                        var msg6 = prepMsg(parent.pzp_state.sessionId, msg.from, "checkHashQR", value);
+                        var msg6 = prepMsg(msg.from, "checkHashQR", value);
                         sendtoClient(msg6);
                     });
                     break;
@@ -351,13 +340,13 @@ var PzpWSS = function (_parent) {
                         logger.log("got pzhcert");
                         logger.log("storing external cert");
                         parent.config.cert.external[msg.from] = { cert: msg.payload.message.cert, crl: msg.payload.message.crl};
-                        parent.config.storeCertificate(parent.config.cert.external,"external");
+                        parent.config.storeDetails(path.join("certificates","external"), null, parent.config.cert.external);
                         logger.log("got pzhCert from:" + msg.from); //remeber the other party
 
                         if(!parent.config.exCertList.hasOwnProperty(msg.from)) {
                             var storepzp = {"exPZP" : msg.from};
                             parent.config.exCertList = storepzp;
-                            parent.config.storeExCertList(parent.config.exCertList);
+                            parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
                         }
 
                         //send own certificate back
@@ -437,7 +426,7 @@ var PzpWSS = function (_parent) {
     }
 
     function sendPzpPeersToApp() {
-        parent.webinos_manager.peerDiscovery.findPzp(parent,'zeroconf', _parent.config.userPref.ports.pzp_tlsServer, null, function(data){
+        parent.webinos_manager.peerDiscovery.findPzp(parent,'zeroconf', parent.config.userPref.ports.pzp_tlsServer, null, function(data){
             var payload = { "foundpeers": data};
             logger.log(data);
             var msg = prepMsg("", "pzpFindPeers", payload);
@@ -448,7 +437,7 @@ var PzpWSS = function (_parent) {
     function getHashQR(cb) {
         var path = require ("path");
         var os = require("os");
-        var infile = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
+        var infile = path.join(parent.config.metaData.webinosRoot, "keys", "conn.pem");
 
         var outfile = path.join("/data/data/org.webinos.app/node_modules/webinos/wp4/webinos/web_root", "testbed", "QR.png");
 
@@ -478,7 +467,7 @@ var PzpWSS = function (_parent) {
 
     function checkHashQR(hash, cb) {
         var path = require ("path");
-        var filename = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
+        var filename = path.join(parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
         try {
             logger.log("android - check hash QR");
             parent.webinos_manager.Sib.checkQRHash(filename, hash, function(data){
@@ -639,12 +628,12 @@ var PzpWSS = function (_parent) {
                         else if (rmsg.payload && rmsg.payload.status === "replyCert") {
                             logger.log("rmsg from: "  + rmsg.from);
                             parent.config.cert.external[rmsg.from] = { cert: rmsg.payload.message.cert, crl: rmsg.payload.message.crl};
-                            parent.config.storeCertificate(parent.config.cert.external,"external");
+                            parent.config.storeDetails(path.join("certificates","external"), null, parent.config.cert.external);
 
                             if(!parent.config.exCertList.hasOwnProperty(rmsg.from)) {
                                 var storepzp = {"exPZP" : rmsg.from};
                                 parent.config.exCertList = storepzp;
-                                parent.config.storeExCertList(parent.config.exCertList);
+                                parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
                             }
                             var msg={};
                             logger.log("rmsg.from: " + rmsg.from);
@@ -713,7 +702,7 @@ var PzpWSS = function (_parent) {
                     startAndroidWRT ();
                 }
                 var WebSocketServer = require ("websocket").server;
-                wsServer = new WebSocketServer ({
+                var wsServer = new WebSocketServer ({
                     httpServer           :value,
                     autoAcceptConnections:false
                 });

@@ -177,11 +177,11 @@ var Pzh_RPC = function (_parent) {
         if (Object.keys (result).length >= 1) {
             if (result["trustedList"]) {
                 _parent.config.metaData.trustedList = result["trustedList"];
-                _parent.config.storeTrustedList (_parent.config.metaData.trustedList);
+                _parent.config.storeDetails(null, "trustedList",_parent.config.metaData.trustedList);
             }
             if (result["crl"]) {
-                _parent.config.crl = receivedMsg[msg];
-                _parent.config.storeCrl (_parent.config.crl);
+                _parent.config.crl.value = receivedMsg[msg];
+                _parent.config.storeDetails(null, "crl", _parent.config.crl);
             }
             if (result["cert"]) {
                 //_parent.config.cert.external = receivedMsg[msg];
