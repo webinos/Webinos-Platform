@@ -314,6 +314,7 @@ function Config () {
                     });
                 } else {
                     logger.log ("Error reading default configuration details");
+                    if (callback) {return callback (false, "Error reading default configuration details");}
                 }
             });
         } catch (err) {
