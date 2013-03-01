@@ -92,7 +92,7 @@ function loadWSCertificate(config, certName, certLabel, callback) {
     }
 }
 
-starter.start = function(hostname, friendlyName) {
+starter.start = function(hostname, friendlyName, callback) {
     var config = new util.webinosConfiguration();
     util.webinosHostname.getHostName(hostname, function (address_) {
         var inputConfig = {
@@ -104,8 +104,7 @@ starter.start = function(hostname, friendlyName) {
                 logger.error(value);
                 logger.error("setting configuration for the zone provider failed, the .webinos directory needs to be deleted.")
             } else {
-                starter.startWS(hostname, config, function (err, val) {
-                });
+                starter.startWS(hostname, config, callback);
             }
         });
     });
