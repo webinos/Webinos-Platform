@@ -454,7 +454,7 @@ var AddPzp = function (parent) {
                         if (status) { // unset expected QRCode
                             parent.config.cert.internal.signedCert[pzpId] = value;
                             parent.pzh_state.expecting.unsetExpected (function () {
-                                parent.config.storeDetails(require("path").join("certificates", "internal"),null, parent.config.cert.internal);
+                                parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
                                 if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
                                     parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
                                     parent.config.storeDetails(null, "trustedList", parent.config.trustedList);

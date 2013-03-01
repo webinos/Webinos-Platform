@@ -55,21 +55,17 @@ exports.fetchDeviceName = function(type, config, callback) {
 
         var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
         devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-    } else if ((type === "Pzp" || type === "PzhP")){
+    } else if ((type.search("Pzp") !== -1)){
         var key, cpus = os.cpus(), id, cpu_acc = "";
         for (key = 0; key <cpus.length; key = key + 1) {
             cpu_acc += cpus[key].model; // This will create string longer depending on cores you have on your machine..
         }
-        id = require("crypto").createHash("md5").update(os.hostname() +
-            os.totalmem()+
-            os.type() +
-            os.arch() +
-            cpu_acc +
-            process.cwd()+
-            type +
-            Object.keys(os.networkInterfaces())).digest("hex");
-        callback( id);
-    } else if (type === "Pzh"){
+        id = require("crypto").createHash("md5").update(os.hostname() + process.cwd() + Math.random()).digest("hex");
+        callback(id);
+    } else if(type.search("PzhP") !== -1) {
+        id = require("crypto").createHash("md5").update(os.hostname() + process.cwd()).digest("hex");
+        callback(id);
+    } else if (type.search("Pzh") !== -1){
         callback(config.friendlyName);
     }
 };
