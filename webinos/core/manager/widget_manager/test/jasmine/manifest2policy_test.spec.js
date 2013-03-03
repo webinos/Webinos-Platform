@@ -23,7 +23,7 @@ var path = require('path');
 var m2p = require (path.join(__dirname,
                              '../../lib/manifest2policy/manifest2policy.js'));
 
-var manifest = 'manifestExample.xml';
+var manifest = path.join(__dirname, 'manifestExample.xml');
 var appId = '123';
 var optionalFeature = ['http://webinos.org/api/notifications'];
 
