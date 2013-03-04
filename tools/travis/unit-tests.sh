@@ -39,7 +39,6 @@ run_unit_test(){
 #'./webinos/core/xmpp-pzp/test/jasmine',
 #'./webinos/core/manager/certificate_manager/test/jasmine',
 #'./webinos/core/manager/keystore/test/jasmine',
-#'./webinos/core/manager/widget_manager/test/jasmine',
 #'./webinos/core/manager/context_manager/test/jasmine',
 #'./webinos/core/manager/messaging/test/jasmine',
 #'./webinos/core/util/test/jasmine',
@@ -53,11 +52,12 @@ run_unit_test(){
 #'./webinos/web_root/tests/test_frameworks/jasmine-1.2.0'
 
 #whitelist=('./webinos/core/manager/policy_manager/test/jasmine')
-whitelist=( "./webinos/core/manager/policy_manager/test/jasmine" )
+whitelist=( "./webinos/core/manager/policy_manager/test/jasmine"
+	"./webinos/core/manager/widget_manager/test/jasmine" )
 #function to determine whether tests will be run on the given component
 #currently, all tests under included in the whitelist will not be filtered
 filter(){
-	if contains "$1" "$whitelist"
+	if contains "$1" "${whitelist[@]}"
 	then
 		return 0
 	else
