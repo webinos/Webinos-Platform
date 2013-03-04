@@ -47,7 +47,8 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         "authCode"              :authCode,
         "csrAuthCodeByPzp"      :csrAuthCodeByPzp,
         "getAllPzh"             :getAllPzhList,
-        "approveUser"           :approveUser
+        "approveUser"           :approveUser,
+        "removePzh"             :removePzh
     };
 
     function getLock () {
@@ -399,9 +400,10 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     // Sixth
     function rejectFriend (conn, obj, userObj) {
-        if (userObj.config.untrustedCert.hasOwnProperty (obj.message.externalUser.email)) {
-            logger.log ("Rejecting friend request by " + obj.message.externalUser.email + " for " + obj.user);
-            delete untrustedCert[obj.message.externalUser.email];
+        if (userObj.config.untrustedCert.hasOwnProperty (obj.message.externalEmail)) {
+            logger.log ("Rejecting friend request by " + obj.message.externalEmail + " for " + obj.user);
+            delete userObj.config.untrustedCert[obj.message.externalEmail];
+            userObj.config.storeUntrustedCert(userObj.config.untrustedCert);
         }
     }
 
@@ -503,6 +505,12 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         });
     }
 
+    function removePzh(conn, obj, userObj) {
+        userObj.removePzh(obj.message.id, refreshPzh, function(status){
+            sendMsg (conn, obj.user, { type:"removePzh", message:status });
+        });
+    }
+
     function createPzh (obj, userId, callback) {
         try {
             var pzh_session = require ("./pzh_tlsSessionHandling.js");
@@ -511,23 +519,24 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 pzhId = hostname + ":" + port + "_" + userId;
             }
             if (pzhs[pzhId]) {
-                return callback(false, "pzh id already exists");
+                callback(false, "pzh id already exists");
+            } else {
+                logger.log ("adding new zone hub - " + pzhId);
+                pzhs[pzhId] = new pzh_session ();
+                pzhs[pzhId].addLoadPzh (userId, pzhId, obj.user, function (status, options, uri) {
+                    if (status) {
+                        addPzh (uri, options);
+                        releaseLock ();
+                        return callback (true, pzhId);
+                    } else {
+                        return callback (false, "failed adding pzh");
+                    }
+                });
             }
-            logger.log ("adding new zone hub - " + pzhId);
-            pzhs[pzhId] = new pzh_session ();
-            pzhs[pzhId].addLoadPzh (userId, pzhId, obj.user, function (status, options, uri) {
-                if (status) {
-                    addPzh (uri, options);
-                    releaseLock ();
-                    return callback (true, pzhId);
-                } else {
-                    return callback (false, "failed adding pzh");
-                }
-            });
-
         } catch (err) {
             logger.log (err);
         }
+        return;
     }
 
     function findExistingUserFromEmail(email,callback) {
