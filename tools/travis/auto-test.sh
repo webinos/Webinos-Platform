@@ -19,14 +19,6 @@ prepare_pzh_config(){
 # Here's the accumulator variable
 test_failed=false
 
-# First, lets test starting the PZP
-# DISABLED - the PZP fails at the moment.
-node webinos_pzp.js --test
-if [ $? -ne 0 ]; then
-  echo "Failed to start the PZP"
-  test_failed=true;
-fi
-
 # fiddle with the PZH config to use high-number ports
 prepare_pzh_config "./webinos_config.json"
 
@@ -34,6 +26,13 @@ prepare_pzh_config "./webinos_config.json"
 node webinos_pzh.js --test
 if [ $? -ne 0 ]; then
   echo "Failed to start the PZH"
+  test_failed=true;
+fi
+
+# Start the PZP
+node webinos_pzp.js --test
+if [ $? -ne 0 ]; then
+  echo "Failed to start the PZP"
   test_failed=true;
 fi
 
