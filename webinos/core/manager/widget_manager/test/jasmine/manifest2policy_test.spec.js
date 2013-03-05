@@ -23,11 +23,11 @@ var path = require('path');
 var m2p = require (path.join(__dirname,
                              '../../lib/manifest2policy/manifest2policy.js'));
 
-var manifest1 = 'manifestExample1.xml';
-var manifest2 = 'manifestExample2.xml';
-var manifest3 = 'manifestExample3.xml';
-var manifest4 = 'manifestExample4.xml';
-var outputFile = 'outputFile.xml';
+var manifest1 = path.join(__dirname, 'manifestExample1.xml');
+var manifest2 = path.join(__dirname, 'manifestExample2.xml');
+var manifest3 = path.join(__dirname, 'manifestExample3.xml');
+var manifest4 = path.join(__dirname, 'manifestExample4.xml');
+var outputFile = path.join(__dirname, 'outputFile.xml');
 var allFeatures = [
     {
         name : 'http://webinos.org/feature/internet',
