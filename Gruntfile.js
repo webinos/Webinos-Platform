@@ -142,15 +142,22 @@ module.exports = function(grunt) {
     webinosConfSubdirs = webinosConfSubdirs.map(function(p) {
       return userDir.apply(null, relPath.concat([p]));
     });
-    webinosConfSubdirs = webinosConfSubdirs.filter(function(p) {
+    var dirsToRemove = webinosConfSubdirs.filter(function(p) {
       return p ? true : false;
     });
-    if (!webinosConfSubdirs.length) {
+
+    // add webinosPzh dir if it exists
+    var webinosPzhConfPath = path.join(path.dirname(webinosConfPath), os.platform() === 'win32' ? 'webinosPzh' : '.webinosPzh');
+    if (fs.existsSync(webinosPzhConfPath)) {
+      dirsToRemove.push(webinosPzhConfPath);
+    }
+
+    if (!dirsToRemove.length) {
       grunt.log.writeln('There are no certificates to remove.');
       return;
     }
 
-    webinosConfSubdirs.forEach(function(p) {
+    dirsToRemove.forEach(function(p) {
       grunt.log.write('Deleting ' + p + ' ...');
       var r = grunt.file.delete(p, {force: true});
       if (r) {
