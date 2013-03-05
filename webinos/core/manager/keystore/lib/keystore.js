@@ -94,8 +94,7 @@ var KeyStore = function () {
         var key, keystore = checkPlatform();
         if(keystore) {
             key = keystore.get(id);
-            console.log(key);
-            if (key) {
+            if (key.search("-----BEGIN RSA PRIVATE KEY-----") !== -1) {
                 return callback(true, key);
             } else {
                 getKeys(id, callback);
