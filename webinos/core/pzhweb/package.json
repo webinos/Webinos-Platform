@@ -11,6 +11,6 @@
     "passport-yahoo": "*",
     "passport-google": "*",
     "optimist": "*",
-    "ejs": "*"
+    "jade": "*"
   }
 }

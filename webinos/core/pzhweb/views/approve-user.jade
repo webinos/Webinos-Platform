@@ -1,0 +1,41 @@
+!!! 5
+html
+  head
+    title Webinos policies - connect to new user
+    meta(charset="utf-8")
+    link(rel="stylesheet", type="text/css", href="/css/reset.css")
+    link(rel="stylesheet", type='text/css', href='http://fonts.googleapis.com/css?family=Open+Sans:400,300')
+    link(rel="stylesheet", type="text/css", href="/css/approve-user.css")
+    meta(name="viewport", content="width=device-width, user-scalable=no")
+    script(type="text/javascript", src="main.js")
+  body#user-allow-page
+    img.webinoslogo(src="img/webinosWithBorder.png")
+    div.header
+      img(src="img/webinosWithBorder.png")
+      div.title REQUEST
+      div.subtitle New user access
+
+    div#user-data-container.content
+      //<h3>User to User Connection Request</h3>
+      div.user-data
+        img#newUserReqImg(src="img/userPlaceholder.png")
+        h1#newUserReqName #{externalUser}
+        h2 would like to connect with you.
+      div#newUserReqButtons.permissions-controls
+      form#newUserReqForm(name="approve-user", action="../../make-user-decision/", method="post")
+        input(type="hidden", value="#{externalUser}", name="useremail")
+        input(type="checkbox", name="decision", value="approve") Approve
+      div#newUserReqContinue.button Continue
+      div#newUserReqInfo.info
+        p
+          | If you click
+          b  allow
+          | ,
+          span#newUserReqNameInfo1  #{externalUser}
+          |  will be able to *request access* to some data and services on your devices. You will be asked before any of your information is actually shared.
+        p
+          | Click
+          b  deny
+          |  if you don't know who
+          span#newUserReqNameInfo2  #{externalUser}
+          |  is, or if you do not want to connect with him or her.
