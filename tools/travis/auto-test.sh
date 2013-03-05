@@ -21,11 +21,11 @@ test_failed=false
 
 # First, lets test starting the PZP
 # DISABLED - the PZP fails at the moment.
-#node webinos_pzp.js --test
-#if [ $? -ne 0 ]; then
-#  echo "Failed to start the PZP"
-#  test_failed=true;
-#fi
+node webinos_pzp.js --test
+if [ $? -ne 0 ]; then
+  echo "Failed to start the PZP"
+  test_failed=true;
+fi
 
 # fiddle with the PZH config to use high-number ports
 prepare_pzh_config "./webinos_config.json"
