@@ -993,7 +993,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerAtTime",
-			Start : "StartNow",
+			StartTime : "StartNow",
 			MaxDelay : "P0Y0M5DT0H0M0S"
 		};
 
@@ -1057,7 +1057,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerAtTime",
-			Start : "StartNow",
+			StartTime : "StartNow",
 			MaxDelay : "P0Y0M8DT0H0M0S"
 		};
 
@@ -1122,7 +1122,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerAtTime",
-			Start : "2012-12-11T00:00:00.00+00:00",
+			StartTime : "2012-12-11T00:00:00.00+00:00",
 			MaxDelay : "P0Y0M5DT0H0M0S"
 		};
 
@@ -1186,7 +1186,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerAtTime",
-			Start : "2012-12-11T00:00:00.00+00:00",
+			StartTime : "2012-12-11T00:00:00.00+00:00",
 			MaxDelay : "P0Y0M8DT0H0M0S"
 		};
 
@@ -2137,7 +2137,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerDataSubjectAccess",
-			Uri : "http://webinos.org/user/data"
+			AccessURI : "http://webinos.org/user/data"
 		};
 
 		obligations[0] = {
@@ -2201,7 +2201,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerDataSubjectAccess",
-			Uri : "http://webinos.org/anotherUser/data"
+			AccessURI : "http://webinos.org/anotherUser/data"
 		};
 
 		obligations[0] = {
@@ -2265,7 +2265,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerDataSubjectAccess",
-			Uri : "http://webinos.org/user/data"
+			AccessURI : "http://webinos.org/user/data"
 		};
 
 		obligations[0] = {
@@ -2329,7 +2329,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerDataSubjectAccess",
-			Uri : "http://webinos.org/anotherUser/data"
+			AccessURI : "http://webinos.org/anotherUser/data"
 		};
 
 		obligations[0] = {
@@ -2393,7 +2393,7 @@ describe("Manager.PolicyManager", function() {
 
 		triggers[0] = {
 			triggerID : "TriggerAtTime",
-			Start : "StartNow",
+			StartTime : "StartNow",
 			MaxDelay : "P0Y0M5DT0H0M0S"
 		};
 
