@@ -1,0 +1,19 @@
+!!! 5
+html
+  head
+    title PZP Enrollment
+    script(type="text/javascript")
+      var templateData = {};
+      templateData.user = "#{user}";
+      templateData.pzpPort = "#{pzpPort}";
+      templateData.authCode = "#{authCode}";
+      templateData.port = "#{port}";
+      templateData.address = "#{address}";
+    script(src="/js/view-enroll-pzp.js", type="text/javascript")
+  body
+    h1 Currently your device is being enrolled at the PZH...
+    span Please hold you will redirected automatically to your PZP
+    footer#main
+      a(href="http://www.webinos.org") Powered by webinos
+      |  |
+      a(href="http://developer.webinos.org")  Developer resources on webinos

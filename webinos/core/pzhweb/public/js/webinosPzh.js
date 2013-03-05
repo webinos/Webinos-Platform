@@ -57,6 +57,9 @@ var webinosPZH = {
                     case 'approveUser':
                         if (typeof webinosPZH.callbacks.approveUser === 'function') webinosPZH.callbacks.approveUser(msg.message);
                         break;
+                    case 'removePzh':
+                        if (typeof webinosPZH.callbacks.removePzh === 'function') webinosPZH.callbacks.removePzh(msg.message);
+                        break;
                 }
             }
         }
@@ -86,7 +89,8 @@ var webinosPZH = {
         registerService:null,
         unregisterService:null,
         getAllPzh:null,
-        approveUser:null
+        approveUser:null,
+        removePzh:null
     },
     commands:{
         getZoneStatus:function (callback) {
@@ -139,6 +143,10 @@ var webinosPZH = {
         approveUser:function (callback) {
             webinosPZH.callbacks.approveUser = callback;
             webinosPZH.send({payload:{status:'approveUser'}});
+        },
+        removePzh:function (id, callback) {
+            webinosPZH.callbacks.removePzh = callback;
+            webinosPZH.send({payload:{status:'removePzh', id: id}});
         }
     }
 };

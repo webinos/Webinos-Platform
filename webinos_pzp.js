@@ -54,6 +54,10 @@ var argv = require ('optimist')
             describe:"enforce content security policy on the widgets",
             default :false
         },
+        "test":{
+            describe:"start the PZP and exit if it loaded successfully.  Useful for testing the build",
+            default :false
+        },
         "help"            :{
             describe:"to get this help menu"
         }})
@@ -114,6 +118,7 @@ function initializeWidgetServer () {
 
 function initializePzp (config) {
     pzp.session.initializePzp (config, function (status, result) {
+        testStart(status);
         if (status) {
             if (argv.widgetServer)
                 initializeWidgetServer ();
@@ -122,4 +127,20 @@ function initializePzp (config) {
         }
     });
 }
+
+/* This function is only relevant when the --test switch is passed to
+ * the webinos_pzp.js script.
+ */
+function testStart(hasStarted) {
+  if (argv.test) {
+    if (hasStarted) {
+      console.log("Started successfully.  This is a test, so the process is now exiting");
+      process.exit(0);
+    } else {
+      console.log("The PZP did not start successfully.  Ending.");
+      process.exit(-1);
+    }
+  }
+}
+
 

@@ -17,7 +17,6 @@
  ******************************************************************************/
 
 module.exports = function(grunt) {
-
   var fs = require('fs');
   var os = require('os');
   var path = require('path');
@@ -143,15 +142,22 @@ module.exports = function(grunt) {
     webinosConfSubdirs = webinosConfSubdirs.map(function(p) {
       return userDir.apply(null, relPath.concat([p]));
     });
-    webinosConfSubdirs = webinosConfSubdirs.filter(function(p) {
+    var dirsToRemove = webinosConfSubdirs.filter(function(p) {
       return p ? true : false;
     });
-    if (!webinosConfSubdirs.length) {
+
+    // add webinosPzh dir if it exists
+    var webinosPzhConfPath = path.join(path.dirname(webinosConfPath), os.platform() === 'win32' ? 'webinosPzh' : '.webinosPzh');
+    if (fs.existsSync(webinosPzhConfPath)) {
+      dirsToRemove.push(webinosPzhConfPath);
+    }
+
+    if (!dirsToRemove.length) {
       grunt.log.writeln('There are no certificates to remove.');
       return;
     }
 
-    webinosConfSubdirs.forEach(function(p) {
+    dirsToRemove.forEach(function(p) {
       grunt.log.write('Deleting ' + p + ' ...');
       var r = grunt.file.delete(p, {force: true});
       if (r) {
@@ -161,8 +167,42 @@ module.exports = function(grunt) {
       }
     });
   });
+ grunt.registerTask(
+   'webinos-version',
+   'inserts webinos version in webinos-config.json file',
+   function() {
+     var isPresent = (fs.existsSync || path.existsSync)('./webinos_config.json');
+     if (!isPresent) {
+       grunt.log.writeln('Error: webinos-config.json is missing');
+       return false;
+     } else {
+       var webinos_config = require("./webinos_config.json");
+       var done = this.async();
+       require("child_process").exec("git describe", function(err, stderr){
+         if (!err){
+           var webinos_version = stderr && stderr.split("-");
+           if(webinos_version) {
+             webinos_config.webinos_version.tag = webinos_version[0];
+             webinos_config.webinos_version.num_commit = webinos_version[1];
+             webinos_config.webinos_version.commit_id = webinos_version[2].replace(/\n/g,"");
+             fs.writeFileSync("./webinos_config.json", JSON.stringify(webinos_config, null , " "));
+             grunt.log.writeln("webinos_config updated with the correct version");
+             var packageValues = require("./package.json");
+             if (packageValues && webinos_config.webinos_version.tag > packageValues.version) {
+               packageValues.version = webinos_config.webinos_version.tag;
+               fs.writeFileSync("./package.json", JSON.stringify(packageValues, null, " "));
+               grunt.log.writeln("package.json updated with the correct version, please commit package.json");
+             }
+           }
+           done(true);
+         } else {
+           grunt.log.writeln("failed to update webinos_config with webinos version");
+           done(true);
+         }
+        });
+    }
+  });
 
-  grunt.registerTask('default', ['check-rpc', 'concat']);
-
+  grunt.registerTask('default', ['check-rpc', 'concat', 'webinos-version']);
   grunt.registerTask('minify', ['default', 'uglify']);
 };

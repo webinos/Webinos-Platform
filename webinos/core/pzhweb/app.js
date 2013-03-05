@@ -151,7 +151,7 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
         var MemStore = express.session.MemoryStore;
         app.configure(function () {
             app.set('views', __dirname + '/views');
-            app.set('view engine', 'ejs');
+            app.set('view engine', 'jade');
 //      app.use(express.logger()); // turn on express logging for every page
             app.use(express.bodyParser());
             app.use(express.methodOverride());

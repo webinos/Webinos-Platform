@@ -100,8 +100,7 @@ var Provider = function (_hostname, _friendlyName) {
             } else {
                 setParam(function (status, options) {
                     if (status) {
-                        var tls = require("tls");
-                        server = tls.createServer(options, function (conn) {   // This is the main TLS server, pzh started are stored as SNIContext to this server
+                        server = require("tls").createServer(options, function (conn) {   // This is the main TLS server, pzh started are stored as SNIContext to this server
                             handleConnection(conn);
                         });
                         server.on("error", function (error) {
@@ -133,7 +132,7 @@ var Provider = function (_hostname, _friendlyName) {
     function addPzhDetails(uri, options) {
         server.addContext(uri, options);
         config.trustedList.pzh[uri] = {"address":hostname};
-        config.storeTrustedList(config.trustedList);
+        config.storeDetails(null, "trustedList", config.trustedList);
     }
 
     function getAllPzhList(userId, userObj) {

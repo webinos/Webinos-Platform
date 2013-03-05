@@ -41,9 +41,9 @@ $ (document).ready (function () {
         }
     }
     function webinosVersion (msg) {
-        var currentVersion = msg.payload.message.split ("-")[0];
-        var sha1 = msg.payload.message.split ("-")[2];
-        $ ("#webinosVersion").html ("<ul align=\"right\"> Webinos Version-" + currentVersion + " (Commit ID-" + sha1 + ") </ul>");
+        var currentVersion = msg.payload.message;
+        $ ("#webinosVersion").html ("<ul align=\"right\"> Webinos Version - "+currentVersion.tag+"."+
+                currentVersion.num_commit + "( CommitId-"+ currentVersion.commit_id+") </ul>");
     }
     webinos.session.addListener ('webinosVersion', webinosVersion);
     function pzhDisconnected () {
