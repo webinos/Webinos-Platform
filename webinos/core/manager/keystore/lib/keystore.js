@@ -94,6 +94,7 @@ var KeyStore = function () {
         var key, keystore = checkPlatform();
         if(keystore) {
             key = keystore.get(id);
+            console.log(key);
             if (key) {
                 return callback(true, key);
             } else {
