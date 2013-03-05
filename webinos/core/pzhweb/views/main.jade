@@ -1,0 +1,73 @@
+!!! 5
+html
+  head
+    meta(charset="utf-8")
+    title PZH Dashboard
+    script(src="/js/webinosPzh.js", type="text/javascript")
+    link(rel="stylesheet", href="/css/layout.css", type="text/css", media="screen")
+    //if lt IE 9
+      link(rel="stylesheet", href="css/ie.css", type="text/css", media="screen")
+      script(src="http://html5shim.googlecode.com/svn/trunk/html5.js")
+    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js", type="text/javascript")
+    script(src="/js/hideshow.js", type="text/javascript")
+    script(src="/js/jquery.equalHeight.js", type="text/javascript")
+    script(type="text/javascript")
+      var userPath = "#{user}";
+    script(src="/js/view-main.js", type="text/javascript")
+  body
+    header#header
+      hgroup
+        h1.site_title
+          img(src="/images/webinosWithBorder.png")
+          | Personal zone admin
+        h2.section_title Dashboard
+        div.btn_view_site
+          a(href="/logout") Logout
+    // end of header bar
+
+    section#secondary_bar
+      div.user
+        p#userId Connecting...
+      div.breadcrumbs_container
+        article.breadcrumbs
+          a(href="/") webinos personal zone hub
+          div.breadcrumb_divider
+          a.current Dashboard
+    // end of secondary bar
+
+    aside#sidebar.column
+      h3
+        a(href="#refresh", id="refresh") Refresh list
+      h3 Connected personal zones
+      ul#enumConnectedPzh(style="display: block;")
+      ul#connectToAnotherPZHLink
+        li: a#connectPzh(href="#connectPzh") Connect to another personal zone...
+        li: a#approveUser(href="#approveUser") Approve another user...
+      h3 Connected devices
+      ul#enumConnectedPzp(style="display: block;")
+      ul
+        li: a#revokeCert(href="#revokeCert") Remove a device...
+      h3 Personal zone admin
+      ul
+        li: a#userDetails(href="#userDetails") About you
+        li: a#serviceConfig(href="#serviceConfig") Service configuration
+        li: a#restartPzh(href="#restartPzh") Restart the personal zone hub
+        li: a#crashLog(href="#crashLog") Crash log
+        li: a#infoLog(href="#infoLog") Info log
+
+      footer
+        hr
+        p
+          strong
+            | Powered by
+            a(href="http://www.webinos.org") webinos
+    // end of sidebar
+
+    section#main.column
+      article.module.width_full
+        header
+          h3 webinos personal zone hub
+          div.module_content
+            p Please select one of the actions on the left menu
+      // end of styles article
+      div.spacer

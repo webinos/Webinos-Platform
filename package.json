@@ -19,7 +19,7 @@
   , "xml2js" : "0.x.x"
   , "data2xml" : "0.8.x"
   , "crypt" : "0.0.x"
-  , "ejs" : "0.x.x"
+  , "jade" : "0.x.x"
   , "websocket" : "1.0.2"
   , "ansi" : "0.0.x"
   , "mdns" : "1.x.x"
