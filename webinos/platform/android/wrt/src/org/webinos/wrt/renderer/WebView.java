@@ -23,6 +23,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.webkit.WebSettings;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class WebView extends android.webkit.WebView {
@@ -30,7 +31,10 @@ public class WebView extends android.webkit.WebView {
 	private static final String TAG = "org.webinos.wrt.renderer.WebView";
 	public WebView(Context context, AttributeSet as) {
 		super(context, as);
-		getSettings().setJavaScriptEnabled(true);
+		WebSettings settings = getSettings();
+		settings.setJavaScriptEnabled(true);
+		/* temporary: until we have the widget API */
+		settings.setDomStorageEnabled(true);
 		/* TO avoid the scrollbar issue
 		 * http://forum.jquery.com/topic/extra-vertical-white-space-at-right-on-screen-for-android-phone */
 		setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
