@@ -28,6 +28,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webinos.app.R;
+import org.webinos.app.pzp.ConfigActivity;
 import org.webinos.app.wrt.mgr.WidgetManagerImpl;
 import org.webinos.app.wrt.mgr.WidgetManagerService;
 import org.webinos.util.AssetUtils;
@@ -51,6 +52,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class WidgetListActivity extends ListActivity implements WidgetManagerService.LaunchListener, WidgetManagerImpl.EventListener {
@@ -66,6 +68,7 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 
 	static final int SCAN_MENUITEM_ID     = 0;
 	static final int CONTEXT_MENUITEM_ID  = 1;
+	static final int PZP_MENUITEM_ID      = 2;
 	static final int STORES_MENUITEM_BASE = 100;
 	static final int SCANNING_DIALOG      = 0;
 	static final int NO_WIDGETS_DIALOG    = 1;
@@ -80,6 +83,8 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		setContentView(R.layout.activity_widget_list);
+
 		registerForContextMenu(getListView());
 		asyncRefreshHandler = new Handler() {
 			@Override
@@ -129,10 +134,10 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 			startActivity(intent);
 			return true;
 		case R.id.menu_check_for_updates:
-			Toast.makeText(this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.not_yet_implemented), Toast.LENGTH_SHORT).show();
 			return true;
 		case R.id.menu_details:
-			Toast.makeText(this, "Not yet implemented", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.not_yet_implemented), Toast.LENGTH_SHORT).show();
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -143,7 +148,8 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		menu.setQwertyMode(true);
-		menu.add(0, SCAN_MENUITEM_ID, 0, "Scan SD card");
+		menu.add(0, SCAN_MENUITEM_ID, 0, getString(R.string.scan_sd_card));
+		menu.add(0, PZP_MENUITEM_ID, 0, getString(R.string.pzp_settings));
 		/* add any configured stores to the menu */
 		if(stores != null) {
 			for(int i = 0; i < stores.length; i++) {
@@ -159,6 +165,10 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 		int itemId = item.getItemId();
 		if(itemId == SCAN_MENUITEM_ID) {
 			scanner.scan();
+			return true;
+		}
+		if(itemId == PZP_MENUITEM_ID) {
+			startActivity(new Intent(this, ConfigActivity.class));
 			return true;
 		}
 		if(itemId >= STORES_MENUITEM_BASE) {
@@ -197,6 +207,7 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 	private void initList() {
 		ids = mgr.getInstalledWidgets();
 		setListAdapter(new WidgetListAdapter(this, ids));
+		((TextView)findViewById(android.R.id.empty)).setText(getString(R.string.no_apps_installed));
 	}
 
 	@Override
