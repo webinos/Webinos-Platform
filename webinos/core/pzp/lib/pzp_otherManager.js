@@ -86,7 +86,7 @@ var Pzp_OtherManager = function (_parent) {
             }
             else if (msg === "cert") {
                 _parent.config.cert.external = receivedMsg[msg];
-                _parent.config.storeDetails(require("path").join("certificates", "external"), null, _parent.config.cert.external);
+                _parent.config.storeDetails(require("path").join("certificates", "external"), "certificates", _parent.config.cert.external);
             }
         }
         logger.log ("Files Synchronised with the PZH");
@@ -151,7 +151,7 @@ var Pzp_OtherManager = function (_parent) {
             _parent.pzp_state.connectedPzh[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
             if (_parent.config.metaData.friendlyName.indexOf(validMsgObj.payload.message.friendlyName) === -1) {
                 _parent.config.metaData.friendlyName = validMsgObj.payload.message.friendlyName + "'s " + _parent.config.metaData.friendlyName;
-                _parent.config.storeDetails(null, null, _parent.config.metaData);
+                _parent.config.storeDetails(null, "metaData", _parent.config.metaData);
             }
         } else if (_parent.pzp_state.connectedPzp[validMsgObj.from]) {
             _parent.pzp_state.connectedPzp[validMsgObj.from].friendlyName = validMsgObj.payload.message.friendlyName;
@@ -291,6 +291,9 @@ var Pzp_OtherManager = function (_parent) {
                         break;
                     case "update":
                         updateDeviceInfo(validMsgObj);
+                        break;
+                    case "changeFriendlyName":
+                        _parent.changeFriendlyName(validMsgObj.payload.message);
                         break;
                 }
             } else {

@@ -1,4 +1,4 @@
-/*******************************************************************************
+    /*******************************************************************************
  *  Code contributed to the webinos project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,14 +45,14 @@ function Config () {
     self.userPref = {};
     self.serviceCache = [];
 
-    var fileList = [{folderName: null, fileName: null, object: self.metaData},
+    var fileList = [{folderName: null, fileName: "metaData", object: self.metaData},
         {folderName: null, fileName: "crl", object: self.crl},
         {folderName: null, fileName:"trustedList", object: self.trustedList},
         {folderName: null, fileName:"untrustedList", object: self.untrustedCert},
         {folderName: null, fileName:"exCertList", object: self.exCertList},
-        {folderName: path.join("certificates", "internal"),fileName: null, object: self.cert.internal},
-        {folderName: path.join("certificates", "external"),fileName: null, object: self.cert.external},
-        {folderName:"userData", fileName: null, object: self.userData},
+        {folderName: path.join("certificates", "internal"),fileName: "certificates", object: self.cert.internal},
+        {folderName: path.join("certificates", "external"),fileName: "certificates", object: self.cert.external},
+        {folderName:"userData", fileName: "userDetails", object: self.userData},
         {folderName:"userData", fileName:"serviceCache", object: self.serviceCache},
         {folderName:"userData", fileName:"userPref", object: self.userPref}];
 
@@ -103,13 +103,14 @@ function Config () {
             var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
             var config = require(filePath);
             if (type === "serviceCache") {
-               if (self.metaData.webinosType === "Pzh" && config.pzhDefaultServices.length !== self.serviceCache.length) {
+               if (self.metaData.webinosType === "Pzh" &&
+                   config.pzhDefaultServices.length !== self.serviceCache.length) {
                    config.pzhDefaultServices = self.serviceCache;
-                   writeFile(config);
-               } else if (self.metaData.webinosType === "Pzp" && config.pzpDefaultServices.length !== self.serviceCache.length) {
+               } else if (self.metaData.webinosType === "Pzp" &&
+                          config.pzpDefaultServices.length !== self.serviceCache.length) {
                    config.pzpDefaultServices = self.serviceCache;
-                   writeFile(config);
                }
+               writeFile(config);
             } else if (type === "userPref" && !compareObjects(config.ports, self.userPref.ports)) {
                 config.ports = self.userPref.ports;
                 writeFile(config);
@@ -122,7 +123,7 @@ function Config () {
         var config = require(filePath), key;
         if (!compareObjects(config.webinos_version, self.metaData.webinos_version)) {
             self.metaData.webinos_version = config.webinos_version;
-            self.storeDetails(null, null, self.metaData);
+            self.storeDetails(null, "metaData", self.metaData);
         }
         if (!compareObjects(config.ports, self.userPref.ports)) {
             self.userPref.ports = config.ports;
@@ -139,7 +140,6 @@ function Config () {
 
     function createPolicyFile() {
         // policy file
-
         fs.readFile (path.join (self.metaData.webinosRoot, "policies", "policy.xml"), function (err) {
             if (err && err.code === "ENOENT") {
                 var data;
@@ -160,7 +160,7 @@ function Config () {
         fileList.forEach (function (name) {
             if (typeof name === "object") {
                 if(name.folderName === "userData") {
-                    if (name.fileName === null) {
+                    if (name.fileName === "userDetails") {
                         name.object = self.userData;
                     }
                     if (name.fileName === "serviceCache") {
@@ -178,8 +178,7 @@ function Config () {
         var name, i;
         require("./webinosId.js").fetchDeviceName(webinosType, inputConfig, function (webinosName) {
             var webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
-            self.metaData.webinosRoot = webinos_root + "/" + webinosName;
-            self.metaData.webinosName = webinosName;
+            self.metaData.webinosRoot = (webinosType.search("Pzh") !== -1)? (webinos_root + "/" + webinosName): webinos_root;
             for (i = 0; i < fileList.length; i = i + 1) {
                 name = fileList[i];
                 var fileName = (name.fileName !== null) ? (name.fileName+".json"):(webinosName +".json");
@@ -234,7 +233,6 @@ function Config () {
         self.userData.email = user.emails;
         self.userData.authenticator = user.from;
         self.userData.identifier = user.identifier;
-
     }
     /**
      *
@@ -249,9 +247,8 @@ function Config () {
             self.metaData.serverName = inputConfig.sessionIdentity;
             self.metaData.webinosName = deviceName;
             webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
-            self.metaData.webinosRoot = webinos_root+ "/" + self.metaData.webinosName;
+            self.metaData.webinosRoot = (webinosType.search("Pzh") !== -1)? webinos_root+ "/" + self.metaData.webinosName: webinos_root;
             setFriendlyName(inputConfig.friendlyName);
-
             createDefaultDirectories(webinosType, function (status) {
                 if (status) {
                     logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
@@ -298,7 +295,7 @@ function Config () {
                                         if (status) {
                                             logger.log ("*****connection certificate signed by master certificate*****");
                                             self.cert.internal.conn.cert = signedCert;
-                                            self.storeDetails(path.join("certificates", "internal"), null, self.cert.internal);
+                                            self.storeDetails(path.join("certificates", "internal"), "certificates", self.cert.internal);
                                             self.storeDetails(null, "crl", self.crl);
                                             callback(true);
                                         } else {
@@ -360,7 +357,7 @@ function Config () {
      * @param data
      */
     this.storeDetails = function (folderName, type, data) {
-        var fileName = (type !== null) ? type+".json":self.metaData.webinosName +".json";
+        var fileName = type+".json";
         var filePath = path.join (self.metaData.webinosRoot, folderName, fileName);
         fs.writeFile (path.resolve (filePath), JSON.stringify (data, null, " "), function (err) {
             if (err) {
@@ -376,7 +373,7 @@ function Config () {
      * @param callback
      */
     this.fetchDetails = function (folderName, type, assignValue) {
-        var fileName = (type !== null) ? (type+".json"):(self.metaData.webinosName +".json");
+        var fileName = type+".json";
         var filePath = path.join (self.metaData.webinosRoot, folderName, fileName);
         try {
             var data = fs.readFileSync (path.resolve (filePath));

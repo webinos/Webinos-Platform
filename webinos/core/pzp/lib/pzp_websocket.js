@@ -215,7 +215,7 @@ var PzpWSS = function (parent) {
                     break;
                 case "signedCertByPzh":
                     if (expectedPzhAddress === (msg.from && msg.from.split("_") && msg.from.split("_")[0])) {
-                        parent.enrollPzp.register (msg.from, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
+                        parent.enrollPzp.register (msg.from, msg.to, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
                     }
                     break;
                 case "setPzhProviderAddress":
@@ -340,7 +340,7 @@ var PzpWSS = function (parent) {
                         logger.log("got pzhcert");
                         logger.log("storing external cert");
                         parent.config.cert.external[msg.from] = { cert: msg.payload.message.cert, crl: msg.payload.message.crl};
-                        parent.config.storeDetails(path.join("certificates","external"), null, parent.config.cert.external);
+                        parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
                         logger.log("got pzhCert from:" + msg.from); //remeber the other party
 
                         if(!parent.config.exCertList.hasOwnProperty(msg.from)) {
@@ -628,7 +628,7 @@ var PzpWSS = function (parent) {
                         else if (rmsg.payload && rmsg.payload.status === "replyCert") {
                             logger.log("rmsg from: "  + rmsg.from);
                             parent.config.cert.external[rmsg.from] = { cert: rmsg.payload.message.cert, crl: rmsg.payload.message.crl};
-                            parent.config.storeDetails(path.join("certificates","external"), null, parent.config.cert.external);
+                            parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
 
                             if(!parent.config.exCertList.hasOwnProperty(rmsg.from)) {
                                 var storepzp = {"exPZP" : rmsg.from};
