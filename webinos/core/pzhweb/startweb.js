@@ -77,7 +77,7 @@ function loadWSCertificate(config, certName, certLabel, callback) {
                 config.generateSignedCertificate(value, function (status, value) {
                     if (status) {
                         config.cert.internal[certName].cert = value;
-                        config.storeDetails(require("path").join("certificates", "internal"), null, config.cert.internal);
+                        config.storeDetails(require("path").join("certificates", "internal"), "certificates", config.cert.internal);
                         return callback(status);
                     } else {
                         return callback(false);

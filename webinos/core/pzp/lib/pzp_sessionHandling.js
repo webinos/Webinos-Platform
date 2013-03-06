@@ -106,7 +106,7 @@ var Pzp = function () {
 
     this.changeFriendlyName = function (name) {
         self.config.metaData.friendlyName = name;
-        self.config.storeDetails(null, null, self.config.metaData);
+        self.config.storeDetails(null, "metaData", self.config.metaData);
         self.sendUpdateToAll();
     };
 
@@ -116,7 +116,11 @@ var Pzp = function () {
     this.setSessionId = function () {
         self.pzp_state.sessionId = self.config.metaData.webinosName;
         if (self.pzp_state.enrolled) {
-            self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.webinosName;
+            if (self.config.metaData.pzhAssignedId) {
+                self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.pzhAssignedId;
+            } else {
+                self.pzp_state.sessionId = self.config.metaData.pzhId + "/" + self.config.metaData.webinosName;
+            }
         }
         logger.addId (self.config.metaData.webinosName);
     };
@@ -636,7 +640,7 @@ var ConnectHub = function (parent) {
  */
 var EnrollPzp = function (parent, hub) {
     var logger = util.webinosLogging (__filename + "_EnrollPzp") || console;
-    this.register = function (_from, _clientCert, _masterCert, _masterCrl) {
+    this.register = function (_from, _to, _clientCert, _masterCert, _masterCrl) {
         logger.log ("PZP ENROLLED AT  " + _from);    // This message come from PZH web server over websocket
         //_parent.config.cert.internal.conn.cert = _clientCert;
         //_parent.config.cert.internal.master.cert = _masterCert;
@@ -657,13 +661,16 @@ var EnrollPzp = function (parent, hub) {
                 if (!parent.config.trustedList.pzh.hasOwnProperty (parent.config.metaData.pzhId)) {
                     parent.config.trustedList.pzh[parent.config.metaData.pzhId] = {"addr":"", "port":""};
                 }
-                parent.config.storeDetails(null, null, parent.config.metaData);
+                parent.config.storeDetails(null, "metaData", parent.config.metaData);
                 parent.config.storeDetails(null, "crl", parent.config.crl);
                 parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
-                parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
+                parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
                 parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
 
-
+                // Same PZP name existed in PZ, PZH has assigned a new id to the PZP.
+                if ((_to.split("/") && _to.split("/")[1])!== parent.config.metaData.webinosName) {
+                  parent.config.metaData.pzhAssignedId = _to.split("/")[1];
+                } 
                 hub.connect (function (status) {
                     if (status) {
                         logger.log ("successfully connected to the PZH ")

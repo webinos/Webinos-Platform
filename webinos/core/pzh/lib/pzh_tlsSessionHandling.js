@@ -100,7 +100,8 @@ var Pzh = function () {
             self.sendUpdateToAll(self.pzh_state.sessionId);
             self.pzh_otherManager.syncStart(_pzpId);
         } else {
-            logger.error ("unknown pzp " + _pzpId + " trying to connect")
+            logger.error ("unregistered pzp " + _pzpId + " trying to connect");
+            _conn.socket.end();
         }
     }
 
@@ -476,13 +477,21 @@ var AddPzp = function (parent) {
                 _callback (false, msg);
                 return;
             }
+            if (parent.config.trustedList.pzp[pzpId]) {
+                // Either PZP is already registered or else there is a name clash,,
+                // Lets assume there is name clash
+                pzpId = pzpId + Math.round((Math.random() * 100));
+                if (parent.config.trustedList.pzp[pzpId]) {
+                    this.addNewPzpCert(_msgRcvd, _callback); // Random failed to generate something unique, regenerate id
+                }
+            }
             parent.pzh_state.expecting.isExpectedCode (_msgRcvd.message.code, function (expected) { // Check QRCode if it is valid ..
                 if (expected) {
                     parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
                         if (status) { // unset expected QRCode
                             parent.config.cert.internal.signedCert[pzpId] = value;
                             parent.pzh_state.expecting.unsetExpected (function () {
-                                parent.config.storeDetails(require("path").join("certificates", "internal"),null, parent.config.cert.internal);
+                                parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
                                 if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
                                     parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
                                     parent.config.storeDetails(null, "trustedList", parent.config.trustedList);

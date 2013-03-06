@@ -52,7 +52,7 @@ function handleMessage() {
             return true;
         }
 
-        var userAndRequestor = arguments[1].split("_")[1].split("/");
+        var userAndRequestor = arguments[1].split("/");
         var sessionId = arguments[1].replace(/\//g, "_").replace(/@/g, "_");
 
         var request = {

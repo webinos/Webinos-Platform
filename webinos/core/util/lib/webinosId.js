@@ -45,19 +45,27 @@ exports.fetchDeviceName = function(type, config, callback) {
         };
 
         function onsuccess(prop_value, prop){
-            callback(prop_value + "_"+ type);
+            callback(prop_value);
         }
 
         function onerror(){
             log.error("android get device name returns error");
-            callback("android"+ "_"+ type);
+            callback("android");
         }
 
         var devStatusModule = bridge.load('org.webinos.impl.DevicestatusImpl', this);
         devStatusModule.getPropertyValue(onsuccess, onerror, prop);
-    } else if ((type === "Pzp" || type === "PzhP")){
-        callback(os.hostname() + "_"+ type);
-    } else if (type === "Pzh"){
+    } else if ((type.search("Pzp") !== -1)){
+        var key, cpus = os.cpus(), id, cpu_acc = "";
+        for (key = 0; key <cpus.length; key = key + 1) {
+            cpu_acc += cpus[key].model; // This will create string longer depending on cores you have on your machine..
+        }
+        id = require("crypto").createHash("md5").update(os.hostname() + process.cwd() + Math.random()).digest("hex");
+        callback(id);
+    } else if(type.search("PzhP") !== -1) {
+        id = require("crypto").createHash("md5").update(os.hostname() + process.cwd()).digest("hex");
+        callback(id);
+    } else if (type.search("Pzh") !== -1){
         callback(config.friendlyName);
     }
 };

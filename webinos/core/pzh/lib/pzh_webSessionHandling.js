@@ -279,7 +279,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :obj.message.externalCerts.crl,
                     serverPort   :obj.message.externalCerts.serverPort
                 };
-                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
+                userObj.config.storeDetails(require("path").join("certificates", "external"),"certificates", userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {// refresh your own certs
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -377,7 +377,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.cert.external.hasOwnProperty (name)) {
                 userObj.config.cert.external[name] = details;
-                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
+                userObj.config.storeDetails(require("path").join("certificates", "external"), "certificates", userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -425,7 +425,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :friendpzh.config.crl,
                     serverPort   :80 // TODO
                 };
-                userObj.config.storeDetails(require("path").join("certificates", "external"),null, userObj.config.cert.external);
+                userObj.config.storeDetails(require("path").join("certificates", "external"), "certificates", userObj.config.cert.external);
 
                 //update the actual list.
                 if (!userObj.config.trustedList.pzh.hasOwnProperty (friendpzh.config.metaData.serverName)) {
