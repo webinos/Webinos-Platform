@@ -28,13 +28,13 @@
     this.base = WebinosService;
     this.base(params);
 
-    this.peerId = this.id;
+    this.peerId = generateIdentifier();
     module = this;
 
     this.createChannel = createChannel;
     this.searchForChannels = searchForChannels;
 
-    console.log("Creating app2app instance with id "+ this.id);
+    console.log("Creating app2app instance with peer Id " + this.peerId);
     registerPeer(
       function (success) {
         console.log("Bind succeeded: registered peer.");
@@ -168,12 +168,19 @@
   /**
    * Create a new channel. The configuration object should contain "namespace", "properties" and optionally "appInfo".
    * Namespace is a valid URN which uniquely identifies the channel in the personal zone. Properties currently contain
-   * a "mode" of either "send-receive" or "receive-only". The "send-receive" mode allows both the channel creator
-   * and connected clients to send and receive, while "receive-only" only allows the channel creator to send. appInfo
-   * allows a channel creator to attach application-specific information to a channel.
+   * "mode" and optionally "canDetach".
+   * The mode can be either "send-receive" or "receive-only". The "send-receive" mode allows both the channel creator
+   * and connected clients to send and receive, while "receive-only" only allows the channel creator to send.
+   * If canDetach is defined it allows the channel creator to disconnect from the channel without closing the channel.
+   * appInfo allows a channel creator to attach application-specific information to a channel.
    *
-   * The channel creator decides which clients are allowed to connect to the channel. For each client which wants to
+   * The channel creator can decide which clients are allowed to connect to the channel. For each client which wants to
    * connect to the channel the requestCallback is invoked which should return true (if allowed to connect) or false.
+   * If no requestCallback is defined access is allowed by default.
+   *
+   * If the channel namespace already exists the error callback is invoked, unless the request is from the same
+   * session as the existing channel in which case it is considered a reconnect of the channel creator and its
+   * bindings are refreshed (the configuration of the existing channel is not modified).
    *
    * @param configuration Channel configuration.
    * @param requestCallback Callback invoked to allow or deny clients access to a channel.
@@ -217,11 +224,6 @@
       return;
     }
 
-    if (typeof requestCallback !== "function") {
-      errorCallback(respondWith("Invalid request callback."));
-      return;
-    }
-
     if (typeof messageCallback !== "function") {
       errorCallback(respondWith("Invalid message callback."));
       return;
@@ -229,9 +231,11 @@
 
     var params = {};
     params.peerId = module.peerId;
+    params.sessionId = webinos.session.getSessionId();
     params.namespace = configuration.namespace;
     params.properties = configuration.properties;
     params.appInfo = configuration.appInfo;
+    params.hasRequestCallback = (typeof requestCallback === "function");
 
     var rpc = webinos.rpcHandler.createRPC(module, "createChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
@@ -317,7 +321,6 @@
     };
 
     return pendingOperation;
-
   }
 
   /* Channel proxy implementation */
@@ -501,6 +504,13 @@
     return {
       message: message
     };
+  }
+
+  function generateIdentifier() {
+    function s4() {
+      return ((1 + Math.random()) * 0x10000|0).toString(16).substr(1);
+    }
+    return s4() + s4() + s4();
   }
 
 }());
