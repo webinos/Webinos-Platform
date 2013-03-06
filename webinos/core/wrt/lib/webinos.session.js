@@ -162,7 +162,7 @@
   function updateConnected(message){
     otherPzh = message.connectedPzh;
     otherPzp = message.connectedPzp;
-    isConnected = !!(otherPzh.indexOf (pzhId) !== -1);
+    isConnected = !!(otherPzh.indexOf(pzhId) !== -1);
     enrolled = message.enrolled;
     mode = message.mode;
   }
@@ -210,7 +210,7 @@
           callListenerForMsg(data);
           break;   
         case "update":
-          updateConnected(data.payload.message);
+          setWebinosSession(data);
           callListenerForMsg(data);
           break;
         case "infoLog":
