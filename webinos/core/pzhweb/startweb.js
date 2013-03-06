@@ -104,8 +104,7 @@ starter.start = function(hostname, friendlyName, callback) {
                 logger.error(value);
                 logger.error("setting configuration for the zone provider failed, the .webinos directory needs to be deleted.")
             } else {
-                starter.startWS(hostname, config, function (err, val) {
-                });
+                starter.startWS(hostname, config, callback);
             }
         });
     });
