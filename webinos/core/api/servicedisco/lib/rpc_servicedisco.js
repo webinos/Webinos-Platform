@@ -185,9 +185,10 @@
 					// filter results for zoneId
 					if (filter && typeof filter.zoneId === 'object') {
 						function hasZoneId(sv) {
+							// extract the openid account (user@foo.bar)
+							var zoneId = /[^_]+_([^\/]+)/.exec(sv.serviceAddress);
 							for (var i=0; i<filter.zoneId.length; i++) {
-								var found = sv.serviceAddress.indexOf(filter.zoneId[i]) !== -1 ? true : false;
-								if (found) return true;
+								if (zoneId && zoneId[1] === filter.zoneId[i]) return true;
 							}
 							return false;
 						}
