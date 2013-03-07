@@ -1,0 +1,28 @@
+<policy-set combine="first-matching-target" description="user policy" id='s000000'>
+    <policy combine="first-applicable" description="default policy" id='p000000'>
+        <target>
+        </target>
+        <rule effect="deny"></rule>
+        <DataHandlingPreferences PolicyId="#DHP_allow_all">
+            <AuthorizationsSet>
+                <AuthzUseForPurpose>
+                    <Purpose/>
+                </AuthzUseForPurpose>
+            </AuthorizationsSet>
+        </DataHandlingPreferences>
+        <ProvisionalActions>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://webinos.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://www.w3.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://wacapps.net</AttributeValue>
+            </ProvisionalAction>
+        </ProvisionalActions>
+    </policy>
+</policy-set>
