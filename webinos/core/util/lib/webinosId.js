@@ -61,10 +61,10 @@ exports.fetchDeviceName = function(type, config, callback) {
             cpu_acc += cpus[key].model; // This will create string longer depending on cores you have on your machine..
         }
         id = require("crypto").createHash("md5").update(os.hostname() + process.cwd() + Math.random()).digest("hex");
-        callback(id);
+        callback(id.substring (0, 40));
     } else if(type.search("PzhP") !== -1) {
         id = require("crypto").createHash("md5").update(os.hostname() + process.cwd()).digest("hex");
-        callback(id);
+        callback(id.substring (0, 40));
     } else if (type.search("Pzh") !== -1){
         callback(config.friendlyName);
     }
