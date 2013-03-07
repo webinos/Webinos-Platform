@@ -337,11 +337,12 @@ var Pzp = function () {
                         } else {
                             logger.error ("connection to PZH failed ");
                         }
+                        return callback(status);
                     });
                 } else {
                     self.webinos_manager.setupMessage_RPCHandler ();
+                    return callback (true, self.pzp_state.sessionId);  // Virgin mode
                 }
-                return callback (true, self.pzp_state.sessionId, self.config.cert.internal.conn.csr);// retruning csr to make test work
             } else {
                 return callback (false, value);
             }
