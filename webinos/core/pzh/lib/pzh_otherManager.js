@@ -217,7 +217,7 @@ var Pzh_RPC = function (_parent) {
      */
     this.processMsg = function (msgObj) {
         util.webinosMsgProcessing.processedMsg (this, msgObj, function (validMsgObj) {
-            _parent.pzh_state.logger.log ("received message" + JSON.stringify (validMsgObj));
+            //_parent.pzh_state.logger.log ("received message" + JSON.stringify (validMsgObj));
             if (validMsgObj.type === "prop") {
                 switch (validMsgObj.payload.status) {
                     case "registerServices":

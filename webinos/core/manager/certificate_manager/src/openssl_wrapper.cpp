@@ -463,9 +463,8 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   // It does set GMT time but is relevant to machine time.
   // A better solution would be to have ntp server contacted to get a proper time.
   if(certType == 1) {
-    X509_gmtime_adj(s, long(0-300));
-  }
-  else {
+    X509_gmtime_adj(s, long(0-3000));
+  } else {
     X509_gmtime_adj(s, long(0));
   }
   // End of WP-37
@@ -528,7 +527,7 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
       X509_add_ext(cert, ex, -1);
     }
 
-    if(!(ex = X509V3_EXT_conf_nid(NULL,  &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
+    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
       return ERR_peek_error();
     } else {
       X509_add_ext(cert, ex, -1);

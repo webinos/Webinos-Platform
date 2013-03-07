@@ -80,7 +80,7 @@
             // Get the correct websocket object.
             var ws = window.WebSocket || window.MozWebSocket;
             try {
-                channel = new ws ("ws://" + hostname + ":" + port);
+                channel = new ws ("wss://" + hostname + ":" + port);
             } catch (err) { // Websockets are not available for this browser. We need to investigate in order to support it.
                 throw new Error ("Your browser does not support websockets. Please report your browser on webinos.org.");
             }

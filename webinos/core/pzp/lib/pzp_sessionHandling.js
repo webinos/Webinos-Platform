@@ -34,6 +34,7 @@ var Pzp = function () {
         discoveredPzp:[], // Store Discovered PZP details
         networkAddr: "",
         connectingPeerAddr: "",
+        wssServer: {},
         connectedDevicesToPzh: {pzp:{}, pzh: {} } }; //Stores information about device connected to PZH but not to PZP.
     self.config = {}; // All data in this structure will be persistent information, set by configuration.js
     self.webinos_manager = {}; // Hold objects of connected webinos manager
@@ -137,6 +138,7 @@ var Pzp = function () {
                     var caList = [], crlList = [], key;
                     caList.push(self.config.cert.internal.pzh.cert);
                     crlList.push(self.config.crl.value );
+                   // caList.push(self.config.cert.internal.master.cert);
 
                     for ( key in self.config.cert.external) {
                         if(self.config.cert.external.hasOwnProperty(key)) {
@@ -147,7 +149,7 @@ var Pzp = function () {
                     options = {
                         key : value,
                         cert: self.config.cert.internal.conn.cert,
-                        crl : crlList,
+                        //crl : crlList,
                         ca  : caList,
                         servername: self.config.metaData.pzhId,
                         rejectUnauthorized: true,
@@ -652,35 +654,44 @@ var EnrollPzp = function (parent, hub) {
             if(status) {
                 logger.log("connection signed certificate by PZP");
                 parent.config.cert.internal.conn.cert = signedCert;
-                parent.config.crl.value = _masterCrl;
-                parent.config.metaData.pzhId = _from;
-                parent.config.metaData.serverName = _from && _from.split ("_")[0];
-                if (_from.indexOf (":") !== -1) {
-                    parent.config.metaData.serverName = parent.config.metaData.serverName.split (":")[0];
-                }
+                parent.config.generateSignedCertificate(parent.config.cert.internal.web.csr, function(status, signedCert) {
+                    if(status) {
+                        parent.config.cert.internal.web.cert = signedCert;
 
-                if (!parent.config.trustedList.pzh.hasOwnProperty (parent.config.metaData.pzhId)) {
-                    parent.config.trustedList.pzh[parent.config.metaData.pzhId] = {"addr":"", "port":""};
-                }
-                parent.config.storeDetails(null, "metaData", parent.config.metaData);
-                parent.config.storeDetails(null, "crl", parent.config.crl);
-                parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
-                parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
-                parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
+                        parent.config.crl.value = _masterCrl;
+                        parent.config.metaData.pzhId = _from;
+                        parent.config.metaData.serverName = _from && _from.split ("_")[0];
 
-                // Same PZP name existed in PZ, PZH has assigned a new id to the PZP.
-                if ((_to.split("/") && _to.split("/")[1])!== parent.config.metaData.webinosName) {
-                  parent.config.metaData.pzhAssignedId = _to.split("/")[1];
-                } 
-                hub.connect (function (status) {
-                    if (status) {
-                        logger.log ("successfully connected to the PZH ")
-                    } else {
-                        logger.error ("connection to the PZH unsuccessful")
+                        if (_from.indexOf (":") !== -1) {
+                            parent.config.metaData.serverName = parent.config.metaData.serverName.split (":")[0];
+                        }
+
+                        if (!parent.config.trustedList.pzh.hasOwnProperty (parent.config.metaData.pzhId)) {
+                            parent.config.trustedList.pzh[parent.config.metaData.pzhId] = {"addr":"", "port":""};
+                        }
+                        // Same PZP name existed in PZ, PZH has assigned a new id to the PZP.
+                        if ((_to.split("/") && _to.split("/")[1])!== parent.config.metaData.webinosName) {
+                            parent.config.metaData.pzhAssignedId = _to.split("/")[1];
+                        }
+
+                        parent.config.storeDetails(null, "metaData", parent.config.metaData);
+                        parent.config.storeDetails(null, "crl", parent.config.crl);
+                        parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
+                        parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
+                        parent.pzp_state.enrolled = true; // Moved from Virgin mode to hub mode
+
+                        hub.connect (function (status) {
+                            if (status) {
+                                logger.log ("successfully connected to the PZH ")
+                            } else {
+                                logger.error ("connection to the PZH unsuccessful")
+                            }
+                        });
                     }
-                });
+                });// Start WSS AGAIN
             }
         });
+
     };
 };
 

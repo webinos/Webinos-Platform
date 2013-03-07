@@ -227,7 +227,7 @@ var PzpWSS = function (parent) {
                 case "showHashQR":
                     getHashQR(function(value){
                         var msg5 = prepMsg(msg.from, "showHashQR", value);
-                        sendtoClient(msg5);
+                        sendAllClients(msg5);
                     });
                     break;
                 case "checkHashQR":
@@ -236,7 +236,7 @@ var PzpWSS = function (parent) {
                     logger.log("hash passed from client page is: " + hash);
                     checkHashQR(hash, function(value){
                         var msg6 = prepMsg(msg.from, "checkHashQR", value);
-                        sendtoClient(msg6);
+                        sendAllClients(msg6);
                     });
                     break;
                 case "requestRemoteScanner":
@@ -290,112 +290,160 @@ var PzpWSS = function (parent) {
         var documentRoot = path.join (__dirname, "../../../web_root/");
         var filename = path.join (documentRoot, uri);
         util.webinosContent.sendFile (res, documentRoot, filename, "testbed/client.html");
-
+    }
+    function setCertParams(callback) {
+        var key_id = parent.config.cert.internal.web.key_id;
+        parent.config.fetchKey(key_id, function (status, privateKey) {
+            if (status) {
+                var ca = [parent.config.cert.internal.master.cert];
+                if (parent.pzp_state.enrolled){
+                    ca.push(parent.config.cert.internal.pzh.cert);
+                }
+                callback(true, {
+                    key:  privateKey,
+                    cert: parent.config.cert.internal.web.cert,
+                    ca: ca,
+                    requestCert: false,
+                    rejectUnauthorized: false
+                });
+            } else {
+                callback(false)
+            }
+        });
+    }
+    function loadPzpWSCertificate(callback) {
+        // If this is first time of PZP WS generate certificates
+        if (!parent.config.cert.internal.web.cert) {
+            var cn = "PzpWSS" + ":" + parent.config.metaData.webinosName;
+            parent.config.generateSelfSignedCertificate("PzpWSS", cn, function (status, selfSignCert) {
+                if (status) {
+                    parent.config.generateSignedCertificate(selfSignCert, function (status, signedWebCert) {
+                        if (status) {
+                            parent.config.cert.internal.web.cert = signedWebCert;
+                            parent.config.storeDetails(require("path").join("certificates", "internal"), null, parent.config.cert.internal);
+                            setCertParams(callback);
+                            //self.storeCertificateBrowser(false);
+                            // Ziran : Add your code here
+                        } else {
+                            return callback(false);
+                        }
+                    });
+                } else {
+                    return callback(false);
+                }
+            });
+        } else {
+            setCertParams(callback);
+        }
     }
 
     function startHttpServer(callback) {
-        var self = this;
-        var http = require ("http");
-        var httpserver = http.createServer(function (request, response) {
-            var parsed = url.parse(request.url, true);
-            var tmp = "";
+        loadPzpWSCertificate(function(status, certProp) {
+            if(status) {
+                var httpsServer = require("https").createServer(certProp,function (request, response) {
+                    var parsed = url.parse(request.url, true);
+                    var tmp = "";
 
-            request.on('data', function(data){
-                tmp = tmp + data;
-            });
-            request.on("end", function(data){
-                if (parsed.query && parsed.query.cmd === "pubCert"){
-                    var msg = JSON.parse(tmp.toString("utf8"));
-                    logger.log("got pubcert");
-                    //store the pub certificate and send own pub cert back
-                    var filename = "otherconn";
-                    parent.config.storeKeys(msg.payload.message.cert, filename);
-                    parent.pzp_state.connectingPeerAddr = msg.payload.message.addr;
-                    //send own public key out
-                    var to = msg.from;
-                    logger.log("exchange cert message sending to: " + to);
-                    //save a local copy
-                    var filename = "conn";
-                    parent.config.storeKeys(parent.config.cert.internal.conn.cert, filename);
-                    var repubcert = {
-                        from: parent.pzp_state.sessionId,
-                        payload: {
-                            status: "repubCert",
-                            message:
-                            {cert: parent.config.cert.internal.conn.cert }
+                    request.on('data', function(data){
+                        tmp = tmp + data;
+                    });
+                    request.on("end", function(data){
+                        var msg, storepzp, filename, to;
+                        if (parsed.query && parsed.query.cmd === "pubCert"){
+                            msg = JSON.parse(tmp.toString("utf8"));
+                            logger.log("got pubcert");
+                            //store the pub certificate and send own pub cert back
+                            filename = "otherconn";
+                            parent.config.storeKeys(msg.payload.message.cert, filename);
+                            parent.pzp_state.connectingPeerAddr = msg.payload.message.addr;
+                            //send own public key out
+                            to = msg.from;
+                            logger.log("exchange cert message sending to: " + to);
+                            //save a local copy
+                            filename = "conn";
+                            parent.config.storeKeys(parent.config.cert.internal.conn.cert, filename);
+                            var repubcert = {
+                                from: parent.pzp_state.sessionId,
+                                payload: {
+                                    status: "repubCert",
+                                    message:
+                                    {cert: parent.config.cert.internal.conn.cert }
+                                }
+                            };
+                            response.writeHead(200, {"Content-Type": "application/json"});
+                            response.write(JSON.stringify(repubcert));
+                            response.end();
+
+                            msg = prepMsg("", "pubCert", { "pubCert": true});
+                            sendAllClients(msg);
+                            return;
                         }
-                    };
-                    response.writeHead(200, {"Content-Type": "application/json"});
-                    response.write(JSON.stringify(repubcert));
-                    response.end();
+                        else if (parsed.query && parsed.query.cmd === "pzhCert"){
+                            if (!parent.config.cert.external.hasOwnProperty(parsed.query.from)) {
+                                msg = JSON.parse(tmp.toString("utf8"));
+                                logger.log("got pzhcert");
+                                logger.log("storing external cert");
+                                parent.config.cert.external[msg.from] = { cert: msg.payload.message.cert, crl: msg.payload.message.crl};
+                                parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
+                                logger.log("got pzhCert from:" + msg.from); //remeber the other party
 
-                    var msg = prepMsg("", "pubCert", { "pubCert": true});
-                    sendtoClient(msg);
+                                if(!parent.config.exCertList.hasOwnProperty(msg.from)) {
+                                    storepzp = {"exPZP" : msg.from};
+                                    parent.config.exCertList = storepzp;
+                                    parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
+                                }
 
-                    return;
-                }
-                else if (parsed.query && parsed.query.cmd === "pzhCert"){
-                    if (!parent.config.cert.external.hasOwnProperty(parsed.query.from)) {
-                        var msg = JSON.parse(tmp.toString("utf8"));
-                        logger.log("got pzhcert");
-                        logger.log("storing external cert");
-                        parent.config.cert.external[msg.from] = { cert: msg.payload.message.cert, crl: msg.payload.message.crl};
-                        parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
-                        logger.log("got pzhCert from:" + msg.from); //remeber the other party
+                                //send own certificate back
+                                to = msg.from;
+                                logger.log("exchange cert message sending to: " + to);
 
-                        if(!parent.config.exCertList.hasOwnProperty(msg.from)) {
-                            var storepzp = {"exPZP" : msg.from};
-                            parent.config.exCertList = storepzp;
-                            parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
-                        }
+                                var replycert = {
+                                    from: parent.pzp_state.sessionId,
+                                    payload: {
+                                        status: "replyCert",
+                                        message:
+                                        {cert: parent.config.cert.internal.master.cert, crl: parent.config.crl}
+                                    }
+                                };
 
-                        //send own certificate back
-                        var to = msg.from;
-                        logger.log("exchange cert message sending to: " + to);
-
-                        var replycert = {
-                            from: parent.pzp_state.sessionId,
-                            payload: {
-                                status: "replyCert",
-                                message:
-                                {cert: parent.config.cert.internal.master.cert, crl: parent.config.crl}
+                                response.writeHead(200, {"Content-Type": "application/json"});
+                                response.write(JSON.stringify(replycert));
+                                response.end();
                             }
-                        };
-                        response.writeHead(200, {"Content-Type": "application/json"});
-                        response.write(JSON.stringify(replycert));
-                        response.end();
+                            return;
+                        }
+                        else if(parsed.query && parsed.query.cmd === "requestRemoteScanner"){
+                            msg = JSON.parse(tmp.toString("utf8"));
+                            logger.log("got requestRemoteScanner");
+                            msg = prepMsg("", "requestRemoteScanner", { "requestRemoteScanner": true});
+                            sendAllClients(msg);
+                            return;
+                        }
+                    });
+
+                    handleRequest(parsed.pathname, request, response);
+                });
+                httpsServer.on ("error", function (err) {
+                    if (err.code === "EADDRINUSE") {
+                        parent.config.userPref.ports.pzp_webSocket = parseInt (parent.config.userPref.ports.pzp_webSocket, 10) + 1;
+                        logger.error ("address in use, now trying port " + parent.config.userPref.ports.pzp_webSocket);
+                        httpsServer.listen (parent.config.userPref.ports.pzp_webSocket, "0.0.0.0");
+
+                    } else {
+                        logger.log("starting pzp https failed");
+                        callback(false);
                     }
-                    return;
-                }
-                else if(parsed.query && parsed.query.cmd === "requestRemoteScanner"){
-                    var msg = JSON.parse(tmp.toString("utf8"));
-                    logger.log("got requestRemoteScanner");
+                });
 
-                    var msg = prepMsg("", "requestRemoteScanner", { "requestRemoteScanner": true});
-                    sendtoClient(msg);
-
-                    return;
-                }
-            });
-
-            handleRequest(parsed.pathname, request, response);
-        });
-
-        httpserver.on ("error", function (err) {
-            if (err.code === "EADDRINUSE") {
-                parent.config.userPref.ports.pzp_webSocket = parseInt (parent.config.userPref.ports.pzp_webSocket, 10) + 1;
-                logger.error ("address in use, now trying port " + parent.config.userPref.ports.pzp_webSocket);
-                httpserver.listen (parent.config.userPref.ports.pzp_webSocket, "0.0.0.0");
+                httpsServer.on ("listening", function () {
+                    logger.log ("httpServer listening at port " + parent.config.userPref.ports.pzp_webSocket + " and hostname localhost");
+                    return callback (true, httpsServer);
+                });
+                httpsServer.listen (parent.config.userPref.ports.pzp_webSocket, "0.0.0.0");
             } else {
-                return callback (false, err);
+                logger.error("pzp failed to load certificates. You will not be able to use browser to connect PZP");
             }
         });
-
-        httpserver.on ("listening", function () {
-            logger.log ("httpServer listening at port " + parent.config.userPref.ports.pzp_webSocket + " and hostname localhost");
-            return callback (true, httpserver);
-        });
-        httpserver.listen (parent.config.userPref.ports.pzp_webSocket, "0.0.0.0");
     }
 
     function startAndroidWRT () {
@@ -430,7 +478,7 @@ var PzpWSS = function (parent) {
             var payload = { "foundpeers": data};
             logger.log(data);
             var msg = prepMsg("", "pzpFindPeers", payload);
-            sendtoClient(msg);
+            sendAllClients(msg);
         });
     }
 
@@ -622,8 +670,9 @@ var PzpWSS = function (parent) {
                             parent.config.storeKeys(rmsg.payload.message.cert, filename);
                             //trigger Hash QR display
                             var payload = { "pubCert": true};
+
                             var msg = prepMsg("", "pubCert", { "pubCert": true});
-                            sendtoClient(msg);
+                            sendAllClients(msg);
                         }
                         else if (rmsg.payload && rmsg.payload.status === "replyCert") {
                             logger.log("rmsg from: "  + rmsg.from);
@@ -695,19 +744,29 @@ var PzpWSS = function (parent) {
         }
     };
 
+    function sendAllClients(msg) {
+        var appId;
+        for(appId in connectedWebApp) {
+            if(connectedWebApp.hasOwnProperty(appId)) {
+                msg.to = appId;
+                connectedWebApp[appId].sendUTF(JSON.stringify(msg));
+            }
+        }
+    }
+
     this.startWebSocketServer = function (_callback) {
-        startHttpServer (function (status, value) {
+        startHttpServer (function (status, httpsServer) {
             if (status) {
                 if (wrtServer) {
                     startAndroidWRT ();
                 }
                 var WebSocketServer = require ("websocket").server;
-                var wsServer = new WebSocketServer ({
-                    httpServer           :value,
+                parent.pzp_state.wssServer = new WebSocketServer ({
+                    httpServer           :httpsServer,
                     autoAcceptConnections:false
                 });
                 logger.addId (parent.config.metaData.webinosName);
-                wsServer.on ("request", function (request) {
+                parent.pzp_state.wssServer.on("request", function (request) {
                     logger.log ("Request for a websocket, origin: " + request.origin + ", host: " + request.host);
                     if (request.host && request.host.split (":") &&
                         (request.host.split(":")[0] === "localhost" || request.host.split(":")[0] === "127.0.0.1")) {
@@ -722,20 +781,10 @@ var PzpWSS = function (parent) {
                 });
                 return _callback (true);
             } else {
-                return _callback (false, err);
+                return _callback (false);
             }
         });
     };
-
-    function sendtoClient(msg) {
-        var appId;
-        for(appId in connectedWebApp) {
-            if(connectedWebApp.hasOwnProperty(appId)) {
-                msg.to = appId;
-                connectedWebApp[appId].sendUTF(JSON.stringify(msg));
-            }
-        }
-    }
 
     this.sendConnectedApp = function (address, message) {
         if (address && message) {
@@ -773,7 +822,82 @@ var PzpWSS = function (parent) {
                 self.sendConnectedApp (key, msg);
             }
         }
-    }
+    };
+    this.storeCertificateBrowser = function(enrolled) {
+        function deleteFiles() {
+            fs.unlinkSync("pass.txt");
+            fs.unlinkSync("privatekey.pem");
+            fs.unlinkSync("webkey.pem");
+            fs.unlinkSync("pzpca.pem");
+            fs.unlinkSync("pzp_wss.pem");
+            fs.unlinkSync("cert_ca.p12");
+            fs.unlinkSync("cert_web.p12");
+            if (enrolled) {
+                fs.unlinkSync("pzh_cert.pem");
+            }
+        }
+        function execute(exec, i) {
+            require ("child_process").exec(exec[i], function (error, stderr, stdout) {
+                if (!error) {
+                    logger.log("successfully executed - " + exec[i]);
+                    if ((exec.length-1) === i){
+                        deleteFiles();
+                        return;
+                    }
+                    i = i + 1;
+                    execute(exec, i);
+                } else {
+                    logger.error(error.message);
+                    logger.error(stdout);
+                    logger.error("FAILED IMPORTING CERTIFICATE IN THE BROWSER.")
+                }
+            });
+        }
+        try {
+            var fs = require("fs"), i, j, mozillaDir, fileList, exec = [], wss, ca, pzhca;
+            fs.writeFileSync("pzpca.pem", parent.config.cert.internal.master.cert);
+            fs.writeFileSync("pzp_wss.pem", parent.config.cert.internal.web.cert);
+            fs.writeFileSync("pass.txt", "\n");
+            fileList = fs.readdirSync("../.mozilla/firefox/");
+            for (i = 0 ; i < fileList.length; i = i + 1) {
+                var stat = fs.statSync("../.mozilla/firefox/"+fileList[i]);
+                if(stat.isDirectory() && fileList[i].split(".") && fileList[i].split(".")[1] === "default") {
+                    mozillaDir = fileList[i];
+                    break;
+                }
+            }
+            wss = encodeURIComponent("PzpWSS:"+parent.config.metaData.webinosName);
+            ca = encodeURIComponent("PzpCA:"+parent.config.metaData.webinosName);
+            pzhca = encodeURIComponent("PzhCA:"+parent.config.metaData.webinosName);
+            if(enrolled) {
+                fs.writeFileSync("pzh_cert.pem", parent.config.cert.internal.pzh.cert);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -D -n "+wss);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -D -n "+ca);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -D -n "+ wss);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -D -n "+ ca);
+                exec.push("certutil -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -A -t 'TCu,,' -i pzh_cert.pem -n "+pzhca);
+                exec.push("certutil -d sql:$HOME/.pki/nssdb -A -t 'TCu,,' -i pzh_cert.pem -n "+pzhca);
+            }
+            exec.push("openssl pkcs12 -export -in pzpca.pem -inkey privatekey.pem -out cert_ca.p12 -passin pass:\"\" -passout pass:\"\" -name "+ca);
+            exec.push("openssl pkcs12 -export -in pzp_wss.pem -inkey webkey.pem -out cert_web.p12 -passin pass:\"\" -passout pass:\"\" -name "+wss);
+            exec.push("pk12util -d sql:$HOME/.pki/nssdb -i cert_ca.p12 -w pass.txt");
+            exec.push("pk12util -d sql:$HOME/.pki/nssdb -i cert_web.p12 -w pass.txt");
+            exec.push("pk12util -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -i cert_ca.p12 -w pass.txt");
+            exec.push("pk12util -d $HOME/.mozilla/firefox/"+mozillaDir+"/ -i cert_web.p12 -w pass.txt");
+            parent.config.fetchKey(parent.config.cert.internal.master.key_id, function (status, value) {
+                if (status) {
+                    fs.writeFileSync("privatekey.pem", value);
+                    parent.config.fetchKey(parent.config.cert.internal.web.key_id, function (status, value) {
+                        if (status) {
+                            fs.writeFileSync("webkey.pem", value);
+                            execute(exec, 0);
+                        }
+                    });
+                }
+            });
+        } catch (err) {
+            logger.error("failed in importing certificates in the browser");
+        }
+    };
 };
-
 module.exports = PzpWSS;
