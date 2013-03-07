@@ -319,13 +319,13 @@ var Pzh = function () {
         }
         if (self.config.trustedList.pzh[id]) {
             delete self.config.trustedList.pzh[id];
-            self.config.storeTrustedList (self.config.trustedList);
+            self.config.storeDetails(null, "trustedList", self.config.trustedList);
             //self.config.storeDetails(null, "trustedList", self.config.trustedList);
             logger.log("removed pzh "+ id+" from the trusted list ");
             if (self.config.cert.external[id]) {
                 delete self.config.cert.external[id];
-                self.config.storeCertificate (self.config.cert.external, "external");
-                //self.config.storeDetails("certificates/external", null, self.config.certificate.external);
+                self.config.storeDetails(require("path").join("certificates", "external"), "certificates",
+                                         self.config.cert.external);
                 logger.log("removed pzh "+ id+" certificate details ");
             }
             for (var key in self.pzh_state.connectedPzp) {

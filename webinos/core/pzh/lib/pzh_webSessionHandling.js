@@ -450,8 +450,8 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                         encodeURIComponent(friendpzh.config.metaData.webinosName) + 
                         "/approve-user/" + encodeURIComponent(userObj.config.metaData.webinosName) + "/"        
                 
-                console.log("User data:\n" + require('util').inspect(userObj.config.userData));
-                console.log("Obj data:\n" + require('util').inspect(obj.message));
+                logger.log("User data:\n" + require('util').inspect(userObj.config.userData));
+                logger.log("Obj data:\n" + require('util').inspect(obj.message));
                 
                 notifyUser(
                     friendpzh.config.metaData.serverName, 
@@ -621,13 +621,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 if (obj.message.type !== "checkPzh") {
                     findUserFromEmail (obj, function (userObj) {
                         if (userObj) {
-                            messageType[obj.message.type].apply (this, [conn, obj, userObj]);
+                            messageType[obj.message.type].apply(userObj, [conn, obj, userObj]);
                         } else {
                             logger.error ("error validating user");
                         }
                     });
                 } else {
-                    messageType[obj.message.type].apply (this, [conn, obj]);
+                    messageType[obj.message.type].apply (userObj, [conn, obj]);
                 }
             }
         } else {

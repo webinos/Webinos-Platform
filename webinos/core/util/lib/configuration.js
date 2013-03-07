@@ -228,7 +228,12 @@ function Config () {
             return callback (false, err.code);
         }
     }
-    function storeUserData(user){
+    function storeUserData(user, defaultCert){
+        var key;
+        self.userData = {};
+        for(key in defaultCert) {
+            self.userData[key] = defaultCert[key];
+        }
         self.userData.name = user.displayName;
         self.userData.email = user.emails;
         self.userData.authenticator = user.from;
@@ -256,7 +261,7 @@ function Config () {
                     self.metaData.webinos_version = defaultConfig.webinos_version;
                     self.userPref.ports = defaultConfig.ports;
                     self.userData = defaultConfig.certConfiguration;
-                    if(inputConfig.user)  storeUserData(inputConfig.user);
+                    if(inputConfig.user)  storeUserData(inputConfig.user, defaultConfig.certConfiguration);
                     if (webinosType === "Pzh" || webinosType === "PzhCA") {
                         self.serviceCache = defaultConfig.pzhDefaultServices.slice(0);
                         self.metaData.friendlyName = self.userData.name +" ("+ self.userData.authenticator + ")";
