@@ -44,6 +44,7 @@ function Config () {
     self.userData = {};
     self.userPref = {};
     self.serviceCache = [];
+    var existsSync = fs.existsSync || path.existsSync;
 
     self.fileList = [{folderName: null, fileName: "metaData", object: self.metaData},
 
@@ -187,7 +188,7 @@ function Config () {
                 name = self.fileList[i];
                 var fileName = (name.fileName !== null) ? (name.fileName+".json"):(webinosName +".json");
                 var filePath = path.join (self.metaData.webinosRoot, name.folderName, fileName);
-                if( !fs.existsSync(filePath)){
+                if( !existsSync(filePath)){
                     return callback(false);
                 }
             }
@@ -205,12 +206,11 @@ function Config () {
         var webinos_root =  (type.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
         try {
             //In case of node 0.6, define the fs existsSync
-            if (typeof fs.existsSync === "undefined") fs.existsSync = path.existsSync;
-            if (!fs.existsSync (webinos_root)) {//If the folder doesn't exist
+            if (!existsSync (webinos_root)) {//If the folder doesn't exist
                 fs.mkdirSync (webinos_root, root_permission);//Create it
              }
 
-            if (!fs.existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
+            if (!existsSync (self.metaData.webinosRoot))//If the folder doesn't exist
                 fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
             // webinos root was created, we need the following 1st level dirs
             var list = [ path.join (self.metaData.webinosRoot, "logs"),
@@ -223,7 +223,7 @@ function Config () {
                 path.join (self.metaData.webinosRoot, "certificates", "external"),
                 path.join (self.metaData.webinosRoot, "certificates", "internal")];
             list.forEach (function (name) {
-                if (!fs.existsSync (name)) fs.mkdirSync (name, internal_permission);
+                if (!existsSync (name)) fs.mkdirSync (name, internal_permission);
             });
             // Notify that we are done
             callback (true);
