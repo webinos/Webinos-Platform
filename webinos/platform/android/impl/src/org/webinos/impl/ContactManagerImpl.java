@@ -411,7 +411,6 @@ public class ContactManagerImpl extends ContactManager implements IModule {
 	    		contacts.add(contact);
 	        }
 	    }
-	    Log.v("DBG", "000");
     		
 		return contacts.toArray(new Contact[0]);
 	}
