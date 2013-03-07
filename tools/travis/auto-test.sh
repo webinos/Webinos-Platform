@@ -19,14 +19,6 @@ prepare_pzh_config(){
 # Here's the accumulator variable
 test_failed=false
 
-# First, lets test starting the PZP
-# DISABLED - the PZP fails at the moment.
-#node webinos_pzp.js --test
-#if [ $? -ne 0 ]; then
-#  echo "Failed to start the PZP"
-#  test_failed=true;
-#fi
-
 # fiddle with the PZH config to use high-number ports
 prepare_pzh_config "./webinos_config.json"
 
@@ -36,6 +28,14 @@ if [ $? -ne 0 ]; then
   echo "Failed to start the PZH"
   test_failed=true;
 fi
+
+# Start the PZP
+# Disable as PZP is starting but not getting completely loaded
+#node webinos_pzp.js --test
+#if [ $? -ne 0 ]; then
+#  echo "Failed to start the PZP"
+#  test_failed=true;
+#fi
 
 # Run the unit tests
 # Passing 0, enables whitelisted tests
