@@ -45,7 +45,8 @@ function Config () {
     self.userPref = {};
     self.serviceCache = [];
 
-    var fileList = [{folderName: null, fileName: "metaData", object: self.metaData},
+    self.fileList = [{folderName: null, fileName: "metaData", object: self.metaData},
+
         {folderName: null, fileName: "crl", object: self.crl},
         {folderName: null, fileName:"trustedList", object: self.trustedList},
         {folderName: null, fileName:"untrustedList", object: self.untrustedCert},
@@ -95,7 +96,7 @@ function Config () {
     function updateWebinosConfig(folderName, type) {
         function writeFile(config) {
             var filePath = path.resolve (__dirname, "../../../../webinos_config.json");
-            fs.writeFileSync(filePath, JSON.stringify(config, null, " "));
+            fs.writeFileSync(filePath, JSON.stringify(config, null, "  "));
             logger.log("updated webinos config ");
         }
 
@@ -157,7 +158,7 @@ function Config () {
 
 
     function storeAll() {
-        fileList.forEach (function (name) {
+        self.fileList.forEach (function (name) {
             if (typeof name === "object") {
                 if(name.folderName === "userData") {
                     if (name.fileName === "userDetails") {
@@ -179,8 +180,8 @@ function Config () {
         require("./webinosId.js").fetchDeviceName(webinosType, inputConfig, function (webinosName) {
             var webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
             self.metaData.webinosRoot = (webinosType.search("Pzh") !== -1)? (webinos_root + "/" + webinosName): webinos_root;
-            for (i = 0; i < fileList.length; i = i + 1) {
-                name = fileList[i];
+            for (i = 0; i < self.fileList.length; i = i + 1) {
+                name = self.fileList[i];
                 var fileName = (name.fileName !== null) ? (name.fileName+".json"):(webinosName +".json");
                 var filePath = path.join (self.metaData.webinosRoot, name.folderName, fileName);
                 if( !fs.existsSync(filePath)){
@@ -334,7 +335,7 @@ function Config () {
     this.setConfiguration = function (webinosType, inputConfig, callback) {
         checkConfigExists(webinosType, inputConfig, function(status) {
             if(status) {
-                fileList.forEach(function(name){
+                self.fileList.forEach(function(name){
                     self.fetchDetails(name.folderName, name.fileName, name.object);
                 });
                 checkDefaultValues(webinosType);

@@ -257,6 +257,9 @@ var PzpWSS = function (parent) {
                         logger.log("connect intra-zone peer: " + value);
                     });
                     break;
+                case "resetDevice":
+                    parent.resetDevice();
+                    break;
             }
         } else {
             parent.webinos_manager.messageHandler.onMessageReceived (msg, msg.to);
@@ -668,7 +671,8 @@ var PzpWSS = function (parent) {
             connectedWebApp[appId] = connection;
             connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-            payload = { "pzhId":(parent.config.metaData.pzhId && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId].friendlyName),
+            payload = { "pzhId":(parent.config.metaData.pzhId && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] &&
+                                 parent.pzp_state.connectedPzh[parent.config.metaData.pzhId].friendlyName)|| "",
                 "connectedPzp" :getConnectedPzp(),
                 "connectedPzh" :getConnectedPzh(),
                 "state"        :parent.pzp_state.state,
@@ -683,7 +687,7 @@ var PzpWSS = function (parent) {
             for (key in connectedWebApp) {
                 if (connectedWebApp.hasOwnProperty (key)) {
                     tmp = connectedWebApp[key];
-                    payload = { "pzhId":parent.config.metaData.pzhId,
+                    payload = { "pzhId":parent.config.metaData.pzhId || "",
                         "connectedPzp" :getConnectedPzp(),
                         "connectedPzh" :getConnectedPzh(),
                         "state"        :parent.pzp_state.state,
