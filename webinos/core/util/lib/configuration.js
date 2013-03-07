@@ -136,6 +136,9 @@ function Config () {
             self.serviceCache = config.pzpDefaultServices;
             self.storeDetails("userData", "serviceCache", self.serviceCache);
         }
+        if (webinosType === "Pzp" && config.friendlyName !== "") {
+            setFriendlyName(config.friendlyName);
+        }
     }
 
     function createPolicyFile() {
@@ -248,7 +251,7 @@ function Config () {
             self.metaData.webinosName = deviceName;
             webinos_root =  (webinosType.search("Pzh") !== -1)? wPath.webinosPath()+"Pzh" :wPath.webinosPath();
             self.metaData.webinosRoot = (webinosType.search("Pzh") !== -1)? webinos_root+ "/" + self.metaData.webinosName: webinos_root;
-            setFriendlyName(inputConfig.friendlyName);
+
             createDefaultDirectories(webinosType, function (status) {
                 if (status) {
                     logger.log ("created default webinos directories at location : " + self.metaData.webinosRoot);
@@ -256,6 +259,7 @@ function Config () {
                     self.metaData.webinos_version = defaultConfig.webinos_version;
                     self.userPref.ports = defaultConfig.ports;
                     self.userData = defaultConfig.certConfiguration;
+                    setFriendlyName(inputConfig.friendlyName || defaultConfig.friendlyName);
                     if(inputConfig.user)  storeUserData(inputConfig.user);
                     if (webinosType === "Pzh" || webinosType === "PzhCA") {
                         self.serviceCache = defaultConfig.pzhDefaultServices.slice(0);
@@ -263,9 +267,7 @@ function Config () {
                     } else if (webinosType === "Pzp" || webinosType === "PzpCA") {
                         self.serviceCache = defaultConfig.pzpDefaultServices.slice(0);
                     }
-                    if (defaultConfig.friendlyName && defaultConfig.friendlyName !== "") {
-                        self.metaData.friendlyName =  userPref.friendlyName;
-                    }
+
                     createPolicyFile();
                     storeAll();
                     callback (true);
