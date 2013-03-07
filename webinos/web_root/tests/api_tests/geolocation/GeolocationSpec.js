@@ -28,7 +28,7 @@ function checkPosition(position) {
 describe("Geolocation API", function() {
 	var geolocationService;
 
-	webinos.discovery.findServices(new ServiceType("http://www.w3.org/ns/api-perms/geolocation"), {
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/w3c/geolocation"), {
 		onFound: function (service) {
 			geolocationService = service;
 		}
