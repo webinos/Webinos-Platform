@@ -26,17 +26,19 @@ $ (document).ready (function () {
         }
     }
     function setEnrolling () {
-        var pzpId = webinos.session.getPZPId();
-        if (!webinos.session.getPZHId()) {
+        var pzhId = webinos.session.getPZHId();
+        if (pzhId === "") {
             $ ('#enableLogin').html ("<a href='#login' id='login'> Connect to Your PZH </a>");
             $ ("#login").click (function () {
                 setPage ("Login to your PZH", "login.html");
             });
+
+            $ ("#userId").html (webinos.session.getPZPId());
         } else {
             if (webinos.session.isConnected()) {
-                $ ('#enableLogin').html ("Connected to " + webinos.session.getPZHId());
+                $ ('#enableLogin').html ("Connected to " + pzhId);
             } else {
-                $ ('#enableLogin').html ("Enrolled to " + webinos.session.getPZHId() + "(Not Connected)");
+                $ ('#enableLogin').html ("Enrolled to " + pzhId + "(Not Connected)");
             }
         }
     }
@@ -83,7 +85,13 @@ $ (document).ready (function () {
         logMessage (data.payload.message);
     }
     webinos.session.addListener ('info', printInfo);
-
+    $("#resetDevice").click(function(){
+        var sure = confirm("Are you sure you want to reset device?");
+        if (sure) {
+          var options = {type: 'prop', payload: {status:'resetDevice'}};
+          webinos.session.message_send(options);
+        }
+    });
     $("#findPeers").click(function(){
         var options = {type: 'prop', payload: {status:'pzpFindPeers'}};
         webinos.session.message_send(options);
@@ -104,7 +112,7 @@ $ (document).ready (function () {
             document.getElementById('connected_list').innerHTML="";
         }
         var list;
-        //TODO: Fileter out and update connected Peer list
+        //TODO: Filter out and update connected Peer list
         if(data.payload.message.foundpeers.connected)
             list= document.getElementById('connected_list');
         else
@@ -376,7 +384,8 @@ $ (document).ready (function () {
 
         <h2 class="section_title">Dashboard</h2>
 
-        <div class="btn_view_site"><a href="#logout">Disconnect</a></div>
+        <!--<div class="btn_view_site"><a href="#logout">Disconnect</a></div>-->
+        <div class="btn_view_site"> <a href="#resetDevice" id="resetDevice">Disonnect Device from Perzonal Zone</a> </div>
     </hgroup>
 </header>
 <!-- end of header bar -->
