@@ -45,9 +45,10 @@
 			//console.log("\nPolicy Editor - addRule");
 			var newTarget = createNewTarget(request);
 			var newRule = createNewRule(request, decision);
-			loadPolicy();
-			insertRule(newTarget, newRule);
-			savePolicy();
+			loadPolicy(function(){
+				insertRule(newTarget, newRule);
+				savePolicy();
+			});
 			//pm.reloadPolicy();
 		}
 
@@ -103,14 +104,14 @@
 		}
 
 
-		function loadPolicy() {
+		function loadPolicy(callback) {
 			//console.log("loadPolicy - 01");
 			var xmlPolicy = fs.readFileSync(policyFile);
 			//console.log("loadPolicy - 02");
-			//TODO: it is not clear why parseString ends in a sync way...
 			xmlParser.parseString(xmlPolicy, function(err, data) {
 				//console.log("loadPolicy - 05");
 				policySet = data["policy-set"];
+                callback();
 				//console.log("loadPolicy - 06");
 			});
 			//console.log("loadPolicy: "+JSON.stringify(policySet));

@@ -14,6 +14,7 @@
 , "dependencies" :
   { "webinos-jsonrpc2" : "*"
   , "schema" : "0.x.x"
+  , "JSV" : "4.x.x"
   , "sax" : "0.x.x"
   , "seq" : "0.x.x"
   , "xml2js" : "0.x.x"

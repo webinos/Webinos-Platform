@@ -32,9 +32,9 @@
 			<Obligation>
 				<TriggersSet>
 					<TriggerAtTime>
-						 <Start>
+						 <StartTime>
 							<StartNow/>
-						 </Start>
+						 </StartTime>
 						 <MaxDelay>
 							<Duration>P0Y0M7DT0H0M0S</Duration>
 						 </MaxDelay>

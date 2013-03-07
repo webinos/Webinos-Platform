@@ -1,0 +1,806 @@
+{
+    "type":[{
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+            "policy-set": {
+                "type":"object",
+                "id": "policy-set",
+                "required":false,
+                "additionalProperties":false,
+                "properties":{
+                    "$":{
+                        "type":"object",
+                        "id":"policysetattrs",
+                        "required":false,
+                        "additionalProperties":false,
+                        "properties":{
+                            "combine": {
+                                "type":"string",
+                                "required":false,
+                                "enum" : ["deny-overrides", "permit-overrides", "first-matching-target"]
+                            },
+                            "id": {
+                                "type":"string",
+                                "required":false
+                            },
+                            "description": {
+                                "type":"string",
+                                "required":false
+                            }
+                        }
+                    },
+                    "target": {
+                        "type":"array",
+                        "id": "target",
+                        "required":false,
+                        "additionalItems":false,
+                        "maxItems" : 1,
+                        "items":{
+                            "type":"object",
+                            "required":false,
+                            "additionalProperties":false,
+                            "properties":{
+                                "$":{
+                                    "type":"object",
+                                    "required":false,
+                                    "additionalProperties":false,
+                                    "properties":{
+                                        "id": {
+                                            "type":"string",
+                                            "required":false
+                                        }
+                                    }
+                                },
+                                "subject":{
+                                    "type":"array",
+                                    "id": "subject",
+                                    "required":true,
+                                    "additionalItems":false,
+                                    "items":{
+                                        "type":"object",
+                                        "required":false,
+                                        "additionalProperties":false,
+                                        "properties":{
+                                            "subject-match":{
+                                                "type":"array",
+                                                "id": "subject-match",
+                                                "required":true,
+                                                "additionalItems":false,
+                                                "items":{
+                                                    "type":"object",
+                                                    "required":false,
+                                                    "additionalProperties":false,
+                                                    "properties":{
+                                                        "$":{
+                                                            "type":"object",
+                                                            "id":"match-attrs",
+                                                            "required":true,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "attr":{
+                                                                    "type":"string",
+                                                                    "required":true
+                                                                },
+                                                                "match":{
+                                                                        "type":"string",
+                                                                        "required":false
+                                                                },
+                                                                "func":{
+                                                                        "type":"string",
+                                                                        "required":false,
+                                                                        "enum":["equal", "glob", "regexp"]
+                                                                }
+                                                            }
+                                                        },
+                                                        "_": {
+                                                            "type":"string",
+                                                            "required":false
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "DataHandlingPreferences":{
+                        "type":"array",
+                        "id": "DataHandlingPreferences",
+                        "required":false,
+                        "additionalItems":false,
+                        "items":{
+                            "type":"object",
+                            "required":false,
+                            "additionalProperties":false,
+                            "properties":{
+                                "$":{
+                                    "type":"object",
+                                    "required":true,
+                                    "additionalProperties":false,
+                                    "properties":{
+                                        "PolicyId": {
+                                            "type":"string",
+                                            "required":true
+                                        }
+                                    }
+                                },
+                                "AuthorizationsSet":{
+                                    "type":"array",
+                                    "id": "AuthorizationsSet",
+                                    "required":false,
+                                    "additionalItems":false,
+                                    "maxItems" : 1,
+                                    "items":{
+                                        "type":"object",
+                                        "required":false,
+                                        "additionalProperties":false,
+                                        "properties":{
+                                            "AuthzUseForPurpose":{
+                                                "type":"array",
+                                                "id": "AuthzUseForPurpose",
+                                                "required":false,
+                                                "additionalItems":false,
+                                                "items":{
+                                                    "type":"object",
+                                                    "required":false,
+                                                    "additionalProperties":false,
+                                                    "properties":{
+                                                        "Purpose": {
+                                                            "type":"array",
+                                                            "id": "Purpose",
+                                                            "required":false,
+                                                            "additionalItems":false,
+                                                            "items":{
+                                                                "type":[
+                                                                    {
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{}
+                                                                    },
+                                                                    {
+                                                                        "type":"string",
+                                                                        "required":false,
+                                                                        "enum" : [
+                                                                            "http://www.w3.org/2002/01/P3Pv1/current",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/admin",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/develop",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/tailoring",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/pseudo-analysis",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/pseudo-decision",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/individual-analysis",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/individual-decision",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/contact",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/historical",
+                                                                            "http://www.w3.org/2002/01/P3Pv1/telemarketing",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/account",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/arts",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/browsing",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/charity",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/communicate",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/custom",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/delivery",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/downloads",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/education",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/feedback",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/finmgt",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/gambling",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/gaming",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/government",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/health",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/login",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/marketing",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/news",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/payment",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/sales",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/search",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/state",
+                                                                            "http://www.w3.org/2002/01/P3Pv11/surveys",
+                                                                            "http://www.primelife.eu/purposes/unspecified"
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "ObligationsSet":{
+                                    "type":"array",
+                                    "id": "ObligationsSet",
+                                    "required":false,
+                                    "additionalItems":false,
+                                    "maxItems" : 1,
+                                    "items":{
+                                        "type":"object",
+                                        "required":false,
+                                        "additionalProperties":false,
+                                        "properties":{
+                                            "Obligation":{
+                                                "type":"array",
+                                                "id": "Obligation",
+                                                "required":false,
+                                                "additionalItems":false,
+                                                "items":{
+                                                    "type":[
+                                                        {
+                                                            "type":"object",
+                                                            "required":true,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "TriggersSet":{
+                                                                    "type":"array",
+                                                                    "id": "TriggersSet",
+                                                                    "required":true,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                            "TriggerAtTime":{
+                                                                                "type":"array",
+                                                                                "id": "TriggerAtTime",
+                                                                                "required":false,
+                                                                                "additionalItems":false,
+                                                                                "items":{
+                                                                                    "type":"object",
+                                                                                    "required":false,
+                                                                                    "additionalProperties":false,
+                                                                                    "properties":{
+                                                                                        "StartTime":{
+                                                                                            "type":"array",
+                                                                                            "id": "StartTime",
+                                                                                            "required":true,
+                                                                                            "additionalItems":false,
+                                                                                            "maxItems" : 1,
+                                                                                            "items":{
+                                                                                                "type":[{
+                                                                                                        "type":"object",
+                                                                                                        "required":false,
+                                                                                                        "additionalProperties":false,
+                                                                                                        "properties":{
+                                                                                                            "StartNow":{
+                                                                                                                "type":"array",
+                                                                                                                "id": "StartNow",
+                                                                                                                "required":false,
+                                                                                                                "additionalItems":false,
+                                                                                                                "maxItems" : 1,
+                                                                                                                "items":{
+                                                                                                                    "type":"object",
+                                                                                                                    "required":false,
+                                                                                                                    "additionalProperties":false,
+                                                                                                                    "properties":{
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type":"object",
+                                                                                                        "required":false,
+                                                                                                        "additionalProperties":false,
+                                                                                                        "properties":{
+                                                                                                            "DateAndTime":{
+                                                                                                                "type":"array",
+                                                                                                                "id": "DateAndTime",
+                                                                                                                "required":false,
+                                                                                                                "additionalItems":false,
+                                                                                                                "maxItems" : 1,
+                                                                                                                "items":{
+                                                                                                                    "type":"string",
+                                                                                                                    "required":true
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        },
+                                                                                        "MaxDelay":{
+                                                                                            "type":"array",
+                                                                                            "id": "MaxDelay",
+                                                                                            "required":true,
+                                                                                            "additionalItems":false,
+                                                                                            "maxItems" : 1,
+                                                                                            "items":{
+                                                                                                "type":"object",
+                                                                                                "required":false,
+                                                                                                "additionalProperties":false,
+                                                                                                "properties":{
+                                                                                                    "Duration":{
+                                                                                                        "type":"array",
+                                                                                                        "id": "Duration",
+                                                                                                        "required":true,
+                                                                                                        "additionalItems":false,
+                                                                                                        "maxItems" : 1,
+                                                                                                        "items":{
+                                                                                                            "type":"string",
+                                                                                                            "required":true
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            "TriggerPersonalDataAccessedForPurpose":{
+                                                                                "type":"array",
+                                                                                "id": "TriggerPersonalDataAccessedForPurpose",
+                                                                                "required":false,
+                                                                                "additionalItems":false,
+                                                                                "items":{
+                                                                                    "type":"object",
+                                                                                    "required":false,
+                                                                                    "additionalProperties":false,
+                                                                                    "properties":{
+                                                                                        "Purpose":{"$ref":"Purpose"},
+                                                                                        "MaxDelay":{"$ref":"MaxDelay"}
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            "TriggerPersonalDataDeleted":{
+                                                                                "type":"array",
+                                                                                "id": "TriggerPersonalDataDeleted",
+                                                                                "required":false,
+                                                                                "additionalItems":false,
+                                                                                "items":{
+                                                                                    "type":"object",
+                                                                                    "required":false,
+                                                                                    "additionalProperties":false,
+                                                                                    "properties":{
+                                                                                        "MaxDelay":{"$ref":"MaxDelay"}
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            "TriggerDataSubjectAccess":{
+                                                                                "type":"array",
+                                                                                "id": "TriggerDataSubjectAccess",
+                                                                                "required":false,
+                                                                                "additionalItems":false,
+                                                                                "items":{
+                                                                                    "type":"object",
+                                                                                    "required":false,
+                                                                                    "additionalProperties":false,
+                                                                                    "properties":{
+                                                                                        "AccessURI":{
+                                                                                            "type":"array",
+                                                                                            "id": "AccessURI",
+                                                                                            "required":true,
+                                                                                            "additionalItems":false,
+                                                                                            "maxItems" : 1,
+                                                                                            "items":{
+                                                                                                "type":"string",
+                                                                                                "required":true
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "ActionDeletePersonalData":{
+                                                                    "type":"array",
+                                                                    "id": "ActionDeletePersonalData",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "TriggersSet":{"$ref":"TriggersSet"},
+                                                                "ActionAnonymizePersonalData":{
+                                                                    "type":"array",
+                                                                    "id": "ActionAnonymizePersonalData",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "TriggersSet":{"$ref":"TriggersSet"},
+                                                                "ActionNotifyDataSubject":{
+                                                                    "type":"array",
+                                                                    "id": "ActionNotifyDataSubject",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                            "Media":{
+                                                                                "type":"array",
+                                                                                "id": "Media",
+                                                                                "required":true,
+                                                                                "additionalItems":false,
+                                                                                "maxItems" : 1,
+                                                                                "items":{
+                                                                                    "type":"string",
+                                                                                    "required":true
+                                                                                }
+                                                                            },
+                                                                            "Address":{
+                                                                                "type":"array",
+                                                                                "id": "Address",
+                                                                                "required":true,
+                                                                                "additionalItems":false,
+                                                                                "maxItems" : 1,
+                                                                                "items":{
+                                                                                    "type":"string",
+                                                                                    "required":true
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "TriggersSet":{"$ref":"TriggersSet"},
+                                                                "ActionLog":{
+                                                                    "type":"array",
+                                                                    "id": "ActionLog",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "TriggersSet":{"$ref":"TriggersSet"},
+                                                                "ActionSecureLog":{
+                                                                    "type":"array",
+                                                                    "id": "ActionSecureLog",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "maxItems" : 1,
+                                                                    "items":{
+                                                                        "type":"object",
+                                                                        "required":false,
+                                                                        "additionalProperties":false,
+                                                                        "properties":{
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "ProvisionalActions":{
+                        "type":"array",
+                        "id": "ProvisionalActions",
+                        "required":false,
+                        "additionalItems":false,
+                        "maxItems" : 1,
+                        "items":{
+                            "type":"object",
+                            "required":false,
+                            "additionalProperties":false,
+                            "properties":{
+                                "ProvisionalAction":{
+                                    "type":"array",
+                                    "id": "ProvisionalAction",
+                                    "required":false,
+                                    "additionalItems":false,
+                                    "items":{
+                                        "type":"object",
+                                        "required":false,
+                                        "additionalProperties":false,
+                                        "properties":{
+                                            "AttributeValue":{
+                                                "type":"array",
+                                                "id": "AttributeValue",
+                                                "required":true,
+                                                "additionalItems":false,
+                                                "minItems" : 2,
+                                                "maxItems" : 2,
+                                                "items":{
+                                                    "type":"string",
+                                                    "required":true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "policy":{
+                        "type":"array",
+                        "required":false,
+                        "additionalItems":false,
+                        "items":{
+                            "type":"object",
+                            "id": "policy",
+                            "required":false,
+                            "additionalProperties":false,
+                            "properties":{
+                                "$":{
+                                    "type":"object",
+                                    "required":false,
+                                    "additionalProperties":false,
+                                    "properties":{
+                                        "combine": {
+                                            "type":"string",
+                                            "required":false,
+                                            "enum" : ["deny-overrides", "permit-overrides", "first-applicable"]
+                                        },
+                                        "id": {
+                                            "type":"string",
+                                            "required":false
+                                        },
+                                        "description": {
+                                            "type":"string",
+                                            "required":false
+                                        }
+                                    }
+                                },
+                                "target":{"$ref":"target"},
+                                "DataHandlingPreferences":{"$ref":"DataHandlingPreferences"},
+                                "ProvisionalActions":{"$ref":"ProvisionalActions"},
+                                "rule":{
+                                    "type":"array",
+                                    "id": "rule",
+                                    "required":false,
+                                    "additionalItems":false,
+                                    "items":{
+                                        "type":"object",
+                                        "required":false,
+                                        "additionalProperties":false,
+                                        "properties":{
+                                            "$":{
+                                                "type":"object",
+                                                "id":"policy-set-attrs",
+                                                "required":false,
+                                                "additionalProperties":false,
+                                                "properties":{
+                                                    "effect": {
+                                                        "type":"string",
+                                                        "required":false,
+                                                        "enum" : ["permit", "prompt-blanket", "prompt-session", "prompt-oneshot", "deny"]
+                                                    },
+                                                    "require-reauth": {
+                                                        "type":"string",
+                                                        "required":false,
+                                                        "enum" : ["none", "local", "remote"]
+                                                    },
+                                                    "auth-expires-after-min": {
+                                                        "type":"number",
+                                                        "required":false
+                                                    },
+                                                    "id": {
+                                                        "type":"string",
+                                                        "required":false
+                                                    }
+                                                }
+                                            },
+                                            "DataHandlingPreferences":{"$ref":"DataHandlingPreferences"},
+                                            "ProvisionalActions":{"$ref":"ProvisionalActions"},
+                                            "condition":{
+                                                "type":"array",
+                                                "id": "condition",
+                                                "required":false,
+                                                "additionalItems":false,
+                                                "maxItems" : 1,
+                                                "items":{
+                                                    "type":[
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "$":{
+                                                                    "type":"object",
+                                                                    "id":"condition-attrs",
+                                                                    "required":false,
+                                                                    "additionalProperties":false,
+                                                                    "properties":{
+                                                                        "combine": {
+                                                                            "type":"string",
+                                                                            "required":false,
+                                                                            "enum" : ["and", "or"]
+                                                                        }
+                                                                    }
+                                                                },
+                                                                "condition":{"$ref":"condition"}
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "$":{"$ref":"condition-attrs"},
+                                                                "subject-match":{"$ref":"subject-match"}
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "$":{"$ref":"condition-attrs"},
+                                                                "resource-match":{
+                                                                    "type":"array",
+                                                                    "id": "re-match",
+                                                                    "required":false,
+                                                                    "additionalItems":false,
+                                                                    "items":{
+                                                                        "type":[
+                                                                            {
+                                                                                "type":"object",
+                                                                                "required":true,
+                                                                                "additionalProperties":false,
+                                                                                "properties":{
+                                                                                    "$":{"$ref":"match-attrs"},
+                                                                                    "subject-attr":{
+                                                                                        "type":"array",
+                                                                                        "id": "sre-attr",
+                                                                                        "required":false,
+                                                                                        "additionalItems":false,
+                                                                                        "items":{
+                                                                                            "type":"object",
+                                                                                            "required":false,
+                                                                                            "additionalProperties":false,
+                                                                                            "properties":{
+                                                                                                "$":{
+                                                                                                    "type":"object",
+                                                                                                    "required":true,
+                                                                                                    "additionalProperties":false,
+                                                                                                    "properties":{
+                                                                                                        "attr": {
+                                                                                                            "type":"string",
+                                                                                                            "required":true
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "type":"object",
+                                                                                "required":true,
+                                                                                "additionalProperties":false,
+                                                                                "properties":{
+                                                                                    "$":{"$ref":"match-attrs"},
+                                                                                    "resource-attr":{"$ref":"sre-attr"}
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "type":"object",
+                                                                                "required":true,
+                                                                                "additionalProperties":false,
+                                                                                "properties":{
+                                                                                    "$":{"$ref":"match-attrs"},
+                                                                                    "environment-attr":{"$ref":"sre-attr"}
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "type":"object",
+                                                                                "required":true,
+                                                                                "additionalProperties":false,
+                                                                                "properties":{
+                                                                                    "$":{"$ref":"match-attrs"},
+                                                                                    "_":{
+                                                                                        "type":"string",
+                                                                                        "required":false
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            "type":"object",
+                                                            "required":false,
+                                                            "additionalProperties":false,
+                                                            "properties":{
+                                                                "$":{"$ref":"condition-attrs"},
+                                                                "environment-match":{"$ref":"re-match"}
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+            "policy-set": {
+                "type":"object",
+                "required":false,
+                "additionalProperties":false,
+                "properties":{
+                    "$":{"$ref":"policysetattrs"},
+                    "target": {"$ref":"target"},
+                    "DataHandlingPreferences": {"$ref":"DataHandlingPreferences"},
+                    "ProvisionalActions": {"$ref":"ProvisionalActions"},
+                    "policy-set": {
+                        "type":"array",
+                        "required":false,
+                        "additionalItems":false,
+                        "items":{"$ref":"policy-set"}
+                    }
+                }
+            }
+        }
+    },
+    {
+        "type":"object",
+        "additionalProperties":false,
+        "properties":{
+            "policy": { "$ref":"policy" }
+        }
+    }]
+}
