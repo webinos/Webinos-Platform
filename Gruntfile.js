@@ -45,7 +45,7 @@ module.exports = function(grunt) {
           'node_modules/webinos-jsonrpc2/lib/rpc.js',
           'webinos/core/manager/messaging/lib/messagehandler.js',
           'webinos/core/wrt/lib/webinos.session.js',
-          'webinos/core/wrt/lib/webinos.servicedisco.js',
+          'webinos/core/wrt/lib/webinos.service.js',
           'webinos/core/wrt/lib/webinos.js',
           'webinos/core/api/file/lib/virtual-path.js',
           'webinos/core/wrt/lib/webinos.file.js',
@@ -71,7 +71,8 @@ module.exports = function(grunt) {
           'webinos/core/wrt/lib/webinos.payment.js',
           'webinos/core/wrt/lib/webinos.mediacontent.js',
           'webinos/core/wrt/lib/webinos.corePZinformation.js',
-          'webinos/core/wrt/lib/webinos.nfc.js'
+          'webinos/core/wrt/lib/webinos.nfc.js',
+          'webinos/core/wrt/lib/webinos.servicedisco.js'
         ],
         dest: '<%= generated.normal %>'
       }

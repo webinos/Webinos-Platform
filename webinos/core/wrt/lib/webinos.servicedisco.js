@@ -244,45 +244,7 @@
             message: message
         };
     }
-    
-    
-    ///////////////////// WEBINOS SERVICE INTERFACE ///////////////////////////
 
-    // TODO decide what to do with this class.
-    WebinosService = function (obj) {
-        this.base = RPCWebinosService;
-        this.base(obj);
-
-//        this.id = Math.floor(Math.random()*101);
-    };
-    WebinosService.prototype = new RPCWebinosService;
-
-    WebinosService.prototype.state = "";
-
-//    WebinosService.prototype.api = "";
-
-//    WebinosService.prototype.id = "";
-
-//    WebinosService.prototype.displayName = "";
-
-//    WebinosService.prototype.description = "";
-
-    WebinosService.prototype.icon = "";
-
-    // stub implementation in case a service module doesn't provide its own bindService
-    WebinosService.prototype.bindService = function(bindCB) {
-        if (typeof bindCB === 'undefined') return;
-
-        if (typeof bindCB.onBind === 'function') {
-            bindCB.onBind(this);
-        }
-    };
-
-    WebinosService.prototype.unbind = function() {
-        webinos.discovery.registeredServices--;
-        if (channel != null && webinos.discovery.registeredServices > 0) {
-            channel.close();
-            channel = null;
-        }
-    };
+    webinos.discovery = new ServiceDiscovery (webinos.rpcHandler);
+    webinos.ServiceDiscovery = webinos.discovery; // for backward compat
 }());

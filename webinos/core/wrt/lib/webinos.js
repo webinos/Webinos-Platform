@@ -111,7 +111,5 @@
 
     webinos.rpcHandler = new RPCHandler (undefined, new Registry ());
     webinos.messageHandler = new MessageHandler (webinos.rpcHandler);
-    webinos.discovery = new ServiceDiscovery (webinos.rpcHandler);
-    webinos.ServiceDiscovery = webinos.discovery; // for backward compat
 
 } ());
