@@ -1,4 +1,54 @@
 !macro CheckAppRunning
+	StrCpy $0 "webinosBrowser.exe"
+	DetailPrint "Searching for processes called '$0'"
+	KillProc::FindProcesses
+	StrCmp $1 "-1" wooops3
+	Goto BrowserAppRunning	
+	BrowserAppRunning:
+		DetailPrint "-> Found $0 processes running"
+		StrCmp $0 "0" BrowserAppNotRunning
+		MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "webinos renderer is currently running. $\n$\nDo you want to close it and continue installation?" IDYES KillBrowserApp
+		DetailPrint "Installation aborted"
+		Abort	
+	KillBrowserApp:
+		StrCpy $0 "webinosBrowser.exe"
+		DetailPrint "Killing all processes called '$0'"
+		KillProc::KillProcesses
+		StrCmp $1 "-1" wooops3
+		DetailPrint "-> Killed $0 processes, failed to kill $1 processes"
+		sleep 1500
+		Goto BrowserAppNotRunning		
+	wooops3:
+		DetailPrint "-> Error: unable to close all running instances of webinos renderer. Please close them all manually before installing ${PRODUCT_NAME}."
+		Abort	
+	BrowserAppNotRunning:
+		DetailPrint "No webinos renderer instances found running"
+
+	StrCpy $0 "webinosNodeServiceUI.exe"
+	DetailPrint "Searching for processes called '$0'"
+	KillProc::FindProcesses
+	StrCmp $1 "-1" wooops2
+	Goto UIAppRunning	
+	UIAppRunning:
+		DetailPrint "-> Found $0 processes running"
+		StrCmp $0 "0" UIAppNotRunning
+		MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "webinos node service is currently running. $\n$\nDo you want to close it and continue installation?" IDYES KillUIApp
+		DetailPrint "Installation aborted"
+		Abort	
+	KillUIApp:
+		StrCpy $0 "webinosNodeServiceUI.exe"
+		DetailPrint "Killing all processes called '$0'"
+		KillProc::KillProcesses
+		StrCmp $1 "-1" wooops2
+		DetailPrint "-> Killed $0 processes, failed to kill $1 processes"
+		sleep 1500
+		Goto UIAppNotRunning		
+	wooops2:
+		DetailPrint "-> Error: unable to close all running instances of webinos node service. Please close them all manually before installing ${PRODUCT_NAME}."
+		Abort	
+	UIAppNotRunning:
+		DetailPrint "No webinosNodeServiceUI instances found running"
+
   StrCpy $0 "node.exe"
   DetailPrint "Searching for processes called '$0'"
   KillProc::FindProcesses
@@ -25,30 +75,6 @@
   AppNotRunning:
     DetailPrint "No Application Instances Found"
 		
-	StrCpy $0 "webinosNodeServiceUI.exe"
-	DetailPrint "Searching for processes called '$0'"
-	KillProc::FindProcesses
-	StrCmp $1 "-1" wooops2
-	Goto UIAppRunning	
-	UIAppRunning:
-		DetailPrint "-> Found $0 processes running"
-		StrCmp $0 "0" UIAppNotRunning
-		MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "webinos node service is currently running. $\n$\nDo you want to close it and continue installation?" IDYES KillUIApp
-		DetailPrint "Installation aborted"
-		Abort	
-	KillUIApp:
-		StrCpy $0 "webinosNodeServiceUI.exe"
-		DetailPrint "Killing all processes called '$0'"
-		KillProc::KillProcesses
-		StrCmp $1 "-1" wooops2
-		DetailPrint "-> Killed $0 processes, failed to kill $1 processes"
-		sleep 1500
-		Goto UIAppNotRunning		
-	wooops2:
-		DetailPrint "-> Error: unable to close all running instances of webinos node service. Please close them all manually before installing ${PRODUCT_NAME}."
-		Abort	
-	UIAppNotRunning:
-		DetailPrint "No webinosNodeServiceUI instances found running"
 		
 !macroend
 

@@ -27,14 +27,16 @@ private:
 	friend void CALLBACK globalServiceEnded(void* context, BOOLEAN TimerOrWaitFired);
 	friend DWORD WINAPI MonitorThread(LPVOID lpParam);
 	
+  CRuntimeParameters m_runtimeParameters;
 	CUserParameters m_user;
 	CServiceParameters m_parameters;
 
 public:
-	CServiceRunner(const TCHAR* serviceName);
+	CServiceRunner(CRuntimeParameters& runtimeParams, const TCHAR* serviceName, const TCHAR* serviceFolder);
 	~CServiceRunner(void);
 
 	void Run();
+  bool IsRunning() { return m_processHandle != NULL; }
 	bool IsExiting() { return m_exiting; }
 	const CServiceParameters& GetParameters() { return m_parameters; }
 	const CUserParameters& GetUser() { return m_user; }

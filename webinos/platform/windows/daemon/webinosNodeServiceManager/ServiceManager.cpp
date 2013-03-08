@@ -2,6 +2,7 @@
 #include "StdAfx.h"
 #include "messages.h"
 #include <shlobj.h>
+#include <ShellAPI.h>
 #else
 #include <errno.h>
 #include <sys/types.h>
@@ -20,9 +21,11 @@
 const std::string CServiceManager::pathToNodeKey = "nodePath";
 const std::string CServiceManager::pathToWorkingDirectoryKey = "workingDirectoryPath";
 const std::string CServiceManager::pathToAppDataKey = "appDataPath";
-const std::string CServiceManager::nodeArgsKey = "nodeArgs";
+const std::string CServiceManager::pzp_nodeArgsKey = "pzp_nodeArgs";
+const std::string CServiceManager::pzh_nodeArgsKey = "pzh_nodeArgs";
 const std::string CServiceManager::instanceKey = "instance";
 const std::string CServiceManager::showOutputKey = "showOutput";
+const std::string CServiceManager::enabledKey = "enabled";
 const char CServiceManager::jsonParamDelim = ',';
 const std::string CServiceManager::trimChars = "\r\n\t \"";
 
@@ -106,17 +109,84 @@ void CServiceManager::CreateSharedFile(std::string path)
 #endif
 }
 
+bool CServiceManager::GetRuntimeParameters(CRuntimeParameters& params)
+{
+  bool ok = false;
+
+  // Build the path to the json config file.
+  std::string runtimeConfigPath = GetInstalledPath();
+  runtimeConfigPath += WEBINOS_INSTALLED_CONFIG;
+
+  std::string parse = ReadFile(runtimeConfigPath);
+
+  // Strip outer object delimiters.
+  webinos::trim(parse,std::string("\r\n\t {}"));
+
+  std::vector<std::string> toks = webinos::split(parse.c_str(), jsonParamDelim);
+  for (std::vector<std::string>::iterator it = toks.begin(); it != toks.end(); it++)
+  {
+    std::string& tok = *it;
+    if (tok.length() == 0)
+      continue;
+
+    webinos::trim(tok,trimChars);
+
+    int kvPos = tok.find_first_of(':');
+    std::string tmp = tok.substr(0,kvPos);
+    std::string kvTok = webinos::trim(tmp,std::string("\" "));
+    if (kvTok == pathToNodeKey)
+    {
+      tmp = tok.substr(kvPos+1);
+      params.nodePath = webinos::trim(tmp,trimChars);
+
+      // Un-escape path separator backslashes.          
+      webinos::replace(params.nodePath,std::string("\\\\"),std::string("\\"));
+    }
+
+    if (kvTok == pathToWorkingDirectoryKey)
+    {
+      tmp = tok.substr(kvPos+1);
+      params.workingDirectoryPath = webinos::trim(tmp,trimChars);
+
+      // Un-escape path separator backslashes.
+      webinos::replace(params.workingDirectoryPath,std::string("\\\\"),std::string("\\"));
+    }
+
+    if (kvTok == pzp_nodeArgsKey)
+    {
+      tmp = tok.substr(kvPos+1);
+      params.pzp_nodeArgs = webinos::trim(tmp,trimChars);
+
+      // Un-escape double quotes.
+      webinos::replace(params.pzp_nodeArgs,std::string("\\\""),std::string("\""));
+      webinos::replace(params.pzp_nodeArgs,std::string("\\"),std::string("\""));
+    }
+
+    if (kvTok == pzh_nodeArgsKey)
+    {
+      tmp = tok.substr(kvPos+1);
+      params.pzh_nodeArgs = webinos::trim(tmp,trimChars);
+
+      // Un-escape double quotes.
+      webinos::replace(params.pzh_nodeArgs,std::string("\\\""),std::string("\""));
+      webinos::replace(params.pzh_nodeArgs,std::string("\\"),std::string("\""));
+    }
+  }
+
+  return ok;
+}
+
 // Read settings from the users configuration file for the service.
 // Don't have a full-on json parser so we just do it manually for the time being (apologies).
 bool CServiceManager::GetServiceParameters(CUserParameters& user, CServiceParameters& params)
 {
-	bool ok = false;
+  bool ok = false;
 
-	std::string serviceConfigPath;
-	if (GetUserSettingsPath(user, serviceConfigPath))
-	{
+  std::string serviceConfigPath;
+  if (GetUserSettingsPath(user, params, serviceConfigPath))
+  {
     // Build the path to the json config file (made up of the service name).
-		serviceConfigPath += pathSeparator + std::string(params.serviceName) + std::string(".json");
+    serviceConfigPath += pathSeparator + std::string(params.serviceName) + std::string(".json");
 
     std::string parse = ReadFile(serviceConfigPath);
 
@@ -126,74 +196,54 @@ bool CServiceManager::GetServiceParameters(CUserParameters& user, CServiceParame
     std::vector<std::string> toks = webinos::split(parse.c_str(), jsonParamDelim);
     for (std::vector<std::string>::iterator it = toks.begin(); it != toks.end(); it++)
     {
-		std::string& tok = *it;
-		if (tok.length() == 0)
-			continue;
+      std::string& tok = *it;
+      if (tok.length() == 0)
+        continue;
 
       webinos::trim(tok,trimChars);
 
       int kvPos = tok.find_first_of(':');
       std::string tmp = tok.substr(0,kvPos);
       std::string kvTok = webinos::trim(tmp,std::string("\" "));
-      if (kvTok == pathToNodeKey)
+
+      if (kvTok == instanceKey)
       {
-    	  tmp = tok.substr(kvPos+1);
-    	  params.nodePath = webinos::trim(tmp,trimChars);
-
-        // Un-escape path separator backslashes.          
-        webinos::replace(params.nodePath,std::string("\\\\"),std::string("\\"));
-      }
-
-			if (kvTok == pathToWorkingDirectoryKey)
-      {
-		    	  tmp = tok.substr(kvPos+1);
-				params.workingDirectoryPath = webinos::trim(tmp,trimChars);
-
-        // Un-escape path separator backslashes.
-        webinos::replace(params.workingDirectoryPath,std::string("\\\\"),std::string("\\"));
-      }
-
-			if (kvTok == nodeArgsKey)
-      {
-		    	  tmp = tok.substr(kvPos+1);
-				params.nodeArgs = webinos::trim(tmp,trimChars);
-
-        // Un-escape double quotes.
-        webinos::replace(params.nodeArgs,std::string("\\\""),std::string("\""));
-        webinos::replace(params.nodeArgs,std::string("\\"),std::string("\""));
-      }
-
-			if (kvTok == instanceKey)
-			{
-		    	  tmp = tok.substr(kvPos+1);
+        tmp = tok.substr(kvPos+1);
         std::string inst = webinos::trim(tmp,trimChars);
-				params.instance = atol(inst.c_str());
-			}
+        params.instance = atol(inst.c_str());
+      }
 
-			if (kvTok == showOutputKey)
-			{
-				tmp = tok.substr(kvPos+1);
-				std::string showOutput = webinos::trim(tmp,trimChars);
-				params.showOutput = atol(showOutput.c_str());
-			}
-		}
+      if (kvTok == showOutputKey)
+      {
+        tmp = tok.substr(kvPos+1);
+        std::string showOutput = webinos::trim(tmp,trimChars);
+        params.showOutput = atol(showOutput.c_str());
+      }
 
-		ok = true;
-	}
-	else
-		ok = false;
+      if (kvTok == enabledKey)
+      {
+        tmp = tok.substr(kvPos+1);
+        std::string enabled = webinos::trim(tmp,trimChars);
+        params.enabled = atol(enabled.c_str());
+      }
+    }
 
-	return ok;
+    ok = true;
+  }
+  else
+    ok = false;
+
+  return ok;
 }
 
 bool CServiceManager::SetServiceParameters(CUserParameters& user,CServiceParameters& params)
 {
-	bool ok = false;
+  bool ok = false;
 
-	std::string serviceConfigPath;
-	if (GetUserSettingsPath(user, serviceConfigPath))
-	{
-		serviceConfigPath += pathSeparator + std::string(params.serviceName) + std::string(".json");
+  std::string serviceConfigPath;
+  if (GetUserSettingsPath(user, params, serviceConfigPath))
+  {
+    serviceConfigPath += pathSeparator + std::string(params.serviceName) + std::string(".json");
 
     std::ofstream fs(serviceConfigPath.c_str());
 
@@ -201,55 +251,43 @@ bool CServiceManager::SetServiceParameters(CUserParameters& user,CServiceParamet
     {
       fs << "{";
 
-      std::string fix(params.nodePath);
-      // Escape path separators.
-      webinos::replace(fix, std::string("\\"),std::string("\\\\"));
-      WriteJSONKey(fs,pathToNodeKey,fix);
+      char val[256];
+      sprintf(val,"%ld",params.instance);
+      WriteJSONKey(fs,instanceKey,val);
 
-      fix = params.workingDirectoryPath;
-      // Escape path separators.
-      webinos::replace(fix, std::string("\\"),std::string("\\\\"));
-			WriteJSONKey(fs,pathToWorkingDirectoryKey,fix);
-			
-      fix = params.nodeArgs;
-      // Escape the escaped double-quotes!
-      webinos::replace(fix,std::string("\""),std::string("\\\""));
-      WriteJSONKey(fs,nodeArgsKey,fix);
+      sprintf(val,"%ld",params.showOutput);
+      WriteJSONKey(fs,showOutputKey,val);
 
-			char val[256];
-			sprintf(val,"%ld",params.instance);
-			WriteJSONKey(fs,instanceKey,val);
-	
-			sprintf(val,"%ld",params.showOutput);
-			WriteJSONKey(fs,showOutputKey,val,true);
+      sprintf(val,"%ld",params.enabled);
+      WriteJSONKey(fs,enabledKey,val,true);
 
-			fs << "}";
+      fs << "}";
 
       fs.close();
 
       ok = true;
     }
-	}
-	else
-		ok = false;
+  }
+  else
+    ok = false;
 
-	return ok;
+  return ok;
 }
 
 // Get the path to the current users' configuration folder.
 bool CServiceManager::GetUserParameters(CUserParameters& params)
 {
-	bool ok = false;
+  bool ok = false;
 
-	// Get the current AppData folder for the webinos PZP service to reflect the current user name.
-	TCHAR appData[MAX_PATH];
-	if (0 != ::GetEnvironmentVariable(_T("AppData"), appData, _countof(appData)))
-	{
-		params.appDataPath = appData;
-		ok = true;
-	}
+  // Get the current AppData folder for the webinos PZP service to reflect the current user name.
+  TCHAR appData[MAX_PATH];
+  if (0 != ::GetEnvironmentVariable(_T("AppData"), appData, _countof(appData)))
+  {
+    params.appDataPath = appData;
+    ok = true;
+  }
 
-	return ok;
+  return ok;
 }
 
 void CServiceManager::WriteJSONKey(std::ofstream& fs, std::string keyName, std::string keyVal, bool final)
@@ -260,68 +298,55 @@ void CServiceManager::WriteJSONKey(std::ofstream& fs, std::string keyName, std::
     fs << ",";
 }
 
+std::string CServiceManager::GetInstalledPath()
+{
+  HMODULE hModule = GetModuleHandle(NULL);
+
+  char path[MAX_PATH];
+  GetModuleFileName(hModule, path, MAX_PATH);
+
+  char drive[_MAX_DRIVE];
+  char directory[MAX_PATH];
+  _splitpath(path,drive,directory,NULL,NULL);
+
+  sprintf(path,"%s%s",drive,directory);
+
+  return path;
+}
+
 //
 // Get the path to the users webinos wrt configuration folder.
 // This is currently of the form %APPDATA%/webinos/wrt
 //
-bool CServiceManager::GetUserSettingsPath(const CUserParameters& params, std::string& settingsPath)
+bool CServiceManager::GetUserSettingsPath(const CUserParameters& params, const CServiceParameters& serviceParams, std::string& settingsPath, bool getWRTFolder)
 {
-	settingsPath.clear();
+  settingsPath.clear();
 
   // Make sure the webinos sub-folder exists.
-  std::string path = params.appDataPath + pathSeparator + configFolder;
+  std::string path = params.appDataPath + pathSeparator + serviceParams.serviceFolder;
 
-	if (CreateDirectory(path))
-	{
+  if (CreateDirectory(path))
+  {
+    settingsPath = path;
+
     // Make sure the wrt sub-folder exists.
     path = path + pathSeparator + std::string("wrt");
-	  if (CreateDirectory(path))
-	  {
-		  settingsPath = path;
+    if (CreateDirectory(path))
+    {
+      if (getWRTFolder)
+        settingsPath = path;
     }
-	}
+  }
 
-	return settingsPath.length() > 0;
+  return settingsPath.length() > 0;
 }
 
-bool CServiceManager::GetCommonSettingsPath(std::string& serviceConfigPath)
+void CServiceManager::WriteServiceHeartbeat(const CUserParameters& user, const CServiceParameters& params)
 {
-	serviceConfigPath.clear();
-
-  // Get the path to the common data area.
-  std::string commonDataPath;
-#if defined(WIN32)
-	TCHAR common[MAX_PATH];
-	::SHGetSpecialFolderPath(0, common, CSIDL_COMMON_APPDATA, TRUE);
-  commonDataPath = common;
-#else
-  commonDataPath = "/var/tmp";
-#endif
-
-	std::string path;
-
-  // Make sure the webinos sub-folder exists.
-  path = commonDataPath + pathSeparator + "webinos";
-
-	if (CreateDirectory(path))
-	{
-    // Make sure the wrt sub-folder exists.
-    path = path + pathSeparator + std::string("wrt");
-	  if (CreateDirectory(path))
-	  {
-  		serviceConfigPath = path;
-    }
-	}
-
-	return serviceConfigPath.length() > 0;
-}
-
-void CServiceManager::WriteServiceHeartbeat(const CServiceParameters& params)
-{
-	std::string serviceConfigPath;
-	if (GetCommonSettingsPath(serviceConfigPath))
-	{
-		serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
+  std::string serviceConfigPath;
+  if (GetUserSettingsPath(user,params,serviceConfigPath))
+  {
+    serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
 
     CreateSharedFile(serviceConfigPath.c_str());
 
@@ -331,16 +356,16 @@ void CServiceManager::WriteServiceHeartbeat(const CServiceParameters& params)
       fs << "x";
       fs.close();
 
-		}
-	}
+    }
+  }
 }
 
 void CServiceManager::WriteNodeHeartbeat(const CUserParameters& user,const CServiceParameters& params)
 {
-	std::string settingsPath;
-	if (GetUserSettingsPath(user,settingsPath))
-	{
-		settingsPath += pathSeparator + params.serviceName + std::string(".hb");
+  std::string settingsPath;
+  if (GetUserSettingsPath(user,params, settingsPath))
+  {
+    settingsPath += pathSeparator + params.serviceName + std::string(".hb");
 
     std::ofstream fs(settingsPath.c_str());
     if (fs)
@@ -348,8 +373,8 @@ void CServiceManager::WriteNodeHeartbeat(const CUserParameters& user,const CServ
       fs << "x";
       fs.close();
 
-		}
-	}
+    }
+  }
 }
 
 unsigned long CServiceManager::GetLastWriteTimeElapsed(std::string path)
@@ -387,45 +412,70 @@ unsigned long CServiceManager::GetLastWriteTimeElapsed(std::string path)
 
   if (stat(path.c_str(), &sb) != -1)
   {
-	  elapsed = sb.st_atime;
+    elapsed = sb.st_atime;
   }
 #endif
 
-	return elapsed;
+  return elapsed;
 }
 
-unsigned long  CServiceManager::GetServiceHeartbeatTime(const CServiceParameters& params)
+unsigned long  CServiceManager::GetServiceHeartbeatTime(const CUserParameters& user, const CServiceParameters& params)
 {
-	unsigned long  ret = ULONG_MAX;
+  unsigned long  ret = ULONG_MAX;
 
-	std::string serviceConfigPath;
-	if (GetCommonSettingsPath(serviceConfigPath))
-	{
-		serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
-		ret = GetLastWriteTimeElapsed(serviceConfigPath);
-	}
+  std::string serviceConfigPath;
+  if (GetUserSettingsPath(user,params,serviceConfigPath))
+  {
+    serviceConfigPath += pathSeparator + params.serviceName + std::string(".server.hb");
+    ret = GetLastWriteTimeElapsed(serviceConfigPath);
+  }
 
-	return ret;
+  return ret;
 }
 
 unsigned long CServiceManager::GetNodeHeartbeatTime(const CUserParameters& user, const CServiceParameters& params)
 {
-	unsigned long  ret = ULONG_MAX;
+  unsigned long  ret = ULONG_MAX;
 
-	std::string serviceConfigPath;
-	if (GetUserSettingsPath(user,serviceConfigPath))
-	{
-		serviceConfigPath += pathSeparator + params.serviceName + std::string(".hb");
-		ret = GetLastWriteTimeElapsed(serviceConfigPath);
-	}
+  std::string serviceConfigPath;
+  if (GetUserSettingsPath(user,params,serviceConfigPath))
+  {
+    serviceConfigPath += pathSeparator + params.serviceName + std::string(".hb");
+    ret = GetLastWriteTimeElapsed(serviceConfigPath);
+  }
 
-	return ret;
+  return ret;
 }
 
-void CServiceManager::GetLaunchFiles(const CUserParameters& user, long allowedTimespan, std::vector<std::string> &out)
+bool CServiceManager::DeleteServiceFolder(const CUserParameters& user, const CServiceParameters& params)
+{
+  std::string path;
+  bool ok = false;
+
+  if (GetUserSettingsPath(user,params,path,false))
+  {
+    SHFILEOPSTRUCT fos = {0};
+    char dir[MAX_PATH+1];
+
+    strcpy(dir,path.c_str());
+
+    // Need to add addtional terminator for SHFileOperation.
+    dir[path.length() + 1] = 0;
+
+    // Delete the folder completely.
+    fos.wFunc = FO_DELETE;
+    fos.pFrom = dir;
+    fos.fFlags = FOF_NO_UI;
+    ok = SHFileOperation( &fos );  
+  }
+
+  return ok;
+}
+
+void CServiceManager::GetLaunchFiles(const CUserParameters& user, const CServiceParameters& params, long allowedTimespan, std::vector<std::string> &out)
 {
   std::string directory;
-  GetUserSettingsPath(user,directory);
+  GetUserSettingsPath(user,params,directory);
 
 #if defined(WIN32)
   SYSTEMTIME timeNow;
@@ -445,12 +495,12 @@ void CServiceManager::GetLaunchFiles(const CUserParameters& user, long allowedTi
     const bool is_directory = (file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 
     if (is_directory)
-    	continue;
+      continue;
 
     const std::string file_name = file_data.cFileName;
     const std::string full_file_name = directory + "/" + file_name;
     const std::string failed_file_name = full_file_name + ".failed";
-   
+
     ULONGLONG fileTimeLong = (((ULONGLONG)file_data.ftCreationTime.dwHighDateTime) << 32) + file_data.ftCreationTime.dwLowDateTime;
 
     if (timeNowLong < fileTimeLong)
