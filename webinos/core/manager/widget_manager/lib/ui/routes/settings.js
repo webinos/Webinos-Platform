@@ -24,7 +24,7 @@
     function readPZPConfig(callback) {
       var pzpConfig;
 
-      fs.readFile((path.join(pzp.session.getWebinosPath(),'../wrt/webinos_pzp.json')), function (err, data) {
+      fs.readFile((path.join(pzp.session.getWebinosPath(),'wrt/webinos_pzp.json')), function (err, data) {
         if (err) {
           console.log(err);
         } else {
@@ -39,7 +39,7 @@
     function readWRTConfig(callback) {
       var cfg = {};
 
-      fs.readFile((path.join(pzp.session.getWebinosPath(), '../wrt/webinos_runtime.json')), function (err, data) {
+      fs.readFile((path.join(pzp.session.getWebinosPath(), 'wrt/webinos_runtime.json')), function (err, data) {
         if (err) {
           console.log(err);
         } else {
@@ -102,7 +102,7 @@
         //pzpConfig.nodeArgs = 'webinos_pzp.js --auth-code=\"' + req.body.authCode + '\" --pzh-name=\"' + req.body.pzhName + '\"';
         pzpConfig.instance++;
 
-        fs.writeFile((path.join(pzp.session.getWebinosPath(), '../wrt/webinos_pzp.json')), JSON.stringify(pzpConfig, null, ' '), function (err) {
+        fs.writeFile((path.join(pzp.session.getWebinosPath(), 'wrt/webinos_pzp.json')), JSON.stringify(pzpConfig, null, ' '), function (err) {
           if (err) {
             console.log('error saving pzp configuration file');
             res.redirect('/settings/failure');

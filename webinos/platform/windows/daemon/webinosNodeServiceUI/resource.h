@@ -29,15 +29,21 @@
 #define IDC_NODE_PATH_BROWSE_BTN        1011
 #define IDC_WEBINOS_PATH_BROWSE_BTN     1012
 #define IDC_RESET_BUTTON                1013
-#define IDC_PZH_RESET_BUTTON            1014
 #define IDC_PZH_STATUS_STATIC           1015
 #define IDC_SYSLINK                     1016
 #define IDC_BUTTON1                     1017
 #define IDC_PZP_SYSLINK                 1017
-#define IDC_PZH_SYSLINK                 1018
 #define IDC_VERSION_STATIC              1019
 #define IDC_WRT_SYSLINK                 1020
-#define IDC_OUTPUT_CHECK								1021
+#define IDC_OUTPUT_CHECK                1021
+#define IDC_ENABLE_PZP_CHECK            1022
+#define IDC_PZH_SYSLINK                 1023
+#define IDC_PZH_RESET_BUTTON            1024
+#define IDC_ENABLE_PZH_CHECK            1025
+#define IDC_PZH_OUTPUT_CHECK            1026
+#define IDC_CLEAN_PZH_BUTTON            1027
+#define IDC_CLEAN_PZP_BUTTON            1028
+
 #define ID_CONFIGURE_EXIT               32775
 #define ID_CONTEXT_EXIT                 32776
 #define ID_CONTEXT_CONFIGURE            32777
@@ -51,7 +57,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         32781
-#define _APS_NEXT_CONTROL_VALUE         1022
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
