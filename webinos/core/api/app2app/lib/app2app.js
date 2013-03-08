@@ -126,6 +126,7 @@
     var properties = params.properties;
     var appInfo = params.appInfo;
     var hasRequestCallback = params.hasRequestCallback;
+    var reclaimIfExists = (properties.reclaimIfExists === true);
 
     // first check if the peer is known to us
     if ( ! registeredPeers.hasOwnProperty(peerId)) {
@@ -137,17 +138,16 @@
     client.peerId = peerId;
     client.sessionId = sessionId;
     client.hasRequestCallback = hasRequestCallback;
-    client.canDetach = params.properties.hasOwnProperty("canDetach");
+    client.canDetach = (properties.canDetach === true);
     client.proxyId = generateIdentifier();
 
     if (registeredChannels.hasOwnProperty(namespace)) {
       // channel already exists; check if request is from the same session; if yes assume reconnect
       var existingChannel = registeredChannels[namespace];
-      if (sessionId === existingChannel.creator.sessionId) {
+      if (sessionId === existingChannel.creator.sessionId && reclaimIfExists) {
         console.log("Reconnecting channel creator to channel with namespace " + namespace);
 
         // refresh client bindings, but keep existing configuration
-        client.canDetach = existingChannel.creator.canDetach;
         existingChannel.clients = existingChannel.clients.filter(notEqualsClient(existingChannel.creator));
         existingChannel.creator = client;
         existingChannel.clients.push(client);

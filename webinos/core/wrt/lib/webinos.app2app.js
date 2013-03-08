@@ -166,21 +166,29 @@
   /* Public API functions */
 
   /**
-   * Create a new channel. The configuration object should contain "namespace", "properties" and optionally "appInfo".
-   * Namespace is a valid URN which uniquely identifies the channel in the personal zone. Properties currently contain
-   * "mode" and optionally "canDetach".
+   * Create a new channel.
+   *
+   * The configuration object should contain "namespace", "properties" and optionally "appInfo".
+   *
+   * Namespace is a valid URN which uniquely identifies the channel in the personal zone.
+   *
+   * Properties currently contain "mode" and optionally "canDetach" and "reclaimIfExists".
+   *
    * The mode can be either "send-receive" or "receive-only". The "send-receive" mode allows both the channel creator
    * and connected clients to send and receive, while "receive-only" only allows the channel creator to send.
-   * If canDetach is defined it allows the channel creator to disconnect from the channel without closing the channel.
+   *
+   * If canDetach is true it allows the channel creator to disconnect from the channel without closing the channel.
+   *
    * appInfo allows a channel creator to attach application-specific information to a channel.
    *
    * The channel creator can decide which clients are allowed to connect to the channel. For each client which wants to
    * connect to the channel the requestCallback is invoked which should return true (if allowed to connect) or false.
-   * If no requestCallback is defined access is allowed by default.
+   * If no requestCallback is defined all connect requests are granted.
    *
-   * If the channel namespace already exists the error callback is invoked, unless the request is from the same
-   * session as the existing channel in which case it is considered a reconnect of the channel creator and its
-   * bindings are refreshed (the configuration of the existing channel is not modified).
+   * If the channel namespace already exists the error callback is invoked, unless the reclaimIfExists property is set to
+   * true, in which case it is considered a reconnect of the channel creator. Reclaiming only succeeds when the request
+   * originates from the same session as the original channel creator. If so, its bindings are refreshed (the mode and
+   * appInfo of the existing channel are not modified).
    *
    * @param configuration Channel configuration.
    * @param requestCallback Callback invoked to allow or deny clients access to a channel.
