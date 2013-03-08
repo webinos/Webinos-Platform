@@ -1,22 +1,25 @@
-//
-// Webinos-Platform/webinos/core/wrt/lib/webinos.servicedisco.js
-//
-// Maintenance records:
-// These inline comments should be incorporated in release notes and removed
-// from here when releasing new versions.
-//
-// Modification implements
-// -- Interface DiscoveryInterface method
-//      PendingOperation findServices(ServiceType serviceType, FindCallBack findCallBack, Options options, Filter filter)
-// -- Interface FindCallBack method
-//      void onError(DOMError error)
-// -- Interface PendingOperation method
-//      void cancel()
-//
+/*******************************************************************************
+ * Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2011 Alexander Futasz, Fraunhofer FOKUS
+ ******************************************************************************/
+
 (function () {
     function isOnNode() {
         return typeof module === "object" ? true : false;
-    };
+    }
 
     // TODO The typeMap is hard-coded here so only these APIs are
     // supported. In the future this should be improved to support
@@ -75,8 +78,6 @@
      * Interface DiscoveryInterface
      */
     var ServiceDiscovery = function (rpcHandler) {
-        this.registeredServices = 0;
-        
         var _webinosReady = false;
         var callerCache = [];
 
@@ -129,7 +130,6 @@
                 if (ServiceConstructor) {
                     // elevate baseServiceObj to usable local WebinosService object
                     var service = new ServiceConstructor(baseServiceObj, rpcHandler);
-                    this.registeredServices++;
                     findOp.found = true;
                     callback.onFound(service);
                 } else {
@@ -162,17 +162,6 @@
                 rpc.serviceAddress = rpcHandler.parent.config.pzhId;
             } else {
                 rpc.serviceAddress = webinos.session.getServiceLocation();
-            }
-            
-            // TODO Need to check how to handle it. The serviceType BlobBuilder is
-            // not in the API spec.
-            // Pure local services.
-            if (serviceType == "BlobBuilder") {
-                this.found =true;
-                var tmp = new BlobBuilder();
-                this.registeredServices++;
-                callback.onFound(tmp);
-                return findOp;
             }
             
             if (!isOnNode() && !_webinosReady) {
