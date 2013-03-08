@@ -17,7 +17,60 @@
     function isOnNode() {
         return typeof module === "object" ? true : false;
     };
-    
+
+    // TODO The typeMap is hard-coded here so only these APIs are
+    // supported. In the future this should be improved to support
+    // dynamic APIs.
+    //
+    // APIs should be classified as intrinsic ones and webinos
+    // services. Intrinsic APIs, like Discovery, App2App, should be
+    // provided directly in WRT. webinos service APIs, like Actuator,
+    // Vehicle, which are supposed to be provided with a PZP, should be
+    // found with Discovery implemented in this file.
+    //
+    // That means, intrinsic APIs are released along with WRT and not
+    // acquired with Discovery. Users can invoke them directly just
+    // like using a library. While webinos service APIs will still be
+    // acquired with Discovery.
+    //
+    var typeMap = {};
+    if (typeof ActuatorModule !== 'undefined') typeMap['http://webinos.org/api/actuators'] = ActuatorModule;
+    if (typeof App2AppModule !== 'undefined') typeMap['http://webinos.org/api/app2app'] = App2AppModule;
+    if (typeof AppLauncherModule !== 'undefined') typeMap['http://webinos.org/api/applauncher'] = AppLauncherModule;
+    if (typeof AuthenticationModule !== 'undefined') typeMap['http://webinos.org/api/authentication'] = AuthenticationModule;
+    if (typeof webinos.Context !== 'undefined') typeMap['http://webinos.org/api/context'] = webinos.Context;
+    if (typeof corePZinformationModule !== 'undefined') typeMap['http://webinos.org/api/corePZinformation'] = corePZinformationModule;
+    if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/api/discovery'] = DiscoveryModule;
+    if (typeof EventsModule !== 'undefined') typeMap['http://webinos.org/api/events'] = EventsModule;
+    if (webinos.file && webinos.file.Service) typeMap['http://webinos.org/api/file'] = webinos.file.Service;
+    if (typeof MediaContentModule !== 'undefined') typeMap['http://webinos.org/api/mediacontent'] = MediaContentModule;
+    if (typeof NfcModule !== 'undefined') typeMap['http://webinos.org/api/nfc'] = NfcModule;
+    if (typeof WebNotificationModule !== 'undefined') typeMap['http://webinos.org/api/notifications'] = WebNotificationModule;
+    if (typeof WebinosDeviceOrientation !== 'undefined') typeMap['http://webinos.org/api/deviceorientation'] = WebinosDeviceOrientation;
+    if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
+    if (typeof Sensor !== 'undefined') typeMap['http://webinos.org/api/sensors'] = Sensor;
+    if (typeof TestModule !== 'undefined') typeMap['http://webinos.org/api/test'] = TestModule;
+    if (typeof TVManager !== 'undefined') typeMap['http://webinos.org/api/tv'] = TVManager;
+    if (typeof Vehicle !== 'undefined') typeMap['http://webinos.org/api/vehicle'] = Vehicle;
+    if (typeof WebinosGeolocation !== 'undefined') typeMap['http://webinos.org/api/w3c/geolocation'] = WebinosGeolocation;
+    if (typeof WebinosGeolocation !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/geolocation'] = WebinosGeolocation; // old feature URI for compatibility
+    if (typeof Contacts !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/contacts'] = Contacts;
+    if (typeof ZoneNotificationModule !== 'undefined') typeMap['http://webinos.org/api/internal/zonenotification'] = ZoneNotificationModule;
+//    if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/manager/discovery/bluetooth'] = DiscoveryModule;
+    if (typeof oAuthModule !== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
+    if (typeof DeviceStatusManager !== 'undefined') typeMap['http://wacapps.net/api/devicestatus'] = DeviceStatusManager;
+
+    if (isOnNode()) {
+        var path = require('path');
+        var moduleRoot = path.resolve(__dirname, '../') + '/';
+        var moduleDependencies = require(moduleRoot + '/dependencies.json');
+        var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
+        var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
+
+        var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
+        typeMap['http://webinos.org/api/context'] = Context;
+    }
+
     /**
      * Interface DiscoveryInterface
      */
@@ -64,84 +117,16 @@
             }, timer);
             
             var success = function (params) {
-                var baseServiceObj = params;
-                
                 console.log("servicedisco: service found.");
-                
-                // TODO The typeMap is hard-coded here so only these APIs are
-                // supported. In the future this should be improved to support
-                // dynamic APIs.
-                //
-                // APIs should be classified as intrinsic ones and webinos
-                // services. Intrinsic APIs, like Discovery, App2App, should be
-                // provided directly in WRT. webinos service APIs, like Actuator,
-                // Vehicle, which are supposed to be provided with a PZP, should be
-                // found with Discovery implemented in this file.
-                //
-                // That means, intrinsic APIs are released along with WRT and not
-                // acquired with Discovery. Users can invoke them directly just
-                // like using a library. While webinos service APIs will still be
-                // acquired with Discovery.
-                //
-                var typeMap = {};
-                if (typeof webinos.file !== 'undefined' && typeof webinos.file.Service !== 'undefined')
-                    typeMap['http://webinos.org/api/file'] = webinos.file.Service;
-                if (typeof TestModule !== 'undefined') typeMap['http://webinos.org/api/test'] = TestModule;
-                if (typeof ActuatorModule !== 'undefined') {
-                    typeMap['http://webinos.org/api/actuators'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.linearmotor'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.switch'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.rotationalmotor'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.vibratingmotor'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.servomotor'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.swivelmotor'] = ActuatorModule;
-                    typeMap['http://webinos.org/api/actuators.thermostat'] = ActuatorModule;
-                }
-                if (typeof WebNotificationModule !== 'undefined') typeMap['http://webinos.org/api/notifications'] = WebNotificationModule;
-                if (typeof ZoneNotificationModule !== 'undefined') typeMap['http://webinos.org/api/internal/zonenotification'] = ZoneNotificationModule;
-                if (typeof oAuthModule!== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
-                if (typeof WebinosGeolocation !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/geolocation'] = WebinosGeolocation;
-                if (typeof WebinosDeviceOrientation !== 'undefined') typeMap['http://webinos.org/api/deviceorientation'] = WebinosDeviceOrientation;
-                if (typeof Vehicle !== 'undefined') typeMap['http://webinos.org/api/vehicle'] = Vehicle;
-                if (typeof EventsModule !== 'undefined') typeMap['http://webinos.org/api/events'] = EventsModule;
-                if (typeof App2AppModule !== 'undefined') typeMap['http://webinos.org/api/app2app'] = App2AppModule;
-                if (typeof AppLauncherModule !== 'undefined') typeMap['http://webinos.org/api/applauncher'] = AppLauncherModule;
-                if (typeof Sensor !== 'undefined') {
-                    typeMap['http://webinos.org/api/sensors'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.temperature'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.light'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.proximity'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.noise'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.pressure'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.humidity'] = Sensor;
-                    typeMap['http://webinos.org/api/sensors.heartratemonitor'] = Sensor;
-                }
-                if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
-                if (typeof UserProfileIntModule !== 'undefined') typeMap['UserProfileInt'] = UserProfileIntModule;
-                if (typeof TVManager !== 'undefined') typeMap['http://webinos.org/api/tv'] = TVManager;
-                if (typeof DeviceStatusManager !== 'undefined') typeMap['http://wacapps.net/api/devicestatus'] = DeviceStatusManager;
-                if (typeof Contacts !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/contacts'] = Contacts;
-                if (typeof webinos.Context !== 'undefined') typeMap['http://webinos.org/api/context'] = webinos.Context;
-                //if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/manager/discovery/bluetooth'] = DiscoveryModule;
-                if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/api/discovery'] = DiscoveryModule;
-                if (typeof AuthenticationModule !== 'undefined') typeMap['http://webinos.org/api/authentication'] = AuthenticationModule;
-                if (typeof MediaContentModule !== 'undefined') typeMap['http://webinos.org/api/mediacontent'] = MediaContentModule;
-                if (typeof corePZinformationModule !== 'undefined') typeMap['http://webinos.org/api/corePZinformation'] = corePZinformationModule;
-                if (typeof NfcModule !== 'undefined') typeMap['http://webinos.org/api/nfc'] = NfcModule;
+                var baseServiceObj = params;
 
-                if (isOnNode()) {
-                    var path = require('path');
-                    var moduleRoot = path.resolve(__dirname, '../') + '/';
-                    var moduleDependencies = require(moduleRoot + '/dependencies.json');
-                    var webinosRoot = path.resolve(moduleRoot + moduleDependencies.root.location) + '/';
-                    var dependencies = require(path.resolve(webinosRoot + '/dependencies.json'));
+                // reduce feature uri to base form, e.g. http://webinos.org/api/sensors
+                // instead of http://webinos.org/api/sensors.light etc.
+                var stype = /(?:.*(?:\/[\w]+)+)/.exec(baseServiceObj.api);
+                stype = stype ? stype[0] : undefined;
 
-                    var Context = require(path.join(webinosRoot, dependencies.wrt.location, 'lib/webinos.context.js')).Context;
-                    typeMap['http://webinos.org/api/context'] = Context;
-                }
-
-                var ServiceConstructor = typeMap[baseServiceObj.api];
-                if (typeof ServiceConstructor !== 'undefined') {
+                var ServiceConstructor = typeMap[stype];
+                if (ServiceConstructor) {
                     // elevate baseServiceObj to usable local WebinosService object
                     var service = new ServiceConstructor(baseServiceObj, rpcHandler);
                     this.registeredServices++;
