@@ -19,23 +19,13 @@
 (function() {
   App2AppModule = function (params) {
 
-    if(typeof App2AppModule.prototype._singletonInstance !== 'undefined') {
-      return App2AppModule.prototype._singletonInstance;
-    }
-
-    App2AppModule.prototype._singletonInstance = this;
-
     this.base = WebinosService;
     this.base(params);
 
     this.peerId = generateIdentifier();
-    module = this;
-
-    this.createChannel = createChannel;
-    this.searchForChannels = searchForChannels;
 
     console.log("Creating app2app instance with peer Id " + this.peerId);
-    registerPeer(
+    registerPeer(this,
       function (success) {
         console.log("Bind succeeded: registered peer.");
       },
@@ -56,13 +46,12 @@
 
   App2AppModule.prototype.unbindService = function (successCallback, errorCallback) {
     var params = {};
-    params.peerId = module.peerId;
+    params.peerId = this.peerId;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "unregisterPeer", params);
+    var rpc = webinos.rpcHandler.createRPC(this, "unregisterPeer", params);
 
     webinos.rpcHandler.executeRPC(rpc,
       function (success) {
-        App2AppModule.prototype._singletonInstance = undefined;
         successCallback(success);
       },
       function (error) {
@@ -79,18 +68,17 @@
   var MODE_SEND_RECEIVE = "send-receive";
   var MODE_RECEIVE_ONLY = "receive-only";
 
-  var module;
   var requestCallbacks = {};
   var messageCallbacks = {};
   var searchCallbacks = {};
 
   /* Initialisation helpers */
 
-  function registerPeer(successCallback, errorCallback) {
+  function registerPeer(serviceInstance, successCallback, errorCallback) {
     var params = {};
-    params.peerId = module.peerId;
+    params.peerId = serviceInstance.peerId;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "registerPeer", params);
+    var rpc = webinos.rpcHandler.createRPC(serviceInstance, "registerPeer", params);
 
     // setup callback dispatcher for incoming channel connect requests
     rpc.handleConnectRequest = function (connectRequest, requestSuccessCallback, requestErrorCallback) {
@@ -104,7 +92,7 @@
 
     // setup callback dispatcher for incoming search results
     rpc.handleChannelSearchResult = function (searchResult, searchSuccessCallback, searchErrorCallback) {
-      dispatchChannelSearchResult(searchResult, searchSuccessCallback, searchErrorCallback);
+      dispatchChannelSearchResult(serviceInstance, searchResult, searchSuccessCallback, searchErrorCallback);
     };
 
     webinos.rpcHandler.registerCallbackObject(rpc);
@@ -149,14 +137,14 @@
     }
   }
 
-  function dispatchChannelSearchResult(searchResult, successCallback, errorCallback) {
+  function dispatchChannelSearchResult(serviceInstance, searchResult, successCallback, errorCallback) {
     var channel = searchResult.channel;
     var proxyId = searchResult.proxyId;
 
     console.log("Received channel search result with namespace " + channel.namespace);
-    if (searchCallbacks.hasOwnProperty(module.peerId)) {
-      var callback = searchCallbacks[module.peerId];
-      callback(new ChannelProxy(channel, proxyId));
+    if (searchCallbacks.hasOwnProperty(serviceInstance.peerId)) {
+      var callback = searchCallbacks[serviceInstance.peerId];
+      callback(new ChannelProxy(serviceInstance, channel, proxyId));
       successCallback();
     } else {
       errorCallback(respondWith("No search result callback found for namespace " + searchResult.namespace));
@@ -196,7 +184,7 @@
    * @param successCallback Callback invoked when channel creation was successful.
    * @param errorCallback Callback invoked when channel creation failed.
    */
-  function createChannel(configuration, requestCallback, messageCallback, successCallback, errorCallback) {
+  App2AppModule.prototype.createChannel = function(configuration, requestCallback, messageCallback, successCallback, errorCallback) {
 
     // sanity checks
 
@@ -238,26 +226,27 @@
     }
 
     var params = {};
-    params.peerId = module.peerId;
+    params.peerId = this.peerId;
     params.sessionId = webinos.session.getSessionId();
     params.namespace = configuration.namespace;
     params.properties = configuration.properties;
     params.appInfo = configuration.appInfo;
     params.hasRequestCallback = (typeof requestCallback === "function");
 
-    var rpc = webinos.rpcHandler.createRPC(module, "createChannel", params);
+    var that = this;
+    var rpc = webinos.rpcHandler.createRPC(this, "createChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
       function(channel) {
         requestCallbacks[channel.namespace] = requestCallback;
         messageCallbacks[channel.creator.proxyId] = messageCallback;
-        successCallback(new ChannelProxy(channel, channel.creator.proxyId));
+        successCallback(new ChannelProxy(that, channel, channel.creator.proxyId));
       },
       function(error) {
         console.log("Could not create channel: " + error.message);
         errorCallback(error);
       }
     );
-  }
+  };
 
   /**
    * Search for channels with given namespace, within its own personal zone. It returns a proxy to a found
@@ -273,7 +262,7 @@
    * @param successCallback Callback invoked when the search is accepted for processing.
    * @param errorCallback Callback invoked when search query could not be processed.
    */
-  function searchForChannels(namespace, zoneIds, searchCallback, successCallback, errorCallback) {
+  App2AppModule.prototype.searchForChannels = function (namespace, zoneIds, searchCallback, successCallback, errorCallback) {
 
     // sanity checks
 
@@ -291,25 +280,28 @@
     }
 
     var params = {};
-    params.peerId = module.peerId;
+    params.peerId = this.peerId;
     params.namespace = namespace;
     params.zoneIds = zoneIds;
 
     // we only allow a single search at a time
-    if (searchCallbacks.hasOwnProperty(module.peerId)) {
+    if (searchCallbacks.hasOwnProperty(this.peerId)) {
       errorCallback(respondWith("There is already a search in progress."));
       return;
     }
 
     // set current search callback
-    searchCallbacks[module.peerId] = searchCallback;
+    searchCallbacks[this.peerId] = searchCallback;
+
+    // save reference in context
+    var that = this;
 
     var timeoutId = setTimeout(function() {
       console.log("Hit channel search timeout, remove callback");
-      delete searchCallbacks[module.peerId];
+      delete searchCallbacks[that.peerId];
     }, CHANNEL_SEARCH_TIMEOUT);
 
-    var rpc = webinos.rpcHandler.createRPC(module, "searchForChannels", params);
+    var rpc = webinos.rpcHandler.createRPC(this, "searchForChannels", params);
     webinos.rpcHandler.executeRPC(rpc,
       function(success) {
         successCallback(success);
@@ -322,20 +314,21 @@
 
     var pendingOperation = {};
     pendingOperation.cancel = function() {
-      if (searchCallbacks[module.peerId]) {
+      if (searchCallbacks[that.peerId]) {
         clearTimeout(timeoutId);
-        delete searchCallbacks[module.peerId];
+        delete searchCallbacks[that.peerId];
       }
     };
 
     return pendingOperation;
-  }
+  };
 
   /* Channel proxy implementation */
 
-  function ChannelProxy(channel, proxyId) {
+  function ChannelProxy(serviceInstance, channel, proxyId) {
+    this.serviceInstance = serviceInstance;
     this.client = {};
-    this.client.peerId = module.peerId;
+    this.client.peerId = serviceInstance.peerId;
     this.client.proxyId = proxyId;
 
     this.creator = channel.creator;
@@ -371,7 +364,7 @@
     params.requestInfo = requestInfo;
     params.namespace = this.namespace;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "connectToChannel", params);
+    var rpc = webinos.rpcHandler.createRPC(this.serviceInstance, "connectToChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
       function (client) {
         messageCallbacks[client.proxyId] = messageCallback;
@@ -408,7 +401,7 @@
     params.namespace = this.namespace;
     params.clientMessage = message;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "sendToChannel", params);
+    var rpc = webinos.rpcHandler.createRPC(this.serviceInstance, "sendToChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
       function (success) {
         successCallback();
@@ -456,7 +449,7 @@
     params.namespace = this.namespace;
     params.clientMessage = message;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "sendToChannel", params);
+    var rpc = webinos.rpcHandler.createRPC(this.serviceInstance, "sendToChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
       function (success) {
         successCallback();
@@ -488,7 +481,7 @@
     params.from = this.client;
     params.namespace = this.namespace;
 
-    var rpc = webinos.rpcHandler.createRPC(module, "disconnectFromChannel", params);
+    var rpc = webinos.rpcHandler.createRPC(this.serviceInstance, "disconnectFromChannel", params);
     webinos.rpcHandler.executeRPC(rpc,
       function (success) {
         successCallback();
