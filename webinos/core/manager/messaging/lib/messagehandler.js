@@ -320,6 +320,16 @@
 					if (isLocalAppMsg.call(this, message)) {
 						// msg from other pzp to wrt previously connected to this pzp
 						console.log('drop message, wrt disconnected');
+						var m = {
+							type: 'mprop',
+							to: message.resp_to,
+							from: this.ownSessionId,
+							payload: {
+								name: 'disconnected',
+								sessionId: message.to
+							}
+						}
+						this.sendMsg(m, message.resp_to);
 						return;
 					}
 

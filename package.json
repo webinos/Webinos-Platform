@@ -12,7 +12,7 @@
   , "url" : "http://github.com/webinos/Webinos-Platform.git"
   }
 , "dependencies" :
-  { "webinos-jsonrpc2" : "*"
+  { "webinos-jsonrpc2" : "~0.8.1"
   , "schema" : "0.x.x"
   , "JSV" : "4.x.x"
   , "sax" : "0.x.x"
