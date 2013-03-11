@@ -145,7 +145,6 @@ var Pzh_RPC = function (_parent) {
         };
         // Setting message handler to work with pzh instance
         self.messageHandler.setGetOwnId (_parent.pzh_state.sessionId);
-        self.messageHandler.setObjectRef (_parent);
         self.messageHandler.setSendMessage (messageHandlerSend);
         self.messageHandler.setSeparator ("/");
     };
