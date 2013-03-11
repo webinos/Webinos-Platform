@@ -163,6 +163,44 @@
 	};
 
 	/**
+	 * Somehow finds out the PZH address and returns it?
+	 */
+	function getPzhAddr(message) {
+		// check occurances of separator used in addressing
+		var data = message.to.split(this.separator);
+		var occurences = data.length - 1;
+		var id = data[0];
+		var forwardto = data[0];
+
+		// strip from right side
+		for (var i = 1; i < occurences; i++) {
+			id = id + this.separator + data[i];
+			var new_session1 = [id, this.ownSessionId].join("->");
+			var new_session2 = [this.ownSessionId, id].join("->");
+
+			if (this.clients[new_session1] || this.clients[new_session2]) {
+				forwardto = id;
+			}
+		}
+
+		if (forwardto === data[0]) {
+			var s1 = [forwardto, this.ownSessionId].join("->");
+			var s2 = [this.ownSessionId, forwardto].join("->");
+			if (this.clients[s1] || this.clients[s2])
+				forwardto = data[0];
+			else
+			{
+				var own_addr = this.ownSessionId.split(this.separator);
+				var own_pzh = own_addr[0]
+				if (forwardto !== own_pzh) {
+					forwardto = own_pzh;
+				}
+			}
+		}
+		return forwardto;
+	}
+
+	/**
 	 * RPC writer - referto write function in  RPC
 	 * @param rpc Message body
 	 * @param to Destination for rpc result to be sent to
@@ -193,38 +231,8 @@
 
 		if ((!this.clients[session1]) && (!this.clients[session2])) { // not registered either way
 			logger.log("session not set up");
-			var occurences = (message.to.split(this.separator).length - 1);
-
-			var data = message.to.split(this.separator);
-			var id = data[0];
-			var forwardto = data[0];
-
-			for (var i = 1; i < occurences; i++) {
-				id = id + this.separator + data[i];
-				var new_session1 = [id, this.ownSessionId].join("->");
-				var new_session2 = [this.ownSessionId, id].join("->");
-
-				if (this.clients[new_session1] || this.clients[new_session2]) {
-					forwardto = id;
-					logger.log("forwardto ", forwardto);
-				}
-			}
-			if (forwardto === data[0]) {
-				var s1 = [forwardto, this.ownSessionId].join("->");
-				var s2 = [this.ownSessionId, forwardto].join("->");
-
-				if (this.clients[s1] || this.clients[s2]) {
-					forwardto = data[0];
-				}
-
-				else {
-					var own_addr = this.ownSessionId.split(this.separator);
-					var own_pzh = own_addr[0]
-					if (forwardto !== own_pzh) {
-						forwardto = own_pzh;
-					}
-				}
-			}
+			var forwardto = getPzhAddr.call(this, message);
+			logger.log("message forward to:" + forwardto);
 			this.sendMsg(message, forwardto);
 		}
 		else if (this.clients[session2]) {
@@ -236,7 +244,6 @@
 			this.sendMsg(message, this.clients[session1]);
 		}
 	};
-
 
 	/**
 	 *  Handle message routing on receiving message. it does -
@@ -275,7 +282,6 @@
 		}
 		// check message destination
 		else if (message.hasOwnProperty("to") && (message.to)) {
-			this.ownSessionId = this.ownSessionId;
 
 			//check if a session with destination has been stored
 			if(message.to !== this.ownSessionId) {
@@ -290,38 +296,7 @@
 				// not registered either way
 				if ((!this.clients[session1]) && (!this.clients[session2])) {
 					logObj(message, "Sender, receiver not registered either way");
-					//check occurances of separator used in addressing
-					var occurences = (message.to.split(this.separator).length - 1);
-					var data = message.to.split(this.separator);
-					var id = data[0];
-					var forwardto = data[0];
-
-					//strip from right side
-					for (var i = 1; i < occurences; i++) {
-						id = id + this.separator + data[i];
-						var new_session1 = [id, this.ownSessionId].join("->");
-						var new_session2 = [this.ownSessionId, id].join("->");
-
-						if (this.clients[new_session1] || this.clients[new_session2]) {
-							forwardto = id;
-						}
-					}
-
-
-					if (forwardto === data[0]) {
-						var s1 = [forwardto, this.ownSessionId].join("->");
-						var s2 = [this.ownSessionId, forwardto].join("->");
-						if (this.clients[s1] || this.clients[s2])
-							forwardto = data[0];
-						else
-						{
-							var own_addr = this.ownSessionId.split(this.separator);
-							var own_pzh = own_addr[0]
-							if (forwardto !== own_pzh) {
-								forwardto = own_pzh;
-							}
-						}
-					}
+					var forwardto = getPzhAddr.call(this, message);
 					logger.log("message forward to:" + forwardto);
 					this.sendMsg(message, forwardto);
 				}
@@ -343,7 +318,6 @@
 					}
 					else {
 						if (typeof message.payload.method !== "undefined") {
-							// FIXME: can we call rpc.handleMessage here without checking messageCallbacks[] for message.id?
 							var from = message.from;
 							var msgid = message.id;
 							this.rpcHandler.handleMessage(message.payload, from, msgid);
