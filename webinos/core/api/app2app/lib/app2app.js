@@ -91,14 +91,25 @@
 
         Object.keys(registeredChannels).forEach(function(namespace) {
           var channel = registeredChannels[namespace];
-          if (channel.creator.peerId === peerId) {
-            // remove all channels where the creator runs on the peer to unregister
+
+          channel.clients = channel.clients.filter(function(client) {
+            return client.peerId !== peerId;
+          });
+
+          if (channel.clients.length === 0) {
+            console.log("All channel clients on the same unregistered peer; remove channel");
             delete registeredChannels[channel.namespace];
           } else {
-            // for all other channels, remove all clients which run on the peer to unregister
-            channel.clients = channel.clients.filter(function(client) {
-              return client.peerId !== peerId;
-            });
+            if (channel.creator.peerId === peerId) {
+              // the channel creator is on the peer that is being unregistered
+              if (channel.creator.canDetach) {
+                console.log("Channel creator is on unregistered peer but can detach; keep channel");
+                detachCreator(channel.creator);
+              } else {
+                console.log("Channel creator is on unregistered peer and can not detach; remove channel");
+                delete registeredChannels[channel.namespace];
+              }
+            }
           }
         });
 
@@ -110,9 +121,12 @@
 
   App2AppService.prototype.createChannel = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
+    var sessionId = params.sessionId;
     var namespace = params.namespace;
     var properties = params.properties;
     var appInfo = params.appInfo;
+    var hasRequestCallback = params.hasRequestCallback;
+    var reclaimIfExists = (properties.reclaimIfExists === true);
 
     // first check if the peer is known to us
     if ( ! registeredPeers.hasOwnProperty(peerId)) {
@@ -120,16 +134,34 @@
       return;
     }
 
+    var client = {};
+    client.peerId = peerId;
+    client.sessionId = sessionId;
+    client.hasRequestCallback = hasRequestCallback;
+    client.canDetach = (properties.canDetach === true);
+    client.proxyId = generateIdentifier();
+
     if (registeredChannels.hasOwnProperty(namespace)) {
-      errorCallback(respondWith("Channel already exists."));
-      return;
+      // channel already exists; check if request is from the same session; if yes assume reconnect
+      var existingChannel = registeredChannels[namespace];
+      if (sessionId === existingChannel.creator.sessionId && reclaimIfExists) {
+        console.log("Reconnecting channel creator to channel with namespace " + namespace);
+
+        // refresh client bindings, but keep existing configuration
+        existingChannel.clients = existingChannel.clients.filter(notEqualsClient(existingChannel.creator));
+        existingChannel.creator = client;
+        existingChannel.clients.push(client);
+
+        successCallback(existingChannel);
+        return;
+
+      } else {
+        errorCallback(respondWith("Channel already exists."));
+        return;
+      }
     }
 
     console.log("Create channel with namespace " + namespace);
-
-    var client = {};
-    client.peerId = peerId;
-    client.proxyId = generateIdentifier();
 
     var channel = {
       creator: client,
@@ -218,19 +250,25 @@
       return;
     }
 
-    // send connect request to channel creator
-    var peerRef = registeredPeers[channel.creator.peerId];
+    // send connect request to channel creator, if callback is provided
+    if (channel.creator.hasRequestCallback) {
+      var peerRef = registeredPeers[channel.creator.peerId];
 
-    var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
-    this.rpcHandler.executeRPC(rpc,
-      function(success) {
-        registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
-        successCallback(connectRequest.from);
-      },
-      function(error) {
-        errorCallback(error);
-      }
-    );
+      var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
+      this.rpcHandler.executeRPC(rpc,
+        function(success) {
+          registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
+          successCallback(connectRequest.from);
+        },
+        function(error) {
+          errorCallback(error);
+        }
+      );
+    } else {
+      // no request callback provided; allow access by default
+      registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
+      successCallback(connectRequest.from);
+    }
   };
 
   App2AppService.prototype.sendToChannel = function(params, successCallback, errorCallback) {
@@ -268,7 +306,7 @@
     // check if we should broadcast or unicast
     var toClients = (typeof to === "undefined" ? channel.clients : [to]);
 
-    console.log("Sending on channel " + namespace + " which has " + channel.clients.length + " connected clients (including the channel creator)");
+    console.log("Sending on channel " + namespace + " which has " + channel.clients.length + " connected clients (including the channel creator, if connected)");
 
     // all ok; send to connected clients
     toClients.forEach(function(toClient) {
@@ -304,14 +342,18 @@
     if (registeredChannels.hasOwnProperty(namespace)) {
       var channel = registeredChannels[namespace];
 
-      if (equalsClient(from)(channel.creator)) {
-        // if creator disconnects, remove channel
-        delete registeredChannels[namespace];
-      } else {
-        // otherwise just remove client from channel list
-        channel.clients = channel.clients.filter(notEqualsClient(from));
-      }
+      channel.clients = channel.clients.filter(notEqualsClient(from));
 
+      if (channel.clients.length === 0) {
+        delete registeredChannels[namespace];
+      } else if (equalsClient(from)(channel.creator)) {
+        if (channel.creator.canDetach) {
+          detachCreator(channel.creator);
+        } else {
+          // if creator disconnects, remove channel
+          delete registeredChannels[namespace];
+        }
+      }
       successCallback();
     } else {
       errorCallback(respondWith("Channel with namespace " + namespace + " not found."));
@@ -319,6 +361,14 @@
   };
 
   /* Helpers */
+
+  function detachCreator(creator) {
+    creator.peerId = "";
+    creator.hasRequestCallback = false;
+    creator.canDetach = true;
+    creator.proxyId = "";
+    // we keep the sessionId to allow reconnects
+  }
 
   function isPzh(serviceParams) {
     return (typeof serviceParams !== "undefined" && serviceParams.scope === "pzh");
