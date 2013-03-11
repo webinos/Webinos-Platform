@@ -117,7 +117,10 @@ function watchPosition (args, successCB, errorCB, objectRef) {
 
 	var watchId = setInterval(function() {getPos(); }, tint);
 	
-	watchIdTable[objectRef.rpcId] = watchId;
+	watchIdTable[objectRef.rpcId] = {
+		id: watchId,
+		ref: objectRef
+	};
 }
 
 /**
@@ -126,10 +129,12 @@ function watchPosition (args, successCB, errorCB, objectRef) {
  */
 function clearWatch (params, successCB, errorCB) {
 	var watchIdKey = params[0];
-	var watchId = watchIdTable[watchIdKey];
+	var watchIdObj = watchIdTable[watchIdKey];
+	if (!watchIdObj) return;
+	
 	delete watchIdTable[watchIdKey];
 
-	clearInterval(watchId);
+	clearInterval(watchIdObj.id);
 }
 
 /**
@@ -138,6 +143,21 @@ function clearWatch (params, successCB, errorCB) {
  */
 function setRPCHandler(rpcHdlr) {
 	rpcHandler = rpcHdlr;
+}
+
+/**
+ * Handler for internal webinos events
+ * @private
+ */
+function handleEvent(event) {
+	if (!Object.keys(watchIdTable)) return;
+
+	Object.keys(watchIdTable).forEach(function(watchIdKey) {
+		var watchIdObj = watchIdTable[watchIdKey];
+		if (watchIdObj.ref.from === event.sessionId) {
+			clearWatch([watchIdObj.ref.rpcId]);
+		}
+	});
 }
 
 function setRequired() {
@@ -149,6 +169,7 @@ exports.watchPosition = watchPosition;
 exports.clearWatch = clearWatch;
 exports.setRPCHandler = setRPCHandler;
 exports.setRequired = setRequired;
+exports.handleEvent = handleEvent;
 exports.serviceDesc = {
 		api:'http://webinos.org/api/w3c/geolocation',
 		displayName:'Geolocation (by IP)',

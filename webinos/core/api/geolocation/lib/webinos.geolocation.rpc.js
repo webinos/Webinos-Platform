@@ -97,6 +97,10 @@ var GeolocationModule = function(rpcHandler, params) {
 		implModule.clearWatch(params, successCB, errorCB, objectRef);
 	};
 	
+	// Add listener for internal webinos disconnect events
+	this._addListener('disconnected', function(event) {
+		if (implModule.handleEvent) implModule.handleEvent(event);
+	});
 };
 
 GeolocationModule.prototype = new RPCWebinosService;
