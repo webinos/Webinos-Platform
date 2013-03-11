@@ -156,7 +156,7 @@
   }
   function setWebinosMessaging() {
     webinos.messageHandler.setGetOwnId(sessionId);
-    var msg = webinos.messageHandler.registerSender(sessionId, pzpId);
+    var msg = webinos.messageHandler.createRegisterMessage(sessionId, pzpId);
     webinos.session.message_send(msg, pzpId);
   }
   function updateConnected(message){

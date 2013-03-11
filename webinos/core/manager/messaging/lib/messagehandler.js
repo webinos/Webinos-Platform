@@ -61,16 +61,15 @@
 	 *              |
 	 *              +-- A0B3
 	 * other_user@her_domain.com/laptop/urn:services-webinos-org:calender/
-	 * @param rpcHandler RPC handler manager.
 	 */
-  /**
+
+	/**
 	 * MessageHandler constructor
 	 *  @constructor
 	 *  @param rpcHandler RPC handler manager.
 	 */
 	var MessageHandler = function (rpcHandler) {
 		this.sendMsg = null;
-		this.objectRef = null;
 
 		this.ownId = null;
 		this.separator = null;
@@ -85,8 +84,6 @@
 		 *  TODO need to adjust clients[] to accommodate PZH farm, PZP farm scenarios
 		 */
 		this.clients = {};
-
-		this.message = {};
 
 		/**
 		 * To Store callback functions associated with each message.
@@ -105,18 +102,6 @@
 		this.sendMsg = sendMessageFunction;
 	};
 
-	MessageHandler.prototype.sendMessage = function (message, sessionid, objectRef) {
-		this.sendMsg(message, sessionid, objectRef);
-	};
-
-	/**
-	 * To set the reference to different objects.
-	 * @param objref A object reference to referring different PZH or PZP instances.
-	 */
-	MessageHandler.prototype.setObjectRef = function (objref) {
-		this.objectRef = objref;
-	};
-
 	/**
 	 * Function to get own identity.
 	 * @param OwnIdGetter A function that used to get own identification.
@@ -132,7 +117,6 @@
 		return this.ownId;
 	};
 
-
 	/**
 	 * Set separator used to in Addressing to separator different part of the address.
 	 * e.g. PZH/PZP/APPID, "/" is the separator here
@@ -144,50 +128,26 @@
 	};
 
 	/**
-	 *  Create new message. Refer Message fields above for more details.
-	 *  @param options An array that contains elements to define fields in a message
-	 */
-	MessageHandler.prototype.createMessage = function (options) {
-		var message = {};
-
-		for (var i in options ) {
-			message[i] = options[i];
-		}
-		return message;
-	};
-
-	/**
-	 *  Create messageid. This messageid is used as an identifier for callback function associated
-	 *  with the message.
-	 *  @param message Message
-	 *  @param successHandler Success handler
-	 *  @param errorHandler	Error handler
-	 */
-	MessageHandler.prototype.createMessageId = function(message, successHandler, errorHandler) {
-		message.id =  1 + Math.floor(Math.random() * 1024);
-		if (errorHandler || successHandler)	{
-			this.messageCallbacks[message.id] = {onError: errorHandler, onSuccess: successHandler};
-		}
-	};
-
-	/**
-	 *  Only need to call this once. This will result a sessionid in the receiver's storage.
+	 *  Create a register message.
+	 *  Use the created message to send it to an entity, this will setup a session
+	 *  on the receiver side. The receiver will then route messages to the
+	 *  sender of this message.
 	 *  @param from Message originator
 	 *  @param to  Message destination
 	 */
-	MessageHandler.prototype.registerSender = function(from, to) {
+	MessageHandler.prototype.createRegisterMessage = function(from, to) {
 		logger.log('creating register msg to send from ' + from + ' to ' + to);
 		if (from === to) throw new Error('cannot create register msg to itself');
 
-		var options = {};
-		options.register = true;
-		options.to = to;
-		options.from = from;
-		options.type = "JSONRPC";
-		options.payload = null;
+		var msg = {
+			register: true,
+			to: to,
+			from: from,
+			type: 'JSONRPC',
+			payload: null
+		};
 
-		var message = this.createMessage(options);
-		return message;
+		return msg;
 	};
 
 	/**
@@ -199,7 +159,7 @@
 		var session = [sender, receiver];
 		session.join("->");
 		if (this.clients[session]) {
-			this.clients[session] = null;
+			delete this.clients[session];
 		}
 	};
 
@@ -210,26 +170,22 @@
 	 * @param msgid Message id
 	 */
 	MessageHandler.prototype.write = function (rpc, respto, msgid) {
-		//TODO calling write function from RPC does not allow to register call-backs yet
-
-		//create response message
-		var options = {};
-		options.to = respto;
-//	options.resp_to = respto; // used to be respto... FIXME
-		options.resp_to = this.ownId; // used to be respto... FIXME
-		options.from = this.ownId;
+		var message = {
+			to: respto,
+			resp_to: this.ownId,
+			from: this.ownId
+		};
 
 		if (!msgid) {
 			msgid = 1 + Math.floor(Math.random() * 1024);
 		}
-		options.id = msgid;
+		message.id = msgid;
 
 		if (typeof rpc.jsonrpc !== "undefined") {
-			options.type = "JSONRPC";
+			message.type = "JSONRPC";
 		}
 
-		options.payload = rpc;
-		var message = this.createMessage(options);
+		message.payload = rpc;
 
 		if (message.to !== undefined) {
 			var to = message.to;
@@ -275,15 +231,15 @@
 						}
 					}
 				}
-				this.sendMsg(message, forwardto, this.objectRef);
+				this.sendMsg(message, forwardto);
 			}
 			else if (this.clients[session2]) {
 				logger.log("clients[session2]:" + this.clients[session2]);
-				this.sendMsg(message, this.clients[session2], this.objectRef);
+				this.sendMsg(message, this.clients[session2]);
 			}
 			else if (this.clients[session1]) {
 				logger.log("clients[session1]:" + this.clients[session1]);
-				this.sendMsg(message, this.clients[session1], this.objectRef);
+				this.sendMsg(message, this.clients[session1]);
 			}
 		}
 	};
@@ -381,13 +337,13 @@
 						}
 					}
 					logger.log("message forward to:" + forwardto);
-					this.sendMsg(message, forwardto, this.objectRef);
+					this.sendMsg(message, forwardto);
 				}
 				else if (this.clients[session2]) {
-					this.sendMsg(message, this.clients[session2], this.objectRef);
+					this.sendMsg(message, this.clients[session2]);
 				}
 				else if (this.clients[session1]) {
-					this.sendMsg(message, this.clients[session1], this.objectRef);
+					this.sendMsg(message, this.clients[session1]);
 				}
 				return;
 			}

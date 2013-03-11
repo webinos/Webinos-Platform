@@ -95,7 +95,7 @@ var Pzh = function () {
                 self.config.storeDetails(null, "trustedList", self.config.trustedList);
             }
             _conn.id = _pzpId;
-            msg = self.pzh_otherManager.messageHandler.registerSender (self.pzh_state.sessionId, _pzpId);
+            msg = self.pzh_otherManager.messageHandler.createRegisterMessage (self.pzh_state.sessionId, _pzpId);
             self.sendMessage (msg, _pzpId);
             self.sendUpdateToAll(self.pzh_state.sessionId);
             self.pzh_otherManager.syncStart(_pzpId);
@@ -123,7 +123,7 @@ var Pzh = function () {
                 _conn.id = _pzhId;
 
                 setTimeout (function () {
-                    msg = self.pzh_otherManager.messageHandler.registerSender(self.config.metaData.serverName, _pzhId);
+                    msg = self.pzh_otherManager.messageHandler.createRegisterMessage(self.config.metaData.serverName, _pzhId);
                     self.sendMessage (msg, _pzhId);
                     self.sendUpdateToAll(self.pzh_state.sessionId);
                     self.pzh_otherManager.registerServices (_pzhId);
