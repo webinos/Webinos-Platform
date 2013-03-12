@@ -200,7 +200,7 @@ var Pzp_OtherManager = function (_parent) {
             _parent.sendMessage (message, address);
         };
         self.rpcHandler.setSessionId (_parent.pzp_state.sessionId);
-        self.messageHandler.setGetOwnId (_parent.pzp_state.sessionId);
+        self.messageHandler.setOwnSessionId (_parent.pzp_state.sessionId);
         self.messageHandler.setSendMessage (send);
         self.messageHandler.setSeparator ("/");
     };

@@ -22,11 +22,11 @@ describe('manager.messaging', function() {
 	it('has setSendMessage function', function() {
 		expect(messageHandler.setSendMessage).toBeFunction();
 	});
-	it('has setGetOwnId function', function() {
-		expect(messageHandler.setGetOwnId).toBeFunction();
+	it('has setOwnSessionId function', function() {
+		expect(messageHandler.setOwnSessionId).toBeFunction();
 	});
-	it('has getOwnId function', function() {
-		var id = messageHandler.getOwnId();
+	it('has getOwnSessionId function', function() {
+		var id = messageHandler.getOwnSessionId();
 		expect(id).toBeNull();
 	});
 	it('has setSeparator function', function() {

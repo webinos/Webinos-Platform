@@ -155,7 +155,7 @@
     }
   }
   function setWebinosMessaging() {
-    webinos.messageHandler.setGetOwnId(sessionId);
+    webinos.messageHandler.setOwnSessionId(sessionId);
     var msg = webinos.messageHandler.createRegisterMessage(sessionId, pzpId);
     webinos.session.message_send(msg, pzpId);
   }

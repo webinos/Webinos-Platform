@@ -71,7 +71,7 @@
 	var MessageHandler = function (rpcHandler) {
 		this.sendMsg = null;
 
-		this.ownId = null;
+		this.ownSessionId = null;
 		this.separator = null;
 
 		this.rpcHandler = rpcHandler;
@@ -103,18 +103,18 @@
 	};
 
 	/**
-	 * Function to get own identity.
-	 * @param OwnIdGetter A function that used to get own identification.
+	 * Function to set own session identity.
+	 * @param ownSessionId pz session id
 	 */
-	MessageHandler.prototype.setGetOwnId = function (OwnIdGetter) {
-		this.ownId = OwnIdGetter;
+	MessageHandler.prototype.setOwnSessionId = function (ownSessionId) {
+		this.ownSessionId = ownSessionId;
 	};
 
 	/**
-	 * Function to get own identity.
+	 * Function to get own session identity.
 	 */
-	MessageHandler.prototype.getOwnId = function () {
-		return this.ownId;
+	MessageHandler.prototype.getOwnSessionId = function () {
+		return this.ownSessionId;
 	};
 
 	/**
@@ -156,8 +156,7 @@
 	 *  @param receiver Message receiver
 	 */
 	MessageHandler.prototype.removeRoute = function (sender, receiver) {
-		var session = [sender, receiver];
-		session.join("->");
+		var session = [sender, receiver].join("->");
 		if (this.clients[session]) {
 			delete this.clients[session];
 		}
@@ -166,14 +165,16 @@
 	/**
 	 * RPC writer - referto write function in  RPC
 	 * @param rpc Message body
-	 * @param respto Destination for rpc result to be sent to
+	 * @param to Destination for rpc result to be sent to
 	 * @param msgid Message id
 	 */
-	MessageHandler.prototype.write = function (rpc, respto, msgid) {
+	MessageHandler.prototype.write = function (rpc, to, msgid) {
+		if (!to) throw new Error('to is missing, cannot send message');
+
 		var message = {
-			to: respto,
-			resp_to: this.ownId,
-			from: this.ownId
+			to: to,
+			resp_to: this.ownSessionId,
+			from: this.ownSessionId
 		};
 
 		if (!msgid) {
@@ -187,60 +188,52 @@
 
 		message.payload = rpc;
 
-		if (message.to !== undefined) {
-			var to = message.to;
-			var session1 = [to, this.self];
-			session1.join("->");
-			var session2 = [this.self, to];
-			session2.join("->");
+		var session1 = [to, this.ownSessionId].join("->");
+		var session2 = [this.ownSessionId, to].join("->");
 
-			if ((!this.clients[session1]) && (!this.clients[session2]))  // not registered either way
-			{
-				logger.log("session not set up");
-				var occurences = (message.to.split(this.separator).length - 1);
+		if ((!this.clients[session1]) && (!this.clients[session2])) { // not registered either way
+			logger.log("session not set up");
+			var occurences = (message.to.split(this.separator).length - 1);
 
-				var data = message.to.split(this.separator);
-				var id = data[0];
-				var forwardto = data[0];
+			var data = message.to.split(this.separator);
+			var id = data[0];
+			var forwardto = data[0];
 
-				for (var i = 1; i < occurences; i++)	{
-					id = id + this.separator + data[i];
-					var new_session1 = [id, this.self];
-					new_session1.join("->");
-					var new_session2 = [this.self, id];
-					new_session2.join("->");
+			for (var i = 1; i < occurences; i++) {
+				id = id + this.separator + data[i];
+				var new_session1 = [id, this.ownSessionId].join("->");
+				var new_session2 = [this.ownSessionId, id].join("->");
 
-					if (this.clients[new_session1] || this.clients[new_session2]) {
-						forwardto = id;
-						logger.log("forwardto ", forwardto);
+				if (this.clients[new_session1] || this.clients[new_session2]) {
+					forwardto = id;
+					logger.log("forwardto ", forwardto);
+				}
+			}
+			if (forwardto === data[0]) {
+				var s1 = [forwardto, this.ownSessionId].join("->");
+				var s2 = [this.ownSessionId, forwardto].join("->");
+
+				if (this.clients[s1] || this.clients[s2]) {
+					forwardto = data[0];
+				}
+
+				else {
+					var own_addr = this.ownSessionId.split(this.separator);
+					var own_pzh = own_addr[0]
+					if (forwardto !== own_pzh) {
+						forwardto = own_pzh;
 					}
 				}
-				if (forwardto === data[0]) {
-					var s1 = [forwardto, this.self];
-					s1.join("->");
-					var s2 = [this.self, forwardto];
-					s2.join("->");
-					if (this.clients[s1] || this.clients[s2])
-						forwardto = data[0];
-					else
-					{
-						var own_addr = this.self.split(this.separator);
-						var own_pzh = own_addr[0]
-						if (forwardto !== own_pzh) {
-							forwardto = own_pzh;
-						}
-					}
-				}
-				this.sendMsg(message, forwardto);
 			}
-			else if (this.clients[session2]) {
-				logger.log("clients[session2]:" + this.clients[session2]);
-				this.sendMsg(message, this.clients[session2]);
-			}
-			else if (this.clients[session1]) {
-				logger.log("clients[session1]:" + this.clients[session1]);
-				this.sendMsg(message, this.clients[session1]);
-			}
+			this.sendMsg(message, forwardto);
+		}
+		else if (this.clients[session2]) {
+			logger.log("clients[session2]:" + this.clients[session2]);
+			this.sendMsg(message, this.clients[session2]);
+		}
+		else if (this.clients[session1]) {
+			logger.log("clients[session1]:" + this.clients[session1]);
+			this.sendMsg(message, this.clients[session1]);
 		}
 	};
 
@@ -266,8 +259,7 @@
 			var from = message.from;
 			var to = message.to;
 			if (to !== undefined) {
-				var regid = [from, to];
-				regid.join("->");
+				var regid = [from, to].join("->");
 
 				//Register message to associate the address with session id
 				if (message.from) {
@@ -283,19 +275,17 @@
 		}
 		// check message destination
 		else if (message.hasOwnProperty("to") && (message.to)) {
-			this.self = this.ownId;
+			this.ownSessionId = this.ownSessionId;
 
 			//check if a session with destination has been stored
-			if(message.to !== this.self) {
+			if(message.to !== this.ownSessionId) {
 				logger.log("forward Message");
 
 				//if no session is available for the destination, forward to the hop nearest,
 				//i.e A->D, if session for D is not reachable, check C, then check B if C is not reachable
 				var to = message.to;
-				var session1 = [to, this.self];
-				session1.join("->");
-				var session2 = [this.self, to];
-				session2.join("->");
+				var session1 = [to, this.ownSessionId].join("->");
+				var session2 = [this.ownSessionId, to].join("->");
 
 				// not registered either way
 				if ((!this.clients[session1]) && (!this.clients[session2])) {
@@ -309,10 +299,8 @@
 					//strip from right side
 					for (var i = 1; i < occurences; i++) {
 						id = id + this.separator + data[i];
-						var new_session1 = [id, this.self];
-						new_session1.join("->");
-						var new_session2 = [this.self, id];
-						new_session2.join("->");
+						var new_session1 = [id, this.ownSessionId].join("->");
+						var new_session2 = [this.ownSessionId, id].join("->");
 
 						if (this.clients[new_session1] || this.clients[new_session2]) {
 							forwardto = id;
@@ -321,15 +309,13 @@
 
 
 					if (forwardto === data[0]) {
-						var s1 = [forwardto, this.self];
-						s1.join("->");
-						var s2 = [this.self, forwardto];
-						s2.join("->");
+						var s1 = [forwardto, this.ownSessionId].join("->");
+						var s2 = [this.ownSessionId, forwardto].join("->");
 						if (this.clients[s1] || this.clients[s2])
 							forwardto = data[0];
 						else
 						{
-							var own_addr = this.self.split(this.separator);
+							var own_addr = this.ownSessionId.split(this.separator);
 							var own_pzh = own_addr[0]
 							if (forwardto !== own_pzh) {
 								forwardto = own_pzh;
