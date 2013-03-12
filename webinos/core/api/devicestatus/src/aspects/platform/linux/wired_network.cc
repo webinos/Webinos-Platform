@@ -48,13 +48,18 @@ string WiredNetwork::networkStatus(string wiredNetworkName)
 string line, res, result;
 size_t pos;
 
- line = Utils::exec(string("ifconfig -a")); //netstat
- pos = line.find("inet addr");
- result = line.substr (pos);
- res = result.substr (10,27);
-
-        return string(res);
-
+ line = Utils::exec(string("iwconfig 2>&1")); //cat proc/load
+ pos = line.find("ESSID");
+ if(pos < line.size())
+ { 
+ result = line.substr(pos);
+ res = result.substr(6,10); 
+ return string(res);
+ }
+ else 
+ {
+ return "No ssid found";
+ } 
     //    return "networkStatus";
 }
 
@@ -66,7 +71,7 @@ size_t pos;
  line = Utils::exec(string("ifconfig -a"));
  pos = line.find("inet addr");
  result = line.substr (pos);
- res = result.substr (10,27);
+ res = result.substr (10,15);
 
         return string(res);
 }

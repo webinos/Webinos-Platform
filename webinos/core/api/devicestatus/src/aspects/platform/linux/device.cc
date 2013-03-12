@@ -46,21 +46,21 @@ string Device::getPropertyValue(string * property, string * component)
 
 string Device::imei(string deviceName)
 {
-	return "imei";
+	return "Can't Retrieve from OS";
 }
 
 string Device::model(string deviceName)
 {
-	return "model";
+	return "Can't Retrieve from OS";
 }
 
 string Device::vendor(string deviceName)
 {
-	return "vendor";
+	return "Can't Retrieve from OS";
 }
 
 string Device::version(string deviceName)
 {
-	return "version";
+	return "Can't Retrieve from OS";
 }
 

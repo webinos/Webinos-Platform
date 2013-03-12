@@ -39,14 +39,25 @@ string WiFiHardware::getPropertyValue(string * property, string *  component)
 
 string WiFiHardware::status(string wifiHardwareName)
 {
-	string line;
-	size_t pos, pos_endl;
+string line, res, result;
+size_t pos;
 
-	line = Utils::exec(string("iwconfig"));
-	pos = line.find("Access Point") + 14;
-	pos_endl = line.find(' ', pos);
-	
-	return "Associated to: " + line.substr (pos, pos_endl - pos);
+ line = Utils::exec(string("iwconfig 2>&1")); //cat proc/load
+ pos = line.find("ESSID");
+ //cout<<line.size()<<endl;
+ //cout<<pos<<endl;
+ if(pos < line.size())
+ { 
+ //cout<<"check"<<endl;
+ result = line.substr(pos);
+ //cout<<result<<endl;
+ res = result.substr(6,10); 
+ return string(res);
+ }
+ else 
+ {
+ return "No ssid found";
+ } 
 }
 
 
