@@ -7,7 +7,7 @@
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
-			api: 'http://wacapps.net/api/devicestatus',
+			api: 'http://webinos.org/api/devicestatus',
 			displayName: 'DeviceStatus',
 			description: 'Get information about the device status.'
 		});
