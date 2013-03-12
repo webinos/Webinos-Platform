@@ -163,6 +163,18 @@
 	};
 
 	/**
+	 * Returns true if msg is a msg for app on wrt connected to this pzp.
+	 */
+	function isLocalAppMsg(msg) {
+		if (/(?:\/[a-f0-9]+){2,}/.exec(msg.to) // must include /$id/$otherid to be wrt
+				&& /\//.exec(this.ownSessionId) // must include "/" to be pzp
+				&& msg.to.substr(0, this.ownSessionId.length) === this.ownSessionId) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Somehow finds out the PZH address and returns it?
 	 */
 	function getPzhAddr(message) {
@@ -232,6 +244,13 @@
 		if ((!this.clients[session1]) && (!this.clients[session2])) { // not registered either way
 			logger.log("session not set up");
 			var forwardto = getPzhAddr.call(this, message);
+
+			if (isLocalAppMsg.call(this, message)) {
+				// msg from this pzp to wrt previously connected to this pzp
+				console.log('drop message, wrt disconnected');
+				return;
+			}
+
 			logger.log("message forward to:" + forwardto);
 			this.sendMsg(message, forwardto);
 		}
@@ -297,6 +316,13 @@
 				if ((!this.clients[session1]) && (!this.clients[session2])) {
 					logObj(message, "Sender, receiver not registered either way");
 					var forwardto = getPzhAddr.call(this, message);
+
+					if (isLocalAppMsg.call(this, message)) {
+						// msg from other pzp to wrt previously connected to this pzp
+						console.log('drop message, wrt disconnected');
+						return;
+					}
+
 					logger.log("message forward to:" + forwardto);
 					this.sendMsg(message, forwardto);
 				}
