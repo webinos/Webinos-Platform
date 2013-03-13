@@ -52,7 +52,6 @@ module.exports = function(myCommonPaths, myStorageInfo){
 	try{
 		fs.statSync(commonPaths.storage);
 	}catch(e){
-		debugger;
 		mkdirSyncRecursive(commonPaths.storage);
 	}
 	fixFolder(commonPaths.storage, storageInfo.Map);

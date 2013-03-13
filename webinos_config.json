@@ -9,14 +9,6 @@
   },
   "pzhDefaultServices":[
     {
-      "name"  :"context",
-      "params":{}
-    },
-    {
-      "name"  :"events",
-      "params":{}
-    },
-    {
       "name"  :"test",
       "params":{}
     },
@@ -25,6 +17,10 @@
         "params":{
             "scope":"pzh"
         }
+    },
+    {
+      "name"  :"zonenotification",
+      "params":{}
     }
   ],
   "pzpDefaultServices":[
@@ -39,10 +35,10 @@
       "params":{}
     },
     {
-        "name"  :"app2app",
-        "params":{
-            "scope":"pzp"
-        }
+      "name"  :"app2app",
+      "params":{
+          "scope":"pzp"
+      }
     },
     {
       "name"  :"webnotification",
@@ -128,5 +124,11 @@
     "orgunit":"WP4",
     "cn"     :"",
     "email"  :"hello@webinos.org"
+  },
+  "friendlyName":"",
+  "webinos_version": {
+    "tag": "v0.8.0",
+    "num_commit": "15",
+    "commit_id": "gba7314e"
   }
 }

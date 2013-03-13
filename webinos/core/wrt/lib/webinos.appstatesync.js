@@ -48,14 +48,16 @@
 			_callerCache = [];
 		};
 
-		webinos.discovery.findServices({"api": "http://webinos.org/api/app2app"}, {
-			onFound: function (unboundService) {
-				_app2app = unboundService; // FIXME should be assigned on bind
-				unboundService.bindService({onBind: function(sv) {
-					finishCallers();
-				}});
-			}
-		});
+		var getA2aService = function() {
+			webinos.discovery.findServices({"api": "http://webinos.org/api/app2app"}, {
+				onFound: function (unboundService) {
+					_app2app = unboundService; // FIXME should be assigned on bind
+					unboundService.bindService({onBind: function(sv) {
+						finishCallers();
+					}});
+				}
+			});
+		};
 
 		this.create = function (id, successCallback, errorCallback, options) {
 			if (!_app2app) {
@@ -63,6 +65,7 @@
 					"func": "create",
 					"params": [id, successCallback, errorCallback, options]
 				});
+				getA2aService();
 				return;
 			}
 
@@ -143,6 +146,7 @@
 					"func": "find",
 					"params": [id, successCallback, errorCallback]
 				});
+				getA2aService();
 				return;
 			}
 
@@ -156,6 +160,7 @@
 					"func": "detach",
 					"params": [id, successCallback, errorCallback]
 				});
+				getA2aService();
 				return;
 			}
 
@@ -169,6 +174,7 @@
 					"func": "remove",
 					"params": [id, successCallback, errorCallback]
 				});
+				getA2aService();
 				return;
 			}
 

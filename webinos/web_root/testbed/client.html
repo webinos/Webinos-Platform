@@ -11,15 +11,11 @@
 <script type="text/javascript" src="js/jquery.equalHeight.js"></script>
 <script type="text/javascript" src="../webinos.js"></script>
 <script type="text/javascript">
+
 $ (document).ready (function () {
     function setPage (type, page) {
-        var port = window.location.port;
-        if (typeof port === "undefined") {
-            port = 8080;
-        }
-        var fetch = 'http://' + window.location.hostname + ':' + port + '/client/' + page;
         $.get (page, {}, function (reply) {
-            $ ('#main').html ('<article class="module width_full"><header><h3>' + type +
+            $ ('#main').html('<article class="module width_full"><header><h3>' + type +
                     '</h3></header><div class="module_content">' + reply + '</div></article><div class="spacer"></div>');
             //$('.column').equalHeight(); // Fix height
         }, "html");
@@ -30,24 +26,26 @@ $ (document).ready (function () {
         }
     }
     function setEnrolling () {
-        var pzpId = webinos.session.getPZPId();
-        if (pzpId && pzpId.indexOf ('/') === -1) {
+        var pzhId = webinos.session.getPZHId();
+        if (pzhId === "") {
             $ ('#enableLogin').html ("<a href='#login' id='login'> Connect to Your PZH </a>");
             $ ("#login").click (function () {
                 setPage ("Login to your PZH", "login.html");
             });
+
+            $ ("#userId").html (webinos.session.getPZPId());
         } else {
-            if (webinos.session.isConnected ()) {
-                $ ('#enableLogin').html ("Connected to " + webinos.session.getPZHId ());
+            if (webinos.session.isConnected()) {
+                $ ('#enableLogin').html ("Connected to " + pzhId);
             } else {
-                $ ('#enableLogin').html ("Enrolled to " + webinos.session.getPZHId () + "(Not Connected)");
+                $ ('#enableLogin').html ("Enrolled to " + pzhId + "(Not Connected)");
             }
         }
     }
     function webinosVersion (msg) {
-        var currentVersion = msg.payload.message.split ("-")[0];
-        var sha1 = msg.payload.message.split ("-")[2];
-        $ ("#webinosVersion").html ("<ul align=\"right\"> Webinos Version-" + currentVersion + " (Commit ID-" + sha1 + ") </ul>");
+        var currentVersion = msg.payload.message;
+        $ ("#webinosVersion").html ("<ul align=\"right\"> Webinos Version - "+currentVersion.tag+"."+
+                currentVersion.num_commit + "( CommitId-"+ currentVersion.commit_id+") </ul>");
     }
     webinos.session.addListener ('webinosVersion', webinosVersion);
     function pzhDisconnected () {
@@ -63,18 +61,12 @@ $ (document).ready (function () {
         $ ("#enumConnectedPzp").html ("");
         var pzhText = "", pzpText = "", style = "connected";
         for (var i = 0; i < connectedPzh.length; i += 1) {
-            if (webinos.session.getPZHId () === connectedPzh[i]) {
-                pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + " (Your PZH) </a></li>";
-            }
-            else {
-                pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + "</a></li>";
-            }
+            pzhText += "<li><a class='" + style + "'>" + connectedPzh[i] + (connectedPzh[i] === webinos.session.getPZHId()?" (Your Hub)": "")+"</a></li>";
         }
         $ ("#enumConnectedPzh").html (pzhText);
         for (i = 0; i < connectedPzp.length; i += 1) {
-            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + "</a></li>";
+            pzpText += "<li><a class='" + style + "'>" + connectedPzp[i] + (connectedPzp[i] === webinos.session.getPZPId()?" (This Device)": "")+ "</a></li>";
         }
-        pzpText += "<li><a class='connected'>" + webinos.session.getPZPId () + " (This DEVICE) </a></li>";
         $ ("#enumConnectedPzp").html (pzpText);
         setEnrolling ();
     }
@@ -93,7 +85,13 @@ $ (document).ready (function () {
         logMessage (data.payload.message);
     }
     webinos.session.addListener ('info', printInfo);
-
+    $("#resetDevice").click(function(){
+        var sure = confirm("Are you sure you want to reset device?");
+        if (sure) {
+          var options = {type: 'prop', payload: {status:'resetDevice'}};
+          webinos.session.message_send(options);
+        }
+    });
     $("#findPeers").click(function(){
         var options = {type: 'prop', payload: {status:'pzpFindPeers'}};
         webinos.session.message_send(options);
@@ -114,7 +112,7 @@ $ (document).ready (function () {
             document.getElementById('connected_list').innerHTML="";
         }
         var list;
-        //TODO: Fileter out and update connected Peer list
+        //TODO: Filter out and update connected Peer list
         if(data.payload.message.foundpeers.connected)
             list= document.getElementById('connected_list');
         else
@@ -386,7 +384,8 @@ $ (document).ready (function () {
 
         <h2 class="section_title">Dashboard</h2>
 
-        <div class="btn_view_site"><a href="#logout">Disconnect</a></div>
+        <!--<div class="btn_view_site"><a href="#logout">Disconnect</a></div>-->
+        <div class="btn_view_site"> <a href="#resetDevice" id="resetDevice">Disonnect Device from Perzonal Zone</a> </div>
     </hgroup>
 </header>
 <!-- end of header bar -->

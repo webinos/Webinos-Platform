@@ -18,7 +18,7 @@
  *         Ziran Sun (ziran.sun@samsung.com)
  *******************************************************************************/
 
-var PzpWSS = function (_parent) {
+var PzpWSS = function (parent) {
     "use strict";
     var dependency = require ("find-dependencies") (__dirname);
     var util = dependency.global.require (dependency.global.util.location);
@@ -27,9 +27,7 @@ var PzpWSS = function (_parent) {
 
     var connectedWebApp = {}; // List of connected apps i.e session with browser
     var sessionWebApp   = 0;
-    var wsServer        = "";
     var self            = this;
-    var parent          = _parent;
     var expectedPzhAddress;
     var wrtServer, pzhProviderAddress;
 
@@ -41,51 +39,64 @@ var PzpWSS = function (_parent) {
         }
     }
 
-    function prepMsg (from, to, status, message) {
-        "use strict";
+    function prepMsg(to, status, message) {
         return {
-            "type"   :"prop",
-            "from"   :from,
-            "to"     :to,
-            "payload":{
-                "status" :status,
-                "message":message
+            "type": "prop",
+            "from": parent.pzp_state.sessionId,
+            "to": to,
+            "payload": {
+                "status": status,
+                "message": message
             }
         };
     }
 
-    function getConnectedPzp () {
-        return Object.keys (parent.pzp_state.connectedPzp);
+    function getConnectedPzp() {
+        var list = [], key;
+        for (key in parent.pzp_state.connectedPzp) {
+            if(parent.pzp_state.connectedPzp.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedPzp[key].friendlyName || key);
+            }
+        }
+        for (key in parent.pzp_state.connectedDevicesToPzh.pzp) {
+            if(parent.pzp_state.connectedDevicesToPzh.pzp.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzp[key] || key);
+            }
+        }
+        list.push(parent.config.metaData.friendlyName);
+        return list;
     }
 
-    function getConnectedPzh () {
-        return Object.keys (parent.pzp_state.connectedPzh);
+    function getConnectedPzh(){
+        var list = [], key;
+        for (key in parent.pzp_state.connectedPzh) {
+            if(parent.pzp_state.connectedPzh.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedPzh[key].friendlyName || key);
+            }
+        }
+        for (key in parent.pzp_state.connectedDevicesToPzh.pzh) {
+            if(parent.pzp_state.connectedDevicesToPzh.pzh.hasOwnProperty(key)) {
+                list.push(parent.pzp_state.connectedDevicesToPzh.pzh[key] || key);
+            }
+        }
+        return list;
     }
 
     function getVersion (from) {
-        function sendVersion (data) {
-            var msg = prepMsg (parent.pzp_state.sessionId, from, "webinosVersion", data);
-            self.sendConnectedApp (from, msg);
-        }
-        var os = require ("os");
-        var child_process = require ("child_process").exec;
-        if (os.platform ().toLowerCase () !== "android") {
-            child_process ("git describe", function (error, stderr, stdout) {
-                if (!error) {
-                    sendVersion (stderr);
-                } else {
-                    sendVersion ("v0.7"); // Change this or find another way of reading git describe for android
-                }
-            })
+        var msg;
+        if (parent.config.metaData.webinos_version) {
+            msg = prepMsg (from, "webinosVersion", parent.config.metaData.webinos_version);
         } else {
-            sendVersion ("v0.7");
+            var packageValue = require("../../../../package.json")
+            msg = prepMsg (from, "webinosVersion", packageValue.version);
         }
+        self.sendConnectedApp (from, msg);
     }
 
     function getWebinosLog (type, from) {
         "use strict";
         logger.fetchLog (type, "Pzp", parent.config.metaData.friendlyName, function (data) {
-            var msg = prepMsg (parent.pzp_state.sessionId, from, type + "Log", data);
+            var msg = prepMsg (from, type + "Log", data);
             self.sendConnectedApp (from, msg);
         });
     }
@@ -94,32 +105,97 @@ var PzpWSS = function (_parent) {
         expectedPzhAddress = address;
     }
 
+    function setInternalParams(id) {
+        var to;
+        if(id === parent.pzp_state.sessionId) {
+            id = parent.config.metaData.friendlyName; // Special case of findServices
+        } else if (parent.pzp_state.connectedPzp.hasOwnProperty(id) && parent.pzp_state.connectedPzp[id].friendlyName) {
+            id = parent.pzp_state.connectedPzp[id].friendlyName;
+        } else if (parent.pzp_state.connectedPzh.hasOwnProperty(id) && parent.pzp_state.connectedPzh[id].friendlyName) {
+            id = parent.pzp_state.connectedPzh[id].friendlyName;
+        } else if (connectedWebApp[id]) {
+            to = (id.split("/") && id.split("/").length === 2) ? id.split("/")[1] : id.split("/")[2];
+            id = parent.config.metaData.friendlyName + "/"+ to;
+        } else if(parent.pzp_state.connectedDevicesToPzh.pzp[id]) {
+            id = parent.pzp_state.connectedDevicesToPzh.pzp[id];
+        } else if(parent.pzp_state.connectedDevicesToPzh.pzh[id]) {
+            id = parent.pzp_state.connectedDevicesToPzh.pzh[id];
+        }
+        return id;
+    }
+
+    function setOriginalId(id) {
+        if (id) {
+            var matchId= id.split("/") && id.split("/")[0], key, i;
+            if(matchId === parent.config.metaData.friendlyName) {
+                id = (id.split('/').length > 1) ? (parent.pzp_state.sessionId +"/"+ id.split('/')[1]) : parent.pzp_state.sessionId;
+            } else {
+                for (key in parent.pzp_state.connectedPzp) {
+                    if (parent.pzp_state.connectedPzp.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedPzp[key].friendlyName === matchId) {
+                        id = key;
+                        break;
+                    }
+                }
+                for (key in parent.pzp_state.connectedPzh) {
+                    if (parent.pzp_state.connectedPzh.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedPzh[key].friendlyName === matchId) {
+                        id = key;
+                        break;
+                    }
+                }
+                for (key in parent.pzp_state.connectedDevicesToPzh.pzp) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzp.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedDevicesToPzh.pzp[key] === matchId) {
+                        id = key;
+                        break;
+                    }
+                }
+                for (key in parent.pzp_state.connectedDevicesToPzh.pzh) {
+                    if (parent.pzp_state.connectedDevicesToPzh.pzh.hasOwnProperty(key) &&
+                        parent.pzp_state.connectedDevicesToPzh.pzh[key] === matchId) {
+                        id = key;
+                        break;
+                    }
+                }
+            }
+        }
+        return id;
+    }
     function wsMessage (connection, origin, utf8Data) {
         //schema validation
-        var msg = JSON.parse (utf8Data);
-        var invalidSchemaCheck = true;
-        try {
-            invalidSchemaCheck = util.webinosSchema.checkSchema (msg);
-        } catch (err) {
-            logger.error (err);
+        var key, msg = JSON.parse (utf8Data), invalidSchemaCheck = true;
+        if (msg && msg.payload && msg.payload.status === "registerBrowser") {
+            // skip schema check as this is first message
+        } else {
+            try {
+                invalidSchemaCheck = util.webinosSchema.checkSchema (msg);
+            } catch (err) {
+                logger.error (err);
+            }
+            if (invalidSchemaCheck) {
+                // For debug purposes, we only print a message about unrecognized packet,
+                // in the final version we should throw an error.
+                // Currently there is no a formal list of allowed packages and throw errors
+                // would prevent the PZP from working
+                logger.error ("msg schema is not valid " + JSON.stringify (msg));
+            }
         }
-        if (invalidSchemaCheck) {
-            // For debug purposes, we only print a message about unrecognized packet,
-            // in the final version we should throw an error.
-            // Currently there is no a formal list of allowed packages and throw errors
-            // would prevent the PZP from working
-            logger.error ("msg schema is not valid " + JSON.stringify (msg));
-        }
+        msg.to = setOriginalId(msg.to);
+        msg.from = setOriginalId(msg.from);
+        msg.resp_to = setOriginalId(msg.resp_to);
+
         if (msg.type === "prop") {
             switch (msg.payload.status) {
                 case "registerBrowser":
-                    connectedApp (connection);
+                    parent.pzpWebSocket.connectedApp(connection, msg.payload.value);
                     break;
                 case "setFriendlyName":
-                    parent.changeFriendlyName (msg.payload.value);
+                    //parent.changeFriendlyName(msg.payload.value);
+                    // THis functionality will be added via webinos core api.
                     break;
                 case "getFriendlyName":
-                    var msg1 = prepMsg (parent.pzp_state.sessionId, msg.from, "friendlyName", parent.config.metaData.friendlyName);
+                    var msg1 = prepMsg(msg.from, "friendlyName", parent.config.metaData.friendlyName);
                     self.sendConnectedApp (msg.from, msg1);
                     break;
                 case "infoLog":
@@ -134,11 +210,13 @@ var PzpWSS = function (_parent) {
                 case "authCodeByPzh":
                     if (expectedPzhAddress === msg.payload.providerDetails) {
                         connection.sendUTF (JSON.stringify ({"from":parent.config.metaData.webinosName,
-                            "payload":{"status":"csrAuthCodeByPzp", "csr":parent.config.cert.internal.conn.csr, "authCode":msg.payload.authCode}}));
+                            "payload":{"status":"csrAuthCodeByPzp", "csr":parent.config.cert.internal.master.csr, "authCode":msg.payload.authCode}}));
                     }
                     break;
                 case "signedCertByPzh":
-                    parent.enrollPzp.register (msg.from, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
+                    if (expectedPzhAddress === (msg.from && msg.from.split("_") && msg.from.split("_")[0])) {
+                        parent.enrollPzp.register (msg.from, msg.to, msg.payload.message.clientCert, msg.payload.message.masterCert, msg.payload.message.masterCrl);
+                    }
                     break;
                 case "setPzhProviderAddress":
                     setPzhProviderAddress (msg.payload.message);
@@ -148,7 +226,7 @@ var PzpWSS = function (_parent) {
                     break;
                 case "showHashQR":
                     getHashQR(function(value){
-                        var msg5 = prepMsg(parent.pzp_state.sessionId, msg.from, "showHashQR", value);
+                        var msg5 = prepMsg(msg.from, "showHashQR", value);
                         sendtoClient(msg5);
                     });
                     break;
@@ -157,7 +235,7 @@ var PzpWSS = function (_parent) {
                     var hash = msg.payload.message.hash;
                     logger.log("hash passed from client page is: " + hash);
                     checkHashQR(hash, function(value){
-                        var msg6 = prepMsg(parent.pzp_state.sessionId, msg.from, "checkHashQR", value);
+                        var msg6 = prepMsg(msg.from, "checkHashQR", value);
                         sendtoClient(msg6);
                     });
                     break;
@@ -175,11 +253,12 @@ var PzpWSS = function (_parent) {
                     });
                     break;
                 case "intraPeer":
-                {
                     connectintra(msg, function(value){
                         logger.log("connect intra-zone peer: " + value);
                     });
-                }
+                    break;
+                case "resetDevice":
+                    parent.resetDevice();
                     break;
             }
         } else {
@@ -190,6 +269,7 @@ var PzpWSS = function (_parent) {
     function wsClose (connection, reason) {
         if (connectedWebApp[connection.id]) {
             delete connectedWebApp[connection.id];
+            parent.webinos_manager.messageHandler.removeRoute (connection.id, parent.pzp_state.sessionId);
             logger.log ("web client disconnected: " + connection.id + " due to " + reason);
         }
     }
@@ -252,7 +332,7 @@ var PzpWSS = function (_parent) {
                     response.write(JSON.stringify(repubcert));
                     response.end();
 
-                    var msg = prepMsg(parent.pzp_state.sessionId, "", "pubCert", { "pubCert": true});
+                    var msg = prepMsg("", "pubCert", { "pubCert": true});
                     sendtoClient(msg);
 
                     return;
@@ -263,13 +343,13 @@ var PzpWSS = function (_parent) {
                         logger.log("got pzhcert");
                         logger.log("storing external cert");
                         parent.config.cert.external[msg.from] = { cert: msg.payload.message.cert, crl: msg.payload.message.crl};
-                        parent.config.storeCertificate(parent.config.cert.external,"external");
+                        parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
                         logger.log("got pzhCert from:" + msg.from); //remeber the other party
 
                         if(!parent.config.exCertList.hasOwnProperty(msg.from)) {
                             var storepzp = {"exPZP" : msg.from};
                             parent.config.exCertList = storepzp;
-                            parent.config.storeExCertList(parent.config.exCertList);
+                            parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
                         }
 
                         //send own certificate back
@@ -294,7 +374,7 @@ var PzpWSS = function (_parent) {
                     var msg = JSON.parse(tmp.toString("utf8"));
                     logger.log("got requestRemoteScanner");
 
-                    var msg = prepMsg(parent.pzp_state.sessionId, "", "requestRemoteScanner", { "requestRemoteScanner": true});
+                    var msg = prepMsg("", "requestRemoteScanner", { "requestRemoteScanner": true});
                     sendtoClient(msg);
 
                     return;
@@ -331,7 +411,7 @@ var PzpWSS = function (_parent) {
                 };
                 connection.sendUTF = connection.send;
 
-                connectedApp (connection);
+                parent.pzpWebSocket.connectedApp(connection);
 
                 connection.listener = {
                     onMessage:function (ev) {
@@ -349,10 +429,10 @@ var PzpWSS = function (_parent) {
     }
 
     function sendPzpPeersToApp() {
-        parent.webinos_manager.peerDiscovery.findPzp(parent,'zeroconf', _parent.config.userPref.ports.pzp_tlsServer, null, function(data){
+        parent.webinos_manager.peerDiscovery.findPzp(parent,'zeroconf', parent.config.userPref.ports.pzp_tlsServer, null, function(data){
             var payload = { "foundpeers": data};
             logger.log(data);
-            var msg = prepMsg(parent.pzp_state.sessionId, "", "pzpFindPeers", payload);
+            var msg = prepMsg("", "pzpFindPeers", payload);
             sendtoClient(msg);
         });
     }
@@ -360,7 +440,7 @@ var PzpWSS = function (_parent) {
     function getHashQR(cb) {
         var path = require ("path");
         var os = require("os");
-        var infile = path.join(_parent.config.metaData.webinosRoot, "keys", "conn.pem");
+        var infile = path.join(parent.config.metaData.webinosRoot, "keys", "conn.pem");
 
         var outfile = path.join("/data/data/org.webinos.app/node_modules/webinos/wp4/webinos/web_root", "testbed", "QR.png");
 
@@ -390,7 +470,7 @@ var PzpWSS = function (_parent) {
 
     function checkHashQR(hash, cb) {
         var path = require ("path");
-        var filename = path.join(_parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
+        var filename = path.join(parent.config.metaData.webinosRoot, "keys", "otherconn.pem");
         try {
             logger.log("android - check hash QR");
             parent.webinos_manager.Sib.checkQRHash(filename, hash, function(data){
@@ -419,7 +499,7 @@ var PzpWSS = function (_parent) {
         else
         {
             logger.log("requestRemoteScanner at: " + to);
-            var msg = prepMsg(parent.pzp_state.sessionId, to, "requestRemoteScanner", {addr: parent.pzp_state.networkAddr});
+            var msg = prepMsg(to, "requestRemoteScanner", {addr: parent.pzp_state.networkAddr});
             if(msg) {
                 var options = {
                     host: to,
@@ -474,7 +554,7 @@ var PzpWSS = function (_parent) {
                 logger.log("please select the peer first");
             else
             {
-                var msg = prepMsg(parent.pzp_state.sessionId, to, "pubCert", {cert: parent.config.cert.internal.conn.cert, addr: parent.pzp_state.networkAddr});
+                var msg = prepMsg(to, "pubCert", {cert: parent.config.cert.internal.conn.cert, addr: parent.pzp_state.networkAddr});
                 logger.log("own address is: " + parent.pzp_state.networkAddr);
 
                 // save a local copy - remove when connected
@@ -506,7 +586,7 @@ var PzpWSS = function (_parent) {
             else
             {
                 logger.log("msg send to: " + to);
-                var msg = prepMsg(parent.pzp_state.sessionId, to, "pzhCert", {cert: parent.config.cert.internal.master.cert, crl : parent.config.crl});
+                var msg = prepMsg(to, "pzhCert", {cert: parent.config.cert.internal.master.cert, crl : parent.config.crl});
                 if(msg) {
                     var options = {
                         host: to,
@@ -545,18 +625,18 @@ var PzpWSS = function (_parent) {
                             parent.config.storeKeys(rmsg.payload.message.cert, filename);
                             //trigger Hash QR display
                             var payload = { "pubCert": true};
-                            var msg = prepMsg(parent.pzp_state.sessionId, "", "pubCert", { "pubCert": true});
+                            var msg = prepMsg("", "pubCert", { "pubCert": true});
                             sendtoClient(msg);
                         }
                         else if (rmsg.payload && rmsg.payload.status === "replyCert") {
                             logger.log("rmsg from: "  + rmsg.from);
                             parent.config.cert.external[rmsg.from] = { cert: rmsg.payload.message.cert, crl: rmsg.payload.message.crl};
-                            parent.config.storeCertificate(parent.config.cert.external,"external");
+                            parent.config.storeDetails(path.join("certificates","external"), "certificates", parent.config.cert.external);
 
                             if(!parent.config.exCertList.hasOwnProperty(rmsg.from)) {
                                 var storepzp = {"exPZP" : rmsg.from};
                                 parent.config.exCertList = storepzp;
-                                parent.config.storeExCertList(parent.config.exCertList);
+                                parent.config.storeDetails(null, "exCertList", parent.config.exCertList);
                             }
                             var msg={};
                             logger.log("rmsg.from: " + rmsg.from);
@@ -581,20 +661,23 @@ var PzpWSS = function (_parent) {
         }
     }
 
-    function connectedApp(connection) {
+    this.connectedApp = function(connection, webAppName) {
         var appId, tmp, payload, key, msg, msg2;
         if (connection) {
-            appId = parent.pzp_state.sessionId+ "/"+ sessionWebApp;
-            sessionWebApp  += 1;
+            if (!webAppName) webAppName = require("crypto").randomBytes(3).toString("hex").toUpperCase();
+            //sessionWebApp  += 1;
+            sessionWebApp = require("crypto").createHash("md5").update(parent.pzp_state.sessionId + webAppName).digest("hex");
+            appId = parent.pzp_state.sessionId  + "/"+ sessionWebApp;
             connectedWebApp[appId] = connection;
             connection.id = appId; // this appId helps in while deleting socket connection has ended
 
-            payload = { "pzhId":parent.config.metaData.pzhId,
-                "connectedPzp" :getConnectedPzp (),
-                "connectedPzh" :getConnectedPzh (),
+            payload = { "pzhId":(parent.config.metaData.pzhId && parent.pzp_state.connectedPzh[parent.config.metaData.pzhId] &&
+                                 parent.pzp_state.connectedPzh[parent.config.metaData.pzhId].friendlyName)|| "",
+                "connectedPzp" :getConnectedPzp(),
+                "connectedPzh" :getConnectedPzh(),
                 "state"        :parent.pzp_state.state,
                 "enrolled"     :parent.pzp_state.enrolled};
-            msg = prepMsg(parent.pzp_state.sessionId, appId, "registeredBrowser", payload);
+            msg = prepMsg(appId, "registeredBrowser", payload);
             self.sendConnectedApp(appId, msg);
 
             if(Object.keys(connectedWebApp).length == 1 ) {
@@ -604,31 +687,17 @@ var PzpWSS = function (_parent) {
             for (key in connectedWebApp) {
                 if (connectedWebApp.hasOwnProperty (key)) {
                     tmp = connectedWebApp[key];
-                    payload = { "pzhId":parent.config.metaData.pzhId,
-                        "connectedPzp" :getConnectedPzp (),
-                        "connectedPzh" :getConnectedPzh (),
+                    payload = { "pzhId":parent.config.metaData.pzhId || "",
+                        "connectedPzp" :getConnectedPzp(),
+                        "connectedPzh" :getConnectedPzh(),
                         "state"        :parent.pzp_state.state,
                         "enrolled"     :parent.pzp_state.enrolled};
-                    msg = prepMsg(parent.pzp_state.sessionId, key, "update", payload);
+                    msg = prepMsg(key, "update", payload);
                     self.sendConnectedApp(key, msg);
                 }
             }
         }
-    }
-
-    function handleData (cmd, data) {
-        var msg = {type:"prop", from:parent.pzp_state.sessionId, to:"", payload:{ status:cmd, message:data}};
-        for (var id in connectedWebApp) {
-            msg.to = id;
-            connectedWebApp[id].sendUTF (JSON.stringify (msg));
-        }
-    }
-
-
-    function approveRequest (request) {
-        var requestor = request.host.split (":")[0]; // don't care about port.
-        return (requestor === "localhost" || requestor === "127.0.0.1");
-    }
+    };
 
     this.startWebSocketServer = function (_callback) {
         startHttpServer (function (status, value) {
@@ -637,17 +706,18 @@ var PzpWSS = function (_parent) {
                     startAndroidWRT ();
                 }
                 var WebSocketServer = require ("websocket").server;
-                wsServer = new WebSocketServer ({
+                var wsServer = new WebSocketServer ({
                     httpServer           :value,
                     autoAcceptConnections:false
                 });
                 logger.addId (parent.config.metaData.webinosName);
                 wsServer.on ("request", function (request) {
                     logger.log ("Request for a websocket, origin: " + request.origin + ", host: " + request.host);
-                    if (approveRequest (request)) {
+                    if (request.host && request.host.split (":") &&
+                        (request.host.split(":")[0] === "localhost" || request.host.split(":")[0] === "127.0.0.1")) {
                         var connection = request.accept ();
                         logger.log ("Request accepted");
-                        connectedApp (connection);
+                        //_parent.pzpWebSocket.connectedApp(connection);
                         connection.on ("message", function (message) { wsMessage (connection, request.origin, message.utf8Data); });
                         connection.on ("close", function (reason, description) { wsClose (connection, description) });
                     } else {
@@ -669,16 +739,29 @@ var PzpWSS = function (_parent) {
                 connectedWebApp[appId].sendUTF(JSON.stringify(msg));
             }
         }
-    };
+    }
 
     this.sendConnectedApp = function (address, message) {
         if (address && message) {
             if (connectedWebApp.hasOwnProperty (address)) {
-                var jsonString = JSON.stringify (message);
-                logger.log ('send to ' + address + ' message ' + jsonString);
-                connectedWebApp[address].socket.pause ();
-                connectedWebApp[address].sendUTF (jsonString);
-                connectedWebApp[address].socket.resume ();
+                message.from = setInternalParams(message.from);
+                message.resp_to = setInternalParams(message.resp_to);
+                message.to = setInternalParams(message.to);
+
+                if(message.payload && message.payload.method && message.payload.method.indexOf("servicefound") > -1) {
+                    message.payload.params.serviceAddress = setInternalParams(message.payload.params.serviceAddress);
+                }
+
+                try {
+                    var jsonString = JSON.stringify(message);
+                    connectedWebApp[address].socket.pause ();
+                    connectedWebApp[address].sendUTF(jsonString);
+                } catch (err) {
+                    self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
+                } finally {
+                    logger.log ('send to web app - ' + address + ' message ' + jsonString);
+                    connectedWebApp[address].socket.resume ();
+                }
             } else {
                 logger.error ("unknown destination " + address);
             }
@@ -686,14 +769,11 @@ var PzpWSS = function (_parent) {
             logger.error ("message or address is missing");
         }
     };
-    this.updateApp = function () {
-        connectedApp ();
-    };
     this.pzhDisconnected = function () {
         var key;
         for (key in connectedWebApp) {
             if (connectedWebApp.hasOwnProperty (key)) {
-                var msg = prepMsg (parent.pzp_state.sessionId, key, "pzhDisconnected", "pzh disconnected");
+                var msg = prepMsg (key, "pzhDisconnected", "pzh disconnected");
                 self.sendConnectedApp (key, msg);
             }
         }

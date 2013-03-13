@@ -14,7 +14,7 @@
 	var webn;
 	
 	function sendNoti(){
-		webinos.discovery.findServices(new ServiceType('http://webinos.org/api/webnotification'), 
+		webinos.discovery.findServices(new ServiceType('http://webinos.org/api/notifications'), 
                 {onFound: function (service) {
                 	 webn = service;
 	             	 service.bindService( 

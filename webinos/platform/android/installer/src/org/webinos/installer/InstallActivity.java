@@ -34,12 +34,13 @@ public class InstallActivity extends Activity {
 	private static final String TARGET_PATH = "targets/";
 	private static final String TMP_DIR = "asset_tmp";
 	private static InstallActivity theActivity;
+	private static Properties config;
+	private static Target[] targets;
 
-	private Properties config;
 	private ProgressDialog progressDialog;
 	private Target pendingTarget;
 
-	private class Target {
+	private static class Target {
 		String name;
 		String packageName;
 		String version;
@@ -48,13 +49,24 @@ public class InstallActivity extends Activity {
 	}
 
 	static void resumeFromPackageIntent(Context context, Intent intent, boolean postInstall) {
+		String packageName = intent.getData().getSchemeSpecificPart();
+		Target pendingTarget = (theActivity == null) ? null : theActivity.pendingTarget;
+
+		/* if the package in question isn't one of ours, return */
+		if(getTarget(context, packageName) == null) {
+			if(pendingTarget != null) {
+				/* we were in the middle of installing anyway, so don't shutdown */
+				return;
+			}
+			/* we were woken by some other package being installed, so exit */
+			System.exit(0);
+		}
+
 		Intent resumeIntent;
 		if(theActivity != null) {
 			resumeIntent = new Intent(theActivity, InstallActivity.class);
-			Target pendingTarget = theActivity.pendingTarget;
 			/* check that it's the package we thought we were installing;
 			 * if it is, it's no longer pending */
-			String packageName = intent.getData().getSchemeSpecificPart();
 			if(pendingTarget != null && packageName.equals(pendingTarget.packageName)) {
 				if(pendingTarget.postInstallAction != null) {
 					/* trigger the postinstall action */
@@ -92,6 +104,8 @@ public class InstallActivity extends Activity {
 				pendingTarget = null;
 				theActivity = null;
 				finish();
+				/* force the installer to exit; otherwise it sits around indefinitely */
+				System.exit(0);
 			}});
 		dialog.setButton(getString(R.string.ok), new OnClickListener() {
 			@Override
@@ -130,9 +144,9 @@ public class InstallActivity extends Activity {
 		/* read list of targets, and compile a list
 		 * of required installs / updates */
 		PackageManager pm = getPackageManager();
-		Target[] targets = getTargets();
 
 		/* if nothing to do, then exit */
+		getTargets(this);
 		if(targets == null || targets.length == 0) {
 			end(getString(R.string.install_complete_title), getString(R.string.install_complete), subsequentStart);
 			return;
@@ -233,19 +247,21 @@ public class InstallActivity extends Activity {
 		theActivity = null;
 	}
 
-	private Target[] getTargets() {
-		Target[] result = null;
+	private static synchronized Target[] getTargets(Context ctx) {
+		if(targets != null)
+			return targets;
+
 		InputStream is = null;
 		config = new Properties();
 		try {
 			Log.v(TAG, "Loading config file from assets");
-			config.load(is = getAssets().open(CONFIG_FILE));
+			config.load(is = ctx.getAssets().open(CONFIG_FILE));
 			int count = Integer.valueOf(config.getProperty("target.count"));
 			if(count > 0) {
-				result = new Target[count];
+				targets = new Target[count];
 				for(int i = 0; i < count; i++) {
 					String propertyBase = "target." + String.valueOf(i) + ".";
-					Target target = result[i] = new Target();
+					Target target = targets[i] = new Target();
 					target.name = config.getProperty(propertyBase + "name");
 					target.packageName = config.getProperty(propertyBase + "package");
 					target.version = config.getProperty(propertyBase + "version");
@@ -259,6 +275,15 @@ public class InstallActivity extends Activity {
 			if(is != null)
 				try { is.close(); } catch (IOException e) {}
 		}
-		return result;
+		return targets;
+	}
+
+	private static Target getTarget(Context ctx, String packageName) {
+		getTargets(ctx);
+		for(Target target : targets) {
+			if(target.packageName.equals(packageName))
+				return target;
+		}
+		return null;
 	}
 }

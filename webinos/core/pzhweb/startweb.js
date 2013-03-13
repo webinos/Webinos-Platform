@@ -74,10 +74,10 @@ function loadWSCertificate(config, certName, certLabel, callback) {
         var cn = certLabel + ":" + config.metaData.serverName;
         config.generateSelfSignedCertificate(certLabel, cn, function (status, value) {
             if (status) {
-                config.generateSignedCertificate(value, 2, function (status, value) {
+                config.generateSignedCertificate(value, function (status, value) {
                     if (status) {
                         config.cert.internal[certName].cert = value;
-                        config.storeCertificate(config.cert.internal, "internal");
+                        config.storeDetails(require("path").join("certificates", "internal"), "certificates", config.cert.internal);
                         return callback(status);
                     } else {
                         return callback(false);
@@ -92,7 +92,7 @@ function loadWSCertificate(config, certName, certLabel, callback) {
     }
 }
 
-starter.start = function(hostname, friendlyName) {
+starter.start = function(hostname, friendlyName, callback) {
     var config = new util.webinosConfiguration();
     util.webinosHostname.getHostName(hostname, function (address_) {
         var inputConfig = {
@@ -104,9 +104,7 @@ starter.start = function(hostname, friendlyName) {
                 logger.error(value);
                 logger.error("setting configuration for the zone provider failed, the .webinos directory needs to be deleted.")
             } else {
-                starter.startWS(hostname, config, function (err, val) {
-                    //meh.
-                });
+                starter.startWS(hostname, config, callback);
             }
         });
     });

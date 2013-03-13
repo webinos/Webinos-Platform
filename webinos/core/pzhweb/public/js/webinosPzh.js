@@ -24,9 +24,6 @@ var webinosPZH = {
                     case 'getUserDetails':
                         if (typeof webinosPZH.callbacks.getUserDetails === 'function') webinosPZH.callbacks.getUserDetails(msg.message);
                         break;
-                    case 'authCode':
-                        if (typeof webinosPZH.callbacks.authCode === 'function') webinosPZH.callbacks.authCode(msg.message);
-                        break;
                     case 'getCrashLog':
                         if (typeof webinosPZH.callbacks.getCrashLog === 'function') webinosPZH.callbacks.getCrashLog(msg.message);
                         break;
@@ -60,6 +57,9 @@ var webinosPZH = {
                     case 'approveUser':
                         if (typeof webinosPZH.callbacks.approveUser === 'function') webinosPZH.callbacks.approveUser(msg.message);
                         break;
+                    case 'removePzh':
+                        if (typeof webinosPZH.callbacks.removePzh === 'function') webinosPZH.callbacks.removePzh(msg.message);
+                        break;
                 }
             }
         }
@@ -79,7 +79,6 @@ var webinosPZH = {
     callbacks:{
         getZoneStatus:null,
         getUserDetails:null,
-        authCode:null,
         getCrashLog:null,
         getInfoLog:null,
         pzhPzh:null,
@@ -90,16 +89,13 @@ var webinosPZH = {
         registerService:null,
         unregisterService:null,
         getAllPzh:null,
-        approveUser:null
+        approveUser:null,
+        removePzh:null
     },
     commands:{
         getZoneStatus:function (callback) {
             webinosPZH.callbacks.getZoneStatus = callback;
             webinosPZH.send({payload:{status:"getZoneStatus"}});
-        },
-        authCode:function (callback) {
-            webinosPZH.callbacks.authCode = callback;
-            webinosPZH.send({payload:{status:"authCode"}});
         },
         getPzps:function (callback) {
             webinosPZH.callbacks.getPzps = callback;
@@ -147,6 +143,10 @@ var webinosPZH = {
         approveUser:function (callback) {
             webinosPZH.callbacks.approveUser = callback;
             webinosPZH.send({payload:{status:'approveUser'}});
+        },
+        removePzh:function (id, callback) {
+            webinosPZH.callbacks.removePzh = callback;
+            webinosPZH.send({payload:{status:'removePzh', id: id}});
         }
     }
 };

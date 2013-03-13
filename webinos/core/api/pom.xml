@@ -23,6 +23,7 @@
     <module>app2app</module>
     <module>applauncher</module>
     <module>webnotification</module>
+    <module>zonenotification</module>
     <module>file</module>
     <module>gallery</module>
     <module>geolocation</module>

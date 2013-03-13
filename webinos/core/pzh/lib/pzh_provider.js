@@ -100,8 +100,7 @@ var Provider = function (_hostname, _friendlyName) {
             } else {
                 setParam(function (status, options) {
                     if (status) {
-                        var tls = require("tls");
-                        server = tls.createServer(options, function (conn) {   // This is the main TLS server, pzh started are stored as SNIContext to this server
+                        server = require("tls").createServer(options, function (conn) {   // This is the main TLS server, pzh started are stored as SNIContext to this server
                             handleConnection(conn);
                         });
                         server.on("error", function (error) {
@@ -133,7 +132,7 @@ var Provider = function (_hostname, _friendlyName) {
     function addPzhDetails(uri, options) {
         server.addContext(uri, options);
         config.trustedList.pzh[uri] = {"address":hostname};
-        config.storeTrustedList(config.trustedList);
+        config.storeDetails(null, "trustedList", config.trustedList);
     }
 
     function getAllPzhList(userId, userObj) {
@@ -183,12 +182,11 @@ var Provider = function (_hostname, _friendlyName) {
         conn.on("data", function (data) {
             if (conn.servername && pzhs[conn.servername]) { // forward message to respective PZH handleData function
                 pzhs[conn.servername].handleData(conn, data);
-            } else if (isWebInterface(conn)) {
-                // Check is user exists and is currently logged in
-                logger.log("Sending it to the web interface...");
+            } else if (isWebInterface(conn)) { // Check is user exists and is currently logged in
                 webInterface.handleData(conn, data);
             } else {
                 logger.error("pzh  -  " + conn.servername + " is not registered in this provider");
+                conn.socket.end();
             }
 
         });

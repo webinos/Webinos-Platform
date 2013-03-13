@@ -1,0 +1,34 @@
+!!! 5
+html
+  head
+    title #{externalEmailId} is trying to connect to #{user}'s PZH
+    link(rel="stylesheet", type="text/css", href="/css/reset.css")
+    link(rel="stylesheet", type="text/css", href="/css/structure.css")
+    link(rel="stylesheet", type="text/css", href="/css/login.css")
+    script(src="/js/webinosPzh.js", type="text/javascript")
+    script(type="text/javascript")
+      function loginGoogle() {
+        window.location.href = "./request-access-authenticate?externalprovider=google&externalCertUrl=#{externalCertUrl}&externalPZHUrl=#{externalPZHUrl}&externalEmailId=#{externalEmailId}";
+      }
+      function loginYahoo() {
+        window.location.href = "./request-access-authenticate?externalprovider=yahoo&externalCertUrl=#{externalCertUrl}&externalPZHUrl=#{externalPZHUrl}&externalEmailId=#{externalEmailId}";
+      }
+  body
+    form.box.login
+      header
+        img(src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png", width="100px")
+        // <label>Please login to you personal zone hub using one of the following methods.</label>
+        // TODO: "If you do not have an account, click..."
+        // TODO: Fix stylesheet so that addition text can be added here if necessary
+      fieldset.boxBody
+        p #{externalEmailId} is trying to connect to #{user}'s PZH
+        label Request access using your Google ID
+        img(src='https://ssl.gstatic.com/images/logos/google_logo_41.png', width="100px")
+        input.btnLogin(type="button", onclick="loginGoogle()", value="Login via Google")
+        label Request access using your Yahoo! ID
+        img(src='http://l.yimg.com/a/images/ww/met/slimheader/yahoo-logo-sm-png8.png', width="100px")
+        input.btnLogin(type="button", onclick="loginYahoo()", value="Login via Yahoo!")
+    footer#main
+      a(href="http://www.webinos.org") Powered by webinos
+      |  |
+      a(href="http://developer.webinos.org")  Developer resources on webinos

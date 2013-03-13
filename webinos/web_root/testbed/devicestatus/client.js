@@ -7,7 +7,7 @@ $(document).ready(
             devicestatusServices = {};
             recentService = null;
             $('#servicesList').empty();
-            webinos.discovery.findServices(new ServiceType('http://wacapps.net/api/devicestatus'),
+            webinos.discovery.findServices(new ServiceType('http://webinos.org/api/devicestatus'),
                 {onFound:function (service) {
                     devicestatusServices[service.serviceAddress] = service;
                     $('#servicesList').append($('<option>' + service.serviceAddress + '</option>'));

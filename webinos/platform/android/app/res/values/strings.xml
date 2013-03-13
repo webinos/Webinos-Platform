@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Anode</string>
+    <string name="app_name">Webinos</string>
     <string name="pzp_activity_name">PZP</string>
     <string name="initialising_runtime">Initialising Webinos Runtime</string>
     <string name="start">Start</string>
@@ -38,4 +38,10 @@
     <string name="menu_check_for_updates">Check for updates</string>
     <string name="menu_details">Details</string>
     <string name="nfc_instruction">Tap NFC compatible item with the back of your device</string>
+    <string name="scan_sd_card">Scan SD card</string>
+    <string name="pzp_settings">Settings</string>
+    <string name="not_yet_implemented">Not yet implemented</string>
+    <string name="no_apps_installed">No applications installed</string>
+    <string name="loading_apps">Loading applications</string>
+    
 </resources>

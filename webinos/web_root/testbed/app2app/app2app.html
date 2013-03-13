@@ -33,6 +33,8 @@
                 var properties = {};
                 // we allow all channel clients to send and receive
                 properties.mode = "send-receive";
+                properties.canDetach = true;
+                properties.reclaimIfExists = true;
 
                 var config = {};
                 // the namespace is an URN which uniquely defines the channel in the personal zone

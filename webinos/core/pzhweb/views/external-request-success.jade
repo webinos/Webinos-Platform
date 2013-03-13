@@ -1,0 +1,29 @@
+!!! 5
+html
+  head
+    title PZH Successful Certificate Exchange
+    script(type="text/javascript")
+      setTimeout(function() {
+        window.location.href = "#{externalPzhUrl}";
+      }, 5000);
+  body
+    h1 Successfully requested access to #{user}'s personal zone
+    p Your request has been sent for approval.
+    p Your details:
+    ul
+      li Email: #{externaluser.email}
+      - if (externaluser.fullname)
+        li Name: #{externaluser.fullname}
+      - else
+        li Name: #{externaluser.firstname} #{externaluser.lastname}
+      li
+        | PZH URL:
+        a(href='#{externalPzhUrl}') #{externalPzhUrl}
+    p
+      | You will be redirected to your Personal Zone or click
+      a(href='#{externalPzhUrl}')  here
+      |  to go manually
+    footer#main
+      a(href="http://www.webinos.org") Powered by webinos
+      |  |
+      a(href="http://developer.webinos.org")  Developer resources on webinos

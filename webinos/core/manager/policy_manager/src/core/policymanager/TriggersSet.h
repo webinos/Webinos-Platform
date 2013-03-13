@@ -29,12 +29,12 @@ static const string triggerPersonalDataAccessedTag = "TriggerPersonalDataAccesse
 static const string triggerPersonalDataDeletedTag = "TriggerPersonalDataDeleted";
 static const string triggerDataSubjectAccessTag = "TriggerDataSubjectAccess";
 static const string triggerIdTag = "triggerID";
-static const string startTag = "Start";
+static const string startTag = "StartTime";
 static const string startNowTag = "StartNow";
 static const string dateAndTimeTag = "DateAndTime";
 static const string maxDelayTag = "MaxDelay";
 static const string durationTag = "Duration";
-static const string uriTag = "Uri";
+static const string uriTag = "AccessURI";
 
 class TriggersSet{
 	

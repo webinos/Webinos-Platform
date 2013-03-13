@@ -47,7 +47,8 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         "authCode"              :authCode,
         "csrAuthCodeByPzp"      :csrAuthCodeByPzp,
         "getAllPzh"             :getAllPzhList,
-        "approveUser"           :approveUser
+        "approveUser"           :approveUser,
+        "removePzh"             :removePzh
     };
 
     function getLock () {
@@ -69,27 +70,35 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function getConnectedPzp (_instance) {
-        var i, pzps = [], list = Object.keys (_instance.config.trustedList.pzp);
+        var i, pzps = [], list = Object.keys (_instance.config.trustedList.pzp), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            if (_instance.pzh_state.connectedPzp.hasOwnProperty (list[i])) {
-                pzps.push ({id:list[i].split ("/")[1], url:list[i], isConnected:true});
-            } else {
-                pzps.push ({id:list[i].split ("/")[1], url:list[i], isConnected:false});
+            isConnected = !!(_instance.pzh_state.connectedPzp.hasOwnProperty (list[i]));
+            id = (_instance.pzh_state.connectedPzp[list[i]] && _instance.pzh_state.connectedPzp[list[i]].friendlyName) || list[i];
+            pzps.push ({id: id, url:list[i], isConnected:isConnected});
+        }
+        for (i in _instance.pzh_state.connectedDevicesToOtherPzh.pzp) {
+            if (_instance.pzh_state.connectedDevicesToOtherPzh.pzp.hasOwnProperty(i)) {
+                pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzp[i] || i,
+                url:i, isConnected:true});
             }
         }
         return pzps;
     }
 
     function getConnectedPzh (_instance) {
-        var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh);
+        var pzhs = [], i, list = Object.keys (_instance.config.trustedList.pzh), isConnected, id;
         for (i = 0; i < list.length; i = i + 1) {
-            if (_instance.pzh_state.connectedPzh.hasOwnProperty (list[i])) {
-                pzhs.push ({id:list[i].split ("_")[1], url:list[i], isConnected:true});
-            } else {
-                pzhs.push ({id:list[i].split ("_")[1], url:list[i], isConnected:false});
+            isConnected = !!(_instance.pzh_state.connectedPzh.hasOwnProperty (list[i]));
+            id =  (_instance.pzh_state.connectedPzh[list[i]] && _instance.pzh_state.connectedPzh[list[i]].friendlyName) || list[i];
+            pzhs.push ({id: id, url:list[i], isConnected:isConnected});
+        }
+        for (i in _instance.pzh_state.connectedDevicesToOtherPzh.pzh) {
+            if (_instance.pzh_state.connectedDevicesToOtherPzh.pzh.hasOwnProperty(i)) {
+                pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i]|| i,
+                    url:i, isConnected:true});
             }
         }
-        pzhs.push ({id:_instance.config.userData.email[0].value + " (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
+        pzhs.push ({id:_instance.config.metaData.friendlyName+" (Your Pzh)", url:_instance.config.metaData.serverName, isConnected:true});
         return pzhs;
     }
 
@@ -109,6 +118,12 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     function getUserDetails (conn, obj, userObj) {
         sendMsg (conn, obj.user, { type:"getUserDetails", message:userObj.config.userData });
+    }
+
+    function notifyUser(pzh, notification, idcallback, resultcallback) {
+        logger.log("NotifyUser method with pzh id: " + pzh);
+        var Notifications = dependency.global.require(dependency.global.api.zonenotification.location, "lib/notificationPzh.js");
+        Notifications.sendFromInternal(pzh, notification, idcallback, resultcallback);
     }
 
     function getZoneStatus (conn, obj, userObj) {
@@ -176,13 +191,13 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         for (var i = 0; i < userObj.config.serviceCache.length; i = i + 1) {
             if (userObj.config.serviceCache[i].name === name) {
                 userObj.config.serviceCache.splice (i, 1);
-                userObj.config.storeServiceCache (userObj.config.serviceCache);
+                userObj.config.storeDetails("userData", "serviceCache", userObj.config.serviceCache);
                 return;
             }
         }
         if (!remove) {
             userObj.config.serviceCache.splice (i, 0, {"name":name, "params":{} });
-            userObj.config.storeServiceCache (userObj.config.serviceCache);
+            userObj.config.storeDetails("userData", "serviceCache", userObj.config.serviceCache);
         }
     }
 
@@ -192,7 +207,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 sendMsg (conn, obj.user, { type:"listUnregServices",
                     message                    :{"pzEntityId":obj.message.at, "modules":modules.services} });
             });
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "listUnregServices", {listenerId:id});
+            var msg = userObj.prepMsg (obj.message.at, "listUnregServices", {listenerId:id});
             userObj.sendMessage (msg, obj.message.at);
         } else { // returns all the current serviceCache
             var data = require ("fs").readFileSync ("./webinos_config.json");
@@ -204,7 +219,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     function registerService (conn, obj, userObj) {
         if (userObj.pzh_state.sessionId !== obj.message.at) {
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "registerService",
+            var msg = userObj.prepMsg (obj.message.at, "registerService",
                 {name:obj.message.name, params:{}});
             userObj.sendMessage (msg, obj.message.at);
         } else {
@@ -220,7 +235,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
 
     function unregisterService (conn, obj, userObj) {
         if (userObj.pzh_state.sessionId !== obj.message.at) {
-            var msg = userObj.prepMsg (userObj.pzh_state.sessionId, obj.message.at, "unregisterService",
+            var msg = userObj.prepMsg (obj.message.at, "unregisterService",
                 {svId:obj.message.svId, svAPI:obj.message.svAPI})
             userObj.sendMessage (msg, obj.message.at);
         } else {
@@ -236,7 +251,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         var result = {
             "provider"  :"provider-cert-data",
             "server"    :userObj.config.cert.internal.master.cert,
-            "crl"       :userObj.config.crl,
+            "crl"       :userObj.config.crl.value,
             "serverPort":userObj.config.userPref.ports.provider
         };
         sendMsg (conn, obj.user, { type:"getCertificates", message:result });
@@ -264,7 +279,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :obj.message.externalCerts.crl,
                     serverPort   :obj.message.externalCerts.serverPort
                 };
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");
+                userObj.config.storeDetails(require("path").join("certificates", "external"),"certificates", userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {// refresh your own certs
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -277,7 +292,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.trustedList.pzh.hasOwnProperty (name)) {
                 userObj.config.trustedList.pzh[name] = {};
-                userObj.config.storeTrustedList (userObj.config.trustedList);
+                userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
             }
             sendMsg (conn, obj.user, { type:"storeExternalCert", message:true });
         }
@@ -291,6 +306,25 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             obj.message.externalUser.email + " with PZH details : " + obj.message.externalPzh.externalPZHUrl +
             " has been authenticated and would like to be added to the list of trusted users to " +
             obj.user + "'s zone");
+        
+        // notify the user about it.  This may or may not be successful, it doesn't
+        // really matter.  
+        var approveURL = "https://" + hostname + "/main/" + 
+                encodeURIComponent(userObj.config.metaData.webinosName) + 
+                "/approve-user/" + encodeURIComponent(obj.message.externalUser.email) + "/"        
+        notifyUser(
+            userObj.config.metaData.serverName, 
+            { "type" : "connection request", 
+              "url"  : approveURL,
+              "user" : { "email" : obj.message.externalUser.email,
+                         "fullname" : obj.message.externalUser.fullname,
+                         "nickname" : obj.message.externalUser.nickname,
+                         "image" : obj.message.externalUser.image
+                       }
+            },
+            function(id) { /* don't care */ }, 
+            function(id) { /* don't care */ }
+        );
 
         var url = require ("url").parse (obj.message.externalPzh.externalPZHUrl);
         userObj.config.untrustedCert[obj.message.externalUser.email] = {
@@ -300,7 +334,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             externalCerts:obj.message.externalPzh.pzhCerts.server,
             externalCrl  :obj.message.externalPzh.pzhCerts.crl,
             serverPort   :obj.message.externalPzh.pzhCerts.serverPort};
-        userObj.config.storeUntrustedCert (userObj.config.untrustedCert);
+        userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
         sendMsg (conn, obj.user, { type:"requestAddFriend", message:true });
     }
 
@@ -343,7 +377,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.cert.external.hasOwnProperty (name)) {
                 userObj.config.cert.external[name] = details;
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");
+                userObj.config.storeDetails(require("path").join("certificates", "external"), "certificates", userObj.config.cert.external);
                 userObj.setConnParam (function (status, certificateParam) {
                     if (status) {
                         var id = hostname + "_" + userObj.config.userData.email[0].value;
@@ -357,18 +391,19 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             }
             if (!userObj.config.trustedList.pzh.hasOwnProperty (name)) {
                 userObj.config.trustedList.pzh[name] = {};
-                userObj.config.storeTrustedList (userObj.config.trustedList);
+                userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
             }
             delete userObj.config.untrustedCert[obj.message.externalEmail];
-            userObj.config.storeUntrustedCert (userObj.config.untrustedCert);
+            userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
         }
     }
 
     // Sixth
     function rejectFriend (conn, obj, userObj) {
-        if (userObj.config.untrustedCert.hasOwnProperty (obj.message.externalUser.email)) {
-            logger.log ("Rejecting friend request by " + obj.message.externalUser.email + " for " + obj.user);
-            delete untrustedCert[obj.message.externalUser.email];
+        if (userObj.config.untrustedCert.hasOwnProperty (obj.message.externalEmail)) {
+            logger.log ("Rejecting friend request by " + obj.message.externalEmail + " for " + obj.user);
+            delete userObj.config.untrustedCert[obj.message.externalEmail];
+            userObj.config.storeUntrustedCert(userObj.config.untrustedCert);
         }
     }
 
@@ -390,12 +425,12 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :friendpzh.config.crl,
                     serverPort   :80 // TODO
                 };
-                userObj.config.storeCertificate (userObj.config.cert.external, "external");                                
-                
+                userObj.config.storeDetails(require("path").join("certificates", "external"), "certificates", userObj.config.cert.external);
+
                 //update the actual list.
                 if (!userObj.config.trustedList.pzh.hasOwnProperty (friendpzh.config.metaData.serverName)) {
                     userObj.config.trustedList.pzh[friendpzh.config.metaData.serverName] = {};
-                    userObj.config.storeTrustedList (userObj.config.trustedList);
+                    userObj.config.storeDetails(null, "trustedList", userObj.config.trustedList);
                 }
                 
                 // refresh your own certificates (I don't exactly know why, but it matters)
@@ -408,6 +443,30 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                         refreshPzh (id, certificateParam);
                     }
                 });
+
+                // notify the user about it.  This may or may not be successful, it doesn't
+                // really matter.  
+                var approveURL = "https://" + hostname + "/main/" + 
+                        encodeURIComponent(friendpzh.config.metaData.webinosName) + 
+                        "/approve-user/" + encodeURIComponent(userObj.config.metaData.webinosName) + "/"        
+                
+                logger.log("User data:\n" + require('util').inspect(userObj.config.userData));
+                logger.log("Obj data:\n" + require('util').inspect(obj.message));
+                
+                notifyUser(
+                    friendpzh.config.metaData.serverName, 
+                    { "type" : "connection request", 
+                      "url"  : approveURL,
+                      "user" : { "email" : userObj.config.metaData.webinosName,
+                                 "fullname" : userObj.config.userData.fullname,
+                                 "nickname" : userObj.config.userData.nickname,
+                                 "name" : userObj.config.userData.name,
+                                 "image" : userObj.config.userData.image
+                               }
+                    },
+                    function(id) { /* don't care */ }, 
+                    function(id) { /* don't care */ }
+                );
                 
                 // add the current user to the friend's list of untrusted people.
                 // the friend will later approve or reject the request.
@@ -420,7 +479,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                     externalCrl  :userObj.config.crl,
                     serverPort   :80 // TODO 
                 };
-                userObj.config.storeUntrustedCert (friendpzh.config.untrustedCert);
+                userObj.config.storeDetails(null, "untrustedList", userObj.config.untrustedCert);
                 sendMsg (conn, obj.user, { type:"requestAddLocalFriend", message:true });
                 return;
             } else {
@@ -428,8 +487,6 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
                 return;
             }      
         });
-
-        
     }
 
 
@@ -441,10 +498,16 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function csrAuthCodeByPzp (conn, obj, userObj) {
-        userObj.enroll.addNewPZPCert (obj, function (status, payload) {
+        userObj.enroll.addNewPZPCert (obj, refreshPzh, function (status, payload) {
             if (status) {
                 sendMsg (conn, obj.user, { type:"csrAuthCodeByPzp", message:payload });
             }
+        });
+    }
+
+    function removePzh(conn, obj, userObj) {
+        userObj.removePzh(obj.message.id, refreshPzh, function(status){
+            sendMsg (conn, obj.user, { type:"removePzh", message:status });
         });
     }
 
@@ -455,21 +518,25 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             if (port !== 443) {
                 pzhId = hostname + ":" + port + "_" + userId;
             }
-            logger.log ("adding new zone hub - " + pzhId);
-            pzhs[pzhId] = new pzh_session ();
-            pzhs[pzhId].addLoadPzh (userId, pzhId, obj.user, function (status, options, uri) {
-                if (status) {
-                    addPzh (uri, options);
-                    releaseLock ();
-                    return callback (true, pzhId);
-                } else {
-                    return callback (false, "failed adding pzh");
-                }
-            });
-
+            if (pzhs[pzhId]) {
+                callback(false, "pzh id already exists");
+            } else {
+                logger.log ("adding new zone hub - " + pzhId);
+                pzhs[pzhId] = new pzh_session ();
+                pzhs[pzhId].addLoadPzh (userId, pzhId, obj.user, function (status, options, uri) {
+                    if (status) {
+                        addPzh (uri, options);
+                        releaseLock ();
+                        return callback (true, pzhId);
+                    } else {
+                        return callback (false, "failed adding pzh");
+                    }
+                });
+            }
         } catch (err) {
             logger.log (err);
         }
+        return;
     }
 
     function findExistingUserFromEmail(email,callback) {
@@ -535,28 +602,33 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             logger.log ("No 'user' or 'message' field in message from web interface");
             return false;
         }
-        valid = obj.message.hasOwnProperty ("type") && obj.message.type !== undefined && obj.message.type !== null &&
-            ( messageType.hasOwnProperty (obj.message.type));
-        if (!valid) {
-            logger.log ("No valid type field in message: " + obj.message.type);
-            return false;
+        if (obj.message !== "WEB SERVER INIT") { // Web server init
+            valid = obj.message.hasOwnProperty ("type") && obj.message.type !== undefined && obj.message.type !== null &&
+                ( messageType.hasOwnProperty (obj.message.type));
+            if (!valid) {
+                logger.log ("No valid type field in message: " + obj.message.type);
+                return false;
+            }
         }
-
         return true;
     }
 
     function processMsg (conn, obj) {
         if (validateMessage (obj)) {
-            if (obj.message.type !== "checkPzh") {
-                findUserFromEmail (obj, function (userObj) {
-                    if (userObj) {
-                        messageType[obj.message.type].apply (this, [conn, obj, userObj]);
-                    } else {
-                        logger.error ("error validating user");
-                    }
-                });
+            if( obj.message === "WEB SERVER INIT") {
+                // Do nothing
             } else {
-                messageType[obj.message.type].apply (this, [conn, obj]);
+                if (obj.message.type !== "checkPzh") {
+                    findUserFromEmail (obj, function (userObj) {
+                        if (userObj) {
+                            messageType[obj.message.type].apply(userObj, [conn, obj, userObj]);
+                        } else {
+                            logger.error ("error validating user");
+                        }
+                    });
+                } else {
+                    messageType[obj.message.type].apply (userObj, [conn, obj]);
+                }
             }
         } else {
             sendMsg (conn, obj.user, {type:"error", "message":"not valid msg"});
@@ -564,7 +636,6 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     this.handleData = function (conn, data) {
-        logger.log ("handling Web Interface data");
         try {
             conn.pause ();
             util.webinosMsgProcessing.readJson (this, data, function (obj) {

@@ -42,7 +42,9 @@
 			</subject>
 		</target>
 		<rule effect="permit">
-			<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			<condition>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			</condition>
 		</rule>
 	</policy>
 	<policy combine="first-applicable" description="untrusted">
@@ -66,9 +68,9 @@
 			<Obligation>
 				<TriggersSet>
 					<TriggerAtTime>
-						<Start>
+						<StartTime>
 							<DateAndTime>2012-12-10T14:00:00.00+01:00</DateAndTime>
-						</Start>
+						</StartTime>
 						<MaxDelay>
 							<Duration>P0Y0M7DT0H0M0S</Duration>
 						</MaxDelay>

@@ -112,41 +112,44 @@ function newContact(i, item, picture, callback)
 	{
 		if (item['gd$structuredPostalAddress'].length !== undefined) //if is an array
 		{
-            for (j=0; j<item['gd$email'].length; j++)
-			{
-                if (formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'])
+            if (item['gd$email'] && item['gd$email'].length) //if email is defined
+            {
+                for (j=0; j<item['gd$email'].length; j++)
                 {
-                    formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress']["$t"];
-                }
-				type = 'other';
-				if(item['gd$structuredPostalAddress'][j].rel !==undefined)
-                {
-                    type = item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
-                }
-                if(item['gd$structuredPostalAddress'][j]['gd$street'])
-                {
-                    street = item['gd$structuredPostalAddress'][j]['gd$street']["$t"];
-                }
-                j==0?pref=true:pref=false;
-                if(item['gd$structuredPostalAddress'][j]['gd$city'])
-                {
-                    locality = item['gd$structuredPostalAddress'][j]['gd$city']["$t"];
-                }
-                if(item['gd$structuredPostalAddress'][j]['gd$region'])
-                {
-                    region = item['gd$structuredPostalAddress'][j]['gd$region']["$t"];
-                }
-                if(item['gd$structuredPostalAddress'][j]['gd$postcode'])
-                {
-                    postCode = item['gd$structuredPostalAddress'][j]['gd$postcode']["$t"];
-                }
-                if(item['gd$structuredPostalAddress'][j]['gd$country'])
-                {
-                    country = item['gd$structuredPostalAddress'][j]['gd$country']["$t"];
-                }
+                    if (formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress'])
+                    {
+                        formatted = item['gd$structuredPostalAddress'][j]['gd$formattedAddress']["$t"];
+                    }
+                    type = 'other';
+                    if(item['gd$structuredPostalAddress'][j].rel !==undefined)
+                    {
+                        type = item['gd$structuredPostalAddress'][j].rel.substr(('http://schemas.google.com/g/2005#').length);
+                    }
+                    if(item['gd$structuredPostalAddress'][j]['gd$street'])
+                    {
+                        street = item['gd$structuredPostalAddress'][j]['gd$street']["$t"];
+                    }
+                    j==0?pref=true:pref=false;
+                    if(item['gd$structuredPostalAddress'][j]['gd$city'])
+                    {
+                        locality = item['gd$structuredPostalAddress'][j]['gd$city']["$t"];
+                    }
+                    if(item['gd$structuredPostalAddress'][j]['gd$region'])
+                    {
+                        region = item['gd$structuredPostalAddress'][j]['gd$region']["$t"];
+                    }
+                    if(item['gd$structuredPostalAddress'][j]['gd$postcode'])
+                    {
+                        postCode = item['gd$structuredPostalAddress'][j]['gd$postcode']["$t"];
+                    }
+                    if(item['gd$structuredPostalAddress'][j]['gd$country'])
+                    {
+                        country = item['gd$structuredPostalAddress'][j]['gd$country']["$t"];
+                    }
 
-				addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
-			}
+                    addrs.push(new ContactAddress(formatted, type, street, pref, locality, region, postCode, country));
+                }
+            }
 		}
 		else
 		//single address

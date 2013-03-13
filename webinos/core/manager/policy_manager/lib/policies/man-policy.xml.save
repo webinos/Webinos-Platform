@@ -1,0 +1,66 @@
+<policy-set combine="first-matching-target" description="decisionfile" id='s000001'>
+    <policy combine="first-applicable" description="catch" id='p000002'>
+        <target>
+            <subject>
+                <subject-match attr="user-id" match="Adrian"/>
+                <subject-match attr="id" match="AdApp"/>
+            </subject>
+        </target>
+        <rule effect="permit">
+            <condition combine="or">
+                <resource-match attr="api-feature" match="http://webinos.org/api/discovery"/>
+                <resource-match attr="api-feature" match="http://webinos.org/api/geolocation"/>
+            </condition>
+        </rule>
+        <rule effect="deny"></rule>
+        <DataHandlingPreferences PolicyId="#DHP_allow_all">
+            <AuthorizationsSet>
+                <AuthzUseForPurpose>
+                    <Purpose/>
+                </AuthzUseForPurpose>
+            </AuthorizationsSet>
+        </DataHandlingPreferences>
+        <ProvisionalActions>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://webinos.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://www.w3.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://wacapps.net</AttributeValue>
+            </ProvisionalAction>
+        </ProvisionalActions>
+    </policy>
+    <policy combine="first-applicable" description="catch" id='p000001'>
+        <target>
+        </target>
+        <rule effect="prompt-blanket"></rule>
+        <DataHandlingPreferences PolicyId="#DHP_allow_all">
+            <AuthorizationsSet>
+                <AuthzUseForPurpose>
+                    <Purpose/>
+                </AuthzUseForPurpose>
+            </AuthorizationsSet>
+        </DataHandlingPreferences>
+        <ProvisionalActions>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://webinos.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://www.w3.org</AttributeValue>
+            </ProvisionalAction>
+            <ProvisionalAction>
+                <AttributeValue>#DHP_allow_all</AttributeValue>
+                <AttributeValue>http://wacapps.net</AttributeValue>
+            </ProvisionalAction>
+        </ProvisionalActions>
+    </policy>
+    <policy-set combine="first-matching-target" description="decisionfile" id='s000002'>
+    </policy-set>
+</policy-set>

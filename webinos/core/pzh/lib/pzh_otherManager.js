@@ -46,14 +46,54 @@ var Pzh_RPC = function (_parent) {
                     "from"       :_parent.pzh_state.sessionId,
                     "to"         :key,
                     "payload"    :{"status":"registerServices",
-                        "message"          :{services:localServices,
-                            from                     :_parent.pzh_state.sessionId}}};
+                        "message":{services:localServices,
+                        "from":_parent.pzh_state.sessionId}}};
                 _parent.sendMessage (msg, key);
                 _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + key);
             }
         }
     }
 
+    function updateDeviceInfo(validMsgObj) {
+        function updateCheckFN(connList, from, fn) {
+            for (var key in connList) {
+                if (connList[key].friendlyName === fn && key !== from) {
+                    // Update PZP that your friendly name is duplicate in PZ.
+                    logger.log("sending pzp " + key + " to change friendlyName")
+                    fn = fn + "#" + Math.round(Math.random()*100);
+                    var msg = _parent.prepMsg(validMsgObj.from, "changeFriendlyName", fn);
+                    _parent.sendMessage (msg, validMsgObj.from);
+                } else {
+                    continue;
+                }
+            }
+            connList[from].friendlyName = fn;
+        }
+        var i, fn = validMsgObj.payload.message.friendlyName;
+        if (_parent.pzh_state.connectedPzh[validMsgObj.from]) {
+             updateCheckFN(_parent.pzh_state.connectedPzh, validMsgObj.from, fn);
+
+        } else if (_parent.pzh_state.connectedPzp[validMsgObj.from]) {
+            updateCheckFN(_parent.pzh_state.connectedPzp, validMsgObj.from, fn);
+        }
+        // These are friendlyName... Just for display purpose
+        for (i = 0; i < validMsgObj.payload.message.connectedPzp.length; i = i + 1) {
+            if(!_parent.pzh_state.connectedPzp.hasOwnProperty(validMsgObj.payload.message.connectedPzp[i].key)) {
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzp[validMsgObj.payload.message.connectedPzp[i].key] =
+                    validMsgObj.payload.message.connectedPzp[i].friendlyName || undefined;
+            }
+        }
+        for (i = 0; i < validMsgObj.payload.message.connectedPzh.length; i = i + 1) {
+            if(!_parent.pzh_state.connectedPzh.hasOwnProperty(validMsgObj.payload.message.connectedPzh[i].key) &&
+                validMsgObj.payload.message.connectedPzh[i].key !== _parent.pzh_state.sessionId ) {
+                _parent.pzh_state.connectedDevicesToOtherPzh.pzh[validMsgObj.payload.message.connectedPzh[i].key] =
+                    validMsgObj.payload.message.connectedPzh[i].friendlyName || undefined;
+            }
+        }
+
+        _parent.sendUpdateToAll(validMsgObj.from);
+
+    }
     /**
      * Initialize RPC to enable discovery and rpcHandler
      */
@@ -72,8 +112,8 @@ var Pzh_RPC = function (_parent) {
      */
     this.sendFoundServices = function (validMsgObj) {
         _parent.pzh_state.logger.log ("trying to send webinos services from this RPC handler to " + validMsgObj.from + "...");
-        var services = self.discovery.getAllServices (validMsgObj.from);
-        var msg = _parent.prepMsg (_parent.pzh_state.sessionId, validMsgObj.from, "foundServices", services);
+        var services = self.discovery.getAllServices(validMsgObj.from);
+        var msg = _parent.prepMsg(validMsgObj.from, "foundServices", services);
         msg.payload.id = validMsgObj.payload.message.id;
         _parent.sendMessage (msg, validMsgObj.from);
         _parent.pzh_state.logger.log ("sent " + (services && services.length) || 0 + " Webinos Services from this rpc handler.");
@@ -114,9 +154,13 @@ var Pzh_RPC = function (_parent) {
      */
     this.registerServices = function (pzhId) {
         var localServices = self.discovery.getAllServices ();
-        var msg = {"type":"prop", "from":_parent.pzh_state.sessionId, "to":pzhId, "payload":{"status":"registerServices", "message":{services:localServices, from:_parent.pzh_state.sessionId}}};
+        var msg = {"type":"prop",
+            "from":_parent.pzh_state.sessionId,
+            "to":pzhId,
+            "payload":{"status":"registerServices",
+                "message":{services:localServices,
+                    from:_parent.pzh_state.sessionId}}};
         _parent.sendMessage (msg, pzhId);
-
         _parent.pzh_state.logger.log ("sent " + (localServices && localServices.length) || 0 + " webinos services to " + pzhId);
     };
 
@@ -136,7 +180,7 @@ var Pzh_RPC = function (_parent) {
 
             for (myKey in _parent.pzh_state.connectedPzp) {
                 if (_parent.pzh_state.connectedPzp.hasOwnProperty (myKey)) { // Sync with everyone.
-                    msg = _parent.prepMsg (_parent.pzh_state.sessionId, myKey, "sync_hash", result);
+                    msg = _parent.prepMsg (myKey, "sync_hash", result);
                     _parent.sendMessage (msg, myKey);
                 }
             }
@@ -148,17 +192,17 @@ var Pzh_RPC = function (_parent) {
         if (Object.keys (result).length >= 1) {
             if (result["trustedList"]) {
                 _parent.config.metaData.trustedList = result["trustedList"];
-                _parent.config.storeTrustedList (_parent.config.metaData.trustedList);
+                _parent.config.storeDetails(null, "trustedList",_parent.config.metaData.trustedList);
             }
             if (result["crl"]) {
-                _parent.config.crl = receivedMsg[msg];
-                _parent.config.storeCrl (_parent.config.crl);
+                _parent.config.crl.value = receivedMsg[msg];
+                _parent.config.storeDetails(null, "crl", _parent.config.crl);
             }
             if (result["cert"]) {
                 //_parent.config.cert.external = receivedMsg[msg];
                 //_parent.config.storeCertificate(_parent.config.cert.external, "external");
             }
-            var msg = _parent.prepMsg (_parent.pzh_state.sessionId, _pzpId, "update_hash", result);
+            var msg = _parent.prepMsg (_pzpId, "update_hash", result);
             _parent.sendMessage (msg, _pzpId);
         }
         else {
@@ -178,7 +222,7 @@ var Pzh_RPC = function (_parent) {
                 switch (validMsgObj.payload.status) {
                     case "registerServices":
                         self.discovery.addRemoteServiceObjects (validMsgObj.payload.message);
-                        sendUpdateServiceToAllPzh (validMsgObj.from);
+                        sendUpdateServiceToAllPzh(validMsgObj.from);
                         break;
                     case "findServices":
                         self.sendFoundServices (validMsgObj);
@@ -193,12 +237,15 @@ var Pzh_RPC = function (_parent) {
                         self.registry.unregisterObject ({id:validMsgObj.payload.message.svId, api:validMsgObj.payload.message.svAPI});
                         sendUpdateServiceToAllPzh ();
                         break;
+                    case "update":
+                        updateDeviceInfo(validMsgObj);
+                        break;
                 }
             } else {
                 try {
                     self.messageHandler.onMessageReceived (validMsgObj, validMsgObj.to);
                 } catch (err2) {
-                    _parent.pzh_state.logger.error ("error message sending to messaging " + err2.message);
+                    _parent.pzh_state.logger.error ("error processing message in messaging manager - " + err2.message);
                 }
             }
         });

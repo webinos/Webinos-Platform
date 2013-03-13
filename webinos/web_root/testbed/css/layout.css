@@ -94,6 +94,26 @@ text-shadow: 0 -1px 0 #000;}
 background-position: 0 -27px;
 }
 
+.btn_reset {
+    float: left;
+    width: 9%;
+}
+
+.btn_reset a {
+    display: block;
+    margin-top: 12px;
+    width: 91px;
+    height: 27px;
+    background: url(../images/btn_view_site.png);
+    text-align: center;
+    line-height: 29px;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 -1px 0 #000;}
+
+.btn_reset a:hover {
+    background-position: 0 -27px;
+}
 /* Secondary Header Bar */
 
 section#secondary_bar {

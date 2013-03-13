@@ -20,7 +20,6 @@
 var webinos = require("find-dependencies")(__dirname);
 var fs = require("fs");
 var path = require("path");
-var sessionID = webinos.global.require (webinos.global.pzp.location).getSessionId();
 var wPath = webinos.global.require (webinos.global.pzp.location).getWebinosPath();
 
 var local_contacts = '';
@@ -115,7 +114,8 @@ function makeW3Ccontacts(successCB, errorCB)
 {
     var contacts_l;
     var rawContacts;
-    var pzpJsonPath = wPath + "/userData/" + sessionID + ".json";
+    var wID = webinos.global.require (webinos.global.pzp.location).getDeviceName();
+    var pzpJsonPath = wPath + "/userData/" + wID + ".json";
     var pzp_json = require(pzpJsonPath);
     if ( !pzp_json.abook || pzp_json.abook === "")
     {

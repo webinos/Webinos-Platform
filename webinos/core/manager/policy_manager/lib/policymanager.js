@@ -24,6 +24,12 @@
 	var os = require('os');
 	var promptLib = require('../src/promptMan/promptManager.js');
 	var dslib = require('./decisionstorage.js');
+	var JSV = require('JSV').JSV;
+	var fs = require('fs');
+	var xml2js = require('xml2js');
+	var schema = require('./schema.json');
+	var env = JSV.createEnvironment("json-schema-draft-03");
+	var xmlParser = new xml2js.Parser(xml2js.defaults["0.2"]);
 	var bridge = null;
 	var pmCore = null;
 	var pmNativeLib = null;
@@ -31,30 +37,39 @@
 	var policyFile = null;
 	var decisionStorage = null;
 
-
 	var policyManager = function(policyFilename) {
+		var self = this;
 		// Load the native module
 		try {
-			this.pmNativeLib = require('pm');
+			pmNativeLib = require('pm');
 		} catch (err) {
 			console.log("Warning! Policy manager could not be loaded");
 		}
 		// Load the prompt manager
 		if (os.platform()==='android') {
-			this.bridge = require('bridge');
-			this.promptMan = this.bridge.load('org.webinos.impl.PromptImpl', this);
+			bridge = require('bridge');
+			promptMan = bridge.load('org.webinos.impl.PromptImpl', self);
 		}
 		else if (os.platform()==='win32') {
-			this.promptMan = require('promptMan');
+			promptMan = require('promptMan');
 		}
 		else {
-			this.promptMan = new promptLib.promptManager();
+			promptMan = new promptLib.promptManager();
 		}
 		//Policy file location
-        	policyFile = policyFilename;
-		this.pmCore = new this.pmNativeLib.PolicyManagerInt(policyFile);
-		//Loads decision storage module
-		this.decisionStorage = new dslib.decisionStorage(policyFile);
+		policyFile = policyFilename;
+
+		self.isAWellFormedPolicyFile(policyFile
+			, function () {
+				pmCore = new pmNativeLib.PolicyManagerInt(policyFile);
+				//Loads decision storage module
+				decisionStorage = new dslib.decisionStorage(policyFile);
+				console.log("Policy file loaded");
+			}
+			, function () {
+				console.log("Policy file is not valid");
+			}
+		);
 	};
 
 	policyManager.prototype.getPolicyFilePath = function() {
@@ -62,7 +77,11 @@
 	}
 
 	policyManager.prototype.enforceRequest = function(request, sessionId, noprompt) {
-		var res = this.pmCore.enforceRequest(request);
+		if (!pmCore) {
+			console.log("Invalid policy file: request denied")
+			return 1;
+		}
+		var res = pmCore.enforceRequest(request);
 		var promptcheck = true;
 		if (arguments.length == 3) {
 			if (noprompt == true)
@@ -71,8 +90,8 @@
 
 		if(res>1 && res<5) {
 			// if there is a promptMan then show a message
-			if (this.promptMan && this.decisionStorage && promptcheck) {
-				var storedDecision = this.decisionStorage.checkDecision(request, sessionId);
+			if (promptMan && decisionStorage && promptcheck) {
+				var storedDecision = decisionStorage.checkDecision(request, sessionId);
 				if(storedDecision == 0 || storedDecision == 1) {
 					res = storedDecision;
 				}
@@ -85,13 +104,13 @@
 						choices[0] = "Deny always";
 						choices[1] = "Deny this time";
 						choices[2] = "Allow this time";
-						selected = this.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1)
 							res = 1;
 						if(selected == 2)
 							res = 0;
 						if(selected == 0) {
-							this.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 					}
 					else if(res==3) {
@@ -101,16 +120,16 @@
 						choices[2] = "Deny this time";
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
-						selected = this.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4)
 							res = 0;
 						if(selected == 0) {
-							this.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 						if(selected == 1 || selected == 4) {
-							this.decisionStorage.addDecision(request, sessionId, res, 1);
+							decisionStorage.addDecision(request, sessionId, res, 1);
 						}
 					}
 					else {
@@ -121,16 +140,16 @@
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
 						choices[5] = "Allow always";
-						selected = this.promptMan.display(message, choices);
+						selected = promptMan.display(message, choices);
 						if(selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4 || selected == 5)
 							res = 0;
 						if(selected == 0 || selected == 5) {
-							this.decisionStorage.addDecision(request, sessionId, res, 0);
+							decisionStorage.addDecision(request, sessionId, res, 0);
 						}
 						if(selected == 1 || selected == 4) {
-							this.decisionStorage.addDecision(request, sessionId, res, 1);
+							decisionStorage.addDecision(request, sessionId, res, 1);
 						}
 					}
 				}
@@ -141,12 +160,29 @@
 		return (res);
 	};
 
-	policyManager.prototype.reloadPolicy = function() {
-		this.pmCore.reloadPolicy();
-		return;
+	policyManager.prototype.reloadPolicy = function () {
+		self.isAWellFormedPolicyFile(policyFile
+			, function () {
+				pmCore.reloadPolicy();
+			}
+			, function () {
+				console.log("Policy file is not valid");
+			}
+		);
 	};
+
+	policyManager.prototype.isAWellFormedPolicyFile = function (policyFilename, successCB, errorCB) {
+		var data = fs.readFileSync(policyFilename);
+
+		xmlParser.parseString(data, function (err, jsonData) {
+			if (!err) {
+				(env.validate(jsonData, schema).errors.length === 0) ? successCB() : errorCB();
+			} else {
+				errorCB();
+			}
+		});
+	}
 
 	exports.policyManager = policyManager;
 
 }());
-
