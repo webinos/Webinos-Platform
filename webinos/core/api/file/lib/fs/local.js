@@ -16,35 +16,35 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-// Long-term issues:
-// [WP-?] Support multiple file systems (for origin-specificity).
-// [WP-?] Enforce file system quota limitations.
-// [WP-?] Garbage collect temporary file systems.
+module.exports = LocalFileSystem
 
+var express = require("express")
 var fs = require("fs")
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 var mkdirp = require("mkdirp")
 var pathModule = require("path")
 var util = require("../util.js")
-var virtualPathModule = require("../virtual-path.js")
+var uuid = require("node-uuid")
+var vpath = require("../virtual-path.js")
 
 var EventEmitter = require("events").EventEmitter
 
 // Map of POSIX error codes to DOM4 error types (and descriptions). Mappings
 // are chromium-based and may not comply with the specification.
-var errorMap = { "EACCES"    : { type : "NoModificationAllowedError" }
-               , "EEXIST"    : { type : "InvalidModificationError" }
-               , "EISDIR"    : { type : "NoModificationAllowedError" }
-               , "EMFILE"    : { type : "InvalidModificationError" }
-               , "ENOENT"    : { type : "NotFoundError" }
-               , "ENOMEM"    : { type : "InvalidModificationError" }
-               , "ENOSPC"    : { type : "QuotaExceededError" }
-               , "ENOTDIR"   : { type : "TypeMismatchError" }
-               , "ENOTEMPTY" : { type : "InvalidModificationError" }
-               , "EPERM"     : { type : "NoModificationAllowedError" }
-               , "EROFS"     : { type : "NoModificationAllowedError" }
-               , "ETXTBSY"   : { type : "InvalidModificationError" }
-               }
+var errorMap =
+  { "EACCES"    : { type : "NoModificationAllowedError" }
+  , "EEXIST"    : { type : "InvalidModificationError" }
+  , "EISDIR"    : { type : "NoModificationAllowedError" }
+  , "EMFILE"    : { type : "InvalidModificationError" }
+  , "ENOENT"    : { type : "NotFoundError" }
+  , "ENOMEM"    : { type : "InvalidModificationError" }
+  , "ENOSPC"    : { type : "QuotaExceededError" }
+  , "ENOTDIR"   : { type : "TypeMismatchError" }
+  , "ENOTEMPTY" : { type : "InvalidModificationError" }
+  , "EPERM"     : { type : "NoModificationAllowedError" }
+  , "EROFS"     : { type : "NoModificationAllowedError" }
+  , "ETXTBSY"   : { type : "InvalidModificationError" }
+  }
 
 // Maps the given error, or, more precisely, its POSIX error code, to a DOM4
 // error type (and description). If provided, the customErrorMap precedes the
@@ -64,69 +64,62 @@ function map(error, customErrorMap) {
   return new util.CustomError(mapping.type, mapping.description)
 }
 
-var basePath
-exports.init = function (path) {
-  basePath = path
+function LocalFileSystem(name, path) {
+  mkdirp.sync(path)
 
-  mkdirp.sync(basePath)
-}
-
-// webinos <3 webkit
-var fileSystem
-function openFileSystem(name, create, callback) {
-  if (fileSystem) return util.async(callback)(null, fileSystem)
-
-  mkdirp(pathModule.join(basePath, "default"), function (error) {
-    if (error) return callback(map(error))
-
-    fileSystem = new LocalFileSystem("default", "permanent", 0)
-    callback(null, fileSystem)
-  })
-}
-
-exports.requestFileSystem = function (name, type, size, callback) {
-  // webkit-style: Ignore requested file system type and size.
-  openFileSystem(name, true, callback)
-}
-
-exports.readFileSystem = function (name, callback) {
-  openFileSystem(name, false, callback)
-}
-
-function realize(fileSystem, path) {
-  return pathModule.join(basePath, fileSystem.name, path)
-}
-
-function LocalFileSystem(name, type, size) {
   this.name = name
-  this.type = type
-  this.size = size
+  this.path = path
+}
+
+var links = {}
+var app = express()
+app.get("/media/:ref", function (request, response) {
+  if (links[request.params.ref]) {
+    response.sendfile(links[request.params.ref])
+  } else {
+    response.send(404)
+  }
+})
+
+LocalFileSystem.port = null
+LocalFileSystem.hostname = null
+
+LocalFileSystem.init = function (port, hostname) {
+  LocalFileSystem.port = port
+  LocalFileSystem.hostname = hostname
+  app.listen(port, hostname)
+}
+
+LocalFileSystem.prototype.type = "local"
+
+LocalFileSystem.prototype.realize = function(path) {
+  return pathModule.join(this.path, path)
 }
 
 LocalFileSystem.prototype.readMetadata = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
-    var metadata = { isFile           : stats.isFile()
-                   , isDirectory      : stats.isDirectory()
-                   , size             : stats.size
-                   , modificationTime : stats.mtime
-                   }
+    var metadata =
+      { path             : path
+      , isFile           : stats.isFile()
+      , isDirectory      : stats.isDirectory()
+      , size             : stats.size
+      , modificationTime : stats.mtime
+      }
     callback(null, metadata)
   })
 }
 
 LocalFileSystem.prototype.move = function (source, destination, callback) {
-  fs.rename(realize(this, source), realize(this, destination),
-      function (error) {
-        callback(error ? map(error) : null)
-      })
+  fs.rename(this.realize(source), this.realize(destination), function (error) {
+    callback(error ? map(error) : null)
+  })
 }
 
-LocalFileSystem.prototype.copy = function (source, destination, recursive,
-    callback) {
+LocalFileSystem.prototype.copy = function (source, destination, recursive, callback) {
   var self = this
-  fs.stat(realize(self, source), function (error, stats) {
+  fs.stat(self.realize(source), function (error, stats) {
     if (error) return callback(map(error))
 
     if (stats.isDirectory()) {
@@ -142,7 +135,7 @@ LocalFileSystem.prototype.copy = function (source, destination, recursive,
 
 LocalFileSystem.prototype.remove = function (path, recursive, callback) {
   var self = this
-  fs.stat(realize(self, path), function (error, stats) {
+  fs.stat(self.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (stats.isDirectory()) {
@@ -160,14 +153,14 @@ LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
   var self = this
 
   var flags = exclusive ? "wx" : "a"
-  fs.open(realize(self, path), flags, function (error, fd) {
+  fs.open(self.realize(path), flags, function (error, fd) {
     if (!error) {
       return fs.close(fd, function (error) {
         callback(error ? map(error) : null)
       })
     }
 
-    fs.stat(realize(self, path), function (error2, stats) {
+    fs.stat(self.realize(path), function (error2, stats) {
       if (error2) return callback(map(error))
 
       if (exclusive) {
@@ -184,7 +177,7 @@ LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
 }
 
 LocalFileSystem.prototype.fileExists = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (!stats.isFile()) {
@@ -195,9 +188,15 @@ LocalFileSystem.prototype.fileExists = function (path, callback) {
   })
 }
 
+LocalFileSystem.prototype.createFileLink = function (path, callback) {
+  var ref = uuid.v4()
+  links[ref] = this.realize(path)
+  util.async(callback)(null, "http://" + LocalFileSystem.hostname + ":" + LocalFileSystem.port + "/media/" + ref)
+}
+
 inherits(ReadStreamWrapper, EventEmitter)
 function ReadStreamWrapper(stream) {
-  ReadStreamWrapper.super.call(this)
+  ReadStreamWrapper.super_.call(this)
 
   var self = this
   stream.addListener("open", function () {
@@ -233,11 +232,10 @@ ReadStreamWrapper.prototype.destroy = function (callback) {
   })
 }
 
-LocalFileSystem.prototype.createReadStream = function (path, options,
-    callback) {
+LocalFileSystem.prototype.createReadStream = function (path, options, callback) {
   var stream
   try {
-    stream = fs.createReadStream(realize(this, path), options)
+    stream = fs.createReadStream(this.realize(path), options)
   } catch (error) {
     util.async(callback)(map(error))
   }
@@ -248,7 +246,7 @@ LocalFileSystem.prototype.createReadStream = function (path, options,
 
 inherits(WriteStreamWrapper, EventEmitter)
 function WriteStreamWrapper(stream) {
-  WriteStreamWrapper.super.call(this)
+  WriteStreamWrapper.super_.call(this)
 
   var self = this
   stream.addListener("open", function () {
@@ -286,11 +284,10 @@ WriteStreamWrapper.prototype.destroy = function (callback) {
   })
 }
 
-LocalFileSystem.prototype.createWriteStream = function (path, options,
-    callback) {
+LocalFileSystem.prototype.createWriteStream = function (path, options, callback) {
   var stream
   try {
-    stream = fs.createWriteStream(realize(this, path), options)
+    stream = fs.createWriteStream(this.realize(path), options)
   } catch (error) {
     util.async(callback)(map(error))
   }
@@ -300,7 +297,7 @@ LocalFileSystem.prototype.createWriteStream = function (path, options,
 }
 
 LocalFileSystem.prototype.truncate = function (path, size, callback) {
-  fs.open(realize(this, path), "r+", function (error, fd) {
+  fs.open(this.realize(path), "r+", function (error, fd) {
     if (error) return callback(map(error))
 
     fs.truncate(fd, size, function (error) {
@@ -312,8 +309,8 @@ LocalFileSystem.prototype.truncate = function (path, size, callback) {
 }
 
 LocalFileSystem.prototype.copyFile = function (source, destination, callback) {
-  var sourceStream = fs.createReadStream(realize(this, source))
-  var destinationStream = fs.createWriteStream(realize(this, destination))
+  var sourceStream = fs.createReadStream(this.realize(source))
+  var destinationStream = fs.createWriteStream(this.realize(destination))
 
   function onend() {
     destinationStream.end(function (error) {
@@ -348,22 +345,21 @@ LocalFileSystem.prototype.copyFile = function (source, destination, callback) {
 }
 
 LocalFileSystem.prototype.removeFile = function (path, callback) {
-  fs.unlink(realize(this, path), function (error) {
+  fs.unlink(this.realize(path), function (error) {
     callback(error ? map(error) : null)
   })
 }
 
 // webinos <3 mkdirp
-LocalFileSystem.prototype.createDirectory = function (path, exclusive,
-    recursive, callback) {
+LocalFileSystem.prototype.createDirectory = function (path, exclusive, recursive, callback) {
   var self = this
-  fs.mkdir(realize(self, path), function (error) {
+  fs.mkdir(self.realize(path), function (error) {
     if (!error) return callback(null)
 
     switch (error.code) {
       case "ENOENT":
         if (recursive) {
-          var fullPath = virtualPathModule.dirname(path)
+          var fullPath = vpath.dirname(path)
           self.createDirectory(fullPath, false, true, function (error) {
             if (error) return callback(error)
             self.createDirectory(path, exclusive, false, callback)
@@ -371,7 +367,7 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
         } else callback(map(error))
         break
       default:
-        fs.stat(realize(self, path), function (error2, stats) {
+        fs.stat(self.realize(path), function (error2, stats) {
           if (error2) return callback(map(error))
 
           if (exclusive) {
@@ -389,7 +385,7 @@ LocalFileSystem.prototype.createDirectory = function (path, exclusive,
 }
 
 LocalFileSystem.prototype.directoryExists = function (path, callback) {
-  fs.stat(realize(this, path), function (error, stats) {
+  fs.stat(this.realize(path), function (error, stats) {
     if (error) return callback(map(error))
 
     if (!stats.isDirectory()) {
@@ -401,26 +397,40 @@ LocalFileSystem.prototype.directoryExists = function (path, callback) {
 }
 
 LocalFileSystem.prototype.readDirectory = function (path, callback) {
-  fs.readdir(realize(this, path), function (error, files) {
+  var self = this
+  fs.readdir(self.realize(path), function (error, files) {
     if (error) return callback(map(error))
-    callback(null, files)
+
+    var metadataz = []
+    ;(function iterate() {
+      var file = files.shift()
+      if (!file) return callback(null, metadataz)
+
+      var fullPath = vpath.join(path, file)
+      self.readMetadata(fullPath, function (error, metadata) {
+        if (error) return callback(error)
+        metadata.path = fullPath
+        metadataz.push(metadata)
+
+        iterate()
+      })
+    })()
   })
 }
 
-LocalFileSystem.prototype.copyDirectory = function (source, destination,
-    recursive, callback, isRetry) {
+LocalFileSystem.prototype.copyDirectory = function (source, destination, recursive, callback, isRetry) {
   var self = this
 
   function children() {
-    fs.readdir(realize(self, source), function (error, files) {
+    fs.readdir(self.realize(source), function (error, files) {
       if (error) return callback(map(error))
 
       ;(function iterate() {
         var file = files.shift()
         if (!file) return callback(null)
 
-        var sourcePath = virtualPathModule.join(source, file)
-          , destinationPath = virtualPathModule.join(destination, file)
+        var sourcePath = vpath.join(source, file)
+          , destinationPath = vpath.join(destination, file)
         self.copy(sourcePath, destinationPath, true, function (error) {
           if (error) return callback(error)
           iterate()
@@ -441,25 +451,24 @@ LocalFileSystem.prototype.copyDirectory = function (source, destination,
   })
 }
 
-LocalFileSystem.prototype.removeDirectory = function (path, recursive,
-    callback) {
+LocalFileSystem.prototype.removeDirectory = function (path, recursive, callback) {
   var self = this
 
   function root() {
-    fs.rmdir(realize(self, path), function (error) {
+    fs.rmdir(self.realize(path), function (error) {
       callback(error ? map(error) : null)
     })
   }
 
   if (recursive) {
-    fs.readdir(realize(self, path), function (error, files) {
+    fs.readdir(self.realize(path), function (error, files) {
       if (error) return callback(map(error))
 
       ;(function iterate() {
         var file = files.shift()
         if (!file) return root()
 
-        var fullPath = virtualPathModule.join(path, file)
+        var fullPath = vpath.join(path, file)
         self.remove(fullPath, true, function (error) {
           if (error) return callback(error)
           iterate()

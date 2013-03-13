@@ -27,12 +27,11 @@
   , "now" : "0.8.1"
   , "node-uuid" : "1.3.x"
   , "find-dependencies" : "~0.0.2"
-  , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
-  , "connect" : "2.6.x"
+  , "dbox": "https://github.com/felixjendrusch/node-dbox/tarball/put-zero"
   , "optimist" : "x.x.x"
   }
-, "devDependencies": 
+, "devDependencies":
   { "grunt": "~0.4.x"
   , "jasmine-node" : "1.x.x"
   , "grunt-contrib-concat": "~0.1.3"
@@ -40,7 +39,7 @@
   , "grunt-contrib-jshint": "~0.1.x"
   , "grunt-contrib-clean": "~0.4.x"
   }
-, "optionalDependencies": 
+, "optionalDependencies":
   { "sqlite3": "2.1.x"
   , "qrcode": "0.x.x"
   , "openid": "0.x.x"
@@ -50,16 +49,16 @@
   , "passport-google": "x.x.x"
   , "serialport2": "0.0.5"
   }
-, "engines": 
+, "engines":
   { "node": ">= 0.6.0"
   , "npm": ">= 1.1.17"
   }
 , "preferGlobal": true
-, "bin": 
+, "bin":
   { "webinos_pzh": "webinos_pzh.js"
   , "webinos_pzp": "webinos_pzp.js"
   }
-, "scripts": 
+, "scripts":
   { "install": "node-gyp configure build && grunt"
   , "test": "./tools/travis/auto-test.sh"
   }

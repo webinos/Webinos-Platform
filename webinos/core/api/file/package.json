@@ -19,7 +19,9 @@
   }
 , "dependencies" :
   { "find-dependencies" : "0.0.x"
-  , "inherits" : "1.0.0"
   , "mkdirp" : "0.3.x"
+  , "express" : "3.1.x"
+  , "node-uuid" : "1.4.x"
+  , "dbox": "0.5.x"
   }
 }

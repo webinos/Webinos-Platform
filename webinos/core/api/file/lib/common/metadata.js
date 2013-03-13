@@ -24,8 +24,9 @@ function Metadata(metadata) {
 }
 
 Metadata.prototype.toJSON = function () {
-  var json = { modificationTime : this.modificationTime
-             , size             : this.size
-             }
+  var json =
+    { modificationTime : this.modificationTime
+    , size             : this.size
+    }
   return json
 }
