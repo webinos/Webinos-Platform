@@ -66,30 +66,30 @@ var Pzp = function () {
     }
 
     this.addStateListener = function (listener) {
-      if (typeof listener !== "undefined") {
-        if (typeof listener.setHubConnected !== "function") {
-          listener.setHubConnected = function(isConnected) {};
-        }
-        if (typeof listener.setPeerConnected !== "function") {
-          listener.setPeerConnected = function(isConnected) {};
-        }
-        stateListeners.push(listener);
+        if (typeof listener !== "undefined") {
+            if (typeof listener.setHubConnected !== "function") {
+                listener.setHubConnected = function(isConnected) {};
+            }
+            if (typeof listener.setPeerConnected !== "function") {
+                listener.setPeerConnected = function(isConnected) {};
+            }
+            stateListeners.push(listener);
 
-        // communicate current state
-        listener.setHubConnected(self.pzp_state.state["hub"] === "connected");
-        listener.setPeerConnected(self.pzp_state.state["peer"] === "connected");
-      }
+            // communicate current state
+            listener.setHubConnected(self.pzp_state.state["hub"] === "connected");
+            listener.setPeerConnected(self.pzp_state.state["peer"] === "connected");
+        }
     };
 
     this.setConnectState = function (mode, isConnected) {
-      self.pzp_state.state[mode] = (isConnected ? "connected" : "not_connected");
-      stateListeners.forEach(function(listener) {
-        if (mode === "hub") {
-          listener.setHubConnected(isConnected);
-        } else if (mode === "peer") {
-          listener.setPeerConnected(isConnected);
-        }
-      });
+        self.pzp_state.state[mode] = (isConnected ? "connected" : "not_connected");
+        stateListeners.forEach(function(listener) {
+            if (mode === "hub") {
+                listener.setHubConnected(isConnected);
+            } else if (mode === "peer") {
+                listener.setPeerConnected(isConnected);
+            }
+        });
     };
     this.sendUpdateToAll = function() {
         function getConnectedList(type) {
@@ -385,7 +385,7 @@ var Pzp = function () {
         self.config = new util.webinosConfiguration ();// sets configuration
         util.webinosHostname.getHostName(inputConfig.sessionIdentity, function (hostname) {
             inputConfig.sessionIdentity = hostname;
-             self.config.setConfiguration ("Pzp", inputConfig, function (status) {
+            self.config.setConfiguration ("Pzp", inputConfig, function (status) {
                 if (status) {
                     self.pzp_state.enrolled  = false;
                     self.pzp_state.sessionId = self.config.metaData.webinosName;
@@ -655,9 +655,9 @@ var ConnectHub = function (parent) {
                 });
 
                 pzpClient.on ("close", function(had_error) {
-                   if(had_error) {
-                       logger.log("transmission error lead to disconnect");
-                   }
+                    if(had_error) {
+                        logger.log("transmission error lead to disconnect");
+                    }
                 });
                 pzpClient.on ("end", function () {
                     parent.cleanUp (pzpClient.id);
@@ -717,8 +717,8 @@ var EnrollPzp = function (parent, hub) {
 
                 // Same PZP name existed in PZ, PZH has assigned a new id to the PZP.
                 if ((_to.split("/") && _to.split("/")[1])!== parent.config.metaData.webinosName) {
-                  parent.config.metaData.pzhAssignedId = _to.split("/")[1];
-                } 
+                    parent.config.metaData.pzhAssignedId = _to.split("/")[1];
+                }
                 hub.connect (function (status) {
                     if (status) {
                         logger.log ("successfully connected to the PZH ")
@@ -737,6 +737,22 @@ exports.initializePzp = function (config, callback) {
     pzpInstance.initializePzp (config, function (status, result) {
         if (status) {
             logger.log ("initialized pzp");
+            var os = require("os");
+            if(os.platform().toLowerCase() == "android") {
+                try {
+                    var bridge = require('bridge');
+                    var notification = bridge.load('org.webinos.impl.PZPNotificationManagerImpl', this);
+                    notification.eventNotify("Initialized", function(status){
+                        logger.log("send notification on PZP status:" + status);
+                    });
+                }
+                catch(e) {
+                    logger.error("Android pzp notification - error: "+e.message);
+                }
+            }
+
+            //end of adding android
+
             callback (true);
         } else {
             callback (false);
