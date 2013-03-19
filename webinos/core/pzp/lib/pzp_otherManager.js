@@ -184,11 +184,6 @@ var Pzp_OtherManager = function (_parent) {
         self.rpcHandler = new RPCHandler (_parent, self.registry); // Handler for remote method calls.
         self.discovery = new Discovery (self.rpcHandler, [self.registry]);
         self.registry.registerObject (self.discovery);
-        for(var i=0; i < _parent.config.serviceCache.length; i = i + 1) {
-           if (_parent.config.serviceCache[i].name === "file") {
-             _parent.config.serviceCache[i].params = { getPath:function () { return _parent.config.metaData.webinosRoot; } };
-           }
-        }
         modLoader.loadServiceModules (_parent.config.serviceCache, self.registry, self.rpcHandler); // load specified modules
         self.messageHandler = new MessageHandler (self.rpcHandler); // handler for all things message
         // Init the rpc interception of policy manager

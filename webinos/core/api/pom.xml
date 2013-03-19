@@ -24,7 +24,6 @@
     <module>applauncher</module>
     <module>webnotification</module>
     <module>zonenotification</module>
-    <module>zap-and-shake</module>
     <module>file</module>
     <module>gallery</module>
     <module>geolocation</module>

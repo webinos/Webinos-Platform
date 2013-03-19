@@ -18,13 +18,13 @@
 
 module.exports = DirectoryEntry
 
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 
 var Entry = require("./entry.js")
 
 inherits(DirectoryEntry, Entry)
 function DirectoryEntry(filesystem, fullPath) {
-  DirectoryEntry.super.call(this, filesystem, fullPath)
+  DirectoryEntry.super_.call(this, filesystem, fullPath)
 }
 
 DirectoryEntry.prototype.isDirectory = true

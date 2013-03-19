@@ -23,8 +23,7 @@ if (typeof module === "undefined") {
 
 // webinos <3 node.js
 (function (exports) {
-  var splitPathRe =
-        /^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$/;
+  var splitPathRe = /^(\/?)([\s\S]+\/(?!$)|\/)?((?:\.{1,2}$|[\s\S]+?)?(\.[^.\/]*)?)$/;
 
   function splitPath(path) {
     var result = splitPathRe.exec(path);
