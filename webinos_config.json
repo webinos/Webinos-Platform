@@ -1,131 +1,136 @@
 {
-  "ports"             :{
-    "provider"          :80,
-    "provider_webServer":443,
-    "pzp_webSocket"     :8080,
-    "pzp_tlsServer"     :8040,
-    "pzp_zeroConf"      :4321,
-    "iot"               :3000
+  "ports": {
+    "provider": 80,
+    "provider_webServer": 443,
+    "pzp_webSocket": 8080,
+    "pzp_tlsServer": 8040,
+    "pzp_zeroConf": 4321,
+    "iot": 3000
   },
-  "pzhDefaultServices":[
+  "pzhDefaultServices": [
     {
-      "name"  :"test",
-      "params":{}
+      "name": "test",
+      "params": {}
     },
     {
-      "name"  :"app2app",
-        "params":{
-            "scope":"pzh"
-        }
+      "name": "app2app",
+      "params": {
+        "scope": "pzh"
+      }
     },
     {
-      "name"  :"zonenotification",
-      "params":{}
+      "name": "events",
+      "params": {}
+    },
+    {
+      "name": "zonenotification",
+      "params": {}
     }
   ],
-  "pzpDefaultServices":[
+  "pzpDefaultServices": [
     {
-      "name"  :"test",
-      "params":{
-        "num":"21"
+      "name": "test",
+      "params": {
+        "num": "21"
       }
     },
     {
-      "name"  :"actuator",
-      "params":{}
+      "name": "actuator",
+      "params": {}
     },
     {
-      "name"  :"app2app",
-      "params":{
-          "scope":"pzp"
+      "name": "app2app",
+      "params": {
+        "scope": "pzp"
       }
     },
     {
-      "name"  :"webnotification",
-      "params":{}
-    },
-    { "name" : "file"
-    , "params" : {}
+      "name": "webnotification",
+      "params": {}
     },
     {
-      "name"  :"geolocation",
-      "params":{
-        "connector":"geoip"
+      "name": "file",
+      "params": {}
+    },
+    {
+      "name": "geolocation",
+      "params": {
+        "connector": "geoip"
       }
     },
     {
-      "name"  :"applauncher",
-      "params":{}
+      "name": "applauncher",
+      "params": {}
     },
     {
-      "name"  :"sensors",
-      "params":{}
+      "name": "sensors",
+      "params": {}
     },
     {
-      "name"  :"payment",
-      "params":{}
+      "name": "payment",
+      "params": {}
     },
     {
-      "name"  :"tv",
-      "params":{}
+      "name": "tv",
+      "params": {}
     },
     {
-      "name"  :"oauth",
-      "params":{}
+      "name": "oauth",
+      "params": {}
     },
     {
-      "name"  :"deviceorientation",
-      "params":{}
+      "name": "deviceorientation",
+      "params": {}
     },
     {
-      "name"  :"vehicle",
-      "params":{
-        "connector":"simulator"
+      "name": "vehicle",
+      "params": {
+        "connector": "simulator"
       }
     },
     {
-      "name"  :"context",
-      "params":{}
+      "name": "context",
+      "params": {}
     },
     {
-      "name"  :"authentication",
-      "params":{}
+      "name": "authentication",
+      "params": {}
     },
     {
-      "name"  :"contacts",
-      "params":{}
+      "name": "contacts",
+      "params": {}
     },
     {
-      "name"  :"devicestatus",
-      "params":{}
+      "name": "devicestatus",
+      "params": {}
     },
     {
-      "name"  :"discovery",
-      "params":{}
+      "name": "discovery",
+      "params": {}
     },
     {
-      "name"  :"mediacontent",
-      "params":{}
+      "name": "mediacontent",
+      "params": {}
     },
     {
-      "name"  :"corePZinformation",
-      "params":{}
+      "name": "corePZinformation",
+      "params": {}
     },
     {
-      "name"  :"nfc",
-      "params":{}
+      "name": "nfc",
+      "params": {}
     }
   ],
-  "certConfiguration" :{
-    "country":"UK",
-    "state"  :"MX",
-    "city"   :"London",
-    "orgname":"Webinos",
-    "orgunit":"WP4",
-    "cn"     :"",
-    "email"  :"hello@webinos.org"
+  "certConfiguration": {
+    "country": "UK",
+    "state": "MX",
+    "city": "London",
+    "orgname": "Webinos",
+    "orgunit": "WP4",
+    "cn": "",
+    "email": "hello@webinos.org"
   },
-  "friendlyName":"",
+  "friendlyName": "",
   "webinos_version": {
     "tag": "v0.8.0",
     "num_commit": "15",
