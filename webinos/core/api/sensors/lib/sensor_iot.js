@@ -29,6 +29,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         // inherit from RPCWebinosService
         this.base = RPCWebinosService;
         var driverInterface = drvInt;
+        this.listeners = [];
         this.objRef = null;
         this.listenerActive = false;
         this.maximumRange = "na";
@@ -167,54 +168,39 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         */
         this.configureSensor = function(params, successCB, errorCB) {
             console.log("Configuring sensor with params : "+JSON.stringify(params));
-            // configureSensorHandlers = {"succCB" : successCB , "errCB": errorCB};
-            
             driverInterface.sendCommand('cfg', this.elementId, params, errorCB, successCB);
         };
         
         this.addEventListener = function (eventType, successCB, errorCB, objectRef) {
-            console.log('Sensor '+sensorEvent.sensorId+': addEventListener');
+            //console.log("Sensor:addEventListener - eventType : " +eventType);
+            //console.log("Sensor:addEventListener - successCB : " +successCB);
+            //console.log("Sensor:addEventListener - errorCB : " +errorCB);
+            //console.log("Sensor:addEventListener - objectRef : " +JSON.stringify(objectRef));
+            
             this.objRef = objectRef;
             this.listenerActive = true;
-            // addEventListenerHandlers.succCB = successCB;
-            // addEventListenerHandlers.errCB  = errorCB;
-            // driverInterface.sendCommand('start', this.elementId, null,addEventListenerErrorHandler,addEventListenerSuccessHandler);
+            this.listeners.push([successCB, errorCB, objectRef, eventType]);
             driverInterface.sendCommand('start', this.elementId, null, errorCB, successCB);
         };
 
-        this.removeEventListener = function (eventType, successCB, errorCB, objectRef) {
-            this.listenerActive = false;
-            // removeEventListenerHandlers.succCB = successCB;
-            // removeEventListenerHandlers.errCB  = errorCB;
-            // driverInterface.sendCommand('stop', this.elementId, null, removeEventListenerErrorHandler, removeEventListenerSuccessHandler);
-            driverInterface.sendCommand('stop', this.elementId, null, errorCB, successCB);
+        this.removeEventListener = function (arguments) {
+            //console.log("removeEventListener : arg[0] - " + arguments[0]);
+            //console.log("removeEventListener : arg[1] - " + arguments[1]);
+
+            for (i = 0; i < this.listeners.length; i++) {
+                if(this.listeners[i][2].rpcId === arguments[0]){
+                    this.listeners.splice(i, 1);
+                    break;
+                }
+            }
+
+            if(this.listeners.length == 0){
+                console.log("Stopping sensor " + this.id);
+                this.listenerActive = false;
+                driverInterface.sendCommand('stop', this.elementId, null);
+            }
         };
     }
-
-
-    // function configureSensorSuccessHandler(){
-    //     //configureSensorHandlers.succCB();
-    // }
-
-    // function configureSensorErrorHandler(){
-    //     configureSensorHandlers.errCB();
-    // }
-    
-    // function addEventListenerSuccessHandler(){
-    //     addEventListenerHandlers.succCB();
-    // }
-
-    // function addEventListenerErrorHandler(){
-    //     addEventListenerHandlers.errCB();
-    // }
-
-    // function removeEventListenerSuccessHandler(){
-    //     removeEventListenerHandlers.succCB();
-    // }
-
-    // function removeEventListenerErrorHandler(){
-    //     removeEventListenerHandlers.errCB();
-    // }
 
     SensorService.prototype = new RPCWebinosService;
 

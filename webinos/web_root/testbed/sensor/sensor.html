@@ -68,10 +68,10 @@
                     $('#messages').append('<li> Error configuring Sensor ' + sensorToUse.api + '</li>');
             });
         });
-                    
-        $('#register').bind('click', function() {
-            sensorToUse.addEventListener('temperature', function(event){
-                if ($('#sensorResult')!=null) {//If there is the element
+               
+
+        function onSensorEvent(event){
+            if ($('#sensorResult')!=null) {//If there is the element
                     $('#sensorResult').html('');
                     $('#sensorResult').append('<li> Sensor Event from: ' + sensorToUse.api + '</li>');
                     $('#sensorResult').append('<li> Sensor Type: ' + event.sensorType + '</li>');
@@ -82,13 +82,16 @@
                     $('#sensorResult').append('<li> Absolute Temp: ' + event.sensorValues[0] + '</li>');
                     $('#sensorResult').append('<li> Normalized Temp: ' + event.sensorValues[1] + '</li>');
                 }else{
-                } } , false
-            );
+                } 
+        }   
+
+        $('#register').bind('click', function() {
+            sensorToUse.addEventListener('sensor', onSensorEvent , false);
         }); 
 
         $('#unregister').bind('click', function() {
             try {
-                sensorToUse.removeEventListener('temperature', function(){}, false);
+                sensorToUse.removeEventListener('sensor', onSensorEvent, false);
             }
             catch(e) {
                 alert('cannot unregister: '+e.message);
