@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Copyright 2012 University of Catania
+ * Author: Giuseppe La Torre - giuseppe.latorre@dieei.unict.it
  * 
  ******************************************************************************/
 
@@ -84,8 +84,8 @@
 						});
 
 						serial.on('error', function (err) {
-							if(err.code == "ENOENT" && err.path == SERIAL_PORT){
-								//console.log("Serial port ["+SERIAL_PORT+"] is not ready");
+							if(err.path == SERIAL_PORT){
+								//console.log("Serial port ["+SERIAL_PORT+"] is not ready. Err code : "+err.code);
 								setTimeout(init_serial,2000);
 							}
 						});
