@@ -71,11 +71,16 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
                         serviceList[id] = service;
                         break;
                     case 'data':
-                        //console.log('sensor api listener: sensor '+id+' sent value '+data);
+                        //console.log("RPC_sensors: sensor " + id + " has " + serviceList[id].listeners.length + " listeners");
                         if(serviceList[id].listenerActive == true) {
                             var sensorEvent = serviceList[id].getEvent(data);
-                            var rpc = rpcHandler.createRPC(serviceList[id].objRef, "onEvent", sensorEvent);
-                            rpcHandler.executeRPC(rpc);
+                            for(var i=0; i<serviceList[id].listeners.length; i++){
+                                if(serviceList[id].listeners[i][3] === "sensor"){
+                                    //console.log("RPC_sensor : send RPC "+ JSON.stringify(serviceList[id].listeners[i][2]));
+                                    var rpc = rpcHandler.createRPC(serviceList[id].listeners[i][2], "onEvent", sensorEvent);
+                                    rpcHandler.executeRPC(rpc);
+                                }
+                            }
                         }
                         break;
                     default:
