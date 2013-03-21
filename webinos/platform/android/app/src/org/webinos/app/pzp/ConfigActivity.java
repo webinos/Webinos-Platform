@@ -34,7 +34,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 public class ConfigActivity extends Activity implements PzpServiceListener, PzpStateListener {
@@ -42,11 +42,8 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 	private PzpService pzpService;
 	private Button startButton;
 	private Button stopButton;
-	private EditText pzhHost;
-	private EditText pzhName;
-	private EditText pzpName;
-	private EditText authCode;
 	private TextView stateText;
+	private CheckBox autoStart;
 	private Handler viewHandler = new Handler();
 	private long uiThread;
 	
@@ -81,7 +78,6 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 			@Override
 			public void onClick(View v) {
 				Log.v(TAG, "startButton.onClick(): requesting PZP start");
-				updateConfigFromEditText();
 				pzpService.startPzp();
 			}
 		});
@@ -96,25 +92,18 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 			}
 		});
 
-		pzhHost = (EditText)findViewById(R.id.args_pzhHost);
-		String pzhHostText = configParams.pzhHost;
-		if(pzhHostText != null)
-			pzhHost.setText(pzhHostText);
+		autoStart = (CheckBox)findViewById(R.id.auto_start);
+		String autoStartText = configParams.autoStart;
+		if(autoStartText != null)
+			autoStart.setChecked("true".equals(autoStartText));
+		autoStart.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.v(TAG, "startButton.onClick(): requesting PZP start");
+				updateConfigFromForm();
+			}
+		});
 
-		pzhName = (EditText)findViewById(R.id.args_pzhName);
-		String pzhNameText = configParams.pzhName;
-		if(pzhNameText != null)
-			pzhName.setText(pzhNameText);
-
-		pzpName = (EditText)findViewById(R.id.args_pzpName);
-		String pzpNameText = configParams.pzpName;
-		if(pzpNameText != null)
-			pzpName.setText(pzpNameText);
-
-		authCode = (EditText)findViewById(R.id.args_authCode);
-		String authCodeText = configParams.authCode;
-		if(authCodeText != null)
-			authCode.setText(authCodeText);
 
 		/* if the platform is not yet initialised, wait until that
 		 * has completed and retry */
@@ -132,12 +121,9 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		}
 	}
 
-	private void updateConfigFromEditText() {
+	private void updateConfigFromForm() {
 		ConfigParams configParams = pzpService.getConfig();
-		configParams.pzhHost = pzhHost.getText().toString();
-		configParams.pzhName = pzhName.getText().toString();
-		configParams.pzpName = pzpName.getText().toString();
-		configParams.authCode = authCode.getText().toString();
+		configParams.autoStart = String.valueOf(autoStart.isChecked());
 		pzpService.updateConfig();
 	}
 
