@@ -26,7 +26,7 @@
                 	    webinos.discovery.findServices(new ServiceType('http://webinos.org/api/applauncher'), 
 						{onFound: function (service) {
 							
-							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
+							 $("<option value='" + service.serviceAddress + "' >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
 								launcherAPIS[service.serviceAddress] = service;
 							
                 	    	$('#messages').append('<li> AppLauncher API found: ' + service.api + ' @ ' + service.serviceAddress + '</li>');
