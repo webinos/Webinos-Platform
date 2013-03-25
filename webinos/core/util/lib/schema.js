@@ -1,22 +1,22 @@
-/*
-********************************************************************************
-*  Code contributed to the webinos project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Copyright 2011-2013 Torsec -Computer and network security group-
-* Politecnico di Torino
-*******************************************************************************/
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2011-2013 Torsec -Computer and network security group-
+ * Politecnico di Torino
+ *
+ ******************************************************************************/
 
 (function () {
     "use strict";
@@ -37,7 +37,7 @@
         // generic message validation
         var validation = checkGenericSchema(msg);
 
-        // validation error is false, so validation is ok
+        // validation error is false, so generic message validation is ok
         if(validation === false) {
             if (msg.type === "deliveryNotification") {
                 return checkDeliveyNotificationSchema(msg);
@@ -48,7 +48,9 @@
             if (msg.type === "JSONRPC20Response") {
                 return checkJSONRPC20ResponseSchema(msg);
             }
-            // TODO: check "Prop" messages
+            if (msg.type === "prop") {
+                return checkPropSchema(msg);
+            }
         }
         else {
             // generic message validation failed
@@ -162,6 +164,39 @@
     };
 
     /**
+     * Validate "prop" message
+     * @name checkPropSchema
+     * @function
+     * @param msg Message to validate
+     */
+    checkPropSchema = function(message) {
+        var schema, validation;
+
+        schema = myEnv.Schema.create({
+            "type": "object",
+            "properties":{
+                "type": {
+                    "type": "string",
+                    "enum": ["prop"]
+                },
+                "payload": {
+                    "type": "object"
+                }
+            },
+            "additionalProperties": true
+        });
+        try {
+            validation = schema.validate(message);
+            assert.strictEqual(validation.isError(), false);
+            return validation.isError();
+        } catch (err) {
+            console.log(validation.getError());
+            console.log(validation.getError().errors);
+            return true;
+        }
+    };
+
+    /**
      * Validate generic message
      * @name checkGenericSchema
      * @function
@@ -171,14 +206,14 @@
         var schema, validation;
 
         // "deliveryNotification", "JSONRPC20Request", "JSONRPC20Response" and
-        // "Prop" types are allowed
+        // "prop" types are allowed
         schema = myEnv.Schema.create({
             "type": "object",
             "properties": {
                 "type": {
                     "type": "string",
                     "enum": ["deliveryNotification", "JSONRPC20Request",
-                        "JSONRPC20Response", "Prop"]
+                        "JSONRPC20Response", "prop"]
                 },
                 "from": {
                     "type": "string"
