@@ -40,11 +40,14 @@
         // validation error is false, so validation is ok
         if(validation === false) {
             if (msg.type === "deliveryNotification") {
-                // "prop" type message validation
                 return checkDeliveyNotificationSchema(msg);
             }
-            // TODO: check "JSONRPC20Request" messages
-            // TODO: check "JSONRPC20Response" messages
+            if (msg.type === "JSONRPC20Request") {
+                return checkJSONRPC20RequestSchema(msg);
+            }
+            if (msg.type === "JSONRPC20Response") {
+                return checkJSONRPC20ResponseSchema(msg);
+            }
             // TODO: check "Prop" messages
         }
         else {
@@ -54,7 +57,7 @@
     };
 
     /**
-     * Validate "deliveryNotification" type messages
+     * Validate "deliveryNotification" message
      * @name checkDeliveryNotificationSchema
      * @function
      * @param msg Message to validate
@@ -93,7 +96,73 @@
     };
 
     /**
-     * Validate generic message schema
+     * Validate "JSONRPC20Request" message
+     * @name checkJSONRPC20RequestSchema
+     * @function
+     * @param msg Message to validate
+     */
+    checkJSONRPC20RequestSchema = function(message) {
+        var schema, validation;
+
+        schema = myEnv.Schema.create({
+            "type": "object",
+            "properties":{
+                "type": {
+                    "type": "string",
+                    "enum": ["JSONRPC20Request"]
+                },
+                "payload": {
+                    "type": "object"
+                }
+            },
+            "additionalProperties": true
+        });
+        try {
+            validation = schema.validate(message);
+            assert.strictEqual(validation.isError(), false);
+            return validation.isError();
+        } catch (err) {
+            console.log(validation.getError());
+            console.log(validation.getError().errors);
+            return true;
+        }
+    };
+
+    /**
+     * Validate "JSONRPC20Response" message
+     * @name checkJSONRPC20ResponseSchema
+     * @function
+     * @param msg Message to validate
+     */
+    checkJSONRPC20ResponseSchema = function(message) {
+        var schema, validation;
+
+        schema = myEnv.Schema.create({
+            "type": "object",
+            "properties":{
+                "type": {
+                    "type": "string",
+                    "enum": ["JSONRPC20Response"]
+                },
+                "payload": {
+                    "type": "object"
+                }
+            },
+            "additionalProperties": true
+        });
+        try {
+            validation = schema.validate(message);
+            assert.strictEqual(validation.isError(), false);
+            return validation.isError();
+        } catch (err) {
+            console.log(validation.getError());
+            console.log(validation.getError().errors);
+            return true;
+        }
+    };
+
+    /**
+     * Validate generic message
      * @name checkGenericSchema
      * @function
      * @param msg Message to validate
