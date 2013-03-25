@@ -1522,8 +1522,11 @@ if (typeof webinos.util === "undefined") webinos.util = {};
             if (typeof TestModule !== 'undefined') typeMap['http://webinos.org/api/test'] = TestModule;
             if (typeof ActuatorModule !== 'undefined') typeMap['http://webinos.org/api/actuator'] = ActuatorModule;
             if (typeof WebNotificationModule !== 'undefined') typeMap['http://webinos.org/api/notifications'] = WebNotificationModule;
-            if (typeof oAuthModule!== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
-            if (typeof WebinosGeolocation !== 'undefined') typeMap['http://www.w3.org/ns/api-perms/geolocation'] = WebinosGeolocation;
+            if (typeof oAuthModule !== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
+            if (typeof WebinosGeolocation !== 'undefined') {
+                typeMap['http://webinos.org/api/w3c/geolocation'] = WebinosGeolocation;
+                typeMap['http://www.w3.org/ns/api-perms/geolocation'] = WebinosGeolocation; // old feature URI for compatibility
+            }
             if (typeof WebinosDeviceOrientation !== 'undefined') typeMap['http://webinos.org/api/deviceorientation'] = WebinosDeviceOrientation;
             if (typeof Vehicle !== 'undefined') typeMap['http://webinos.org/api/vehicle'] = Vehicle;
             if (typeof EventsModule !== 'undefined') typeMap['http://webinos.org/api/events'] = EventsModule;
