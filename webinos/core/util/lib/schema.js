@@ -32,7 +32,7 @@
      * @function
      * @param msg Message to validate
      */
-    schema.checkSchema = function(msg) {
+    var checkSchema = function(msg) {
 
         // generic message validation
         var validation = checkGenericSchema(msg);
@@ -64,7 +64,7 @@
      * @function
      * @param msg Message to validate
      */
-    checkDeliveryNotificationSchema = function(message) {
+    var checkDeliveryNotificationSchema = function(message) {
         var schema, validation;
 
         schema = myEnv.Schema.create({
@@ -103,7 +103,7 @@
      * @function
      * @param msg Message to validate
      */
-    checkJSONRPC20RequestSchema = function(message) {
+    var checkJSONRPC20RequestSchema = function(message) {
         var schema, validation;
 
         schema = myEnv.Schema.create({
@@ -136,7 +136,7 @@
      * @function
      * @param msg Message to validate
      */
-    checkJSONRPC20ResponseSchema = function(message) {
+    var checkJSONRPC20ResponseSchema = function(message) {
         var schema, validation;
 
         schema = myEnv.Schema.create({
@@ -169,7 +169,7 @@
      * @function
      * @param msg Message to validate
      */
-    checkPropSchema = function(message) {
+    var checkPropSchema = function(message) {
         var schema, validation;
 
         schema = myEnv.Schema.create({
@@ -202,7 +202,7 @@
      * @function
      * @param msg Message to validate
      */
-    checkGenericSchema = function(message) {
+    var checkGenericSchema = function(message) {
         var schema, validation;
 
         // "deliveryNotification", "JSONRPC20Request", "JSONRPC20Response" and
