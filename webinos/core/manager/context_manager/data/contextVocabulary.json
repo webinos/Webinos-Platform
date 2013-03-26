@@ -690,7 +690,7 @@
             "objectName" : "MyPositions"
          }
       ],
-      "URI" : "http://www.w3.org/ns/api-perms/geolocation",
+      "URI" : "http://webinos.org/api/w3c/geolocation",
       "otherMethods" : [
          {
             "Errors" : [],

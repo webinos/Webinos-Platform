@@ -45,9 +45,9 @@ PzhWebTLSCommunicator.init = function (config, webOptions, handler, cb) {
     connection.on("data", function (_buffer) {
         util.webinosMsgProcessing.readJson(this, _buffer, function (obj) {
             var userid = obj.user.identifier || obj.user;
-            if (callbackStorage[userid, obj.payload.type]) {
-                callbackStorage[userid, obj.payload.type].success(obj.payload);
-                delete callbackStorage[userid, obj.payload.type];
+            if (userid in callbackStorage && callbackStorage[userid][obj.payload.type]) {
+                callbackStorage[userid][obj.payload.type].success(obj.payload);
+                delete callbackStorage[userid][obj.payload.type];
             }
         });
     });
@@ -75,7 +75,12 @@ PzhWebTLSCommunicator.send = function (user, message, callback) {
         connection.write(buf);
         connection.resume();
         var userid = user.identifier || user;
-        if (callback && userid && realMsg.message.type) callbackStorage[userid, realMsg.message.type] = callback;
+        if (callback && userid && realMsg.message.type) {
+          if (!(userid in callbackStorage)) {
+            callbackStorage[userid] = {};
+          }
+          callbackStorage[userid][realMsg.message.type] = callback;
+        }
     } catch (err) {
         logger.error("Failed to send a message to the PZH TLS Server: " + err);
         callback.err("Failed to send a message to the PZH TLS Server");

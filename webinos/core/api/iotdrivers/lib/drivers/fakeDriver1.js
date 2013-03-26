@@ -30,7 +30,7 @@
     elementsList[0] = {
         'type': 'temperature',
         'name': 'Fake temperature sensor',
-        'description': 'Fake sensor for emulation',
+        'description': 'Monitors kitchen temperature',
         'sa': 0,
         'interval': 1,
         'value': 10,
@@ -41,7 +41,7 @@
     elementsList[1] = {
         'type': 'light',
         'name': 'Fake light sensor',
-        'description': 'Fake sensor for emulation',
+        'description': 'Monitors kitchen light',
         'sa': 0,
         'interval': 3,
         'value': 55,
@@ -63,7 +63,7 @@
 
     elementsList[3] = {
         'type': 'temperature',
-        'name': 'Fake temperature sensor',
+        'name': 'Monitors bedroom temperature',
         'description': 'Fake sensor for emulation',
         'sa': 0,
         'interval': 2,
@@ -82,13 +82,15 @@
     };
 
 
-    exports.execute = function(cmd, eId, data) {
+    exports.execute = function(cmd, eId, data, errorCB, successCB) {
         //console.log('Fake driver 1 data - element is '+eId+', data is '+data);
         switch(cmd) {
             case 'cfg':
                 //In this case cfg data are transmitted to the sensor/actuator
                 //this data is in json(???) format
                 console.log('Received cfg for element '+eId+', cfg is '+data);
+
+                successCB(eId);
                 break;
             case 'start':
                 //In this case the sensor should start data acquisition
@@ -127,7 +129,6 @@
         console.log('\nFake driver 1 - register new elements');
         for(var i in elementsList) {
             var json_info = {type:elementsList[i].type, name:elementsList[i].name, description:elementsList[i].description, range:elementsList[i].range};
-            console.log("Register " + JSON.stringify(json_info));
             elementsList[i].id = registerFunc(driverId, elementsList[i].sa, json_info);
             //elementsList[i].id = registerFunc(driverId, elementsList[i].sa, elementsList[i].type);
         };

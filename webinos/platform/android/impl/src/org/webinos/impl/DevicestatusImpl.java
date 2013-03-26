@@ -36,6 +36,10 @@ import android.telephony.TelephonyManager;
 import android.net.wifi.WifiManager;
 import android.provider.Settings.System;
 import android.util.Log;
+import android.widget.Toast;
+import android.os.Handler;
+import android.os.Looper;
+
 
 public class DevicestatusImpl extends DevicestatusManager implements IModule {
 
@@ -107,7 +111,6 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 	@Override
 	public void clearPropertyChange(int watchHandler) throws DeviceAPIError {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	/*****************************
@@ -115,24 +118,26 @@ public class DevicestatusImpl extends DevicestatusManager implements IModule {
 	 *****************************/
 	@Override
 	public Object startModule(IModuleContext ctx) {
-		androidContext = ((AndroidContext)ctx).getAndroidContext();
 		
+    androidContext = ((AndroidContext)ctx).getAndroidContext();
 		if(D) Log.v(TAG, "DevicestatusImpl: startModule");
-		/*
-		 * perform any module initialisation here ...
-		 */
 		
-		androidContext = ((AndroidContext)ctx).getAndroidContext();
-		
-		// Setup WiFi
-		mWiFiManager = (WifiManager) androidContext.getSystemService(Context.WIFI_SERVICE);
-		if(!mWiFiManager.isWifiEnabled()){
-			Log.v(TAG, "DevicestatusImpl: Enable WiFi");
-			mWiFiManager.setWifiEnabled(true);  
-		}
-		
-		return this;
-	}
+    // Setup WiFi
+    mWiFiManager = (WifiManager) androidContext.getSystemService(Context.WIFI_SERVICE);
+    if(!mWiFiManager.isWifiEnabled()){
+      Handler handler = new Handler(Looper.getMainLooper());
+      handler.post(new Runnable() {
+        @Override
+        public void run() {
+          Toast.makeText(
+            androidContext,
+            "Turn on WiFi in orser to get WiFi status",
+            Toast.LENGTH_LONG).show();
+        }
+      });
+    } 
+    return this;
+  }
 
 	@Override
 	public void stopModule() {

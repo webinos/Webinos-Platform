@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.webinos.app.R;
+import org.webinos.app.pzp.PzpService;
 import org.webinos.util.AssetUtils;
 import org.webinos.util.ModuleUtils;
 import org.webinos.util.ModuleUtils.ModuleType;
@@ -210,6 +211,7 @@ public class PlatformInit extends Service {
 	public void onCreate() {
 		super.onCreate();
 		Config.init(this);
+		startService(new Intent(this, PzpService.class));
 	}
 	
 	/*******************

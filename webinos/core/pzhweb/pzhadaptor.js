@@ -73,6 +73,10 @@ PzhAdaptor.storeExternalUserCert = function (user, externalEmail, externalPzh, e
         externalCerts:externalCerts}, responseHandler(res));
 };
 
+PzhAdaptor.requestAddLocalFriend = function(user, externalEmail, res) {
+    pzhTLS.send(user, {type:"requestAddLocalFriend", externalEmail:externalEmail}, responseHandler(res));
+};
+
 //unauthenticated input
 PzhAdaptor.requestAddFriend = function (internaluser, externaluser, externalPzhDetails, res) {
     getUserFromEmail(internaluser, function (user, err) {
@@ -154,9 +158,6 @@ function manageStatus(payload, user, res) {
         case 'unregisterService':
             pzhTLS.send(user, {type:"unregisterService", at:payload.at, svId:payload.svId, svAPI:payload.svAPI }, responseHandler(res));
             break;
-        case 'authCode':
-            pzhTLS.send(user, {type:"authCode"}, responseHandler(res));
-            break;
         case 'getAllPzh':
             pzhTLS.send(user, {type:"getAllPzh"}, responseHandler(res));
             break;
@@ -168,6 +169,9 @@ function manageStatus(payload, user, res) {
             break;
         case 'enrollPzpAuthCode':
             pzhTLS.send(user, {type:"authCode"}, pzpResponder(payload.user, payload.port, payload.address, payload.pzpPort, res));
+            break;
+        case 'removePzh':
+            pzhTLS.send(user, {type:"removePzh", id: payload.id}, responseHandler(res));
             break;
         default:
             responseHandler(res).err({"error":"not valid message type"});

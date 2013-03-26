@@ -3,7 +3,7 @@
       package="org.webinos.app"
       android:versionCode="1"
       android:versionName="1.0" android:installLocation="auto">
-<uses-sdk android:minSdkVersion="9" android:targetSdkVersion="10" />
+<uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10" />
 <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
@@ -21,13 +21,13 @@
 <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
 <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"></uses-permission>
 <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+<uses-permission android:name="android.permission.NFC"/>
 <uses-feature android:name="android.hardware.wifi" />
     <application android:label="@string/app_name" android:icon="@drawable/webinos_icon">
         <activity android:name="org.webinos.app.anode.AnodeActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="org.webinos.app.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name="org.webinos.app.pzp.ConfigActivity"
@@ -38,7 +38,6 @@
                   android:allowTaskReparenting="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name="org.webinos.impl.PromptActivity"
@@ -71,6 +70,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="org.webinos.impl.nfc.WebinosNfcActivity"
+            android:label="WebinosNfcActivity"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true" >
         </activity>
         <receiver android:enabled="true" android:label="@string/anode_receiver" android:exported="true" android:description="@string/anode_receiver_description" android:name=".anode.AnodeReceiver">
             <intent-filter>

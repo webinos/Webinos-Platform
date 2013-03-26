@@ -7,7 +7,7 @@
 		</target>
 		<rule effect="permit">
 			<condition combine="or">
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.climate"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.navigation"/>
@@ -61,7 +61,7 @@
 		<rule effect="prompt-blanket">
 			<condition combine="or">
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
@@ -96,7 +96,7 @@
 				<resource-match attr="api-feature" match="http://webinos.org/api/nfc"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
@@ -134,7 +134,7 @@
 				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
 				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/nfc.read"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
@@ -166,7 +166,7 @@
 			<condition combine="or">
 				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/calendar.read"/>
 				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/contacts.read"/>
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.find"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.subscribe"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.attach"/>
@@ -210,7 +210,7 @@
 		</rule>
 		<rule effect="deny">
 			<condition combine="or">
-				<resource-match attr="api-feature" match="http://www.w3.org/ns/api-perms/geolocation"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/vehicle.tripcomputer"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
 				<resource-match attr="api-feature" match="http://webinos.org/api/messaging"/>

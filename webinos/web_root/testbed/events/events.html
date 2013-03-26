@@ -1,8 +1,8 @@
 <html>
 <head>
 	<title>webinos events</title>
-	<script type="text/javascript" src="./webinos.js"></script>
-  <script src="./jquery-1.8.2.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="/webinos.js"></script>
+  <script src="/testbed/jquery-1.8.2.min.js" type="text/javascript"></script>
 	<script type="text/javascript">
 
 	function logObj(obj, name){
@@ -52,7 +52,7 @@
                         $('#message').append('<li>Searching for services</li>');
                         webinos.discovery.findServices(new ServiceType('http://webinos.org/api/events'), 
                         {onFound: function (service) {
-							 $("<option value=" + service.serviceAddress + " >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
+							 $("<option value='" + service.serviceAddress + "' >" +service.serviceAddress + "</option>").appendTo("#pzh_pzp_list");
 							eventAPIS[service.serviceAddress] = service;
 							
                 	    	$('#messages').append('<li> EventAPI found: ' + service.api + ' @ ' + service.serviceAddress + '</li>');
@@ -67,7 +67,7 @@
                     
                     $('#bind').bind('click', function() {
                     	
-                    	eventAPIToUse = eventAPIS[$('#pzh_pzp_list option:selected').val()];
+                    	eventAPIToUse = eventAPIS[$('#pzh_pzp_list option:selected').text()];
                     	
                         eventAPIToUse.bind({onBind:function(){
                         	$('#messages').append('<li> Events API ' + eventAPIToUse.api + ' bound.</li>');

@@ -40,6 +40,7 @@ var path = require("path");
 
 var port;
 
+var handlers = {};
 
 
 (function () {
@@ -90,7 +91,7 @@ var port;
     * @param data Data of the command
     *
     */
-    exports.execute = function(cmd, eId, data) {
+    exports.execute = function(cmd, eId, data, errorCB, successCB) {
         var native_element_id = elementsList[eId].id.split("_")[1];  //eg nativeid = "000001_001"
         var board_id = elementsList[eId].id.split("_")[0];
         switch(cmd) {
@@ -98,10 +99,15 @@ var port;
                 //In this case cfg data are transmitted to the sensor/actuator
                 //this data is in json(???) format
                 console.log('Received cfg for element '+eId+', cfg is '+JSON.stringify(data));
+                
+                handlers[elementsList[eId].id] = {"succCB" : successCB, "errCB" : errorCB, "eId" : eId};
+                
                 var eventmode = (data.eventFireMode === "valuechange") ? VALUECHANGE_MODE:FIXEDINTERVAL_MODE;
                 var param_data = data.timeout+":"+data.rate+":"+eventmode;
                 console.log("send : "+param_data);
                 makeHTTPRequest(boards[board_id].ip, boards[board_id].port, CONFIGURE_CMD, native_element_id, param_data);
+
+                //successCB(eId);
                 break;
             case 'start':                                 
                 //In this case the sensor should start data acquisition
@@ -157,6 +163,8 @@ var port;
         console.log("New board : "+req.param('jsondata'));
         var jsondata = req.param('jsondata').replace(/'/g, "\"");		
         var boardinfo = JSON.parse(jsondata);
+        
+        console.log("\nNew board was connected to local PZP");
         console.log("BOARD ID : " + boardinfo.id);
 //      console.log("BOARD LANGUAGE : " + boardinfo.language);
         console.log("BOARD PROTOCOL : " + boardinfo.protocol);
@@ -211,8 +219,8 @@ var port;
         var req = http.request(options, function(res) {
             var str = '';
             res.setEncoding('utf8');
-            console.log('STATUS: ' + res.statusCode);
-            console.log('HEADERS: ' + JSON.stringify(res.headers));
+            //console.log('STATUS: ' + res.statusCode);
+            //console.log('HEADERS: ' + JSON.stringify(res.headers));
             
             res.on('data', function (chunk) {
                 str += chunk;
@@ -221,12 +229,12 @@ var port;
             res.on('end', function () {
                 try{
                     var data = JSON.parse(str);
-                    console.log("data.cmd : " + data.cmd);
+                    //console.log("data.cmd : " + data.cmd);
                     if(data.cmd === GET_ELEMENTS_CMD){
-                        console.log("Received response for cmd=ele");                
+                        //console.log("Received response for cmd=ele");                
                         boards[data.id].elements = data.elements;
                         for(var i=0; i<data.elements.length ;i++){   
-                            console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
+                            //console.log("Board ["+data.id+"] - Adding element : " + JSON.stringify(data.elements[i]));                           
                             var tmp_ele = data.elements[i];
                             if(!isAlreadyRegistered(tmp_ele.id)){
                                 var str_type = (tmp_ele.element.sa == 0) ? "sensor" : "actuator";
@@ -238,14 +246,16 @@ var port;
                                 }catch(e){}
                                 var id = registerFunc(driverId, tmp_ele.element.sa, tmp_ele.element);
                                 elementsList[id] = tmp_ele;
-                                console.log("Adding element with id " + id);
+                                //console.log("Adding element with id " + id);
                             }
                             else
                                 console.log("Element is already registered");
                         }
                     }
                     else if(data.cmd === CONFIGURE_CMD){
-                        console.log("Configuring element " + data.id);                            
+                        console.log("Configuring element " + data.id);
+                        
+                        handlers[data.id].succCB(handlers[data.id].eId);                      
                     }
                     else if(data.cmd === START_LISTENING_CMD){
                         console.log("Starting element " + data.id);

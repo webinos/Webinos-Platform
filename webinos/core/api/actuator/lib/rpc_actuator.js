@@ -62,16 +62,15 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 
         function driverListener(cmd, id, data) {
-            console.log('Actuator driver listener');
             if (impl == 'iot') {
                 switch(cmd) {
                     case 'register':
                         //If cmd is register, then data is the type of sensor (temperature, light, ...)
-                        console.log('actuator api listener: register actuator of type '+data);
+//                        console.log('actuator api listener: register actuator of type '+data);
                         var service = new actlib.ActuatorService(rpcHandler, data, id, driverInterface);
-                        console.log('actuator api listener: register - 03');
+//                        console.log('actuator api listener: register - 03');
                         regFunc(service);
-                        console.log('actuator api listener: register - 04');
+//                        console.log('actuator api listener: register - 04');
                         serviceList[id] = service;
                         break;
                     case 'data':

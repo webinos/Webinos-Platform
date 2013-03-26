@@ -20,22 +20,16 @@ describe("Vehicle API", function() {
 	var vehicleService;
 	var boundVehicleService;
 	
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/vehicle"), {
+		onFound: function (service) {
+			vehicleService = service;
+			vehicleService.bindService({onBind: function(service) {
+				boundVehicleService = service;
+			}});
+		}
+	});
+
 	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/vehicle"), {
-			onFound: function (service) {
-				vehicleService = service;
-				vehicleService.bindService({onBind: function(service) {
-					boundVehicleService = service;
-				}});
-			}
-		});
-
 		waitsFor(function() {
 			return !!vehicleService;
 		}, "The discovery didn't find a Vehicle service", 5000);
@@ -43,8 +37,6 @@ describe("Vehicle API", function() {
 		waitsFor(function() {
 			return !!boundVehicleService;
 		}, "The found Vehicle service couldn't be bound", 5000);
-
-		
 	});
 
 	it("should be available from the discovery", function() {
@@ -52,18 +44,12 @@ describe("Vehicle API", function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(vehicleService).toHaveProp("state");
-		expect(vehicleService).toHaveProp("api");
+		expect(vehicleService.state).toBeDefined();
 		expect(vehicleService.api).toEqual(jasmine.any(String));
-		expect(vehicleService).toHaveProp("id");
 		expect(vehicleService.id).toEqual(jasmine.any(String));
-		expect(vehicleService).toHaveProp("displayName");
 		expect(vehicleService.displayName).toEqual(jasmine.any(String));
-		expect(vehicleService).toHaveProp("description");
 		expect(vehicleService.description).toEqual(jasmine.any(String));
-		expect(vehicleService).toHaveProp("icon");
 		expect(vehicleService.icon).toEqual(jasmine.any(String));
-		expect(vehicleService).toHaveProp("bindService");
 		expect(vehicleService.bindService).toEqual(jasmine.any(Function));
 	});
 
@@ -85,11 +71,8 @@ describe("Vehicle API", function() {
 	});
 
 	it("has the necessary properties and functions as Vehicle API service", function() {
-		expect(boundVehicleService).toHaveProp("addEventListener");
 		expect(boundVehicleService.addEventListener).toEqual(jasmine.any(Function));
-		expect(boundVehicleService).toHaveProp("removeEventListener");
 		expect(boundVehicleService.removeEventListener).toEqual(jasmine.any(Function));
-		expect(boundVehicleService).toHaveProp("get");
 		expect(boundVehicleService.get).toEqual(jasmine.any(Function));
 		
 		//currently not implemented functions

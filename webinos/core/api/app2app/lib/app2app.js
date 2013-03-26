@@ -18,8 +18,32 @@
 
 (function() {
   var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
+
+  var App2AppModule = function(rpcHandler, params) {
+    this.rpcHandler = rpcHandler;
+    this.params = params;
+  };
   
-  var App2AppModule = function(rpcHandler) {
+  App2AppModule.prototype.init = function (register, unregister) {
+    var service = new App2AppService(this.rpcHandler, this.params);
+    if (isPzh(this.params)) {
+      // always register service for pzh
+      register(service);
+    } else {
+      this.rpcHandler.parent.addStateListener({
+        setHubConnected: function(isConnected) {
+          if (isConnected) {
+            unregister(service);
+          } else {
+            // only register service for pzp when pzh is not connected
+            register(service);
+          }
+        }
+      });
+    }
+  };
+
+  var App2AppService = function(rpcHandler, params) {
     this.base = RPCWebinosService;
     this.base({
       api: 'http://webinos.org/api/app2app',
@@ -27,12 +51,10 @@
       description: 'The App2App Messaging API for using channel-based communication between applications.'
     });
 
-    this.defaultString = "App2App Messaging API";
-
     this.rpcHandler = rpcHandler;
   };
 
-  App2AppModule.prototype = new RPCWebinosService();
+  App2AppService.prototype = new RPCWebinosService();
 
   var CHANNEL_NAMESPACE_REGEXP = /^(urn:[a-z0-9][a-z0-9\-]{0,31}:)([a-z0-9()+,\-.:=@;$_!*'%/?#]+)$/i;
   var CHANNEL_NAMESPACE_WILDCARD = "*";
@@ -48,7 +70,7 @@
    * a web runtime, which (de)multiplexes callback invocations (e.g., channel requests, messages, search results)
    * to channel clients.
    */
-  App2AppModule.prototype.registerPeer = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.registerPeer = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
     if (peerId === 'undefined' || registeredPeers.hasOwnProperty(peerId)) {
       errorCallback(respondWith("Could not register peer: missing id or already registered."));
@@ -59,7 +81,7 @@
     }
   };
 
-  App2AppModule.prototype.unregisterPeer = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.unregisterPeer = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
     if (typeof peerId === 'undefined') {
       errorCallback(respondWith("Could not unregister peer: missing id."));
@@ -69,14 +91,25 @@
 
         Object.keys(registeredChannels).forEach(function(namespace) {
           var channel = registeredChannels[namespace];
-          if (channel.creator.peerId === peerId) {
-            // remove all channels where the creator runs on the peer to unregister
+
+          channel.clients = channel.clients.filter(function(client) {
+            return client.peerId !== peerId;
+          });
+
+          if (channel.clients.length === 0) {
+            console.log("All channel clients on the same unregistered peer; remove channel");
             delete registeredChannels[channel.namespace];
           } else {
-            // for all other channels, remove all clients which run on the peer to unregister
-            channel.clients = channel.clients.filter(function(client) {
-              return client.peerId !== peerId;
-            });
+            if (channel.creator.peerId === peerId) {
+              // the channel creator is on the peer that is being unregistered
+              if (channel.creator.canDetach) {
+                console.log("Channel creator is on unregistered peer but can detach; keep channel");
+                detachCreator(channel.creator);
+              } else {
+                console.log("Channel creator is on unregistered peer and can not detach; remove channel");
+                delete registeredChannels[channel.namespace];
+              }
+            }
           }
         });
 
@@ -86,11 +119,14 @@
     }
   };
 
-  App2AppModule.prototype.createChannel = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.createChannel = function(params, successCallback, errorCallback, fromObjRef) {
     var peerId = params.peerId;
+    var sessionId = params.sessionId;
     var namespace = params.namespace;
     var properties = params.properties;
     var appInfo = params.appInfo;
+    var hasRequestCallback = params.hasRequestCallback;
+    var reclaimIfExists = (properties.reclaimIfExists === true);
 
     // first check if the peer is known to us
     if ( ! registeredPeers.hasOwnProperty(peerId)) {
@@ -98,16 +134,34 @@
       return;
     }
 
+    var client = {};
+    client.peerId = peerId;
+    client.sessionId = sessionId;
+    client.hasRequestCallback = hasRequestCallback;
+    client.canDetach = (properties.canDetach === true);
+    client.proxyId = generateIdentifier();
+
     if (registeredChannels.hasOwnProperty(namespace)) {
-      errorCallback(respondWith("Channel already exists."));
-      return;
+      // channel already exists; check if request is from the same session; if yes assume reconnect
+      var existingChannel = registeredChannels[namespace];
+      if (sessionId === existingChannel.creator.sessionId && reclaimIfExists) {
+        console.log("Reconnecting channel creator to channel with namespace " + namespace);
+
+        // refresh client bindings, but keep existing configuration
+        existingChannel.clients = existingChannel.clients.filter(notEqualsClient(existingChannel.creator));
+        existingChannel.creator = client;
+        existingChannel.clients.push(client);
+
+        successCallback(existingChannel);
+        return;
+
+      } else {
+        errorCallback(respondWith("Channel already exists."));
+        return;
+      }
     }
 
     console.log("Create channel with namespace " + namespace);
-
-    var client = {};
-    client.peerId = peerId;
-    client.proxyId = generateIdentifier();
 
     var channel = {
       creator: client,
@@ -121,7 +175,7 @@
     successCallback(channel);
   };
 
-  App2AppModule.prototype.searchForChannels = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.searchForChannels = function(params, successCallback, errorCallback) {
     var peerId = params.peerId;
     var namespace = params.namespace;
     var zoneIds = params.zoneIds;
@@ -172,7 +226,7 @@
 
   };
 
-  App2AppModule.prototype.connectToChannel = function(params, successCallback, errorCallback, fromObjRef) {
+  App2AppService.prototype.connectToChannel = function(params, successCallback, errorCallback, fromObjRef) {
     var connectRequest = {};
     connectRequest.from = params.from;
     connectRequest.namespace = params.namespace;
@@ -196,22 +250,28 @@
       return;
     }
 
-    // send connect request to channel creator
-    var peerRef = registeredPeers[channel.creator.peerId];
+    // send connect request to channel creator, if callback is provided
+    if (channel.creator.hasRequestCallback) {
+      var peerRef = registeredPeers[channel.creator.peerId];
 
-    var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
-    this.rpcHandler.executeRPC(rpc,
-      function(success) {
-        registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
-        successCallback(connectRequest.from);
-      },
-      function(error) {
-        errorCallback(error);
-      }
-    );
+      var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
+      this.rpcHandler.executeRPC(rpc,
+        function(success) {
+          registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
+          successCallback(connectRequest.from);
+        },
+        function(error) {
+          errorCallback(error);
+        }
+      );
+    } else {
+      // no request callback provided; allow access by default
+      registeredChannels[connectRequest.namespace].clients.push(connectRequest.from);
+      successCallback(connectRequest.from);
+    }
   };
 
-  App2AppModule.prototype.sendToChannel = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.sendToChannel = function(params, successCallback, errorCallback) {
     var from = params.from;
     var to = params.to;
     var namespace = params.namespace;
@@ -246,7 +306,7 @@
     // check if we should broadcast or unicast
     var toClients = (typeof to === "undefined" ? channel.clients : [to]);
 
-    console.log("Sending on channel " + namespace + " which has " + channel.clients.length + " connected clients (including the channel creator)");
+    console.log("Sending on channel " + namespace + " which has " + channel.clients.length + " connected clients (including the channel creator, if connected)");
 
     // all ok; send to connected clients
     toClients.forEach(function(toClient) {
@@ -275,21 +335,25 @@
 
   };
 
-  App2AppModule.prototype.disconnectFromChannel = function(params, successCallback, errorCallback) {
+  App2AppService.prototype.disconnectFromChannel = function(params, successCallback, errorCallback) {
     var from = params.from;
     var namespace = params.namespace;
 
     if (registeredChannels.hasOwnProperty(namespace)) {
       var channel = registeredChannels[namespace];
 
-      if (equalsClient(from)(channel.creator)) {
-        // if creator disconnects, remove channel
-        delete registeredChannels[namespace];
-      } else {
-        // otherwise just remove client from channel list
-        channel.clients = channel.clients.filter(notEqualsClient(from));
-      }
+      channel.clients = channel.clients.filter(notEqualsClient(from));
 
+      if (channel.clients.length === 0) {
+        delete registeredChannels[namespace];
+      } else if (equalsClient(from)(channel.creator)) {
+        if (channel.creator.canDetach) {
+          detachCreator(channel.creator);
+        } else {
+          // if creator disconnects, remove channel
+          delete registeredChannels[namespace];
+        }
+      }
       successCallback();
     } else {
       errorCallback(respondWith("Channel with namespace " + namespace + " not found."));
@@ -297,6 +361,18 @@
   };
 
   /* Helpers */
+
+  function detachCreator(creator) {
+    creator.peerId = "";
+    creator.hasRequestCallback = false;
+    creator.canDetach = true;
+    creator.proxyId = "";
+    // we keep the sessionId to allow reconnects
+  }
+
+  function isPzh(serviceParams) {
+    return (typeof serviceParams !== "undefined" && serviceParams.scope === "pzh");
+  }
 
   function equalsClient(client1) {
     return function(client2) {
@@ -336,5 +412,5 @@
     return s4() + s4() + s4();
   }
 
-  exports.Service=App2AppModule;
+  exports.Module=App2AppModule;
 })();

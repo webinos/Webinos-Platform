@@ -15,9 +15,9 @@
      <param name="csp-img-src" value="http://maps.googleapis.com"/>
      <param name="csp-script-src" value="http://maps.googleapis.com"/>
    </feature>
-   <feature name="http://webinos.org/api/webnotification" required="false" />
+   <feature name="http://webinos.org/api/notifications" required="false" />
    <feature name="http://webinos.org/api/file" required="true" />
-   <feature name="http://www.w3.org/ns/api-perms/geolocation" 
+   <feature name="http://webinos.org/api/w3c/geolocation" 
      required="true" />
 
    <!-- privacy policies -->
@@ -42,7 +42,7 @@
      </ProvisionalAction>
 
      <ProvisionalAction>
-       <AttributeValue>http://webinos.org/api/webnotification</AttributeValue>
+       <AttributeValue>http://webinos.org/api/notifications</AttributeValue>
        <AttributeValue>#current</AttributeValue>
        <DeveloperProvidedDescription language="EN">
          Notifications are used to alert you when a reminder is valid - 

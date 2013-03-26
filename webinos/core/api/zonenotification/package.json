@@ -1,0 +1,25 @@
+{
+  "name": "zonenotification",
+  "publishConfig": {
+    "tag": "alpha" 
+  },
+  "description": "The webinos intra-zone notifications API",
+  "keywords": [ "webinos", "zone", "notification", "API"],
+  "version": "0.0.1",
+  "homepage": "http://webinos.org/",
+  "author": "John Lyle <john.lyle@cs.ox.ac.uk>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jplyle/Webinos-Platform.git"
+  },
+  "bugs": {
+    "email": "webinos-wp4-ml@fokus.fraunhofer.de",
+    "url": "http://jira.webinos.org/browse/WP-218"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib/zonenotification.js",
+  "dependencies": {},
+  "bundleDependencies": []
+}

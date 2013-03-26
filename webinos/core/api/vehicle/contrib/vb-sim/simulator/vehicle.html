@@ -18,846 +18,317 @@
 ******************************************************************************/
 -->
 <html>
-<head>
-	<title>webinos | vehicle simulator</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<link rel="icon" href="webinos.ico" type="image/x-icon">
-	<link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-	<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />	
-	<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
-	<script type="text/javascript" src="/nowjs/now.js"></script>
-	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-	<script type="text/javascript">
-		now.ready(function(){ 
-			$('#inputGear').removeAttr('disabled');
-		});
+  <head>
+    <title>webinos | vehicle simulator</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="icon" href="webinos.ico" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
+    <link type="text/css" href="css/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />	
+    <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.8.17.custom.min.js"></script>
+    <script type="text/javascript" src="/nowjs/now.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="simulator.js"></script>
+  </head>
 	
-		$(document).ready(function() {
-		
-			 //$(':checkbox').iphoneStyle();
-			$( "#slider-pf-or" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-or" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-or" ).val(( "#slider-pf-or" ).slider( "value" ));
-			
-			
-			$( "#slider-pf-r" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-r" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-r" ).val(( "#slider-pf-r" ).slider( "value" ) );
-			
-			$( "#slider-pf-mr" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-mr" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-mr" ).val(( "#slider-pf-mr" ).slider( "value" ) );
-			 
-			 
-			 $( "#slider-pf-ml" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-ml" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-ml" ).val(( "#slider-pf-ml" ).slider( "value" ) );
-			 
-			 
-			$( "#slider-pf-l" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-l" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-l" ).val(( "#slider-pf-l" ).slider( "value" ) );
-			
-			
-			$( "#slider-pf-ol" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pf-ol" ).val(ui.value);
-				},
-			stop:function(event, ui){
-				setPsFront();
-			}
-			});
-			//$( "#pf-ol" ).val(( "#slider-pf-ol" ).slider( "value" ) );
-			 
-			$( "#slider-pr-or" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-or" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			//$( "#pr-or" ).val(( "#slider-pr-or" ).slider( "value" ));
-			
-			
-			$( "#slider-pr-r" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-r" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			//$( "#pr-r" ).val(( "#slider-pr-r" ).slider( "value" ) );
-			
-			$( "#slider-pr-mr" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-mr" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			//$( "#pr-mr" ).val(( "#slider-pr-mr" ).slider( "value" ) );
-			 
-			 
-			 $( "#slider-pr-ml" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-ml" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			//$( "#pr-ml" ).val(( "#slider-pr-ml" ).slider( "value" ) );
-			 
-			 
-			$( "#slider-pr-l" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-l" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			//$( "#pr-l" ).val(( "#slider-pr-l" ).slider( "value" ) );
-			
-			
-			$( "#slider-pr-ol" ).slider({
-			range: "min",
-			value: 255,
-			min: 10,
-			max: 255,
-			slide: function( event, ui ) {
-				$( "#pr-ol" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setPsRear();
-			}
-			});
-			
-			
-			$( "#slider-da-x" ).slider({
-			range: "min",
-			value: 0,
-			min: 0,
-			max: 100,
-			step: 0.1,
-			slide: function( event, ui ) {
-				$( "#da-x" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setDeviceMotion();
-			}
-			});
-			$( "#slider-da-y" ).slider({
-			range: "min",
-			value: 0,
-			min: 0,
-			max: 100,
-			step: 0.1,
-			slide: function( event, ui ) {
-				$( "#da-y" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setDeviceMotion();
-			}
-			});
-			
-			$( "#slider-da-z" ).slider({
-			range: "min",
-			value: 0,
-			min: 0,
-			max: 100,
-			step: 0.1,
-			slide: function( event, ui ) {
-				$( "#da-z" ).val(ui.value);
-			},
-			stop:function(event, ui){
-				setDeviceMotion();
-			}
-			});
-			
-			
-			//$( "#pr-ol" ).val(( "#slider-pr-ol" ).slider( "value" ) );
-			
-			if(navigator.geolocation){
-				$('#myLocation').removeAttr('disabled');
-			}
-			$('#inputGear').change(function(){
-				now.setGear($('#inputGear').val());	
-			});
-			
-			$('#pr-or').change(function(){
-				setPsRear();
-			});
-			$('#pr-r').change(function(){
-				setPsRear();
-			});
-			$('#pr-mr').change(function(){
-				setPsRear();
-			});
-			$('#pr-ml').change(function(){
-				setPsRear();
-			});
-			$('#pr-l').change(function(){
-				setPsRear();
-			});
-			$('#pr-ol').change(function(){
-				setPsRear();
-			});
+  <body>
+    <div id="content" class='content cf'>
+      <div id="header">
+        	<h1><img src="simulator_logo.png"></h1>
 
-			$('#pf-or').change(function(){
-				setPsFront();
-			});
-			$('#pf-r').change(function(){
-				setPsFront();
-			});
-			$('#pf-mr').change(function(){
-				setPsFront();
-			});
-			$('#pf-ml').change(function(){
-				setPsFront();
-			});
-			$('#pf-l').change(function(){
-				setPsFront();
-			});
-			$('#pf-ol').change(function(){
-				setPsFront();
-			});
-			
-			$('input[id*="tc-"]').change(function(){
-				setTripComputer();
-			});
+      </div>
+      <div id="functions">
+        	<h3>Gear</h3>
 
+        <p>
+          <label class='select'>Gear:</label>
+          <select id="inputGear">
+            <option value=''></option>
+            <option value='0'>R</option>
+            <option value='10'>P</option>
+            <option value='11' selected>N</option>
+            <option value='1'>1</option>
+            <option value='2'>2</option>
+            <option value='3'>3</option>
+            <option value='4'>4</option>
+            <option value='5'>5</option>
+            <option value='6'>6</option>
+          </select>
+        </p>
+        	<h3>Tripcomputer</h3>
 
+        <p>
+          <label>Avg. Speed 1:</label>
+          <input type='text' value='48.5' id='tc-s1'>
+        </p>
+        <p>
+          <label>Avg. Speed 2:</label>
+          <input type='text' value='46.5' id='tc-s2'>
+        </p>
+        <p>
+          <label>Avg. Consumption 1:</label>
+          <input type='text' value='5.7' id='tc-c1'>
+        </p>
+        <p>
+          <label>Avg. Consumption 2:</label>
+          <input type='text' value='6.1' id='tc-c2'>
+        </p>
+        <p>
+          <label>Mileage:</label>
+          <input type='text' value='11298' id='tc-m'>
+        </p>
+        <p>
+          <label>Range:</label>
+          <input type='text' value='456' id='tc-r'>
+        </p>
+        <p>
+          <label>Distance:</label>
+          <input class='input' type='text' value='33.3' id='tc-d'>
+        </p>
+        <input type='button' id='setTripComputer' value="Set Tripcomputer" />
+        	<h3>Parksensors Front</h3>
 
-			
-			$('#setTripComputer').click(function(){
-				setTripComputer();
-			});
+        <p>
+          <label for="pf-ol">OutLeft:</label>
+          <input type="text" id="pf-ol" value="255" />
+          <div id="slider-pf-ol"></div>
+        </p>
+        <p>
+          <label for="pf-l">Left:</label>
+          <input type="text" id="pf-l" value="255" />
+          <div id="slider-pf-l"></div>
+        </p>
+        <p>
+          <label for="pf-ml">MidLeft:</label>
+          <input type="text" id="pf-ml" value="255" />
+          <div id="slider-pf-ml"></div>
+        </p>
+        <p>
+          <label for="pf-mr">MidRight:</label>
+          <input type="text" id="pf-mr" value="255" />
+          <div id="slider-pf-mr"></div>
+        </p>
+        <p>
+          <label for="pf-r">Right:</label>
+          <input type="text" id="pf-r" value="255" />
+          <div id="slider-pf-r"></div>
+        </p>
+        <p>
+          <label for="pf-or">OutRight:</label>
+          <input type="text" id="pf-or" value="255" />
+          <div id="slider-pf-or"></div>
+        </p>
+        <input type='button' id='setPsFront' value="Set Parksensors Front" />
+        	<h3>Parksensors Rear</h3>
 
-			$('#setPsFront').click(function(){
-				setPsFront();
+        <p>
+          <label for="pr-ol">OutLeft:</label>
+          <input type="text" id="pr-ol" value="255" />
+          <div id="slider-pr-ol"></div>
+        </p>
+        <p>
+          <label for="pr-l">Left:</label>
+          <input type="text" id="pr-l" value="255" />
+          <div id="slider-pr-l"></div>
+        </p>
+        <p>
+          <label for="pr-ml">MidLeft:</label>
+          <input type="text" id="pr-ml" value="255" />
+          <div id="slider-pr-ml"></div>
+        </p>
+        <p>
+          <label for="pr-mr">MidRight:</label>
+          <input type="text" id="pr-mr" value="255" />
+          <div id="slider-pr-mr"></div>
+        </p>
+        <p>
+          <label for="pr-r">Right:</label>
+          <input type="text" id="pr-r" value="255" />
+          <div id="slider-pr-r"></div>
+        </p>
+        <p>
+          <label for="pr-or">OutRight:</label>
+          <input type="text" id="pr-or" value="255" />
+          <div id="slider-pr-or"></div>
+        </p>
+        <input type='button' id='setPsRear' value="Set Parksensors Rear" />
+        	<h3>Device Motion </h3>
 
-			});
+        <p>
+          <label>x-Motion (lateral):</label>
+          <input type='text' value='0' id='da-x'>
+        </p>
+        <div id="slider-da-x"></div>
+        <p>
+          <label>y-Motion (lng):</label>
+          <input type='text' value='0' id='da-y'>
+          <div id="slider-da-y"></div>
+        </p>
+        <p>
+          <label>z-Motion</label>
+          <input type='text' value='0' id='da-z'>
+          <div id="slider-da-z"></div>
+        </p>
+        <p>
+          <label>Rotation alpha</label>
+          <input type='text' value='0' id='da-ra'>
+        </p>
+        <div id="slider-da-ra"></div>
+        <p>
+          <label>Rotation beta</label>
+          <input type='text' value='0' id='da-rb'>
+          <div id="slider-da-rb"></div>
+        </p>
+        <p>
+          <label>Rotation gamma</label>
+          <input type='text' value='0' id='da-rg'>
+          <div id="slider-da-rg"></div>
+        </p>
+        <p>
+          <label>Interval (ms)</label>
+          <input type='text' value='500' id='da-i'>
+        </p>
+        <input type='button' id='setDeviceMotion' value="Fire DeviceMotion" />
+        	<h3>Device Orientation Event</h3>
 
-			$('#setPsRear').click(function(){
-				setPsRear();
-			});
-			
-			$('#setDeviceMotion').click(function(){
-				setDeviceMotion();
-			});
-			
-			$('#l-fog-front').bind('click',function(){
-					now.setLightsFogFront($('#l-fog-front').is(':checked'));
-			});
-			
-			$('#l-fog-rear').bind('click',function(){
-					now.setLightsFogRear($('#l-fog-rear').is(':checked'));
-			});
-			
-			$('#l-hibeam').bind('click',function(){
-					now.setLightsHibeam($('#l-hibeam').is(':checked'));
-			});
-
-			$('#l-parking').bind('click',function(){
-					now.setLightsParking($('#l-parking').is(':checked'));
-			});
-
-			$('#l-head').bind('click',function(){
-					now.setLightsHead($('#l-head').is(':checked'));
-			});
-
-			$('#l-signal-left').bind('click',function(){
-					now.setLightsSignalLeft($('#l-signal-left').is(':checked'));
-			});
-
-			$('#l-signal-right').bind('click',function(){
-					now.setLightsSignalRight($('#l-signal-right').is(':checked'));
-			});
-
-			$('#l-signal-warn').bind('click',function(){
-					now.setLightsSignalWarn($('#l-signal-warn').is(':checked'));
-			});
-						
-			$('#locateOnMap').click(function(){
-				var address = $('#d-street').val() + " " + $('d-streetnumber').val() + ", " + $('#d-city').val() + ", " + $('#d-country').val();
-				geocoder.geocode( { 'address': address}, handleGeocoder);
-			});
-			
-			$('#setDestinationReached').click(function(){
-				now.setDestinationReached(getAdressData());
-			});
-			$('#setDestinationCancelled').click(function(){
-				now.setDestinationCancelled(getAdressData());
-			});
-			$('#setDestinationChanged').click(function(){
-				now.setDestinationChanged(getAdressData());
-			});
-			
-			$('#setLocation').click(function(){
-				setGeolocation();	
-			});
-			
-			$('#c-alt').bind('change', function(){
-				setGeolocation();
-			});
-			$('#c-speed').bind('change', function(){
-				setGeolocation();
-			});
-			$('#c-heading').bind('change', function(){
-				setGeolocation();
-			});
-			
-			
-			function getAdressData(){
-				var data = new Object();
-				data.street = $('#d-street').val();
-				data.streetnumber = $('#d-streetnumber').val();
-				data.country = $('#d-country').val();
-				data.city = $('#d-city').val();
-				data.postalcode = $('#d-postalcode').val();
-				data.premises = $('#d-premises').val();
-				data.region = $('#d-region').val();
-				data.county = $('#d-county').val();
-				data.additionals = '';
-				return data;
-			}
-			$('#myLocation').click(function(){
-				navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
-				
-				function successFunction(pos) {
- 					console.log(pos);
- 					
-    				position = new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
-    				marker.setPosition(position);
-    				map.setCenter(position);
-    				$('#c-lat').val(position.lat());
-    				$('#c-lng').val(position.lng());
-    				geocoder.geocode({'latLng': position}, handleReversedGeocoder);
- 				}
- 				
- 				function errorFunction(position) {
-				    alert('Error!');
-				}
-
-
-			});
-						
-			initializeMap();
-		
-		
-		});
-
-
-	
-  var centerPoint = new google.maps.LatLng(41.38765942141657, 2.1694680888855373);
-  var markerPoint = new google.maps.LatLng(41.38765942141657, 2.1694680888855373);
-  
-  	
-  
-  var marker;
-  var position;
-  var map;
-  var geocoder;
-  function initializeMap() {
-    var mapOptions = {
-      zoom: 13,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      center: centerPoint
-    };
-    
-    $('#c-lng').val(markerPoint.lng());
-	$('#c-lat').val(markerPoint.lat());
-
-    map = new google.maps.Map(document.getElementById("map_canvas"),
-            mapOptions);
-    geocoder = new google.maps.Geocoder();
-    marker = new google.maps.Marker({
-      map:map,
-      draggable:true,
-      animation: google.maps.Animation.DROP,
-      position: markerPoint
-    });
-    google.maps.event.addListener(marker, 'dragend', handleNewPosition);
-  }
-
-	function handleNewPosition(){
-    	position = marker.getPosition();
-    	$('#c-lat').val(position.lat());
-    	$('#c-lng').val(position.lng());
-    	geocoder.geocode({'latLng': position}, handleReversedGeocoder);
-    }	
-   	 
-   	 
-   	function setGeolocation(){
-   			var position = new Object();
-         	position.coords = new Object();
-			position.coords.latitude = $('#c-lat').val();
-			position.coords.longitude = $('#c-lng').val();
-    		position.coords.accuracy = 99;
- 			position.coords.heading = $('#c-heading').val();
-			position.coords.speed = $('#c-speed').val();
-			position.coords.altitude = $('#c-alt').val();
-         	now.setGeolocation(position);
-   	}
-   	
-   	function setPsFront(){
-   		var psData = new Object();
-		psData.ol = $('#pf-ol').val();
-		psData.l = $('#pf-l').val();
-		psData.ml = $('#pf-ml').val();
-		psData.mr = $('#pf-mr').val();
-		psData.r = $('#pf-r').val();
-		psData.or = $('#pf-or').val();
-		now.setPsFront(psData);	
-	}
-   	
-   	function setPsRear(){
-   		var psData = new Object();
-		psData.ol = $('#pr-ol').val();
-		psData.l = $('#pr-l').val();
-		psData.ml = $('#pr-ml').val();
-		psData.mr = $('#pr-mr').val();
-		psData.r = $('#pr-r').val();
-		psData.or = $('#pr-or').val();
-		now.setPsRear(psData);	
-   	}
-   	
-   	function setDeviceMotion(){
-   		var dmData = new Object();
-   		dmData.acceleration = new Object();
-   		dmData.acceleration.x = $('#da-x').val();
-   		dmData.acceleration.y = $('#da-y').val();
-   		dmData.acceleration.z = $('#da-z').val();
-   		dmData.rotationRate = new Object();
-   		dmData.rotationRate.alpha = $('#da-ra').val();
-   		dmData.rotationRate.beta = $('#da-rb').val();;
-   		dmData.rotationRate.gamma = $('#da-rg').val(); ;
-   		dmData.interval = $('#da-i').val();
-  		now.setMotion(dmData);
-   	}
-   	
-   	function setTripComputer(){
-   		var tcData = new Object();
-		tcData.c1 = $('#tc-c1').val();
-		tcData.c2 = $('#tc-c2').val();
-		tcData.s1 = $('#tc-s1').val();
-		tcData.s2 = $('#tc-s2').val();
-		tcData.d = $('#tc-d').val();
-		tcData.m = $('#tc-m').val();
-		tcData.r = $('#tc-r').val();
-		now.setTripComputer(tcData);	
-   	}
-   	
-   	function updateAddress(address){
-   	 		for(var i = 0; i < address.address_components.length; i++){
-				var component = address.address_components[i];
-				switch(component.types[0]){
-					case 'street_number':
-						$('#d-streetnumber').val(component.long_name);
-						break;
-					case 'route':
-						$('#d-street').val(component.long_name);
-						break;
-					case 'country':
-						$('#d-country').val(component.long_name);
-						break;
-					case 'postal_code':
-						$('#d-postalcode').val(component.long_name);
-						break;
-					case 'postal_code':
-						$('#d-postalcode').val(component.long_name);
-						break;
-					case 'administrative_area_level_1': //STATES
-						$('#d-region').val(component.long_name);
-						break;
-					case 'administrative_area_level_3': //COUNTIES				
-						$('#d-county').val(component.long_name);
-						break;
-					case 'administrative_area_level_2': //COUNTIES				
-						$('#d-county').val(component.long_name);
-						break;
-					case 'locality': //CITY				
-						$('#d-city').val(component.long_name);
-						break;
-					
-					case 'premise': //COUNTIES				
-						$('#d-premises').val(component.long_name);
-						break;
-					
-					}
-         	}
-   	 
-   	 }
-
-   	 function handleReversedGeocoder(results, status){
-   	 	if (status == google.maps.GeocoderStatus.OK) {
-          if (results[0]) {
-          
-          	var position = new Object();
-         	position.coords = new Object();
-			position.coords.latitude = results[0].geometry.location.lat()
-			position.coords.longitude = results[0].geometry.location.lng();
-		    position.coords.altitude = $('#c-alt').val();
-    		position.coords.accuracy = 99;
- 			position.coords.heading = $('#c-heading').val();
-			position.coords.speed = $('#c-speed').val();
-         	now.setGeolocation(position);
-          
-          	
-         	updateAddress(results[0]);
-          }
-        } else {
-          alert("Geocoder failed due to: " + status);
-        }
-   	 }
-   	 
-   	 function handleGeocoder(results, status){
-		if (status == google.maps.GeocoderStatus.OK) {
-          if (results[0]) {
-         	
-         	updateAddress(results[0]);
-         	centerPoint = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-         	map.setCenter(centerPoint);
-         	marker.setPosition(centerPoint);
-         	$('#c-lat').val(centerPoint.lat());
-         	$('#c-lng').val(centerPoint.lng());
-         	
-         	var position = new Object();
-         	position.coords = new Object();
-			position.coords.latitude = results[0].geometry.location.lat()
-			position.coords.longitude = results[0].geometry.location.lng();
-		    position.coords.altitude = $('#c-alt').val();
-    		position.coords.accuracy = 99;
- 			position.coords.heading = $('#c-heading').val();
-			position.coords.speed = $('#c-speed').val();
-         	now.setGeolocation(position);
-         	
-          }
-        } else {
-          alert("Geocoder failed due to: " + status);
-        }
-   	 
-   	 }
-	</script>
-</head>
-	
-<body>
-<div id="content" class='content cf'>
-	<div id="header">
-		<h1><img src="simulator_logo.png"></h1>
-     </div>
-     <div id="functions">
-	<h3>Gear</h3>
-	<p><label class='select'>Gear: </label>
-	<select id="inputGear" disabled>
-				<option value=''></option>
-				<option value='0'>R</option>
-				<option value='10'>P</option>
-				<option value='11' selected>N</option>
-				<option value='1'>1</option>
-				<option value='2'>2</option>
-				<option value='3'>3</option>
-				<option value='4'>4</option>
-				<option value='5'>5</option>
-				<option value='6'>6</option>
-			</select>
-			
-	</p>
-	<h3>Tripcomputer</h3>
-	<p><label>Avg. Speed 1:</label><input type='text' value='48.5' id='tc-s1'></p>
-	<p><label>Avg. Speed 2:</label><input type='text' value='46.5' id='tc-s2'></p>
-	<p><label>Avg. Consumption 1:</label><input type='text' value='5.7' id='tc-c1'></p>
-	<p><label>Avg. Consumption 2:</label><input type='text' value='6.1' id='tc-c2'></p>
-	<p><label>Mileage:</label><input type='text' value='11298' id='tc-m'></p>
-	<p><label>Range:</label><input type='text' value='456' id='tc-r'></p>
-	<p><label>Distance:</label><input class='input' type='text' value='33.3' id='tc-d'></p>
-	<input type='button' id='setTripComputer' value="Set Tripcomputer"/>
-	
-	<h3>Parksensors Front</h3>
-	<p>
-	<label for="pf-ol">OutLeft:</label>
-	<input type="text" id="pf-ol" value="255"/>
-	<div id="slider-pf-ol"></div>
-	</p>
-
-	<p>
-	<label for="pf-l">Left:</label>
-	<input type="text" id="pf-l" value="255"/>
-	<div id="slider-pf-l"></div>
-	</p>
-
-	
-	<p>
-	<label for="pf-ml">MidLeft:</label>
-	<input type="text" id="pf-ml" value="255"/>
-	<div id="slider-pf-ml"></div>
-	</p>
-	
-	<p>
-	<label for="pf-mr">MidRight:</label>
-	<input type="text" id="pf-mr" value="255"/>
-	<div id="slider-pf-mr"></div>
-	</p>
-	
-	<p>
-	<label for="pf-r">Right:</label>
-	<input type="text" id="pf-r" value="255"/>
-	<div id="slider-pf-r"></div>
-	</p>
-	
-	<p>
-	<label for="pf-or">OutRight:</label>
-	<input type="text" id="pf-or" value="255"/>
-	<div id="slider-pf-or"></div>
-	</p>	
-	<input type='button' id='setPsFront' value="Set Parksensors Front"/>
-
-	<h3>Parksensors Rear</h3>
-	<p>
-	<label for="pr-ol">OutLeft:</label>
-	<input type="text" id="pr-ol" value="255"/>
-	<div id="slider-pr-ol"></div>
-	</p>
-
-	<p>
-	<label for="pr-l">Left:</label>
-	<input type="text" id="pr-l" value="255"/>
-	<div id="slider-pr-l"></div>
-	</p>
-
-	
-	<p>
-	<label for="pr-ml">MidLeft:</label>
-	<input type="text" id="pr-ml" value="255"/>
-	<div id="slider-pr-ml"></div>
-	</p>
-	
-	<p>
-	<label for="pr-mr">MidRight:</label>
-	<input type="text" id="pr-mr" value="255"/>
-	<div id="slider-pr-mr"></div>
-	</p>
-	
-	<p>
-	<label for="pr-r">Right:</label>
-	<input type="text" id="pr-r" value="255"/>
-	<div id="slider-pr-r"></div>
-	</p>
-	
-	<p>
-	<label for="pr-or">OutRight:</label>
-	<input type="text" id="pr-or" value="255"/>
-	<div id="slider-pr-or"></div>
-	</p>
-
-
+        <!-- <h3>Lights (in progress) </h3>
+	  <p><label class='box'>Signal left: </label><input type="checkbox" id="l-signal-left" /></p>
+	  <p><label class='box'>Signal right: </label><input type="checkbox" id="l-signal-right" /></p>
+	  <p><label class='box'>Signal warn: </label><input type="checkbox" id="l-signal-warn" /></p>
+	  <p><label class='box'>Parking: </label><input type="checkbox" id="l-parking" /></p>
+	  <p><label class='box'>Head: </label><input type="checkbox" id="l-head" /></p>
+	  <p><label class='box'>Hibeam: </label><input type="checkbox" id="l-hibeam" /></p>
+	  <p><label class='box'>Fog front: </label><input type="checkbox" id="l-fog-front" /></p>
+	  <p><label class='box'>Fog rear: </label><input type="checkbox" id="l-fog-rear" /></p>
 	
 	
-	<input type='button' id='setPsRear' value="Set Parksensors Rear"/>
+	  <h3>Wipers (in progress)</h3>
+		  <p><label class='box'>Front Wash: </label><input type="checkbox" id="w-front-wash" /></p>
+	  <p><label class='box'>Rear Wash: </label><input type="checkbox" id="w-rear-wash" /></p>
+	  <p><label class='box'>Wiper auto: </label><input type="checkbox" id="w-automatic" /></p>
+	  <p><label class='box'>Wiper front once: </label><input type="checkbox" id="w-front-once" /></p>
+	  <p><label class='box'>Wiper rear once: </label><input type="checkbox" id="w-rear-once" /></p>
+	  <p><label class='box'>Wiper front level 1 </label><input type="checkbox" id="w-front-level1" /></p>
+	  <p><label class='box'>Wiper front level 2 </label><input type="checkbox" id="w-front-level2" /></p>
 	
-	<h3>Device Motion </h3>
-		<p>
-			<label >x-Motion (lateral):</label><input type='text' value='0' id='da-x'>
-			
-		</p>
-		<div id="slider-da-x"></div>
-		<p>
-			<label >y-Motion (lng):</label><input type='text' value='0' id='da-y'>
-			<div id="slider-da-y"></div>
-		</p>
-		<p>
-			<label >z-Motion</label><input type='text' value='0' id='da-z'>
-			<div id="slider-da-z"></div>
-		</p>
-		<p>
-			<label >Rotation alpha</label><input type='text' value='0' id='da-ra'>
-			
-		</p>
-		<div id="slider-da-ra"></div>
-		<p>
-			<label >Rotation beta</label><input type='text' value='0' id='da-rb'>
-			<div id="slider-da-rb"></div>
-		</p>
-		<p>
-			<label >Rotation gamma</label><input type='text' value='0' id='da-rg'>
-			<div id="slider-da-rg"></div>
-		</p>
-		<p>
-			<label >Interval (ms)</label><input type='text' value='500' id='da-i'>
-		</p>
-	<input type='button' id='setDeviceMotion' value="Fire DeviceMotion"/>
-		
-	<h3>Device Orientation Event</h3>
-
-
-<!--
-	<h3>Lights (in progress) </h3>
-	<p><label class='box'>Signal left: </label><input type="checkbox" id="l-signal-left" /></p>
-	<p><label class='box'>Signal right: </label><input type="checkbox" id="l-signal-right" /></p>
-	<p><label class='box'>Signal warn: </label><input type="checkbox" id="l-signal-warn" /></p>
-	<p><label class='box'>Parking: </label><input type="checkbox" id="l-parking" /></p>
-	<p><label class='box'>Head: </label><input type="checkbox" id="l-head" /></p>
-	<p><label class='box'>Hibeam: </label><input type="checkbox" id="l-hibeam" /></p>
-	<p><label class='box'>Fog front: </label><input type="checkbox" id="l-fog-front" /></p>
-	<p><label class='box'>Fog rear: </label><input type="checkbox" id="l-fog-rear" /></p>
+	  <h3>Climate Control (in progress)</h3>
+	  <p><label class='select'>Zone: </label>
+	  <select id="climate_zone">
+				  <option value=''></option>
+				  <option value='climate-all'>overall</option>
+				  <option value='climate-driver'>driver</option>
+				  <option value='climate-passenger-front'>passenger-front</option>
+				  <option value='climate-passenger-rear-left'>rear-left</option>
+				  <option value='climate-passenger-rear-right'>rear-right</option>
+			  </select>
+	  </p>
+	  <p><label>Desired Temp: </label><input type='text' value='255' id='climate-temp'>
+	  </p>
+	  <p><label >Vent Level: </label><input type='text' value='255' id='climate-ventlevel'></p>
+	  <p><label class='box'>AC: </label><input type="checkbox" id="cimate-ac" />
+	  </p>
+	  <p><label class='box'>Vent Auto: </label><input type="checkbox" id="climate-vent" />
+	  </p>
 	
-	
-	<h3>Wipers (in progress)</h3>
-		<p><label class='box'>Front Wash: </label><input type="checkbox" id="w-front-wash" /></p>
-	<p><label class='box'>Rear Wash: </label><input type="checkbox" id="w-rear-wash" /></p>
-	<p><label class='box'>Wiper auto: </label><input type="checkbox" id="w-automatic" /></p>
-	<p><label class='box'>Wiper front once: </label><input type="checkbox" id="w-front-once" /></p>
-	<p><label class='box'>Wiper rear once: </label><input type="checkbox" id="w-rear-once" /></p>
-	<p><label class='box'>Wiper front level 1 </label><input type="checkbox" id="w-front-level1" /></p>
-	<p><label class='box'>Wiper front level 2 </label><input type="checkbox" id="w-front-level2" /></p>
-	
-	<h3>Climate Control (in progress)</h3>
-	<p><label class='select'>Zone: </label>
-	<select id="climate_zone">
-				<option value=''></option>
-				<option value='climate-all'>overall</option>
-				<option value='climate-driver'>driver</option>
-				<option value='climate-passenger-front'>passenger-front</option>
-				<option value='climate-passenger-rear-left'>rear-left</option>
-				<option value='climate-passenger-rear-right'>rear-right</option>
-			</select>
-	</p>
-	<p><label>Desired Temp: </label><input type='text' value='255' id='climate-temp'>
-	</p>
-	<p><label >Vent Level: </label><input type='text' value='255' id='climate-ventlevel'></p>
-	<p><label class='box'>AC: </label><input type="checkbox" id="cimate-ac" />
-	</p>
-	<p><label class='box'>Vent Auto: </label><input type="checkbox" id="climate-vent" />
-	</p>
-	
-	<input type='button' id='setClimate' value="Set Climate" disabled/>
-	</p>
--->
+	  <input type='button' id='setClimate' value="Set Climate" disabled/>
+	  </p>
+  -->
+      </div>
+      <div id="info">
+        	<h3>Mapsfeatures</h3>
 
-	</div>
-	<div id="info">
-		<h3>Mapsfeatures</h3>
-		<div id="map_canvas" style="width: 640px; height: 400px;">
-		</div>
-			<h4>Coordinates</h4>
-			<p><label >Latitude:</label><input type='text' value='' id='c-lat'></p>
-			<p><label >Longitude:</label><input type='text' value='' id='c-lng'></p>
-			<p><label >Altitude:</label><input type='text' value='12' id='c-alt'></p>
-			<p><label >Speed:</label><input type='text' value='0.0' id='c-speed'></p>
-			<p><label >Heading:</label><input type='text' value='90.0' id='c-heading'></p>
-			
-			<h4>Address</h4>
-			<p><label >Country:</label><input type='text' value='Deutschland' id='d-country'></p>
-			<p><label >Region:</label><input type='text' value='Bayern' id='d-region'></p>
-			<p><label >County:</label><input type='text' value='' id='d-county'></p>
-			<p><label >City:</label><input type='text' value='München' id='d-city'></p>
-			<p><label >Street:</label><input type='text' value='Hanauer Str.' id='d-street'></p>
-			<p><label >Streetnumber:</label><input type='text' value='46' id='d-streetnumber'></p>
-			<p><label >Premises:</label><input class='input' type='text' value='' id='d-premises'></p>
-			<p><label >add. Info:</label><input class='input' type='text' value='' id='d-info'></p>
-			<p><label >add. postalCode:</label><input class='input' type='text' value='80992' id='d-postalcode'></p>
+        <div id="map_canvas" style="width: 640px; height: 400px;"></div>
+        	<h4>Coordinates</h4>
 
-		
-		
-		<h4>Helpers</h4>
-		<p><input type='button' id='myLocation' value="Use my current position" disabled/></p>
-		<p><input type='button' id='locateOnMap' value="Resolve current address"/></p>
-		
-		<h4>Navigation Events</h4>
-		
-		<p><input type='button' id='setDestinationCancelled' value="Destination-changed"/></p>
-		<p><input type='button' id='setDestinationReached' value="Destination-reached"/></p>
-		<p><input type='button' id='setDestinationChanged' value="Destination-cancelled"/></p>
-		
-		<h4>Geolocation</h4>
-		<p><input type='button' id='setLocation' value="Set Geolocation"/></p>
-		
-		
-		
-	</div>	
-	</div>
+        <p>
+          <label>Latitude:</label>
+          <input type='text' value='' id='c-lat'>
+        </p>
+        <p>
+          <label>Longitude:</label>
+          <input type='text' value='' id='c-lng'>
+        </p>
+        <p>
+          <label>Altitude:</label>
+          <input type='text' value='12' id='c-alt'>
+        </p>
+        <p>
+          <label>Speed:</label>
+          <input type='text' value='0.0' id='c-speed'>
+        </p>
+        <p>
+          <label>Heading:</label>
+          <input type='text' value='90.0' id='c-heading'>
+        </p>
+        	<h4>Address</h4>
 
-	<!--<div id='footer'>VEHICLE SIMULATOR</div>-->
-</body>
+        <p>
+          <label>Country:</label>
+          <input type='text' value='Deutschland' id='d-country'>
+        </p>
+        <p>
+          <label>Region:</label>
+          <input type='text' value='Bayern' id='d-region'>
+        </p>
+        <p>
+          <label>County:</label>
+          <input type='text' value='' id='d-county'>
+        </p>
+        <p>
+          <label>City:</label>
+          <input type='text' value='München' id='d-city'>
+        </p>
+        <p>
+          <label>Street:</label>
+          <input type='text' value='Hanauer Str.' id='d-street'>
+        </p>
+        <p>
+          <label>Streetnumber:</label>
+          <input type='text' value='46' id='d-streetnumber'>
+        </p>
+        <p>
+          <label>Premises:</label>
+          <input class='input' type='text' value='' id='d-premises'>
+        </p>
+        <p>
+          <label>add. Info:</label>
+          <input class='input' type='text' value='' id='d-info'>
+        </p>
+        <p>
+          <label>add. postalCode:</label>
+          <input class='input' type='text' value='80992'
+          id='d-postalcode'>
+        </p>
+        	<h4>Helpers</h4>
 
+        <p>
+          <input type='button' id='myLocation' value="Use my current position" disabled/>
+        </p>
+        <p>
+          <input type='button' id='locateOnMap' value="Resolve current address"
+          />
+        </p>
+        	<h4>Navigation Events</h4>
+
+        <p>
+          <input type='button' id='setDestinationCancelled' value="Destination-changed"
+          />
+        </p>
+        <p>
+          <input type='button' id='setDestinationReached' value="Destination-reached"
+          />
+        </p>
+        <p>
+          <input type='button' id='setDestinationChanged' value="Destination-cancelled"
+          />
+        </p>
+        	<h4>Geolocation</h4>
+
+        <p>
+          <input type='button' id='setLocation' value="Set Geolocation" />
+        </p>
+      </div>
+    </div>
+  </body>
 
 </html>

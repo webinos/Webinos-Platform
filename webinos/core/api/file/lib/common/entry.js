@@ -18,10 +18,10 @@
 
 module.exports = Entry
 
-var virtualPathModule = require("../virtual-path.js")
+var vpath = require("../virtual-path.js")
 
 function Entry(filesystem, fullPath) {
-  this.name = virtualPathModule.basename(fullPath)
+  this.name = vpath.basename(fullPath)
   this.fullPath = fullPath
   this.filesystem = filesystem
 }
@@ -30,6 +30,10 @@ Entry.prototype.isFile = false
 Entry.prototype.isDirectory = false
 
 Entry.prototype.getMetadata = function (callback) {
+  // Not yet implemented.
+}
+
+Entry.prototype.getLink = function () {
   // Not yet implemented.
 }
 
@@ -54,11 +58,12 @@ Entry.prototype.getParent = function (callback) {
 }
 
 Entry.prototype.toJSON = function () {
-  var json = { name        : this.name
-             , fullPath    : this.fullPath
-             , filesystem  : this.filesystem
-             , isFile      : this.isFile
-             , isDirectory : this.isDirectory
-             }
+  var json =
+    { name        : this.name
+    , fullPath    : this.fullPath
+    , filesystem  : this.filesystem
+    , isFile      : this.isFile
+    , isDirectory : this.isDirectory
+    }
   return json
 }

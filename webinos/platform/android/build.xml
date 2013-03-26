@@ -31,6 +31,7 @@
 				node_modules/mkdirp/,
 				node_modules/node-uuid/,
 				node_modules/optimist/,
+				node_modules/JSV/,
 				webinos/web_root/webinos.js,
 				webinos/" 
 			excludes="

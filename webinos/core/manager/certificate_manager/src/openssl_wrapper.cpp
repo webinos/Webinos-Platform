@@ -25,7 +25,6 @@
 #include <openssl/err.h>
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <stdlib.h>
 #include <string.h>
@@ -206,7 +205,7 @@ int getHash(char* filename, char *pointer){
   };
 
   // reads file
-  if (fgets(buff, len, fd) == NULL) 
+  if (!fread(buff, 1, len, fd))  
   {
     perror("getHash: read()");
     free(buff);
@@ -217,8 +216,6 @@ int getHash(char* filename, char *pointer){
   fclose(fd);
 
   // initialize OpenSSL
-  SSL_library_init();
-  SSL_load_error_strings();
   
   // creates BIO buffer
   bio = BIO_new_mem_buf(buff, len);
@@ -465,7 +462,7 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
   // If there is a small clock difference between machines, it results in cert_not_yet_valid
   // It does set GMT time but is relevant to machine time.
   // A better solution would be to have ntp server contacted to get a proper time.
-  if(certType == 2) {
+  if(certType == 1) {
     X509_gmtime_adj(s, long(0-300));
   }
   else {
@@ -532,18 +529,6 @@ int signRequest(char* pemRequest, int days, char* pemCAKey, char* pemCaCert,  in
     }
 
     if(!(ex = X509V3_EXT_conf_nid(NULL,  &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
-      return ERR_peek_error();
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-  } else if( certType == 2) {
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_basic_constraints, (char*)"critical, CA:FALSE"))) {
-      return ERR_peek_error();
-    } else {
-      X509_add_ext(cert, ex, -1);
-    }
-
-    if(!(ex = X509V3_EXT_conf_nid(NULL, &ctx, NID_ext_key_usage, (char*)"critical, clientAuth, serverAuth"))) {
       return ERR_peek_error();
     } else {
       X509_add_ext(cert, ex, -1);

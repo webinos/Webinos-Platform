@@ -20,11 +20,16 @@
 (function() {
 var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
-    var SensorService = function(rpcHandler, data, id, drvInt) {
+//    var configureSensorHandlers = {}; //new Array();
+//    var addEventListenerHandlers = new Array();
+//    var removeEventListenerHandlers = new Array();
 
+    var SensorService = function(rpcHandler, data, id, drvInt) {
+        
         // inherit from RPCWebinosService
         this.base = RPCWebinosService;
         var driverInterface = drvInt;
+        this.listeners = [];
         this.objRef = null;
         this.listenerActive = false;
         this.maximumRange = "na";
@@ -39,7 +44,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         var name;
         var description;
         
-        console.log("Called sensor ctor with params " + JSON.stringify(data));
+//        console.log("Called sensor ctor with params " + JSON.stringify(data));
 
         if(data.type) {
             type = data.type;
@@ -95,7 +100,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         this.base({
             api: 'http://webinos.org/api/sensors.'+type,
             displayName: name,
-            description: description+' - id '+id
+            description: description //+' - id '+id
         });
 
         /**
@@ -105,14 +110,20 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         * @param errorCB Issued if sensor configuration fails.
         */
         this.getStaticData = function (params, successCB, errorCB){
-            var tmp = {};
-            tmp.maximumRange = this.maximumRange;
-            tmp.minDelay = this.minDelay;
-            tmp.power = this.power;
-            tmp.resolution = this.resolution;
-            tmp.vendor = this.vendor;  
-            tmp.version = this.version;
-            successCB(tmp);
+            try{
+                var tmp = {};
+                tmp.maximumRange = this.maximumRange;
+                tmp.minDelay = this.minDelay;
+                tmp.power = this.power;
+                tmp.resolution = this.resolution;
+                tmp.vendor = this.vendor;  
+                tmp.version = this.version;
+                successCB(tmp);
+            }
+            catch(err){
+                errorCB();
+            }
+            
         };
         
         this.getEvent = function (data) {
@@ -126,6 +137,9 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
                         sensorEvent.sensorValues = new Array;
                         sensorEvent.sensorValues[0] = tmp;
                     }
+
+                    sensorEvent.timestamp = new Date().getTime();
+                    
                 }
                 catch(e) {
                     //console.log('Sensor event error: cannot convert data to array of values');
@@ -139,12 +153,12 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             return sensorEvent;
         }
         
-        var CmdErrorHandler = function(rpcErrorCB) {
-            this.rpcErrorCB = rpcErrorCB;      
-            this.errorCB = function(message) {
-                rpcErrorCB(message);
-            };
-        };
+        // var CmdErrorHandler = function(rpcErrorCB) {
+        //     this.rpcErrorCB = rpcErrorCB;      
+        //     this.errorCB = function(message) {
+        //         rpcErrorCB(message);
+        //     };
+        // };
         
         /**
         * Configures a sensor.
@@ -154,22 +168,37 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
         */
         this.configureSensor = function(params, successCB, errorCB) {
             console.log("Configuring sensor with params : "+JSON.stringify(params));
-            driverInterface.sendCommand('cfg', this.elementId, params,
-                    new CmdErrorHandler(errorCB).errorCB);
+            driverInterface.sendCommand('cfg', this.elementId, params, errorCB, successCB);
         };
         
         this.addEventListener = function (eventType, successCB, errorCB, objectRef) {
-            console.log('Sensor '+sensorEvent.sensorId+': addEventListener');
+            //console.log("Sensor:addEventListener - eventType : " +eventType);
+            //console.log("Sensor:addEventListener - successCB : " +successCB);
+            //console.log("Sensor:addEventListener - errorCB : " +errorCB);
+            //console.log("Sensor:addEventListener - objectRef : " +JSON.stringify(objectRef));
+            
             this.objRef = objectRef;
             this.listenerActive = true;
-            driverInterface.sendCommand('start', this.elementId, null,
-                    new CmdErrorHandler(errorCB).errorCB);
+            this.listeners.push([successCB, errorCB, objectRef, eventType]);
+            driverInterface.sendCommand('start', this.elementId, null, errorCB, successCB);
         };
 
-        this.removeEventListener = function (eventType, successCB, errorCB, objectRef) {
-            this.listenerActive = false;
-            driverInterface.sendCommand('stop', this.elementId, null,
-                    new CmdErrorHandler(errorCB).errorCB);
+        this.removeEventListener = function (arguments) {
+            //console.log("removeEventListener : arg[0] - " + arguments[0]);
+            //console.log("removeEventListener : arg[1] - " + arguments[1]);
+
+            for (i = 0; i < this.listeners.length; i++) {
+                if(this.listeners[i][2].rpcId === arguments[0]){
+                    this.listeners.splice(i, 1);
+                    break;
+                }
+            }
+
+            if(this.listeners.length == 0){
+                console.log("Stopping sensor " + this.id);
+                this.listenerActive = false;
+                driverInterface.sendCommand('stop', this.elementId, null);
+            }
         };
     }
 

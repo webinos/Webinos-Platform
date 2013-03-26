@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import org.meshpoint.anode.Isolate;
@@ -115,8 +114,6 @@ public class PzpService extends Service implements StateListener {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		/* init the platform */
-		PlatformInit.onInit(this, null);
 		/* init config */
 		initConfig();
 		/* synchronously set ourselves as the singleton instance, and notify
@@ -127,6 +124,24 @@ public class PzpService extends Service implements StateListener {
 				listener.onServiceAvailable(theService);
 			serviceListeners = null;
 		}
+
+		/* if the platform is not yet initialised, wait until that
+		 * has completed and retry */
+		if(PlatformInit.onInit(this, new Runnable() {
+			@Override
+			public void run() {
+				/* init (deferred case) */
+				onPlatformInit();
+			}
+		})) {
+			/* init (no wait) */
+			onPlatformInit();
+		}
+	}
+
+	private void onPlatformInit() {
+		if("true".equals(getConfig().autoStart))
+			startPzp();
 	}
 
 	@Override
@@ -140,19 +155,13 @@ public class PzpService extends Service implements StateListener {
 	 *******************/
 
 	public class ConfigParams {
-		String pzhHost;
-		String pzhName;
-		String pzpName;
-		String authCode;
+		String autoStart;
 
 		void readConfig() {
 			BufferedReader reader = null;
 			try {
 				reader = new BufferedReader(new InputStreamReader(openFileInput(LASTCONFIG)));
-				pzhHost = reader.readLine();
-				pzhName = reader.readLine();
-				pzpName = reader.readLine();
-				authCode = reader.readLine();
+				autoStart = reader.readLine();
 			} catch (IOException e) {
 			} finally {
 				try {
@@ -166,10 +175,7 @@ public class PzpService extends Service implements StateListener {
 			BufferedWriter writer = null;
 			try {
 				writer = new BufferedWriter(new OutputStreamWriter(openFileOutput(LASTCONFIG, MODE_PRIVATE)));
-				writer.write(pzhHost + '\n');
-				writer.write(pzhName + '\n');
-				writer.write(pzpName + '\n');
-				/* writer.write(authCode + '\n'); */
+				writer.write(autoStart + '\n');
 			} catch (IOException e) {
 			} finally {
 				try {
@@ -180,20 +186,7 @@ public class PzpService extends Service implements StateListener {
 		}
 
 		String getCmd() {
-			HashMap<String, String> args = new HashMap<String, String>();
-			args.put("pzh.host", pzhHost);
-			args.put("pzh.name", pzhName);
-			args.put("pzp.name", pzpName);
-			args.put("auth_code", authCode);
-			Config config = Config.getInstance();
-			String cmd = config.getProperty("pzp.cmd");
-			for(String key : args.keySet()) {
-				String argValue = args.get(key);
-				if(argValue != null && !argValue.isEmpty())
-					cmd += " " + config.getProperty("pzp.cmd." + key).replace("%" + key, argValue);
-			}
-
-			return cmd;			
+			return Config.getInstance().getProperty("pzp.cmd");
 		}
 	}
 
@@ -204,17 +197,8 @@ public class PzpService extends Service implements StateListener {
 
 		/* set defaults if not already set */
 		Config config = Config.getInstance();
-		if(configParams.pzhHost == null)
-			configParams.pzhHost = config.getProperty("pzh.host.default");
-
-		if(configParams.pzhName == null)
-			configParams.pzhName = config.getProperty("pzh.name.default");
-
-		if(configParams.pzpName == null)
-			configParams.pzpName = config.getProperty("pzp.name.default");
-
-		if(configParams.authCode == null)
-			configParams.authCode = config.getProperty("auth_code.default");
+		if(configParams.autoStart == null)
+			configParams.autoStart = config.getProperty("pzp.autoStart");
 	}
 
 	/*******************

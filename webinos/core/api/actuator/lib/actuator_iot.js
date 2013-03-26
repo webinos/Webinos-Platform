@@ -38,7 +38,7 @@
         this.elementId = id;
 
         var type;
-        console.log("Called actuator ctor with params " + JSON.stringify(data));
+//        console.log("Called actuator ctor with params " + JSON.stringify(data));
 
         if(data.type) {
             type = data.type;
@@ -83,7 +83,7 @@
         this.base({
             api: 'http://webinos.org/api/actuators.'+type,
             displayName: name,
-            description: description+' - id '+id
+            description: description //+' - id '+id
         });
 
         /**

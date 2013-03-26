@@ -100,15 +100,16 @@
                 webinos.messageHandler.onMessageReceived (data, data.to);
             }
         };
+        channel.onopen = function() {
+          var url = window.location.pathname;
+          var filename = url.substring(url.lastIndexOf('/')+1);
+          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser', value: filename}});
+        };
     }
 
     createCommChannel ();
 
-    if (typeof webinos === 'undefined') webinos = {};
-
     webinos.rpcHandler = new RPCHandler (undefined, new Registry ());
     webinos.messageHandler = new MessageHandler (webinos.rpcHandler);
-    webinos.discovery = new ServiceDiscovery (webinos.rpcHandler);
-    webinos.ServiceDiscovery = webinos.discovery; // for backward compat
 
 } ());

@@ -23,7 +23,7 @@
     <module>app2app</module>
     <module>applauncher</module>
     <module>webnotification</module>
-    <module>zap-and-shake</module>
+    <module>zonenotification</module>
     <module>file</module>
     <module>gallery</module>
     <module>geolocation</module>
@@ -34,5 +34,7 @@
     <module>tv</module>
     <module>contacts</module>
     <module>vehicle</module>
+    <module>corePZinformation</module>
+    <module>nfc</module>
   </modules>
 </project>

@@ -37,7 +37,7 @@ var featureList = [
 	"http://wacapps.net/api/devicestatus",
 	"http://webinos.org/api/discovery",
 	"http://webinos.org/api/events",
-	"http://www.w3.org/ns/api-perms/geolocation",
+	"http://webinos.org/api/w3c/geolocation",
 	"http://webinos.org/api/messaging",
 	"http://webinos.org/api/messaging.send",
 	"http://webinos.org/api/messaging.find",

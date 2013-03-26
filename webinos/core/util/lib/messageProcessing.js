@@ -41,7 +41,7 @@ ProcessWebinosMsg.jsonStr2Buffer = function(jsonString) {
 /**
  * Read in JSON objects from buffer and call objectHandler for each parsed
  * object.
- * @param instance PZH/PZP instance.
+ * @param instance reference to the connection the message was receive on.
  * @param buffer Buffer instance containing JSON serialized objects.
  * @param objectHandler Callback for parsed object.s
  */
@@ -49,35 +49,37 @@ ProcessWebinosMsg.readJson = function(instance, buffer, objectHandler) {
     var jsonStr;
     var len;
     var offset = 0;
+    var accumulator;
 
     for (;;) {
         var readByteLen;
-        if (instanceMap[instance]) {
+        if (instance in instanceMap) {
             // we already read from a previous buffer, read the rest
             len = instanceMap[instance].restLen;
-            var jsonStrTmp = buffer.toString('utf8', offset, offset + len);
-            readByteLen = Buffer.byteLength(jsonStrTmp, 'utf8');
-            jsonStr = instanceMap[instance].part + jsonStrTmp;
-            offset += len;
-            instanceMap[instance] = undefined;
-
+            readByteLen = (offset + len < buffer.length) ? len : (buffer.length - offset);
+            var tmpBuffer = buffer.slice(offset,offset + readByteLen);
+            accumulator = Buffer.concat([instanceMap[instance].part, tmpBuffer], readByteLen + instanceMap[instance].part.length);
+            offset += readByteLen;
+            delete instanceMap[instance];
         } else {
             len = buffer.readUInt32LE(offset);
             offset += 4;
-            jsonStr = buffer.toString('utf8', offset, offset + len);
-            readByteLen = Buffer.byteLength(jsonStr, 'utf8');
-            offset += len;
+            readByteLen = (offset + len < buffer.length) ? len : (buffer.length - offset);
+            accumulator = new Buffer(readByteLen);
+            buffer.copy(accumulator,0,offset,offset + readByteLen);
+            offset += readByteLen;
         }
 
         if (readByteLen < len) {
             instanceMap[instance] = {
                 restLen: len - readByteLen,
-                part: jsonStr
+                part: accumulator
             };
             return;
         }
 
         // call handler with parsed message object
+        jsonStr = accumulator.toString('utf8');
         objectHandler(JSON.parse(jsonStr));
 
         if (offset >= buffer.length) {

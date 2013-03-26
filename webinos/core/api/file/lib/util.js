@@ -16,13 +16,13 @@
  * Copyright 2012 Felix-Johannes Jendrusch, Fraunhofer FOKUS
  ******************************************************************************/
 
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 
 exports.CustomError = CustomError
 
 inherits(CustomError, Error)
 function CustomError(name, message) {
-  CustomError.super.call(this, message || name)
+  CustomError.super_.call(this, message || name)
 
   Error.captureStackTrace(this, CustomError)
 
@@ -30,9 +30,10 @@ function CustomError(name, message) {
 }
 
 CustomError.prototype.toJSON = function () {
-  var json = { name    : this.name
-             , message : this.message
-             }
+  var json =
+    { name    : this.name
+    , message : this.message
+    }
   return json
 }
 

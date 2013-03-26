@@ -19,40 +19,39 @@
 //Test suite for tv module API according to spec at http://dev.webinos.org/specifications/draft/tv.html
 //Potential changes/diffs especially regarding the phase two of the project are marked as such.
 
+beforeEach(function() {
+	this.addMatchers({
+		toBeEither: function() {
+			for (var j=0;j<arguments.length;j++){
+				if (arguments[j]===this.actual)	return true;
+			}
+			return false;
+		},
+		toBePrintableString: function(){
+			return !(/[\x00-\x08\x0E-\x1F]/.test(this.actual)) && 
+				 typeof this.actual === "string" && this.actual.length>0;
+		},
+		toBeValidAsSourceForVideoElement: function(){
+			return typeof this.actual === "string" || 
+			(typeof this.actual !== "undefined" && 
+			 typeof this.actual.audioTracks !== "undefined" && 
+			 typeof this.actual.ended !== "undefined" && 
+			 typeof this.actual.label !== "undefined" &&
+			 typeof this.actual.videoTracks !== "undefined"  )
+		}
+	});
+});
+
 describe("tv module API", function() {
 	var tvService;
 
+	webinos.discovery.findServices(new ServiceType("http://webinos.org/api/tv"), {
+		onFound: function (service) {
+			tvService = service;
+		}
+	});
+
 	beforeEach(function() {
-		this.addMatchers({
-			toHaveProp: function(expected) {
-				return typeof this.actual[expected] !== "undefined";
-			},
-			toBeEither: function() {
-				for (var j=0;j<arguments.length;j++){
-					if (arguments[j]===this.actual)	return true;
-				}
-				return false;
-			},
-			toBePrintableString: function(){
-				return !(/[\x00-\x08\x0E-\x1F]/.test(this.actual)) && 
-					 typeof this.actual === "string" && this.actual.length>0;
-			},
-			toBeValidAsSourceForVideoElement: function(){
-				return typeof this.actual === "string" || 
-				(typeof this.actual !== "undefined" && 
-				 typeof this.actual.audioTracks !== "undefined" && 
-				 typeof this.actual.ended !== "undefined" && 
-				 typeof this.actual.label !== "undefined" &&
-				 typeof this.actual.videoTracks !== "undefined"  )
-			}
-		});
-
-		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/tv"), {
-			onFound: function (service) {
-				tvService = service;
-			}
-		});
-
 		waitsFor(function() {
 			return !!tvService;
 		}, "the discovery to find an TV Control service", 10000);
@@ -63,7 +62,7 @@ describe("tv module API", function() {
 	});
 
 	it("has the necessary properties as service object", function() {
-		expect(tvService).toHaveProp("state");
+		expect(tvService.state).toBeDefined();
 		expect(tvService.api).toEqual(jasmine.any(String));
 		expect(tvService.id).toEqual(jasmine.any(String));
 		expect(tvService.displayName).toEqual(jasmine.any(String));

@@ -18,13 +18,13 @@
 
 module.exports = FileEntry
 
-var inherits = require("inherits")
+var inherits = require("util").inherits // require("inherits")
 
 var Entry = require("./entry.js")
 
 inherits(FileEntry, Entry)
 function FileEntry(filesystem, fullPath) {
-  FileEntry.super.call(this, filesystem, fullPath)
+  FileEntry.super_.call(this, filesystem, fullPath)
 }
 
 FileEntry.prototype.isFile = true
