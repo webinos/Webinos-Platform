@@ -769,7 +769,7 @@ exports.getDeviceName = function () {
 exports.getWebinosPath = function () {
     return pzpInstance.config.metaData.webinosRoot;
 };
-exports.getWebinosPorts = function () {
-    return pzpInstance.config.userPref.ports.pzp_webSocket
+exports.getWebinosPort = function () {
+    return pzpInstance.config.userPref.ports.pzp_webSocket;
 };
 
