@@ -54,7 +54,7 @@
   
   function writeLaunchRequest(appId,widget) {
     var fname = uuid.v1() + ".launch";
-    var launchFile = path.join(pzp.session.getWebinosPath(),'../wrt/' + fname);
+    var launchFile = path.join(pzp.session.getWebinosPath(),'wrt/' + fname);
     if (widget) {
       fs.writeFileSync(launchFile,'wgt:' + appId);
     } else {
