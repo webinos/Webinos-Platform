@@ -17,7 +17,7 @@
    </feature>
    <feature name="http://webinos.org/api/notifications" required="false" />
    <feature name="http://webinos.org/api/file" required="true" />
-   <feature name="http://www.w3.org/ns/api-perms/geolocation" 
+   <feature name="http://webinos.org/api/w3c/geolocation" 
      required="true" />
 
    <!-- privacy policies -->

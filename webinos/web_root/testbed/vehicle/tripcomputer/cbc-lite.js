@@ -250,7 +250,7 @@ function updateStatus(text){
                 		geolocation = null;
                 		
                 		webinos.discovery.findServices( 
-                        new ServiceType('http://www.w3.org/ns/api-perms/geolocation'),                         
+                        new ServiceType('http://webinos.org/api/w3c/geolocation'),
                         {onFound: function (service) {
                             updateStatus('geolocation service found');
                             geolocation = service;
@@ -264,7 +264,7 @@ function updateStatus(text){
                 		deviceorientation = null;
                 		
                 		webinos.discovery.findServices( 
-                        new ServiceType('http://webinos.org/api/deviceorientation'),                         
+                        new ServiceType('http://webinos.org/api/deviceorientation'),
                         {onFound: function (service) {
                             updateStatus('deviceorientation service found');
                             deviceorientation = service;

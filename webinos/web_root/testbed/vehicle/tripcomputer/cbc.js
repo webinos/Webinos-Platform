@@ -202,7 +202,7 @@ function findGeolocation() {
     allServices = {};
     geolocation = null;
     webinos.discovery.findServices(
-    new ServiceType('http://www.w3.org/ns/api-perms/geolocation'), {
+    new ServiceType('http://webinos.org/api/w3c/geolocation'), {
         onFound: function (service) {
             updateStatus('geolocation service found');
             geolocation = service;
