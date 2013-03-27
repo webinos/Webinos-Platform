@@ -5,7 +5,8 @@
 
 #define HEARTBEAT_INTERVAL 2500
 
-CServiceRunner::CServiceRunner(const TCHAR* serviceName) :
+CServiceRunner::CServiceRunner(CRuntimeParameters& runtimeParams,const TCHAR* serviceName, const TCHAR* serviceFolder) :
+  m_runtimeParameters(runtimeParams),
 	m_processHandle(NULL),
 	m_waitHandle(NULL),
 	m_pid(0),
@@ -16,6 +17,7 @@ CServiceRunner::CServiceRunner(const TCHAR* serviceName) :
 	m_restartTimer(NULL)
 {
 	m_parameters.serviceName = serviceName; 
+  m_parameters.serviceFolder = serviceFolder;
 }
 
 CServiceRunner::~CServiceRunner(void)
@@ -32,9 +34,7 @@ void CServiceRunner::Run()
 		CEventLogger::Get().Log(EVENTLOG_WARNING_TYPE, WEBINOS_SERVER_EVENT_CREATEWAITABLETIMER_FAILED, m_parameters.serviceName.c_str(), CEventLogger::Get().LookupError(GetLastError()), 0);
 	}
 
-	Start();
-
-	DWORD monitorThreadId;
+  DWORD monitorThreadId;
 	m_monitorThreadHandle = CreateThread(NULL, 0, MonitorThread, this, 0, &monitorThreadId);   
 }
 
@@ -43,19 +43,33 @@ void CServiceRunner::Start()
 	assert(m_pid == 0);
 	assert(m_processHandle == 0);
 
-	m_forceRestart = false;
+  m_forceRestart = false;
 
 	bool logged = false;
 
-	while (StartProcess()) 
+  // Get process parameters
+	CServiceManager smgr;
+	if (!smgr.GetUserParameters(m_user) || m_user.appDataPath.length() == 0 || !smgr.GetServiceParameters(m_user,m_parameters))
 	{
-		// Service failed to start, usually because of a configuration error - wait before retrying.
+		return;
+	}
+
+  while (!m_exiting && m_parameters.enabled != 0 && StartProcess()) 
+	{
+    // Service failed to start, usually because of a configuration error - wait before retrying.
 		if (!logged)
 		{
 			CEventLogger::Get().Log(EVENTLOG_WARNING_TYPE, WEBINOS_SERVER_EVENT_RESTART_SERVICE_FAILED, m_parameters.serviceName.c_str(), 0);
 			logged = true;
 		}
 		Sleep(5000);
+
+    // Refresh process parameters
+	  CServiceManager smgr;
+	  if (!smgr.GetUserParameters(m_user) || m_user.appDataPath.length() == 0 || !smgr.GetServiceParameters(m_user,m_parameters))
+	  {
+		  return;
+	  }
 	}
 }
 
@@ -90,17 +104,19 @@ int CServiceRunner::StartProcess()
 	PROCESS_INFORMATION pi;
 	ZeroMemory(&pi, sizeof(pi));
 
-	// Get process parameters
-	CServiceManager smgr;
-	if (!smgr.GetUserParameters(m_user) || m_user.appDataPath.length() == 0 || !smgr.GetServiceParameters(m_user,m_parameters))
-	{
-//		CEventLogger::Get().Log(EVENTLOG_ERROR_TYPE, WEBINOS_SERVER_EVENT_GET_PARAMETERS_FAILED, (LPCTSTR)m_parameters.serviceName, 0);
-		return 2;
-	}
+  std::string nodeArgs;
+  if (m_parameters.serviceName == WEBINOS_PZP)
+    nodeArgs = m_runtimeParameters.pzp_nodeArgs;
+  else if (m_parameters.serviceName == WEBINOS_PZH)
+    nodeArgs = m_runtimeParameters.pzh_nodeArgs;
+  else
+  {
+    return 2;
+  }
 
 	// Build process command line with parameters
 	TCHAR cmd[MAX_COMMAND_LINE_LENGTH];
-	if (_stprintf_s(cmd, _countof(cmd), _T("\"%s\\node.exe\" %s"), m_parameters.nodePath.c_str(), m_parameters.nodeArgs.c_str()) < 0) 
+	if (_stprintf_s(cmd, _countof(cmd), _T("\"%s\\node.exe\" %s"), m_runtimeParameters.nodePath.c_str(), nodeArgs.c_str()) < 0) 
 	{
 		CEventLogger::Get().Log(EVENTLOG_ERROR_TYPE, WEBINOS_SERVER_EVENT_OUT_OF_MEMORY, _T("creating service command"), _T("StartProcess"), 0);
 		return 2;
@@ -114,14 +130,14 @@ int CServiceRunner::StartProcess()
   TCHAR* currentPath = new TCHAR[pathSize+1];
   GetEnvironmentVariable(_T("PATH"), currentPath, pathSize);
   
-  if (_tcsstr(currentPath,m_parameters.nodePath.c_str()) == NULL)
+  if (_tcsstr(currentPath,m_runtimeParameters.nodePath.c_str()) == NULL)
   {
-    DWORD newPathSize = pathSize + m_parameters.nodePath.length() + 1;
+    DWORD newPathSize = pathSize + m_runtimeParameters.nodePath.length() + 1;
     TCHAR* newPath = new TCHAR[newPathSize];
-    _stprintf_s(newPath,newPathSize,_T("%s;%s"),m_parameters.nodePath.c_str(), currentPath);
+    _stprintf_s(newPath,newPathSize,_T("%s;%s"),m_runtimeParameters.nodePath.c_str(), currentPath);
     SetEnvironmentVariable(_T("PATH"),newPath);
 
-    GetEnvironmentVariable(_T("PATH"), newPath, pathSize + m_parameters.nodePath.length() + 1);
+    GetEnvironmentVariable(_T("PATH"), newPath, pathSize + m_runtimeParameters.nodePath.length() + 1);
 
     delete[] newPath;
   }
@@ -129,7 +145,7 @@ int CServiceRunner::StartProcess()
   delete[] currentPath;
 
 	DWORD processFlags = m_parameters.showOutput == 0 ? CREATE_NO_WINDOW : 0;
-	if (!CreateProcess(0, cmd, 0, 0, false, processFlags, NULL, m_parameters.workingDirectoryPath.c_str(), &si, &pi)) 
+	if (!CreateProcess(0, cmd, 0, 0, false, processFlags, NULL, m_runtimeParameters.workingDirectoryPath.c_str(), &si, &pi)) 
 	{
 		unsigned long error = GetLastError();
 		if (error == ERROR_INVALID_PARAMETER) 
@@ -155,13 +171,16 @@ int CServiceRunner::StartProcess()
 		// Register to receive notification when the process exits.
 		if (!RegisterWaitForSingleObject(&m_waitHandle, m_processHandle, globalServiceEnded, (void *)this, INFINITE, WT_EXECUTEONLYONCE | WT_EXECUTELONGFUNCTION)) 
 		{
-			CEventLogger::Get().Log(EVENTLOG_WARNING_TYPE, WEBINOS_SERVER_EVENT_REGISTERWAITFORSINGLEOBJECT_FAILED, m_parameters.serviceName.c_str(), m_parameters.nodePath, CEventLogger::Get().LookupError(GetLastError()), 0);
+			CEventLogger::Get().Log(EVENTLOG_WARNING_TYPE, WEBINOS_SERVER_EVENT_REGISTERWAITFORSINGLEOBJECT_FAILED, m_parameters.serviceName.c_str(), m_runtimeParameters.nodePath, CEventLogger::Get().LookupError(GetLastError()), 0);
 			return 3;
 		}
 	}
 	else
 	{
-		// Process has ended already.
+		// Process has ended already - clean up.
+    m_restartAttempts++;
+    m_pid = 0;
+    m_processHandle = 0;
 		return 3;
 	}
 
@@ -223,9 +242,10 @@ void CServiceRunner::KillProcess()
 	{
 		KillProcessTree(m_pid, 0);
 
-		m_processHandle = 0;
 		m_pid = 0;
 	}
+
+  m_processHandle = 0;
 }
 
 // Helper
@@ -267,10 +287,17 @@ void CServiceRunner::KillProcessTree(DWORD myprocID, DWORD dwTimeout)
 
 void CServiceRunner::ForceRestart()
 {
-	m_forceRestart = true;
+  m_forceRestart = true;
 
-	// Kill Process and wait for ProcessStopped to be called.
-	KillProcess();
+  if (m_pid != 0)
+  {
+    // Kill Process and wait for ProcessStopped to be called.
+	  KillProcess();
+  }
+  else
+  {
+    Start();
+  }
 }
 
 void CALLBACK globalServiceEnded(void* context, BOOLEAN TimerOrWaitFired)
@@ -296,6 +323,7 @@ DWORD WINAPI MonitorThread(LPVOID lpParam)
 		CUserParameters currentUser;
 		CServiceParameters currentParams;
 		currentParams.serviceName = runningParams.serviceName;
+    currentParams.serviceFolder = runningParams.serviceFolder;
 
 		CServiceManager mgr;
 		if (mgr.GetUserParameters(currentUser) && mgr.GetServiceParameters(currentUser,currentParams))
@@ -313,7 +341,7 @@ DWORD WINAPI MonitorThread(LPVOID lpParam)
 		}
 
 		// Indicate the host service is running.
-		mgr.WriteServiceHeartbeat(runningParams);
+		mgr.WriteServiceHeartbeat(runningUser, runningParams);
 
 		// Indicate the node process is running.
 		if (runner->m_processHandle != NULL)
@@ -324,4 +352,3 @@ DWORD WINAPI MonitorThread(LPVOID lpParam)
 
 	return 0;
 }
-

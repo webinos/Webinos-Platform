@@ -29,6 +29,13 @@ if [ $? -ne 0 ]; then
   test_failed=true;
 fi
 
+#move back the original config file if it still exists
+if [ -f "$config_backup_file" ]
+then
+    echo "moving $config_backup_file"
+   mv -f $config_backup_file ./webinos_config.json
+fi
+
 # Start the PZP
 # Disable as PZP is starting but not getting completely loaded
 #node webinos_pzp.js --test
