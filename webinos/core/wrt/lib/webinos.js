@@ -102,8 +102,8 @@
         };
         channel.onopen = function() {
           var url = window.location.pathname;
-          var filename = url.substring(url.lastIndexOf('/')+1);
-          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser', value: filename}});
+          //var filename = url.substring(url.lastIndexOf('/')+1); //patch: http://jira.webinos.org/browse/WP-878
+          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser', value: url}});
         };
     }
 

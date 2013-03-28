@@ -667,7 +667,7 @@ var PzpWSS = function (parent) {
             if (!webAppName) webAppName = require("crypto").randomBytes(3).toString("hex").toUpperCase();
             //sessionWebApp  += 1;
             sessionWebApp = require("crypto").createHash("md5").update(parent.pzp_state.sessionId + webAppName).digest("hex");
-            appId = parent.pzp_state.sessionId  + "/"+ sessionWebApp;
+            appId = parent.pzp_state.sessionId  + "/"+ sessionWebApp + "_" + (Date.now()+Math.random()*10000); //patch: http://jira.webinos.org/browse/WP-878
             connectedWebApp[appId] = connection;
             connection.id = appId; // this appId helps in while deleting socket connection has ended
 
