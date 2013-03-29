@@ -142,3 +142,97 @@ describe('deliveryNotification message check', function() {
         }
     });
 });
+
+describe('JSONRPC20Request message check', function() {
+
+    // JSONRPC20Request message example
+    var req_msg = {
+        type : 'JSONRPC20Request',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        payload : {}
+    };
+
+    it('Recognized JSONRPC20Request message', function() {
+        expect(validation.checkSchema(req_msg)).toEqual(false);
+    });
+
+    // wrong JSONRPC20Request message examples
+    var wrong_req_msg = [];
+    wrong_req_msg[0] = {
+        type : 'JSONRPC20Request',
+        from : 'fromString',
+        to : 'toString',
+        //id : 'idString', // required field is missing
+        payload : {}
+    };
+    wrong_req_msg[1] = {
+        type : 'JSONRPC20Request',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        additional_field : 'fieldString', // not allowed field
+        payload : {}
+    };
+    wrong_req_msg[2] = {
+        type : 'JSONRPC20Request',
+        from : 'fromString',
+        to : 'toString',
+        id : 5, // wrong type
+        payload : {}
+    };
+
+    it('Unrecognized JSONRPC20Request messages', function() {
+        for (var i = 0; i < wrong_req_msg.length; i++) {
+            expect(validation.checkSchema(wrong_req_msg[i])).toEqual(true);
+        }
+    });
+});
+
+describe('JSONRPC20Response message check', function() {
+
+    // JSONRPC20Response message example
+    var JsonRes_msg = {
+        type : 'JSONRPC20Response',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        payload : {}
+    };
+
+    it('Recognized JSONRPC20Response message', function() {
+        expect(validation.checkSchema(JsonRes_msg)).toEqual(false);
+    });
+
+    // wrong JSONRPC20Response message examples
+    var wrong_res_msg = [];
+    wrong_res_msg[0] = {
+        type : 'JSONRPC20Response',
+        from : 'fromString',
+        to : 'toString',
+        //id : 'idString', // required field is missing
+        payload : {}
+    };
+    wrong_res_msg[1] = {
+        type : 'JSONRPC20Response',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        additional_field : 'fieldString', // not allowed field
+        payload : {}
+    };
+    wrong_res_msg[2] = {
+        type : 'JSONRPC20Response',
+        from : 'fromString',
+        to : 'toString',
+        id : 5, // wrong type
+        payload : {}
+    };
+
+    it('Unrecognized JSONRPC20Response messages', function() {
+        for (var i = 0; i < wrong_res_msg.length; i++) {
+            expect(validation.checkSchema(wrong_res_msg[i])).toEqual(true);
+        }
+    });
+});
