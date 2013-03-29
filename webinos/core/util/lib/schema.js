@@ -19,11 +19,11 @@
  ******************************************************************************/
 
 (function () {
-    "use strict";
+    'use strict';
 
-    var myEnv = require("schema")("myEnvironment",
-        { fallbacks: "STRICT_FALLBACKS" });
-    var assert = require("assert");
+    var myEnv = require('schema')('myEnvironment',
+        { fallbacks: 'STRICT_FALLBACKS' });
+    var assert = require('assert');
 
     /**
      * Validate messages defined in D3.3
@@ -35,22 +35,11 @@
     var checkSchema = function(msg) {
 
         // generic message validation
-        var validation = checkGenericSchema(msg);
+        var validation = checkByType(msg, 'generic');
 
         // validation error is false, so generic message validation is ok
         if(validation === false) {
-            if (msg.type === "deliveryNotification") {
-                return checkDeliveyNotificationSchema(msg);
-            }
-            if (msg.type === "JSONRPC20Request") {
-                return checkJSONRPC20RequestSchema(msg);
-            }
-            if (msg.type === "JSONRPC20Response") {
-                return checkJSONRPC20ResponseSchema(msg);
-            }
-            if (msg.type === "prop") {
-                return checkPropSchema(msg);
-            }
+            return checkByType(msg, msg.type);
         }
         else {
             // generic message validation failed
@@ -59,197 +48,127 @@
     };
 
     /**
-     * Validate "deliveryNotification" message
-     * @name checkDeliveryNotificationSchema
+     * Validate messages by type
+     * @name checkByType
      * @function
-     * @param msg Message to validate
+     * @param message Message to validate
+     * @param type Message type
      */
-    var checkDeliveryNotificationSchema = function(message) {
+    var checkByType = function(message, type) {
         var schema, validation;
 
-        schema = myEnv.Schema.create({
-            "type": "object",
-            "properties":{
-                "type": {
-                    "type": "string",
-                    "enum": ["deliveryNotification"]
+        if (type === 'generic') {
+            // 'deliveryNotification', 'JSONRPC20Request', 'JSONRPC20Response'
+            // and 'Prop' types are allowed
+            schema = myEnv.Schema.create({
+                'type': 'object',
+                'properties': {
+                    'type': {
+                        'type': 'string',
+                        'enum': ['deliveryNotification', 'JSONRPC20Request',
+                            'JSONRPC20Response', 'Prop'],
+                        'description': 'non lo so',
+                    },
+                    'from': {
+                        'type': 'string'
+                    },
+                    'to': {
+                        'type': 'string'
+                    },
+                    'id': {
+                        'type': 'string'
+                    },
+                    'timestamp': {
+                        'type': 'string',
+                        'optional': true
+                    },
+                    'expires': {
+                        'type': 'string',
+                        'optional': true
+                    },
+                    'deliveryReceipt': {
+                        'type': 'boolean',
+                        'optional': true
+                    },
+                    'payload': {
+                        'type': ['object', 'string', 'null'],
+                        'optional': true
+                    }
                 },
-                "deliveryReceipt": {
-                    "type": "boolean",
-                    "enum": ["true"]
+                'additionalProperties': false
+            });
+        } else if (type === 'deliveryNotification') {
+            schema = myEnv.Schema.create({
+                'type': 'object',
+                'properties':{
+                    'type': {
+                        'type': 'string',
+                        'enum': ['deliveryNotification']
+                    },
+                    'deliveryReceipt': {
+                        'type': 'boolean',
+                        'enum': ['true']
+                    },
+                    'payload': {
+                        'type': 'string',
+                        'enum': ['ok', 'duplicate', 'invalid', 'badDestination',
+                            'expired', 'refused', 'noReference']
+                    }
                 },
-                "payload": {
-                    "type": "string",
-                    "enum": ["ok", "duplicate", "invalid", "badDestination",
-                        "expired", "refused", "noReference"]
-                }
-            },
-            "additionalProperties": true
-        });
-        try {
-            validation = schema.validate(message);
-            assert.strictEqual(validation.isError(), false);
-            return validation.isError();
-        } catch (err) {
-            console.log(validation.getError());
-            console.log(validation.getError().errors);
+                'additionalProperties': true
+            });
+        } else if (type === 'JSONRPC20Request') {
+            schema = myEnv.Schema.create({
+                'type': 'object',
+                'properties':{
+                    'type': {
+                        'type': 'string',
+                        'enum': ['JSONRPC20Request']
+                    },
+                    'payload': {
+                        'type': 'object'
+                    }
+                },
+                'additionalProperties': true
+            });
+        } else if (type === 'JSONRPC20Response') {
+            schema = myEnv.Schema.create({
+                'type': 'object',
+                'properties':{
+                    'type': {
+                        'type': 'string',
+                        'enum': ['JSONRPC20Response']
+                    },
+                    'payload': {
+                        'type': 'object'
+                    }
+                },
+                'additionalProperties': true
+            });
+        } else if (type === 'Prop') {
+            schema = myEnv.Schema.create({
+                'type': 'object',
+                'properties':{
+                    'type': {
+                        'type': 'string',
+                        'enum': ['Prop']
+                    },
+                    'payload': {
+                        'type': 'object'
+                    }
+                },
+                'additionalProperties': true
+            });
+        } else {
+            console.log('Invalid message type: ' + type);
             return true;
         }
-    };
-
-    /**
-     * Validate "JSONRPC20Request" message
-     * @name checkJSONRPC20RequestSchema
-     * @function
-     * @param msg Message to validate
-     */
-    var checkJSONRPC20RequestSchema = function(message) {
-        var schema, validation;
-
-        schema = myEnv.Schema.create({
-            "type": "object",
-            "properties":{
-                "type": {
-                    "type": "string",
-                    "enum": ["JSONRPC20Request"]
-                },
-                "payload": {
-                    "type": "object"
-                }
-            },
-            "additionalProperties": true
-        });
         try {
             validation = schema.validate(message);
             assert.strictEqual(validation.isError(), false);
             return validation.isError();
         } catch (err) {
-            console.log(validation.getError());
-            console.log(validation.getError().errors);
-            return true;
-        }
-    };
-
-    /**
-     * Validate "JSONRPC20Response" message
-     * @name checkJSONRPC20ResponseSchema
-     * @function
-     * @param msg Message to validate
-     */
-    var checkJSONRPC20ResponseSchema = function(message) {
-        var schema, validation;
-
-        schema = myEnv.Schema.create({
-            "type": "object",
-            "properties":{
-                "type": {
-                    "type": "string",
-                    "enum": ["JSONRPC20Response"]
-                },
-                "payload": {
-                    "type": "object"
-                }
-            },
-            "additionalProperties": true
-        });
-        try {
-            validation = schema.validate(message);
-            assert.strictEqual(validation.isError(), false);
-            return validation.isError();
-        } catch (err) {
-            console.log(validation.getError());
-            console.log(validation.getError().errors);
-            return true;
-        }
-    };
-
-    /**
-     * Validate "prop" message
-     * @name checkPropSchema
-     * @function
-     * @param msg Message to validate
-     */
-    var checkPropSchema = function(message) {
-        var schema, validation;
-
-        schema = myEnv.Schema.create({
-            "type": "object",
-            "properties":{
-                "type": {
-                    "type": "string",
-                    "enum": ["prop"]
-                },
-                "payload": {
-                    "type": "object"
-                }
-            },
-            "additionalProperties": true
-        });
-        try {
-            validation = schema.validate(message);
-            assert.strictEqual(validation.isError(), false);
-            return validation.isError();
-        } catch (err) {
-            console.log(validation.getError());
-            console.log(validation.getError().errors);
-            return true;
-        }
-    };
-
-    /**
-     * Validate generic message
-     * @name checkGenericSchema
-     * @function
-     * @param msg Message to validate
-     */
-    var checkGenericSchema = function(message) {
-        var schema, validation;
-
-        // "deliveryNotification", "JSONRPC20Request", "JSONRPC20Response" and
-        // "prop" types are allowed
-        schema = myEnv.Schema.create({
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "enum": ["deliveryNotification", "JSONRPC20Request",
-                        "JSONRPC20Response", "prop"]
-                },
-                "from": {
-                    "type": "string"
-                },
-                "to": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "optional": true
-                },
-                "expires": {
-                    "type": "string",
-                    "optional": true
-                },
-                "deliveryReceipt": {
-                    "type": "boolean",
-                    "optional": true
-                },
-                "payload": {
-                    "type": ["object", "string", "null"],
-                    "optional": true
-                }
-            },
-            "additionalProperties": false
-        });
-        try {
-            validation = schema.validate(message);
-            assert.strictEqual(validation.isError(), false);
-            return validation.isError();
-        } catch (err) {
-            console.log("schema");
-            console.log(validation.getError());
+            console.log(type + ' message validation failed');
             console.log(validation.getError().errors);
             return true;
         }
