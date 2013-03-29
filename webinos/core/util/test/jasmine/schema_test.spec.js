@@ -83,3 +83,62 @@ describe('Prop message check', function() {
         }
     });
 });
+
+describe('deliveryNotification message check', function() {
+
+    // deliveryNotification message example
+    var dn_msg = {
+        type : 'deliveryNotification',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        deliveryReceipt: false,
+        payload : 'ok'
+    };
+
+    it('Recognized deliveryNotification message', function() {
+        expect(validation.checkSchema(dn_msg)).toEqual(false);
+    });
+
+    // wrong deliveryNotification message examples
+    var wrong_dn_msg = [];
+    wrong_dn_msg[0] = {
+        type : 'deliveryNotification',
+        from : 'fromString',
+        to : 'toString',
+        //id : 'idString', // required field is missing
+        deliveryReceipt: false,
+        payload : 'ok'
+    };
+    wrong_dn_msg[1] = {
+        type : 'deliveryNotification',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        additional_field : 'fieldString', // not allowed field
+        deliveryReceipt: false,
+        payload : 'ok'
+    };
+    wrong_dn_msg[2] = {
+        type : 'deliveryNotification',
+        from : 'fromString',
+        to : 'toString',
+        id : 5, // wrong type
+        deliveryReceipt: false,
+        payload : 'ok'
+    };
+    wrong_dn_msg[3] = {
+        type : 'deliveryNotification',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        deliveryReceipt: false,
+        payload : 'unknown' // wrong payload
+    };
+
+    it('Unrecognized deliveryNotification messages', function() {
+        for (var i = 0; i < wrong_dn_msg.length; i++) {
+            expect(validation.checkSchema(wrong_dn_msg[i])).toEqual(true);
+        }
+    });
+});
