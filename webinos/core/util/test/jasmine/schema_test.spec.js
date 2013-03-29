@@ -33,7 +33,7 @@ describe('Generic message check', function() {
     };
 
     it('Unrecognized generic message', function() {
-        expect(validation.checkSchema(wrong_generic_msg)).toEqual(true);
+        expect(validation.checkSchema(wrong_generic_msg, 'D3.3')).toEqual(true);
     });
 });
 
@@ -49,7 +49,7 @@ describe('Prop message check', function() {
     };
 
     it('Recognized Prop message', function() {
-        expect(validation.checkSchema(prop_msg)).toEqual(false);
+        expect(validation.checkSchema(prop_msg, 'D3.3')).toEqual(false);
     });
 
     // wrong Prop message examples
@@ -79,7 +79,8 @@ describe('Prop message check', function() {
 
     it('Unrecognized Prop messages', function() {
         for (var i = 0; i < wrong_prop_msg.length; i++) {
-            expect(validation.checkSchema(wrong_prop_msg[i])).toEqual(true);
+            expect(validation.checkSchema(wrong_prop_msg[i], 'D3.3'))
+                .toEqual(true);
         }
     });
 });
@@ -97,7 +98,7 @@ describe('deliveryNotification message check', function() {
     };
 
     it('Recognized deliveryNotification message', function() {
-        expect(validation.checkSchema(dn_msg)).toEqual(false);
+        expect(validation.checkSchema(dn_msg, 'D3.3')).toEqual(false);
     });
 
     // wrong deliveryNotification message examples
@@ -138,7 +139,8 @@ describe('deliveryNotification message check', function() {
 
     it('Unrecognized deliveryNotification messages', function() {
         for (var i = 0; i < wrong_dn_msg.length; i++) {
-            expect(validation.checkSchema(wrong_dn_msg[i])).toEqual(true);
+            expect(validation.checkSchema(wrong_dn_msg[i], 'D3.3'))
+                .toEqual(true);
         }
     });
 });
@@ -155,7 +157,7 @@ describe('JSONRPC20Request message check', function() {
     };
 
     it('Recognized JSONRPC20Request message', function() {
-        expect(validation.checkSchema(req_msg)).toEqual(false);
+        expect(validation.checkSchema(req_msg, 'D3.3')).toEqual(false);
     });
 
     // wrong JSONRPC20Request message examples
@@ -185,7 +187,8 @@ describe('JSONRPC20Request message check', function() {
 
     it('Unrecognized JSONRPC20Request messages', function() {
         for (var i = 0; i < wrong_req_msg.length; i++) {
-            expect(validation.checkSchema(wrong_req_msg[i])).toEqual(true);
+            expect(validation.checkSchema(wrong_req_msg[i], 'D3.3'))
+                .toEqual(true);
         }
     });
 });
@@ -202,7 +205,7 @@ describe('JSONRPC20Response message check', function() {
     };
 
     it('Recognized JSONRPC20Response message', function() {
-        expect(validation.checkSchema(JsonRes_msg)).toEqual(false);
+        expect(validation.checkSchema(JsonRes_msg, 'D3.3')).toEqual(false);
     });
 
     // wrong JSONRPC20Response message examples
@@ -232,7 +235,116 @@ describe('JSONRPC20Response message check', function() {
 
     it('Unrecognized JSONRPC20Response messages', function() {
         for (var i = 0; i < wrong_res_msg.length; i++) {
-            expect(validation.checkSchema(wrong_res_msg[i])).toEqual(true);
+            expect(validation.checkSchema(wrong_res_msg[i], 'D3.3'))
+                .toEqual(true);
         }
     });
+});
+
+// old messages tests
+
+describe('Generic old message check', function() {
+
+    // wrong genric old message example
+    var wrong_generic_msg = {
+        type : 'another type', // unrecognized type
+        from : 'WebinosPzh/WebinosPzp',
+        to : 'WebinosPzh',
+        payload:{
+            status : 'pzpDetails',
+            message : 8040
+        }
+    };
+
+    it('Unrecognized generic message', function() {
+        expect(validation.checkSchema(wrong_generic_msg)).toEqual(true);
+    });
+});
+
+
+describe ('Old prop message check', function () {
+
+    // old prop message example
+    var prop_msg = {
+        type : 'prop',
+        from : 'WebinosPzh/WebinosPzp',
+        to : 'WebinosPzh',
+        payload : {
+            status : 'pzpDetails',
+            message : 8040
+        }
+    };
+
+    it ('Recognized old prop message', function () {
+        expect (validation.checkSchema(prop_msg)).toEqual(false);
+    });
+
+    var wrong_prop_msg = {
+        type : 'prop',
+        id : 3, // forbidden field
+        from : 'WebinosPzh/WebinosPzp',
+        to : 'WebinosPzh',
+        payload : {
+            status : 'pzpDetails',
+            message : 8040
+        }
+    };
+
+    it ('Unrecognized old prop message', function () {
+        expect (validation.checkSchema(wrong_prop_msg)).toEqual(true);
+    });
+
+});
+
+describe ('Old JSONRPC message check', function () {
+
+    // JSONRPC message examples
+    var JSONRPC_msg = [];
+    JSONRPC_msg[0] = {
+        type : 'JSONRPC',
+        register : true,
+        from : 'WebinosPzh/WebinosPzp',
+        to : 'WebinosPzh',
+        payload : null
+    };
+    JSONRPC_msg[1] = {
+        type : 'JSONRPC',
+        id : 3,
+        from : 'WebinosPzh/WebinosPzp/0',
+        to : 'WebinosPzh',
+        resp_to : 'WebinosPzh/WebinosPzp/0',
+        payload : {
+            jsonrpc : '2.0',
+            id : 68,
+            method : 'http://webinos.org/api/test@6e6885b25a7ddb5f4658e7.get42',
+            serviceAddress : 'WebinosPzh',
+            params : ['foo']
+        }
+    };
+
+    it ('Recognized old JSONRPC message', function () {
+        for (var i = 0; i < JSONRPC_msg.length; i++) {
+            expect(validation.checkSchema(JSONRPC_msg[i])).toEqual(false);
+        }
+    });
+
+    var wrong_JSONRPC_msg = {
+        type : 'JSONRPC',
+        id : 3,
+        from : 'WebinosPzh/WebinosPzp/0',
+        to : 'WebinosPzh',
+        resp_to : null, // forbidden value
+        payload : {
+            jsonrpc : '2.0',
+            id : 68,
+            method : 'http://webinos.org/api/test@6e6885b25a7ddb5f4658e7.get42',
+            serviceAddress : 'WebinosPzh',
+            params : ['foo']
+        }
+    };
+
+    it ('Unrecognized old JSONRPC message', function () {
+        expect (validation.checkSchema(wrong_JSONRPC_msg)).toEqual(true);
+    });
+
 });
