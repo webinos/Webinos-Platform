@@ -36,3 +36,50 @@ describe('Generic message check', function() {
         expect(validation.checkSchema(wrong_generic_msg)).toEqual(true);
     });
 });
+
+describe('Prop message check', function() {
+
+    // Prop message example
+    var prop_msg = {
+        type : 'Prop',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        payload : {}
+    };
+
+    it('Recognized Prop message', function() {
+        expect(validation.checkSchema(prop_msg)).toEqual(false);
+    });
+
+    // wrong Prop message examples
+    var wrong_prop_msg = [];
+    wrong_prop_msg[0] = {
+        type : 'Prop',
+        from : 'fromString',
+        to : 'toString',
+        //id : 'idString', // required field is missing
+        payload : {}
+    };
+    wrong_prop_msg[1] = {
+        type : 'Prop',
+        from : 'fromString',
+        to : 'toString',
+        id : 'idString',
+        additional_field : 'fieldString', // not allowed field
+        payload : {}
+    };
+    wrong_prop_msg[2] = {
+        type : 'Prop',
+        from : 'fromString',
+        to : 'toString',
+        id : 5, // wrong type
+        payload : {}
+    };
+
+    it('Unrecognized Prop messages', function() {
+        for (var i = 0; i < wrong_prop_msg.length; i++) {
+            expect(validation.checkSchema(wrong_prop_msg[i])).toEqual(true);
+        }
+    });
+});
