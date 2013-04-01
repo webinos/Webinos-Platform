@@ -152,27 +152,52 @@ LocalFileSystem.prototype.remove = function (path, recursive, callback) {
 LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
   var self = this
 
-  var flags = exclusive ? "wx" : "a"
-  fs.open(self.realize(path), flags, function (error, fd) {
-    if (!error) {
-      return fs.close(fd, function (error) {
-        callback(error ? map(error) : null)
-      })
+  // var flags = exclusive ? "wx" : "a"
+  // fs.open(self.realize(path), flags, function (error, fd) {
+  //   if (!error) {
+  //     return fs.close(fd, function (error) {
+  //       callback(error ? map(error) : null)
+  //     })
+  //   }
+
+  //   fs.stat(self.realize(path), function (error2, stats) {
+  //     if (error2) return callback(map(error))
+
+  //     if (exclusive) {
+  //       return callback(new util.CustomError("PathExistsError"))
+  //     }
+
+  //     if (!stats.isFile()) {
+  //       return callback(new util.CustomError("TypeMismatchError"))
+  //     }
+
+  //     callback(null)
+  //   })
+  // })
+
+  fs.stat(self.realize(path), function (error1, stats) {
+    switch (error1 ? error1.code : null) {
+      case null:
+        if (exclusive) {
+          callback(new util.CustomError("PathExistsError"))
+        } else if (!stats.isFile()) {
+          callback(new util.CustomError("TypeMismatchError"))
+        } else {
+          callback(null)
+        }
+        break
+      case "ENOENT":
+        fs.open(self.realize(path), "w", function (error2, fd) {
+          if (error2) return callback(map(error2))
+          fs.close(fd, function (error3) {
+            if (error3) return callback(map(error3))
+            callback(null)
+          })
+        })
+        break
+      default:
+        callback(map(error1))
     }
-
-    fs.stat(self.realize(path), function (error2, stats) {
-      if (error2) return callback(map(error))
-
-      if (exclusive) {
-        return callback(new util.CustomError("PathExistsError"))
-      }
-
-      if (!stats.isFile()) {
-        return callback(new util.CustomError("TypeMismatchError"))
-      }
-
-      callback(null)
-    })
   })
 }
 
