@@ -222,43 +222,5 @@ Utils.prototype.executeCommandViaSpawn = function(command, arguments, cb, argsTo
 }
 
 
-Utils.prototype.performAPICall = function(apiCallUrl, cb, callType){
-    var restReq = undefined;
-    switch(callType){
-        case "post":
-            restReq = restler.post(apiCallUrl);
-            break;
-        case "get":
-        default:
-            restReq = restler.get(apiCallUrl);
-            break;
-    }
-    if(restReq !== undefined){
-        restReq.on('complete', function(result){
-            if(result instanceof Error){
-                sys.puts('Error: ' + result.message);
-            }else{
-                sys.puts(result);
-            }
-            cb(JSON.parse(result));
-        });
-    }else{
-        console.log("Specified Calltype Not Supported");
-    }
-}
-
-
-Utils.prototype.formatURL = function(resourceType, resourceId, operation, apiParams){
-    var url = config.BASEURL + config.SERVICES + resourceType;
-    if (resource_id != "")
-        url += "/" + resourceId;
-    var query = {"operation": operation, "user": config.USERNAME, "password": config.PASSWORD };
-    url += "?" + querystring.stringify(query);
-    //Maybe check the length as well
-    if(apiParams !== undefined)
-        url += "&" + querystring.stringify(apiParams);
-    url = encodeURIComponent(url);
-    return url;
-}
 
 module.exports = Utils;
