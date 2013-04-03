@@ -95,7 +95,7 @@
     * @function
     * @param manifest Parsed application manifest
     * @param appId Application identifier
-    * @param features Array of {name, permit} elements related to not denied
+    * @param features Array of {name, effect} elements related to not denied
     * features
     * @param userId User identifier
     * @param requestorId Requestor identifier
@@ -282,7 +282,7 @@
             } else if (subject['subject-match'][i].$.attr === 'requestor-id') {
                 requestorId = subject['subject-match'][i].$.match;
             }
-        } 
+        }
 
         for (var i = 0; i < parsedPolicy.length; i++) {
             if (parsedPolicy[i].target && util.isArray(parsedPolicy[i].target)
@@ -367,7 +367,7 @@
     * Generate a new rule
     * @function
     * @param manifest Parsed application manifest
-    * @param features Array of {name, permit} elements related to not denied
+    * @param features Array of {name, effect} elements related to not denied
     * features
     * @param effect Rule effect (permit, prompt-blanket, prompt-session,
     * prompt-oneshot)
