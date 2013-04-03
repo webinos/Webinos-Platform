@@ -61,18 +61,17 @@
 	 *              |
 	 *              +-- A0B3
 	 * other_user@her_domain.com/laptop/urn:services-webinos-org:calender/
-	 * @param rpcHandler RPC handler manager.
 	 */
-  /**
+
+	/**
 	 * MessageHandler constructor
 	 *  @constructor
 	 *  @param rpcHandler RPC handler manager.
 	 */
 	var MessageHandler = function (rpcHandler) {
 		this.sendMsg = null;
-		this.objectRef = null;
 
-		this.ownId = null;
+		this.ownSessionId = null;
 		this.separator = null;
 
 		this.rpcHandler = rpcHandler;
@@ -85,8 +84,6 @@
 		 *  TODO need to adjust clients[] to accommodate PZH farm, PZP farm scenarios
 		 */
 		this.clients = {};
-
-		this.message = {};
 
 		/**
 		 * To Store callback functions associated with each message.
@@ -105,33 +102,20 @@
 		this.sendMsg = sendMessageFunction;
 	};
 
-	MessageHandler.prototype.sendMessage = function (message, sessionid, objectRef) {
-		this.sendMsg(message, sessionid, objectRef);
+	/**
+	 * Function to set own session identity.
+	 * @param ownSessionId pz session id
+	 */
+	MessageHandler.prototype.setOwnSessionId = function (ownSessionId) {
+		this.ownSessionId = ownSessionId;
 	};
 
 	/**
-	 * To set the reference to different objects.
-	 * @param objref A object reference to referring different PZH or PZP instances.
+	 * Function to get own session identity.
 	 */
-	MessageHandler.prototype.setObjectRef = function (objref) {
-		this.objectRef = objref;
+	MessageHandler.prototype.getOwnSessionId = function () {
+		return this.ownSessionId;
 	};
-
-	/**
-	 * Function to get own identity.
-	 * @param OwnIdGetter A function that used to get own identification.
-	 */
-	MessageHandler.prototype.setGetOwnId = function (OwnIdGetter) {
-		this.ownId = OwnIdGetter;
-	};
-
-	/**
-	 * Function to get own identity.
-	 */
-	MessageHandler.prototype.getOwnId = function () {
-		return this.ownId;
-	};
-
 
 	/**
 	 * Set separator used to in Addressing to separator different part of the address.
@@ -144,50 +128,26 @@
 	};
 
 	/**
-	 *  Create new message. Refer Message fields above for more details.
-	 *  @param options An array that contains elements to define fields in a message
-	 */
-	MessageHandler.prototype.createMessage = function (options) {
-		var message = {};
-
-		for (var i in options ) {
-			message[i] = options[i];
-		}
-		return message;
-	};
-
-	/**
-	 *  Create messageid. This messageid is used as an identifier for callback function associated
-	 *  with the message.
-	 *  @param message Message
-	 *  @param successHandler Success handler
-	 *  @param errorHandler	Error handler
-	 */
-	MessageHandler.prototype.createMessageId = function(message, successHandler, errorHandler) {
-		message.id =  1 + Math.floor(Math.random() * 1024);
-		if (errorHandler || successHandler)	{
-			this.messageCallbacks[message.id] = {onError: errorHandler, onSuccess: successHandler};
-		}
-	};
-
-	/**
-	 *  Only need to call this once. This will result a sessionid in the receiver's storage.
+	 *  Create a register message.
+	 *  Use the created message to send it to an entity, this will setup a session
+	 *  on the receiver side. The receiver will then route messages to the
+	 *  sender of this message.
 	 *  @param from Message originator
 	 *  @param to  Message destination
 	 */
-	MessageHandler.prototype.registerSender = function(from, to) {
+	MessageHandler.prototype.createRegisterMessage = function(from, to) {
 		logger.log('creating register msg to send from ' + from + ' to ' + to);
 		if (from === to) throw new Error('cannot create register msg to itself');
 
-		var options = {};
-		options.register = true;
-		options.to = to;
-		options.from = from;
-		options.type = "JSONRPC";
-		options.payload = null;
+		var msg = {
+			register: true,
+			to: to,
+			from: from,
+			type: 'JSONRPC',
+			payload: null
+		};
 
-		var message = this.createMessage(options);
-		return message;
+		return msg;
 	};
 
 	/**
@@ -196,98 +156,113 @@
 	 *  @param receiver Message receiver
 	 */
 	MessageHandler.prototype.removeRoute = function (sender, receiver) {
-		var session = [sender, receiver];
-		session.join("->");
+		var session = [sender, receiver].join("->");
 		if (this.clients[session]) {
-			this.clients[session] = null;
+			delete this.clients[session];
 		}
 	};
 
 	/**
+	 * Returns true if msg is a msg for app on wrt connected to this pzp.
+	 */
+	function isLocalAppMsg(msg) {
+		if (/(?:\/[a-f0-9]+){2,}/.exec(msg.to) // must include /$id/$otherid to be wrt
+				&& /\//.exec(this.ownSessionId) // must include "/" to be pzp
+				&& msg.to.substr(0, this.ownSessionId.length) === this.ownSessionId) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Somehow finds out the PZH address and returns it?
+	 */
+	function getPzhAddr(message) {
+		// check occurances of separator used in addressing
+		var data = message.to.split(this.separator);
+		var occurences = data.length - 1;
+		var id = data[0];
+		var forwardto = data[0];
+
+		// strip from right side
+		for (var i = 1; i < occurences; i++) {
+			id = id + this.separator + data[i];
+			var new_session1 = [id, this.ownSessionId].join("->");
+			var new_session2 = [this.ownSessionId, id].join("->");
+
+			if (this.clients[new_session1] || this.clients[new_session2]) {
+				forwardto = id;
+			}
+		}
+
+		if (forwardto === data[0]) {
+			var s1 = [forwardto, this.ownSessionId].join("->");
+			var s2 = [this.ownSessionId, forwardto].join("->");
+			if (this.clients[s1] || this.clients[s2])
+				forwardto = data[0];
+			else
+			{
+				var own_addr = this.ownSessionId.split(this.separator);
+				var own_pzh = own_addr[0]
+				if (forwardto !== own_pzh) {
+					forwardto = own_pzh;
+				}
+			}
+		}
+		return forwardto;
+	}
+
+	/**
 	 * RPC writer - referto write function in  RPC
 	 * @param rpc Message body
-	 * @param respto Destination for rpc result to be sent to
+	 * @param to Destination for rpc result to be sent to
 	 * @param msgid Message id
 	 */
-	MessageHandler.prototype.write = function (rpc, respto, msgid) {
-		//TODO calling write function from RPC does not allow to register call-backs yet
+	MessageHandler.prototype.write = function (rpc, to, msgid) {
+		if (!to) throw new Error('to is missing, cannot send message');
 
-		//create response message
-		var options = {};
-		options.to = respto;
-//	options.resp_to = respto; // used to be respto... FIXME
-		options.resp_to = this.ownId; // used to be respto... FIXME
-		options.from = this.ownId;
+		var message = {
+			to: to,
+			resp_to: this.ownSessionId,
+			from: this.ownSessionId
+		};
 
 		if (!msgid) {
 			msgid = 1 + Math.floor(Math.random() * 1024);
 		}
-		options.id = msgid;
+		message.id = msgid;
 
 		if (typeof rpc.jsonrpc !== "undefined") {
-			options.type = "JSONRPC";
+			message.type = "JSONRPC";
 		}
 
-		options.payload = rpc;
-		var message = this.createMessage(options);
+		message.payload = rpc;
 
-		if (message.to !== undefined) {
-			var to = message.to;
-			var session1 = [to, this.self];
-			session1.join("->");
-			var session2 = [this.self, to];
-			session2.join("->");
+		var session1 = [to, this.ownSessionId].join("->");
+		var session2 = [this.ownSessionId, to].join("->");
 
-			if ((!this.clients[session1]) && (!this.clients[session2]))  // not registered either way
-			{
-				logger.log("session not set up");
-				var occurences = (message.to.split(this.separator).length - 1);
+		if ((!this.clients[session1]) && (!this.clients[session2])) { // not registered either way
+			logger.log("session not set up");
+			var forwardto = getPzhAddr.call(this, message);
 
-				var data = message.to.split(this.separator);
-				var id = data[0];
-				var forwardto = data[0];
-
-				for (var i = 1; i < occurences; i++)	{
-					id = id + this.separator + data[i];
-					var new_session1 = [id, this.self];
-					new_session1.join("->");
-					var new_session2 = [this.self, id];
-					new_session2.join("->");
-
-					if (this.clients[new_session1] || this.clients[new_session2]) {
-						forwardto = id;
-						logger.log("forwardto ", forwardto);
-					}
-				}
-				if (forwardto === data[0]) {
-					var s1 = [forwardto, this.self];
-					s1.join("->");
-					var s2 = [this.self, forwardto];
-					s2.join("->");
-					if (this.clients[s1] || this.clients[s2])
-						forwardto = data[0];
-					else
-					{
-						var own_addr = this.self.split(this.separator);
-						var own_pzh = own_addr[0]
-						if (forwardto !== own_pzh) {
-							forwardto = own_pzh;
-						}
-					}
-				}
-				this.sendMsg(message, forwardto, this.objectRef);
+			if (isLocalAppMsg.call(this, message)) {
+				// msg from this pzp to wrt previously connected to this pzp
+				console.log('drop message, wrt disconnected');
+				return;
 			}
-			else if (this.clients[session2]) {
-				logger.log("clients[session2]:" + this.clients[session2]);
-				this.sendMsg(message, this.clients[session2], this.objectRef);
-			}
-			else if (this.clients[session1]) {
-				logger.log("clients[session1]:" + this.clients[session1]);
-				this.sendMsg(message, this.clients[session1], this.objectRef);
-			}
+
+			logger.log("message forward to:" + forwardto);
+			this.sendMsg(message, forwardto);
+		}
+		else if (this.clients[session2]) {
+			logger.log("clients[session2]:" + this.clients[session2]);
+			this.sendMsg(message, this.clients[session2]);
+		}
+		else if (this.clients[session1]) {
+			logger.log("clients[session1]:" + this.clients[session1]);
+			this.sendMsg(message, this.clients[session1]);
 		}
 	};
-
 
 	/**
 	 *  Handle message routing on receiving message. it does -
@@ -310,8 +285,7 @@
 			var from = message.from;
 			var to = message.to;
 			if (to !== undefined) {
-				var regid = [from, to];
-				regid.join("->");
+				var regid = [from, to].join("->");
 
 				//Register message to associate the address with session id
 				if (message.from) {
@@ -327,67 +301,36 @@
 		}
 		// check message destination
 		else if (message.hasOwnProperty("to") && (message.to)) {
-			this.self = this.ownId;
 
 			//check if a session with destination has been stored
-			if(message.to !== this.self) {
+			if(message.to !== this.ownSessionId) {
 				logger.log("forward Message");
 
 				//if no session is available for the destination, forward to the hop nearest,
 				//i.e A->D, if session for D is not reachable, check C, then check B if C is not reachable
 				var to = message.to;
-				var session1 = [to, this.self];
-				session1.join("->");
-				var session2 = [this.self, to];
-				session2.join("->");
+				var session1 = [to, this.ownSessionId].join("->");
+				var session2 = [this.ownSessionId, to].join("->");
 
 				// not registered either way
 				if ((!this.clients[session1]) && (!this.clients[session2])) {
 					logObj(message, "Sender, receiver not registered either way");
-					//check occurances of separator used in addressing
-					var occurences = (message.to.split(this.separator).length - 1);
-					var data = message.to.split(this.separator);
-					var id = data[0];
-					var forwardto = data[0];
+					var forwardto = getPzhAddr.call(this, message);
 
-					//strip from right side
-					for (var i = 1; i < occurences; i++) {
-						id = id + this.separator + data[i];
-						var new_session1 = [id, this.self];
-						new_session1.join("->");
-						var new_session2 = [this.self, id];
-						new_session2.join("->");
-
-						if (this.clients[new_session1] || this.clients[new_session2]) {
-							forwardto = id;
-						}
+					if (isLocalAppMsg.call(this, message)) {
+						// msg from other pzp to wrt previously connected to this pzp
+						console.log('drop message, wrt disconnected');
+						return;
 					}
 
-
-					if (forwardto === data[0]) {
-						var s1 = [forwardto, this.self];
-						s1.join("->");
-						var s2 = [this.self, forwardto];
-						s2.join("->");
-						if (this.clients[s1] || this.clients[s2])
-							forwardto = data[0];
-						else
-						{
-							var own_addr = this.self.split(this.separator);
-							var own_pzh = own_addr[0]
-							if (forwardto !== own_pzh) {
-								forwardto = own_pzh;
-							}
-						}
-					}
 					logger.log("message forward to:" + forwardto);
-					this.sendMsg(message, forwardto, this.objectRef);
+					this.sendMsg(message, forwardto);
 				}
 				else if (this.clients[session2]) {
-					this.sendMsg(message, this.clients[session2], this.objectRef);
+					this.sendMsg(message, this.clients[session2]);
 				}
 				else if (this.clients[session1]) {
-					this.sendMsg(message, this.clients[session1], this.objectRef);
+					this.sendMsg(message, this.clients[session1]);
 				}
 				return;
 			}
@@ -401,7 +344,6 @@
 					}
 					else {
 						if (typeof message.payload.method !== "undefined") {
-							// FIXME: can we call rpc.handleMessage here without checking messageCallbacks[] for message.id?
 							var from = message.from;
 							var msgid = message.id;
 							this.rpcHandler.handleMessage(message.payload, from, msgid);

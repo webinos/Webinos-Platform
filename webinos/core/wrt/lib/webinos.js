@@ -94,8 +94,7 @@
             if (data.type === "prop") {
                 webinos.session.handleMsg (data);
             } else {
-                webinos.messageHandler.setGetOwnId (webinos.session.getSessionId ());
-                webinos.messageHandler.setObjectRef (this);
+                webinos.messageHandler.setOwnSessionId (webinos.session.getSessionId ());
                 webinos.messageHandler.setSendMessage (webinos.session.message_send_messaging);
                 webinos.messageHandler.onMessageReceived (data, data.to);
             }
