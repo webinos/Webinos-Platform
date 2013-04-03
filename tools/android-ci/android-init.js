@@ -186,3 +186,6 @@ AndroidInit.prototype.selectComponents = function(components, cb){
             cb(availableComponents);
 		}, []);
 	}
+
+
+module.exports = AndroidInit;

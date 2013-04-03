@@ -13,7 +13,9 @@ var nodeUtil = require("util"),
     events = require("events");
 
 var Utils = function(){
+    events.EventEmitter.call(this);
     this._curlCMD = 'curl';
+
 }
 
 nodeUtil.inherits(Utils, events.EventEmitter);
@@ -56,7 +58,7 @@ Utils.prototype.setEnv = function(envVar, envValue){
  * @param argsToForward
  * @param grepChild
  */
-Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForward, grepChild) {
+Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForward, grepChild, withNotification) {
     var self = this;
     var withgrep = false;
     if(grepChild !== undefined)
@@ -67,19 +69,22 @@ Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForw
         stdout.push(data);
         if(withgrep)
             grepChild.stdin.end();
+        if(withNotification){
+            if(data !== undefined && data.toString().indexOf("EmulatorReady") > -1){
+                //This will be reached when the shell script echos "Ready..." without exiting
+                //additional information is attached in the form "Ready \t comma separated list
+                var info = data.toString().substr(data.lastIndexOf("\t")+1);
+                var additionalInfo = info.trim().split(",");
+                self.emit("EmulatorReady", additionalInfo);
+                console.log("Emulator is ready >> emitting event now");
+            }
+        }
     });
 
     cmdChild.stderr.on('data', function (data) {
         console.error(command + ' stderr: ' + data);
         if(withgrep)
             grepChild.stdin.write(data);
-        if(data !== undefined && data.toString().indexOf("Ready") > -1){
-            //This will be reached when the shell script echos "Ready..." without exiting
-            //additional information is attached in the form "Ready \t comma separated list
-            var info = data.toString().substr(data.lastIndexOf("\t")+1);
-            var additionalInfo = info.trim().split(",");
-            self.emit("Ready", additionalInfo);
-        }
     });
 
     cmdChild.stdout.on('end', function (data) {
@@ -125,12 +130,13 @@ Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForw
  * @param cb : callback function
  * @param argsToForward : arguments that can be forwarded to the callback function
  */
-Utils.prototype.executeCommandViaExec = function(command, arguments, cb, argsToForward ){
+Utils.prototype.executeCommandViaExec = function(command, arguments, argsToForward, cb ){
+    var self = this;
     if(command != undefined && arguments != undefined){
         console.log("Executing command " + command + " using Exec with  arguments " + arguments.toString());
         var cmdChild = exec(command + " " + arguments.toString());
 
-        Utils.prototype.processChildProcess(cmdChild, command, cb, argsToForward);
+       self.processChildProcess(cmdChild, command, cb, argsToForward);
     }else{
         console.log("Could not execute specified command - one or both of command or arguments is undefined");
     }
@@ -143,13 +149,18 @@ Utils.prototype.executeCommandViaExec = function(command, arguments, cb, argsToF
  * @param cb : callback function that will be called when execution of the script is complete
  * @param argsToForward :parameters that should be forwarded to the callback function
  */
-Utils.prototype.executeShellScript = function(script, arguments, argsToForward, cb){
-    fs.exists(process.cwd() + "/" + script, function (exists) {
+Utils.prototype.executeShellScript = function(script, args, argsToForward, withNotify, cb){
+   // this.emit("Test", "Testing 123");
+    var self = this;
+    var script2Exec = process.cwd() + "/" + script;
+    console.log("Preparing to execute script " + script2Exec);
+    fs.exists(script2Exec, function (exists) {
         if(exists){
-            console.log("Executing script " + script + " with  arguments " + arguments.toString() + " from dir " + process.cwd());
+            console.log("Executing script " + script + " with  arguments " + args.toString() + " from dir " + process.cwd());
 
-            var cmdChild = execFile(process.cwd() + "/" + script, arguments);
-            Utils.prototype.processChildProcess(cmdChild, script, cb, argsToForward);
+            var cmdChild = execFile(script2Exec, args);
+            var grepChld = undefined;
+            self.processChildProcess(cmdChild, script, cb, argsToForward, grepChld, withNotify);
         }
     });
 }
@@ -164,6 +175,7 @@ Utils.prototype.executeShellScript = function(script, arguments, argsToForward, 
  * @param grepArgs : arguments to grep
  */
 Utils.prototype.executeCommandExecWithGrep = function(command, arguments, cb, argsToForward, grepArgs ){
+    var self = this;
     if(command != undefined && arguments != undefined){
         console.log("Executing command " + command + " using Exec with  arguments " + arguments.toString());
         var cmdChild = exec(command + " "  +arguments.toString());
@@ -171,7 +183,7 @@ Utils.prototype.executeCommandExecWithGrep = function(command, arguments, cb, ar
         if(grepArgs !== undefined)
             grep = spawn('grep', grepArgs);
 
-        Utils.prototype.processChildProcess(cmdChild, command, cb, argsToForward, grep);
+        self.processChildProcess(cmdChild, command, cb, argsToForward, grep);
     }else{
         console.log("Could not execute specified command - one or both of command or arguments is undefined");
     }

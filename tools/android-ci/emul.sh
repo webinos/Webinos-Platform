@@ -7,7 +7,7 @@
 function startEmulator {
     local avd=$2
     local CONSOLE_PORT=$1
-    echo "[emulator-$CONSOLE_PORT] Starting emulator with avd avd_$avd and console port $CONSOLE_PORT"
+    echo "[emulator-$CONSOLE_PORT] Starting emulator with avd $avd and console port $CONSOLE_PORT"
     emulator -avd $avd -port $CONSOLE_PORT &
 
     # This waits for emulator to start up
@@ -16,7 +16,7 @@ function startEmulator {
     wait_for_boot_complete "getprop sys.boot_completed" 1
     wait_for_boot_complete "pm path android" package
     #The order of additional info attached to Ready is relied upon by other functions to be exact
-    echo "Ready \t emulator-$CONSOLE_PORT, $CONSOLE_PORT, $avd"
+    echo "EmulatorReady \t emulator-$CONSOLE_PORT,$CONSOLE_PORT,$avd"
     return 1
 }
  
@@ -31,7 +31,6 @@ function wait_for_boot_complete {
         result=`adb -s emulator-$CONSOLE_PORT shell $boot_property 2>/dev/null | grep "$boot_property_test"`
     done
     echo "[emulator-$CONSOLE_PORT] $boot_property check was successful"
-    return $result
 }
 
 startEmulator $1 $2

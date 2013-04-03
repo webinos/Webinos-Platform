@@ -19,6 +19,10 @@ var EmulatorDevice = function(avd, target, consolePort, adbPort){
     this._target = target;
     this._adbport = adbPort;
     this._consolePort = consolePort;
+    this.getConsolePort = function(cb){
+           var self = this;
+        cb(self._consolePort);
+    }
 }
 
 /**
@@ -28,7 +32,8 @@ var EmulatorDevice = function(avd, target, consolePort, adbPort){
  * @constructor
  */
 var Emulator = function(emulSettings){
-    var devices = [];
+    events.EventEmitter.call(this);
+    this.devices = [];
 	var self = this;
 	this._avd = emulSettings.WEBINOS_AVD;
 	this._target = emulSettings.ANDROID_DEVICE_TARGET;
@@ -36,6 +41,17 @@ var Emulator = function(emulSettings){
     this._emulCMD = 'emulator';
     this._adbCMD = 'adb';
     this._startEmulatorScript = emulSettings.STARTER_SCRIPT;
+
+    utils.on("EmulatorReady", function(additionalInfo){
+        console.log("Emulator ready received from utils with details:" + additionalInfo.toString());
+        if(additionalInfo !== undefined && additionalInfo[1] !== undefined){
+            var port = additionalInfo[1];
+            self.emit("Ready", port);
+            self.devices.push(new EmulatorDevice(self._avd,undefined, port, port + 1));
+            console.log("Emulator Started started on port: "  + port);
+        }
+    });
+
 }
 
 //We use node utils to specify that the the Emulator is an event emitter
@@ -47,7 +63,7 @@ nodeUtil.inherits(Emulator, events.EventEmitter);
  * @return {*}
  */
 Emulator.prototype.getDevices = function(){
-    return devices;
+    return this.devices;
 }
 
 /**
@@ -56,23 +72,44 @@ Emulator.prototype.getDevices = function(){
  * @param port
  * @param cb
  */
-Emulator.prototype.startAndroidEmulator = function(port, cb){
+Emulator.prototype.startAndroidEmulator = function(port, avd, cb){
     var self = this;
-    var avd = self._avd;
     var script = self._startEmulatorScript;
     console.log("Starting Android Emulator:" + avd + " on port:" + port);
-    utils.executeShellScript(script, [port, avd], {}, function(){
+
+    //We set this to enable utils to notify us of the progress
+    var withNotify = true;
+    utils.executeShellScript(script, [port, avd], {}, withNotify, function(){
 
     });
+}
 
-    utils.on("Ready", function(additionalInfo){
-        if(additionalInfo !== undefined && additionalInfo[1] !== undefined){
-            var port = additionalInfo[1];
-            self.emit("Emulator-ready", port);
-            devices.push(new EmulatorDevice(avd,undefined, port, port + 1));
-            console.log("Emulator Started started on port:"  + port);
+
+Emulator.prototype.stopAndroidEmulator = function(port, cb){
+    var self = this;
+    var script = self._startEmulatorScript;
+    console.log("Stopping Android Device: emulator-" + port);
+
+    utils.executeCommandViaExec(self._adbCMD + " -s emulator-" + port + " stop", {}, function(code, forwardedArgs, stdout){
+        if(code == 0)
+            console.log("Device emulator-" + port + " Successfully Stopped");
+        cb(0);
+    });
+}
+
+
+Emulator.prototype.shutdown = function(cb){
+    var self = this;
+    if(self.devices !== undefined){
+        for(var i in devices){
+            var emulDev = devices[i];
+            emulDev.getConsolePort(function(port){
+                stopAndroidEmulator(port, function(code){
+                   //if code is 0 then emulator was stopped successfulyy
+                });
+            })
         }
-    });
+    }
 }
 /**
  * This function executes a shell command on the specified emulated device only if the device is ready
@@ -80,13 +117,12 @@ Emulator.prototype.startAndroidEmulator = function(port, cb){
  * @param device
  * @param cb
  */
-Emulator.prototype.executeShellCommandOnEmulator = function(command, deviceId, arguments, cb){
+Emulator.prototype.executeShellCommandOnEmulator = function(command, deviceId, args, cb){
     var self = this;
     this.getDeviceStatus(deviceId, function(status){
         if(status == "device"){
-            console.log("Executing command: " + command + " on " + deviceId + " with arguments " + arguments.toString());
-              // adb shell <command>          - run remote shell command
-            utils.executeCommandViaSpawn(self._adbCMD, ['-s', deviceId, 'shell', command, arguments], cb, {});
+            console.log("Executing command: " + command + " on " + deviceId + " with arguments " + args.toString());
+            utils.executeCommandViaSpawn(self._adbCMD, ['-s', deviceId, 'shell', command, args], cb, {});
         }
     });
 }
@@ -97,28 +133,36 @@ Emulator.prototype.executeShellCommandOnEmulator = function(command, deviceId, a
  * @param deviceId
  * @param cb
  */
+/*
 Emulator.prototype.getDeviceStatus = function(deviceId, cb){
     utils.executeCommandViaSpawn('adb', ['devices'], function(status, forwardedArgs, stdout){
+        var state = "offline";
          for(var i in stdout){
              var entry = stdout[i].toString().split("\n");
              if(entry !== undefined){
                  for(var x in entry){
                      var line = entry[x];
-                     if(line !== undefined){
+                     if(line !== undefined && line !== ""){
                          line = line.toString();
                          if(line.indexOf(deviceId) > -1){
                             // each line is shown by device name\tstatus
-                            var status = line.substr(line.lastIndexOf("\t")+1);
-                            cb(status);
+                            state = line.substr(line.lastIndexOf("\t")+1);
                          }
                      }
                  }
             }
          }
+        cb(state);
     }, {}) ;
 }
+*/
 
-
+Emulator.prototype.getDeviceStatus = function(deviceId, cb){
+    utils.executeCommandViaSpawn('adb', ['-s', deviceId, 'get-state'], function(status, forwardedArgs, stdout){
+        //TODO: check the status code
+       cb(stdout.toString().trim());
+    }, {}) ;
+}
 /**
  * This function determines the next available port that can be used by an emulator instance
  * @param cb
@@ -172,10 +216,13 @@ Emulator.prototype.getNextFreePort = function(cb){
  * @param cb
  */
 Emulator.prototype.installAppOnEmulatedDevice = function(deviceId, appToInstall, cb){
+    console.log("Installing app: " + appToInstall + " on " + deviceId);
     this.getDeviceStatus(deviceId, function(status){
         if(status == "device"){
-            //TODO: allow installation of unsigned packages
+            //TODO: force installation of unsigned packages
             utils.executeCommandViaSpawn('adb', ['-s', deviceId, 'install', '-r', appToInstall], cb, {});
+        }else{
+            console.log("Device " + deviceId + " not ready. Status=" + status);
         }
     });
 }
@@ -197,9 +244,9 @@ function waitForBootComplete(consolePort, bootProperty, bootPropertyTest){
  * @param propertyTest
  * @param cb
  */
-function checkEmulatorBootProperty(property, delay, propertyTest, cb) {
+function checkEmulatorBootProperty(consolePort, property, delay, propertyTest, cb) {
     setTimeout(function () {
-            waitForBootComplete(5554, property, propertyTest);
+            waitForBootComplete(consolePort, property, propertyTest);
             cb();
         }, delay
     );

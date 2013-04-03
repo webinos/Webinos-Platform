@@ -40,6 +40,6 @@ var setupCI = function(cb){
 var AndroidEmulatorBasedCIWorkflow = require("./emulator-based-workflow");
 
 setupCI(function(androidCI){
-    var emulatorBasedWorkflow = AndroidEmulatorBasedCIWorkflow(androidCI);
+    var emulatorBasedWorkflow = new AndroidEmulatorBasedCIWorkflow(androidCI);
     emulatorBasedWorkflow.run();
 });

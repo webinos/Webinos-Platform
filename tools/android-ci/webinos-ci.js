@@ -20,7 +20,8 @@ var Webinos = function(webinosSettings){
 	var self = this;
 	this._anodeRepo = webinosSettings.ANODE_REPO;
 	this._webinosAndroidPlatform = webinosSettings.ANDROID_PLATFORM_PATH;
-	this._webinosAPK = undefined;
+    this._webinosAPK = undefined;
+    this._appAPK = undefined;
     this._anodeDownloadPath = webinosSettings.ANODE_DOWNLOAD_PATH;
 }
 	/**
@@ -59,13 +60,17 @@ var Webinos = function(webinosSettings){
 
         try {
             //Change directory to platform/android
-            process.chdir(webinosAndroidPlatformPath);
-            console.log('Now working from directory: ' + process.cwd());
+           /* process.chdir(webinosAndroidPlatformPath);
+            console.log('Now working from directory: ' + process.cwd());     */
             //TODO: refactor to use ci-utils
             var buildFor = '';
             if(mode == 'release')
                 buildFor = mode;
-            var antChild = spawn('ant', [buildFor]);
+            var antChild = spawn(
+                'ant',
+                [buildFor],
+                { cwd: webinosAndroidPlatformPath,  env: process.env }
+            );
             var appApkPath = undefined;
             var webinosApkPath = undefined;
 
@@ -84,8 +89,10 @@ var Webinos = function(webinosSettings){
                     console.error('FAILURE: ant process exited with code ' + code);
                 } else {
                     //TODO: set appropriate paths to resulting APK files
-                    webinosApkPath = webinosAndroidPlatformPath + "";
-                    appApkPath = webinosAndroidPlatformPath + "";
+                    webinosApkPath = webinosAndroidPlatformPath + "/wrt/bin/wrt-debug.apk";
+                    appApkPath = webinosAndroidPlatformPath + "/app/bin/app-debug.apk";
+                    self._appAPK = appApkPath;
+                    self._webinosAPK = webinosApkPath;
                     console.log('SUCCESS: Android package build finished');
                 }
                 cb(code, webinosApkPath, appApkPath);
@@ -104,7 +111,8 @@ var Webinos = function(webinosSettings){
         var anodeRepo = this._anodeRepo;
         var anodePath = this._anodeDownloadPath;
 
-		console.log("Cloning anode module");
+        cb(0, anodePath);
+		/*console.log("Cloning anode module");
 		var gitClone = spawn('git', ['clone', anodeRepo, anodePath]);
 		gitClone.stdout.on('data', function (data) {
 			console.log(data);
@@ -118,8 +126,16 @@ var Webinos = function(webinosSettings){
             if(code == 0)
                 console.log('SUCCESS: Finished cloning ' + anodeRepo + " into " + anodePath);
 			cb(code, anodePath);
-		});
+		}); */
 	}
 
+
+Webinos.prototype.getAppAPK = function(){
+    return this._appAPK;
+}
+
+Webinos.prototype.getWebinosAPK = function(){
+    return this._webinosAPK;
+}
 
 module.exports = Webinos;
