@@ -50,7 +50,7 @@ var Pzp_OtherManager = function (_parent) {
      */
     function registerMessaging (pzhId) {
         if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
-            var msg = self.messageHandler.registerSender(_parent.pzp_state.sessionId, pzhId);
+            var msg = self.messageHandler.createRegisterMessage(_parent.pzp_state.sessionId, pzhId);
             _parent.sendMessage (msg, pzhId);
         }
     }
@@ -200,8 +200,7 @@ var Pzp_OtherManager = function (_parent) {
             _parent.sendMessage (message, address);
         };
         self.rpcHandler.setSessionId (_parent.pzp_state.sessionId);
-        self.messageHandler.setGetOwnId (_parent.pzp_state.sessionId);
-        self.messageHandler.setObjectRef (_parent);
+        self.messageHandler.setOwnSessionId (_parent.pzp_state.sessionId);
         self.messageHandler.setSendMessage (send);
         self.messageHandler.setSeparator ("/");
     };
