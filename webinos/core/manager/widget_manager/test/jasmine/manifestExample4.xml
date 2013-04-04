@@ -16,7 +16,7 @@
      <param name="csp-script-src" value="http://maps.googleapis.com"/>
      <param name="label" value="Internet access"/>
    </feature>
-   <feature name="http://webinos.org/api/webnotification" required="false">
+   <feature name="http://webinos.org/api/notifications" required="false">
      <param name="label" value="Web notification"/>
    </feature>
    <feature name="http://webinos.org/api/file" required="true">
@@ -48,7 +48,7 @@
      </ProvisionalAction>
 
      <ProvisionalAction>
-       <AttributeValue>http://webinos.org/api/webnotification</AttributeValue>
+       <AttributeValue>http://webinos.org/api/notifications</AttributeValue>
        <AttributeValue>#current</AttributeValue>
        <DeveloperProvidedDescription language="EN">
          Notifications are used to alert you when a reminder is valid - 
