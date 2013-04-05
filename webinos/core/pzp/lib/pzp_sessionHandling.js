@@ -666,7 +666,7 @@ var ConnectHub = function (parent) {
 
                 pzpClient.on ("error", function (err) {
                     pzpServer.startServer ();
-                    if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
+                    if (err.code === "EHOSTUNREACH" || err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
                         logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
                         parent.webinos_manager.startOtherManagers ();
                     }
