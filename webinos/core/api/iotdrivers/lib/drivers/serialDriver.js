@@ -21,10 +21,13 @@
  (function () {
     'use strict';
 
-	var serialPort = require("serialport2").SerialPort;
+	var serialport_module = require('serialport');
+	var serialPort = serialport_module.SerialPort;
+
     var path = require("path");
     var fs = require("fs");
-    
+    var intervalId;
+
     var driverId = null;
     var registerFunc = null;
     var callbackFunc = null;
@@ -56,7 +59,6 @@
     }
 
 	function init_serial(){
-		
 		try{
             var filePath = path.resolve(__dirname, "./serial_devices.json");
             fs.readFile(filePath, function(err,data) {
@@ -67,17 +69,31 @@
                     //console.log("\n\nPORT : "+SERIAL_PORT);
                     //console.log("RATE : "+SERIAL_RATE);
                     try{
-	                    //serial = new serialPort(SERIAL_PORT , { baudrate : SERIAL_RATE });
-	                    serial = new serialPort();
-	                    
-						serial.open(SERIAL_PORT, {
-						  baudRate: SERIAL_RATE,
-						  dataBits: 8,
-						  parity: 'none',
-						  stopBits: 1
-						});
+	                    serial = new serialPort(SERIAL_PORT, {baudrate: SERIAL_RATE}, false);
+	                    intervalId = setInterval(waiting_for_serial,2000);
+					}
+					catch(e){
+						console.log("catch : " + e);
+					}
+                }
+            });
+		}
+		catch(e2){
+			console.log("Serial port " +  SERIAL_PORT + " is not ready");
+		}	
+	}
 
-						serial.on('close', function (err) {
+	function waiting_for_serial(){
+		//console.log("Searching "+ SERIAL_PORT);
+		serialport_module.list(function (err, ports) {
+    		ports.forEach(function(port) {
+      			if(port.comName == SERIAL_PORT){
+      				//console.log("FOUND PORT");
+      				
+      				clearInterval(intervalId);
+
+      				serial.open(function () {
+      					serial.on('close', function (err) {
 							console.log("Serial port ["+SERIAL_PORT+"] was closed");
 							//TODO handle board disconnection
 							//TODO start listening for incoming boards
@@ -89,20 +105,12 @@
 								setTimeout(init_serial,2000);
 							}
 						});
-
-						serial.on('open', function () {
-							start_serial();
-						});
-					}
-					catch(e){
-						console.log("catch : " + e);
-					}
-                }
-            });
-		}
-		catch(e2){
-			console.log("Serial port " +  SERIAL_PORT + " is not ready");
-		}	
+						start_serial();
+					});
+      			}
+    		});
+  		});
+  		
 	}
 
 	function start_serial(){
