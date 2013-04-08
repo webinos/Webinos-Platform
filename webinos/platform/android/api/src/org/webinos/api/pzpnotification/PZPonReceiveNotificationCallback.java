@@ -19,16 +19,6 @@
 
 package org.webinos.api.pzpnotification;
 
-import org.meshpoint.anode.bridge.Env;
-import org.meshpoint.anode.java.Base;
-import org.webinos.api.DeviceAPIError;
-
-public abstract class PZPNotificationManager extends Base {
-    private static short classId = Env.getInterfaceId(PZPNotificationManager.class);
-    protected PZPNotificationManager() { super(classId); }
-
-    public void eventNotify(String status,
-            PZPNotificationCallback Callback) throws DeviceAPIError {};
-    public void eventRegister(PZPonReceiveNotificationCallback Callback) throws DeviceAPIError {};          
-    public void eventUnregister() throws DeviceAPIError {};
+public interface PZPonReceiveNotificationCallback {
+    public void onSuccess(String status);
 }
