@@ -1,65 +1,67 @@
-{ "name" : "webinos_platform"
-, "version" : "0.8.0"
-, "description" : "Web runtime platform based on webinos specification"
-, "keywords" :
-  [ "webinos"
-  , "api"
-  ]
-, "homepage" : "http://www.webinos.org"
-, "bugs" : "http://jira.webinos.org"
-, "repository" :
-  { "type" : "git"
-  , "url" : "http://github.com/webinos/Webinos-Platform.git"
-  }
-, "dependencies" :
-  { "webinos-jsonrpc2" : "*"
-  , "schema" : "0.x.x"
-  , "JSV" : "4.x.x"
-  , "sax" : "0.x.x"
-  , "seq" : "0.x.x"
-  , "xml2js" : "0.x.x"
-  , "data2xml" : "0.8.x"
-  , "crypt" : "0.0.x"
-  , "jade" : "0.x.x"
-  , "websocket" : "1.0.2"
-  , "ansi" : "0.0.x"
-  , "mdns" : "1.x.x"
-  , "now" : "0.8.1"
-  , "node-uuid" : "1.3.x"
-  , "find-dependencies" : "~0.0.2"
-  , "mkdirp" : "0.3.x"
-  , "dbox": "https://github.com/felixjendrusch/node-dbox/tarball/put-zero"
-  , "optimist" : "x.x.x"
-  }
-, "devDependencies":
-  { "grunt": "~0.4.x"
-  , "jasmine-node" : "1.x.x"
-  , "grunt-contrib-concat": "~0.1.3"
-  , "grunt-contrib-uglify": "~0.1.x"
-  , "grunt-contrib-jshint": "~0.1.x"
-  , "grunt-contrib-clean": "~0.4.x"
-  }
-, "optionalDependencies":
-  { "sqlite3": "2.1.x"
-  , "qrcode": "0.x.x"
-  , "openid": "0.x.x"
-  , "express": "3.x.x"
-  , "passport": "x.x.x"
-  , "passport-yahoo": "x.x.x"
-  , "passport-google": "x.x.x"
-  , "serialport2": "0.0.5"
-  }
-, "engines":
-  { "node": ">= 0.6.0"
-  , "npm": ">= 1.1.17"
-  }
-, "preferGlobal": true
-, "bin":
-  { "webinos_pzh": "webinos_pzh.js"
-  , "webinos_pzp": "webinos_pzp.js"
-  }
-, "scripts":
-  { "install": "node-gyp configure build && grunt"
-  , "test": "./tools/travis/auto-test.sh"
-  }
+{
+ "name": "webinos_platform",
+ "version": "v0.8.0",
+ "description": "Web runtime platform based on webinos specification",
+ "keywords": [
+  "webinos",
+  "api"
+ ],
+ "homepage": "http://www.webinos.org",
+ "bugs": "http://jira.webinos.org",
+ "repository": {
+  "type": "git",
+  "url": "http://github.com/webinos/Webinos-Platform.git"
+ },
+ "dependencies": {
+  "webinos-jsonrpc2": "*",
+  "schema": "0.x.x",
+  "JSV": "4.x.x",
+  "sax": "0.x.x",
+  "seq": "0.x.x",
+  "xml2js": "0.x.x",
+  "data2xml": "0.8.x",
+  "crypt": "0.0.x",
+  "jade": "0.x.x",
+  "websocket": "1.0.2",
+  "ansi": "0.0.x",
+  "mdns": "1.x.x",
+  "now": "0.8.1",
+  "node-uuid": "1.3.x",
+  "find-dependencies": "~0.0.2",
+  "mkdirp": "0.3.x",
+  "dbox": "https://github.com/felixjendrusch/node-dbox/tarball/put-zero",
+  "optimist": "x.x.x",
+  "serial-obd": "0.0.1"
+ },
+ "devDependencies": {
+  "grunt": "~0.4.x",
+  "jasmine-node": "1.x.x",
+  "grunt-contrib-concat": "~0.1.3",
+  "grunt-contrib-uglify": "~0.1.x",
+  "grunt-contrib-jshint": "~0.1.x",
+  "grunt-contrib-clean": "~0.4.x"
+ },
+ "optionalDependencies": {
+  "sqlite3": "2.1.x",
+  "qrcode": "0.x.x",
+  "openid": "0.x.x",
+  "express": "3.x.x",
+  "passport": "x.x.x",
+  "passport-yahoo": "x.x.x",
+  "passport-google": "x.x.x",
+  "serialport2": "0.0.5"
+ },
+ "engines": {
+  "node": ">= 0.6.0",
+  "npm": ">= 1.1.17"
+ },
+ "preferGlobal": true,
+ "bin": {
+  "webinos_pzh": "webinos_pzh.js",
+  "webinos_pzp": "webinos_pzp.js"
+ },
+ "scripts": {
+  "install": "node-gyp configure build && grunt",
+  "test": "./tools/travis/auto-test.sh"
+ }
 }

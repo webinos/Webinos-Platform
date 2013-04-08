@@ -44,6 +44,8 @@
             } catch (e) {
                 console.log(e);
             }
+        } else if (connector == 'obd') {
+            //OBD
         } else if (connector == 'fake') {
             implFile = 'fake';
             console.log('connecting to fake data generator');
