@@ -43,36 +43,76 @@ import android.util.Log;
 import android.net.Uri;
 import org.webinos.app.R;
 
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
+
 public class AppLauncherManagerImpl extends AppLauncherManager implements IModule {
 
 	IModuleContext ctx;
 	private Context androidContext;
 	
 	private static final String TAG = "org.webinos.impl.AppLauncherManagerImpl";
-	
-	
-	@Override
-	public void launchApplication(
-			AppLauncherCallback successCallback,
-			AppLauncherErrorCallback errorCallback,
-			String app){
-		
-		Log.v("AppLauncherManagerImpl", "launchApplication");
-		Log.v("AppLauncherManagerImpl", app);
 
-
-		try{
-			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(Uri.parse(app));
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			androidContext.startActivity(i);
-			successCallback.handleEvent("");
-		}
-		catch (Exception e){
-			errorCallback.handleEvent("");
-		}
-		
+	public static String SHAsum(byte[] convertme) throws NoSuchAlgorithmException{
+	    MessageDigest md = MessageDigest.getInstance("SHA-1"); 
+	    return byteArray2Hex(md.digest(convertme));
 	}
+
+	private static String byteArray2Hex(final byte[] hash) {
+	    Formatter formatter = new Formatter();
+	    for (byte b : hash) {
+		formatter.format("%02x", b);
+	    }
+	    return formatter.toString();
+	}
+	
+       @Override
+       public void launchApplication(
+                    AppLauncherCallback successCallback,
+                    AppLauncherErrorCallback errorCallback,
+                    String app){
+            
+             Log.v("AppLauncherManagerImpl", "launchApplication");
+             Log.v("AppLauncherManagerImpl", app);
+ 
+ 
+	     //preserve launching from localhost
+             if (app.toLowerCase().contains("localhost")){
+             try{
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(app));
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    androidContext.startActivity(i);
+                    successCallback.handleEvent("");
+             }
+             catch (Exception e){
+                    errorCallback.handleEvent("");
+             }}
+             //widget launching...
+             else{
+      
+            
+            
+             try{
+                    Intent wrtIntent = new Intent("org.webinos.wrt.START");
+                    wrtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		    //todo: interface the widget manager instead of generating hash manually
+                    wrtIntent.putExtra("id", SHAsum(app.getBytes()));
+                    androidContext.startActivity(wrtIntent);
+                    successCallback.handleEvent("");
+             }
+             catch (Exception e){
+                    errorCallback.handleEvent("");
+             }
+            
+            
+            
+            
+            
+             }
+       }
 	
 	
 	
