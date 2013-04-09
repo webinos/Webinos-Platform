@@ -1,6 +1,3 @@
-var test_failed=false
-var fs = require('fs');
-
 //we set Emulator as an event emitter to signal to other modules when the emulator is
 // ready to accept commands
 var nodeUtil = require("util"),
@@ -90,7 +87,7 @@ Emulator.prototype.stopAndroidEmulator = function(port, cb){
     var script = self._startEmulatorScript;
     console.log("Stopping Android Device: emulator-" + port);
 
-    utils.executeCommandViaExec(self._adbCMD + " -s emulator-" + port + " stop", {}, function(code, forwardedArgs, stdout){
+    utils.executeCommandViaExec(self._adbCMD + " -s emulator-" + port + " emu kill", [], [], function(code, forwardedArgs, stdout){
         if(code == 0)
             console.log("Device emulator-" + port + " Successfully Stopped");
         cb(0);
@@ -101,14 +98,15 @@ Emulator.prototype.stopAndroidEmulator = function(port, cb){
 Emulator.prototype.shutdown = function(cb){
     var self = this;
     if(self.devices !== undefined){
-        for(var i in devices){
-            var emulDev = devices[i];
+        for(var i in self.devices){
+            var emulDev = self.devices[i];
             emulDev.getConsolePort(function(port){
-                stopAndroidEmulator(port, function(code){
+                self.stopAndroidEmulator(port, function(code){
                    //if code is 0 then emulator was stopped successfulyy
                 });
             })
         }
+        cb();
     }
 }
 /**

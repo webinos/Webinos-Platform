@@ -64,13 +64,13 @@ var Webinos = function(webinosSettings){
             console.log('Now working from directory: ' + process.cwd());     */
             //TODO: refactor to use ci-utils
             var buildFor = '';
+            var antargs = [];
+
             if(mode == 'release')
-                buildFor = mode;
-            var antChild = spawn(
-                'ant',
-                [buildFor],
-                { cwd: webinosAndroidPlatformPath,  env: process.env }
-            );
+                antargs.push(mode);
+
+            var antChild = spawn('ant', antargs, {cwd: webinosAndroidPlatformPath, env: process.env});
+
             var appApkPath = undefined;
             var webinosApkPath = undefined;
 
@@ -86,7 +86,8 @@ var Webinos = function(webinosSettings){
 
             antChild.on('close', function (code) {
                 if (code !== 0) {
-                    console.error('FAILURE: ant process exited with code ' + code);
+                    console.error('FAILURE: ant process exited with code: ' + code);
+                    //TODO: webinos build failed: report failure and exit CI
                 } else {
                     //TODO: set appropriate paths to resulting APK files
                     webinosApkPath = webinosAndroidPlatformPath + "/wrt/bin/wrt-debug.apk";
@@ -105,28 +106,40 @@ var Webinos = function(webinosSettings){
 
 /**
  * This function clones the anode repository in prepration for building webinos for android
+ * //TODO: ask if we should replace anode. Currently we replace if it exists
  * @param cb
  */
     Webinos.prototype.gitCloneAnode = function(cb){
         var anodeRepo = this._anodeRepo;
         var anodePath = this._anodeDownloadPath;
 
-        cb(0, anodePath);
-		/*console.log("Cloning anode module");
-		var gitClone = spawn('git', ['clone', anodeRepo, anodePath]);
-		gitClone.stdout.on('data', function (data) {
-			console.log(data);
-		});
+        console.log("Cloning anode module");
 
-		gitClone.stderr.on('data', function (data) {
-			console.log('git clone stderr: ' + data);
-		});
+        fs.exists(anodePath, function(exists){
+           if(exists){
+               //remove directory
+               utils.rmdirSyncRecursive(anodePath);
+           }
+            //Wait until the directory has been removed
+           var gitClone = spawn('git', ['clone', anodeRepo, anodePath]);
+            gitClone.stdout.on('data', function (data) {
+                console.log(data);
+            });
 
-		gitClone.on('close', function (code) {
-            if(code == 0)
-                console.log('SUCCESS: Finished cloning ' + anodeRepo + " into " + anodePath);
-			cb(code, anodePath);
-		}); */
+            gitClone.stderr.on('data', function (data) {
+                console.log('git clone stderr: ' + data);
+            });
+
+            gitClone.on('close', function (code) {
+                if(code == 0)
+                    console.log('SUCCESS: Finished cloning ' + anodeRepo + " into " + anodePath);
+                else
+                    //Anode repository setup failed, exist CI#
+                    console.error('FAILURE: git clone anode failed with code: ' + code);
+                cb(code, anodePath);
+            });
+        });
+
 	}
 
 

@@ -16,7 +16,7 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
             installApps(port);
     });
 
-    this.run = function(){
+    this.run = function(cb){
         async.parallel({
                 androidPrep: function(callback){
                     androidPrep(callback);
@@ -42,6 +42,7 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
                     function(err, results) {
                         if(!err){
                             console.log("Webinos and Emulator Preparation Complete:" + results);
+                            cb();
                             /*async.series({
                              installApp: function(callback){
                              installApp(results.webinosPrep, callback);
@@ -67,55 +68,69 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
 
     }
 
-
+    /**
+     * Function for installing webinos-related apps to the emulator running on specified port
+     * @param port
+     */
     function installApps(port) {
         var appAPK = webinos.getAppAPK();
         var webinosAPK = webinos.getWebinosAPK();
         async.series({
             installApp: function (callback) {
-                emulator.installAppOnEmulatedDevice("emulator-" + port, appAPK, function () {
-                    console.log("Finished installing app: " + appAPK);
-                    callback(null, "");
+                emulator.installAppOnEmulatedDevice("emulator-" + port, appAPK, function (code, argsToForward, stdout) {
+                    if(code == 0){
+                        console.log("Finished installing app: " + appAPK);
+                        callback(null, "");
+                    }else
+                        callback(new Error("Webinos Application Installation on Emulator Failed!"));
                 });
             },
             installWebinos: function (callback) {
-                emulator.installAppOnEmulatedDevice("emulator-" + port, webinosAPK, function () {
-                    console.log("Finished installing app: " + webinosAPK);
-                    callback(null, "");
+                emulator.installAppOnEmulatedDevice("emulator-" + port, webinosAPK, function (code, argsToForward, stdout) {
+                    if(code == 0){
+                        console.log("Finished installing app: " + webinosAPK);
+                        callback(null, "");
+                    }else
+                        callback(new Error("Webinos Installation on Emulator Failed!"));
                 });
             }
         }, function (err, results) {
+            var exitcode = 1;
             if (!err) {
-
+                //Run Webinos Tests and return results
+                console.log("Finished Installing Apps. Exiting with success!");
+                exitcode = 0;
             }  else{
                 console.log("Error occurred while installing app: " + err);
             }
+            emulator.shutdown(function(){
+                process.exit(exitcode);
+            });
         });
     }
 
     function androidPrep(callback){
         console.log("preparing Android");
-        var tarf = "/home/corn/devel/travis-test/Webinos-Platform/tools/android-ci/android-sdk_r21.1-linux.tgz";
+        /*var tarf = "/home/corn/devel/travis-test/Webinos-Platform/tools/android-ci/android-sdk_r21.1-linux.tgz";
         androidCI.setupAndroid(tarf, function(code){
             //TODO: pass the path to the setup android...
             callback(null, "/home/corn/devel/tools/android-sdk-linux");
         });
-
-        /*androidCI.downloadAndroidSDK(function(status, outputFile){
-         if(status !== 0){
-         callback(Error, "SDK Download Error");
-         }else{
-
-         //the outputfile is received as an array forwardded by the downloadAndroidSDK
-         // through the utils.downloadFile and returned by utils.executeCommandViaSpawn
-         //for now, we assume that it will only contain one element, i.e. path to output file
-         if(outputFile != undefined && outputFile[0] != undefined)
-         androidCI.setupAndroid(outputFile[0], function(code){
-         //TODO: pass the path to the setup android...
-         callback(null, "/home/corn/devel/tools/android-sdk-linux");
-         });
-         }
-         });  */
+         */
+        androidCI.downloadAndroidSDK(function(status, outputFile){
+            if(status !== 0){
+                callback(new Error("SDK Download Error"));
+            }else{
+            //the outputfile is received as an array forwardded by the downloadAndroidSDK
+            // through the utils.downloadFile and returned by utils.executeCommandViaSpawn
+            //for now, we assume that it will only contain one element, i.e. path to output file
+                if(outputFile != undefined && outputFile[0] != undefined)
+                    androidCI.setupAndroid(outputFile[0], function(code, envSettings){
+                        if(envSettings !== undefined)
+                            callback(null, envSettings.ANDROID_HOME);
+                    });
+            }
+        });
     }
 
 
@@ -157,6 +172,7 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
                     var nextPort = results.getPort;
                     var avd = results.getAvd;
                     emulator.startAndroidEmulator(nextPort, avd, function(status, forwardedAgs, stdout){
+                        //Never gets here until the emulator exists
                         console.log(stdout);
                         cb();
                     });

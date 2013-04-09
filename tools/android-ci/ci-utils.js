@@ -4,7 +4,8 @@ var exec = require('child_process').exec;
 var execFile = require('child_process').execFile;
 var spawn = require('child_process').spawn;
 var fs = require('fs');
-var url = require('url');
+var url = require('url'),
+_path = require("path");
 
 
 // In order to identify when the emulator is ready for use, we define Utils as an EventEmitter
@@ -23,12 +24,11 @@ nodeUtil.inherits(Utils, events.EventEmitter);
 /**
  * This function downloads a given file into the specified download location using cURL
  A call back is executed once the child process ends
- * @param sourceURL
- * @param destinationDir
+ * @param sourceURL : the location from which the file should be downloaded
+ * @param destinationDir : directory to which the file should be downloaded
  * @param cb
  */
 Utils.prototype.downloadFile = function(sourceURL, destinationDir, cb) {
-    var dwnldStatus = false;
     var fileName = url.parse(sourceURL).pathname.split('/').pop();
     var args = ['-o', destinationDir +"/" + fileName, sourceURL];
     this.executeCommandViaSpawn(this._curlCMD, args, cb, [destinationDir +"/" + fileName]);
@@ -38,13 +38,15 @@ Utils.prototype.downloadFile = function(sourceURL, destinationDir, cb) {
  * This function sets up an env variable for the current Node Process
  * If the variable being set is PATH, then the value is appended to $PATH
  * The variables will only apply to the current node process
+ * For now, we preppend variables to path rather than append them so that we can override any
+ * current settings to allow us to use the new variables.
  * @param envVar
  * @param envValue
  */
 Utils.prototype.setEnv = function(envVar, envValue){
     if(envVar !== undefined){
         if(envVar == "PATH")
-            envValue = process.env["PATH"] + ":" + envValue;
+            envValue = envValue + ":" + process.env["PATH"];
 
         process.env[envVar] = envValue;
     }
@@ -57,6 +59,8 @@ Utils.prototype.setEnv = function(envVar, envValue){
  * @param cb
  * @param argsToForward
  * @param grepChild
+ * PATH
+ /home/corn/CodeSourcery2/Sourcery_CodeBench_Lite_for_ARM_EABI/bin:/home/corn/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/corn/devel/tools/idea-IU-123.72/bin:
  */
 Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForward, grepChild, withNotification) {
     var self = this;
@@ -152,19 +156,47 @@ Utils.prototype.executeCommandViaExec = function(command, arguments, argsToForwa
 Utils.prototype.executeShellScript = function(script, args, argsToForward, withNotify, cb){
    // this.emit("Test", "Testing 123");
     var self = this;
-    var script2Exec = process.cwd() + "/" + script;
-    console.log("Preparing to execute script " + script2Exec);
-    fs.exists(script2Exec, function (exists) {
+    console.log("Preparing to execute script " + script);
+    fs.exists(script, function (exists) {
         if(exists){
             console.log("Executing script " + script + " with  arguments " + args.toString() + " from dir " + process.cwd());
 
-            var cmdChild = execFile(script2Exec, args);
+            var cmdChild = execFile(script, args);
             var grepChld = undefined;
             self.processChildProcess(cmdChild, script, cb, argsToForward, grepChld, withNotify);
         }
     });
 }
 
+Utils.prototype.rmdirSyncRecursive = function(path, failSilent) {
+    var self = this;
+    var files;
+
+    try {
+        files = fs.readdirSync(path);
+    } catch (err) {
+        if(failSilent) return;
+        throw new Error(err.message);
+    }
+
+    /*  Loop through and delete everything in the sub-tree after checking it */
+    for(var i = 0; i < files.length; i++) {
+        var currFile = fs.lstatSync(_path.join(path, files[i]));
+
+        if(currFile.isDirectory()) // Recursive function back to the beginning
+            self.rmdirSyncRecursive(_path.join(path, files[i]));
+
+        else if(currFile.isSymbolicLink()) // Unlink symlinks
+            fs.unlinkSync(_path.join(path, files[i]));
+
+        else // Assume it's a file - perhaps a try/catch belongs here?
+            fs.unlinkSync(_path.join(path, files[i]));
+    }
+
+    /*  Now that we know everything in the sub-tree has been deleted, we can delete the main
+     directory. Huzzah for the shopkeep. */
+    return fs.rmdirSync(path);
+};
 /**
  * This function provides mechanisms to execute a shell command whose output is
  * piped to grep.
@@ -201,10 +233,14 @@ Utils.prototype.executeCommandExecWithGrep = function(command, arguments, cb, ar
  * @param cb
  * @param argsToForward
  */
-Utils.prototype.executeCommandViaSpawn = function(command, arguments, cb, argsToForward ){
+Utils.prototype.executeCommandViaSpawn = function(command, arguments, cb, argsToForward, options ){
     if(command != undefined && arguments != undefined){
         console.log("Executing command " + command + " using Spawn with  arguments " + arguments.toString());
-        var cmdChild = spawn(command, arguments);
+        var cmdChild = undefined;
+        if(options !== undefined)
+            cmdChild = spawn(command, arguments, options);
+        else
+            cmdChild = spawn(command, arguments);
 
         var stdout = [];
         cmdChild.stdout.on('data', function (data) {

@@ -8,7 +8,7 @@ function startEmulator {
     local avd=$2
     local CONSOLE_PORT=$1
     echo "[emulator-$CONSOLE_PORT] Starting emulator with avd $avd and console port $CONSOLE_PORT"
-    emulator -avd $avd -port $CONSOLE_PORT &
+    emulator -avd $avd -port $CONSOLE_PORT -no-window &
 
     # This waits for emulator to start up
     echo "[emulator-$CONSOLE_PORT] Waiting for emulator to boot completely"
