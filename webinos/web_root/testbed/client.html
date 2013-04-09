@@ -93,11 +93,16 @@ $ (document).ready (function () {
         }
     });
     $("#findPeers").click(function(){
-        var options = {type: 'prop', payload: {status:'pzpFindPeers'}};
-        webinos.session.message_send(options);
-        var text = "<center>";
-        text += "<p> <img src=" + 'vehicle/general/ajaxloader.gif' + "> </img> </p> ";
-        setArticle("Peer Discovery in Process",text);
+        var pzhId = webinos.session.getPZHId();
+        if (pzhId === "")
+        	alert("Please enroll with your PZH first"); 
+        else {
+            var options = {type: 'prop', payload: {status:'pzpFindPeers'}};
+            webinos.session.message_send(options);
+            var text = "<center>";
+            text += "<p> <img src=" + 'vehicle/general/ajaxloader.gif' + "> </img> </p> ";
+            setArticle("Peer Discovery in Process",text);
+        }
     });
 
     function foundpeers(data) {
@@ -161,8 +166,8 @@ $ (document).ready (function () {
         //get selected peer
         list= document.getElementById('peer_list');
 
-        if(list.length)
-        {
+		if(list.length)
+		{
             var peer = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].value;
             var name = document.getElementById('peer_list').options[document.getElementById('peer_list').selectedIndex].text;
 
