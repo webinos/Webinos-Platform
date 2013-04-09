@@ -31,6 +31,22 @@ async.parallel({
         });
     },
     runAndroidTests: function(callback){
+        var
+            Utils = require("./ci-utils"),
+            utils = new Utils();
+        var fs = require('fs');
+        var arg = (inWebinosRoot)? cwd + '/webinos/platform/android': cwd + "../webinos/platform/android";
+        console.log("Checking the contents of WRT*********************8888");
+        utils.executeCommandViaSpawn("ls", [], function(code, args2Forward, stdout){
+
+        }, []);
+        console.log("Checking if wrt directory exists*************");
+        fs.exists(arg + "/wrt", function(exists){
+           if(exists)
+            console.log("android/wrt exists");
+            else
+               console.log("android/wrt not found");
+        });
         var androidCi = require('./android-ci');
         androidCi.run(inWebinosRoot, function(){
             //We assume that errors would have been returned through the call
