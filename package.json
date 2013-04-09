@@ -39,7 +39,7 @@
   "grunt-contrib-uglify": "~0.1.x",
   "grunt-contrib-jshint": "~0.1.x",
   "grunt-contrib-clean": "~0.4.x",
-     "async": "0.2.6"
+  "async": "0.2.6"
  },
  "optionalDependencies": {
   "sqlite3": "2.1.x",
