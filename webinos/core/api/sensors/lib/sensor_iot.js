@@ -20,16 +20,12 @@
 (function() {
 var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
 
-//    var configureSensorHandlers = {}; //new Array();
-//    var addEventListenerHandlers = new Array();
-//    var removeEventListenerHandlers = new Array();
-
     var SensorService = function(rpcHandler, data, id, drvInt) {
         
         // inherit from RPCWebinosService
         this.base = RPCWebinosService;
         var driverInterface = drvInt;
-        this.listeners = [];
+        this.sensorEventListeners = [];
         this.objRef = null;
         this.listenerActive = false;
         this.maximumRange = "na";
@@ -179,7 +175,7 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             
             this.objRef = objectRef;
             this.listenerActive = true;
-            this.listeners.push([successCB, errorCB, objectRef, eventType]);
+            this.sensorEventListeners.push([successCB, errorCB, objectRef, eventType]);
             driverInterface.sendCommand('start', this.elementId, null, errorCB, successCB);
         };
 
@@ -187,14 +183,14 @@ var RPCWebinosService = require("webinos-jsonrpc2").RPCWebinosService;
             //console.log("removeEventListener : arg[0] - " + arguments[0]);
             //console.log("removeEventListener : arg[1] - " + arguments[1]);
 
-            for (i = 0; i < this.listeners.length; i++) {
-                if(this.listeners[i][2].rpcId === arguments[0]){
-                    this.listeners.splice(i, 1);
+            for (i = 0; i < this.sensorEventListeners.length; i++) {
+                if(this.sensorEventListeners[i][2].rpcId === arguments[0]){
+                    this.sensorEventListeners.splice(i, 1);
                     break;
                 }
             }
 
-            if(this.listeners.length == 0){
+            if(this.sensorEventListeners.length == 0){
                 console.log("Stopping sensor " + this.id);
                 this.listenerActive = false;
                 driverInterface.sendCommand('stop', this.elementId, null);
