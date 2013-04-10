@@ -214,10 +214,10 @@ function Config () {
                 fs.mkdirSync (self.metaData.webinosRoot, internal_permission);
             // webinos root was created, we need the following 1st level dirs
             var list = [ path.join (self.metaData.webinosRoot, "logs"),
-                path.join (webinos_root, "wrt"),
                 path.join (self.metaData.webinosRoot, "certificates"),
                 path.join (self.metaData.webinosRoot, "policies"),
                 path.join (self.metaData.webinosRoot, "wrt"),
+                path.join (self.metaData.webinosRoot, "wrt", "sessions"),
                 path.join (self.metaData.webinosRoot, "userData"),
                 path.join (self.metaData.webinosRoot, "keys"),
                 path.join (self.metaData.webinosRoot, "certificates", "external"),

@@ -39,12 +39,12 @@ block content
 								div.widgetListOption
 									a(href="/uninstall/#{item.installId}") remove&nbsp;&nbsp;&nbsp;&nbsp;
 								div.widgetListOption
-									a(target="_blank",href="/widget/about/#{item.installId}") about&nbsp;&nbsp;&nbsp;&nbsp;
+									a(target="_blank",href="/boot/about/#{item.installId}") about&nbsp;&nbsp;&nbsp;&nbsp;
 								div.widgetListOption
-									a(style="font-weight:bold;",target="_blank",href="/widget/" + item.installId) run&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									a(style="font-weight:bold;",target="_blank",href="/boot/" + item.installId) run&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 							div.widgetListItemIcon
 								- if (item.prefIcon)
-									img(src='/widget/#{item.installId}/#{item.prefIcon}', width="64px", height="64px")
+									img(src='/icon/#{item.installId}', width="64px", height="64px")
 								- else
 									img(src='/images/no-icon.png', width="64px", height="64px")
 							div.widgetListItemTitle
@@ -52,9 +52,9 @@ block content
 									- var dispName = item.name.unicode;
 									- if (dispName.length > 30)
 										- dispName = dispName.substr(0,30) + "...";
-									a.widgetLaunch(target="_blank",href="/widget/" + item.installId)= dispName
+									a.widgetLaunch(target="_blank",href="/boot/" + item.installId)= dispName
 								- else
-									a.widgetLaunch(target="_blank",href="/widget/" + item.installId)= item.installId
+									a.widgetLaunch(target="_blank",href="/boot/" + item.installId)= item.installId
 				- listIdx++;
 	- else
 		div There are currently no apps installed.
