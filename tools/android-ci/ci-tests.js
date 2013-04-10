@@ -48,18 +48,6 @@ async.parallel({
                console.log("android/wrt not found");
         });
 
-        var arg = "//tmp/android/android-sdk-linux/platform-tools";
-        console.log("Checking the contents of android platform tools*********************8888");
-        utils.executeCommandViaSpawn("ls -l", [arg], function(code, args2Forward, stdout){
-
-        }, []);
-        console.log("Checking if aapt tooly exists*************");
-        fs.exists(arg + "/aapt", function(exists){
-            if(exists)
-                console.log(arg + "/aapt exists");
-            else
-                console.log(arg + "/aapt not found");
-        });
 
         var androidCi = require('./android-ci');
         androidCi.run(inWebinosRoot, function(){
