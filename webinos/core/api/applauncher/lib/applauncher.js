@@ -30,9 +30,12 @@
   var dependencies = require("find-dependencies")(__dirname);
   var pzp = dependencies.global.require(dependencies.global.pzp.location, "lib/pzp.js");
   var uuid = require('node-uuid');
+  var url = require('url');
   var fs = require('fs');
   var path = require('path');
   var existsSync = fs.existsSync || path.existsSync;
+  var exec = require('child_process').exec;
+  var spawn = require('child_process').spawn;
 
   function findInstalledApp(appURI) {
     var requestedApp;
@@ -41,7 +44,7 @@
       
       for (var idx in installedApps) {
         var cfg = widgetLibrary.widgetmanager.getWidgetConfig(installedApps[idx]);
-        if (cfg && cfg.id == appURI) {
+        if (cfg && cfg.id === appURI) {
             console.log("found app id " + cfg.id);
             requestedApp = cfg;
             break;
@@ -52,15 +55,15 @@
     return requestedApp;
   }
   
-  function writeLaunchRequest(appId,widget) {
-    var fname = uuid.v1() + ".launch";
+  function writeLaunchRequest(appId,params) {
+    // Create a dummy wgt file that contains the details of the widget launch.
+    // This fools the OS into launching the renderer, which will parse
+    // the wgt file and launch the correct widget (if installed).
+    var fname = ".__webinosLaunch." + uuid.v1() + ".wgt";
     var launchFile = path.join(pzp.session.getWebinosPath(),'wrt/' + fname);
-    if (widget) {
-      fs.writeFileSync(launchFile,'wgt:' + appId);
-    } else {
-      fs.writeFileSync(launchFile,'web:' + appId);
-    }
-    
+    var launchData = { isWidget: true, installId: appId, params: params };
+    fs.writeFileSync(launchFile,JSON.stringify(launchData));
+    exec(launchFile);
     return launchFile;
   }
   
@@ -68,8 +71,10 @@
     var failedFile = launchFile + ".failed";
     if (existsSync(failedFile)) {
       errorCB("error while launching application");
+      fs.unlinkSync(failedFile);
     } else if (existsSync(launchFile)){
       errorCB("runtime failed to launch application - check runtime is running");
+      fs.unlinkSync(launchFile);
     } else {
       successCB(true);
     }
@@ -99,9 +104,14 @@
    * @param errorCB Error callback.
    * @param appURI URI of application to be launched
    */
-  WebinosAppLauncherModule.prototype.launchApplication = function (appURI, successCB, errorCB){
+  WebinosAppLauncherModule.prototype.launchApplication = function (paramsIn, successCB, errorCB){
+    var appURI = paramsIn[0];
     console.log("launchApplication was invoked. AppID: " +  appURI);
-    
+
+    var parsed = url.parse(appURI);
+    var params = parsed.search;
+    appURI = parsed.href.replace(parsed.search,"");
+
     if (process.platform == 'android'){
         androidLauncher.launchApplication(
           function (res) {
@@ -114,17 +124,27 @@
         );
         return;
     }
-    
-    var installedApp = findInstalledApp(appURI);   
+
+    var installedApp = findInstalledApp(appURI);
     if (typeof installedApp !== "undefined") {
       // Run the installed widget...
       console.log("applauncher: launching widget " + installedApp.installId);
-      var req = writeLaunchRequest(installedApp.installId,true);
+      var req = writeLaunchRequest(installedApp.installId, params);
       setTimeout(checkLaunchRequest, 2000, req, successCB, errorCB);
     } else if (/^http[s]?:\/{2}/.test(appURI)) {
+      // Get entire URI.
+      appURI = paramsIn[0];
+      // Not installed widget, but is a valid URL
       console.log("applauncher: launching " + appURI);
-      var req = writeLaunchRequest(appURI,false);
-      setTimeout(checkLaunchRequest, 2000, req, successCB, errorCB);
+
+      // Spawn the platform-specific action to launch the default browser.
+      if (process.platform === 'linux') {
+        spawn('xdg-open',[appURI]);
+        successCB(true);
+      } else if (process.platform === 'win32') {
+        spawn('explorer.exe',[appURI]);
+        successCB(true);
+      }
     } else {
       console.log("applauncher: invalid/unknown appURI " + appURI);
       if (typeof errorCB === "function") {
@@ -135,10 +155,9 @@
   
   /**
    * Determine whether an app is available.
-   * 
-   * [not yet implemented.]
    */
-  WebinosAppLauncherModule.prototype.appInstalled = function (appURI, successCB, errorCB){
+  WebinosAppLauncherModule.prototype.appInstalled = function (params, successCB, errorCB){
+    var appURI = params[0];
     console.log("appInstalled was invoked. AppID: " + appURI);
 
     if (typeof appURI === "undefined" || !appURI) {
