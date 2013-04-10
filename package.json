@@ -48,6 +48,7 @@
   , "passport-yahoo": "x.x.x"
   , "passport-google": "x.x.x"
   , "serialport2": "0.0.5"
+  , "open": "x.x.x"
   }
 , "engines":
   { "node": ">= 0.6.0"
