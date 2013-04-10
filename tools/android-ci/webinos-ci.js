@@ -69,6 +69,9 @@ var Webinos = function(webinosSettings){
             if(mode == 'release')
                 antargs.push(mode);
 
+            console.log("Checking the PATH VARIABLE*************");
+            console.log("PATH=" + process.env['PATH']);
+
             var antChild = spawn('ant', antargs, {cwd: webinosAndroidPlatformPath, env: process.env});
 
             var appApkPath = undefined;

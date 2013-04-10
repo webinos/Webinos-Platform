@@ -85,9 +85,10 @@ AndroidInit.prototype.setupAndroid = function(sdkTarFilePath, cb){
     }, function(err, results){
         var arg = "/tmp/android/android-sdk-linux/platform-tools";
         console.log("Checking the contents of android platform tools*********************8888");
-        utils.executeCommandViaSpawn("ls -l", [arg], function(code, args2Forward, stdout){
+        utils.executeCommandViaSpawn("ls", ['-l', arg], function(code, args2Forward, stdout){
 
         }, []);
+
         console.log("Checking if aapt tooly exists*************");
         fs.exists(arg + "/aapt", function(exists){
             if(exists)
@@ -95,7 +96,8 @@ AndroidInit.prototype.setupAndroid = function(sdkTarFilePath, cb){
             else
                 console.log(arg + "/aapt not found");
         });
-
+        console.log("Checking the PATH VARIABLE*************");
+        console.log("PATH=" + process.env['PATH']);
         if(!err){
 
             console.log("Setup of Android Completed Successfully");
