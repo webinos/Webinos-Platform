@@ -18,13 +18,14 @@
 (function() {
   var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
   var androidLauncher = null;
-  var widgetLibrary; 
+  var widgetLibrary;
+  var open;
   if (process.platform == 'android') {
     androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
     /* FIXME: temporarily disable widgetmanager in this isolate */
     widgetLibrary = null;
   } else {
-    try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
+    try { widgetLibrary = require('../../../manager/widget_manager/index.js'); open = require('open'); } catch(e) { widgetLibrary = null; }
   }
 
   var dependencies = require("find-dependencies")(__dirname);
@@ -34,8 +35,6 @@
   var fs = require('fs');
   var path = require('path');
   var existsSync = fs.existsSync || path.existsSync;
-  var exec = require('child_process').exec;
-  var spawn = require('child_process').spawn;
 
   function findInstalledApp(appURI) {
     var requestedApp;
@@ -63,7 +62,7 @@
     var launchFile = path.join(pzp.session.getWebinosPath(),'wrt/' + fname);
     var launchData = { isWidget: true, installId: appId, params: params };
     fs.writeFileSync(launchFile,JSON.stringify(launchData));
-    exec(launchFile);
+    open(launchFile);
     return launchFile;
   }
   
@@ -138,13 +137,8 @@
       console.log("applauncher: launching " + appURI);
 
       // Spawn the platform-specific action to launch the default browser.
-      if (process.platform === 'linux') {
-        spawn('xdg-open',[appURI]);
-        successCB(true);
-      } else if (process.platform === 'win32') {
-        spawn('explorer.exe',[appURI]);
-        successCB(true);
-      }
+      open(appURI);
+      successCB(true);
     } else {
       console.log("applauncher: invalid/unknown appURI " + appURI);
       if (typeof errorCB === "function") {
