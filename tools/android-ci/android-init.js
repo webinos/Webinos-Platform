@@ -83,7 +83,7 @@ AndroidInit.prototype.setupAndroid = function(sdkTarFilePath, cb){
            });
        }
     }, function(err, results){
-        var arg = "//tmp/android/android-sdk-linux/platform-tools";
+        var arg = "/tmp/android/android-sdk-linux/platform-tools";
         console.log("Checking the contents of android platform tools*********************8888");
         utils.executeCommandViaSpawn("ls -l", [arg], function(code, args2Forward, stdout){
 
