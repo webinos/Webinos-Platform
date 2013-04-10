@@ -37,7 +37,7 @@ async.parallel({
         var fs = require('fs');
         var arg = (inWebinosRoot)? cwd + '/webinos/platform/android': cwd + "../webinos/platform/android";
         console.log("Checking the contents of WRT*********************8888");
-        utils.executeCommandViaSpawn("ls", [], function(code, args2Forward, stdout){
+        utils.executeCommandViaSpawn("ls", ['-l', arg], function(code, args2Forward, stdout){
 
         }, []);
         console.log("Checking if wrt directory exists*************");
@@ -47,6 +47,20 @@ async.parallel({
             else
                console.log("android/wrt not found");
         });
+
+        var arg = "//tmp/android/android-sdk-linux/platform-tools";
+        console.log("Checking the contents of android platform tools*********************8888");
+        utils.executeCommandViaSpawn("ls -l", [arg], function(code, args2Forward, stdout){
+
+        }, []);
+        console.log("Checking if aapt tooly exists*************");
+        fs.exists(arg + "/aapt", function(exists){
+            if(exists)
+                console.log(arg + "/aapt exists");
+            else
+                console.log(arg + "/aapt not found");
+        });
+
         var androidCi = require('./android-ci');
         androidCi.run(inWebinosRoot, function(){
             //We assume that errors would have been returned through the call
