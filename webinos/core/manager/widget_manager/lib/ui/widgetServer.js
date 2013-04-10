@@ -47,7 +47,7 @@
     app.get('/', apps.installed);
     app.get('/apps', apps.installed);
     app.get('/uninstall/:id', apps.uninstall);
-    app.get('/widget/about/:id', apps.about);
+    app.get('/icon/:id', apps.icon);
 
     if (typeof enforceWidgetCSP != "undefined" && enforceWidgetCSP) {
       // Enforce CSP for all widget requests.
@@ -59,8 +59,9 @@
       });
     }    
 
-    app.get('/widget/:id', apps.boot);
-    app.get('/widget/:id/*', apps.run);
+    app.get('/boot/:id', apps.boot);
+    app.get('/boot/about/:id', apps.about);
+    app.get('/widget/:id/:sessionId/*', apps.run);
     app.get('/sideLoad/:id', apps.sideLoad);
     
     // widget testing

@@ -37,11 +37,16 @@ bool WidgetConfig::LoadFromURL(std::string url)
   }
   else
   {
-    // Try and parse url path - assuming of the form http://localhost:xxxxx/widget/<installId>
+    // Try and parse url path - assuming of the form http://localhost:xxxxx/widget/<installId>/<sessionId>
+    // or
+    // http://localhost:xxxxx/boot/<installId> (when first starting widget)
     const std::string widgetRoute = "/widget/";
+    const std::string bootRoute = "/boot/";
 
     if (p.substr(0,widgetRoute.length()) == widgetRoute)
       it = p.begin() + widgetRoute.length();
+    else if (p.substr(0,bootRoute.length()) == bootRoute)
+      it = p.begin() + bootRoute.length();
   }
 
   if (it != p.end())
@@ -55,12 +60,21 @@ bool WidgetConfig::LoadFromURL(std::string url)
     // Create the path to the widget.
     m_widgetPath = AppGetWidgetStoreDirectory() + m_installId;
 
-    // Move past trailing slash.
-    if (idEnd != p.end() && *idEnd == '/')
-      idEnd++;
-
     std::string widgetConfigPath = m_widgetPath + "/.config";
     m_loaded = Load(widgetConfigPath);
+
+    // Move past the session Id.
+    if (idEnd != p.end() && *idEnd == '/')
+    {
+      idEnd++;
+      it = idEnd;
+      idEnd = std::find(idEnd,p.end(),'/');
+      m_sessionId = std::string(it,idEnd);
+    }
+
+    // Move past the trailing slash.
+    if (idEnd != p.end() && *idEnd == '/')
+      idEnd++;
 
     m_urlPath = std::string(idEnd,p.end());
   }
