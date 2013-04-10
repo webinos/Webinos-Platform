@@ -31,7 +31,7 @@ int m_browsers = 0;
 void destroy(void) {
 	m_browsers--;
 	if (m_browsers == 0)
-		CefQuitMessageLoop();
+	CefQuitMessageLoop();
 }
 
 // Callback for when you click the back button.
@@ -224,7 +224,7 @@ void AppCreateWindow(CefRefPtr<ClientHandler> clientHandler, bool sideLoading, C
 
   gtk_container_add(GTK_CONTAINER(window), vbox);
 
-  if (!sideLoading)
+//  if (!sideLoading)
   {
     gtk_widget_show_all(GTK_WIDGET(window));
   }
@@ -233,8 +233,8 @@ void AppCreateWindow(CefRefPtr<ClientHandler> clientHandler, bool sideLoading, C
   {
     // ToDo - investigate - this doesn't appear to work as expected (i.e. close the instance that is created to perform the widget
     // installation during side-loading.
-    //m_browsers++;
-    //gtk_widget_destroy(GTK_WIDGET(closeParent));
-    //m_browsers--;
+//    m_browsers++;
+//    gtk_widget_destroy(GTK_WIDGET(closeParent));
+//    m_browsers--;
   }
 }
