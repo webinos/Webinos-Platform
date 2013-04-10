@@ -150,29 +150,39 @@ LocalFileSystem.prototype.remove = function (path, recursive, callback) {
 }
 
 LocalFileSystem.prototype.createFile = function (path, exclusive, callback) {
+  //console.log('LocalFileSystem.createFile: path = ' + path + '; exclusive = ' + exclusive);
   var self = this
-
-  var flags = exclusive ? "wx" : "a"
-  fs.open(self.realize(path), flags, function (error, fd) {
-    if (!error) {
-      return fs.close(fd, function (error) {
-        callback(error ? map(error) : null)
-      })
+  var realizedPath = self.realize(path);
+  fs.stat(realizedPath, function (error1, stats) {
+    switch ((error1 && error1.code) || "EEXIST") {
+      case "EEXIST":
+        //console.log('LocalFileSystem.createFile (' + path + ') EEXIST');
+        if (exclusive) {
+          //console.log('LocalFileSystem.createFile (' + path + ') EEXIST+excl');
+          callback(new util.CustomError("PathExistsError"))
+        } else if (!stats.isFile()) {
+          //console.log('LocalFileSystem.createFile (' + path + ') EEXIST+!isfile');
+          callback(new util.CustomError("TypeMismatchError"))
+        } else {
+          //console.log('LocalFileSystem.createFile (' + path + ') EEXIST+OK');
+          callback(null)
+        }
+        break
+      case "ENOENT":
+        //console.log('LocalFileSystem.createFile (' + path + ') ENOENT');
+        fs.open(realizedPath, "w", function (error2, fd) {
+          if (error2) return callback(map(error2))
+          //console.log('LocalFileSystem.createFile (' + path + ') ENOENT+open');
+          fs.close(fd, function (error3) {
+            if (error3) return callback(map(error3))
+            callback(null)
+          })
+        })
+        break
+      default:
+        //console.log('LocalFileSystem.createFile (' + path + ') OTHER (' + error1.code + ')');
+        callback(map(error1))
     }
-
-    fs.stat(self.realize(path), function (error2, stats) {
-      if (error2) return callback(map(error))
-
-      if (exclusive) {
-        return callback(new util.CustomError("PathExistsError"))
-      }
-
-      if (!stats.isFile()) {
-        return callback(new util.CustomError("TypeMismatchError"))
-      }
-
-      callback(null)
-    })
   })
 }
 
