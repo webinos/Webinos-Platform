@@ -85,7 +85,7 @@
     {
       "name": "vehicle",
       "params": {
-        "connector": "simulator"
+        "connector": "obd"
       }
     },
     {
@@ -133,7 +133,7 @@
   "friendlyName": "",
   "webinos_version": {
     "tag": "v0.8.0",
-    "num_commit": "181",
-    "commit_id": "g0a7c950"
+    "num_commit": "182",
+    "commit_id": "gc2233c3"
   }
 }

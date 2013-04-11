@@ -22,10 +22,6 @@
     var rpcHandler = null;
     var vs;
 
-
-
-
-
     function gearEvent(value) {
         this.gear = value;
     }

@@ -19,7 +19,43 @@
 (function () {
     'use strict';
 
-
     //Code for OBD.
+    var OBDReader = require('bluetooth-obd');
+    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
+    var dataReceivedMarker = {};
 
+    btOBDReader.on('dataReceived', function (data) {
+        console.log(data);
+        dataReceivedMarker = data;
+    });
+
+    btOBDReader.on('connected', function () {
+
+    });
+
+    btOBDReader.connect();
+
+    function get(type) {
+        switch (type) {
+        case 'gear':
+            //return new ShiftEvent(gear);
+            return "hello";
+            break;
+        default:
+            console.log('nothing found...');
+        }
+    }
+
+    function addListener(type, listener) {
+        console.log('registering listener ' + type);
+        switch (type) {
+            case 'gear':
+                _listeners.gear = listener;
+                break;
+            default:
+                console.log('type ' + type + ' undefined.');
+        }
+    }
+    exports.get = get;
+    exports.addListener = addListener;
 })(module.exports);

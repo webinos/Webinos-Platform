@@ -23,14 +23,14 @@
         var car = null;
         var conncector = null;
         if (typeof params.connector === 'undefined') {
-            connector = 'simulator';
+            connector = 'obd';
         } else {
             connector = params.connector;
         }
         if (connector == 'most') {
             try {
-                var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
-                car = vehicleSystem.most;
+                //var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
+                //car = vehicleSystem.most;
                 implFile = 'most';
             } catch (e) {
                 console.log(e.stack);
@@ -46,6 +46,13 @@
             }
         } else if (connector == 'obd') {
             //OBD
+            try {
+                car = require('../../vehicle/contrib/vb-obd/vo.js');
+                implFile = 'obd';
+                console.log('connecting to obd');
+            } catch (e) {
+                console.log(e);
+            }
         } else if (connector == 'fake') {
             implFile = 'fake';
             console.log('connecting to fake data generator');

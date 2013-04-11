@@ -31,7 +31,7 @@
   "mkdirp": "0.3.x",
   "dbox": "https://github.com/felixjendrusch/node-dbox/tarball/put-zero",
   "optimist": "x.x.x",
-  "serial-obd": "0.0.1"
+  "bluetooth-obd": "0.0.4"
  },
  "devDependencies": {
   "grunt": "~0.4.x",
