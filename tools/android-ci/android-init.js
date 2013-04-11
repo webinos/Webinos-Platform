@@ -99,7 +99,6 @@ AndroidInit.prototype.setupAndroid = function(sdkTarFilePath, cb){
         console.log("Checking the PATH VARIABLE*************");
         console.log("PATH=" + process.env['PATH']);
         if(!err){
-
             console.log("Setup of Android Completed Successfully");
             cb(0, results.extractSDK);
         }
