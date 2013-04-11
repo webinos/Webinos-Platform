@@ -489,7 +489,12 @@ bool AppGetWidgetArgs(std::string sessionId, std::string& args)
 {
   bool ok = false;
 
+#if defined(OS_WIN)
   CefString sessionFile("webinos/wrt/sessions/" + sessionId + ".json");
+#else
+  CefString sessionFile(".webinos/wrt/sessions/" + sessionId + ".json");
+#endif
+
   base::DictionaryValue* dv = LoadFileAsJSON(sessionFile);
 
   if (dv != NULL)
