@@ -3,7 +3,7 @@
 
 	var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 	var devicestatusmodule = require('./webinos.devicestatus.js').devicestatus,
-	RemoteDeviceStatusManager = function(rpcHandler) {
+	RemoteDeviceStatusManager = function(rpcHandler, params) {
 		// inherit from RPCWebinosService
 		this.base = RPCWebinosService;
 		this.base({
@@ -11,6 +11,7 @@
 			displayName: 'DeviceStatus',
 			description: 'Get information about the device status.'
 		});
+        this.params = params;
 	};
 	
 	RemoteDeviceStatusManager.prototype = new RPCWebinosService;
@@ -38,6 +39,10 @@
 
 	RemoteDeviceStatusManager.prototype.getPropertyValue = 
 		function (params, successCallback, errorCallback) {
+            if (params && params[0] && params[0].aspect == "Device" && params[0].property == "type"){ //If it's the device type
+                // Get it from the parameters in the config file.
+                successCallback(this.params.devicetype);
+            }else
 			devicestatusmodule.devicestatus.getPropertyValue(
 				function (prop) {
 					successCallback(prop);
