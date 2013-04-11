@@ -47,6 +47,7 @@
   , "passport": "x.x.x"
   , "passport-yahoo": "x.x.x"
   , "passport-google": "x.x.x"
+  , "open": "x.x.x"
   , "serialport": "x.x.x"
   }
 , "engines":

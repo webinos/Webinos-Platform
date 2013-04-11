@@ -94,7 +94,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         }
         for (i in _instance.pzh_state.connectedDevicesToOtherPzh.pzh) {
             if (_instance.pzh_state.connectedDevicesToOtherPzh.pzh.hasOwnProperty(i)) {
-                pzhs.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i]|| i,
+                pzps.push ({id: _instance.pzh_state.connectedDevicesToOtherPzh.pzh[i]|| i,
                     url:i, isConnected:true});
             }
         }

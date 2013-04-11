@@ -188,6 +188,7 @@ void ClientApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
                           }; ";
 
         widgetInterface = wifStr.str();
+        LOG(INFO) << "widget interface is \r\n" << widgetInterface;
       }
       else
       {
