@@ -20,26 +20,42 @@
     'use strict';
 
     //Code for OBD.
-    var OBDReader = require('bluetooth-obd');
-    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
-    var dataReceivedMarker = {};
+    var OBDReader = require('serial-obd');
+    var options = {};
+    options.baudrate = 115200;
+    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
+    //var OBDReader = require('bluetooth-obd');
+    //var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
+
+    var speed;
     btOBDReader.on('dataReceived', function (data) {
         console.log(data);
-        dataReceivedMarker = data;
+        speed = data.value;
+        //Huge switch case for all vars.
     });
 
-    btOBDReader.on('connected', function () {
 
+//    btOBDReader.on('dataReceived', function (data) {
+//        console.log(data);
+//        dataReceivedMarker = data;
+//    });
+
+    btOBDReader.on('connected', function () {
+        this.addPoller("vss");
+
+        this.startPolling(1000);
     });
 
     btOBDReader.connect();
 
     function get(type) {
+
         switch (type) {
         case 'gear':
-            //return new ShiftEvent(gear);
-            return "hello";
+            var event = {};
+            event.gear = speed;
+            return event;
             break;
         default:
             console.log('nothing found...');
@@ -47,14 +63,14 @@
     }
 
     function addListener(type, listener) {
-        console.log('registering listener ' + type);
-        switch (type) {
-            case 'gear':
-                _listeners.gear = listener;
-                break;
-            default:
-                console.log('type ' + type + ' undefined.');
-        }
+//        console.log('registering listener ' + type);
+//        switch (type) {
+//            case 'gear':
+//                _listeners.gear = listener;
+//                break;
+//            default:
+//                console.log('type ' + type + ' undefined.');
+//        }
     }
     exports.get = get;
     exports.addListener = addListener;
