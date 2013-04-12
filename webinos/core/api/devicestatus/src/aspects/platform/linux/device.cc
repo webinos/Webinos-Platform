@@ -25,7 +25,7 @@ vector<string> Device::getComponents()
 
 bool Device::isSupported(string * property)
 {
-	return false;
+	return true;
 }
 
 string Device::getPropertyValue(string * property, string * component)
