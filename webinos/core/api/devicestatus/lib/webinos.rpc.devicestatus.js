@@ -28,8 +28,8 @@
 	
 	RemoteDeviceStatusManager.prototype.isSupported = 
 		function (params, successCallback) {
-			if (params && params[0] && params[0].aspect == "Device" && params[0].property == "type") //If it's the device type
-				successCallback(true); // we support it via config
+			if (params && params.length == 2 && params[0] == "Device" && params[1] == "type") //If it's the device type
+				successCallback({ aspect:params[0], property:params[1],isSupported:true}); // we support it via config
 			else // check the native implementation
 				devicestatusmodule.devicestatus.isSupported(
 					params[0],
