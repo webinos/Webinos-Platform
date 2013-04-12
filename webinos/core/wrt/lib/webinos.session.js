@@ -68,48 +68,16 @@
           channel.send(JSON.stringify(message));
     }
   };
-    webinos.session.setServiceLocation = function (loc) {
-        serviceLocation = loc;
-    };
-    webinos.session.getServiceLocation = function () {
-        if (typeof serviceLocation !== "undefined") {
-            return serviceLocation;
-        } else {
-            return pzpId;
-        }
-    };
-    webinos.session.getSessionId = function () {
-        return sessionId;
-    };
-    webinos.session.getPZPId = function () {
-        return pzpId;
-    };
-    webinos.session.getPZHId = function () {
-        return ( pzhId || "");
-    };
-    webinos.session.getOtherPZP = function () {
-        return (otherPzp || []);
-    };
-    webinos.session.getOtherPZH = function () {
-        return (otherPzh || []);
-    };
-    webinos.session.addListener = function (statusType, listener) {
-        var listeners = listenerMap[statusType] || [];
-        listeners.push (listener);
-        listenerMap[statusType] = listeners;
-        return listeners.length;
-    };
-    webinos.session.removeListener = function (statusType, id) {
-        var listeners = listenerMap[statusType] || [];
-        try {
-            listeners[id - 1] = undefined;
-        } catch (e) {
-        }
-    };
-    webinos.session.isConnected = function () {
-        return isConnected;
-    };
-
+  webinos.session.setServiceLocation = function (loc) {
+    serviceLocation = loc;
+  };
+  webinos.session.getServiceLocation = function () {
+    if (typeof serviceLocation !== "undefined") {
+      return serviceLocation;
+    } else {
+      return pzpId;
+    }
+  };
   webinos.session.getSessionId = function() {
     return sessionId;
   };
