@@ -17,7 +17,66 @@
  ******************************************************************************/
 
 (function () {
-    'use strict';
+    //'use strict';
+
+    //Events
+    WDomEvent = function (type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp) {
+        this.initEvent(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp);
+    }
+    WDomEvent.prototype.initEvent = function (type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp) {
+        this.type = type;
+        this.target = target;
+        this.currentTarget = currentTarget;
+        this.eventPhase = eventPhase;
+        this.bubbles = bubbles;
+        this.cancelable = cancelable;
+        this.timestamp = timestamp;
+    }
+
+    SpeedEvent = function (speedData) {
+        this.initSpeedEvent(speedData);
+    }
+    SpeedEvent.prototype = new WDomEvent();
+    SpeedEvent.prototype.constructor = SpeedEvent;
+    SpeedEvent.parent = WDomEvent.prototype; // our "super" property
+    SpeedEvent.prototype.initSpeedEvent = function (speedData) {
+        this.gear = speedData;
+        var d = new Date();
+        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+        var stamp = stamp + d.getUTCMilliseconds();
+        SpeedEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
+    }
+
+//    RPMEvent = function (rpm) {
+//        this.initSpeedEvent(speed);
+//    }
+//    RPMEvent.prototype = new WDomEvent();
+//    RPMEvent.prototype.constructor = SpeedEvent;
+//    RPMEvent.parent = WDomEvent.prototype; // our "super" property
+//    RPMEvent.prototype.initSpeedEvent = function (gear) {
+//        this.gear = gear;
+//        var d = new Date();
+//        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+//        var stamp = stamp + d.getUTCMilliseconds();
+//        RPMEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
+//    }
+//
+//    SpeedEvent = function (load) {
+//        this.initSpeedEvent(load);
+//    }
+//    SpeedEvent.prototype = new WDomEvent();
+//    SpeedEvent.prototype.constructor = SpeedEvent;
+//    SpeedEvent.parent = WDomEvent.prototype; // our "super" property
+//    SpeedEvent.prototype.initSpeedEvent = function (gear) {
+//        this.gear = gear;
+//        var d = new Date();
+//        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+//        var stamp = stamp + d.getUTCMilliseconds();
+//        SpeedEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
+//    }
+
+
+    var _listeners = {}; //Listener object
 
     //Code for OBD.
     var OBDReader = require('serial-obd');
@@ -28,21 +87,36 @@
     //var OBDReader = require('bluetooth-obd');
     //var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
 
-    var speed;
+    var vehicleSpeed;
+    var rpm;
+    var engineLoad;
+
     btOBDReader.on('dataReceived', function (data) {
-        console.log(data);
-        speed = data.value;
+        //console.log(data);
+        switch (data.name) {
+        case "vss":
+            vehicleSpeed = data.value;
+            if (typeof _listeners.gear != 'undefined') {
+                _listeners.gear(new SpeedEvent(vehicleSpeed));
+            }
+            break;
+        case "rpm":
+            rpm = data.value;
+            break;
+        case "load_pct":
+            engineLoad = data.value;
+            break;
+        default:
+            //console.log('No supported pid yet.');
+            break;
+        }
         //Huge switch case for all vars.
     });
 
-
-//    btOBDReader.on('dataReceived', function (data) {
-//        console.log(data);
-//        dataReceivedMarker = data;
-//    });
-
     btOBDReader.on('connected', function () {
         this.addPoller("vss");
+        this.addPoller("rpm");
+        this.addPoller("load_pct");
 
         this.startPolling(1000);
     });
@@ -53,24 +127,28 @@
 
         switch (type) {
         case 'gear':
-            var event = {};
-            event.gear = speed;
-            return event;
-            break;
+            //Gear is speed for now.
+            return new SpeedEvent(vehicleSpeed);
+//        case 'parksensors-front':
+//            //RPM for now.
+//            return new SpeedEvent(vehicleSpeed);
+//        case 'parksensors-rear':
+//            //Load for now.
+//            return new SpeedEvent(vehicleSpeed);
         default:
-            console.log('nothing found...');
+            console.log('Nothing found...');
         }
     }
 
     function addListener(type, listener) {
-//        console.log('registering listener ' + type);
-//        switch (type) {
-//            case 'gear':
-//                _listeners.gear = listener;
-//                break;
-//            default:
-//                console.log('type ' + type + ' undefined.');
-//        }
+        console.log('registering listener ' + type);
+        switch (type) {
+            case 'gear':
+                _listeners.gear = listener;
+                break;
+            default:
+                console.log('type ' + type + ' undefined.');
+        }
     }
     exports.get = get;
     exports.addListener = addListener;

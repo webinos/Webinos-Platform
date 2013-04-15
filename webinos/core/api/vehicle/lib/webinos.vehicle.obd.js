@@ -124,18 +124,18 @@
 
 
     /*handlegearEvents*/
-//    function handleGearEvents(gearE) {
-//        if (listeningToGear) {
-//            for (var i = 0; i < listeners.length; i++) {
-//                if (listeners[i][3] == 'gear') {
-//                    returnData(gearE, function (gearE) {
-//                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', gearE);
-//                        rpcHandler.executeRPC(rpc);
-//                    }, listeners[i][1], listeners[i][2]);
-//                }
-//            }
-//        }
-//    }
+    function handleGearEvents(gearE) {
+        if (listeningToGear) {
+            for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i][3] == 'gear') {
+                    returnData(gearE, function (gearE) {
+                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', gearE);
+                        rpcHandler.executeRPC(rpc);
+                    }, listeners[i][1], listeners[i][2]);
+                }
+            }
+        }
+    }
 
     function returnData(data, successCB, errorCB) {
         if (data === undefined) {
@@ -189,7 +189,7 @@
 
     function setRequired(obj) {
         vs = obj;
-        //vs.addListener('gear', handleGearEvents);
+        vs.addListener('gear', handleGearEvents);
         //vs.addListener('tripcomputer', handleTripComputerEvents);
         //vs.addListener('parksensors-rear', handleParkSensorsEvents);
         //vs.addListener('parksensors-front', handleParkSensorsEvents);
