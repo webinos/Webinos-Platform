@@ -40,5 +40,8 @@
     <string name="not_yet_implemented">Not yet implemented</string>
     <string name="no_apps_installed">No applications installed</string>
     <string name="loading_apps">Loading applications</string>
-    
+    <string name="permlab_wgtRead">read installed webinos widgets</string>
+    <string name="permdesc_wgtRead">Allows the application (a trusted web run times) to access
+        installed widgets contents without your intervention.</string>
+        
 </resources>
