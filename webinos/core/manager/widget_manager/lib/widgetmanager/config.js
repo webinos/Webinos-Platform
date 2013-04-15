@@ -56,7 +56,7 @@ this.Config = (function() {
   /* FIXME: remove nasty hack */
   var wrtHome;
 	if(process.platform == 'android')
-	  wrtHome = '/data/data/org.webinos.app/wrt';
+	  wrtHome = '/data/data/org.webinos.app/node_modules/webinos/wp4/webinos/web_root/apps/wrt';
   else if (process.platform == 'win32' || process.platform == 'linux' || process.platform == 'darwin') {
 		var path = require('path');
 		var webinos = require("find-dependencies")(__dirname);

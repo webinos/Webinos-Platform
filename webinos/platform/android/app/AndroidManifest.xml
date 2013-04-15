@@ -111,7 +111,10 @@
                 <action android:name="org.webinos.wrt.channel.SERVER" />
             </intent-filter>
         </service>
-        <provider android:name=".wrt.provider.WidgetContentProvider" android:authorities="org.webinos.wrt"></provider>
-        
+        <provider android:name=".wrt.provider.WidgetContentProvider" android:exported="true" android:authorities="org.webinos.wrt" android:readPermission="org.webinos.app.WgtReadPermission"></provider>
     </application>
+        <permission android:name="org.webinos.app.WgtReadPermission"
+        android:label="@string/permlab_wgtRead"
+        android:description="@string/permdesc_wgtRead"
+        android:protectionLevel="dangerous" />
 </manifest>

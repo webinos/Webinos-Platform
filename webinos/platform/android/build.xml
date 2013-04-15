@@ -35,7 +35,8 @@
 				node_modules/optimist/,
 				node_modules/JSV/,
 				webinos/web_root/webinos.js,
-				webinos/" 
+				webinos/,
+				webinos/web_root/apps/wrt/"
 			excludes="
 				webinos/platform/,
 				webinos/core/pzh/,
@@ -43,7 +44,6 @@
 				
                 webinos/web_root/tests/,
 				webinos/web_root/api_test_specs/,
-				webinos/web_root/apps/,
 				webinos/web_root/*.html,
 				webinos/web_root/*.xml,
 				webinos/web_root/*.json,
