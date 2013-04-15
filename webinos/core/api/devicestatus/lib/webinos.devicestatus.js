@@ -3,7 +3,11 @@
 	var webinos = require("find-dependencies")(__dirname);
 	var nativeDeviceStatus;
 	try{
-      nativeDeviceStatus = require('nativedevicestatus');
+	if(process.platform=='android'){
+	nativeDeviceStatus = require("bridge").load("org.webinos.impl.DevicestatusImpl", this);
+	}else{
+	nativeDeviceStatus = require('nativedevicestatus');
+	}
     }catch(err){
 	}
 	var DeviceapisDeviceStatusManager, DeviceStatusManager, PropertyRef, WatchOptions, DeviceAPIError, PropertyValueSuccessCallback, ErrorCallback, PendingOperation;
@@ -25,19 +29,19 @@
 	DeviceStatusManager = function () {};
 
 	DeviceStatusManager.prototype.getComponents = function (aspect, successCallback) {
-		successCallback(nativeDeviceStatus.getComponents(aspect));
+		if(nativeDeviceStatus) successCallback(nativeDeviceStatus.getComponents(aspect));
 	};
 
 	DeviceStatusManager.prototype.isSupported = function (aspect, property, successCallback) {
-		successCallback({'aspect':aspect, 'property':property, 'isSupported':nativeDeviceStatus.isSupported(aspect, property)});
+		if(nativeDeviceStatus) successCallback({'aspect':aspect, 'property':property, 'isSupported':nativeDeviceStatus.isSupported(aspect, property)});
 	};
 
 	DeviceStatusManager.prototype.getPropertyValue = function (successCallback, errorCallback, prop) {
-        	successCallback(nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component));
+        	if(nativeDeviceStatus) successCallback(nativeDeviceStatus.getPropertyValue(prop.aspect, prop.property, prop.component));
 	};
 
 	DeviceStatusManager.prototype.watchPropertyChange = function (successCallback, errorCallback, prop, options) {
-		nativeDeviceStatus.watchPropertyChange(prop, options);
+		if(nativeDeviceStatus) nativeDeviceStatus.watchPropertyChange(prop, options);
 	};
 
 	DeviceStatusManager.prototype.clearPropertyChange = function (watchHandler) {
