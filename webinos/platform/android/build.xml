@@ -2,7 +2,25 @@
 <project name="webinos" default="debug" basedir="../../..">
 
 	<!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
-
+	<target name="build-devicetype">
+		<replaceregexp file="${basedir}/webinos_config.json" match='"devicetype": "(.*)"' replace='"devicetype": "${devicetype}"' />
+		<antcall target="debug"/>
+		<move file="${basedir}/webinos/platform/android/installer/bin/WebinosInstaller-debug.apk" tofile="${basedir}/webinos/platform/android/installer/WebinosInstaller-${devicetype}-debug.apk"/>
+	</target>
+	
+	<target name="build-all">
+		<!-- Generate 3 apks for the 3 supported android device types -->
+		<antcall target="build-devicetype">
+			<param name="devicetype" value="smartphone"/>
+		</antcall>
+		<antcall target="build-devicetype">
+			<param name="devicetype" value="tv"/>
+		</antcall>
+		<antcall target="build-devicetype">
+			<param name="devicetype" value="tablet"/>
+		</antcall>
+	</target>
+	
 	<target name="gen-webinos">
 
 		<!-- Creates app/assets/webinos.zip -->
