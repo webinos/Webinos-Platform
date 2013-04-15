@@ -38,7 +38,7 @@
 
 	<target name="sign-wrt-target" depends="replace-mode-placeholders" if="${build.isrelease}" >
 	    <!--  fake sign: decide what to do once we have webinos signing keys -->
-		<move file="../wrt/bin/wrt-release-unsigned.apk" tofile="../wrt/bin/wrt-release.apk" />
+		<!-- <move file="../wrt/bin/wrt-release-unsigned.apk" tofile="../wrt/bin/wrt-release.apk" /> -->
 	</target>
 
 	<target name="sign-app-target" depends="replace-mode-placeholders" if="${build.isrelease}" >
@@ -47,7 +47,7 @@
 	</target>
 
 	<target name="copy-wrt-target" depends="sign-wrt-target">
-		<copy file="../wrt/bin/wrt-${build.target}.apk" tofile="assets/targets/wrt-${build.target}.apk" />
+		<copy file="../wrt_chromium/bin/${build.target}/ContentShell.apk" tofile="assets/targets/ContentShell-${build.target}.apk" />
 	</target>
 
 	<target name="copy-app-target" depends="sign-app-target">
