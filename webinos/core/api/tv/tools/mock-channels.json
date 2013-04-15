@@ -1,21 +1,21 @@
 {
-	"sourceName":"Test Source",
-	"channelList":[
-		{
-			"channelName":"CH01",
-			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/fridge.webm"
-		},
-		{
-			"channelName":"CH02",
-			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/garden1.webm"
-		},
-		{
-			"channelName":"CH03",
-			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/garden2.webm"
-		},
-		{
-			"channelName":"CH04",
-			"channelURL":"http://people.opera.com/patrickl/experiments/webm/videos/windowsill.webm"
-		} 
-	]
+  "sourceName": "TV Mock Source"
+ ,"channelList": [
+    {
+      "channelName": "Das Erste HD"
+     ,"channelURL": "http://www.fokus.fraunhofer.de/files/file.php?h=Rc96972bf9a05350d9e16797b4e06d339"
+    } 
+   ,{
+      "channelName": "ZDF HD"
+     ,"channelURL": "http://www.fokus.fraunhofer.de/files/file.php?h=Rf5d96a08c3ffbb9bdf92e7be6a820446"
+    } 
+   ,{
+      "channelName": "CNBC"
+     ,"channelURL": "http://www.fokus.fraunhofer.de/files/file.php?h=Rdee3537223ddc05b50c8d6ec1cc6be27"
+    } 
+   ,{
+      "channelName": "Bloomberg"
+     ,"channelURL": "http://www.fokus.fraunhofer.de/files/file.php?h=R422ad5490b97ed603bf7257bde19c9f6"
+    } 
+  ]
 }
