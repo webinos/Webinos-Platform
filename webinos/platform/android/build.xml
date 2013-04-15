@@ -1,9 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="webinos" default="debug" basedir="../../..">
 
+	<macrodef name = "git">
+	    <attribute name = "command" />
+	    <attribute name = "dir" default = "" />
+	    <element name = "args" optional = "true" />
+	    <sequential>
+		<echo message = "git @{command}" />
+		<exec executable = "git" dir = "@{dir}">
+		    <arg value = "@{command}" />
+		    <args/>
+		</exec>
+	    </sequential>
+	</macrodef>
+	<macrodef name = "git-clone-pull">
+	    <attribute name = "repository" />
+	    <attribute name = "dest" />
+	    <sequential>
+		<git command = "clone">
+		    <args>
+		        <arg value = "@{repository}" />
+		        <arg value = "@{dest}" />
+		    </args>
+		</git>
+		<git command = "pull" dir = "@{dest}" />
+	    </sequential>
+	</macrodef>
+
 	<!-- ANDROID_HOME and ANODE_ROOT environment variables must be defined -->
 
 	<target name="gen-webinos">
+
+		<!-- Get the enrolment app and prepare it for package -->
+
+		<git-clone-pull repository="git://github.com/webinos/app-pzp-enrolment.git" dest="${basedir}/webinos/platform/android/tmp-app-enrolment" />
+
+		<ant antfile="build.xml" dir="${basedir}/webinos/platform/android/tmp-app-enrolment"/>
+
+		<copy todir="${basedir}/webinos/web_root/apps/wrt/">
+			<fileset dir="${basedir}/webinos/platform/android/tmp-app-enrolment/installed"/>
+		</copy>
+
 
 		<!-- Creates app/assets/webinos.zip -->
 		<zip destfile="${basedir}/webinos/platform/android/app/assets/modules/webinos.zip">
