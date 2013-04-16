@@ -80,7 +80,6 @@ public class ContactManagerImpl extends ContactManager implements IModule {
 		// TODO Auto-generated method stub
 
         if(!fields.isEmpty()) { 
-        	
         	ArrayList<String[]> parameters = inspectFields(fields);
         	Contact[] contacts = this.getFilteredContacts(parameters.get(0)[0],  parameters.get(1));
         	successCB.onSuccess(contacts);
@@ -90,7 +89,7 @@ public class ContactManagerImpl extends ContactManager implements IModule {
     		successCB.onSuccess(contacts);
         }
 		
-//        Log.v("DBG", "---------->#contact SEARCHED: " + Integer.toString(test()));
+        //Log.v("DBG", "---------->#contact SEARCHED: " + Integer.toString(test()));
 	
 		return null;
 	}
@@ -142,6 +141,10 @@ public class ContactManagerImpl extends ContactManager implements IModule {
 		return printDB(cursor);
 	}
 	
+//	public void logg() {
+//		//Log.v("JAVASCRIPT:", logMessage);
+//	}
+	
 	private int printDB(Cursor cursor){
 		Log.v("DBG:DB", "columns: " + cursor.getColumnCount() + " rows: " + cursor.getCount());
 		int i;	
@@ -154,6 +157,7 @@ public class ContactManagerImpl extends ContactManager implements IModule {
 		cursor.close();
 		return i;
 	}
+	
 	
 	private ArrayList<String[]> inspectFields(HashMap<String, String> fields) {
 		
@@ -373,35 +377,40 @@ public class ContactManagerImpl extends ContactManager implements IModule {
 	private Contact[] getAllContacts(){
 				
 		ArrayList<Contact> contacts = new ArrayList<Contact>();
-		Cursor cursor = androidContext.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 		
+		Cursor cursor = androidContext.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 //		Log.v("DBG:allCursor", String.valueOf(cursor.getColumnCount()));
 		
-    	while(cursor.moveToNext()) {
-    		
-    		ContactImpl contact =  new ContactImpl(this);
-    		
-    		String contactID = getContactID(cursor);
-    		
-    		contact.id = contactID;
-    		contact.displayName = getContactDisplayName(cursor);
-    		contact.name = getContactName(cursor, contactID);
-    		contact.revision = getContactRevision(cursor, contactID);		//not working
-    		contact.nickname = getContactNickname(cursor, contactID);
-    		contact.phoneNumbers = getConcactPhoneNumbers(cursor, contactID);
-    		contact.emails = getContactEmails(cursor, contactID);
-    		contact.addresses = getContactAddresses(cursor, contactID);
-    		contact.ims = getContactIms(cursor, contactID);
-    		contact.organizations = getContactOrganizations(cursor, contactID);
-    		contact.birthday = getContactBirthday(cursor, contactID);		//to be tested
-    		contact.note = getContactNote(cursor, contactID);
-    		contact.photos = getContactPhotos(contactID);					//to be tested
-    		contact.categories = getContactCategories(cursor, contactID);	//to be tested
-    		contact.urls = getContactUrls(cursor, contactID);
-    		contact.gender = null;											//not implemented on android
-    		contact.timezone = null;										//not implemented on android
-    		contacts.add(contact);   		
-    	}
+		
+		int size = cursor.getCount();
+	    if (size > 0 && cursor != null) {
+	        for (int i = 0; i < size; i++) {
+	            cursor.moveToPosition(i);
+	            
+	    		ContactImpl contact =  new ContactImpl(this);
+
+	    		String contactID = getContactID(cursor);
+	    		
+	    		contact.id = contactID;
+	    		contact.displayName = getContactDisplayName(cursor);
+	    		contact.name = getContactName(cursor, contactID);
+	    		contact.revision = getContactRevision(cursor, contactID);		//not working
+	    		contact.nickname = getContactNickname(cursor, contactID);
+	    		contact.phoneNumbers = getConcactPhoneNumbers(cursor, contactID);
+	    		contact.emails = getContactEmails(cursor, contactID);
+	    		contact.addresses = getContactAddresses(cursor, contactID);
+	    		contact.ims = getContactIms(cursor, contactID);
+	    		contact.organizations = getContactOrganizations(cursor, contactID);
+	    		contact.birthday = getContactBirthday(cursor, contactID);		//to be tested
+	    		contact.note = getContactNote(cursor, contactID);
+	    		contact.photos = getContactPhotos(contactID);					//to be tested
+	    		contact.categories = getContactCategories(cursor, contactID);	//to be tested
+	    		contact.urls = getContactUrls(cursor, contactID);
+	    		contact.gender = null;											//not implemented on android
+	    		contact.timezone = null;										//not implemented on android
+	    		contacts.add(contact);
+	        }
+	    }
     		
 		return contacts.toArray(new Contact[0]);
 	}
