@@ -246,6 +246,12 @@ $(document).ready(function () {
   $('#setTripComputer').click(function () {
     setTripComputer();
   });
+  $('input[id*="dd-"]').change(function () {
+    setDoorsData();
+  });
+  $('#setDoorsData').click(function () {
+    setDoorsData();
+  });
   $('#setPsFront').click(function () {
     setPsFront();
   });
@@ -435,6 +441,16 @@ function setTripComputer() {
   tcData.m = $('#tc-m').val();
   tcData.r = $('#tc-r').val();
   now.setTripComputer(tcData);
+}
+
+function setDoorsData() {
+  var ddData = new Object();
+  ddData.d = $('#dd-d').val();
+  ddData.fp = $('#dd-fp').val();
+  ddData.bd = $('#dd-bd').val();
+  ddData.bp = $('#dd-bp').val();
+  ddData.td = $('#dd-td').val();
+  now.setDoorsData(ddData);
 }
 
 function updateAddress(address) {

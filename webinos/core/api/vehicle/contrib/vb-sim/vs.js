@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * Copyright 2012 BMW AG
+ * Copyright 2012 TU München
  ******************************************************************************/ 
 
 (function () {
@@ -65,6 +66,28 @@
         var stamp = stamp + d.getUTCMilliseconds();
         ShiftEvent.parent.initEvent.call(this, 'tripcomputer', null, null, null, false, false, stamp);
     }
+
+/*-------Relevant Objects for Doors Data------*/
+
+     DoorsDataEvent = function (ddData) {
+        this.initDoorsDataEvent(ddData);
+    }
+    DoorsDataEvent.prototype = new WDomEvent();
+    DoorsDataEvent.prototype.constructor = ShiftEvent;
+    DoorsDataEvent.parent = WDomEvent.prototype; // our "super" property
+    DoorsDataEvent.prototype.initDoorsDataEvent = function (ddData) {
+        this.driver = ddData.d;
+        this.frontpassenger = ddData.fp;
+        this.behinddriver = ddData.bd;
+        this.behindpassenger = ddData.bp;
+        this.trunkdeck = ddData.td;
+        var d = new Date();
+        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+        var stamp = stamp + d.getUTCMilliseconds();
+        DoorsDataEvent.parent.initEvent.call(this, 'doors', null, null, null, false, false, stamp);
+    }
+
+/*----------Till Here Doors Data---------------*/
 
     function Address(country, region, county, city, street, streetNumber, premises, additionalInformation, postalCode) {
         this.country = country;
@@ -268,6 +291,15 @@
     psrData.r = 255;
     psrData.or = 255;
     var psfData = psrData;
+
+    //Doors Data
+    var ddData = new Object();
+    ddData.d = false;
+    ddData.fp = false;
+    ddData.bd = false;
+    ddData.bp = false;
+    ddData.td = false;
+
     //LIGHTS
     var lfrData = false;
     var lffData = false;
@@ -311,6 +343,13 @@
         console.log(data);
         if (typeof _listeners.tripcomputer != 'undefined') {
             _listeners.tripcomputer(new TripComputerEvent(tcData));
+        }
+    }
+ everyone.now.setDoorsData = function (data) {
+        ddData = data;
+        console.log(data);
+        if (typeof _listeners.doors != 'undefined') {
+            _listeners.doors(new DoorsDataEvent(ddData));
         }
     }
     everyone.now.setPsFront = function (data) {
@@ -427,6 +466,9 @@
             case 'tripcomputer':
                 return new TripComputerEvent(tcData);
                 break;
+            case 'doors':
+                return new DoorsDataEvent(ddData);
+                break;
             case 'parksensors-front':
                 return new ParkSensorEvent(type, psfData);
                 break;
@@ -476,6 +518,9 @@
                 break;
             case 'tripcomputer':
                 _listeners.tripcomputer = listener;
+                break;
+            case 'doors':
+                _listeners.doors = listener;
                 break;
             case 'parksensors-front':
                 _listeners.parksensorsFront = listener;

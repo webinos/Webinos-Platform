@@ -15,6 +15,7 @@
 * limitations under the License.
 *
 * Copyright 2012 BMW AG
+* Copyright 2012 TU München
 ******************************************************************************/
 -->
 <html>
@@ -38,8 +39,8 @@
 
       </div>
       <div id="functions">
-        	<h3>Gear</h3>
 
+        <h3>Gear</h3>
         <p>
           <label class='select'>Gear:</label>
           <select id="inputGear">
@@ -54,9 +55,9 @@
             <option value='5'>5</option>
             <option value='6'>6</option>
           </select>
-        </p>
-        	<h3>Tripcomputer</h3>
-
+         </p>
+        	
+        <h3>Tripcomputer</h3>
         <p>
           <label>Avg. Speed 1:</label>
           <input type='text' value='48.5' id='tc-s1'>
@@ -86,8 +87,8 @@
           <input class='input' type='text' value='33.3' id='tc-d'>
         </p>
         <input type='button' id='setTripComputer' value="Set Tripcomputer" />
-        	<h3>Parksensors Front</h3>
-
+        	
+        <h3>Parksensors Front</h3>
         <p>
           <label for="pf-ol">OutLeft:</label>
           <input type="text" id="pf-ol" value="255" />
@@ -119,8 +120,8 @@
           <div id="slider-pf-or"></div>
         </p>
         <input type='button' id='setPsFront' value="Set Parksensors Front" />
-        	<h3>Parksensors Rear</h3>
-
+        	
+        <h3>Parksensors Rear</h3>
         <p>
           <label for="pr-ol">OutLeft:</label>
           <input type="text" id="pr-ol" value="255" />
@@ -152,8 +153,8 @@
           <div id="slider-pr-or"></div>
         </p>
         <input type='button' id='setPsRear' value="Set Parksensors Rear" />
-        	<h3>Device Motion </h3>
-
+        	
+        <h3>Device Motion </h3>
         <p>
           <label>x-Motion (lateral):</label>
           <input type='text' value='0' id='da-x'>
@@ -189,7 +190,51 @@
           <input type='text' value='500' id='da-i'>
         </p>
         <input type='button' id='setDeviceMotion' value="Fire DeviceMotion" />
-        	<h3>Device Orientation Event</h3>
+       
+       <h3>Doors Data</h3>
+        <p>
+          <label class='select'>driver:</label>
+          <select id="dd-d">
+            <option value='true'>Opened</option>
+            <option value='false' selected>Closed</option>
+          </select>
+        </p>
+       <p>
+          <label class='select'>frontPassenger:</label>
+          <select id="dd-fp">
+            <option value='true'>Opened</option>
+            <option value='false' selected>Closed</option>
+          </select>
+        </p>
+        <p>
+          <label class='select'>behindDriver:</label>
+          <select id="dd-bd">
+            <option value='true'>Opened</option>
+            <option value='false' selected>Closed</option>
+          </select>
+        </p>
+        <p>
+          <label class='select'>behindPassenger:</label>
+          <select id="dd-bp">
+            <option value='true'>Opened</option>
+            <option value='false' selected>Closed</option>
+          </select>
+        </p>
+        <p>
+          <label class='select'>trunkDeck:</label>
+          <select id="dd-td">
+            <option value='true'>Opened</option>
+            <option value='false' selected>Closed</option>
+          </select>
+        </p>
+        <input type='button' id='setDoorsData' value="Set Doors Data" />
+       
+   <!--   <p>
+          <label>Driver</label>
+          <input type='radio' name="driver" value="Opened">
+          </p>   -->
+ 	
+       <h3>Device Orientation Event</h3>
 
         <!-- <h3>Lights (in progress) </h3>
 	  <p><label class='box'>Signal left: </label><input type="checkbox" id="l-signal-left" /></p>
