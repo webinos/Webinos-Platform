@@ -6,6 +6,8 @@
 		<replaceregexp file="${basedir}/webinos_config.json" match='"devicetype": "(.*)"' replace='"devicetype": "${devicetype}"' />
 		<antcall target="debug"/>
 		<move file="${basedir}/webinos/platform/android/installer/bin/WebinosInstaller-debug.apk" tofile="${basedir}/webinos/platform/android/installer/WebinosInstaller-${devicetype}-debug.apk"/>
+		<antcall target="release"/>
+		<move file="${basedir}/webinos/platform/android/installer/bin/WebinosInstaller-release-unsigned.apk" tofile="${basedir}/webinos/platform/android/installer/WebinosInstaller-${devicetype}-release-unsigned.apk"/>
 	</target>
 	
 	<target name="build-all">
