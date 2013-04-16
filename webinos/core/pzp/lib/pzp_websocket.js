@@ -191,7 +191,7 @@ var PzpWSS = function (parent) {
                     parent.pzpWebSocket.connectedApp(connection, msg.payload.value);
                     break;
                 case "setFriendlyName":
-                    //parent.changeFriendlyName(msg.payload.value);
+                    parent.changeFriendlyName(msg.payload.value);
                     // THis functionality will be added via webinos core api.
                     break;
                 case "getFriendlyName":
