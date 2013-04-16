@@ -79,13 +79,14 @@
     var _listeners = {}; //Listener object
 
     //Code for OBD.
-    var OBDReader = require('serial-obd');
-    var options = {};
-    options.baudrate = 115200;
-    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
+//    var OBDReader = require('serial-obd');
+//    var options = {};
+//    options.baudrate = 115200;
+//    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
-    //var OBDReader = require('bluetooth-obd');
-    //var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
+    var OBDReader = require('bluetooth-obd');
+    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
+    console.log('Yeah, it works Eric, don\' t be pessimistic!');
 
     var vehicleSpeed;
     var rpm;

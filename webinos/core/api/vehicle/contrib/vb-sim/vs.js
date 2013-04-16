@@ -17,6 +17,7 @@
  ******************************************************************************/ 
 
 (function () {
+    //TODO: Remove WDomEvent style, it's not neccesary. Look to webinos.vehicle.fake.js
     WDomEvent = function (type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp) {
         this.initEvent(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp);
     }
