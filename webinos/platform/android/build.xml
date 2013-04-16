@@ -37,6 +37,9 @@
 	</target>
 	
 	<target name="build-all">
+		<!-- Add file API parameters -->
+		<replaceregexp file="${basedir}/webinos_config.json" flags="m" byline="false" match='"name":\s"file",[^"]*"params":[^{]*\{\}' 
+			replace='"name": "file",${line.separator}      "params":{${line.separator}          "local" : { "server" : { "port" : 9999, "hostname" : "localhost"},"shares" :[ { "name" : "SD-CARD", "path" : "/sdcard"}]}${line.separator}      }' />
 		<!-- Generate 3 apks for the 3 supported android device types -->
 		<antcall target="build-devicetype">
 			<param name="devicetype" value="smartphone"/>
