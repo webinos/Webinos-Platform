@@ -27,8 +27,14 @@
 
     function get(vehicleDataId, vehicleDataHandler, errorCB) {
         switch (vehicleDataId[0]) {
-            case "gear":
-                vehicleDataHandler(vs.get('gear'));
+            case "rpm":
+                vehicleDataHandler(vs.get('rpm'));
+                break;
+            case "speed":
+                vehicleDataHandler(vs.get('speed'));
+                break;
+            case "engineLoad":
+                vehicleDataHandler(vs.get('engineLoad'));
                 break;
             default:
                 errorCB(new VehicleError(vehicleDataId[0] + ' not supported on this service implementation.'));
@@ -36,46 +42,37 @@
     }
 
     //Objects references for handling EventListeners
-    var objectRefs = new Array();
+    var objectRefs = [];
     var listeners = [];
 
     //BOOLs for handling listeners (are there active listeners)
-    var listeningToGear = false;
-//    var listeningToTripComputer = false;
-//    var listeningToParkSensorsFront = false;
-//    var listeningToParkSensorsRear = false;
-//    var listeningToDestinationReached = false;
-//    var listeningToDestinationChanged = false;
-//    var listeningToDestinationCancelled = false;
-//    var listeningToClimateControlAll = false;
-//    var listeningToClimateControlDriver = false;
-//    var listeningToClimateControlPassFront = false;
-//    var listeningToClimateControlPassRearLeft = false;
-//    var listeningToClimateControlPassRearRight = false;
-//
-//    var listeningToLightsFogFront = false;
-//    var listeningToLightsFogRear = false;
-//    var listeningToLightsSignalLeft = false;
-//    var listeningToLightsSignalRight = false;
-//    var listeningToLightsSignalWarn = false;
-//    var listeningToLightsParking = false;
-//    var listeningToLightsHibeam = false;
-//    var listeningToLightsHead = false;
-//
-//    var listeningToWipers = false;
-//    var listeningToDoors = false;
-//    var listeningToWindows = false;
-//    var listeningToEngineOil = false;
+    var listeningToRPM = false;
+    var listeningToSpeed = false;
+    var listeningToEngineLoad = false;
 
 
     /*AddEventListener*/
     addEventListener = function (vehicleDataId, successHandler, errorHandler, objectRef) {
         var supported = false;
         switch (vehicleDataId) {
-        case "gear":
+        case "rpm":
             supported = true;
-            if (!listeningToGear) { //Listener for gears not yet registered
-                listeningToGear = true;
+            if (!listeningToRPM) { //Listener for gears not yet registered
+                listeningToRPM = true;
+                console.log('now listening');
+            }
+            break;
+        case "speed":
+            supported = true;
+            if (!listeningToSpeed) {
+                listeningToSpeed = true;
+                console.log('now listening');
+            }
+            break;
+        case "engineLoad":
+            supported = true;
+            if (!listeningToEngineLoad) {
+                listeningToEngineLoad = true;
                 console.log('now listening');
             }
             break;
@@ -112,8 +109,14 @@
         if (registeredListeners <= 1) {
             console.log('disabling listening to ' + arguments[1] + " Events");
             switch (arguments[1]) {
-                case "gear":
-                    listeningToGear = false;
+                case "rpm":
+                    listeningToRPM = false;
+                    break;
+                case "speed":
+                    listeningToSpeed = false;
+                    break;
+                case "engineLoad":
+                    listeningToEngineLoad = false;
                     break;
                 default:
                     console.log("nothing found");
@@ -123,13 +126,39 @@
     }
 
 
-    /*handlegearEvents*/
-    function handleGearEvents(gearE) {
-        if (listeningToGear) {
+    /*handlerpmEvents*/
+    function handleRPMEvents(rpmEvent) {
+        if (listeningToRPM) {
             for (var i = 0; i < listeners.length; i++) {
-                if (listeners[i][3] == 'gear') {
-                    returnData(gearE, function (gearE) {
-                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', gearE);
+                if (listeners[i][3] == 'rpm') {
+                    returnData(rpmEvent, function (rpmEvent) {
+                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', rpmEvent);
+                        rpcHandler.executeRPC(rpc);
+                    }, listeners[i][1], listeners[i][2]);
+                }
+            }
+        }
+    }
+    /*handlespeedEvents*/
+    function handleSpeedEvents(speedEvent) {
+        if (listeningToSpeed) {
+            for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i][3] == 'speed') {
+                    returnData(speedEvent, function (speedEvent) {
+                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', speedEvent);
+                        rpcHandler.executeRPC(rpc);
+                    }, listeners[i][1], listeners[i][2]);
+                }
+            }
+        }
+    }
+    /*handleengineLoadEvents*/
+    function handleEngineLoadEvents(engineLoadEvent) {
+        if (listeningToEngineLoad) {
+            for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i][3] == 'engineLoad') {
+                    returnData(engineLoadEvent, function (engineLoadEvent) {
+                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', engineLoadEvent);
                         rpcHandler.executeRPC(rpc);
                     }, listeners[i][1], listeners[i][2]);
                 }
@@ -145,54 +174,15 @@
         }
     }
 
-
-
-    /*handleTripComputerEvents*/
-//    function handleTripComputerEvents(data) {
-//        if (listeningToTripComputer) {
-//            for (var i = 0; i < listeners.length; i++) {
-//                if (listeners[i][3] == 'tripcomputer') {
-//                    returnData(data, function (data) {
-//                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data);
-//                        rpcHandler.executeRPC(rpc);
-//                    }, listeners[i][1], listeners[i][2]);
-//                }
-//            }
-//        }
-//    }
-
-    /*handleParkSensorsEvent*/
-//    function handleParkSensorsEvents(data) {
-//        console.log('handle ps data');
-//        if (listeningToParkSensorsFront || listeningToParkSensorsRear) {
-//            for (var i = 0; i < listeners.length; i++) {
-//                if (listeners[i][3] == 'parksensors-front') {
-//                    returnData(data, function (data) {
-//                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data);
-//                        rpcHandler.executeRPC(rpc);
-//                    }, listeners[i][1], listeners[i][2]);
-//                }
-//                if (listeners[i][3] == 'parksensors-rear') {
-//                    returnData(data, function (data) {
-//                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data);
-//                        rpcHandler.executeRPC(rpc);
-//                    }, listeners[i][1], listeners[i][2]);
-//                }
-//            }
-//        }
-//    }
-
-
     function setRPCHandler(rpcHdlr) {
         rpcHandler = rpcHdlr;
     }
 
     function setRequired(obj) {
         vs = obj;
-        vs.addListener('gear', handleGearEvents);
-        //vs.addListener('tripcomputer', handleTripComputerEvents);
-        //vs.addListener('parksensors-rear', handleParkSensorsEvents);
-        //vs.addListener('parksensors-front', handleParkSensorsEvents);
+        vs.addListener('rpm', handleRPMEvents);
+        vs.addListener('speed', handleSpeedEvents);
+        vs.addListener('engineLoad', handleEngineLoadEvents);
     }
 
 

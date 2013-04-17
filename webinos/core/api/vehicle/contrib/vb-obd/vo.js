@@ -40,40 +40,40 @@
     SpeedEvent.prototype.constructor = SpeedEvent;
     SpeedEvent.parent = WDomEvent.prototype; // our "super" property
     SpeedEvent.prototype.initSpeedEvent = function (speedData) {
-        this.gear = speedData;
+        this.speed = speedData;
         var d = new Date();
         var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
         var stamp = stamp + d.getUTCMilliseconds();
-        SpeedEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
+        SpeedEvent.parent.initEvent.call(this, 'speed', null, null, null, false, false, stamp);
     }
 
-//    RPMEvent = function (rpm) {
-//        this.initSpeedEvent(speed);
-//    }
-//    RPMEvent.prototype = new WDomEvent();
-//    RPMEvent.prototype.constructor = SpeedEvent;
-//    RPMEvent.parent = WDomEvent.prototype; // our "super" property
-//    RPMEvent.prototype.initSpeedEvent = function (gear) {
-//        this.gear = gear;
-//        var d = new Date();
-//        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
-//        var stamp = stamp + d.getUTCMilliseconds();
-//        RPMEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
-//    }
-//
-//    SpeedEvent = function (load) {
-//        this.initSpeedEvent(load);
-//    }
-//    SpeedEvent.prototype = new WDomEvent();
-//    SpeedEvent.prototype.constructor = SpeedEvent;
-//    SpeedEvent.parent = WDomEvent.prototype; // our "super" property
-//    SpeedEvent.prototype.initSpeedEvent = function (gear) {
-//        this.gear = gear;
-//        var d = new Date();
-//        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
-//        var stamp = stamp + d.getUTCMilliseconds();
-//        SpeedEvent.parent.initEvent.call(this, 'gear', null, null, null, false, false, stamp);
-//    }
+    RPMEvent = function (rpmData) {
+        this.initRPMEvent(rpmData);
+    }
+    RPMEvent.prototype = new WDomEvent();
+    RPMEvent.prototype.constructor = RPMEvent;
+    RPMEvent.parent = WDomEvent.prototype; // our "super" property
+    RPMEvent.prototype.initRPMEvent = function (rpmData) {
+        this.rpm = rpmData;
+        var d = new Date();
+        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+        var stamp = stamp + d.getUTCMilliseconds();
+        RPMEvent.parent.initEvent.call(this, 'rpm', null, null, null, false, false, stamp);
+    }
+
+    EngineLoadEvent = function (engineLoadData) {
+        this.initEngineLoadEvent(engineLoadData);
+    }
+    EngineLoadEvent.prototype = new WDomEvent();
+    EngineLoadEvent.prototype.constructor = EngineLoadEvent;
+    EngineLoadEvent.parent = WDomEvent.prototype; // our "super" property
+    EngineLoadEvent.prototype.initEngineLoadEvent = function (engineLoadData) {
+        this.engineLoad = engineLoadData;
+        var d = new Date();
+        var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+        var stamp = stamp + d.getUTCMilliseconds();
+        EngineLoadEvent.parent.initEvent.call(this, 'engineLoad', null, null, null, false, false, stamp);
+    }
 
 
     var _listeners = {}; //Listener object
@@ -86,7 +86,6 @@
 
     var OBDReader = require('bluetooth-obd');
     var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
-    console.log('Yeah, it works Eric, don\' t be pessimistic!');
 
     var vehicleSpeed;
     var rpm;
@@ -95,17 +94,23 @@
     btOBDReader.on('dataReceived', function (data) {
         //console.log(data);
         switch (data.name) {
-        case "vss":
-            vehicleSpeed = data.value;
-            if (typeof _listeners.gear != 'undefined') {
-                _listeners.gear(new SpeedEvent(vehicleSpeed));
-            }
-            break;
         case "rpm":
             rpm = data.value;
+            if (typeof _listeners.rpm != 'undefined') {
+                _listeners.rpm(new RPMEvent(rpm));
+            }
+            break;
+        case "vss":
+            vehicleSpeed = data.value;
+            if (typeof _listeners.speed != 'undefined') {
+                _listeners.speed(new SpeedEvent(vehicleSpeed));
+            }
             break;
         case "load_pct":
             engineLoad = data.value;
+            if (typeof _listeners.engineLoad != 'undefined') {
+                _listeners.engineLoad(new EngineLoadEvent(engineLoad));
+            }
             break;
         default:
             //console.log('No supported pid yet.');
@@ -119,23 +124,19 @@
         this.addPoller("rpm");
         this.addPoller("load_pct");
 
-        this.startPolling(1000);
+        this.startPolling(300);
     });
 
     btOBDReader.connect();
 
     function get(type) {
-
         switch (type) {
-        case 'gear':
-            //Gear is speed for now.
+        case 'speed':
             return new SpeedEvent(vehicleSpeed);
-//        case 'parksensors-front':
-//            //RPM for now.
-//            return new SpeedEvent(vehicleSpeed);
-//        case 'parksensors-rear':
-//            //Load for now.
-//            return new SpeedEvent(vehicleSpeed);
+        case 'rpm':
+            return new RPMEvent(rpm);
+        case 'engineLoad':
+            return new EngineLoadEvent(engineLoad);
         default:
             console.log('Nothing found...');
         }
@@ -144,8 +145,14 @@
     function addListener(type, listener) {
         console.log('registering listener ' + type);
         switch (type) {
-            case 'gear':
-                _listeners.gear = listener;
+            case 'rpm':
+                _listeners.rpm = listener;
+                break;
+            case 'speed':
+                _listeners.speed = listener;
+                break;
+            case 'engineLoad':
+                _listeners.engineLoad = listener;
                 break;
             default:
                 console.log('type ' + type + ' undefined.');
