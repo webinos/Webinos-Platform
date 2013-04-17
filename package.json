@@ -40,7 +40,6 @@
   , "grunt-contrib-clean": "~0.4.x"
   , "async": "0.2.6"
   }
-  }
 , "optionalDependencies":
   { "sqlite3": "2.1.x"
   , "qrcode": "0.x.x"
