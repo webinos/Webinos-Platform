@@ -35,9 +35,6 @@ $(document).ready(function () {
     }, {
         type: 'engineLoad',
         supported: true
-    }, {
-        type: 'window',
-        supported: false
     }];
     postMessage('Info', 'Page loaded. Please Initialize');
     var handleRPMData = function (event) {
@@ -84,11 +81,7 @@ $(document).ready(function () {
         }
     });
     $('#vt_vehicleDataId').change(function () {
-        if ($('#vt_vehicleDataId').val().indexOf('destination') != -1) {
-            $('#vt_getData').attr('disabled', 'true');
-        } else {
-            $('#vt_getData').removeAttr('disabled');
-        }
+        $('#vt_getData').removeAttr('disabled');
     });
     $('#vt_clear').bind('click', function () {
         $('#vt_info').empty();
@@ -123,6 +116,7 @@ $(document).ready(function () {
         listeners.push($('#vt_vehicleDataId').val());
         $('#vt_removeListener').removeAttr('disabled');
         $('#vt_addListener').attr('disabled', 'true');
+        postMessage('info', 'Listener added for' + $('#vehicleDataId').val());
     });
     $('#vt_removeListener').bind('click', function () {
         vehicle.removeEventListener($('#vt_vehicleDataId').val(), getMessageHandler($('#vt_vehicleDataId').val()), false);
