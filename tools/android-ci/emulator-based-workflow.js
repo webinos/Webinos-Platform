@@ -1,3 +1,22 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2012 - 2013 University of Oxford
+ * AUTHOR: Cornelius Namiluko (corni6x@gmail.com)
+ *******************************************************************************/
+
 var async = require('async');
 /**
  * This object specifies the workflow used when testing android CI using an emulator
@@ -28,6 +47,7 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
             function(err, results) {
                 if(err){
                     console.error("Error Occured: " + err);
+                    cb(1, "Android or anode setup failed");
                 }
                 else{
                     console.log("Android and anode prep complete: " + results);
@@ -43,24 +63,9 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
                         if(!err){
                             console.log("Webinos and Emulator Preparation Complete:" + results);
                             cb();
-                            /*async.series({
-                             installApp: function(callback){
-                             installApp(results.webinosPrep, callback);
-                             },
-                             installWebinos: function(callback){
-                             installWebinos(results.webinosPrep, callback);
-                             },
-                             runWebinos: function(callback){
-                             runWebinos(callback);
-                             }
-                             },
-                             function(err, results) {
-                             // results is now equal to: {one: 1, two: 2}
-                             //If we have any errors, then test failed
-                             if(err){
-                             test_failed = true;
-                             }
-                             });  */
+                        } else{
+                            console.error("Webinos or Emulator Preparation Failed:");
+                            cb(1, "Webinos or Emulator Preparation Failed:");
                         }
                     });
                 }
@@ -111,12 +116,6 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
 
     function androidPrep(callback){
         console.log("preparing Android");
-        /*var tarf = "/home/corn/devel/travis-test/Webinos-Platform/tools/android-ci/android-sdk_r21.1-linux.tgz";
-        androidCI.setupAndroid(tarf, function(code){
-            //TODO: pass the path to the setup android...
-            callback(null, "/home/corn/devel/tools/android-sdk-linux");
-        });
-         */
         androidCI.downloadAndroidSDK(function(status, outputFile){
             if(status !== 0){
                 callback(new Error("SDK Download Error"));
@@ -190,7 +189,6 @@ var AndroidEmulatorBasedCIWorkflow = function(androidCI){
             else
                 cb(new Error("Webinos Preparation Failed with code: " + code), code);
         });
-
     }
     function installWebinos(webinosApkPath, cb){
         installApp(webinosApkPath, cb);

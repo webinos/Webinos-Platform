@@ -1,3 +1,22 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2012 - 2013 University of Oxford
+ * AUTHOR: Cornelius Namiluko (corni6x@gmail.com)
+ *******************************************************************************/
+
 /* This script provides functionality to build webinos for android devices and install it on
 an android device
 TODO: refactor to use ci-utils
@@ -58,53 +77,47 @@ var Webinos = function(webinosSettings){
         process.env["ANODE_ROOT"] = anodePath;
         process.env["ANDROID_HOME"] = androidHome;
 
-        try {
-            //Change directory to platform/android
-           /* process.chdir(webinosAndroidPlatformPath);
-            console.log('Now working from directory: ' + process.cwd());     */
-            //TODO: refactor to use ci-utils
-            var buildFor = '';
-            var antargs = [];
+        //Change directory to platform/android
+       /* process.chdir(webinosAndroidPlatformPath);
+        console.log('Now working from directory: ' + process.cwd());     */
+        //TODO: refactor to use ci-utils
+        var buildFor = '';
+        var antargs = [];
 
-            if(mode == 'release')
-                antargs.push(mode);
+        if(mode == 'release')
+            antargs.push(mode);
 
-            console.log("Checking the PATH VARIABLE*************");
-            console.log("PATH=" + process.env['PATH']);
+        console.log("Asking ant to run from : " + webinosAndroidPlatformPath);
+        var antChild = spawn('ant', antargs, {cwd: webinosAndroidPlatformPath, env: process.env});
 
-            var antChild = spawn('ant', antargs, {cwd: webinosAndroidPlatformPath, env: process.env});
+        var appApkPath = undefined;
+        var webinosApkPath = undefined;
 
-            var appApkPath = undefined;
-            var webinosApkPath = undefined;
+        console.log('Executing ant to build android package');
 
-            console.log('Executing ant to build android package');
+        antChild.stdout.on('data', function (data) {
+            console.log('ant info: ' + data);
+        });
 
-            antChild.stdout.on('data', function (data) {
-                console.log('ant info: ' + data);
-            });
+        antChild.stderr.on('data', function (data) {
+            console.error('ant stderr: ' + data);
+            //TODO: exit the process with failure because APK files won't be available
+        });
 
-            antChild.stderr.on('data', function (data) {
-                console.error('ant stderr: ' + data);
-            });
-
-            antChild.on('close', function (code) {
-                if (code !== 0) {
-                    console.error('FAILURE: ant process exited with code: ' + code);
-                    //TODO: webinos build failed: report failure and exit CI
-                } else {
-                    //TODO: set appropriate paths to resulting APK files
-                    webinosApkPath = webinosAndroidPlatformPath + "/wrt/bin/wrt-debug.apk";
-                    appApkPath = webinosAndroidPlatformPath + "/app/bin/app-debug.apk";
-                    self._appAPK = appApkPath;
-                    self._webinosAPK = webinosApkPath;
-                    console.log('SUCCESS: Android package build finished');
-                }
-                cb(code, webinosApkPath, appApkPath);
-            });
-        }
-        catch (err) {
-            console.error('chdir: ' + err);
-        }
+        antChild.on('close', function (code) {
+            if (code !== 0) {
+                console.error('FAILURE: ant process exited with code: ' + code);
+                //TODO: webinos build failed: report failure and exit CI
+            } else {
+                //TODO: dynamically determine paths to resulting APK files
+                webinosApkPath = webinosAndroidPlatformPath + "/wrt/bin/wrt-debug.apk";
+                appApkPath = webinosAndroidPlatformPath + "/app/bin/app-debug.apk";
+                self._appAPK = appApkPath;
+                self._webinosAPK = webinosApkPath;
+                console.log('SUCCESS: Android package build finished');
+            }
+            cb(code, webinosApkPath, appApkPath);
+        });
     }
 
 /**

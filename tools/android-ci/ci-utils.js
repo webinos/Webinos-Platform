@@ -1,3 +1,22 @@
+/*******************************************************************************
+ *  Code contributed to the webinos project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Copyright 2012 - 2013 University of Oxford
+ * AUTHOR: Cornelius Namiluko (corni6x@gmail.com)
+ *******************************************************************************/
+
 var test_failed=false
 
 var exec = require('child_process').exec;
@@ -38,7 +57,7 @@ Utils.prototype.downloadFile = function(sourceURL, destinationDir, cb) {
  * This function sets up an env variable for the current Node Process
  * If the variable being set is PATH, then the value is appended to $PATH
  * The variables will only apply to the current node process
- * For now, we preppend variables to path rather than append them so that we can override any
+ * For now, we prepend variables to path rather than append them so that we can override any
  * current settings to allow us to use the new variables.
  * @param envVar
  * @param envValue
@@ -59,8 +78,6 @@ Utils.prototype.setEnv = function(envVar, envValue){
  * @param cb
  * @param argsToForward
  * @param grepChild
- * PATH
- /home/corn/CodeSourcery2/Sourcery_CodeBench_Lite_for_ARM_EABI/bin:/home/corn/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/home/corn/devel/tools/idea-IU-123.72/bin:
  */
 Utils.prototype.processChildProcess = function(cmdChild, command, cb, argsToForward, grepChild, withNotification) {
     var self = this;
@@ -266,6 +283,7 @@ Utils.prototype.executeCommandViaSpawn = function(command, arguments, cb, argsTo
         });
     }else{
         console.log("Could not execute specified command - one or both of command or arguments is undefined");
+        cb(1, "Could not execute specified command - one or both of command or arguments is undefined");
     }
 }
 
