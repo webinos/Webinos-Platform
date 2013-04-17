@@ -78,7 +78,7 @@ var pzhService;
 
     function test_contextAPI_interceptsAPICalls(completeCB){
         // Make a call to the geolocation API to see if context logs the api call and response
-        webinos.discovery.findServices( new ServiceType('http://www.w3.org/ns/api-perms/geolocation'),{
+        webinos.discovery.findServices( new ServiceType('http://webinos.org/api/w3c/geolocation'),{
             onFound: function (service) {
                 console.log("---DISCOVERY---");
                 console.log("Service: ",service," found!!");

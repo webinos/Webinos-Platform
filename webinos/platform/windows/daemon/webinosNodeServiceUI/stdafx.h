@@ -25,7 +25,9 @@ extern CAppModule _Module;
 
 #define PRODUCT_NAME _T("webinos runtime")
 #define WEBINOS_PZH _T("webinos_pzh")
+#define WEBINOS_PZH_FOLDER _T("webinosPzh")
 #define WEBINOS_PZP _T("webinos_pzp")
+#define WEBINOS_PZP_FOLDER _T("webinos")
 
 #if defined _M_IX86
   #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")

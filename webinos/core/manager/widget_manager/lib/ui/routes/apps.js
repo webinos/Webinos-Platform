@@ -11,6 +11,8 @@
     
     var signedOnly = false;
     var useWGTProtocol = false;
+    var sessions = {};
+    var nextSessionId = 0;
     
     // ToDo - is there a 3rd party library we can use for this?
     var mimeTypes = {
@@ -33,13 +35,13 @@
       var options = {
         host: host,
         port: port,
-        path: path,
+        path: path
       };
 
       // Create and execute request for the file.
       var clientReq = http.get(options, function (clientResponse) {
           // Download to temporary folder.
-          var targetFilePath = path.join(pzp.session.getWebinosPath(), '../widgetDownloads');
+        var targetFilePath = path.join(pzp.session.getWebinosPath(), 'widgetDownloads');
 
           try {
             // Create the target path if it doesn't already exist.
@@ -153,12 +155,30 @@
       });      
     };
 
-    // Start running a widget => redirect to widget start file.
+  // Write session file to disk.
+  function writeSessionFile(sesh) {
+    var seshFile = path.join(pzp.session.getWebinosPath(),'wrt/sessions',sesh.id + ".json");
+    var seshData = JSON.stringify(sesh);
+    fs.writeFileSync(seshFile,seshData,'utf8');
+  }
+
+  // Start running a widget => create session and redirect to widget start file.
     exports.boot = function (req, res) {
       console.log("apps.boot - " + req.url);
-      var installId = req.param('id', '404');
-      var cfg = wm.widgetmanager.getWidgetConfig(installId);
+
+    // Extract install id of widget to be launched.
+    var installId = req.param('id', '');
+
+    // Extract any arguments to be passed to the widget on launch.
+    var query = url.parse(req.url,true);
+
+    // Attempt to get the configuration of the widget.
+    var cfg;
+    if (installId.length > 0) {
+      cfg = wm.widgetmanager.getWidgetConfig(installId);
+    }
       if (typeof(cfg) === "undefined") {
+      // Widget not installed.
         console.log("bad widget id: " + installId);
       } else {
         // Validate the widget signature (if present).
@@ -176,10 +196,18 @@
           var startFileProtocol = url.parse(startFile).protocol;
           if (typeof startFileProtocol === "undefined") {
             // Normal widget with local start file.
+          // Create new session.
+          nextSessionId++;
+
+          // Store installId, sessionId and arguments in session file.
+          sessions[nextSessionId] = { id: nextSessionId, installId: installId, params: query.search };
+          writeSessionFile(sessions[nextSessionId]);
+
+          // Redirect to widget start file.
             if (useWGTProtocol) {
               res.redirect('wgt://' + installId);
             } else {
-              res.redirect(req.url + "/" + startFile);
+            res.redirect("/widget/" + installId + "/" + nextSessionId + "/" + startFile);
             }
           } else {
             // Redirect to remote start location.
@@ -193,23 +221,30 @@
 
     // Run a widget - essentially serves content from the widget root.
     exports.run = function (req, res) {
+    // Get the path portion of the url.
       var pathName = url.parse(req.url).pathname.substr("widget/".length);
-      var widgetId = req.param('id', '404');
       
-      var relPath = pathName.replace(widgetId,"");
+    // Get the widget install Id.
+    var widgetId = req.param('id', '');
+
+    // Get the session id.
+    var sessionId = req.param('sessionId',-1);
+
+    // Check that the session exists.
+    if (sessions.hasOwnProperty(sessionId)) {
+      // Determine the path relative to the widget root.
+      var relPath = pathName.replace(widgetId + "/" + sessionId + "/","");
       if (relPath === "/")
         relPath = "index.html";
       
-      var storePath1 = path.join(wm.Config.get().wrtHome, widgetId);
-      var storePath2 = path.join(storePath1, "wgt");
-      var filename = path.join(storePath2, relPath);
+      // Build the path to the widget content.
+      var filename = path.join(wm.Config.get().wrtHome, widgetId, "wgt", relPath);
       
       path.exists(filename, function(exists) {
         if(!exists) {
-          res.writeHead(200, {'Content-Type': 'text/plain'});
+          res.writeHead(404, {'Content-Type': 'text/plain'});
           res.write('404 Not Found\n');
           res.end();
-          return;
         } else {        
           var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
           res.setHeader('Content-Type', mimeType);
@@ -218,12 +253,41 @@
           fileStream.pipe(res);
         }
       }); 
+    } else {
+      console.log("unknown widget session: " + sessionId);
+    }
     };
     
+  // Fetch widget preferred icon.
+  exports.icon = function (req, res) {
+    var installId = req.param('id', '');
+
+    var cfg = wm.widgetmanager.getWidgetConfig(installId);
+    if (typeof(cfg) === "undefined") {
+      console.log("bad widget id: " + installId);
+    } else {
+      var filename = path.join(wm.Config.get().wrtHome, installId, "wgt", cfg.prefIcon);
+
+      path.exists(filename, function(exists) {
+        if(!exists) {
+          res.writeHead(404, {'Content-Type': 'text/plain'});
+          res.write('404 Not Found\n');
+          res.end();
+        } else {
+          var mimeType = mimeTypes[path.extname(filename).split(".")[1]];
+          res.setHeader('Content-Type', mimeType);
+
+          var fileStream = fs.createReadStream(filename);
+          fileStream.pipe(res);
+        }
+      });
+    }
+  }
+
     // Show page detailing widget config
     exports.about = function (req, res) {
       console.log("apps.about");
-      var installId = req.param('id', '404');
+    var installId = req.param('id', '');
       var cfg = wm.widgetmanager.getWidgetConfig(installId);
       if (typeof(cfg) === "undefined") {
         console.log("bad widget id: " + installId);

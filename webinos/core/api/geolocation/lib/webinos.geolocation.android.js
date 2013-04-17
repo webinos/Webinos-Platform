@@ -79,7 +79,7 @@ exports.clearWatch = clearWatch;
 exports.setRPCHandler = setRPCHandler;
 exports.setRequired = setRequired;
 exports.serviceDesc = {
-		api:'http://www.w3.org/ns/api-perms/geolocation',
+		api:'http://webinos.org/api/w3c/geolocation',
 		displayName:'Geolocation (by phone location service)',
 		description:'Provides geolocation based on phone location service.'
 };

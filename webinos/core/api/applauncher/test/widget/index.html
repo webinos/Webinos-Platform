@@ -1,0 +1,88 @@
+<html>
+<head>
+<script type="text/javascript">   
+	function checkWebinos() {
+
+		if (typeof webinos === "undefined") {
+			alert("webinos not loaded");
+		} else {
+			//alert("webinos loaded");
+		}
+		
+		if (typeof window.widget === "undefined") {
+			alert("no widget interface");
+		} else {
+			//alert("got widget interface");
+			//alert(widget.authorHref);
+		}
+	}
+	
+	var applauncherService;
+
+   function doLaunch2() {
+      var appURI = document.getElementById("appURI").value;
+      applauncherService.launchApplication(function(launched) { 
+        if (launched) { 
+          //alert("successCB - succeeded!");
+        } else { 
+          alert("successCB - failed"); 
+        }}, 
+        function(msg){ 
+          alert("failed! " + msg); 
+        }, appURI);        
+   }
+   
+   function doLaunch() {
+      var appURI = document.getElementById("appURI").value;
+      applauncherService.appInstalled(function(installed) { 
+        if (installed) { 
+          //alert("installed!"); 
+          setTimeout(doLaunch2,0);
+        } else {
+          alert("not installed!"); 
+        }}, function(msg) { 
+          alert("error - " + msg); 
+        }, appURI);		    
+   }
+   
+	function bindService() {
+		applauncherService.bindService({onBind: function(service) {
+			applauncherService = service;
+        doLaunch2();
+		}});
+	}
+
+	function findService() {
+		webinos.discovery.findServices(new ServiceType("http://webinos.org/api/applauncher"), {
+			onFound: function (service) {
+				applauncherService = service;
+				bindService();
+			}
+		});
+	}
+		
+	function launchApp() {
+      checkWebinos();
+      applauncherService = null;
+      if (!applauncherService) {
+        findService(); 
+      } else {
+        doLaunch();
+      }
+      return false;
+	}
+  
+   for (var a in widget.args) {
+    alert("received argument " + a + " = " + widget.args[a]);
+   }
+	
+</script>
+</head>
+<body>
+Enter widget Id or web URL
+<br /> 
+<input style="width:90%" type="text" id="appURI" value="http://webinos.org/demo/webglsigned" />
+<br />
+<a onclick="return launchApp();" href="#">launch app</a>
+</body>
+</html>

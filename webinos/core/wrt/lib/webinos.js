@@ -94,16 +94,15 @@
             if (data.type === "prop") {
                 webinos.session.handleMsg (data);
             } else {
-                webinos.messageHandler.setGetOwnId (webinos.session.getSessionId ());
-                webinos.messageHandler.setObjectRef (this);
+                webinos.messageHandler.setOwnSessionId (webinos.session.getSessionId ());
                 webinos.messageHandler.setSendMessage (webinos.session.message_send_messaging);
                 webinos.messageHandler.onMessageReceived (data, data.to);
             }
         };
         channel.onopen = function() {
           var url = window.location.pathname;
-          var filename = url.substring(url.lastIndexOf('/')+1);
-          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser', value: filename}});
+          //var filename = url.substring(url.lastIndexOf('/')+1); //patch: http://jira.webinos.org/browse/WP-878
+          webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser', value: url}});
         };
     }
 

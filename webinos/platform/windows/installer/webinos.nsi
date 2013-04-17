@@ -24,7 +24,7 @@ SetCompressor lzma
 !define INSTALLER_BANNER "installBanner.bmp"
 
 !define PRODUCT_NAME "webinos"
-!define VERSION "0.7.0"
+!define VERSION "0.8.05"
 
 ; XP Compatibility
 !ifndef SF_SELECTED
@@ -197,13 +197,26 @@ SectionIn RO
 	; Start the ui application
 	WriteRegStr HKCU "SOFTWARE\Microsoft\Windows\CurrentVersion\Run\" "${PRODUCT_NAME}UI"  "$INSTDIR\bin\wrt\webinosNodeServiceUI.exe"
 
-	CreateDirectory $APPDATA\webinos\wrt
+	; Write the runtime configuration data (location of node.exe and working directory etc)
 	${StrRep} $1 $INSTDIR\bin "\" "\\"
 	${StrRep} $2 $INSTDIR "\" "\\"
-	FileOpen $0 $APPDATA\webinos\wrt\webinos_pzp.json w
-	FileWrite $0 "{$\"nodePath$\": $\"$1$\",$\"workingDirectoryPath$\": $\"$2$\",$\"nodeArgs$\": $\"webinos_pzp.js --widgetServer$\",$\"instance$\": $\"0$\",$\"showOutput$\": $\"0$\"}"
+	FileOpen $0 $INSTDIR\bin\wrt\wrt_config.json w
+	FileWrite $0 "{$\"nodePath$\": $\"$1$\",$\"workingDirectoryPath$\": $\"$2$\",$\"pzp_nodeArgs$\": $\"webinos_pzp.js --widgetServer$\",$\"pzh_nodeArgs$\": $\"webinos_pzh.js$\"}"
+	FileClose $0
+	
+	; Write default pzh configuration (not enabled by default)
+	CreateDirectory $APPDATA\webinosPzh\wrt
+	FileOpen $0 $APPDATA\webinosPzh\wrt\webinos_pzh.json w
+	FileWrite $0 "{$\"instance$\": $\"0$\",$\"showOutput$\": $\"0$\",$\"enabled$\": $\"0$\"}"
 	FileClose $0
 
+	; Write the default pzp configuration (enabled by default)
+	CreateDirectory $APPDATA\webinos\wrt
+	FileOpen $0 $APPDATA\webinos\wrt\webinos_pzp.json w
+	FileWrite $0 "{$\"instance$\": $\"0$\",$\"showOutput$\": $\"0$\",$\"enabled$\": $\"1$\"}"
+	FileClose $0
+
+	; Write the app store configuration.
 	FileOpen $0 $APPDATA\webinos\wrt\webinos_stores.json w
 	FileWrite $0 "[{$\"name$\": $\"Megastore$\",$\"description$\": $\"Fraunhofer FOKUS Megastore$\",$\"location$\": $\"http://webinos.fokus.fraunhofer.de/store/$\",$\"logo$\": $\"http://www.fokus.fraunhofer.de/en/fame/_images/_logos/megastore_logo.png$\"},{$\"name$\": $\"UbiApps$\",$\"description$\": $\"UbiApps demonstration webinos app store$\",$\"location$\": $\"http://webinos.two268.com/$\",$\"logo$\": $\"http://ubiapps.com/files/2012/05/ubiapps-120.png$\"}]"
 	FileClose $0
@@ -321,6 +334,9 @@ Section "Uninstall"
 
   ; Required to handle shortcuts properly on Vista/7
   SetShellVarContext all
+
+ # Check is node app is running
+  !insertmacro CheckAppRunning
 
   DetailPrint "Removing ${PRODUCT_NAME} from path"
   Push "$INSTDIR\bin"

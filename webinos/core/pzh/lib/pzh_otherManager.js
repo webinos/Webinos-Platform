@@ -144,8 +144,7 @@ var Pzh_RPC = function (_parent) {
             _parent.sendMessage (message, address);
         };
         // Setting message handler to work with pzh instance
-        self.messageHandler.setGetOwnId (_parent.pzh_state.sessionId);
-        self.messageHandler.setObjectRef (_parent);
+        self.messageHandler.setOwnSessionId (_parent.pzh_state.sessionId);
         self.messageHandler.setSendMessage (messageHandlerSend);
         self.messageHandler.setSeparator ("/");
     };

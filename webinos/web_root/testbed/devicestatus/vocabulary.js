@@ -47,6 +47,7 @@ var vocabulary = {
 				, "model"
 				, "version"
 				, "vendor"
+				, "type"
 				],
 		Components:	[ "_default" ]
 	},

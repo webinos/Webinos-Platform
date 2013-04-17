@@ -159,6 +159,9 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).rc; %(Filename).h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).rc; %(Filename).h;%(Outputs)</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">%(Filename).rc; %(Filename).h;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling message strings</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling message strings</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">Compiling message strings</Message>
     </CustomBuild>
     <None Include="res\banner.bmp" />
     <None Include="res\webinosNodeServiceUI.ico" />

@@ -60,53 +60,6 @@ END
 // remains consistent on all systems.
 IDR_MAINFRAME           ICON                    "res\\webinosNodeServiceUI.ico"
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_MAINDLG DIALOGEX 0, 0, 337, 152
-STYLE DS_SETFONT | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
-CAPTION "webinos service configuration"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    LTEXT           "Service name",IDC_STATIC,7,8,44,8
-    LTEXT           "Path to node",IDC_STATIC,7,30,42,8
-    EDITTEXT        IDC_PATH_TO_NODE_EDIT,79,28,148,14,ES_AUTOHSCROLL
-    LTEXT           "Parameters for node",IDC_STATIC,7,51,64,8
-    EDITTEXT        IDC_NODE_ARGS_EDIT,79,50,148,14,ES_AUTOHSCROLL
-    LTEXT           "Working directory",IDC_STATIC,7,76,56,8
-    EDITTEXT        IDC_WORKING_DIR_EDIT,79,73,148,14,ES_AUTOHSCROLL
-    LTEXT           "Path to AppData",IDC_STATIC,7,98,54,8
-    EDITTEXT        IDC_PATH_TO_APPDATA_EDIT,79,96,147,14,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "Save Settings",IDOK,274,131,56,14
-    ICON            IDR_MAINFRAME,IDC_STATIC,309,7,20,20
-    PUSHBUTTON      "Lookup",IDC_LOOKUP_BUTTON,177,7,50,14
-    COMBOBOX        IDC_SERVICE_COMBO,79,7,90,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Remove service",IDC_REMOVE_SERVICE_BUTTON,7,131,82,14
-    LTEXT           "",IDC_STATUS_STATIC,7,117,323,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
-BEGIN
-    IDD_MAINDLG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 330
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 145
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -155,12 +108,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "webinos node service UI Module"
-            VALUE "FileVersion", "0, 7, 0, 0"
+            VALUE "FileVersion", "0, 8, 0, 0"
             VALUE "InternalName", "webinosNodeServiceUI"
             VALUE "LegalCopyright", "Copyright 2013"
             VALUE "OriginalFilename", "webinosNodeServiceUI.exe"
             VALUE "ProductName", "webinos"
-            VALUE "ProductVersion", "0, 7, 0, 0"
+            VALUE "ProductVersion", "0, 8, 0, 0"
         END
     END
     BLOCK "VarFileInfo"
@@ -281,23 +234,25 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "webinos"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Configuration",IDC_STATIC,7,4,302,62
-    LTEXT           "Path to node",IDC_STATIC,11,16,42,8
-    EDITTEXT        IDC_PATH_TO_NODE_EDIT,68,13,185,14,ES_AUTOHSCROLL | ES_READONLY | WS_DISABLED
-    PUSHBUTTON      "Browse...",IDC_NODE_PATH_BROWSE_BTN,257,13,50,14
-    LTEXT           "Path to webinos",IDC_STATIC,11,34,56,8
-    EDITTEXT        IDC_PATH_TO_WEBINOS_EDIT,68,31,185,14,ES_AUTOHSCROLL | ES_READONLY | WS_DISABLED
-    PUSHBUTTON      "Browse...",IDC_WEBINOS_PATH_BROWSE_BTN,257,31,50,14
-    PUSHBUTTON      "Save",IDOK,257,50,50,14
+    GROUPBOX        "PZH status",IDC_STATIC,7,6,302,38
+    CONTROL         "<a href=""https://"">pzh admin</a>",IDC_PZH_SYSLINK,
+                    "SysLink",WS_TABSTOP,215,30,40,12
+    PUSHBUTTON      "Restart PZH",IDC_PZH_RESET_BUTTON,257,13,50,14
+    PUSHBUTTON      "Clean PZH",IDC_CLEAN_PZH_BUTTON,257,28,50,14
+    CHECKBOX        "Enable PZH",IDC_ENABLE_PZH_CHECK,11,30,50,12,BS_AUTOCHECKBOX | WS_TABSTOP
+    CHECKBOX        "Show PZH console",IDC_PZH_OUTPUT_CHECK,70,30,80,12,BS_AUTOCHECKBOX | WS_TABSTOP
+    LTEXT           "",IDC_PZH_STATUS_STATIC,11,16,205,8
     GROUPBOX        "PZP status",IDC_STATIC,7,66,302,38
     CONTROL         "<a href=""http://localhost:53510"">widget runtime</a>",IDC_WRT_SYSLINK,
-                    "SysLink",WS_TABSTOP,258,90,50,12
+                    "SysLink",WS_TABSTOP,200,90,50,12
     CONTROL         "<a href=""http://localhost:8080/testbed/client.html"">pzp testbed</a>",IDC_PZP_SYSLINK,
-                    "SysLink",WS_TABSTOP,215,90,40,12
+                    "SysLink",WS_TABSTOP,160,90,40,12
     PUSHBUTTON      "Restart PZP",IDC_RESET_BUTTON,257,73,50,14
-    CHECKBOX        "Show PZP console",IDC_OUTPUT_CHECK,11,90,80,12,BS_AUTOCHECKBOX | WS_TABSTOP
+    PUSHBUTTON      "Clean PZP",IDC_CLEAN_PZP_BUTTON,257,88,50,14
+    CHECKBOX        "Enable PZP",IDC_ENABLE_PZP_CHECK,11,90,50,12,BS_AUTOCHECKBOX | WS_TABSTOP
+    CHECKBOX        "Show PZP console",IDC_OUTPUT_CHECK,70,90,80,12,BS_AUTOCHECKBOX | WS_TABSTOP
     CONTROL         IDB_BANNER_BITMAP,IDC_STATIC,"Static",SS_BITMAP,0,111,333,37
-    LTEXT           "runtime v0.7.00  ©2013 · ",IDC_VERSION_STATIC,102,130,80,10
+    LTEXT           "runtime v0.8.05  ©2013 · ",IDC_VERSION_STATIC,102,130,80,10
     CONTROL         "<a href=""http://webinos.org"">webinos.org</a>",IDC_SYSLINK,
                     "SysLink",WS_TABSTOP,183,130,41,9
     LTEXT           "",IDC_STATUS_STATIC,11,76,205,8

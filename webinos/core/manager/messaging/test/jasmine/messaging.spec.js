@@ -1,12 +1,8 @@
-describe('common.manager.messaging', function() {
+describe('manager.messaging', function() {
 
-	var webinos = require("find-dependencies")(__dirname);
-
-	var RPCHandler = webinos.global.require(webinos.global.rpc.location).RPCHandler;
-	var rpcHandler = new RPCHandler();
-
-	var MessageHandler = webinos.global.require('common/manager/messaging').MessageHandler;
-	var messageHandler = new MessageHandler(rpcHandler);
+	var mockRpcHandler = jasmine.createSpyObj('rpcHandler', ['setMessageHandler', 'handleMessage']);
+	var MessageHandler = require('../../lib/messagehandler.js').MessageHandler;
+	var messageHandler = new MessageHandler(mockRpcHandler);
 
 	beforeEach(function() {
 		this.addMatchers({
@@ -26,54 +22,21 @@ describe('common.manager.messaging', function() {
 	it('has setSendMessage function', function() {
 		expect(messageHandler.setSendMessage).toBeFunction();
 	});
-	it('has sendMessage function', function() {
-		expect(messageHandler.sendMessage).toBeFunction();
+	it('has setOwnSessionId function', function() {
+		expect(messageHandler.setOwnSessionId).toBeFunction();
 	});
-	it('has setObjectRef function', function() {
-		expect(messageHandler.setObjectRef).toBeFunction();
-	});
-	it('has setGetOwnId function', function() {
-		expect(messageHandler.setGetOwnId).toBeFunction();
-	});
-	it('has getOwnId function', function() {
-		var id = messageHandler.getOwnId();
+	it('has getOwnSessionId function', function() {
+		var id = messageHandler.getOwnSessionId();
 		expect(id).toBeNull();
 	});
 	it('has setSeparator function', function() {
 		expect(messageHandler.setSeparator).toBeFunction();
 	});
-
-	it('has createMessage function', function() {
-
-		var options = {
-		register: false
-	 	,type: "JSONRPC"
-	 	,id: 36
-	 	,from: "sender"
-	 	,to: "receiver"
-	 	,resp_to:"sender"
-	 	};
-
-		var message = {};
-		message = messageHandler.createMessage(options);
-		expect(message.register).toEqual(false);
-		expect(message.type).toEqual("JSONRPC");
-		expect(message.id).toEqual(36);
-		expect(message.from).toEqual("sender");
-		expect(message.to).toEqual("receiver");
-		expect(message.resp_to).toEqual("sender");
-	});
-	it('has createMessageId function', function() {
-		var message={};
-		messageHandler.createMessageId(message);
-		expect(message.id).toBeNumber();
-	});
-
-	it('has registerSender function', function() {
+	it('has createRegisterMessage function', function() {
 		var from="sender";
 		var to="receiver";
 		var message={};
-		message=messageHandler.registerSender(from,to);
+		message=messageHandler.createRegisterMessage(from,to);
 		expect(message.register).toEqual(true);
 		expect(message.from).toEqual("sender");
 		expect(message.to).toEqual("receiver");

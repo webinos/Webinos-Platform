@@ -450,7 +450,7 @@ void AppCreateWindow(CefRefPtr<ClientHandler> clientHandler, bool sideLoading, C
 
   if (hWnd)
   {
-    if (!sideLoading)
+    //if (!sideLoading)
     {
       ShowWindow(hWnd, SW_SHOW);
       UpdateWindow(hWnd);

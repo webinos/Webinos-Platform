@@ -35,10 +35,10 @@
 		this.base(obj);
 		eventService = this;
 		this.idCount = 0;
-		//this.myAppID = "TestApp" + webinos.messageHandler.getOwnId();
+		//this.myAppID = "TestApp" + webinos.messageHandler.getOwnSessionId();
 
 		//TODO, this is the actuall messaging/session app id but should be replaced with the Apps unique ID (config.xml)
-		this.myAppID = webinos.messageHandler.getOwnId();
+		this.myAppID = webinos.messageHandler.getOwnSessionId();
 		console.log("MyAppID: " + this.myAppID);
 	};
 

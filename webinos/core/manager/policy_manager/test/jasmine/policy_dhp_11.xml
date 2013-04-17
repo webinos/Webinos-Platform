@@ -12,7 +12,7 @@
 					<AttributeValue>#DHPcurrent_and_presudo-analysis</AttributeValue>
 				</ProvisionalAction>
 				<ProvisionalAction>
-					<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+					<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
 					<AttributeValue>#DHPcurrent</AttributeValue>
 				</ProvisionalAction>
 			</ProvisionalActions>
@@ -54,7 +54,7 @@
 	</DataHandlingPreferences>
 	<ProvisionalActions>
 		<ProvisionalAction>
-			<AttributeValue>http://www.w3.org/ns/api-perms/geolocation</AttributeValue>
+			<AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
 			<AttributeValue>#DHPcurrent</AttributeValue>
 		</ProvisionalAction>
 		<ProvisionalAction>

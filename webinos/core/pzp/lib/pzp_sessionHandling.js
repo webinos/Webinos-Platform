@@ -427,7 +427,7 @@ var PzpServer = function (parent) {
         parent.setConnectState("peer", true);
         _conn.id = clientSessionId;
 
-        msg = parent.webinos_manager.messageHandler.registerSender (parent.pzp_state.sessionId, clientSessionId);
+        msg = parent.webinos_manager.messageHandler.createRegisterMessage (parent.pzp_state.sessionId, clientSessionId);
         parent.sendMessage (msg, clientSessionId);
         parent.sendUpdateToAll();
         logger.log ("pzp server - " + clientSessionId + " connected");
@@ -492,7 +492,7 @@ var PzpClient = function (parent) {
         parent.pzp_state.connectedPzp[_msg.name] = _client;
         parent.setConnectState("peer", true);
         _client.id = _msg.name;
-        var msg1 = parent.webinos_manager.messageHandler.registerSender (parent.pzp_state.sessionId, _msg.name);
+        var msg1 = parent.webinos_manager.messageHandler.createRegisterMessage (parent.pzp_state.sessionId, _msg.name);
         parent.sendMessage (msg1, _msg.name);
         parent.sendUpdatesendUpdateToAll();
         parent.pzpWebSocket.connectedApp();
@@ -666,7 +666,7 @@ var ConnectHub = function (parent) {
 
                 pzpClient.on ("error", function (err) {
                     pzpServer.startServer ();
-                    if (err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
+                    if (err.code === "EHOSTUNREACH" || err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
                         logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
                         parent.webinos_manager.startOtherManagers ();
                     }
@@ -769,7 +769,7 @@ exports.getDeviceName = function () {
 exports.getWebinosPath = function () {
     return pzpInstance.config.metaData.webinosRoot;
 };
-exports.getWebinosPorts = function () {
-    return pzpInstance.config.userPref.ports.pzp_webSocket
+exports.getWebinosPort = function () {
+    return pzpInstance.config.userPref.ports.pzp_webSocket;
 };
 

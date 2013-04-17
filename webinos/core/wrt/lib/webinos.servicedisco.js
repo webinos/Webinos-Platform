@@ -43,6 +43,7 @@
     if (typeof AuthenticationModule !== 'undefined') typeMap['http://webinos.org/api/authentication'] = AuthenticationModule;
     if (typeof webinos.Context !== 'undefined') typeMap['http://webinos.org/api/context'] = webinos.Context;
     if (typeof corePZinformationModule !== 'undefined') typeMap['http://webinos.org/api/corePZinformation'] = corePZinformationModule;
+    if (typeof DeviceStatusManager !== 'undefined') typeMap['http://webinos.org/api/devicestatus'] = DeviceStatusManager;
     if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/api/discovery'] = DiscoveryModule;
     if (typeof EventsModule !== 'undefined') typeMap['http://webinos.org/api/events'] = EventsModule;
     if (webinos.file && webinos.file.Service) typeMap['http://webinos.org/api/file'] = webinos.file.Service;
@@ -61,7 +62,6 @@
     if (typeof ZoneNotificationModule !== 'undefined') typeMap['http://webinos.org/api/internal/zonenotification'] = ZoneNotificationModule;
 //    if (typeof DiscoveryModule !== 'undefined') typeMap['http://webinos.org/manager/discovery/bluetooth'] = DiscoveryModule;
     if (typeof oAuthModule !== 'undefined') typeMap['http://webinos.org/mwc/oauth'] = oAuthModule;
-    if (typeof DeviceStatusManager !== 'undefined') typeMap['http://webinos.org/api/devicestatus'] = DeviceStatusManager;
 
     if (isOnNode()) {
         var path = require('path');
