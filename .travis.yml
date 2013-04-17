@@ -11,4 +11,5 @@ before_install:
 before_script:
  - mv ./tmp_node_modules/* ./node_modules/
  - rm -rf ./tmp_node_modules/
+ - export RUN_ANDROID_CI="yes"
 after_failure: cat npm-debug.log

@@ -4,8 +4,13 @@ var Utils = require('./ci-utils'),
 
 var args = process.argv.splice(2);
 var inWebinosRoot = false;
+
+/* The first argument is used to determine whether the script is running
+ under Webinos-Platform or under tools/android-ci. This is necessary to
+ avoid issues with some path dependencies
+*/
 if(args !== undefined && args[0] !== undefined)
-    if(args[0])
+    if(args[0] === 0)
         inWebinosRoot = true;
 var cwd = process.cwd();
 
@@ -33,14 +38,20 @@ async.parallel({
         callback(null);
     },
     runAndroidTests: function(callback){
-        var
-            Utils = require("./ci-utils"),
-            utils = new Utils();
-        var androidCi = require('./android-ci');
-        androidCi.run(inWebinosRoot, function(){
-            //We assume that errors would have been returned through the call
+        //check if we need to run android CI tests. This should be specified as an env: RUN_ANDROID_CI="yes"
+        if(process.env["RUN_ANDROID_CI"] === "yes"){
+            var
+                Utils = require("./ci-utils"),
+                utils = new Utils();
+            var androidCi = require('./android-ci');
+            androidCi.run(inWebinosRoot, function(){
+                //We assume that errors would have been returned through the call
+                callback(null);
+            });
+        }else{
+            console.log("Android CI not performed");
             callback(null);
-        });
+        }
     }
     }, function(err, results){
           if(err)
