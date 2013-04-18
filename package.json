@@ -38,6 +38,7 @@
   , "grunt-contrib-uglify": "~0.1.x"
   , "grunt-contrib-jshint": "~0.1.x"
   , "grunt-contrib-clean": "~0.4.x"
+  , "async": "0.2.6"
   }
 , "optionalDependencies":
   { "sqlite3": "2.1.x"
@@ -61,6 +62,6 @@
   }
 , "scripts":
   { "install": "node-gyp configure build && grunt"
-  , "test": "./tools/travis/auto-test.sh"
+  , "test": "node ./tools/android-ci/ci-tests.js 0"
   }
 }
