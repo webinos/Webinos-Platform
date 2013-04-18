@@ -1,0 +1,20 @@
+<policy-set combine="permit-overrides" description="test1">
+	
+	<policy combine="deny-overrides" description="logic test">
+		<rule effect="permit">
+			<condition combine="and">
+				<subject-match attr="user-id" match="user2"/>
+				<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+			</condition>
+		</rule>
+	</policy>
+
+</policy-set>
+
+
+
+
+
+
+
+

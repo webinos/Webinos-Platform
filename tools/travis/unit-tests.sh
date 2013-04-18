@@ -53,7 +53,8 @@ run_unit_test(){
 
 #whitelist=('./webinos/core/manager/policy_manager/test/jasmine')
 whitelist=( "./webinos/core/manager/policy_manager/test/jasmine"
-	"./webinos/core/manager/widget_manager/test/jasmine" )
+	"./webinos/core/manager/widget_manager/test/jasmine"  
+	"./webinos/core/manager/policy_manager/test/jasmine.policy.tests.working" )
 #function to determine whether tests will be run on the given component
 #currently, all tests under included in the whitelist will not be filtered
 filter(){

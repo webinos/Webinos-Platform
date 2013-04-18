@@ -1,0 +1,117 @@
+<policy-set combine="deny-overrides" description="test prompt priority">
+	
+	<!-- manufacture policy set -->
+	<!-- 
+	allow cert1 everything
+	deny  secret1 and secret2 
+	-->
+	<policy-set combine="permit-overrides" description="Manufacturer1">
+		<policy combine="deny-overrides" description="p1">
+			<target>
+				<subject>
+					<subject-match attr="distributor-key-cn" match="cert1"/>
+				</subject>
+			</target>
+			<rule effect="permit" />
+		</policy>
+		
+		<policy combine="deny-overrides" description="p1">
+			<rule effect="deny">
+				<condition combine="or">
+					<resource-match attr="api-feature" match="http://mega.org/api/secret1"/>
+					<resource-match attr="api-feature" match="http://mega.org/api/api/secet2"/>
+				</condition>
+			</rule>
+			
+		</policy>
+
+	</policy-set>
+
+	
+	<!-- user policy set -->
+	<!-- 
+		user2 device1  - deny
+		user3 device1 geolocal - permit
+		user2 device3 messagesend - permit
+		user1 - permit
+		user2 device2 geolocal - permit
+		user3 device2 geolocal - permit
+		
+	-->
+	<policy-set combine="deny-overrides" description="user Policy">
+		<policy combine="deny-overrides" description="p1">
+			<target>
+				<subject>
+					<subject-match attr="user-id" match="user1"/>
+				</subject>
+			</target>
+			
+			<rule effect="permit"/>
+		</policy>
+		
+		<policy combine="deny-overrides" description="p2">
+			<target>
+				<subject>
+					<subject-match attr="requestor-id" match="device1"/>
+					<subject-match attr="user-id" match="user2"/>
+				</subject>
+			</target>
+			
+			<rule effect="deny"/>
+		</policy>
+
+
+		<policy combine="permit-overrides" description="p3">
+			<target>
+				<subject>
+					<subject-match attr="requestor-id" match="device1"/>
+					<subject-match attr="user-id" match="user3"/>
+				</subject>
+			</target>
+			
+			<rule effect="permit">
+				<condition combine="or">
+					<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+				</condition>
+			</rule>	
+		</policy>
+		
+		<policy combine="deny-overrides" description="p4">
+			<target>
+				<subject>
+					<subject-match attr="requestor-id" match="device3"/>
+					<subject-match attr="user-id" match="user2"/>
+				</subject>
+			</target>
+			
+			<rule effect="permit">
+				<condition combine="and">
+					<resource-match attr="api-feature" match="http://webinos.org/api/messaging.send"/>
+				</condition>
+			</rule>
+		</policy>
+		
+		<policy combine="deny-overrides" description="p5">
+			<target>
+				<subject>
+					<subject-match attr="requestor-id" match="device2"/>
+				</subject>
+			</target>
+			
+			<rule effect="permit">
+				<condition combine="or">
+					<condition combine="and">
+						<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+						<subject-match attr="user-id" match="user12"/>
+					</condition>
+					<condition combine="and">
+						<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+						<subject-match attr="user-id" match="user13"/>
+					</condition>
+				</condition>
+			</rule>
+		</policy>
+	</policy-set>
+	
+
+</policy-set>

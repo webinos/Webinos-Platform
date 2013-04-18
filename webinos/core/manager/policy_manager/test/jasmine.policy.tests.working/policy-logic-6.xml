@@ -1,0 +1,19 @@
+<policy-set combine="permit-overrides" description="test1">
+	
+	<policy combine="deny-overrides" description="logic test">
+		<rule effect="permit">
+			<condition combine="and">
+				<resource-match attr="api-feature" match="http://mega.org/api/w3c/geolocation"/>
+			</condition>
+		</rule>
+	</policy>
+
+</policy-set>
+
+
+
+
+
+
+
+
