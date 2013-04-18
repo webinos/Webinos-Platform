@@ -20,12 +20,16 @@
   var androidLauncher = null;
   var widgetLibrary;
   var open;
+  try { widgetLibrary = require('../../../manager/widget_manager/index.js'); open = require('open'); } catch(e) { widgetLibrary = null; }
+
   if (process.platform == 'android') {
     androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
-    /* FIXME: temporarily disable widgetmanager in this isolate */
-    widgetLibrary = null;
-  } else {
-    try { widgetLibrary = require('../../../manager/widget_manager/index.js'); open = require('open'); } catch(e) { widgetLibrary = null; }
+	if(widgetLibrary) {
+	  /* start up the Android-side widgetmanager service */
+      process.env.WRT_HOME = '/data/data/org.webinos.app/wrt';
+      var bridgewm = require('bridge').load('org.webinos.app.wrt.mgr.WidgetManagerImpl', this);
+      bridgewm.setWidgetProcessor(widgetLibrary.widgetmanager);
+    }
   }
 
   var dependencies = require("find-dependencies")(__dirname);

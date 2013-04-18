@@ -73,7 +73,10 @@ public class WidgetManagerService {
 				result = theManager;
 			} else if(listener != null) {
 				listeners.add(listener);
-				startInstance(ctx);
+				/* we do't need to explicitly start the widgetmanager
+				 * in a separate isolate; it will be started by the
+				 * PZP
+				startInstance(ctx); */
 			}
 		}
 		return result;
