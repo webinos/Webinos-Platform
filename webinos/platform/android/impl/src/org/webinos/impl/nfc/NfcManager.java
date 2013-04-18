@@ -19,24 +19,38 @@
 
 package org.webinos.impl.nfc;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.webinos.impl.nfc.NfcManager.NfcDiscoveryFilter.FilterType;
 
-final class NfcManager {
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Parcelable;
+
+final class NfcManager extends BroadcastReceiver {
 
   private static NfcManager mInstance;
+  
+  public static String ACTION_DISPATCH_NFC = "org.webinos.impl.nfc.dispatchNfc";
+  public static String EXTRA_TAG = "org.webinos.impl.nfc.tag";
+  
+  private Context ctx;
 
-  synchronized static NfcManager getInstance() {
+  synchronized static NfcManager getInstance(Context ctx) {
     if (mInstance == null) {
-      mInstance = new NfcManager();
+      mInstance = new NfcManager(ctx);
     }
     return mInstance;
   }
 
-  private NfcManager() {
+  private NfcManager(Context ctx) {
     super();
+    this.ctx = ctx;
+    ctx.registerReceiver(this, new IntentFilter(ACTION_DISPATCH_NFC));
   }
 
   static interface NfcDiscoveryListener {
@@ -60,7 +74,9 @@ final class NfcManager {
     }
   }
 
-  static final class NfcDiscoveryFilter {
+  static final class NfcDiscoveryFilter implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     enum FilterType {
       UNKNOWN, TEXT, URI, MIME
@@ -115,106 +131,93 @@ final class NfcManager {
     }
   }
 
-  private List<NfcDiscoveryFilter> mFilters = new ArrayList<NfcDiscoveryFilter>();
+  private ArrayList<NfcDiscoveryFilter> mFilters = new ArrayList<NfcDiscoveryFilter>();
   private Object mFilterLock = new Object();
-
-  NfcDiscoveryFilter[] getFilters() {
-    synchronized (mFilterLock) {
-      List<NfcDiscoveryFilter> filters = new ArrayList<NfcDiscoveryFilter>();
-      for (NfcDiscoveryFilter filter : mFilters) {
-        if (!filters.contains(filter)) {
-          filters.add(filter);
-        }
-      }
-      return filters.toArray(new NfcDiscoveryFilter[filters.size()]);
-    }
-  }
 
   public void addTextTypeFilter() {
     synchronized (mFilterLock) {
       mFilters.add(new NfcDiscoveryFilter(FilterType.TEXT));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
 
   public void addUriTypeFilter(String scheme) {
     synchronized (mFilterLock) {
       mFilters.add(new NfcDiscoveryFilter(FilterType.URI, scheme));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
 
   public void addMimeTypeFilter(String mimeType) {
     synchronized (mFilterLock) {
       mFilters.add(new NfcDiscoveryFilter(FilterType.MIME, mimeType));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
 
   public void removeTextTypeFilter() {
     synchronized (mFilterLock) {
       mFilters.remove(new NfcDiscoveryFilter(FilterType.TEXT));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
 
   public void removeUriTypeFilter(String scheme) {
     synchronized (mFilterLock) {
       mFilters.remove(new NfcDiscoveryFilter(FilterType.URI, scheme));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
 
   public void removeMimeTypeFilter(String mimeType) {
     synchronized (mFilterLock) {
       mFilters.remove(new NfcDiscoveryFilter(FilterType.MIME, mimeType));
     }
-    triggerFilterMonitor();
+    updateScanningActivity();
   }
   
-  private Object mSharedTag;
+  private Parcelable mSharedTag;
   private Object mSharedTagLock = new Object();
   
-  public void setSharedTag(Object sharedTag) {
+  public void setSharedTag(Parcelable sharedTag) {
     synchronized (mSharedTagLock) {
       mSharedTag = sharedTag;
-      triggerFilterMonitor();
+      updateScanningActivity();
     }
   }
   
-  public Object getSharedTag() {
-    synchronized (mSharedTagLock) {
-      return mSharedTag;
-    }
+  private Intent createScanningActivityIntent() {
+    Intent scanningIntent = new Intent(ctx, WebinosNfcActivity.class);
+    scanningIntent.putExtra(WebinosNfcActivity.EXTRA_SHAREDTAG, mSharedTag);
+    scanningIntent.putExtra(WebinosNfcActivity.EXTRA_LISTENERS, mFilters);
+    return scanningIntent;
+  }
+  
+  private void updateScanningActivity() {
+    Intent launchIntent = createScanningActivityIntent();
+    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    launchIntent.putExtra(WebinosNfcActivity.EXTRA_UPDATE, true);
+    ctx.startActivity(launchIntent);
+  }
+  
+  void launchScanningActivity(boolean autoDismiss) {
+    Intent launchIntent = createScanningActivityIntent();
+    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    launchIntent.putExtra(WebinosNfcActivity.EXTRA_AUTODISMISS, autoDismiss);
+    launchIntent.putExtra(WebinosNfcActivity.EXTRA_UPDATE, false);
+    ctx.startActivity(launchIntent);
   }
 
-  static interface FilterMonitor {
-    void onListenersUpdated();
-  }
-
-  private FilterMonitor mFilterMonitor;
-  private Object mFilterMonitorLock = new Object();
-
-  void setFilterMonitor(FilterMonitor filterMonitor) {
-    synchronized (mFilterMonitorLock) {
-      mFilterMonitor = filterMonitor;
-      triggerFilterMonitor();
-    }
-  }
-
-  private void triggerFilterMonitor() {
-    synchronized (mFilterMonitorLock) {
-      if (mFilterMonitor != null) {
-        mFilterMonitor.onListenersUpdated();
-      }
-    }
-  }
-
-  void dispatchNfcEvent(Object discoveredTag) {
+  private void dispatchNfcEvent(Object discoveredTag) {
     synchronized (mListenerLock) {
       for (NfcDiscoveryListener listener : mListeners) {
         listener.onTagDiscovered(discoveredTag);
       }
     }
+  }
+
+  @Override
+  public void onReceive(Context context, Intent intent) {
+    dispatchNfcEvent(intent.getParcelableExtra(EXTRA_TAG));
   }
 }

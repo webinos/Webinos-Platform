@@ -21,7 +21,6 @@ package org.webinos.api.nfc;
 
 import org.meshpoint.anode.bridge.Env;
 import org.meshpoint.anode.java.Base;
-import org.webinos.api.ErrorCallback;
 
 public abstract class NfcModule extends Base {
   private static short classId = Env.getInterfaceId(NfcModule.class);

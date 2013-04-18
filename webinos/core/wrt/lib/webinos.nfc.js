@@ -142,7 +142,10 @@
                 
                 tag.read = function(success, fail) {
                     if (this != nfcModule.currentTag) {
-                        fail("invalid tag");
+                        if (typeof fail !== 'undefined') {
+                            fail("invalid tag");
+                            return;
+                        }
                     }
                     var rpc = webinos.rpcHandler.createRPC(nfcModule,
                             "read");

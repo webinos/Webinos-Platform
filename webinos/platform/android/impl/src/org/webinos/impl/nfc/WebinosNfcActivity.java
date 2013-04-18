@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.webinos.app.R;
-import org.webinos.impl.nfc.NfcManager.FilterMonitor;
 import org.webinos.impl.nfc.NfcManager.NfcDiscoveryFilter;
 import org.webinos.impl.nfc.NfcManager.NfcDiscoveryFilter.FilterType;
 
@@ -38,7 +37,7 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.view.Menu;
 
-public class WebinosNfcActivity extends Activity implements FilterMonitor {
+public class WebinosNfcActivity extends Activity {
 
   private boolean autoDismiss;
   
@@ -48,36 +47,40 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
 
   private PendingIntent mPendingIntent;
   private IntentFilter[] mFilters;
+  private NdefMessage mSharedTag;
   
+  public static String EXTRA_LISTENERS = "org.webinos.impl.nfc.listeners";
+  public static String EXTRA_SHAREDTAG = "org.webinos.impl.nfc.sharedTag";
   public static String EXTRA_AUTODISMISS = "org.webinos.impl.nfc.autoDismiss";
+  public static String EXTRA_UPDATE = "org.webinos.impl.nfc.update";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     
     Intent launchIntent = getIntent();
-    if (launchIntent != null) {
-      autoDismiss = launchIntent.getBooleanExtra(EXTRA_AUTODISMISS, autoDismiss);
+    if (launchIntent == null
+        || launchIntent.getBooleanExtra(EXTRA_UPDATE, false)) {
+      finish();
+      return;
     }
 
     mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
     mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
         getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-
-    NfcManager nfcMgr = NfcManager.getInstance();
-    nfcMgr.setFilterMonitor(this);
+    
+    onNfcManagerIntent(launchIntent);
 
     setContentView(R.layout.activity_webinos_nfc);
   }
 
-  private void updateFilter() {
+  private void updateFilter(ArrayList<NfcDiscoveryFilter> nfcFilters) {
     mFilters = null;
     List<IntentFilter> filters = new ArrayList<IntentFilter>();
-    NfcManager nfcMgr = NfcManager.getInstance();
-    if (nfcMgr != null) {
+    if (nfcFilters != null) {
       try {
-        for (NfcDiscoveryFilter filter : nfcMgr.getFilters()) {
+        for (NfcDiscoveryFilter filter : nfcFilters) {
           IntentFilter intentFilter = new IntentFilter(
               NfcAdapter.ACTION_NDEF_DISCOVERED);
           if (filter.getType().equals(FilterType.TEXT)) {
@@ -102,9 +105,8 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
 
   public void createAndSetFilter() {
     if (mNfcAdapter != null) {
-      Object sharedTag = NfcManager.getInstance().getSharedTag();
-      if (sharedTag instanceof NdefMessage) {
-        mNfcAdapter.enableForegroundNdefPush(this, (NdefMessage)sharedTag);
+      if (mSharedTag != null) {
+        mNfcAdapter.enableForegroundNdefPush(this, mSharedTag);
       } else {
         mNfcAdapter.disableForegroundNdefPush(this);
       }
@@ -146,18 +148,26 @@ public class WebinosNfcActivity extends Activity implements FilterMonitor {
       if (autoDismiss) {
         finish();
       }
-      NfcManager nfcMgr = NfcManager.getInstance();
-      if (nfcMgr != null) {
-        nfcMgr.dispatchNfcEvent(tagFromIntent);
-      }
+      Intent dispatchTagIntent = new Intent(NfcManager.ACTION_DISPATCH_NFC);
+      dispatchTagIntent.putExtra(NfcManager.EXTRA_TAG, tagFromIntent);
+      this.sendBroadcast(dispatchTagIntent);
     } else {
-      autoDismiss = intent.getBooleanExtra(EXTRA_AUTODISMISS, autoDismiss);
+      onNfcManagerIntent(intent);
+      if (intent.getBooleanExtra(EXTRA_UPDATE, false) && !isResumed) {
+        moveTaskToBack(true);
+      }
     }
   }
 
-  @Override
-  public void onListenersUpdated() {
-    updateFilter();
+  public void onNfcManagerIntent(Intent intent) {
+    autoDismiss = intent.getBooleanExtra(EXTRA_AUTODISMISS, autoDismiss);
+    updateFilter((ArrayList<NfcDiscoveryFilter>)intent.getSerializableExtra(EXTRA_LISTENERS));
+    Object sharedTag = intent.getParcelableExtra(EXTRA_SHAREDTAG);
+    if (sharedTag instanceof NdefMessage) {
+      mSharedTag = (NdefMessage)sharedTag;
+    } else {
+      mSharedTag = null;
+    }
     if (isResumed) {
       createAndSetFilter();
     }
