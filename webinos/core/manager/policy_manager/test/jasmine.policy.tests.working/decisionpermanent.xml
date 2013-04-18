@@ -1,0 +1,5 @@
+<policy-set combine="first-matching-target" description="decisionfile">
+	<policy combine="first-applicable" description="default">
+		<rule effect="prompt-blanket"></rule>
+	</policy>
+</policy-set>

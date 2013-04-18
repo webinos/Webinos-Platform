@@ -1,0 +1,17 @@
+<policy-set combine="deny-overrides" description="test prompt priority">
+	
+	<policy-set combine="deny-overrides" description="ps1">
+		<policy combine="deny-overrides" description="p1">
+			<rule effect="prompt-oneshot"/>
+		</policy>
+
+		<policy combine="deny-overrides">
+			<rule effect="prompt-session" />
+		</policy>
+		<policy combine="deny-overrides">
+			<rule effect="prompt-blanket" />
+		</policy>
+	</policy-set>
+	
+
+</policy-set>

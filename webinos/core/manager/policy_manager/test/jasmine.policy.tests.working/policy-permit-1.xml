@@ -1,0 +1,29 @@
+<policy-set combine="permit-overrides" description="test1">
+	
+	
+
+	<policy combine="permit-overrides" description="p1">
+		<target>
+			<subject>
+				<subject-match attr="requestor-id" match="device1"/>
+			</subject>
+		</target>
+		
+		<rule effect="deny"/>
+	</policy>
+
+	<policy combine="permit-overrides">
+		<target>
+			<subject>
+				<subject-match attr="requestor-id" match="device1"/>
+			</subject>
+		</target>
+		<rule effect="permit" />
+	</policy>
+	
+	<policy combine="permit-overrides" description="p1">
+		<rule effect="deny"/>
+	</policy>
+
+
+</policy-set>
