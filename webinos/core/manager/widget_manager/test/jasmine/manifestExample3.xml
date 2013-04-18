@@ -33,7 +33,7 @@
    <!-- mapping policies to APIs -->
    <ProvisionalActions>
      <ProvisionalAction>
-       <AttributeValue>http://webinos.org/geolocation</AttributeValue>
+       <AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
        <AttributeValue>#current</AttributeValue>
        <DeveloperProvidedDescription language="EN">
          Geolocation is needed to trigger reminders based on your current 
