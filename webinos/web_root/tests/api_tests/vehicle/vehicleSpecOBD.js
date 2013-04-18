@@ -31,11 +31,10 @@ describe("Vehicle API", function() {
 
 	beforeEach(function () {
 		waitsFor(function () {
-			return !!vehicleService; // Double !?
+			return vehicleService;
 		}, "The discovery didn't find a Vehicle service", 5000);
-		
 		waitsFor(function () {
-			return !!boundVehicleService;
+			return boundVehicleService;
 		}, "The found Vehicle service couldn't be bound", 5000);
 	});
 
@@ -60,7 +59,6 @@ describe("Vehicle API", function() {
 			vehicleService = service;
 			bound = true;
 		}});
-
 		waitsFor(function () {
 			return bound;
 		}, "The service couldn't be bound", 500);
@@ -74,229 +72,86 @@ describe("Vehicle API", function() {
 		expect(boundVehicleService.addEventListener).toEqual(jasmine.any(Function));
 		expect(boundVehicleService.removeEventListener).toEqual(jasmine.any(Function));
 		expect(boundVehicleService.get).toEqual(jasmine.any(Function));
-		
-		//currently not implemented functions
-//		expect(boundVehicleService.brand).toEqual(jasmine.any(String));
-//		expect(boundVehicleService.model).toEqual(jasmine.any(String));
-//		expect(boundVehicleService.year).toEqual(jasmine.any(String));
-//		expect(boundVehicleService.fuel).toEqual(jasmine.any(String));
-//		expect(boundVehicleService.transmission).toEqual(jasmine.any(String));
 	});
 
 
-	
-//	it("can get gear data", function () {
-//		var shiftEvent = null;
-//
-//		boundVehicleService.get('shift', function(event){ shiftEvent=event;});
-//		waitsFor(function () {
-//			return shiftEvent;
-//		}, "successCallback to be called.", 3000);
-//
-//		runs(function() {
-//			expect(shiftEvent).toEqual(jasmine.any(Object));
-//			expect(shiftEvent.type).toEqual('gear');
-//			expect(shiftEvent.gear).toEqual(jasmine.any(String));
-//			expect(shiftEvent.timestamp).toEqual(jasmine.any(Number));
-//		});
-//	});
-//
-//	it("can get trip computer data", function () {
-//		var evObj = null;
-//		boundVehicleService.get('tripcomputer', function(event) { evObj = event;});
-//		waitsFor(function () {
-//			return evObj;
-//		}, "onDelivery callback to be called.", 3000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.type).toEqual('tripcomputer');
-//			expect(parseFloat(evObj.averageSpeed1)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageSpeed2)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageConsumption1)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageConsumption2)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.mileage)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.range)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.tripDistance)).toEqual(jasmine.any(Number));
-//		});
-//	});
-//
-//	it("can get parksensor data", function () {
-//		var evObj = null;
-//		boundVehicleService.get('parksensors-front', function(event){ evObj=event;});
-//		waitsFor(function () {
-//			return evObj;
-//		}, "onDelivery callback to be called.", 3000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.type).toEqual('parksensor');
-//			expect(evObj.position).toEqual('parksensors-front');
-//			expect(parseFloat(evObj.outLeft)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.left)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.midLeft)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.midRight)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.right)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.outRight)).toEqual(jasmine.any(Number));
-//			expect(evObj.timestamp).toEqual(jasmine.any(Number));
-//		});
-//	});
-//
-//	//not implemented for simulator
-//	it("can get control data (e.g. lights)", function() {
-//		var evObj = null;
-//		boundVehicleService.get('lights-fog-front', function(event){ evObj=event;});
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onDelivery callback to be called. (not implemented)", 3000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.controlId).toEqual('lights-fog-front');
-//			expect(evObj.active).toEqual(jasmine.any(Boolean));
-//		});
-//	});
-//
-//	//not implemented for simulator
-//	it("can get climate data", function() {
-//		var evObj = null;
-//		boundVehicleService.get('climate-driver', function(event){ evObj=event;});
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onDelivery callback to be called. (not implemented)" , 3000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.zone).toEqual('climate-driver');
-//			expect(evObj.desiredTemperature).toEqual(jasmine.any(Number));
-//			expect(evObj.acStatus).toEqual(jasmine.any(Boolean));
-//			expect(evObj.ventLevel).toEqual(jasmine.any(Number));
-//			expect(evObj.ventMode).toEqual(jasmine.any(Boolean));
-//		});
-//	});
-//
-//
-//	it("can register and receive events on gear data", function() {
-//		var evObj = null;
-//		boundVehicleService.addEventListener('shift', function(event){evObj = event;}, false);
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onEvent callback to be called. (Use simulator to generate data)", 10000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.type).toEqual('gear');
-//			expect(evObj.gear).toEqual(jasmine.any(String));
-//			expect(evObj.timestamp).toEqual(jasmine.any(Number));
-//		});
-//
-//
-//	});
-//
-//	it("can register and receive events on trip computer data", function() {
-//		var evObj = null;
-//		boundVehicleService.addEventListener('tripcomputer', function(event){evObj = event;}, false);
-//
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onDelivery callback to be called.", 10000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(parseFloat(evObj.averageSpeed1)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageSpeed2)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageConsumption1)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.averageConsumption2)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.mileage)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.range)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.tripDistance)).toEqual(jasmine.any(Number));
-//		});
-//	});
-//
-//
-//	it("can register and receive events on parksensor data", function() {
-//		var evObj = null;
-//		boundVehicleService.addEventListener('parksensors-front', function(event){evObj = event;}, false);
-//
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onEvent callback to be called. (Use simulator to generate data)", 10000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.type).toEqual('parksensor');
-//			expect(evObj.position).toEqual('parksensors-front');
-//			expect(parseFloat(evObj.outLeft)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.left)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.midLeft)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.midRight)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.right)).toEqual(jasmine.any(Number));
-//			expect(parseFloat(evObj.outRight)).toEqual(jasmine.any(Number));
-//			expect(evObj.timestamp).toEqual(jasmine.any(Number));
-//		});
-//	});
-//
-//	//not implemented for simulator
-//	it("can register and receive events on control data", function() {
-//		var evObj = null;
-//		boundVehicleService.addEventListener('lights-fog-front', function(event){evObj = event;}, false);
-//
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onEvent callback to be called. (not implemented)", 10000);
-//
-//		runs(function() {
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj).toEqual(jasmine.any(Object));
-//			expect(evObj.controlId).toEqual('lights-fog-front');
-//			expect(evObj.active).toEqual(jasmine.any(Boolean));
-//		});
-//	});
-//
-//	//not implemented for simulator
-//	it("can register and receive events on control data", function() {
-//		var evObj = null;
-//		boundVehicleService.addEventListener('climate-driver', function(event){evObj = event;}, false);
-//
-//		waitsFor(function() {
-//			return evObj;
-//		}, "onEvent callback to be called. (not implemented)", 10000);
-//
-//		runs(function() {
-//			expect(evObj.zone).toEqual('climate-driver');
-//			expect(evObj.desiredTemperature).toEqual(jasmine.any(Number));
-//			expect(evObj.acStatus).toEqual(jasmine.any(Boolean));
-//			expect(evObj.ventLevel).toEqual(jasmine.any(Number));
-//			expect(evObj.ventMode).toEqual(jasmine.any(Boolean));
-//		});
-//	});
-//
-//	//Currently not implemented
-//	it("can find a POI", function() {
-//		var results = null;
-//		boundVehicleService.findDestionation(function(data){results = data;}, function(err){}, 'Test');
-//
-//		waitsFor(function() {
-//			return results;
-//		}, "onEvent callback to be called. (not implemented)", 10000);
-//
-//		runs(function() {
-//			expect(results).toEqual(jasmine.any(Array));
-//		});
-//	});
-//
-//	//Currently not implemented
-//	it("can request guidance to a POI", function() {
-//		var destinationSet = false;
-//		boundVehicleService.requestGuidance(function(){destinationSet=true;}, function(err){destinationSet=false;}, 'Test');
-//
-//		waitsFor(function() {
-//			return destinationSet;
-//		}, "onEvent callback to be called. (not implemented)", 10000);
-//
-//		runs(function() {
-//			expect(destinationSet).toEqual(true);
-//		});
-//	});
+    it("can get speed data", function () {
+        var speedEvent = null;
 
+        boundVehicleService.get('speed', function (event) { speedEvent = event; });
+
+        waitsFor(function () {
+			return speedEvent;
+		}, "successCallback to be called.", 3000);
+
+		runs(function () {
+			expect(speedEvent).toEqual(jasmine.any(Object));
+			expect(speedEvent.type).toEqual('speed');
+			expect(speedEvent.speed).toEqual(jasmine.any(Number));
+			expect(speedEvent.timestamp).toEqual(jasmine.any(Number));
+		});
+    });
+    it("can get rpm data", function () {
+        var rpmEvent = null;
+
+        boundVehicleService.get('rpm', function (event) { rpmEvent = event; });
+
+        waitsFor(function () {
+            return rpmEvent;
+        }, "successCallback to be called.", 3000);
+
+        runs(function () {
+            expect(rpmEvent).toEqual(jasmine.any(Object));
+            expect(rpmEvent.type).toEqual('rpm');
+            expect(rpmEvent.rpm).toEqual(jasmine.any(Number));
+            expect(rpmEvent.timestamp).toEqual(jasmine.any(Number));
+        });
+    });
+    it("can get engineLoad data", function () {
+        var engineLoadEvent = null;
+
+        boundVehicleService.get('engineLoad', function (event) { engineLoadEvent = event; });
+
+        waitsFor(function () {
+            return engineLoadEvent;
+        }, "successCallback to be called.", 3000);
+
+        runs(function () {
+            expect(engineLoadEvent).toEqual(jasmine.any(Object));
+            expect(engineLoadEvent.type).toEqual('engineLoad');
+            expect(engineLoadEvent.engineLoad).toEqual(jasmine.any(Number));
+            expect(engineLoadEvent.timestamp).toEqual(jasmine.any(Number));
+        });
+    });
+
+
+
+    var listenerEvent;
+    function handleSpeedEvent(event) {
+        listenerEvent = event;
+    }
+    it("can add a listener and receive events for speed data", function () {
+		listenerEvent = null;
+		boundVehicleService.addEventListener('speed', handleSpeedEvent, false);
+		waitsFor(function () {
+			return listenerEvent;
+		}, "onEvent callback to be called. ", 10000);
+
+		runs(function () {
+			expect(listenerEvent).toEqual(jasmine.any(Object));
+			expect(listenerEvent.type).toEqual('speed');
+			expect(listenerEvent.speed).toEqual(jasmine.any(Number));
+			expect(listenerEvent.timestamp).toEqual(jasmine.any(Number));
+		});
+
+    });
+
+    it("can remove a listener", function () {
+        listenerEvent = null;
+        boundVehicleService.removeEventListener('speed', handleSpeedEvent, false);
+        waits(1000);
+        runs(function () {
+           expect(listenerEvent).toEqual(null);
+        });
+    });
 });
