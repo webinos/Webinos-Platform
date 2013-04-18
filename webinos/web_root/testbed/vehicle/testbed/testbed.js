@@ -132,9 +132,8 @@ $(document).ready(function () {
     $('#vt_info').append("<p>Timestamp " + data.timestamp + "</p>");
   }
 
-//Doors Data//
-
-var handleDoorsData = function (data) {
+  //Doors Data//
+  var handleDoorsData = function (data) {
     postMessage("info", "new Doors Data-Event received.");
     $('#vt_info').empty();
     console.log(data);
@@ -143,12 +142,10 @@ var handleDoorsData = function (data) {
     $('#vt_info').append("<p>Behind Driver: " + data.behinddriver + "</p>");
     $('#vt_info').append("<p>Behind Passenger: " + data.behindpassenger + "</p>");
     $('#vt_info').append("<p>Trunk Deck: " + data.trunkdeck + "</p>");
- //   $('#vt_info').append("<p>Timestamp: " + data.timestamp + "</p>");
+  //   $('#vt_info').append("<p>Timestamp: " + data.timestamp + "</p>");
   }
-
-
-
-//---Handle Doors Data Ends Here----//
+  //---Handle Doors Data Ends Here----//
+ 
   var handleNavigation = function (data) {
     postMessage("info", ".");
     $('#vt_info').empty();

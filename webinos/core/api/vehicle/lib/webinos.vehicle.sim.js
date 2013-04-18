@@ -287,9 +287,6 @@
             case "engineoil":
                 supported = false;
                 break;
-           /* case "doors":
-                supported = false;
-                break;*/
             case "windows":
                 supported = false;
                 break;
@@ -448,7 +445,7 @@
     function handleDoorsDataEvents(data) {
         if (listeningToDoorsData) {
             for (var i = 0; i < listeners.length; i++) {
-                if (listeners[i][3] == 'doorsdata') {
+                if (listeners[i][3] == 'doors') {
                     returnData(data, function (data) {
                         var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data);
                         rpcHandler.executeRPC(rpc);
