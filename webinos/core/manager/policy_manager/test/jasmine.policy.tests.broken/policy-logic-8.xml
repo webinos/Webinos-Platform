@@ -1,0 +1,21 @@
+<policy-set combine="permit-overrides" description="test1">
+	
+	<policy combine="deny-overrides" description="logic test">
+		
+		<rule effect="permit">
+			<condition combine="and">
+				<subject-match attr="user-id" match="user1"/>
+				<subject-match attr="user-id" match="user2"/>			
+			</condition>
+		</rule>
+	</policy>
+
+</policy-set>
+
+
+
+
+
+
+
+
