@@ -20,7 +20,7 @@
 
     // rpcHandler set be setRPCHandler
     var rpcHandler = null;
-    var vs;
+    var vo;
 
     function VehicleError(message) {
         this.message = message;
@@ -29,13 +29,13 @@
     function get(vehicleDataId, vehicleDataHandler, errorCB) {
         switch (vehicleDataId[0]) {
             case "rpm":
-                vehicleDataHandler(vs.get('rpm'));
+                vo.get('rpm', vehicleDataHandler);
                 break;
             case "speed":
-                vehicleDataHandler(vs.get('speed'));
+                vo.get('vss', vehicleDataHandler);
                 break;
             case "engineLoad":
-                vehicleDataHandler(vs.get('engineLoad'));
+                vo.get('load_pct', vehicleDataHandler);
                 break;
             default:
                 errorCB(new VehicleError(vehicleDataId[0] + ' not supported on this service implementation.'));
@@ -63,14 +63,14 @@
                 console.log('now listening');
             }
             break;
-        case "speed":
+        case "vss":
             supported = true;
             if (!listeningToSpeed) {
                 listeningToSpeed = true;
                 console.log('now listening');
             }
             break;
-        case "engineLoad":
+        case "load_pct":
             supported = true;
             if (!listeningToEngineLoad) {
                 listeningToEngineLoad = true;
@@ -113,10 +113,10 @@
                 case "rpm":
                     listeningToRPM = false;
                     break;
-                case "speed":
+                case "vss":
                     listeningToSpeed = false;
                     break;
-                case "engineLoad":
+                case "load_pct":
                     listeningToEngineLoad = false;
                     break;
                 default:
@@ -144,7 +144,7 @@
     function handleSpeedEvents(speedEvent) {
         if (listeningToSpeed) {
             for (var i = 0; i < listeners.length; i++) {
-                if (listeners[i][3] == 'speed') {
+                if (listeners[i][3] == 'vss') {
                     returnData(speedEvent, function (speedEvent) {
                         var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', speedEvent);
                         rpcHandler.executeRPC(rpc);
@@ -157,7 +157,7 @@
     function handleEngineLoadEvents(engineLoadEvent) {
         if (listeningToEngineLoad) {
             for (var i = 0; i < listeners.length; i++) {
-                if (listeners[i][3] == 'engineLoad') {
+                if (listeners[i][3] == 'load_pct') {
                     returnData(engineLoadEvent, function (engineLoadEvent) {
                         var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', engineLoadEvent);
                         rpcHandler.executeRPC(rpc);
@@ -180,10 +180,10 @@
     }
 
     function setRequired(obj) {
-        vs = obj;
-        vs.addListener('rpm', handleRPMEvents);
-        vs.addListener('speed', handleSpeedEvents);
-        vs.addListener('engineLoad', handleEngineLoadEvents);
+        vo = obj;
+        //vo.addListener('rpm', handleRPMEvents);
+        //vo.addListener('speed', handleSpeedEvents);
+        //vo.addListener('load_pct', handleEngineLoadEvents);
     }
 
 

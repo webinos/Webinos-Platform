@@ -80,69 +80,76 @@
     var _listeners = {}; //Listener object
 
     //Code for OBD.
-//    var OBDReader = require('serial-obd');
-//    var options = {};
-//    options.baudrate = 115200;
-//    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
+    var OBDReader = require('serial-obd');
+    var options = {};
+    options.baudrate = 115200;
+    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
-    var OBDReader = require('bluetooth-obd');
-    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
-
-    var vehicleSpeed;
-    var rpm;
-    var engineLoad;
+//    var OBDReader = require('bluetooth-obd');
+//    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
 
     btOBDReader.on('dataReceived', function (data) {
-        //console.log(data);
         switch (data.name) {
         case "rpm":
-            rpm = data.value;
             if (typeof _listeners.rpm != 'undefined') {
-                _listeners.rpm(new RPMEvent(rpm));
+                _listeners.rpm(new RPMEvent(data.value));
             }
             break;
         case "vss":
-            vehicleSpeed = data.value;
             if (typeof _listeners.speed != 'undefined') {
-                _listeners.speed(new SpeedEvent(vehicleSpeed));
+                _listeners.speed(new SpeedEvent(data.value));
             }
             break;
         case "load_pct":
-            engineLoad = data.value;
-            if (typeof _listeners.engineLoad != 'undefined') {
-                _listeners.engineLoad(new EngineLoadEvent(engineLoad));
+            if (typeof _listeners.load_pct != 'undefined') {
+                _listeners.load_pct(new EngineLoadEvent(data.value));
             }
             break;
         default:
-            //console.log('No supported pid yet.');
+            console.log('No supported pid yet.');
             break;
         }
-        //Huge switch case for all vars.
     });
 
     btOBDReader.on('connected', function () {
-        this.addPoller("vss");
-        this.addPoller("rpm");
-        this.addPoller("load_pct");
 
-        this.startPolling(300);
     });
 
     btOBDReader.connect();
 
-    function get(type) {
-        switch (type) {
-        case 'speed':
-            return new SpeedEvent(vehicleSpeed);
-        case 'rpm':
-            return new RPMEvent(rpm);
-        case 'engineLoad':
-            return new EngineLoadEvent(engineLoad);
-        default:
-            console.log('Nothing found...');
-        }
+    /**
+     * Get method. Makes uses of once. (Eventlistener that only triggers once, and then removes itself.)
+     * @param type String
+     * @param callback Function
+     */
+    function get(type, callback) {
+
+        //Event for callback, removes listener after triggered.
+        btOBDReader.once('dataReceived', function (data) {
+            switch (data.name) {
+                case "rpm":
+                    callback(new RPMEvent(data.value));
+                    break;
+                case "vss":
+                    callback(new SpeedEvent(data.value));
+                    break;
+                case "load_pct":
+                    callback(new EngineLoadEvent(data.value));
+                    break;
+                default:
+                    console.log('No supported pid yet.');
+                    break;
+            }
+        });
+
+        btOBDReader.requestValueByName(type);
     }
 
+    /**
+     * Adds listener to listener array.
+     * @param type
+     * @param listener
+     */
     function addListener(type, listener) {
         console.log('registering listener ' + type);
         switch (type) {
@@ -152,13 +159,18 @@
             case 'speed':
                 _listeners.speed = listener;
                 break;
-            case 'engineLoad':
-                _listeners.engineLoad = listener;
+            case 'load_pct':
+                _listeners.load_pct = listener;
                 break;
             default:
                 console.log('type ' + type + ' undefined.');
         }
     }
+
+    function removeListener(type) {
+
+    }
     exports.get = get;
     exports.addListener = addListener;
+    exports.removeListener = removeListener;
 })(module.exports);
