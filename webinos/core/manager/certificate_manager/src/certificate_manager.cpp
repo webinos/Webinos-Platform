@@ -257,7 +257,7 @@ v8::Handle<Value> _getHash(const Arguments& args)
       return ThrowException(Exception::TypeError(String::New("Failed to read hash")));
     }
     else{
-      printf("hashkey: %s", hashkey);
+      //printf("hashkey: %s", hashkey);
     }
   
     Local<String> result = String::New(hashkey);
