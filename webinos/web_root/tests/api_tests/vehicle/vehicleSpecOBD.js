@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Copyright 2012 BMW AG
+ *
+ * Additions and changes had been made to support he bluetooth-obd module.
+ *
  * Copyright 2013 TNO
+ * Author: Eric Smekens
  ******************************************************************************/
-
 describe("Vehicle API", function() {
 	var vehicleService;
 	var boundVehicleService;

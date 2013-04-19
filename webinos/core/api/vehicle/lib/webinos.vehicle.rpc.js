@@ -21,16 +21,16 @@
     function VehicleModule(rpcHandler, params) {
         var implFile = 'fake';
         var car = null;
-        var conncector = null;
+        var connector = null;
         if (typeof params.connector === 'undefined') {
-            connector = 'obd';
+            connector = 'fake';
         } else {
             connector = params.connector;
         }
         if (connector == 'most') {
             try {
-                //var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
-                //car = vehicleSystem.most;
+                var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
+                car = vehicleSystem.most;
                 implFile = 'most';
             } catch (e) {
                 console.log(e.stack);
@@ -44,7 +44,7 @@
             } catch (e) {
                 console.log(e);
             }
-        } else if (connector == 'obd') {
+        } else if (connector == 'obd') { //OBD-II Addition!
             //OBD
             try {
                 car = require('../../vehicle/contrib/vb-obd/vo.js');

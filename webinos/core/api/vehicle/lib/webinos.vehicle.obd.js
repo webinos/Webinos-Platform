@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * Copyright 2013 TNO
+ * Author: Eric Smekens
  ******************************************************************************/
 (function () {
 
@@ -196,7 +197,7 @@
     exports.serviceDesc = {
         api: 'http://webinos.org/api/vehicle',
         displayName: 'Vehicle API (OBD)',
-        description: 'Provides data from the vehicle simulator.'
+        description: 'Provides data from the vehicle OBD-II bus.'
     };
 
 })(module.exports);

@@ -14,6 +14,8 @@
  * limitations under the License.
  *
  * Copyright 2012 BMW AG
+ *
+ * Changes has been made by TNO to support OBD-II.
  ******************************************************************************/ 
 
 (function () {

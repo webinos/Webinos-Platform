@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  * Copyright 2013 TNO
+ * Author: Eric Smekens
  ******************************************************************************/
 
 (function () {
