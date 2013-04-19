@@ -21,6 +21,9 @@
     //'use strict';
 
     //Events
+    /**
+     * WDomEvent. Every PID specific event inherits this event.
+     */
     WDomEvent = function (type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp) {
         this.initEvent(type, target, currentTarget, eventPhase, bubbles, cancelable, timestamp);
     }
@@ -85,9 +88,14 @@
     options.baudrate = 115200;
     var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
+
+//      //Code for bluetooth-serial-port, doesn't work atm.
 //    var OBDReader = require('bluetooth-obd');
 //    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
 
+    /**
+     * The listener for 'dataReceived'. This is for events.
+     */
     btOBDReader.on('dataReceived', function (data) {
         switch (data.name) {
         case "rpm":
@@ -115,21 +123,23 @@
         }
     });
 
+    /**
+     * On connected, start polling.
+     */
     btOBDReader.on('connected', function () {
         //For now start polling here.
         //TODO: When all listeners are disabled, stopPolling. Etc.
-        this.startPolling(500);
+        this.startPolling(600);
     });
 
     btOBDReader.connect();
 
     /**
      * Get method. Makes uses of once. (Eventlistener that only triggers once, and then removes itself.)
-     * @param type String
-     * @param callback Function
+     * @param {string} type
+     * @param {Function} callback
      */
     function get(type, callback) {
-
         //Event for callback, removes listener after triggered.
         btOBDReader.once('dataReceived', function (data) {
             switch (data.name) {
@@ -147,14 +157,14 @@
                     break;
             }
         });
-
+        //Request value after callback.
         btOBDReader.requestValueByName(type);
     }
 
     /**
      * Adds listener to listener array.
-     * @param type
-     * @param listener
+     * @param {string} type Type you want the add the listener off.
+     * @param listener Eventhandler
      */
     function addListener(type, listener) {
         var shouldAdd = false;
@@ -179,6 +189,10 @@
         }
     }
 
+    /**
+     * Function to remove a listener
+     * @param {string} type Type you want the listener removed.
+     */
     function removeListener(type) {
         var shouldRemove = false;
         switch (type) {
@@ -201,6 +215,8 @@
             btOBDReader.removePoller(type);
         }
     }
+
+    //Exports
     exports.get = get;
     exports.addListener = addListener;
     exports.removeListener = removeListener;

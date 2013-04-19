@@ -19,6 +19,8 @@
  *
  * Copyright 2013 TNO
  * Author: Eric Smekens
+ *
+ * LINK: http://localhost:8080/tests/api_tests/vehicle/SpecRunnerOBD.html
  ******************************************************************************/
 describe("Vehicle API", function() {
 	var vehicleService;
@@ -82,7 +84,7 @@ describe("Vehicle API", function() {
     it("can get speed data", function () {
         var speedEvent = null;
 
-        boundVehicleService.get('speed', function (event) { speedEvent = event; });
+        boundVehicleService.get('vss', function (event) { speedEvent = event; });
 
         waitsFor(function () {
 			return speedEvent;
@@ -90,8 +92,8 @@ describe("Vehicle API", function() {
 
 		runs(function () {
 			expect(speedEvent).toEqual(jasmine.any(Object));
-			expect(speedEvent.type).toEqual('speed');
-			expect(speedEvent.speed).toEqual(jasmine.any(Number));
+			expect(speedEvent.type).toEqual('vss');
+			expect(speedEvent.vss).toEqual(jasmine.any(Number));
 			expect(speedEvent.timestamp).toEqual(jasmine.any(Number));
 		});
     });
@@ -114,7 +116,7 @@ describe("Vehicle API", function() {
     it("can get engineLoad data", function () {
         var engineLoadEvent = null;
 
-        boundVehicleService.get('engineLoad', function (event) { engineLoadEvent = event; });
+        boundVehicleService.get('load_pct', function (event) { engineLoadEvent = event; });
 
         waitsFor(function () {
             return engineLoadEvent;
@@ -122,8 +124,8 @@ describe("Vehicle API", function() {
 
         runs(function () {
             expect(engineLoadEvent).toEqual(jasmine.any(Object));
-            expect(engineLoadEvent.type).toEqual('engineLoad');
-            expect(engineLoadEvent.engineLoad).toEqual(jasmine.any(Number));
+            expect(engineLoadEvent.type).toEqual('load_pct');
+            expect(engineLoadEvent.load_pct).toEqual(jasmine.any(Number));
             expect(engineLoadEvent.timestamp).toEqual(jasmine.any(Number));
         });
     });
@@ -136,15 +138,15 @@ describe("Vehicle API", function() {
     }
     it("can add a listener and receive events for speed data", function () {
 		listenerEvent = null;
-		boundVehicleService.addEventListener('speed', handleSpeedEvent, false);
+		boundVehicleService.addEventListener('vss', handleSpeedEvent, false);
 		waitsFor(function () {
 			return listenerEvent;
 		}, "onEvent callback to be called. ", 10000);
 
 		runs(function () {
 			expect(listenerEvent).toEqual(jasmine.any(Object));
-			expect(listenerEvent.type).toEqual('speed');
-			expect(listenerEvent.speed).toEqual(jasmine.any(Number));
+			expect(listenerEvent.type).toEqual('vss');
+			expect(listenerEvent.vss).toEqual(jasmine.any(Number));
 			expect(listenerEvent.timestamp).toEqual(jasmine.any(Number));
 		});
 
@@ -152,7 +154,7 @@ describe("Vehicle API", function() {
 
     it("can remove a listener", function () {
         listenerEvent = null;
-        boundVehicleService.removeEventListener('speed', handleSpeedEvent, false);
+        boundVehicleService.removeEventListener('vss', handleSpeedEvent, false);
         waits(1000);
         runs(function () {
            expect(listenerEvent).toEqual(null);

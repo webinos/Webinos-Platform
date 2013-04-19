@@ -15,17 +15,30 @@
  *
  * Copyright 2013 TNO
  * Author: Eric Smekens
+ *
+ * Webroot Jasmine TEST: http://localhost:8080/tests/api_tests/vehicle/SpecRunnerOBD.html
  ******************************************************************************/
 (function () {
 
     // rpcHandler set be setRPCHandler
     var rpcHandler = null;
+    // Connection to the OBD-II. Vehicle Obd
     var vo;
 
+    /**
+     * Called when an error should be printed.
+     * @param message Message to be printed.
+     */
     function VehicleError(message) {
         this.message = message;
     }
 
+    /**
+     * Get a value by PID-name.
+     * @param vehicleDataId PID
+     * @param vehicleDataHandler Succes callback
+     * @param errorCB Error callback
+     */
     function get(vehicleDataId, vehicleDataHandler, errorCB) {
         switch (vehicleDataId[0]) {
             case "rpm":
@@ -46,13 +59,19 @@
     var objectRefs = [];
     var listeners = [];
 
-    //BOOLs for handling listeners (are there active listeners)
+    //BOOLs for handling listeners
     var listeningToRPM = false;
     var listeningToSpeed = false;
     var listeningToEngineLoad = false;
 
 
-    /*AddEventListener*/
+    /**
+     * Add an event listener. This starts polling the OBD-II device!
+     * @param vehicleDataId The PID.
+     * @param successHandler
+     * @param errorHandler
+     * @param objectRef
+     */
     addEventListener = function (vehicleDataId, successHandler, errorHandler, objectRef) {
         var supported = false;
         switch (vehicleDataId) {
@@ -91,7 +110,10 @@
     }
 
 
-    /*RemoveEventListener*/
+    /**
+     * Removes an event. This stops polling for that specific PID.
+     * @param arguments [1] is PID.
+     */
     removeEventListener = function (arguments) {
 
         // arguments[0] = objectReference, arguments[1] = vehicleDataId
@@ -185,11 +207,7 @@
 
     function setRequired(obj) {
         vo = obj;
-        //vo.addListener('rpm', handleRPMEvents);
-        //vo.addListener('speed', handleSpeedEvents);
-        //vo.addListener('load_pct', handleEngineLoadEvents);
     }
-
 
     exports.addEventListener = addEventListener;
     exports.removeEventListener = removeEventListener;

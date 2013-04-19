@@ -59,6 +59,7 @@ $(document).ready(function () {
         supported: true
     }];
     postMessage('Info', 'Page loaded. Please Initialize');
+    var counter = 0;
     var handleRPMData = function (event) {
         rpm = parseInt(event.rpm);
         postMessage("info", "new RPM-Event received.");
