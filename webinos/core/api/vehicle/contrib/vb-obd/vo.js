@@ -41,11 +41,11 @@
     SpeedEvent.prototype.constructor = SpeedEvent;
     SpeedEvent.parent = WDomEvent.prototype; // our "super" property
     SpeedEvent.prototype.initSpeedEvent = function (speedData) {
-        this.speed = speedData;
+        this.vss = speedData;
         var d = new Date();
         var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
         var stamp = stamp + d.getUTCMilliseconds();
-        SpeedEvent.parent.initEvent.call(this, 'speed', null, null, null, false, false, stamp);
+        SpeedEvent.parent.initEvent.call(this, 'vss', null, null, null, false, false, stamp);
     }
 
     RPMEvent = function (rpmData) {
@@ -69,11 +69,11 @@
     EngineLoadEvent.prototype.constructor = EngineLoadEvent;
     EngineLoadEvent.parent = WDomEvent.prototype; // our "super" property
     EngineLoadEvent.prototype.initEngineLoadEvent = function (engineLoadData) {
-        this.engineLoad = engineLoadData;
+        this.load_pct = engineLoadData;
         var d = new Date();
         var stamp = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
         var stamp = stamp + d.getUTCMilliseconds();
-        EngineLoadEvent.parent.initEvent.call(this, 'engineLoad', null, null, null, false, false, stamp);
+        EngineLoadEvent.parent.initEvent.call(this, 'load_pct', null, null, null, false, false, stamp);
     }
 
 
@@ -96,8 +96,8 @@
             }
             break;
         case "vss":
-            if (typeof _listeners.speed != 'undefined') {
-                _listeners.speed(new SpeedEvent(data.value));
+            if (typeof _listeners.vss != 'undefined') {
+                _listeners.vss(new SpeedEvent(data.value));
             }
             break;
         case "load_pct":
@@ -106,13 +106,19 @@
             }
             break;
         default:
+            if(data.value === "OK")
+            {
+                break;
+            }
             console.log('No supported pid yet.');
             break;
         }
     });
 
     btOBDReader.on('connected', function () {
-
+        //For now start polling here.
+        //TODO: When all listeners are disabled, stopPolling. Etc.
+        this.startPolling(500);
     });
 
     btOBDReader.connect();
@@ -151,24 +157,49 @@
      * @param listener
      */
     function addListener(type, listener) {
-        console.log('registering listener ' + type);
+        var shouldAdd = false;
         switch (type) {
             case 'rpm':
                 _listeners.rpm = listener;
+                shouldAdd = true;
                 break;
-            case 'speed':
-                _listeners.speed = listener;
+            case 'vss':
+                _listeners.vss = listener;
+                shouldAdd = true;
                 break;
             case 'load_pct':
                 _listeners.load_pct = listener;
+                shouldAdd = true;
                 break;
             default:
                 console.log('type ' + type + ' undefined.');
         }
+        if(shouldAdd) {
+            btOBDReader.addPoller(type);
+        }
     }
 
     function removeListener(type) {
-
+        var shouldRemove = false;
+        switch (type) {
+            case 'rpm':
+                _listeners.rpm = undefined;
+                shouldRemove = true;
+                break;
+            case 'vss':
+                _listeners.vss = undefined;
+                shouldRemove = true;
+                break;
+            case 'load_pct':
+                _listeners.load_pct = undefined;
+                shouldRemove = true;
+                break;
+            default:
+                console.log('type ' + type + ' undefined.');
+        }
+        if(shouldRemove) {
+            btOBDReader.removePoller(type);
+        }
     }
     exports.get = get;
     exports.addListener = addListener;

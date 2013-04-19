@@ -52,10 +52,10 @@ $(document).ready(function () {
         type: 'rpm',
         supported: true
     }, {
-        type: 'speed',
+        type: 'vss',
         supported: true
     }, {
-        type: 'engineLoad',
+        type: 'load_pct',
         supported: true
     }];
     postMessage('Info', 'Page loaded. Please Initialize');
@@ -65,12 +65,12 @@ $(document).ready(function () {
         $('#vt_info').html("RPM: <br />" + rpm);
     };
     var handleSpeedData = function (event) {
-        speed = parseInt(event.speed);
+        speed = parseInt(event.vss);
         postMessage("info", "new Speed-Event received.");
         $('#vt_info').html("Speed: <br />" + speed + " km/h");
     };
     var handleEngineLoadData = function (event) {
-        engineLoad = parseInt(event.engineLoad);
+        engineLoad = parseInt(event.load_pct);
         postMessage("info", "new EngineLoad-Event received.");
         $('#vt_info').html("Engine Load: <br />" + engineLoad + " %");
     };
@@ -175,10 +175,10 @@ $(document).ready(function () {
             case "rpm":
                 return handleRPMData;
                 break;
-            case "speed":
+            case "vss":
                 return handleSpeedData;
                 break;
-            case "engineLoad":
+            case "load_pct":
                 return handleEngineLoadData;
                 break;
             default:

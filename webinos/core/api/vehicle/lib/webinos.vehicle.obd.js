@@ -31,10 +31,10 @@
             case "rpm":
                 vo.get('rpm', vehicleDataHandler);
                 break;
-            case "speed":
+            case "vss":
                 vo.get('vss', vehicleDataHandler);
                 break;
-            case "engineLoad":
+            case "load_pct":
                 vo.get('load_pct', vehicleDataHandler);
                 break;
             default:
@@ -60,6 +60,7 @@
             supported = true;
             if (!listeningToRPM) { //Listener for gears not yet registered
                 listeningToRPM = true;
+                vo.addListener(vehicleDataId, handleRPMEvents);
                 console.log('now listening');
             }
             break;
@@ -67,6 +68,7 @@
             supported = true;
             if (!listeningToSpeed) {
                 listeningToSpeed = true;
+                vo.addListener(vehicleDataId, handleSpeedEvents);
                 console.log('now listening');
             }
             break;
@@ -74,6 +76,7 @@
             supported = true;
             if (!listeningToEngineLoad) {
                 listeningToEngineLoad = true;
+                vo.addListener(vehicleDataId, handleEngineLoadEvents);
                 console.log('now listening');
             }
             break;
@@ -123,6 +126,7 @@
                     console.log("nothing found");
 
             }
+            vo.removeListener(arguments[1]);
         }
     }
 
