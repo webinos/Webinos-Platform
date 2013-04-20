@@ -19,7 +19,11 @@
 
     (function() {
 
-var wPayment2 = require('./impl_payment2.js');
+var wPayment2;
+if(process.platform === 'android')
+    wPayment2 = require('bridge').load('org.webinos.impl.PaymentImpl', this);
+else
+    wPayment2 = require('./impl_payment2.js');
 var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 
 
