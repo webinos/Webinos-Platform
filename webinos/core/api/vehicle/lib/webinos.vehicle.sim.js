@@ -22,10 +22,6 @@
     var rpcHandler = null;
     var vs;
 
-
-
-
-
     function gearEvent(value) {
         this.gear = value;
     }
@@ -39,6 +35,16 @@
         this.mileage = mileage;
         this.range = range;
     }
+
+    //Doors Data
+
+     function DoorsDataEvent(driver, frontpassenger, behinddriver, behindpassenger, trunkdeck) {
+        this.driver = driver;
+        this.frontpassenger = frontpassenger;
+        this.behinddriver = behinddriver;
+        this.behindpassenger = behindpassenger;
+        this.trunkdeck = trunkdeck;
+     }
 
     //Navigation Event - Destination Reached, Destination Changed, Destination Cancelled
     function NavigationEvent(type, address) {
@@ -145,7 +151,7 @@
                 errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
                 break;
             case "doors":
-                errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
+                vehicleDataHandler(vs.get('doors'));
                 break;
             case "windows":
                 errorCB(new VehicleError(vehicleDataId[0] + 'not found'));
@@ -165,6 +171,7 @@
     //BOOLs for handling listeners (are there active listeners)
     var listeningToGear = false;
     var listeningToTripComputer = false;
+    var listeningToDoorsData = false;
     var listeningToParkSensorsFront = false;
     var listeningToParkSensorsRear = false;
     var listeningToDestinationReached = false;
@@ -206,6 +213,12 @@
                 supported = true;
                 if (!listeningToTripComputer) {
                     listeningToTripComputer = true;
+                }
+                break;
+            case "doors":
+                supported = true;
+                if (!listeningToDoorsData) {
+                    listeningToDoorsData = true;
                 }
                 break;
             case "parksensors-front":
@@ -272,9 +285,6 @@
                 supported = false;
                 break;
             case "engineoil":
-                supported = false;
-                break;
-            case "doors":
                 supported = false;
                 break;
             case "windows":
@@ -377,7 +387,7 @@
                     listeningToWipers = false;
                     break;
                 case "doors":
-                    listeningToWipers = false;
+                    listeningToDoorsData = false;
                     break;
                 case "windows":
                     listeningToWipers = false;
@@ -431,6 +441,20 @@
         }
     }
 
+    /*handleDoorsDataEvents*/
+    function handleDoorsDataEvents(data) {
+        if (listeningToDoorsData) {
+            for (var i = 0; i < listeners.length; i++) {
+                if (listeners[i][3] == 'doors') {
+                    returnData(data, function (data) {
+                        var rpc = rpcHandler.createRPC(listeners[i][2], 'onEvent', data);
+                        rpcHandler.executeRPC(rpc);
+                    }, listeners[i][1], listeners[i][2]);
+                }
+              }
+        }
+    }
+
     /*handleParkSensorsEvent*/
     function handleParkSensorsEvents(data) {
         console.log('handle ps data');
@@ -463,6 +487,7 @@
         vs.addListener('tripcomputer', handleTripComputerEvents);
         vs.addListener('parksensors-rear', handleParkSensorsEvents);
         vs.addListener('parksensors-front', handleParkSensorsEvents);
+        vs.addListener('doors', handleDoorsDataEvents);
     }
 
 
