@@ -89,7 +89,7 @@
 //    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
 
-      //Code for bluetooth-serial-port, doesn't work atm.
+    //Code for bluetooth-serial-port, doesn't work atm.
     //TODO: Move settings to webinos.config.json, or let it scan.
     //
     var OBDReader = require('bluetooth-obd');
@@ -125,7 +125,6 @@
                 console.log(data);
             }
 
-
             break;
         }
     });
@@ -137,7 +136,7 @@
         //For now start polling here.
         //TODO: When all listeners are disabled, stopPolling. Etc.
         console.log('OBD-II device is connected');
-        this.startPolling(600);
+        this.startPolling(1000);
     });
 
     btOBDReader.connect();
@@ -145,12 +144,11 @@
     /**
      * Get method. Makes use of 'once'. (Eventlistener that only triggers once, and then removes itself.)
      * @param {string} type
-     * @param {Function} callback
+     * @param {Function} callback Function that will execute when data is received.
      */
     function get(type, callback) {
 
-        //Event for callback, removes listener after triggered.
-        btOBDReader.once('dataReceived', function (data) {
+        var getMessageHandler = function (data) {
             if(data.name === type) {
                 switch (data.name) {
                     case "rpm":
@@ -166,10 +164,16 @@
                         console.log('No supported pid yet.');
                         break;
                 }
+                this.removeListener('dataReceived', getMessageHandler);
             } else {
                 console.log('Collision with listener and get. Not supported yet.');
+                console.log(type);
+                console.log(data);
+                //Do nothing, let the next thing come in. Will be caught by generalHandler.
             }
-        });
+        };
+
+        btOBDReader.on('dataReceived', getMessageHandler);
 
         //Request value after callback.
         btOBDReader.requestValueByName(type);
