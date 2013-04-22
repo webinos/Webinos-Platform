@@ -136,7 +136,7 @@
     btOBDReader.on('connected', function () {
         //For now start polling here.
         //TODO: When all listeners are disabled, stopPolling. Etc.
-
+        console.log('OBD-II device is connected');
         this.startPolling(600);
     });
 
@@ -151,19 +151,23 @@
 
         //Event for callback, removes listener after triggered.
         btOBDReader.once('dataReceived', function (data) {
-            switch (data.name) {
-                case "rpm":
-                    callback(new RPMEvent(data.value));
-                    break;
-                case "vss":
-                    callback(new SpeedEvent(data.value));
-                    break;
-                case "load_pct":
-                    callback(new EngineLoadEvent(data.value));
-                    break;
-                default:
-                    console.log('No supported pid yet.');
-                    break;
+            if(data.name === type) {
+                switch (data.name) {
+                    case "rpm":
+                        callback(new RPMEvent(data.value));
+                        break;
+                    case "vss":
+                        callback(new SpeedEvent(data.value));
+                        break;
+                    case "load_pct":
+                        callback(new EngineLoadEvent(data.value));
+                        break;
+                    default:
+                        console.log('No supported pid yet.');
+                        break;
+                }
+            } else {
+                console.log('Collision with listener and get. Not supported yet.');
             }
         });
 
