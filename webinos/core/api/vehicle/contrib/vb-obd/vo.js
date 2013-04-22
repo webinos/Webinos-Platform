@@ -82,16 +82,18 @@
 
     var _listeners = {}; //Listener object
 
-    //Code for OBD.
-    var OBDReader = require('serial-obd');
-    var options = {};
-    options.baudrate = 115200;
-    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
+//    //Code for OBD.
+//    var OBDReader = require('serial-obd');
+//    var options = {};
+//    options.baudrate = 115200;
+//    var btOBDReader = new OBDReader('/dev/rfcomm0', options);
 
 
-//      //Code for bluetooth-serial-port, doesn't work atm.
-//    var OBDReader = require('bluetooth-obd');
-//    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
+      //Code for bluetooth-serial-port, doesn't work atm.
+    //TODO: Move settings to webinos.config.json, or let it scan.
+    //
+    var OBDReader = require('bluetooth-obd');
+    var btOBDReader = new OBDReader('D8:0D:E3:80:19:B4', 14);
 
     /**
      * The listener for 'dataReceived'. This is for events.
@@ -114,11 +116,16 @@
             }
             break;
         default:
-            if(data.value === "OK")
-            {
+            if(data.value === "OK" || data.value === "NO DATA") {
                 break;
+            } else if (data.value === "?") {
+                console.log('Unknown answer!');
+            } else {
+                console.log('No supported pid yet:');
+                console.log(data);
             }
-            console.log('No supported pid yet.');
+
+
             break;
         }
     });
@@ -129,17 +136,19 @@
     btOBDReader.on('connected', function () {
         //For now start polling here.
         //TODO: When all listeners are disabled, stopPolling. Etc.
+
         this.startPolling(600);
     });
 
     btOBDReader.connect();
 
     /**
-     * Get method. Makes uses of once. (Eventlistener that only triggers once, and then removes itself.)
+     * Get method. Makes use of 'once'. (Eventlistener that only triggers once, and then removes itself.)
      * @param {string} type
      * @param {Function} callback
      */
     function get(type, callback) {
+
         //Event for callback, removes listener after triggered.
         btOBDReader.once('dataReceived', function (data) {
             switch (data.name) {
@@ -157,6 +166,7 @@
                     break;
             }
         });
+
         //Request value after callback.
         btOBDReader.requestValueByName(type);
     }
