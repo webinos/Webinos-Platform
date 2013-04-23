@@ -7,11 +7,11 @@ try {
 
 channel.onerror = function (error) {
 	console.error ("Connection Error: " + error.toString ());
-}
+};
 
 channel.onclose = function () {
 	console.log ("PZP Connection Closed");
-}
+};
 
 channel.onmessage = function (message) {
 	var data = JSON.parse (message.data);
@@ -24,8 +24,10 @@ channel.onmessage = function (message) {
 				if (msg !== "") {
 					var parse = JSON.parse(msg);
 					channel.send(JSON.stringify(parse.message));
-					window.location.href = "http://localhost:"+templateData.pzpPort+"/testbed/client.html";
-					channel.close();
+                    if (parse.message.payload.status === "signedCertByPzh" || parse.message.payload.status === "error") {
+						window.location.href = "http://localhost:"+templateData.pzpPort+"/testbed/client.html";
+						channel.close();
+					}
 				}
 			 }
 		 }
@@ -33,7 +35,7 @@ channel.onmessage = function (message) {
 		 req.setRequestHeader ("Content-Type", "application/json");
 		 req.send(JSON.stringify({authCode:data.payload.authCode, csr:data.payload.csr, from:data.from}));
 	}
-}
+};
 
 channel.onopen = function() {
 	console.log("connection successful");
@@ -43,4 +45,4 @@ channel.onopen = function() {
 		authCode:templateData.authCode,
 		providerDetails:((templateData.port !== '443') ? (templateData.address+":"+templateData.port) : templateData.address)}};
 	channel.send(JSON.stringify(data));
-}
+};

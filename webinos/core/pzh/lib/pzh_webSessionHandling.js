@@ -205,7 +205,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
         if (userObj.pzh_state.sessionId !== obj.message.at) { // Different PZH
             var id = userObj.pzh_otherManager.addMsgListener (function (modules) {
                 sendMsg (conn, obj.user, { type:"listUnregServices",
-                    message                    :{"pzEntityId":obj.message.at, "modules":modules.services} });
+                    message:{"pzEntityId":obj.message.at, "modules":modules.services} });
             });
             var msg = userObj.prepMsg (obj.message.at, "listUnregServices", {listenerId:id});
             userObj.sendMessage (msg, obj.message.at);
@@ -213,7 +213,7 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
             var data = require ("fs").readFileSync ("./webinos_config.json");
             var c = JSON.parse (data.toString ());
             sendMsg (conn, obj.user, { type:"listUnregServices",
-                message                    :{"pzEntityId":userObj.pzh_state.sessionId, "modules":c.pzhDefaultServices} }); // send default services...
+                message:{"pzEntityId":userObj.pzh_state.sessionId, "modules":c.pzhDefaultServices} }); // send default services...
         }
     }
 
@@ -498,10 +498,8 @@ var pzhWI = function (pzhs, hostname, port, serverPort, addPzh, refreshPzh, getA
     }
 
     function csrAuthCodeByPzp (conn, obj, userObj) {
-        userObj.enroll.addNewPZPCert (obj, refreshPzh, function (status, payload) {
-            if (status) {
-                sendMsg (conn, obj.user, { type:"csrAuthCodeByPzp", message:payload });
-            }
+        userObj.enroll.addNewPZPCert (obj, refreshPzh, function (payload) {
+            sendMsg (conn, obj.user, { type:"csrAuthCodeByPzp", message:payload });
         });
     }
 
