@@ -122,12 +122,10 @@ var Pzh = function () {
                 self.pzh_state.connectedPzh[_pzhId] = {"socket":_conn, "address":_conn.socket.remoteAddress};
                 _conn.id = _pzhId;
 
-                setTimeout (function () {
-                    msg = self.pzh_otherManager.messageHandler.createRegisterMessage(self.config.metaData.serverName, _pzhId);
-                    self.sendMessage (msg, _pzhId);
-                    self.sendUpdateToAll(self.pzh_state.sessionId);
-                    self.pzh_otherManager.registerServices (_pzhId);
-                }, 3000);
+                msg = self.pzh_otherManager.messageHandler.createRegisterMessage(self.config.metaData.serverName, _pzhId);
+                self.sendMessage (msg, _pzhId);
+                self.sendUpdateToAll(self.pzh_state.sessionId);
+                self.pzh_otherManager.registerServices (_pzhId);
             } else {
                 self.pzh_state.logger.log ("pzh -" + _pzhId + " already connected");
             }
@@ -156,7 +154,9 @@ var Pzh = function () {
             }
 
             if (cn[0] === "Pzh") {
-                cn = _conn.getPeerCertificate ().subjectaltname.split (":");
+                cn = _conn.getPeerCertificate() &&
+                    _conn.getPeerCertificate().subjectaltname &&
+                    _conn.getPeerCertificate().subjectaltname.split (":");
                 if (cn.length > 2) {
                     name = cn[1] + ":" + cn[2];
                 } else {
@@ -440,7 +440,7 @@ var RevokePzp = function (parent) {
         parent.config.revokeClientCert (pzpCert, function (status, crl) {
             if (status) {
                 parent.pzh_state.logger.log ("revocation success! " + _pzpid + " should not be able to connect anymore ");
-                parent.config.crl = crl;
+                parent.config.crl.value = crl;
                 delete parent.config.cert.internal.signedCert[_pzpid];
                 delete parent.config.trustedList.pzp[_pzpid];
                 parent.config.cert.internal.revokedCert[_pzpid] = crl;
@@ -463,6 +463,7 @@ var RevokePzp = function (parent) {
 };
 
 var AddPzp = function (parent) {
+    var self = this;
     /**
      * Adds new PZP certificate. This is triggered by client, which sends its csr certificate and PZH signs
      * certificate and return backs a signed PZP certificate.
@@ -471,52 +472,50 @@ var AddPzp = function (parent) {
      */
     this.addNewPZPCert = function (_msgRcvd, refreshCert, _callback) {
         try {
-            var pzpId = parent.pzh_state.sessionId + "/" + _msgRcvd.message.from, msg;
+            var pzpId = parent.pzh_state.sessionId + "/" + _msgRcvd.message.from, msg, randId;
             if (parent.config.cert.internal.revokedCert[pzpId]) {
                 msg = parent.prepMsg(pzpId, "error", "pzp was previously revoked");
-                _callback (false, msg);
+                _callback ( msg);
                 return;
             }
             if (parent.config.trustedList.pzp[pzpId]) {
                 // Either PZP is already registered or else there is a name clash,,
                 // Lets assume there is name clash
-                pzpId = pzpId + Math.round((Math.random() * 100));
+                randId =Math.round((Math.random() * 100));
+                pzpId = pzpId + "_" +randId;
                 if (parent.config.trustedList.pzp[pzpId]) {
-                    this.addNewPzpCert(_msgRcvd, _callback); // Random failed to generate something unique, regenerate id
+                    return self.addNewPzpCert(_msgRcvd, refreshCert, _callback);
+                } else {
+                    msg = parent.prepMsg(_msgRcvd.message.from, "pzpId_Update", _msgRcvd.message.from+"_"+randId);
+                    _callback(msg);
+                    return 
                 }
             }
-            parent.pzh_state.expecting.isExpectedCode (_msgRcvd.message.code, function (expected) { // Check QRCode if it is valid ..
-                if (expected) {
-                    parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
-                        if (status) { // unset expected QRCode
-                            parent.config.cert.internal.signedCert[pzpId] = value;
-                            parent.pzh_state.expecting.unsetExpected (function () {
-                                parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
-                                if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
-                                    parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
-                                    parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
-                                }
-                                // Add PZP in list of master certificates as PZP will sign connection certificate at its end.
-                                parent.setConnParam(function(status, options){
-                                    if (status) {
-                                        refreshCert(parent.pzh_state.sessionId, options);
-                                        // Send signed certificate and master certificate to PZP
-                                        var payload = {"clientCert":parent.config.cert.internal.signedCert[pzpId],
-                                                    "masterCert":parent.config.cert.internal.master.cert,
-                                                    "masterCrl" :parent.config.crl.value};
-                                        msg = parent.prepMsg (pzpId,"signedCertByPzh", payload);
-                                        _callback (true, msg);
-                                    }
-                                });
-                            });
-                        } else {
-                            msg = parent.prepMsg(_msgRcvd.message.from, "error", value);
-                            _callback (false, msg);
-                        }
+            if(!_msgRcvd.message.csr) {
+                msg = parent.prepMsg(_msgRcvd.message.from, "error", "message without certificate sign request from PZP.. cannot sign");
+                _callback(msg);
+            }
+            parent.config.generateSignedCertificate (_msgRcvd.message.csr, function (status, value) { // Sign certificate based on received csr from client.// pzp = 2
+                if (status) { 
+                    parent.config.cert.internal.signedCert[pzpId] = value;
+                    parent.config.storeDetails(require("path").join("certificates", "internal"), "certificates", parent.config.cert.internal);
+                    if (!parent.config.trustedList.pzp.hasOwnProperty (pzpId)) {// update configuration with signed certificate details ..
+                        parent.config.trustedList.pzp[pzpId] = {addr:"", port:""};
+                        parent.config.storeDetails(null, "trustedList", parent.config.trustedList);
+                    }
+                    // Add PZP in list of master certificates as PZP will sign connection certificate at its end.
+                    parent.setConnParam(function(status, options){
+                        refreshCert(parent.pzh_state.sessionId, options);
+                        // Send signed certificate and master certificate to PZP
+                        var payload = {"clientCert":parent.config.cert.internal.signedCert[pzpId],
+                                    "masterCert":parent.config.cert.internal.master.cert,
+                                    "masterCrl" :parent.config.crl.value};
+                        msg = parent.prepMsg (pzpId,"signedCertByPzh", payload);
+                        _callback (msg);
                     });
                 } else {
-                    msg = parent.prepMsg(_msgRcvd.message.from, "error", "not expecting new pzp");
-                    _callback (false, msg);// Fail message
+                    msg = parent.prepMsg(_msgRcvd.message.from, "error", "failed signing client certificate");
+                    _callback (msg);
                 }
             });
         } catch (err) {

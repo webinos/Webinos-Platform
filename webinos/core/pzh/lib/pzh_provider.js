@@ -252,10 +252,9 @@ var Provider = function (_hostname, _friendlyName) {
         });
     };
 
-    /*// This keeps pzh running but you cannot find where error occurred
+    // This keeps pzh running but you cannot find where error occurred
      process.on("uncaughtException", function(err) {
      logger.error("uncaught exception " + err.message);
-     })*/
-    ;
+     });
 };
 module.exports = Provider;
