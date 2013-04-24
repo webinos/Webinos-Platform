@@ -93,21 +93,25 @@ public class WalletServiceMessageHandler extends Handler {
         Log.d(TAG, "handleMessage() what=" + what);
         if(WalletEngine.CMD_CODE_WALLET_OPEN == what) {
             totalBill = 0;
-            Log.d(TAG, "handleMessage() what=CODE_SHOP_OPEN");
+            Log.d(TAG, "handleMessage() what=CMD_CODE_WALLET_OPEN");
             responseCode = WalletEngine.RESPONSE_CODE_OK;
             canReply = true;
         } else if(WalletEngine.CMD_CODE_WALLET_ADDITEM == what) {
-            Log.d(TAG, "handleMessage() what=CODE_SHOP_ADDITEM");
+            Log.d(TAG, "handleMessage() what=CMD_CODE_WALLET_ADDITEM");
             Bundle bundle = msg.getData().getBundle("Item");
-            ShoppingItem item = new ShoppingItem(bundle);
+            BillableItem item = new BillableItem(bundle);
+            Log.d(TAG, "Item price : " +  item.price);
             totalBill += item.price;
+            Log.d(TAG, "New total : " +  totalBill);
             responseCode = WalletEngine.RESPONSE_CODE_OK;
             canReply = true;
         } else if(WalletEngine.CMD_CODE_WALLET_CHECKOUT == what) {
-            Log.d(TAG, "handleMessage() what=CODE_SHOP_CHECKOUT");
+            Log.d(TAG, "handleMessage() what=CMD_CODE_WALLET_CHECKOUT");
             Intent intent = new Intent(ACTION_WALLET_START);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(ACTION_PARAMETER_TOTALPRICE, (float) totalBill / 100.0);
+            double amount = totalBill / 100.0;
+            Log.d(TAG,"Sending to pay for " + amount);
+            intent.putExtra(ACTION_PARAMETER_TOTALPRICE, amount );
             TestWallet.setMessage(msg);
             context.startActivity(intent);
 //            synchronized (synchronizerThread) {
@@ -117,13 +121,13 @@ public class WalletServiceMessageHandler extends Handler {
 //                    Log.d(TAG,"Interrupted exception. should be ok");
 //                }
 //            }
-            canReply = false; // We will have to wait
-            //answer = new Answer(Answer.STATE_OK,"this is a demo");
+            canReply = false; // We will have to let the intent answer that
         } else if(WalletEngine.CMD_CODE_WALLET_CLOSE == what) {
-            Log.d(TAG, "handleMessage() what=CODE_SHOP_RELEASE");
+            Log.d(TAG, "handleMessage() what=CMD_CODE_WALLET_CLOSE");
             responseCode = WalletEngine.RESPONSE_CODE_OK;
             canReply = true;
         } else {
+            Log.d(TAG, "handleMessage() what=RESPONSE_CODE_UNKNOWN actual code was " + what);
             responseCode = WalletEngine.RESPONSE_CODE_UNKNOWN;
             canReply = true;
         }

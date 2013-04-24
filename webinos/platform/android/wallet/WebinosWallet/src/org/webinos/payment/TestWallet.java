@@ -33,6 +33,7 @@ public class TestWallet extends Activity {
         cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"Sending payed");
                 sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_OK);
                 thi$.finish();
             }
@@ -42,17 +43,27 @@ public class TestWallet extends Activity {
         cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"Sending NOT payed");
                 sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
                 thi$.finish();
             }
         });
     }
 
+    @Override
+    public void onPause() {
+        super.onResume();
+        Log.d(TAG, "onPause()");
+        Log.d(TAG,"Sending NOT payed");
+        sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
+        thi$.finish();
+    }
+
     private void sendMessage(int code) {
         if (TestWallet.respondTo!=null){
             Message answ = new Message();
             answ.what = code;
-            Log.v(TAG, "Will send user input"+code);
+            Log.v(TAG, "Will send user input: "+code);
             try {
                 TestWallet.respondTo.replyTo.send(answ);
             } catch (RemoteException e) {
