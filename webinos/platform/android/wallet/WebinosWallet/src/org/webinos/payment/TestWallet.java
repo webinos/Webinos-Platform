@@ -22,12 +22,13 @@ public class TestWallet extends Activity {
         super.onCreate(savedInstanceState);
         thi$ = this;
         Intent intent = getIntent();
-        Double totalAmount = intent.getDoubleExtra(WalletServiceMessageHandler.ACTION_PARAMETER_TOTALPRICE, 0);
+        // TODO: this used to be value but java bridge can't pass the double so this is a hack
+        String totalAmount = intent.getStringExtra(WalletServiceMessageHandler.ACTION_PARAMETER_TOTALPRICE);
 
         setContentView(R.layout.main);
 
         TextView textView = (TextView)findViewById(R.id.fldAmount);
-        textView.setText(totalAmount.toString() + " Euros");
+        textView.setText(totalAmount.toString());
 
         Button cmdOk = (Button)findViewById(R.id.cmdOk);
         cmdOk.setOnClickListener(new View.OnClickListener() {

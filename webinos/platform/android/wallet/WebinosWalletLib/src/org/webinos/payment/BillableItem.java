@@ -1,7 +1,9 @@
 package org.webinos.payment;
 import android.os.Bundle;
+import android.util.Log;
 
 public class BillableItem {
+    private final static String TAG = BillableItem.class.getName();
 
     /** The Constant CURRENCY_EUR. */
     public static final String CURRENCY_EUR = "EUR";
@@ -60,6 +62,7 @@ public class BillableItem {
     }
 
     private void init(String productID, String productName, String productDescription, String currency, long price, int count) {
+        Log.d(TAG, "Creating item with description " + productDescription + " and price " + price);
         this.productID = productID;
         this.productName = productName;
         this.productDescription = productDescription;

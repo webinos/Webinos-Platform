@@ -17,7 +17,7 @@
                 android:paddingLeft="40dp"
                 android:paddingTop="20dp"
                 android:text="@string/PleasePay"
-                android:textColor="#ffffff"
+                android:textColor="#000000"
                 tools:context=".MainActivity" />
         <TextView
                 android:id="@+id/fldAmount"
@@ -26,7 +26,7 @@
                 android:paddingLeft="40dp"
                 android:paddingTop="20dp"
                 android:text="Waiting transaction"
-                android:textColor="#ffffff"
+                android:textColor="#000000"
                 tools:context=".MainActivity" />
         <Button
                 android:id="@+id/cmdOk"

@@ -74,7 +74,7 @@ public class WalletEngine {
      * @param item : the shopping item
      */
     public void addItem(BillableItem item) {
-        Log.d(TAG, "addItem()");
+        Log.d(TAG, "addItem() with descr:" + item.productDescription);
         sendMessage(CMD_CODE_WALLET_ADDITEM, "BillableItem", item.toBundle());
     }
 

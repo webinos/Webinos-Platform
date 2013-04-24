@@ -10,6 +10,7 @@ public class WalletServiceMessageHandler extends Handler {
     private final static String TAG = WalletServiceMessageHandler.class.getName();
     private Context context = null;
     private long totalBill = 0;
+    private String lastDescription;
 
     private static final String ACTION_WALLET_START = "org.webinos.payment.TestWallet.Start";
     static final String ACTION_PARAMETER_TOTALPRICE = "org.webinos.payment.totalAmmount";
@@ -98,8 +99,10 @@ public class WalletServiceMessageHandler extends Handler {
             canReply = true;
         } else if(WalletEngine.CMD_CODE_WALLET_ADDITEM == what) {
             Log.d(TAG, "handleMessage() what=CMD_CODE_WALLET_ADDITEM");
-            Bundle bundle = msg.getData().getBundle("Item");
+            Bundle bundle = msg.getData().getBundle("BillableItem");
             BillableItem item = new BillableItem(bundle);
+            lastDescription = item.productDescription;
+            Log.d(TAG, "Item : " +  item.productDescription);
             Log.d(TAG, "Item price : " +  item.price);
             totalBill += item.price;
             Log.d(TAG, "New total : " +  totalBill);
@@ -111,7 +114,8 @@ public class WalletServiceMessageHandler extends Handler {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             double amount = totalBill / 100.0;
             Log.d(TAG,"Sending to pay for " + amount);
-            intent.putExtra(ACTION_PARAMETER_TOTALPRICE, amount );
+            // TODO: Hack since the price is always passed as 0
+            intent.putExtra(ACTION_PARAMETER_TOTALPRICE, lastDescription );
             TestWallet.setMessage(msg);
             context.startActivity(intent);
 //            synchronized (synchronizerThread) {
