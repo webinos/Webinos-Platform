@@ -98,7 +98,9 @@
                     $('#pay').bind('click', function() {
    
                      if (payment2Service == null) { alert("Need to find service first");  }
-                     else {                    
+                     else {
+                         displayStatus("");
+                         displayError("");
                       var bill=new ShoppingItem();
                       bill.productID="12345";
                       bill.description="Test bill for interface check";
