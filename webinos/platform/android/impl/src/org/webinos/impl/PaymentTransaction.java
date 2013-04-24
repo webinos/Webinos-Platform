@@ -14,16 +14,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import de.dtag.tlabs.wallet.extensions.shopping.api.Answer;
-import de.dtag.tlabs.wallet.extensions.shopping.api.Item;
-import de.dtag.tlabs.wallet.extensions.shopping.api.Merchant;
-import de.dtag.tlabs.wallet.extensions.shopping.api.ShopEngine;
+import org.webinos.payment.Store;
+import org.webinos.payment.BillableItem;
+import org.webinos.payment.WalletEngine;
+
 
 public class PaymentTransaction {
 
 	private Context context;
 	private Env env;
-	private ShopEngine shopEngine;
+	private WalletEngine walletEngine;
 	@SuppressWarnings("unused")
 	private String customerID;
 	private String sellerID;
@@ -43,14 +43,13 @@ public class PaymentTransaction {
 	private class OpenShop extends AsyncCall {
 		@Override
 		public void run() {
-			shopEngine = new ShopEngine(context, answerCallback);
+			walletEngine = new WalletEngine(context, answerCallback);
 			/* we need to wait for a short time to allow the
-			 * library to connect to the shop service; there is
+			 * library to connect to the webinos wallet service; there is
 			 * no synchronisation for this */
 			try { Thread.sleep(500L); } catch(InterruptedException ie) {}
-			/* FIXME: where will we get the merchant token? */
-			Merchant merchant = new Merchant(sellerID, "knownMerchantToken");
-			shopEngine.openShop(merchant);
+            Store store = new Store(sellerID, "Webinos Application");
+			walletEngine.openShop(store);
 		}
 	}
 
@@ -65,60 +64,40 @@ public class PaymentTransaction {
 			String currency = bill.currency;
 			/* FIXME: change this multiplier based on currency? */
 			long price = (long)(bill.itemsPrice * 100);
-			Item billItem = new Item(productID, productName, productDescription, currency, price, 1);
-			shopEngine.addItem(billItem);
+            BillableItem billItem = new BillableItem(productID, productName, productDescription, currency, price, 1);
+			walletEngine.addItem(billItem);
 		}
 	}
 
 	private class Checkout extends AsyncCall {
 		@Override
 		public void run() {
-			shopEngine.checkout();
+			walletEngine.checkout();
 		}
 	}
 
-	private PaymentError handleAnswer(Answer answer) {
+	private PaymentError handleAnswer(Message msg) {
 		/* if we've been told to exit, then this answer
 		 * is the answer we were waiting for .. so exit on return */
 		if(exit)
 			answerLooper.quit();
 
-		if(answer.state == Answer.STATE_OK || answer.state == Answer.STATE_CHECKOUT_SUCCESSFUL) {
+		if(msg.what == WalletEngine.RESPONSE_CODE_OK || msg.what == WalletEngine.RESPONSE_CODE_CHECKOUT_OK) {
 			return null;
 		}
 
 		PaymentError error = new PaymentError();
-		error.message = answer.message;
-		switch(answer.state) {
-		case Answer.STATE_ERROR_SHOP_ALLREADY_OPENED:
-			/* we allow this to pass as a non-error - if the shop
-			 * is already open, then we treat the openShop() call as
-			 * having succeeded */
-			return null;
-		case Answer.STATE_CHECKOUT_FAILED:
+		error.message = "An error occured!";
+		switch(msg.what) {
+		case WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL:
 			//error.code = PaymentErrors.PAYMENT_AUTHENTICATION_FAILED;
 			//error.code = PaymentErrors.PAYMENT_CHARGEABLE_EXCEEDED;
 			error.code = PaymentErrors.PAYMENT_CHARGE_FAILED;
 			break;
-		case Answer.STATE_CHECKOUT_NO_ITEMS:
+		case WalletEngine.RESPONSE_CODE_UNKNOWN:
 			error.code = PaymentErrors.INVALID_OPTION;
 			break;
-		case Answer.STATE_ERROR:
-			error.code = PaymentErrors.INVALID_OPTION;
-			break;
-		case Answer.STATE_ERROR_NO_ITEMS:
-			error.code = PaymentErrors.INVALID_OPTION;
-			break;
-		case Answer.STATE_ERROR_NO_SHOP:
-			error.code = PaymentErrors.UNKNOWN_SHOP;
-			break;
-		case Answer.STATE_ERROR_UNKNOWN_ITEM:
-			error.code = PaymentErrors.INVALID_OPTION;
-			break;
-		case Answer.STATE_ERROR_UNKNOWN_SHOP:
-			error.code = PaymentErrors.UNKNOWN_SHOP;
-			break;
-		case Answer.STATE_UNKNOWN:
+		case WalletEngine.RESPONSE_CODE_FAIL:
 			error.code = PaymentErrors.INVALID_OPTION;
 			break;
 		}
@@ -145,7 +124,7 @@ public class PaymentTransaction {
 			@Override
 			public boolean handleMessage(Message msg) {
 				/* get the answer for the current operation */
-				PaymentError error = handleAnswer(new Answer(msg));
+				PaymentError error = handleAnswer(msg);
 				if(error != null) {
 					/* if there was an error, end here */
 					errorCallback.onError(error);
@@ -196,12 +175,12 @@ public class PaymentTransaction {
 		if(exit)
 			return false;
 
-		if(shopEngine != null) {
+		if(walletEngine != null) {
 			/* we need to release the engine, and don't
 			 * exit the looper until we've had the answer to that */
 			exit = true;
-			shopEngine.release();
-			shopEngine = null;
+			walletEngine.release();
+			walletEngine = null;
 			return true;
 		}
 		/* otherwise there's nothing to do, so we can
