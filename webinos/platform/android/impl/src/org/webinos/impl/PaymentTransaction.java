@@ -14,13 +14,15 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
+
 import org.webinos.payment.Store;
 import org.webinos.payment.BillableItem;
 import org.webinos.payment.WalletEngine;
 
 
 public class PaymentTransaction {
-
+	private final static String TAG = PaymentTransaction.class.getName();
 	private Context context;
 	private Env env;
 	private WalletEngine walletEngine;
@@ -64,6 +66,7 @@ public class PaymentTransaction {
 			String currency = bill.currency;
 			/* FIXME: change this multiplier based on currency? */
 			long price = (long)(bill.itemsPrice * 100);
+			Log.d(TAG, "Received item " +  productDescription + " with price " + bill.itemsPrice + " and sending " + price + " to the payment");
             BillableItem billItem = new BillableItem(productID, productName, productDescription, currency, price, 1);
 			walletEngine.addItem(billItem);
 		}
@@ -87,7 +90,7 @@ public class PaymentTransaction {
 		}
 
 		PaymentError error = new PaymentError();
-		error.message = "An error occured!";
+		error.message = "The payment failed";
 		switch(msg.what) {
 		case WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL:
 			//error.code = PaymentErrors.PAYMENT_AUTHENTICATION_FAILED;
@@ -134,7 +137,7 @@ public class PaymentTransaction {
 				/* if there's no next call, we're done */
 				if(callQueue.isEmpty()) {
 					if(finish()) {
-						String proofOfPurchase = "payed"; /* we don't get one from the engine */
+						String proofOfPurchase = "Reciept received"; /* we don't get one from the engine */
 						successCallback.onSuccess(proofOfPurchase);
 					}
 					return true;

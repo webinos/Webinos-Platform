@@ -28,6 +28,7 @@ import org.webinos.api.payment.PaymentErrorCB;
 import org.webinos.api.payment.PaymentManager;
 import org.webinos.api.payment.PaymentSuccessCB;
 import org.webinos.api.payment.ShoppingItem;
+import android.util.Log;
 
 import android.content.Context;
 
@@ -46,7 +47,8 @@ public class PaymentImpl extends PaymentManager implements IModule {
 			final PaymentErrorCB errorCallback, final PaymentChallengeCB challengeCallback,
 			final ShoppingItem[] itemList, final ShoppingItem bill, final String customerID,
 			final String sellerID) {
-
+			
+		Log.d(TAG, "Received bill with price " + bill.itemsPrice + " and desc " + bill.description);
 		PaymentTransaction transaction = new PaymentTransaction(androidContext, customerID, sellerID, successCallback, errorCallback);
 		transaction.perform(itemList, bill);
 	}

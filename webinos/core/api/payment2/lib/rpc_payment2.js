@@ -57,7 +57,8 @@ Payment2Module.prototype = new RPCWebinosService;
 Payment2Module.prototype.pay = function ( params, successCallback,  errorCallback){
 
   console.log("pay2 called on rpc receiver "+   params[0] +" "+ params[1]+" "+ params[2] );
-
+  console.log("Bill item is:");
+  console.log(JSON.stringify(params,null," ") );
   wPayment2.pay(
     function (result){
           successCallback(result);
