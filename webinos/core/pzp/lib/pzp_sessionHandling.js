@@ -55,6 +55,30 @@ var Pzp = function () {
         }
     }
 
+    this.createPzpCertificates = function(callback) {
+        var signedCert, csr;
+        var cn = self.config.metaData.webinosType + "CA:" + self.config.metaData.webinosName;
+        self.config.generateSelfSignedCertificate(self.config.metaData.webinosType+"CA", cn, function(status, csr){
+            logger.log ("*****"+self.config.metaData.webinosType+" Master Certificate Generated*****");
+            cn = self.config.metaData.webinosType + ":" + self.config.metaData.webinosName;
+            self.config.generateSelfSignedCertificate(self.config.metaData.webinosType,cn, function(status, csr) {
+                logger.log ("*****"+self.config.metaData.webinosType+" Connection Certificate Generated*****");
+                self.config.generateSignedCertificate(csr, function(status, signedCert) {
+                    if(status){
+                        logger.log ("*****"+config.metaData.webinosType+" Connection Certificate Signed by Master Certificate*****");
+                        self.config.cert.internal.conn.cert = signedCert;
+                        self.config.storeDetails("certificates/internal","certificates", self.config.cert.internal);
+                        self.config.storeDetails(null, "crl", self.config.cert.crl);
+                        self.config.storeDetails("userData", "userDetails", self.config.cert.userData);
+                        callback(true);
+                    } else {
+                        callback(false);   
+                    }
+                });
+            });
+        });
+    };
+
     function initializePzpComponents() {
         var PzpWebSocket = require ("./pzp_websocket");
         var WebinosManager = require ("./pzp_otherManager.js");
@@ -234,7 +258,7 @@ var Pzp = function () {
                 self.pzpWebSocket.sendConnectedApp (_address, _message);
             }
         } else {
-            logger.error ("send message called without message and address field");
+            logger.error ("send message called without message or address field");
         }
     };
 
@@ -567,7 +591,7 @@ var PzpClient = function (parent) {
  */
 var ConnectHub = function (parent) {
     "use strict";
-    var self = this;
+    var self = this, pzpClient;
     var logger = util.webinosLogging (__filename + "_ConnectHub") || console;
     var pzpServer = new PzpServer (parent);
 
@@ -580,10 +604,25 @@ var ConnectHub = function (parent) {
                 self.connect (function (status) {
                     logger.log ("retrying to connect back to the PZH " + (status ? "successful" : "failed"));
                 });
-            }, 60000);//increase time limit to suggest when it should retry connecting back to the PZH
+            }, 12000);//increase time limit to suggest when it should retry connecting back to the PZH
         }
     }
 
+    //This function will be called when PZH is connected
+    function connectionWithPzhChecker() {
+        var id = setInterval(function(){
+            var socket = require("net").createConnection(parent.config.userPref.ports.provider, parent.config.metaData.serverName);
+            socket.setTimeout(10);
+            socket.on('connect', function() {
+                 socket.end();
+            });
+            socket.on('error', function() { // Assuming this will happen as internet is not reachable
+                logger.log("connection with pzh has been lost. Will try reconnecting back when PZH is available");
+                pzpClient.socket.destroy();
+                clearInterval(id)
+            });
+        },12000);
+    }
     /**
      * PZH connected details are stored in this function
      * @param conn - connection object of the tls client
@@ -634,45 +673,54 @@ var ConnectHub = function (parent) {
         logger.log ("connection to pzh status: " + pzpClient.authorized);
         if (pzpClient.authorized) {
             authenticated (pzpClient, callback);
+            connectionWithPzhChecker();
         } else {
             unauthenticated (pzpClient, callback);
         }
     }
 
     this.connect = function (_callback) {
-        var pzpClient, master, options = {};
+        var master, options = {};
         var tls = require ("tls");
         try {
+            logger.log("connection towards pzh initiated");
+            var socket = require("net").createConnection(parent.config.userPref.ports.provider, parent.config.metaData.serverName); //Check if we are online..
+            socket.setTimeout(10);
+            socket.on('connect', function() {
+                socket.end();
+            	parent.setConnParam (function (options) {
+		            pzpClient = tls.connect (parent.config.userPref.ports.provider, parent.config.metaData.serverName, options, function (conn) {
+		                handleAuthorization (pzpClient, _callback);
+		            });
 
-            parent.setConnParam (function (options) {
-                pzpClient = tls.connect (parent.config.userPref.ports.provider, parent.config.metaData.serverName, options, function (conn) {
-                    handleAuthorization (pzpClient, _callback);
-                });
-                pzpClient.setTimeout(100);
+		            pzpClient.on ("data", function (buffer) {
+		                parent.handleMsg (pzpClient, buffer);
+		            });
 
-                pzpClient.on ("data", function (buffer) {
-                    parent.handleMsg (pzpClient, buffer);
-                });
+		            pzpClient.on ("close", function(had_error) {
+		                if(had_error) {
+		                    logger.log("transmission error lead to disconnect");
+		                }
+		            });
+		            pzpClient.on ("end", function () {
+		                parent.cleanUp (pzpClient.id);
+		                retryConnecting ();
+		            });
 
-                pzpClient.on ("close", function(had_error) {
-                    if(had_error) {
-                        logger.log("transmission error lead to disconnect");
-                    }
-                });
-                pzpClient.on ("end", function () {
-                    parent.cleanUp (pzpClient.id);
-                    retryConnecting ();
-                });
-
-                pzpClient.on ("error", function (err) {
-                    pzpServer.startServer ();
-                    if (err.code === "EHOSTUNREACH" || err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
-                        logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
-                        parent.webinos_manager.startOtherManagers ();
-                    }
-                    logger.error (err);
-                });
-            });
+		            pzpClient.on ("error", function (err) {
+		                pzpServer.startServer ();
+		                if (err.code === "EHOSTUNREACH" || err.code === "ECONNREFUSED" || err.code === "ECONNRESET") {
+		                    logger.error ("Connect  attempt to YOUR PZH " + parent.config.metaData.pzhId + " failed.");
+		                    parent.webinos_manager.startOtherManagers ();
+		                }
+		                logger.error (err);
+		            });
+               });
+           });
+           socket.on('error', function() { // Assuming this will happen as internet is not reachable
+               logger.log("currently your PZH is offline.");
+                retryConnecting();
+           });
         } catch (err) {
             logger.error ("Connect Hub - general error : " + err);
         }

@@ -210,7 +210,21 @@ var PzpWSS = function (parent) {
                 case "authCodeByPzh":
                     if (expectedPzhAddress === msg.payload.providerDetails) {
                         connection.sendUTF (JSON.stringify ({"from":parent.config.metaData.webinosName,
-                            "payload":{"status":"csrAuthCodeByPzp", "csr":parent.config.cert.internal.master.csr, "authCode":msg.payload.authCode}}));
+                            "payload":{"status":"csrAuthCodeByPzp", 
+                                       "csr":parent.config.cert.internal.master.csr}}));
+                    }
+                    break;
+                case "pzpId_Update":
+                    if (expectedPzhAddress === (msg.from && msg.from.split("_") && msg.from.split("_")[0])) {
+                        // Re-Generate Master CSR and send it to PZH..
+                        parent.config.metaData.webinosName = msg.payload.message;
+                        parent.createPzpCertificates(function(){
+		                    parent.setSessionId();
+		                    // set device name
+		                    connection.sendUTF (JSON.stringify ({"from":parent.config.metaData.webinosName,
+		                        "payload":{"status":"csrAuthCodeByPzp", 
+		                         "csr":parent.config.cert.internal.master.csr}}));
+						});
                     }
                     break;
                 case "signedCertByPzh":

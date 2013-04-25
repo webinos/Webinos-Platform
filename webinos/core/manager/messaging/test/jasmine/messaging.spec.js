@@ -1,4 +1,4 @@
-describe('manager.messaging', function() {
+describe('messaging', function() {
 
 	var mockRpcHandler = jasmine.createSpyObj('rpcHandler', ['setMessageHandler', 'handleMessage']);
 	var MessageHandler = require('../../lib/messagehandler.js').MessageHandler;

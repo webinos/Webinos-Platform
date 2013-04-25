@@ -49,9 +49,11 @@ var Pzp_OtherManager = function (_parent) {
      * Any entity connecting to PZP has to register its address with other end point
      */
     function registerMessaging (pzhId) {
-        if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
+        self.rpcHandler.setSessionId (_parent.pzp_state.sessionId);
+        self.messageHandler.setOwnSessionId (_parent.pzp_state.sessionId);
+        if (_parent.pzp_state.connectedPzh.hasOwnProperty(pzhId) && _parent.pzp_state.enrolled) {
             var msg = self.messageHandler.createRegisterMessage(_parent.pzp_state.sessionId, pzhId);
-            _parent.sendMessage (msg, pzhId);
+            _parent.sendMessage(msg, pzhId);
         }
     }
 
@@ -173,8 +175,7 @@ var Pzp_OtherManager = function (_parent) {
             }
         }
         _parent.pzpWebSocket.connectedApp();
-    }
-
+    }   
     /**
      * Initializes Webinos Other Components that interact with the session manager
      * @param modules : webinos modules that should be loaded in the PZP
@@ -209,20 +210,14 @@ var Pzp_OtherManager = function (_parent) {
      * Used by RPC to register and update services to the PZH
      */
     this.registerServicesWithPzh = function () {
-        setTimeout(function(){   // timeout as register services takes time to load
-            var pzhId = _parent.config.metaData.pzhId;
-            if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
-                var localServices = self.discovery.getRegisteredServices ();
-                var msg = {"type":"prop",
-                    "from"       :_parent.pzp_state.sessionId,
-                    "to"         :pzhId,
-                    "payload"    :{"status":"registerServices",
-                        "message":{services:localServices,
-                           "from":_parent.pzp_state.sessionId}}};
-                _parent.sendMessage (msg, pzhId);
-                logger.log ("sent msg to register local services with pzh");
-            }
-        }, 6000);
+        var pzhId = _parent.config.metaData.pzhId;
+        if (_parent.pzp_state.connectedPzh[pzhId] && _parent.pzp_state.enrolled) {
+            var localServices = self.discovery.getRegisteredServices();
+            var msg = _parent.prepMsg("registerServices",{services:localServices,
+                       "from":_parent.pzp_state.sessionId});
+            logger.log ("sent msg to register local services with pzh");
+        }
+
     };
 
     /**
@@ -230,7 +225,7 @@ var Pzp_OtherManager = function (_parent) {
      */
     this.startOtherManagers = function () {
         self.setupMessage_RPCHandler ();
-        registerMessaging (_parent.config.metaData.pzhId);    //message handler
+        registerMessaging(_parent.config.metaData.pzhId);    //message handler
         self.registerServicesWithPzh (); //rpc
         if (!self.peerDiscovery) {// local discovery&& mode !== modes[0]
             if (os.type ().toLowerCase () == "windows_nt") {
