@@ -65,7 +65,7 @@ var Pzp = function () {
                 logger.log ("*****"+self.config.metaData.webinosType+" Connection Certificate Generated*****");
                 self.config.generateSignedCertificate(csr, function(status, signedCert) {
                     if(status){
-                        logger.log ("*****"+config.metaData.webinosType+" Connection Certificate Signed by Master Certificate*****");
+                        logger.log ("*****"+self.config.metaData.webinosType+" Connection Certificate Signed by Master Certificate*****");
                         self.config.cert.internal.conn.cert = signedCert;
                         self.config.storeDetails("certificates/internal","certificates", self.config.cert.internal);
                         self.config.storeDetails(null, "crl", self.config.cert.crl);
