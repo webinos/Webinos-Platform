@@ -381,9 +381,8 @@ this.findContacts = function(filters, successCB, errorCB)
     else //on Android
     {
         console.log("---FIND: android, local");
-        if(!options)
-            options=new Array();
-        LocalContacts.find(fields, successCB, function(){}, options);
+        var options=new Array();
+        LocalContacts.find({}, successCB, function(){}, options);
     }
 };
 
