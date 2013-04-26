@@ -25,7 +25,11 @@ channel.onmessage = function (message) {
 					var parse = JSON.parse(msg);
 					channel.send(JSON.stringify(parse.message));
                     if (parse.message.payload.status === "signedCertByPzh" || parse.message.payload.status === "error") {
-						window.location.href = "http://localhost:"+templateData.pzpPort+"/testbed/client.html";
+						if(navigator.userAgent.toLowerCase().indexOf("android") > -1){
+							window.location.href = "http://localhost:"+templateData.pzpPort+"/apps/wrt/13be5cfb9c336f34de467d6a370e3210c59c5f7f/wgt/index.html?finalStep=1";
+						}else{
+							window.location.href = "http://localhost:"+templateData.pzpPort+"/testbed/client.html";
+						}
 						channel.close();
 					}
 				}
