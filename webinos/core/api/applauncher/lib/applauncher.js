@@ -24,13 +24,13 @@
   try { open = require('open'); } catch(e) { open = null; }
 
   if (process.platform == 'android') {
-    androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
 	if(widgetLibrary) {
 	  /* start up the Android-side widgetmanager service */
       process.env.WRT_HOME = '/data/data/org.webinos.app/wrt';
       var bridgewm = require('bridge').load('org.webinos.app.wrt.mgr.WidgetManagerImpl', this);
       bridgewm.setWidgetProcessor(widgetLibrary.widgetmanager);
     }
+    androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
   }
 
   var dependencies = require("find-dependencies")(__dirname);
