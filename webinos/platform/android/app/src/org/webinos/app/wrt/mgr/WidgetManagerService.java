@@ -54,13 +54,14 @@ public class WidgetManagerService {
 			})) {
 				return;
 			}
+			/* temp - don't launch in separate isolate
 			String launchScript = Constants.RESOURCE_DIR + "/widgetmanager.js";
 			AssetUtils.writeAssetToFile(ctx,"js/widgetmanager.js", launchScript);
 			Intent intent = new Intent(ctx, AnodeService.class);
 			Log.v(TAG, launchScript);
 			intent.setAction(AnodeReceiver.ACTION_START);
 			intent.putExtra(AnodeReceiver.CMD, launchScript);
-			ctx.startService(intent);
+			ctx.startService(intent); */
 		} catch(Throwable t) {
 			Env.logger.e(TAG, "Unable to start widgetmanager", t);
 		}
@@ -73,10 +74,7 @@ public class WidgetManagerService {
 				result = theManager;
 			} else if(listener != null) {
 				listeners.add(listener);
-				/* we do't need to explicitly start the widgetmanager
-				 * in a separate isolate; it will be started by the
-				 * PZP
-				startInstance(ctx); */
+				startInstance(ctx);
 			}
 		}
 		return result;
