@@ -20,7 +20,8 @@
   var androidLauncher = null;
   var widgetLibrary;
   var open;
-  try { widgetLibrary = require('../../../manager/widget_manager/index.js'); open = require('open'); } catch(e) { widgetLibrary = null; }
+  try { widgetLibrary = require('../../../manager/widget_manager/index.js'); } catch(e) { widgetLibrary = null; }
+  try { open = require('open'); } catch(e) { open = null; }
 
   if (process.platform == 'android') {
     androidLauncher = require('bridge').load('org.webinos.impl.AppLauncherManagerImpl', this);
