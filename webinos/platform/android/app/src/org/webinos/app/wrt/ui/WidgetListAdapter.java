@@ -55,7 +55,7 @@ public class WidgetListAdapter extends ArrayAdapter<String> {
 		
 		/* decide what to show as the main label text */
 		String labelText = null;
-		WidgetConfig widgetConfig = WidgetManagerService.getInstance().getWidgetConfig(installId);
+		WidgetConfig widgetConfig = WidgetManagerService.getWidgetManagerInstance().getWidgetConfig(installId);
 		if(widgetConfig == null) {
 			labelText = "widgetConfig is null - widget not properly installed";
 			return rowView;
@@ -109,7 +109,7 @@ public class WidgetListAdapter extends ArrayAdapter<String> {
 		if(prefIcon == null || prefIcon.isEmpty()) {
 			imageView.setImageResource(R.drawable.webinos_icon);
 		} else {
-			String iconPath = WidgetManagerService.getInstance().getWidgetDir(installId) + '/' + prefIcon;
+			String iconPath = WidgetManagerService.getWidgetManagerInstance().getWidgetDir(installId) + '/' + prefIcon;
 			imageView.setImageDrawable(Drawable.createFromPath(iconPath));
 		}
 

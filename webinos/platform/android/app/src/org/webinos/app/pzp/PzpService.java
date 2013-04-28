@@ -79,11 +79,11 @@ public class PzpService extends Service implements StateListener {
 	 * will NOT be called.
 	 * @return the service instance if available; or null otherwise
 	 */
-	static PzpService getService(Context ctx, PzpServiceListener listener) {
+	public static void getService(Context ctx, PzpServiceListener listener) {
 		PzpService foundService = null;
 		/* synchronously check, and add listener if necessary */
 		synchronized(PzpService.class) {
-			if(theService == null) {
+			if(theService == null && listener != null) {
 				serviceListeners.add(listener);
 			}
 			foundService = theService;
@@ -91,9 +91,9 @@ public class PzpService extends Service implements StateListener {
 		/* start service if necessary */
 		if(foundService == null) {
 			ctx.startService(new Intent(ctx, PzpService.class));
+		} else {
+			listener.onServiceAvailable(foundService);
 		}
-		/* return synchronously obtained instance */
-		return foundService;
 	}
 
 	/*******************
@@ -114,17 +114,6 @@ public class PzpService extends Service implements StateListener {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		/* init config */
-		initConfig();
-		/* synchronously set ourselves as the singleton instance, and notify
-		 * and pending listeners */
-		synchronized(PzpService.class) {
-			theService = this;
-			for(PzpServiceListener listener : serviceListeners)
-				listener.onServiceAvailable(theService);
-			serviceListeners = null;
-		}
-
 		/* if the platform is not yet initialised, wait until that
 		 * has completed and retry */
 		if(PlatformInit.onInit(this, new Runnable() {
@@ -140,6 +129,17 @@ public class PzpService extends Service implements StateListener {
 	}
 
 	private void onPlatformInit() {
+		/* init config */
+		initConfig();
+		/* synchronously set ourselves as the singleton instance, and notify
+		 * and pending listeners */
+		synchronized(PzpService.class) {
+			theService = this;
+			for(PzpServiceListener listener : serviceListeners)
+				listener.onServiceAvailable(theService);
+			serviceListeners = null;
+		}
+
 		if("true".equals(getConfig().autoStart))
 			startPzp();
 	}
