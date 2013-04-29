@@ -13,7 +13,7 @@ public class TestWallet extends Activity {
 
     private final static String TAG = TestWallet.class.getName();
     private Activity thi$;
-
+    private boolean haveSentMessage = false;
     /**
      * Called when the activity is first created.
      */
@@ -29,13 +29,14 @@ public class TestWallet extends Activity {
 
         TextView textView = (TextView)findViewById(R.id.fldAmount);
         textView.setText(totalAmount.toString());
-
+        haveSentMessage = false;
         Button cmdOk = (Button)findViewById(R.id.cmdOk);
         cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG,"Sending payed");
                 sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_OK);
+                haveSentMessage = true;
                 thi$.finish();
             }
         });
@@ -46,6 +47,7 @@ public class TestWallet extends Activity {
             public void onClick(View v) {
                 Log.d(TAG,"Sending NOT payed");
                 sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
+                haveSentMessage = true;
                 thi$.finish();
             }
         });
@@ -53,10 +55,11 @@ public class TestWallet extends Activity {
 
     @Override
     public void onPause() {
-        super.onResume();
+        super.onPause();
         Log.d(TAG, "onPause()");
         Log.d(TAG,"Sending NOT payed");
-        sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
+        if (!haveSentMessage)  // If we haven't sent the notification yet
+            sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
         thi$.finish();
     }
 
