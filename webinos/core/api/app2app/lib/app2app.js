@@ -144,7 +144,15 @@
     if (registeredChannels.hasOwnProperty(namespace)) {
       // channel already exists; check if request is from the same session; if yes assume reconnect
       var existingChannel = registeredChannels[namespace];
-      if (sessionId === existingChannel.creator.sessionId && reclaimIfExists) {
+      var mysessionId = sessionId.split("//");
+        mysessionId[mysessionId.length-1] = mysessionId[mysessionId.length-1].split("_")[0];
+        mysessionId = mysessionId.join("//");
+        var mycreatorid = existingChannel.creator.sessionId.split("//");
+        mycreatorid[mycreatorid.length-1] = mycreatorid[mycreatorid.length-1].split("_")[0];
+        mycreatorid = mycreatorid.join("//");
+
+//      if (sessionId === existingChannel.creator.sessionId && reclaimIfExists) {
+      if (mysessionId === mycreatorid && reclaimIfExists) {
         console.log("Reconnecting channel creator to channel with namespace " + namespace);
 
         // refresh client bindings, but keep existing configuration
@@ -250,8 +258,9 @@
       return;
     }
 
+      //ABOT HACK
     // send connect request to channel creator, if callback is provided
-    if (channel.creator.hasRequestCallback) {
+    if (false){//channel.creator.hasRequestCallback) {
       var peerRef = registeredPeers[channel.creator.peerId];
 
       var rpc = this.rpcHandler.createRPC(peerRef, "handleConnectRequest", connectRequest);
