@@ -22,6 +22,7 @@ module.exports = function (app, address, port, state) {
         logger = dependency.global.require(dependency.global.util.location, "lib/logging.js")(__filename) || console,
         pzhadaptor = require('../pzhadaptor.js'),
         passport = require('passport'),
+        util = require("util"),
         helper = require('./helper.js');
 
     app.get('/', ensureAuthenticated, function (req, res) {
@@ -192,6 +193,18 @@ module.exports = function (app, address, port, state) {
         }
         res.render('login', { user:req.user });
     });
+    
+    app.post('/loginlocal', 
+        passport.authenticate('local', { 
+            successRedirect: '/',
+            failureRedirect: '/login',
+            failureFlash: false 
+        }),
+        function (req, res) {
+          res.redirect('/');
+        }
+    );
+    
     // GET /auth/google
     //   Use passport.authenticate() as route middleware to authenticate the
     //   request.  The first step in Google authentication will involve redirecting
