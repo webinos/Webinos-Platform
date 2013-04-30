@@ -50,14 +50,28 @@ WebinosGeolocation.prototype.bindService = function (bindCB, serviceId) {
  * @param positionErrorCB Error callback.
  * @param positionOptions Optional options.
  */
-function getCurrentPosition(positionCB, positionErrorCB, positionOptions) { 
+function getCurrentPosition(positionCB, positionErrorCB, positionOptions) {
 	var rpc = webinos.rpcHandler.createRPC(this, "getCurrentPosition", positionOptions); // RPC service name, function, position options
+	webinos.rpcHandler.registerCallbackObject(rpc);
+	var syncResponse = false;
 	webinos.rpcHandler.executeRPC(rpc, function (position) {
+		syncResponse = true;
 		positionCB(position);
 	},
 	function (error) {
+		syncResponse = true;
 		positionErrorCB(error);
 	});
+	if(syncResponse) {
+		webinos.rpcHandler.unregisterCallbackObject(rpc.id);
+		return;
+	}
+	rpc.onEvent = function (position) {
+		positionCB(position);
+	};
+	rpc.onError = function (err) {
+		positionErrorCB(err);
+	};
 };
 
 var watchIdTable = {};
