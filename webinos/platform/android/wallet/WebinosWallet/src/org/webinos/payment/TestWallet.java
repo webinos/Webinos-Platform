@@ -22,13 +22,19 @@ public class TestWallet extends Activity {
         super.onCreate(savedInstanceState);
         thi$ = this;
         Intent intent = getIntent();
+        String totalAmount = "Nothing to buy";
+        try{
         // TODO: this used to be value but java bridge can't pass the double so this is a hack
-        String totalAmount = intent.getStringExtra(WalletServiceMessageHandler.ACTION_PARAMETER_TOTALPRICE);
-
+            totalAmount = intent.getStringExtra(WalletServiceMessageHandler.ACTION_PARAMETER_TOTALPRICE);
+        }catch (Exception ex){
+            Log.e(TAG,"Error getting Intent data", ex);
+        }
+        if (totalAmount == null)
+            totalAmount = "Nothing to buy";
         setContentView(R.layout.main);
 
         TextView textView = (TextView)findViewById(R.id.fldAmount);
-        textView.setText(totalAmount.toString());
+        textView.setText(totalAmount);
         haveSentMessage = false;
         Button cmdOk = (Button)findViewById(R.id.cmdOk);
         cmdOk.setOnClickListener(new View.OnClickListener() {
@@ -57,9 +63,10 @@ public class TestWallet extends Activity {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause()");
-        Log.d(TAG,"Sending NOT payed");
-        if (!haveSentMessage)  // If we haven't sent the notification yet
+        if (!haveSentMessage)  {// If we haven't sent the notification yet
+            Log.d(TAG,"Sending NOT payed");
             sendMessage(WalletEngine.RESPONSE_CODE_CHECKOUT_FAIL);
+        }
         thi$.finish();
     }
 
