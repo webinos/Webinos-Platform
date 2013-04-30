@@ -69,11 +69,11 @@ public class DeviceorientationImpl extends DeviceorientationManager implements
 	@Override
 	public synchronized void watchMotion(MotionCB motionCb) {
 		(accelerometerListener = new AccelerometerListener(motionCb)).start();
-		sensorManager.registerListener(accelerometerListener, accelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+		sensorManager.registerListener(accelerometerListener, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
 		if(linearAccelerometerSensor != null)
-			sensorManager.registerListener(accelerometerListener, linearAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			sensorManager.registerListener(accelerometerListener, linearAccelerometerSensor, SensorManager.SENSOR_DELAY_GAME);
 		if(magneticSensor != null)
-			sensorManager.registerListener(accelerometerListener, magneticSensor, SensorManager.SENSOR_DELAY_FASTEST);
+			sensorManager.registerListener(accelerometerListener, magneticSensor, SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	@Override
