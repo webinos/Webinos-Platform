@@ -59,7 +59,6 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	private Set<Request> pendingRequests;
 	private HashMap<String, Watch> watches;
 	private long nextWatchId = 1;
-	private int watchCount;
 	private int highAccuracyCount;
 
 	private LocationManager locationManager;
@@ -67,7 +66,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	private Criteria highAccuracyCriteria;
 	private String currentWatchProvider;
 
-	private static final float minDistanceChange = 1;
+	private static final float minDistanceChange = 0;
 	private static final long minTimeChange = 100;
 	
 	private static final String TAG = "org.webinos.impl.GeolocationImpl";
@@ -133,7 +132,11 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 	@Override
 	public void clearWatch(long id) {
 		Log.v(TAG, "clearWatch(): ent id = " + id);
-		getWatch(id).deschedule();
+		Watch watch = getWatch(id);
+		if(watch != null) {
+			watch.deschedule();
+			removeWatch(watch);
+		}
 	}
 
 	/*****************************
@@ -198,7 +201,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 
 	private synchronized void resetProvider() {
 		Log.v(TAG, "resetProvider(): ent");
-		if(watchCount == 0) {
+		if(watches.size() == 0) {
 			locationManager.removeUpdates(this);
 			currentWatchProvider = null;
 			Log.v(TAG, "resetProvider(): ret (no watches)");
@@ -285,6 +288,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 				errorCallback.handleEvent(error);
 			}
 			inError = true;
+			deschedule();
 		}
 		
 		protected void schedule() {
@@ -309,7 +313,10 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 
 			Location location = locationManager.getLastKnownLocation(provider);
 			if(location != null) {
-				if((location.getTime() - System.currentTimeMillis()) < maximumAge) {
+				long posTime = location.getTime();
+				long currTime = System.currentTimeMillis();
+				long age = currTime - posTime;
+				if(age < maximumAge) {
 					dispatch(toPosition(location));
 					return true;
 				}
@@ -319,7 +326,9 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 
 		@Override
 		public void onLocationChanged(Location location) {
-			if((location.getTime() - System.currentTimeMillis()) < maximumAge) {
+			/* only call the callback if we haven't already
+			 * called the error callback */
+			if(!inError) {
 				dispatch(toPosition(location));
 				deschedule();
 			}
@@ -371,7 +380,14 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 				synchronized(GeolocationImpl.this) {
 					addWatch(this);
 					if(!tryLastKnownPosition(currentWatchProvider)) {
+						/* last known position didn't match the criteria;
+						 * but we can't just rely on getLocationUpdates() because
+						 * those updates are unlikely to fire, since the position
+						 * won't be that much different from a (stale) last known
+						 * position. So here we request a single update to get
+						 * the first result */
 						schedule();
+						locationManager.requestSingleUpdate(currentWatchProvider, this, androidContext.getMainLooper());
 					}
 				}
 			}
@@ -386,13 +402,12 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 
 		protected void deschedule() {
 			stopTimer();
-			removeWatch(this);
 		}
 	}
 
 	private synchronized void addWatch(Watch watch) {
 		watches.put(watch.key, watch);
-		boolean statusChange = (watchCount++ == 0);
+		boolean statusChange = (watches.size() == 1);
 		if(watch.enableHighAccuracy) {
 			statusChange |= (highAccuracyCount++ == 0);
 		}
@@ -401,7 +416,7 @@ public class GeolocationImpl extends GeolocationManager implements IModule, Loca
 
 	private synchronized void removeWatch(Watch watch) {
 		watches.remove(watch.key);
-		boolean statusChange = (--watchCount == 0);
+		boolean statusChange = (watches.size() == 0);
 		if(watch.enableHighAccuracy) {
 			statusChange |= (--highAccuracyCount == 0);
 		}
