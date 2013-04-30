@@ -54,12 +54,7 @@ public class ConfigActivity extends Activity implements PzpServiceListener, PzpS
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pzp);
 		uiThread = viewHandler.getLooper().getThread().getId();
-		pzpService = PzpService.getService(this, this);
-		if(pzpService != null) {
-			Log.v(TAG, "onCreate(): service already running");
-			initUI();
-			return;
-		}
+		PzpService.getService(this, this);
 	}
 
 	@Override

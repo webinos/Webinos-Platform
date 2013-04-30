@@ -22,12 +22,17 @@ package org.webinos.app.wrt.mgr;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.meshpoint.anode.AndroidContext;
 import org.meshpoint.anode.module.IModule;
 import org.meshpoint.anode.module.IModuleContext;
+import org.webinos.app.wrt.mgr.WidgetManagerService.WidgetManagerServiceListener;
+
+import android.content.Context;
 
 public class WidgetManagerImpl extends WidgetManager implements IModule {
 	
 	private WidgetProcessor processor;
+	private Context androidContext;
 	
 	/*****************************
 	 * WidgetManager change events
@@ -64,9 +69,14 @@ public class WidgetManagerImpl extends WidgetManager implements IModule {
 	 *****************************/
 
 	@Override
-	public void setWidgetProcessor(WidgetProcessor processor) {
+	public void setWidgetProcessor(final WidgetProcessor processor) {
 		this.processor = processor;
-		WidgetManagerService.onStarted(this);
+		if(true)
+		WidgetManagerService.getService(androidContext, new WidgetManagerServiceListener() {
+			@Override
+			public void onServiceAvailable(WidgetManagerService service) {
+				service.setWidgetManager(WidgetManagerImpl.this);
+			}});
 	}
 
 	/*****************************
@@ -74,6 +84,7 @@ public class WidgetManagerImpl extends WidgetManager implements IModule {
 	 *****************************/
 	@Override
 	public Object startModule(IModuleContext ctx) {
+		androidContext = ((AndroidContext)ctx).getAndroidContext();
 		return this;
 	}
 
