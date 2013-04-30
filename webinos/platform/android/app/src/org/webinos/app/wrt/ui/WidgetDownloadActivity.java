@@ -27,7 +27,7 @@ import java.net.URISyntaxException;
 import org.webinos.app.R;
 import org.webinos.app.wrt.mgr.WidgetManagerImpl;
 import org.webinos.app.wrt.mgr.WidgetManagerService;
-import org.webinos.app.wrt.mgr.WidgetManagerService.LaunchListener;
+import org.webinos.app.wrt.mgr.WidgetManagerService.WidgetManagerLaunchListener;
 import org.webinos.util.ModuleUtils;
 
 import android.app.Activity;
@@ -88,7 +88,7 @@ public class WidgetDownloadActivity extends Activity {
 		final Intent installIntent = new Intent();
 		installIntent.setClass(this, WidgetInstallActivity.class);
 		installIntent.putExtra("path", new String[]{path});
-		WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance(this, new LaunchListener() {
+		WidgetManagerImpl widgetMgr = WidgetManagerService.getWidgetManagerInstance(this, new WidgetManagerLaunchListener() {
 			@Override
 			public void onLaunch(WidgetManagerImpl mgr) {
 				startActivityForResult(installIntent, 0);

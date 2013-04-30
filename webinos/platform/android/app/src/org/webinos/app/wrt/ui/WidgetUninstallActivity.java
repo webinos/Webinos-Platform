@@ -34,7 +34,7 @@ public class WidgetUninstallActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance();
+		final WidgetManagerImpl widgetMgr = WidgetManagerService.getWidgetManagerInstance();
 		if(widgetMgr == null)
 			throw new RuntimeException("WidgetUninstallActivity.onCreate(): unable to get WidgetManager");
 

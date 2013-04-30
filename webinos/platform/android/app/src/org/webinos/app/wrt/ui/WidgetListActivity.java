@@ -34,8 +34,10 @@ import org.webinos.app.wrt.mgr.WidgetManagerService;
 import org.webinos.util.AssetUtils;
 import org.webinos.util.ModuleUtils;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -55,7 +57,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class WidgetListActivity extends ListActivity implements WidgetManagerService.LaunchListener, WidgetManagerImpl.EventListener {
+public class WidgetListActivity extends ListActivity implements WidgetManagerService.WidgetManagerLaunchListener, WidgetManagerImpl.EventListener {
 	private static final String TAG = "ListActivity";
 	private static final String STORES_FILE = "config/stores.json";
 	static final String ACTION_START = "org.webinos.wrt.START";
@@ -79,6 +81,8 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 	private Handler asyncRefreshHandler;
 	private String[] ids;
 	private Store[] stores;
+	private ProgressDialog progressDialog;
+	private boolean blocked;
 
 	@Override
 	public void onCreate(Bundle bundle) {
@@ -92,7 +96,7 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 				initList();
 			}
 		};
-		mgr = WidgetManagerService.getInstance(this, this);
+		mgr = WidgetManagerService.getWidgetManagerInstance(this, this);
 		if(mgr != null) {
 			mgr.addEventListener(this);
 			initList();
@@ -105,6 +109,25 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 				stores = getStores();
 				return null;
 			}}).execute();
+
+		synchronized(this) {
+			if(mgr == null) {
+				blocked = true;
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						/* put up progress dialog until the service is available */
+						Activity context = WidgetListActivity.this;
+						progressDialog = new ProgressDialog(context);
+						progressDialog.setCancelable(true);
+						progressDialog.setMessage(context.getString(R.string.initialising_runtime));
+						progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+						progressDialog.setIndeterminate(true);
+						progressDialog.show();
+					}
+				});
+			}
+		}
 	}
 
 	@Override
@@ -199,7 +222,19 @@ public class WidgetListActivity extends ListActivity implements WidgetManagerSer
 	}
 
 	public void onLaunch(final WidgetManagerImpl mgr) {
-		this.mgr = mgr;
+		synchronized(this) {
+			if(blocked)
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if(progressDialog != null) {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+					}
+				});
+			this.mgr = mgr;
+		}
 		mgr.addEventListener(this);
 		asyncRefreshHandler.sendEmptyMessage(0);
 	}

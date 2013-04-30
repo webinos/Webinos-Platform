@@ -35,7 +35,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 
-public class WidgetInstallActivity extends Activity implements WidgetManagerService.LaunchListener {
+public class WidgetInstallActivity extends Activity implements WidgetManagerService.WidgetManagerLaunchListener {
 	
 	private static final int INSTALL_PROGRESS_DIALOG = 1;
 	private static final String TAG = "org.webinos.app.wrt.ui.WidgetInstallActivity";
@@ -45,7 +45,7 @@ public class WidgetInstallActivity extends Activity implements WidgetManagerServ
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		final WidgetManagerImpl widgetMgr = WidgetManagerService.getInstance(this, this);
+		final WidgetManagerImpl widgetMgr = WidgetManagerService.getWidgetManagerInstance(this, this);
 		if(widgetMgr != null)
 			onWidgetManagerAvailable(widgetMgr);
 	}
