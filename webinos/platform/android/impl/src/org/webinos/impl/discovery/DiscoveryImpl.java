@@ -25,13 +25,12 @@ import android.util.Log;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.MessageQueue;
 
 import org.meshpoint.anode.AndroidContext;
-import org.meshpoint.anode.idl.Dictionary;
 import org.meshpoint.anode.module.IModule;
 import org.meshpoint.anode.module.IModuleContext;
 
-import org.webinos.api.DeviceAPIError;
 import org.webinos.api.PendingOperation;
 import org.webinos.api.discovery.DiscoveryManager;
 import org.webinos.api.discovery.Filter;
@@ -39,7 +38,6 @@ import org.webinos.api.discovery.FindCallback;
 import org.webinos.api.discovery.Options;
 import org.webinos.api.discovery.Service;
 import org.webinos.api.discovery.ServiceType;
-import org.webinos.api.discovery.DiscoveryError;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -81,12 +79,30 @@ public class DiscoveryImpl extends DiscoveryManager implements IModule {
 			return null;
 		}
 			
-		DiscoveryRunnable bluetoothFindService = new BluetoothFindService(serviceType, findCallback, options, filter);
-		Thread t = new Thread(bluetoothFindService);
-		t.start();
-		
-		Log.v(TAG, "findServices - thread started with id "+(int)t.getId());
-		return new DiscoveryPendingOperation(t, bluetoothFindService);
+		//Check on Bluetooth availability
+		mBluetoothAdapter = getDefaultBluetoothAdapter();
+	        
+        if (mBluetoothAdapter == null) {
+            if(D) Log.e(TAG, "Bluetooth is not available");
+            return null;
+        }
+        else{
+            if (!mBluetoothAdapter.isEnabled()){ 
+                if(D) Log.d(TAG, "Bluetooth is not enabled");
+                return null;
+            }
+            else
+            {
+                Log.d(TAG, "Found Bluetooth adapter");
+                //Start FindService
+                DiscoveryRunnable bluetoothFindService = new BluetoothFindService(serviceType, findCallback, options, filter);
+                Thread t = new Thread(bluetoothFindService);
+                t.start();
+                
+                Log.v(TAG, "findServices - thread started with id "+(int)t.getId());
+                return new DiscoveryPendingOperation(t, bluetoothFindService);
+            }
+        }	
 	}
 	
 	public void advertServices(String serviceType){
@@ -112,25 +128,7 @@ public class DiscoveryImpl extends DiscoveryManager implements IModule {
 
 		if(D) Log.v(TAG, "DiscoveryImpl: startModule");
 		androidContext = ((AndroidContext)ctx).getAndroidContext();
-		
-		mBluetoothAdapter = getDefaultBluetoothAdapter();
-		
-		if (mBluetoothAdapter == null) {
-			if(D) Log.e(TAG, "Bluetooth is not available");
-			return null;
-		}
-        else{
-        	if (!mBluetoothAdapter.isEnabled()){ 
-        		if(D) Log.d(TAG, "Bluetooth is not enabled");
-        		// TODO start UI activity to enable Bluetooth
-        		return null;
-        	}
-        	else
-        	{
-        		Log.d(TAG, "Found Bluetooth adapter");
-        		return this;
-        	}
-        } 
+		return this;
 	}
 	
 	@Override
@@ -144,47 +142,52 @@ public class DiscoveryImpl extends DiscoveryManager implements IModule {
 	/*****************************
 	 * Helpers
 	 *****************************/
-	  private static BluetoothAdapter getDefaultBluetoothAdapter() {
-		    // Check if the calling thread is the main application thread,
-		    // if it is, do it directly.
-		    if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
-		    	Log.v(TAG, "main thread - get bluetooth");
-		      return BluetoothAdapter.getDefaultAdapter();
-		    }
-		    
-		    // If the calling thread, isn't the main application thread,
-		    // then get the main application thread to return the default adapter.
-		    final ArrayList<BluetoothAdapter> adapters = new ArrayList<BluetoothAdapter>(1);
-		    final Object mutex = new Object();
-		    
-		    Handler handler = new Handler(Looper.getMainLooper());
-		    handler.post(new Runnable() {
-		      @Override
-		      public void run() {
-		        adapters.add(BluetoothAdapter.getDefaultAdapter());
-		        synchronized (mutex) {
-		          mutex.notify();
-		        }
-		      }
-		    });
-		    
-		    while (adapters.isEmpty()) {
-		    	  Log.d(TAG, "wait for adapter");
-			        
-		      synchronized (mutex) {
-		        try {
-		          mutex.wait(1000L);
-		        } catch (InterruptedException e) {
-		          Log.e(TAG, "Interrupted while waiting for default bluetooth adapter", e);
-		        }
-		      }
-		    }
-		    
-		    if (adapters.get(0) == null) {
-		    	 Log.e(TAG, "No bluetooth adapter found!");
-		    }
-		    return adapters.get(0);
-		  }
+    private static BluetoothAdapter getDefaultBluetoothAdapter() {
+        // Check if the calling thread is the main application thread,
+        // if it is, do it directly 
+        if (Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
+            Log.v(TAG, "main thread - get bluetooth");
+            return BluetoothAdapter.getDefaultAdapter();
+        }
+        
+        // If the calling thread, isn't the main application thread,
+        // then get the main application thread to return the default adapter.
+        final ArrayList<BluetoothAdapter> adapters = new ArrayList<BluetoothAdapter>(1);
+        final Object mutex = new Object();
+        final Handler handler = new Handler(Looper.getMainLooper());
+        
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Looper.myQueue().addIdleHandler(new MessageQueue.IdleHandler() {
+                    public boolean queueIdle() {
+                        adapters.add(BluetoothAdapter.getDefaultAdapter());
+                        synchronized (mutex) {
+                            mutex.notify();
+                        }
+                        return false;
+                    }
+                });
+            }
+        }); 
+        
+        while (adapters.isEmpty()) {
+            Log.d(TAG, "wait for adapter");
+                
+            synchronized (mutex) {
+                try {
+                    mutex.wait(1000L);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Interrupted while waiting for default bluetooth adapter", e);
+                }
+            }
+        }
+            
+        if (adapters.get(0) == null) {
+             Log.e(TAG, "No bluetooth adapter found!");
+        }
+        return adapters.get(0);
+    }
 	
  	class BluetoothFindService implements DiscoveryRunnable {
 
