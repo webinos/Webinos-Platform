@@ -17,6 +17,12 @@
  ******************************************************************************/
 (function () {
 
+var remove = function(arr, val) {
+    var idx = arr.indexOf(val);
+    if(idx != -1)
+        arr.splice(idx, 1);
+};
+
 var rpcHandler = null;
 
 // device info
@@ -79,11 +85,11 @@ function removeEventListener(params, successCB, errorCB, objectRef) {
     switch (params[1]) {
         case "devicemotion":
             if (listeningToDeviceMotion) {
-                var n = objectRefs["devicemotion"].length;
-                for (var i = 0; i < n; i++) {
-                    if (objectRefs["devicemotion"][i] === params[0])
-                        objectRefs["devicemotion"].splice(i, 1);
-                }
+				var idx = objectRefs["devicemotion"].length;
+				while(idx-- > 0) {
+					if(objectRefs["devicemotion"][idx].rpcId == params[0])
+						objectRefs["devicemotion"].splice(idx, 1);
+				}
                 if (objectRefs["devicemotion"].length === 0) {
                     orientation.unwatchMotion();
                     listeningToDeviceMotion = false;
@@ -92,11 +98,11 @@ function removeEventListener(params, successCB, errorCB, objectRef) {
             break;
         case "deviceorientation":
             if (listeningToDeviceOrientation) {
-                var n = objectRefs["deviceorientation"].length;
-                for (var i = 0; i < n; i++) {
-                    if (objectRefs["deviceorientation"][i] === params[0])
-                        objectRefs["deviceorientation"].splice(i, 1);
-                }
+				var idx = objectRefs["deviceorientation"].length;
+				while(idx-- > 0) {
+					if(objectRefs["deviceorientation"][idx].rpcId == params[0])
+						objectRefs["deviceorientation"].splice(idx, 1);
+				}
                 if (objectRefs["deviceorientation"].length === 0) {
                     orientation.unwatchOrientation();
                     listeningToDeviceOrientation = false;
