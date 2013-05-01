@@ -30,12 +30,34 @@ try {
   console.log("error loading native android module: " + e);
 }
 
-function getCurrentPosition (params, successCB, errorCB){
+function getCurrentPosition (params, successCB, errorCB, objectRef){
   if(!androidImpl) {
     errorCB(new Error('Android geolocation service not available'));
     return;
   }
-  androidImpl.getCurrentPosition(successCB, errorCB, params);
+  var inCall;
+  var implSuccess = function(position) {
+  	if(inCall) {
+  		successCB(position);
+  		return;
+  	}
+  	/* it will complete asynchronously */
+	var rpc = rpcHandler.createRPC(objectRef, 'onEvent', position);
+	rpcHandler.executeRPC(rpc);
+  };
+  var implErr = function(err) {
+
+  	if(inCall) {
+  		errorCB(err);
+  		return;
+  	}
+  	/* it will complete asynchronously */
+	var rpc = rpcHandler.createRPC(objectRef, 'onError', err);
+	rpcHandler.executeRPC(rpc);
+  };
+  inCall = true;
+  androidImpl.getCurrentPosition(implSuccess, implErr, params);
+  inCall = false;
 }
 
 function watchPosition (args, successCB, errorCB, objectRef) {
