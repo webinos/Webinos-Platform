@@ -180,7 +180,7 @@ var Pzp = function () {
                     options = {
                         key : value,
                         cert: self.config.cert.internal.conn.cert,
-                        crl : crlList,
+                       // crl : crlList,
                         ca  : caList,
                         servername: self.config.metaData.pzhId,
                         rejectUnauthorized: true,
