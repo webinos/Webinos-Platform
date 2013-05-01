@@ -186,7 +186,12 @@ public class PzpService extends Service implements StateListener {
 		}
 
 		String getCmd() {
-			return Config.getInstance().getProperty("pzp.cmd");
+            try{
+			    return Config.getInstance().getProperty("pzp.cmd");
+            }catch (Exception ex){
+                Log.e(TAG, "FAILED TO READ CONFIG CMD",ex);
+                return "data/data/org.webinos.app/node_modules/webinos/wp4/webinos_pzp.js";
+            }
 		}
 	}
 
@@ -198,7 +203,12 @@ public class PzpService extends Service implements StateListener {
 		/* set defaults if not already set */
 		Config config = Config.getInstance();
 		if(configParams.autoStart == null)
-			configParams.autoStart = config.getProperty("pzp.autoStart");
+            if (config!=null)
+			    configParams.autoStart = config.getProperty("pzp.autoStart");
+            else{
+                configParams.autoStart = "false";
+                Log.e(TAG, "FAILED TO READ CONFIG autoStart");
+            }
 	}
 
 	/*******************

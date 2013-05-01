@@ -197,9 +197,9 @@ if (typeof webinos.file === "undefined") webinos.file = {};
           }
         });
 
-        successCallback(next());
+        successCallback(self.entries );
       }, errorCallback);
-    } else webinos.util.async(successCallback)(next());
+    } else webinos.util.async(successCallback)(self.entries);
   };
 
   webinos.util.inherits(FileEntry, Entry);

@@ -56,6 +56,9 @@ exports.getContentType = function (uri) {
   case ".wav":
     contentType = "video/x-ms-wmv";
     break;
+  case ".otf":
+    contentType = "font/opentype";
+    break;
   }
   return {"Content-Type": contentType};
 };

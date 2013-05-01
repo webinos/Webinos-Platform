@@ -75,7 +75,9 @@ var links = {}
 var app = express()
 app.get("/media/:ref", function (request, response) {
   if (links[request.params.ref]) {
-    response.sendfile(links[request.params.ref])
+    response.sendfile(links[request.params.ref], function(err){
+        console.log(JSON.stringify(err,null," "));
+    })
   } else {
     response.send(404)
   }
@@ -87,7 +89,7 @@ LocalFileSystem.hostname = null
 LocalFileSystem.init = function (port, hostname) {
   LocalFileSystem.port = port
   LocalFileSystem.hostname = hostname
-  app.listen(port, hostname)
+  app.listen(port, "0.0.0.0")
 }
 
 LocalFileSystem.prototype.type = "local"

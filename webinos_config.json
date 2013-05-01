@@ -71,6 +71,10 @@
       "params": {}
     },
     {
+      "name": "payment2",
+      "params": {}
+    },
+    {
       "name": "tv",
       "params": {}
     },

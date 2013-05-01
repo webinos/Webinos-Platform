@@ -52,6 +52,7 @@
     if (typeof WebNotificationModule !== 'undefined') typeMap['http://webinos.org/api/notifications'] = WebNotificationModule;
     if (typeof WebinosDeviceOrientation !== 'undefined') typeMap['http://webinos.org/api/deviceorientation'] = WebinosDeviceOrientation;
     if (typeof PaymentModule !== 'undefined') typeMap['http://webinos.org/api/payment'] = PaymentModule;
+    if (typeof Payment2Module !== 'undefined') typeMap['http://webinos.org/api/payment2'] = Payment2Module;
     if (typeof Sensor !== 'undefined') typeMap['http://webinos.org/api/sensors'] = Sensor;
     if (typeof TestModule !== 'undefined') typeMap['http://webinos.org/api/test'] = TestModule;
     if (typeof TVManager !== 'undefined') typeMap['http://webinos.org/api/tv'] = TVManager;

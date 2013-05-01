@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/background" >
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:text="@string/PleasePay"
+                android:textColor="#ffffff"
+                tools:context=".MainActivity" />
+        <TextView
+                android:id="@+id/fldAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="20dp"
+                android:paddingTop="3dp"
+                android:text="Waiting transaction"
+                android:textColor="#ffffff"
+                tools:context=".MainActivity" />
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:orientation="horizontal" >
+
+            <Button
+                    android:id="@+id/cmdOk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/button"
+                    android:text="PAY"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="40dp"
+                    />
+
+            <Button
+                    android:id="@+id/cmdCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/button2"
+                    android:text="DENY"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:textSize="40dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

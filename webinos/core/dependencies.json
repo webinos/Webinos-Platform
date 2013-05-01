@@ -80,6 +80,10 @@
       "name"    :"Payment",
       "location":"api/payment/"
     },
+    "payment2"         :{
+      "name"    :"Payment2",
+      "location":"api/payment2/"
+    },
     "discovery"        :{
       "name"    :"Discovery",
       "location":"api/discovery/"

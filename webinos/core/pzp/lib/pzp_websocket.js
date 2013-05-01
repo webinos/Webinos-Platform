@@ -771,7 +771,7 @@ var PzpWSS = function (parent) {
                     connectedWebApp[address].socket.pause ();
                     connectedWebApp[address].sendUTF(jsonString);
                 } catch (err) {
-                    self.pzp_state.logger.error ("exception in sending message to pzp - " + err);
+                    logger.error ("exception in sending message to pzp - " + err);
                 } finally {
                     logger.log ('send to web app - ' + address + ' message ' + jsonString);
                     connectedWebApp[address].socket.resume ();

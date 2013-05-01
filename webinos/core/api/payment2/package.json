@@ -1,0 +1,25 @@
+{ "name": "payment"
+, "publishConfig": { "tag": "alpha" }
+, "description": "Payment2 API"
+, "keywords": [ "webinos", "payment2", "API"]
+, "version": "0.0.1"
+, "homepage": "http://webinos.org/"
+, "author": "Christian Fuhrhop <christian.fuhrhop@fokus.fraunhofer.de>"
+, "repository":
+  { "type": "git"
+  , "url": "http://dev.webinos.org/git/wp4.git"
+  }
+, "bugs":
+  { "email": "webinos-wp4-ml@fokus.fraunhofer.de"
+  , "url": ""
+  }
+, "directories": { "lib": "./lib"
+                 }
+, "main": "./lib/rpc_payment2.js"
+, "dependencies":
+  {
+  }
+, "bundleDependencies":
+  [
+  ]
+}

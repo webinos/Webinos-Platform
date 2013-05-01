@@ -32,24 +32,50 @@
 		<replaceregexp file="${basedir}/webinos_config.json" match='"devicetype": "(.*)"' replace='"devicetype": "${devicetype}"' />
 		<antcall target="debug"/>
 		<move file="${basedir}/webinos/platform/android/installer/bin/WebinosInstaller-debug.apk" tofile="${basedir}/webinos/platform/android/installer/WebinosInstaller-${devicetype}-debug.apk"/>
-		<antcall target="release"/>
+		<!--<antcall target="release"/>
 		<move file="${basedir}/webinos/platform/android/installer/bin/WebinosInstaller-release-unsigned.apk" tofile="${basedir}/webinos/platform/android/installer/WebinosInstaller-${devicetype}-release-unsigned.apk"/>
+		-->
 	</target>
 	
-	<target name="build-all">
+	<target name="build-tv">
+		<!-- Copy config -->
+		<copy file="${basedir}/webinos_config.TV.json" overwrite="true" tofile="${basedir}/webinos_config.json"/>
+	
 		<!-- Add file API parameters -->
 		<replaceregexp file="${basedir}/webinos_config.json" flags="m" byline="false" match='"name":\s*"file",[^"]*"params":[^{]*\{\s*\}' 
 			replace='"name": "file",${line.separator}      "params":{${line.separator}          "local" : { "server" : { "port" : 9999, "hostname" : "localhost"},"shares" :[ { "name" : "SD-CARD", "path" : "/sdcard"}]}${line.separator}      }' />
-		<!-- Generate 3 apks for the 3 supported android device types -->
-		<antcall target="build-devicetype">
-			<param name="devicetype" value="smartphone"/>
-		</antcall>
+		
 		<antcall target="build-devicetype">
 			<param name="devicetype" value="tv"/>
 		</antcall>
+		
+		<!-- Restore config -->
+		<copy file="${basedir}/webinos_config.Laptop.json" overwrite="true" tofile="${basedir}/webinos_config.json"/>
+	</target>
+	
+	<target name="build-tablet">
+		<!-- Copy config -->
+		<copy file="${basedir}/webinos_config.WALLET.json" overwrite="true" tofile="${basedir}/webinos_config.json"/>
+	
+		<!-- Add file API parameters -->
+		<replaceregexp file="${basedir}/webinos_config.json" flags="m" byline="false" match='"name":\s*"file",[^"]*"params":[^{]*\{\s*\}' 
+			replace='"name": "file",${line.separator}      "params":{${line.separator}          "local" : { "server" : { "port" : 9999, "hostname" : "localhost"},"shares" :[ { "name" : "SD-CARD", "path" : "/sdcard"}]}${line.separator}      }' />
+		
 		<antcall target="build-devicetype">
 			<param name="devicetype" value="tablet"/>
 		</antcall>
+		
+		<!-- Restore config -->
+		<copy file="${basedir}/webinos_config.Laptop.json" overwrite="true" tofile="${basedir}/webinos_config.json"/>
+	</target>
+	
+	<target name="build-all">
+
+		<antcall target="clean"/>
+		<antcall target="build-tv"/>
+		<antcall target="clean"/>
+		<antcall target="build-tablet"/>
+
 	</target>
 	
 	<target name="gen-webinos">

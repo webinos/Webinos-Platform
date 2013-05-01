@@ -1,0 +1,163 @@
+<html>
+<head>
+        <title>webinos rpc</title>
+        <script type="text/javascript" src="/webinos.js"></script>
+        <script src="/testbed/jquery-1.8.2.min.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+   /*******************************************************************************
+    *  Code contributed to the webinos project
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    *
+    * Copyright 2012 Christian Fuhrhop, Fraunhofer FOKUS
+    * 
+    ******************************************************************************/
+
+        function logObj(obj, name){
+                for (var myKey in obj){
+                        console.log(name + "["+myKey +"] = "+obj[myKey]);
+                        if (typeof obj[myKey] == 'object') logObj(obj[myKey], name + "." + myKey);
+                }
+        }
+        
+            $(document).ready(function() {
+                function fillPZAddrs(data) {
+                    var pzpId = data.from;
+                    var pzhId, connectedPzp, connectedPzh;
+                    //If there is a pzh available
+                    if(typeof webinos.session.getPZHId()!="undefined") {
+                        pzhId = webinos.session.getPZHId();
+                       connectedPzp = data.payload.message.connectedPzp;
+                       connectedPzh = data.payload.message.connectedPzh;
+                    }
+                        
+                    if(document.getElementById('pzh_pzp_list'))
+                        document.getElementById('pzh_pzp_list').innerHTML="";
+            
+                    $("<optgroup label = 'PZP' id ='pzp_list' >").appendTo("#pzh_pzp_list");
+                    var i;
+                    if(typeof connectedPzp !== "undefined") {
+                                for(i =0; i < connectedPzp.length; i++) {
+                                    $("<option value=\"" + connectedPzp[i] + "\" >" +connectedPzp[i] + "</option>").appendTo("#pzh_pzp_list");                  
+                                }
+                            }
+                            $("<option value=\""+pzpId+"\" >" + pzpId+ "</option>").appendTo("#pzh_pzp_list");                      
+                    $("</optgroup>").appendTo("#pzh_pzp_list");
+                    $("<optgroup label = 'PZH' id ='pzh_list' >").appendTo("#pzh_pzp_list");
+                    if(typeof connectedPzh !== "undefined") {
+                                for(i =0; i < connectedPzh.length; i++) {
+                                    $("<option value=\"" + connectedPzh[i] + "\" >" +connectedPzh[i] + "</option>").appendTo("#pzh_pzp_list");                  
+                                }
+                            }
+                   $("</optgroup>").appendTo("#pzh_pzp_list");
+                }
+                webinos.session.addListener('registeredBrowser', fillPZAddrs);
+                //TODO: Perhaps we should be reading the info from the already loaded webinos.
+                if(webinos.session.getSessionId()!=null){ //If the webinos has already started, force the registerBrowser event
+                    webinos.session.message_send({type: 'prop', payload: {status:'registerBrowser'}});
+                }
+                
+                function updatePZAddrs(data) {
+                    if(typeof data.payload.message.pzp !== "undefined") {
+                        $("<option value=\"" + data.payload.message.pzp + "\" >" +data.payload.message.pzp + "</option>").appendTo("#pzp_list");
+                    } else {
+                        $("<option value=\"" + data.payload.message.pzh + "\" >" +data.payload.message.pzh + "</option>").appendTo("#pzh_list");
+                    }
+                }
+                webinos.session.addListener('update', updatePZAddrs);
+                
+                function printInfo(data) {
+                    $('#message').append('<li>'+data.payload.message+'</li>');
+                }
+                webinos.session.addListener('info', printInfo);
+                
+                
+                        var payment2Service = null;
+                        displayStatus("Initial");
+                        displayError("*none*");                        
+                        
+                    $('#findService').bind('click', function() {
+                            webinos.session.setServiceLocation($('#pzh_pzp_list').val());
+                            webinos.discovery.findServices(new ServiceType('http://webinos.org/api/payment2'), {onFound: function (service) {
+                                payment2Service = service;   displayStatus("Service found");
+                            }});                           
+                    });
+                                        
+
+                    $('#pay').bind('click', function() {
+   
+                     if (payment2Service == null) { alert("Need to find service first");  }
+                     else {
+                         displayStatus("");
+                         displayError("");
+                      var bill={};//new ShoppingItem(payment2Service);
+                      bill.productID="12345";
+                      bill.description="Test bill for interface check";
+                      bill.currency="EUR";
+                      bill.itemPrice=3.14;
+                      bill.itemCount=1;
+                      bill.itemsPrice=3.14;
+                      
+                                                               
+                          payment2Service.pay(
+                           function (proofOfPurchase) {
+                                displayStatus("Payment: "+proofOfPurchase);                               
+                            },
+                            function (error) {
+                                if(typeof(error)=='object')displayError(error.code+" : "+error.message);
+                                else displayError("Unknown error condition");
+                            },
+                            function (challengetype) {
+                                displayStatus("Challenge: "+challengetype); 
+                            },
+                            null,
+                            bill,
+                            "UniqueCustomerID",
+                            "UniqueSellerID"
+                            );      
+                       }
+                    }); 
+
+                    
+              });      
+                
+                function displayStatus(statusText){
+                 document.getElementById("messages").innerHTML = "Status: "+statusText;
+                }
+                function displayError(errorText){
+                 if(errorText=="*none*")
+                 document.getElementById("errors").innerHTML = "Error: <FONT COLOR=\"#006600\">"+errorText+"</FONT>";
+                 else
+                 document.getElementById("errors").innerHTML = "Error: <FONT COLOR=\"#660000\">"+errorText+"</FONT>";
+                }
+                
+        </script>
+  
+</head>
+<body>
+   
+                        <p>
+                        <div> PZH PZP LIST : <select id="pzh_pzp_list"> <option> </option> </select> <br> </div>
+                        <button id="findService">Find Service</button><br />
+                        <button id="pay">Pay bill</button><br />
+                
+                        </p>
+                </div>
+                <div id="messages"></div>
+                <div id="errors"></div>
+        </div>
+</body>
+</html>
+
+

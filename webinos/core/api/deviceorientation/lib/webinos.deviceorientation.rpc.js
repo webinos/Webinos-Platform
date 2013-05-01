@@ -21,7 +21,11 @@ var RPCWebinosService = require('webinos-jsonrpc2').RPCWebinosService;
 function DeviceOrientationModule(rpcHandler, params) {
     var car, implFile = 'fake';
     var connector = params.connector;
-    if(connector == 'most'){
+    if(process.platform=='android')
+    {
+        implFile = 'android';
+        console.log('connecting to android impl');
+    }else if(connector == 'most'){
         try{
             var vehicleSystem = require('../../vehicle/contrib/vb-con/vc.js');
             vehicleBusAvailable = vehicleSystem.available;
@@ -44,10 +48,7 @@ function DeviceOrientationModule(rpcHandler, params) {
         console.log('connecting to fake data generator');
      }
     
-    if(process.platform=='android')
-	{
-		implFile = 'android';
-	}
+
 
 
 	var implModule = require('./webinos.deviceorientation.' + implFile + '.js');
