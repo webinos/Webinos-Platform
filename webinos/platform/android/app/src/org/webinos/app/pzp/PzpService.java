@@ -91,7 +91,7 @@ public class PzpService extends Service implements StateListener {
 		/* start service if necessary */
 		if(foundService == null) {
 			ctx.startService(new Intent(ctx, PzpService.class));
-		} else {
+		} else if(listener != null){
 			listener.onServiceAvailable(foundService);
 		}
 	}
