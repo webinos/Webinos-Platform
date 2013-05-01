@@ -65,6 +65,10 @@
       "params": {}
     },
     {
+      "name": "tv",
+      "params": {}
+    },
+    {
       "name": "oauth",
       "params": {}
     },
