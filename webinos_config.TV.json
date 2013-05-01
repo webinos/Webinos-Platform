@@ -1,0 +1,105 @@
+{
+  "ports": {
+    "provider": 80,
+    "provider_webServer": 443,
+    "pzp_webSocket": 8080,
+    "pzp_tlsServer": 8040,
+    "pzp_zeroConf": 4321,
+    "iot": 3000
+  },
+  "pzhDefaultServices": [
+    {
+      "name": "test",
+      "params": {}
+    },
+    {
+      "name": "app2app",
+      "params": {
+        "scope": "pzh"
+      }
+    },
+    {
+      "name": "events",
+      "params": {}
+    },
+    {
+      "name": "zonenotification",
+      "params": {}
+    }
+  ],
+  "pzpDefaultServices": [
+    {
+      "name": "test",
+      "params": {
+        "num": "21"
+      }
+    },
+    {
+      "name": "actuator",
+      "params": {}
+    },
+    {
+      "name": "app2app",
+      "params": {
+        "scope": "pzp"
+      }
+    },
+    {
+      "name": "webnotification",
+      "params": {}
+    },
+    {
+      "name": "file",
+      "params": {}
+    },
+    {
+      "name": "applauncher",
+      "params": {}
+    },
+    {
+      "name": "oauth",
+      "params": {}
+    },
+    {
+      "name": "authentication",
+      "params": {}
+    },
+    {
+      "name": "contacts",
+      "params": {}
+    },
+    {
+      "name": "devicestatus",
+      "params": {
+        "devicetype": "laptop"
+      }
+    },
+    {
+      "name": "mediacontent",
+      "params": {}
+    },
+    {
+      "name": "corePZinformation",
+      "params": {}
+    },
+    {
+      "name": "nfc",
+      "params": {}
+    }
+  ],
+  "certConfiguration": {
+    "country": "UK",
+    "state": "MX",
+    "city": "London",
+    "orgname": "Webinos",
+    "orgunit": "WP4",
+    "cn": "",
+    "email": "hello@webinos.org"
+  },
+  "friendlyName": "webinosTV",
+  "webinos_version": {
+    "tag": "v0.8.0",
+    "num_commit": "15",
+    "commit_id": "gba7314e"
+  }
+}
