@@ -127,7 +127,7 @@
     "cn": "",
     "email": "hello@webinos.org"
   },
-  "friendlyName": "Dell",
+  "friendlyName": "",
   "webinos_version": {
     "tag": "v0.8.0",
     "num_commit": "15",

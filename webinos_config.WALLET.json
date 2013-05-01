@@ -104,7 +104,7 @@
     "cn": "",
     "email": "hello@webinos.org"
   },
-  "friendlyName": "Nexus7",
+  "friendlyName": "",
   "webinos_version": {
     "tag": "v0.8.0",
     "num_commit": "15",
