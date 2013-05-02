@@ -1,0 +1,12 @@
+<policy-set combine="first-matching-target" description=" device1">
+
+	<policy combine="first-applicable" description="p1">
+		<target>
+			<subject>
+				<subject-match attr="requestor-id" match="device1"/>
+			</subject>
+		</target>
+		<rule effect="permit"></rule>
+	</policy>
+
+</policy-set>

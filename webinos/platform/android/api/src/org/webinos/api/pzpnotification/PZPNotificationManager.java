@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Copyright 2013 Ziran Sun
+ * Copyright 2013 Ziran Sun Samsung Electronics(UK) Ltd
  *
  ******************************************************************************/
 
@@ -28,5 +28,7 @@ public abstract class PZPNotificationManager extends Base {
     protected PZPNotificationManager() { super(classId); }
 
     public void eventNotify(String status,
-                            PZPNotificationCallback Callback) throws DeviceAPIError {};
+            PZPNotificationCallback Callback) throws DeviceAPIError {};
+    public void eventRegister(PZPonReceiveNotificationCallback Callback) throws DeviceAPIError {};          
+    public void eventUnregister() throws DeviceAPIError {};
 }

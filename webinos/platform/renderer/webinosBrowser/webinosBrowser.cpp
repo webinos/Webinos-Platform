@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <algorithm>
 #include "include/cef_app.h"
 #include "include/cef_browser.h"
 #include "include/cef_command_line.h"
@@ -42,6 +43,9 @@ namespace
 } 
 
 CefRefPtr<CefCommandLine> g_command_line;
+
+base::DictionaryValue* LoadFileAsJSON(CefString path);
+base::DictionaryValue* LoadFileAsJSON(FilePath filePath);
 
 void AppInitCommandLine(int argc, const char* const* argv) 
 {
@@ -213,103 +217,115 @@ void AppGetBrowserSettings(CefBrowserSettings& settings)
   settings.fullscreen_enabled = g_command_line->HasSwitch(webinosRenderer::kFullscreenEnabled);
 }
 
+bool AppParseLaunchFile(FilePath launchFile, std::string& installId, std::string& params)
+{
+  bool ok = false;
+
+  base::DictionaryValue* dv = LoadFileAsJSON(launchFile);
+  if (dv != NULL)
+  {
+    base::Value* dataVal;
+
+    // Read the installId of the widget to be launched.
+    if (dv->Get("installId",&dataVal) && dataVal->IsType(base::Value::TYPE_STRING))
+    {
+      dataVal->GetAsString(&installId);
+      ok = true;
+    }
+    else
+    {
+      LOG(ERROR) << launchFile.value() << " launch file installId data missing";
+    }
+
+    // Read any arguments of the widget to be launched.
+    if (dv->Get("params",&dataVal) && dataVal->IsType(base::Value::TYPE_STRING))
+    {
+      dataVal->GetAsString(&params);
+    }
+
+    delete dv;
+  }
+
+  return ok;
+}
+
 // Read the configuration (port) data from webinos_runtime.json
 //
 std::string AppGetWebinosWRTConfig(int* pzpPort, int* webPort)
 {
-  std::string pzpPath;
-
-  CefString wrtConfigFilePath(WRT_CONFIG_FILE);
-
-  FilePath wrtConfig;
-#if defined (OS_WIN)
-  PathService::Get(base::DIR_APP_DATA,&wrtConfig);
-  wrtConfig = wrtConfig.Append(wrtConfigFilePath.ToWString());
-#else
-  PathService::Get(base::DIR_HOME,&wrtConfig);
-  wrtConfig = wrtConfig.Append(wrtConfigFilePath);
-#endif
-
   if (pzpPort != NULL)
     *pzpPort = 8081;
   if (webPort != NULL)
     *webPort = 53510;
 
-  // Get the size of the config file.
-  int64 runtimeConfigDataSize;
-  if (file_util::GetFileSize(wrtConfig, &runtimeConfigDataSize))
+  std::string pzpPath;
+
+  CefString wrtConfigFilePath(WRT_CONFIG_FILE);
+
+  base::DictionaryValue* dv = LoadFileAsJSON(wrtConfigFilePath);
+
+  if (dv != NULL)
   {
-    // Allocate storage and read config data.
-    char* runtimeConfigData = new char[runtimeConfigDataSize+1];
-    file_util::ReadFile(wrtConfig, runtimeConfigData, runtimeConfigDataSize);
-    runtimeConfigData[runtimeConfigDataSize] = 0;
+    base::Value* dataVal;
 
-    // Parse JSON.
-    base::Value* v = base::JSONReader::Read(runtimeConfigData);
-    delete[] runtimeConfigData;
-
-    if (v->IsType(base::Value::TYPE_DICTIONARY))
+    // Read the port the widget server is running on.
+    if (webPort != NULL)
     {
-      base::DictionaryValue* dv = static_cast<base::DictionaryValue*>(v);
-      base::Value* dataVal;
-
-      // Read the port the widget server is running on.
-      if (webPort != NULL)
-      {
-        if (dv->Get("runtimeWebServerPort",&dataVal))
-        {
-          if (dataVal->IsType(base::Value::TYPE_STRING))
-        {
-          std::string sPort;
-            dataVal->GetAsString(&sPort);
-          *webPort = atoi(sPort.c_str());
-        }
-        else
-            dataVal->GetAsInteger(webPort);
-        }
-        else
-        {
-          LOG(ERROR) << "webinos_runtime.json runtimeWebServerPort data missing";
-        }
-      }
-
-      // Read the port the pzp socket is listening on.
-      if (pzpPort != NULL)
-      {
-        if (dv->Get("pzpWebSocketPort",&dataVal))
-        {
-          if (dataVal->IsType(base::Value::TYPE_STRING))
-        {
-          std::string sPort;
-            dataVal->GetAsString(&sPort);
-          *pzpPort = atoi(sPort.c_str());
-        }
-        else
-            dataVal->GetAsInteger(pzpPort);
-        }
-        else
-        {
-          LOG(ERROR) << "webinos_runtime.json pzpWebSocketPort data missing";
-        }
-      }
-
-      // Read the pzp path.
-      if (dv->Get("pzpPath",&dataVal))
+      if (dv->Get("runtimeWebServerPort",&dataVal))
       {
         if (dataVal->IsType(base::Value::TYPE_STRING))
         {
-          dataVal->GetAsString(&pzpPath);
+          std::string sPort;
+          dataVal->GetAsString(&sPort);
+          *webPort = atoi(sPort.c_str());
         }
         else
-        {
-          LOG(ERROR) << "webinos_runtime.json pzpPath data invalid type";
-        }
+          dataVal->GetAsInteger(webPort);
       }
       else
       {
-        LOG(ERROR) << "webinos_runtime.json pzpPath data missing";
+        LOG(ERROR) << "webinos_runtime.json runtimeWebServerPort data missing";
       }
     }
+
+    // Read the port the pzp socket is listening on.
+    if (pzpPort != NULL)
+    {
+      if (dv->Get("pzpWebSocketPort",&dataVal))
+      { 
+        if (dataVal->IsType(base::Value::TYPE_STRING))
+        {
+          std::string sPort;
+          dataVal->GetAsString(&sPort);
+          *pzpPort = atoi(sPort.c_str());
+        }
+        else
+          dataVal->GetAsInteger(pzpPort);
+      }
+      else
+      {
+        LOG(ERROR) << "webinos_runtime.json pzpWebSocketPort data missing";
+      }
+    }
+
+    // Read the pzp path.
+    if (dv->Get("pzpPath",&dataVal))
+    {
+      if (dataVal->IsType(base::Value::TYPE_STRING))
+      {
+        dataVal->GetAsString(&pzpPath);
+      }
+      else
+      {
+        LOG(ERROR) << "webinos_runtime.json pzpPath data invalid type";
+      }
+    }
+    else
+    {
+      LOG(ERROR) << "webinos_runtime.json pzpPath data missing";
+    }
+
+    delete dv;
   }
   else
   {
@@ -333,18 +349,53 @@ std::string GetWebinosStartParameters(std::string url, bool sideLoading, bool is
   {
     // There is a command line parameter => determine if it is a running widget or a side-load request.
     if (isExplicitWidget)
-      sprintf(startUrl, "http://localhost:%d/widget/%s",wrtServerPort,url.c_str());
+      sprintf(startUrl, "http://localhost:%d/boot/%s",wrtServerPort,url.c_str());
     else
       strcpy(startUrl,url.c_str());
 
-    if (false == cfg.LoadFromURL(startUrl))
+    if (sideLoading || false == cfg.LoadFromURL(startUrl))
     {
         // The start URL is not a valid widget.
         if (sideLoading)
         {
+          LOG(INFO) << "side loading " << url.c_str();
+
           // Side-loading => attempt to install the passed widget file.
-          std::string escaped = net::EscapeQueryParamValue(url,false);
-          sprintf(startUrl,"http://localhost:%d/sideLoad/%s",wrtServerPort,escaped.c_str());
+          // First check for dummy 'launch' widget files (these files are created by the applauncher api
+          // to fool the OS into launching the widget).
+#if defined (OS_WIN)
+          FilePath launchPath(CefString(url).ToWString());
+#else
+          FilePath launchPath(CefString(url).ToString());
+#endif
+          // Get the filename portion of the path.
+          std::string launchFileName = CefString(launchPath.BaseName().value());
+
+          // Check for well-known 'launch' files.
+          const std::string launchPrefix = ".__webinosLaunch.";
+          if (launchFileName.substr(0,launchPrefix.length()) == launchPrefix)
+          {
+            // This is an applauncher api request
+            std::string installId;
+            std::string launchArguments;
+            if (AppParseLaunchFile(launchPath,installId,launchArguments))
+            {
+              LOG(INFO) << "side loading applauncher request " << installId.c_str();
+              sprintf(startUrl,"http://localhost:%d/boot/%s%s",wrtServerPort,installId.c_str(),launchArguments.c_str());
+              cfg.LoadFromURL(startUrl);
+              file_util::Delete(launchPath,false);
+            }
+            else
+            {
+              LOG(ERROR) << "applaunch failed - invalid launch request";
+            }
+          }
+          else 
+          {
+            // This is a normal side-load request - pass it on to the pzp.
+            std::string escaped = net::EscapeQueryParamValue(url,false);
+            sprintf(startUrl,"http://localhost:%d/sideLoad/%s",wrtServerPort,escaped.c_str());
+          }
         } 
         else
         {
@@ -388,4 +439,93 @@ void AppCreateWebinosBrowser(std::string url, bool isWidget, bool sideLoading, C
 
   // Create the platform-specific window.
   AppCreateWindow(clientHandler,sideLoading,closeParent,width,height);
+}
+
+base::DictionaryValue* LoadFileAsJSON(CefString path)
+{
+  FilePath filePath;
+
+#if defined (OS_WIN)
+  PathService::Get(base::DIR_APP_DATA,&filePath);
+  filePath = filePath.Append(path.ToWString());
+#else
+  PathService::Get(base::DIR_HOME,&filePath);
+  filePath = filePath.Append(path);
+#endif
+
+  return LoadFileAsJSON(filePath);
+}
+
+base::DictionaryValue* LoadFileAsJSON(FilePath filePath)
+{
+  base::DictionaryValue* dv = NULL;
+
+  int64 dataSize;
+  if (file_util::GetFileSize(filePath, &dataSize))
+  {
+    // Allocate storage and read config data.
+    char* fileData = new char[dataSize+1];
+    file_util::ReadFile(filePath, fileData, dataSize);
+    fileData[dataSize] = 0;
+
+    // Parse JSON.
+    base::Value* v = base::JSONReader::Read(fileData);
+    delete[] fileData;
+
+    if (v->IsType(base::Value::TYPE_DICTIONARY))
+    {
+      dv = static_cast<base::DictionaryValue*>(v);
+    }
+    else
+    {
+      delete v;
+    }
+  }
+
+  return dv;
+}
+
+bool AppGetWidgetArgs(std::string sessionId, std::string& args)
+{
+  bool ok = false;
+
+#if defined(OS_WIN)
+  CefString sessionFile("webinos/wrt/sessions/" + sessionId + ".json");
+#else
+  CefString sessionFile(".webinos/wrt/sessions/" + sessionId + ".json");
+#endif
+
+  base::DictionaryValue* dv = LoadFileAsJSON(sessionFile);
+
+  if (dv != NULL)
+  {
+    base::Value* dataVal;
+
+    // Read the installId of the widget to be launched.
+    if (dv->Get("params",&dataVal) && dataVal->IsType(base::Value::TYPE_STRING))
+    {
+      dataVal->GetAsString(&args);
+
+      std::string::const_iterator it = args.begin();
+
+      // Remove leading ?
+      if (*it == '?')
+      {
+        args = args.substr(1);
+      }
+
+      // Un-escape URL encoding
+      args = net::UnescapeURLComponent(args,net::UnescapeRule::NORMAL);
+
+      // Replace separators to emulate JSON format.
+      std::replace(args.begin(),args.end(),'&',',');
+      std::replace(args.begin(),args.end(),'=',':');
+
+      ok = true;
+    }
+
+    delete dv;
+  }
+
+  return ok;
 }

@@ -1,0 +1,5 @@
+<policy-set combine="permit-overrides" description="policy allow all">
+	<policy combine="permit-overrides" description="device1">
+		<rule effect="permit"></rule>
+	</policy>
+</policy-set>

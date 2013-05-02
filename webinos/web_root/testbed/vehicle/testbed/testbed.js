@@ -140,6 +140,21 @@ $(document).ready(function () {
     $('#vt_info').append("<p>Range " + data.range + "</p>");
     $('#vt_info').append("<p>Timestamp " + data.timestamp + "</p>");
   }
+
+  //Doors Data//
+  var handleDoorsData = function (data) {
+    postMessage("info", "new Doors Data-Event received.");
+    $('#vt_info').empty();
+    console.log(data);
+    $('#vt_info').append("<p>Driver: " + data.driver + "</p>");
+    $('#vt_info').append("<p>Front Passenger: " + data.frontpassenger + "</p>");
+    $('#vt_info').append("<p>Behind Driver: " + data.behinddriver + "</p>");
+    $('#vt_info').append("<p>Behind Passenger: " + data.behindpassenger + "</p>");
+    $('#vt_info').append("<p>Trunk Deck: " + data.trunkdeck + "</p>");
+  //   $('#vt_info').append("<p>Timestamp: " + data.timestamp + "</p>");
+  }
+  //---Handle Doors Data Ends Here----//
+ 
   var handleNavigation = function (data) {
     postMessage("info", ".");
     $('#vt_info').empty();
@@ -330,6 +345,9 @@ $(document).ready(function () {
       case "tripcomputer":
         return handleTripData;
         break;
+      case "doors":
+        return handleDoorsData;
+        break;
       case "parksensors-front":
         return handleParkSensorsData;
         break;
@@ -400,8 +418,6 @@ $(document).ready(function () {
         return handleEngineLoadData;
         break;
       case "windows":
-        return handleGeneric;
-      case "doors":
         return handleGeneric;
       default:
         return handleShiftData;

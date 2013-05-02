@@ -4,11 +4,12 @@ node_js:
 install: npm install --save-dev
 before_install:
  - sudo apt-get update -qq
- - sudo apt-get install -qq libopenobex1-dev libobexftp0-dev bluetooth libpam0g-dev libcairo2-dev libjpeg8-dev libgif-dev libavahi-compat-libdnssd-dev gnome-keyring libgnome-keyring-dev g++ libssl-dev
+ - sudo apt-get install -qq libopenobex1-dev libobexftp0-dev bluetooth libpam0g-dev libcairo2-dev libjpeg8-dev libgif-dev libavahi-compat-libdnssd-dev gnome-keyring libgnome-keyring-dev g++ libssl-dev ia32-libs
  - npm i -g grunt-cli jasmine-node
  - mkdir ./tmp_node_modules
  - mv ./node_modules/*.js ./tmp_node_modules/
 before_script:
  - mv ./tmp_node_modules/* ./node_modules/
  - rm -rf ./tmp_node_modules/
+ - export RUN_ANDROID_CI="yes"
 after_failure: cat npm-debug.log

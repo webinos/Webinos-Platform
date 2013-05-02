@@ -24,13 +24,17 @@ import org.meshpoint.anode.module.IModuleContext;
 import org.webinos.api.DeviceAPIError;
 import org.webinos.api.pzpnotification.PZPNotificationCallback;
 import org.webinos.api.pzpnotification.PZPNotificationManager;
+import org.webinos.api.pzpnotification.PZPonReceiveNotificationCallback;
 import org.webinos.app.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
 import android.util.Log;
 
 public class PZPNotificationManagerImpl extends PZPNotificationManager implements IModule {
@@ -41,6 +45,7 @@ public class PZPNotificationManagerImpl extends PZPNotificationManager implement
     private static final String TAG = PZPNotificationManagerImpl.class.getSimpleName();
 
 	private static final int PZP_STATUS_NOTIFICATION = 1;
+	private PZPEventReceiver eventReceiver;
 
     @Override
     public void eventNotify(String status,
@@ -74,6 +79,48 @@ public class PZPNotificationManagerImpl extends PZPNotificationManager implement
         } catch (Exception e)
         {
             Log.v(TAG, "display exception "+e.getMessage());
+        }
+    }
+    
+    @Override
+    public void eventRegister(PZPonReceiveNotificationCallback onReceiveCallBack) throws DeviceAPIError {
+        Log.v(TAG, "Register PZP event notification");
+        eventReceiver = new PZPEventReceiver(onReceiveCallBack);
+        androidContext.registerReceiver(eventReceiver, new IntentFilter(notificationResponseAction));
+    }
+    
+    public void eventUnregister() throws DeviceAPIError {
+        Log.v(TAG, "Unregister PZP notification event");
+        if(eventReceiver!=null)
+            androidContext.unregisterReceiver(eventReceiver);
+    }
+    
+    //PZP Event Response receiver
+    class PZPEventReceiver extends BroadcastReceiver {
+        private PZPonReceiveNotificationCallback successCallback;
+        
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            try {
+                Bundle extras = intent.getExtras();
+                if(extras!=null){
+                    String status = extras.getString("status");
+                    if(status!= null)
+                        eventReceived(status);
+                }
+            }
+            catch (Exception e){
+                Log.v(TAG, "PZPEventReceiver - onReceive exception "+e.getMessage());
+            }
+        }
+        
+        private PZPEventReceiver(PZPonReceiveNotificationCallback successCbk) {
+            Log.v(TAG, "PZPEventReceiver constructor - succCbk: "+successCbk+" - thread: "+(int)Thread.currentThread().getId());
+            successCallback = successCbk;
+        }
+        
+        private void eventReceived(String status) {
+            successCallback.onSuccess(status);
         }
     }
 

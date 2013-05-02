@@ -1,0 +1,24 @@
+<policy-set combine="permit-overrides" description="test1">
+	
+	<policy combine="deny-overrides" description="logic test">
+		<target>
+			<subject>
+				<subject-match attr="requestor-id" match="device2"/>
+			</subject>
+		</target>
+		
+		<rule effect="permit">
+			<condition combine="or">
+				<condition combine="and">
+					<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+					<subject-match attr="user-id" match="user2"/>
+				</condition>
+				<condition combine="and">
+					<resource-match attr="api-feature" match="http://webinos.org/api/w3c/geolocation"/>
+					<subject-match attr="user-id" match="user3"/>
+				</condition>
+			</condition>
+		</rule>
+	</policy>
+
+</policy-set>

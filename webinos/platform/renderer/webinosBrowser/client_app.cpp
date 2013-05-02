@@ -143,11 +143,14 @@ void ClientApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
       file_util::ReadFile(bootPath, bootData, bootDataSize);
       bootData[bootDataSize] = 0;
 
-      char widgetInterface[4096] = "";
+      std::string widgetInterface;
 
       webinos::WidgetConfig cfg;
       if (cfg.LoadFromURL(frame->GetURL()))
       {
+        std::string widgetArgs;
+        AppGetWidgetArgs(cfg.GetSessionId(),widgetArgs);
+
         /*
           We need to expose the w3c widget interface (http://www.w3.org/TR/widgets-apis/)
 
@@ -165,44 +168,36 @@ void ClientApp::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFra
               readonly attribute unsigned long width;
           };
         */
+        std::stringstream wifStr(std::stringstream::in | std::stringstream::out);
 
-        char widgetInterfaceTemplate[] = "\
-                                         // Widget interface\r\n\
-                                         window.widget = { \r\n\
-                                         author: \"%s\",\r\n\
-                                         description: \"%s\",\r\n\
-                                         name: \"%s\",\r\n\
-                                         shortName: \"%s\",\r\n\
-                                         version: \"%s\",\r\n\
-                                         id: \"%s\",\r\n\
-                                         authorEmail: \"%s\",\r\n\
-                                         authorHref: \"%s\",\r\n\
-                                         preferences: {},\r\n\
-                                         height: %d,\r\n\
-                                         width: %d,\r\n\
-                                         }; ";
+        wifStr << "\
+                           // Widget interface\r\n\
+                           window.widget = { \r\n\
+                           author: \"" << cfg.author() << "\",\r\n\
+                           description: \"" << cfg.description() << "\",\r\n\
+                           name: \"" << cfg.name() << "\",\r\n\
+                           shortName: \"" << cfg.shortName() << "\",\r\n\
+                           version: \"" << cfg.version() << "\",\r\n\
+                           id: \"" << cfg.id() << "\",\r\n\
+                           authorEmail: \"" << cfg.authorEmail() << "\",\r\n\
+                           authorHref: \"" << cfg.authorHref() << "\",\r\n\
+                           preferences: {},\r\n\
+                           height: " << cfg.height() << ",\r\n\
+                           width: " << cfg.width() << ",\r\n\
+                           args: {" << widgetArgs << "}\r\n\
+                          }; ";
 
-        sprintf(widgetInterface,widgetInterfaceTemplate,
-            cfg.author().c_str(),             // author
-            cfg.description().c_str(),        // description
-            cfg.name().c_str(),               // name
-            cfg.shortName().c_str(),          // short name
-            cfg.version().c_str(),            // version
-            cfg.id().c_str(),                 // id
-            cfg.authorEmail().c_str(),        // author email
-            cfg.authorHref().c_str(),         // author href
-            cfg.height(),                     // height
-            cfg.width()                       // width
-        );
+        widgetInterface = wifStr.str();
+        LOG(INFO) << "widget interface is \r\n" << widgetInterface;
       }
       else
       {
-    	  LOG(INFO) << "OnContextCreated => not a widget";
+    	  LOG(INFO) << "OnContextCreated => not a widget " << frame->GetURL();
       }
 
-      int bootstrapLen = bootDataSize + strlen(widgetInterface) + 100;
+      int bootstrapLen = bootDataSize + widgetInterface.length() + 100;
       char* bootstrap = new char[bootstrapLen];
-      sprintf(bootstrap,bootData,widgetInterface);
+      sprintf(bootstrap,bootData,widgetInterface.c_str());
       delete[] bootData;
       std::string url = frame->GetURL();
       frame->ExecuteJavaScript(bootstrap, url, 0);

@@ -372,9 +372,21 @@ this.findContacts = function(filters, successCB, errorCB)
     else //on Android
     {
         console.log("---FIND: android, local");
-        if(!options)
-            options=new Array();
-        LocalContacts.find(fields, successCB, function(){}, options);
+        //if(!options)
+        var options=new Array();
+        
+        LocalContacts.find(options, function(c_list)
+        {
+            var res = c_list;
+            
+            
+            res = filterContacts(filters[0], res);
+            cb(res)
+            if (res.empty && eb)
+            {
+                throw new ContactError(this.UNKNOWN_ERROR);
+            }
+        }, function(){}, options);
     }
 };
 

@@ -15,6 +15,7 @@ public:
   std::string GetWidgetPath(void) { return m_widgetPath; }
   std::string GetUrlPath(void) { return m_urlPath; }
   std::string GetInstallId(void) { return m_installId; }
+  std::string GetSessionId(void) { return m_sessionId; }
 
   bool isLoaded(void) { return m_loaded; }
   int width(void) const;
@@ -32,6 +33,7 @@ public:
 private:
   bool m_loaded;
   std::string m_installId;
+  std::string m_sessionId;
   std::string m_widgetPath;
   std::string m_urlPath;
 };

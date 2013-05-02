@@ -26,9 +26,20 @@
       this.params = params;
     };
 
-    NfcModule.prototype.init = function (register, unregister) {
-      var service = new NfcService(this.rpcHandler, this.params);
-      register(service);
+    NfcModule.prototype.init = function(register, unregister) {
+
+        if (process.platform == 'android') {
+            var androidNfcModule = require('bridge').load(
+                    'org.webinos.impl.nfc.NfcAnodeModule', this);
+            if (androidNfcModule != null) {
+                var service = new NfcService(this.rpcHandler, this.params,
+                        androidNfcModule);
+                register(service);
+            }
+        } else {
+            var service = new NfcService(this.rpcHandler, this.params, null);
+            register(service);
+        }
     };
     
     var ListenerType = {
@@ -51,7 +62,7 @@
         return ret;
     };
 
-    var NfcService = function(rpcHandler, params) {
+    var NfcService = function(rpcHandler, params, androidNfcModule) {
         // inherit from RPCWebinosService
         this.base = RPCWebinosService;
         this.base({
@@ -67,12 +78,10 @@
         
         this.currentTag = null;
         
+        this.androidNfcModule = androidNfcModule;
+        
         this.moduleListener = new NfcModuleListener(this);
-
-        this.androidNfcModule = null;
         if (process.platform == 'android') {
-            this.androidNfcModule = require('bridge').load(
-                    'org.webinos.impl.nfc.NfcAnodeModule', this);
             this.androidNfcModule.setListener(this.moduleListener);
         }
     };
@@ -144,7 +153,8 @@
             try {
                 this.androidNfcModule.addTextTypeFilter();
             } catch (err) {
-                errorCB(err); 
+                errorCB(err);
+                return;
             }
         }
         this.listeners[this.listenerHandle] = new ListenerWrapper(ListenerType.TEXT, null, new Listener(this.rpcHandler, objectRef));
@@ -157,7 +167,8 @@
             try {
                 this.androidNfcModule.addUriTypeFilter(params[0]);
             } catch (err) {
-                errorCB(err); 
+                errorCB(err);
+                return;
             }
         }
         this.listeners[this.listenerHandle] = new ListenerWrapper(ListenerType.URI, params[0], new Listener(this.rpcHandler, objectRef));

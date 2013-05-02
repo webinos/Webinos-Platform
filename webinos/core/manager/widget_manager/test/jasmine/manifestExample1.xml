@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<widget xmlns="http://www.w3.org/ns/widgets" version="0.2.0">
+   <name>Proximity Reminders</name>
+   <description>
+     Create reminders based on where you are and what time it is.
+   </description>
+   <content src="index.html" />
+   <icon src="remind_me.png" />
+   <author>John Lyle</author>
+
+   <!-- features needed -->
+   <feature name="http://webinos.org/feature/internet" required="true">
+     <!-- should this be http://webinos.org/core/network-access ?-->
+     <param name="csp-img-src" value="http://maps.googleapis.com"/>
+     <param name="csp-script-src" value="http://maps.googleapis.com"/>
+   </feature>
+   <feature name="http://webinos.org/api/notifications" required="false" />
+   <feature name="http://webinos.org/api/file" required="true" />
+   <feature name="http://webinos.org/api/w3c/geolocation" 
+     required="true" />
+
+   <!-- privacy policies -->
+   <DataHandlingPolicy PolicyId="#current">
+     <AuthorizationsSet>
+       <AuthzUseForPurpose>
+         <Purpose>http://www.w3.org/2002/01/P3Pv1/current</Purpose>
+       </AuthzUseForPurpose>
+     </AuthorizationsSet>
+     <ObligationsSet />
+   </DataHandlingPolicy>
+
+   <!-- mapping policies to APIs -->
+   <ProvisionalActions>
+     <ProvisionalAction>
+       <AttributeValue>http://webinos.org/api/w3c/geolocation</AttributeValue>
+       <AttributeValue>#current</AttributeValue>
+       <DeveloperProvidedDescription language="EN">
+         Geolocation is needed to trigger reminders based on your current 
+         location.
+       </DeveloperProvidedDescription>
+     </ProvisionalAction>
+
+     <ProvisionalAction>
+       <AttributeValue>http://webinos.org/api/notifications</AttributeValue>
+       <AttributeValue>#current</AttributeValue>
+       <DeveloperProvidedDescription language="EN">
+         Notifications are used to alert you when a reminder is valid - 
+         e.g., at a specific time or place.
+       </DeveloperProvidedDescription>
+     </ProvisionalAction>
+
+     <ProvisionalAction>
+       <AttributeValue>http://webinos.org/api/file</AttributeValue>
+       <AttributeValue>#current</AttributeValue>
+       <DeveloperProvidedDescription language="EN">
+         Your reminders are stored in files on the file system
+       </DeveloperProvidedDescription>
+     </ProvisionalAction>
+
+     <ProvisionalAction>
+       <AttributeValue>http://webinos.org/feature/internet</AttributeValue>
+       <AttributeValue>#current</AttributeValue>
+       <DeveloperProvidedDescription language="EN">
+         Internet access is used to load Google Maps
+       </DeveloperProvidedDescription>
+     </ProvisionalAction>
+   </ProvisionalActions>
+</widget>
