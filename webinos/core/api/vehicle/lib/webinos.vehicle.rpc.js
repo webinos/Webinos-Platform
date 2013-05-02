@@ -23,7 +23,7 @@
         var car = null;
         var connector = null;
         if (typeof params.connector === 'undefined') {
-            connector = 'fake';
+            connector = 'sim';
         } else {
             connector = params.connector;
         }
