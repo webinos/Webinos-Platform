@@ -92,6 +92,15 @@ $(document).ready(function () {
   }, {
     type: 'engineoil',
     supported: true
+  }, {
+      type: 'rpm',
+      supported: true
+  }, {
+      type: 'vss',
+      supported: true
+  }, {
+      type: 'load_pct',
+      supported: true
   }];
   postMessage('Info', 'Page loaded. Please Initialize');
   $("#vt_pdcLauncher").fancybox({
@@ -172,6 +181,21 @@ $(document).ready(function () {
     $('#vt_info').append("<p>ControlID: " + data.controlId + "</p>");
     $('#vt_info').append("<p>Active: " + data.active + "</p>");
   }
+  var handleRPMData = function (event) {
+    rpm = parseInt(event.rpm);
+    postMessage("info", "new RPM-Event received.");
+    $('#vt_info').html("RPM: <br />" + rpm);
+  };
+  var handleSpeedData = function (event) {
+    speed = parseInt(event.vss);
+    postMessage("info", "new Speed-Event received.");
+    $('#vt_info').html("Speed: <br />" + speed + " km/h");
+  };
+  var handleEngineLoadData = function (event) {
+      engineLoad = parseInt(event.load_pct);
+      postMessage("info", "new EngineLoad-Event received.");
+      $('#vt_info').html("Engine Load: <br />" + engineLoad + " %");
+  };
   var handleStatus = function (e) {
     $('#vt_info').empty();
     $('#vt_info').html(e.controlId + ": <br />" + e.status + "<br />Timestamp: " + e.timestamp);
@@ -365,6 +389,15 @@ $(document).ready(function () {
         break;
       case "engineoil":
         return handleStatus;
+        break;
+      case "rpm":
+        return handleRPMData;
+        break;
+      case "vss":
+        return handleSpeedData;
+        break;
+      case "load_pct":
+        return handleEngineLoadData;
         break;
       case "windows":
         return handleGeneric;

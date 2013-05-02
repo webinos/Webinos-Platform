@@ -166,10 +166,12 @@
                 }
                 this.removeListener('dataReceived', getMessageHandler);
             } else {
-                console.log('Collision with listener and get. Not supported yet.');
-                console.log(type);
-                console.log(data);
-                //Do nothing, let the next thing come in. Will be caught by generalHandler.
+                if(data.value !== "OK") {
+                    console.log('Collision with listener and get. Not supported yet.');
+                    console.log(type);
+                    console.log(data);
+                    //Do nothing, let the next thing come in. Will be caught by generalHandler.
+                }
             }
         };
 
