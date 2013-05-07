@@ -36,9 +36,9 @@
 		}
 	};
 
-	promptManager.prototype.display = function(message, choices ) {
+	promptManager.prototype.display = function(message, choices, timeout) {
 		if(os.platform() === 'linux' || os.platform() === 'darwin' ) {
-			return(this.promptCore.display(message, choices));
+			return(this.promptCore.display(message, choices, timeout));
 		}
 		else if(os.platform() === 'win32') {
 		}

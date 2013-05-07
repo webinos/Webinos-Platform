@@ -37,6 +37,8 @@
 	var policyFile = null;
 	var decisionStorage = null;
 
+        var promptTimeout = 10;
+
 	var policyManager = function(policyFilename) {
 		var self = this;
 		// Load the native module
@@ -104,8 +106,11 @@
 						choices[0] = "Deny always";
 						choices[1] = "Deny this time";
 						choices[2] = "Allow this time";
-						selected = promptMan.display(message, choices);
-						if(selected == 0 || selected == 1)
+						selected = promptMan.display(message, choices, promptTimeout);
+                                                // promptman.display returns following negative values:
+                                                // -1  ==> prompt timeout
+                                                // -2  ==> generic error
+						if(selected < 0 || selected == 0 || selected == 1)
 							res = 1;
 						if(selected == 2)
 							res = 0;
@@ -120,8 +125,8 @@
 						choices[2] = "Deny this time";
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
-						selected = promptMan.display(message, choices);
-						if(selected == 0 || selected == 1 || selected == 2)
+						selected = promptMan.display(message, choices, promptTimeout);
+						if(selected < 0 || selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4)
 							res = 0;
@@ -140,8 +145,8 @@
 						choices[3] = "Allow this time";
 						choices[4] = "Allow for this session";
 						choices[5] = "Allow always";
-						selected = promptMan.display(message, choices);
-						if(selected == 0 || selected == 1 || selected == 2)
+						selected = promptMan.display(message, choices, promptTimeout);
+						if(selected < 0 || selected == 0 || selected == 1 || selected == 2)
 							res = 1;
 						if(selected == 3 || selected == 4 || selected == 5)
 							res = 0;
@@ -151,6 +156,10 @@
 						if(selected == 1 || selected == 4) {
 							decisionStorage.addDecision(request, sessionId, res, 1);
 						}
+					}
+                                        // In case of prompt timeout take needed actions...
+					if (selected == -1) {
+						console.log('Policy Manager - prompt timed out');
 					}
 				}
 			}

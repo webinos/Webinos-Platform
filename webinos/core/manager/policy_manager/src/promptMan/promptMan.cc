@@ -71,7 +71,7 @@ public:
 		PromptManInt* pmtmp = ObjectWrap::Unwrap<PromptManInt>(args.This());
 		pmtmp->m_count++;
 
-		if (args.Length() < 2) {
+		if (args.Length() < 3) {
 			return ThrowException(Exception::TypeError(String::New("Argument(s) missing")));
 		}
 
@@ -83,9 +83,15 @@ public:
 			return ThrowException(Exception::TypeError(String::New("Bad type argument")));
 		}
 
+		if (!args[2]->IsNumber()) {
+			return ThrowException(Exception::TypeError(String::New("Bad type argument")));
+		}
+
 		v8::String::AsciiValue message(args[0]->ToString());
 
 		Handle<Array> choiceArray = Handle<Array>::Cast(args[1]);
+
+		Local<Integer> timeout = args[2]->ToInteger();
 
 		//Prepare Xmessage cmdline
                 std::stringstream cmdstream(std::stringstream::out);
@@ -102,14 +108,28 @@ public:
 			else {
                                 cmdstream << ",";
                         }
-                        cmdstream << "\"" << *choice << "\"" << ":" << i;
+                        cmdstream << "\"" << *choice << "\"" << ":" << (i+2);
                 }
 
+                //cmdstream << " -default \"Deny this time\"" ;
+                cmdstream << " -timeout " << (int)(timeout->Int32Value()) ;
                 cmdstream << " -center \"" << *message << "\"";
 		std::string cmdline = cmdstream.str();
 
 		LOGD("cmdline is %s", cmdline.data());
 		int res=(system(cmdline.data()))>>8;
+                // res == 0 => timeout
+                if (res == 0) {
+                    res = -1;
+                }
+                // res == 1 => error (for example xmessage closed)
+                else if (res == 1) {
+                    res = -2;
+                }
+                // valid answer
+                else {
+                    res = res-2;
+                }
 		LOGD("Answer is %d", res);
 
 
