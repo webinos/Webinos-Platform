@@ -46,12 +46,12 @@ function Config () {
     self.serviceCache = [];
     var existsSync = fs.existsSync || path.existsSync;
 
-    self.fileList = [{folderName: null, fileName: "metaData", object: self.metaData},
+    self.fileList = [{folderName: "", fileName: "metaData", object: self.metaData},
 
-        {folderName: null, fileName: "crl", object: self.crl},
-        {folderName: null, fileName:"trustedList", object: self.trustedList},
-        {folderName: null, fileName:"untrustedList", object: self.untrustedCert},
-        {folderName: null, fileName:"exCertList", object: self.exCertList},
+        {folderName: "", fileName: "crl", object: self.crl},
+        {folderName: "", fileName:"trustedList", object: self.trustedList},
+        {folderName: "", fileName:"untrustedList", object: self.untrustedCert},
+        {folderName: "", fileName:"exCertList", object: self.exCertList},
         {folderName: path.join("certificates", "internal"),fileName: "certificates", object: self.cert.internal},
         {folderName: path.join("certificates", "external"),fileName: "certificates", object: self.cert.external},
         {folderName:"userData", fileName: "userDetails", object: self.userData},
@@ -125,7 +125,7 @@ function Config () {
         var config = require(filePath), key;
         if (!compareObjects(config.webinos_version, self.metaData.webinos_version)) {
             self.metaData.webinos_version = config.webinos_version;
-            self.storeDetails(null, "metaData", self.metaData);
+            self.storeDetails("", "metaData", self.metaData);
         }
         if (!compareObjects(config.ports, self.userPref.ports)) {
             self.userPref.ports = config.ports;
@@ -304,7 +304,7 @@ function Config () {
                                             logger.log ("*****connection certificate signed by master certificate*****");
                                             self.cert.internal.conn.cert = signedCert;
                                             self.storeDetails(path.join("certificates", "internal"), "certificates", self.cert.internal);
-                                            self.storeDetails(null, "crl", self.crl);
+                                            self.storeDetails("", "crl", self.crl);
                                             callback(true);
                                         } else {
                                             callback (false);
