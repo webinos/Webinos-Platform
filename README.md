@@ -1,3 +1,13 @@
+***NOTICE***: This repository is not maintained anymore. The contents have been split into a set of smaller repositories and the development continues at
+
+* https://github.com/webinos/webinos-pzp for the Personal Zone Proxy
+* https://github.com/webinos/webinos-pzh for the Personal Zone Hub
+* https://github.com/webinos/webinos-api-* for the APIs, where * stands for the API name. 
+
+A list of implemented APIs is available at http://webinos.github.io/
+
+
+
 Secure Web Operating System Application Delivery Environment.
 ===
 
