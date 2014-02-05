@@ -20,9 +20,10 @@
 (function () {
     'use strict';
 
-//    var serialPort = require("serialport").SerialPort;
+    //var serialPort = require("serialport2").SerialPort;
+    var serialport_module = require('serialport');
+    var serialPort = serialport_module.SerialPort;
 
-    var serialPort = require("serialport2").SerialPort;
     var path = require("path");
     var fs = require("fs");
     //var BT_DEV = "/dev/cu.HXM002536-BluetoothSeri";
@@ -102,14 +103,17 @@
                             SERIAL_RATE = settings.bluetooth[0].rate;
 
                             try{
+                                serial = new serialPort(SERIAL_PORT, {baudrate: SERIAL_RATE}, false);
+
+                                /*
                                 serial = new serialPort();
-                                
                                 serial.open(SERIAL_PORT, {
                                   baudRate: SERIAL_RATE,
                                   dataBits: 8,
                                   parity: 'none',
                                   stopBits: 1
                                 });
+                                */
 
                                 serial.on('close', function (err) {
                                     console.log("Serial port ["+SERIAL_PORT+"] was closed");
@@ -123,7 +127,12 @@
                                     }
                                 });
 
+                                /*
                                 serial.on('open', function () {
+                                    start_serial();
+                                });*/
+
+                                serial.open(function () {
                                     start_serial();
                                 });
 
