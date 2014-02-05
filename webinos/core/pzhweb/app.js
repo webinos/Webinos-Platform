@@ -30,8 +30,10 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
             https = require('https'),
             fs = require('fs'),
             passport = require('passport'),
+            LocalStrategy = require('passport-local').Strategy,
             YahooStrategy = require('passport-yahoo').Strategy,
             GoogleStrategy = require('passport-google').Strategy;
+            
     } catch (err) {
         console.log("missing modules in pzh webserver, please run npm install and try again");
     }
@@ -160,6 +162,7 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
             app.use(express.session({ secret:sessionSecret }));//, store: new MemStore({reapInterval: 6000 * 10})
             app.use(passport.initialize());
             app.use(passport.session());
+            app.locals.pretty=true;
             app.use(app.router);
             app.use(express.static(__dirname + '/public'));
         });
@@ -231,6 +234,31 @@ PzhProviderWeb.startWebServer = function (host, address, port, config, cb) {
                 });
             }
         ));
+        
+        passport.use(new LocalStrategy(
+            function(username, password, done) {
+                if (username === "") {
+                  console.log("Username: " + username + " - empty");
+                  return done(null, false, { message: 'Please enter a username.' });
+                } else {
+                  return done(null, {
+                    "id":1,
+                    "from":"local",
+                    "displayName":username,
+                    "internal":true,
+                    "name": { 
+                      "familyName": username, 
+                      "givenName": "" 
+                    },
+                    "password":password,
+                    "identifier":"local-"+username,
+                    "emails": [ {"value" : username } ]
+                  });
+                }
+            }
+        ));
+        
+        
         return passport;
     }
 

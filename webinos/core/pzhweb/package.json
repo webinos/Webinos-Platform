@@ -10,6 +10,7 @@
     "passport": ">= 0.1.15",
     "passport-yahoo": "*",
     "passport-google": "*",
+    "passport-local": "*",
     "optimist": "*",
     "jade": "*"
   }

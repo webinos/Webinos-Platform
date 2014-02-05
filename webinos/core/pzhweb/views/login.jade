@@ -18,20 +18,30 @@ html
       }
 
   body
-    form.box.login
+    .box.login
       header
         img(src="http://webinos.org/wp-content/themes/parallelus-unite/images/webinos_logo.png", width="100px")
         label Personal Zone Hub login
         // <label>Please login to you personal zone hub using one of the following methods.</label>
         // TODO: "If you do not have an account, click..."
         // TODO: Fix stylesheet so that addition text can be added here if necessary
-      fieldset.boxBody
-        label Login using your Google ID
-        img(src='https://ssl.gstatic.com/images/logos/google_logo_41.png', width="100px")
-        input(type="button", class="btnLogin", onclick="loginGoogle()", value="Login via Google")
-        label Login using your Yahoo! ID
-        img(src='http://l.yimg.com/a/images/ww/met/slimheader/yahoo-logo-sm-png8.png', width="100px")
-        input(type="button", class="btnLogin", onclick="loginYahoo()", value="Login via Yahoo!")
+      form
+        fieldset.boxBody
+          label Login using your Google ID
+          img(src='https://ssl.gstatic.com/images/logos/google_logo_41.png', width="100px")
+          input(type="button", class="btnLogin", onclick="loginGoogle()", value="Login via Google")
+          label Login using your Yahoo! ID
+          img(src='http://l.yimg.com/a/images/ww/met/slimheader/yahoo-logo-sm-png8.png', width="100px")
+          input(type="button", class="btnLogin", onclick="loginYahoo()", value="Login via Yahoo!")
+      form(action="/loginlocal", method="POST")
+        fieldset.boxBody
+          label Login with a username and password
+          p Username
+            input(type="text",name="username", value="user@test.webinos.org")
+          p Password
+            input(type="password",name="password",value="test")
+            input(type="submit",value="Login!", class="btnLogin")
+        
     footer#main
       a(href="http://www.webinos.org") Powered by webinos
       |  |
