@@ -291,6 +291,13 @@ var Pzp_OtherManager = function (_parent) {
                         break;
                 }
             } else {
+                if (validMsgObj.to === _parent.pzp_state.sessionId
+                        && validMsgObj.type === 'mprop'
+                        && validMsgObj.payload.name === 'disconnected') {
+                    logger.log('msg dropped for: ' + validMsgObj.payload.sessionId);
+                    self.registry.emitEvent(validMsgObj.payload);
+                    return;
+                }
                 self.messageHandler.onMessageReceived (validMsgObj, validMsgObj.to);
             }
         });

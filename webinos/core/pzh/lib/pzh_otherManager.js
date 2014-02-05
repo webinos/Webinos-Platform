@@ -241,6 +241,13 @@ var Pzh_RPC = function (_parent) {
                         break;
                 }
             } else {
+                if (validMsgObj.to === _parent.pzh_state.sessionId
+                        && validMsgObj.type === 'mprop'
+                        && validMsgObj.payload.name === 'disconnected') {
+                    logger.log('msg dropped for: ' + validMsgObj.payload.sessionId);
+                    self.registry.emitEvent(validMsgObj.payload);
+                    return;
+                }
                 try {
                     self.messageHandler.onMessageReceived (validMsgObj, validMsgObj.to);
                 } catch (err2) {

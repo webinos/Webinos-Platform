@@ -270,6 +270,7 @@ var PzpWSS = function (parent) {
         if (connectedWebApp[connection.id]) {
             delete connectedWebApp[connection.id];
             parent.webinos_manager.messageHandler.removeRoute (connection.id, parent.pzp_state.sessionId);
+            parent.webinos_manager.registry.emitEvent({name: 'disconnected', sessionId: connection.id});
             logger.log ("web client disconnected: " + connection.id + " due to " + reason);
         }
     }
