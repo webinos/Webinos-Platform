@@ -42,7 +42,8 @@ string CPU::getPropertyValue(string * property, string * component)
 
 string CPU::model(string model)
 {
-	return Utils::exec(string("echo -n `uname -p`"));
+	//return Utils::exec(string("echo -n `uname -p`"));
+          return Utils::exec(string("cat /proc/cpuinfo | grep -m 1 'model name'")); //CPU model name
 }
 
 string CPU::currentLoad(string currentload)

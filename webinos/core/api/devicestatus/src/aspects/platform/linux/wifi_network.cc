@@ -47,42 +47,52 @@ string WiFiNetwork::getPropertyValue(string * property, string *  component)
 
 }
 
-string WiFiNetwork::ssid(string wifiNetworkName)
+string WiFiNetwork::ssid(string wifiNetworkssid)
 {
 string line, res, result;
 size_t pos;
 
- line = Utils::exec(string("iwconfig")); //cat proc/loadavg
+ line = Utils::exec(string("iwconfig 2>&1")); //cat proc/load
  pos = line.find("ESSID");
- result = line.substr (pos);
- res = result.substr (6,10);
-if (res == "ESSID")
-{
+ if(pos < line.size())
+ { 
+ result = line.substr(pos);
+ res = result.substr(6,10); 
  return string(res);
-}
-else 
+ }
+ else 
+ {
  return "No ssid found";
+ } 
+//return "true";
 }
 
-string WiFiNetwork::signalStrength(string wifiNetworkName)
+string WiFiNetwork::signalStrength(string wifiNetworksignal)
 {
 string line, res, result;
 size_t pos;
 
- line = Utils::exec(string("iwconfig")); //cat proc/loadavg
+ line = Utils::exec(string("iwconfig 2>&1")); //cat proc/loadavg
  pos = line.find("Tx-Power");
+ if (pos < line.size())
+{
  result = line.substr (pos);
  res = result.substr (9,8);
-
  return string(res);
 }
-
-string WiFiNetwork::networkStatus(string wifiNetworkName)
+else
 {
-        return "networkStatus not Implemented";
+return "No Signal Data";
+}
+//return "true";
 }
 
-string WiFiNetwork::ipAddress(string wifiNetworkName)
+string WiFiNetwork::networkStatus(string wifiNetworkStatus)
+{
+        return "Network Status not Implemented";
+}
+
+string WiFiNetwork::ipAddress(string wifiNetworkip)
 {
 string line, res, result;
 size_t pos;
@@ -90,12 +100,12 @@ size_t pos;
  line = Utils::exec(string("ifconfig -a")); // iwconfig
  pos = line.find("inet addr");
  result = line.substr (pos);
- res = result.substr (10,27);
+ res = result.substr (10,15);
 
         return string(res);
 }
 
-string WiFiNetwork::macAddress(string wifiNetworkName)
+string WiFiNetwork::macAddress(string wifiNetworkmac)
 {
 
 string line, res, result;

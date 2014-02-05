@@ -40,10 +40,13 @@ string InputDevice::getPropertyValue(string * property, string * component)
 
 string InputDevice::type(string inputDeviceName)
 {
-string res;
+string res1, res2, result;
 
-        res = Utils::exec(string("lsusb"));
-        return string(res);
+//Giving Info for USB and PCI both 
+        res1 = Utils::exec(string("lsusb"));
+        res2 = Utils::exec(string("lspci"));
+        result = res1 + res2; 
+        return string(result);
 }
 
 

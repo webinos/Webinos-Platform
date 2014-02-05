@@ -81,19 +81,16 @@ return string(res);
 
 string MemoryUnit::volatil(string memoUnit)
 {
-string line, res, result;
+string res1, res2, res3, result;
 size_t pos;
 
-    ifstream finfo("/proc/version"); //uname -r // ("/proc/version")
-    while(getline(finfo,line)) {
-        stringstream str(line);
+        res1 = Utils::exec(string("cat /proc/meminfo | grep MemTotal"));
+        res2 = Utils::exec(string("cat /proc/meminfo | grep MemFree"));
+        res3 = Utils::exec(string("cat /proc/meminfo | grep Buffers"));
 
-          if ( getline(str, line)){
-          pos = line.find("Ubuntu");    // position of "live" in str
-          result = line.substr (pos);
-          res = result.substr (0,27);
-    break;
-        }
-    }
-return string(res);
+        result = res1 + res2 + res3;
+
+        return string(result);
 }
+
+    

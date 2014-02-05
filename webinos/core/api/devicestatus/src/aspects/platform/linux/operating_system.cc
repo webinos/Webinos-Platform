@@ -58,15 +58,75 @@ string OperatingSystem::language(string oslanguage)
 
 string OperatingSystem::version(string osversion)
 {
-	return Utils::exec(string("echo -n `uname -sr`"));
+	//return Utils::exec(string("echo -n `uname -sr`"));
+        string line, result, res;
+	size_t pos, pos_endl;
+	
+	line = Utils::exec(string("lsb_release -a"));
+        pos = line.find("Release"); 
+        if (pos < line.size())
+        {
+        result = line.substr (pos);
+        res = result.substr (8,6);
+        return string(res);
+        }
+        else
+        {
+        return "No Release Data";
+        }
+/*	pos = line.find("Release") + 10;
+	pos_endl = line.find('\n', pos);
+
+        return line.substr (pos, pos_endl - pos - 1);*/
 }
 
 string OperatingSystem::name(string osname)
 {
-	return Utils::exec(string("echo -n `cat /etc/*version /etc/*release 2>/dev/null`"));
+        string line, result, res;
+	size_t pos, pos_endl;
+
+        line = Utils::exec(string("lsb_release -a"));
+        pos = line.find("Description"); 
+        if (pos < line.size())
+        {
+        result = line.substr (pos);
+        res = result.substr (12,13);
+        return string(res);
+        }
+        else
+        {
+        return "No OS Name Data";
+        }
+	
+	/*line = Utils::exec(string("lsb_release -a"));
+	pos = line.find("Description") + 10;
+	pos_endl = line.find('\n', pos);
+
+        return line.substr (pos, pos_endl - pos - 1);*/
+	//return Utils::exec(string("echo -n `cat /etc/*version /etc/*release 2>/dev/null`"));
 }
 
 string OperatingSystem::vendor(string osvendor)
 {
-	return Utils::exec(string("echo -n `uname -o`"));
+        string line, result, res;
+	size_t pos, pos_endl;
+
+        line = Utils::exec(string("lsb_release -a"));
+        pos = line.find("Distributor ID"); 
+        if (pos < line.size())
+        {
+        result = line.substr (pos);
+        res = result.substr (15,8);
+        return string(res);
+        }
+        else
+        {
+        return "No Vendor Data";
+        }	
+/*	line = Utils::exec(string("lsb_release -a"));
+	pos = line.find("Distributor ID") + 10;
+	pos_endl = line.find('\n', pos);
+
+        return line.substr (pos, pos_endl - pos - 1);*/
+//	return Utils::exec(string("echo -n `uname -o`"));
 }
