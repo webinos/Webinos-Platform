@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <title>
+    </title>
+    <link rel="stylesheet" href="https://s3.amazonaws.com/codiqa-cdn/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <script src="https://s3.amazonaws.com/codiqa-cdn/jquery-1.7.2.min.js"></script>
+    <script src="https://s3.amazonaws.com/codiqa-cdn/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script src="./registerwebinos.js"></script>
+    <script>
+        // Ensure that we always start at waitForWebinos
+        document.location.hash = "#waitForWebinos";
+
+        $(document).bind('pageinit', function(e){
+            if (e.target.id=="selectProvider"){
+                // Hide custom option by default
+                $("#customOptionPanel").hide();
+                $("input:radio[name='availablePZHs']").change(function(){
+                    if ($(this).val()==""){ //If the user clicks on the other option
+                        $("#customOptionPanel").show();
+                    }else{
+                        $("#customOptionPanel").hide();
+                    }
+                });
+                // Preselect official pzh
+                $("#webinosPzhOption").attr('checked', 'checked').checkboxradio("refresh");
+                // Initialize the ui events
+                $("#cmdRegister").click(function(){
+                    // Avoid double tap
+                    $("#cmdRegister").attr('disabled', 'disabled');
+                    var pzhAddress = '';
+                    if ($("#customOption").is(":checked")){// Custom url
+                        pzhAddress = $("#customOptionUrl").val().trim();
+                    }else { // Selected from the predefined list
+                        pzhAddress = $("input:radio[name='availablePZHs']:checked").val().trim();
+                    }
+                    if (pzhAddress.length > 0){ // If we have a host
+                        if (pzhAddress.toLowerCase()=="localhost"){
+                            $("#errorMessage").html("localhost is not supported as a pzh host name. Use 127.0.0.1 instead");
+                            $("#customOptionUrl").val("127.0.0.1");
+                            $("#showError").click();
+                        }else{
+                            // Prepare PZP to register to pzh
+                            var options = {type:'prop', payload:{status:'setPzhProviderAddress', message:pzhAddress}};
+                            webinos.session.message_send(options);
+                            // Navigate user to the selected PZH
+                            window.location.href = "https://" + pzhAddress + "/login?isPzp=true&port=" + webinos.session.getPzpPort ();
+                        }
+                    }else{ // No address selected
+                        $("#errorMessage").html("Please select a pzh provider or specify a host!");
+                        $("#showError").click();
+                    }
+                })
+            }
+        });
+        $(document).bind('pageshow',function(e){
+            if (e.target.id=="selectProvider"){
+                // Enable the button every time you show the page (in the case of an error)
+                $("#cmdRegister").removeAttr('disabled');
+            }
+        });
+
+
+        $(window).load(function(){
+            // Initialize webinos and check if pzp is already
+            // part of a PZH
+            initWebinos(function(result){
+                if (result.pzhExists){
+                    $("#pzhName").html(result.pzhName);
+                    $.mobile.changePage("#alreadyRegistered");
+                }else{
+                    $.mobile.changePage("#selectProvider");
+                }
+            });
+        });
+    </script>
+    <style>
+        .centered{
+            text-align: center;
+        }
+        #pzhName{
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+<div data-role="page" id="waitForWebinos">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Register with PZH
+        </h3>
+    </div>
+    <div data-role="content" class="centered">
+        <p>Waiting for webinos...</p>
+        <img src="pleasewait.gif"/>
+    </div>
+</div>
+<div data-role="page" id="alreadyRegistered">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Register with PZH
+        </h3>
+    </div>
+    <div data-role="content" class="centered">
+        <p>You have already registered to the following PZH</p>
+        <p id="pzhName"></p>
+        <p>Registration to multiple PZHs is not supported. Consider deleting webinos configuration and starting over again.</p>
+    </div>
+</div>
+<div data-role="page" id="selectProvider">
+    <div data-theme="a" data-role="header">
+        <h3>
+            Register with PZH
+        </h3>
+    </div>
+    <div data-role="content">
+        <div data-role="fieldcontain">
+            <fieldset data-role="controlgroup" data-type="vertical">
+                <legend>
+                    Select your PZH provider:
+                </legend>
+                <input id="webinosPzhOption" name="availablePZHs" value="pzh.webinos.org" type="radio" />
+                <label for="webinosPzhOption">
+                    Official webinos PZH
+                </label>
+                <input id="customOption" name="availablePZHs" value="" type="radio" />
+                <label for="customOption">
+                    Custom ip or hostname
+                </label>
+            </fieldset>
+        </div>
+        <div data-role="fieldcontain" id="customOptionPanel">
+            <label for="customOptionUrl">
+                Custom url
+            </label>
+            <input name="" id="customOptionUrl" placeholder="e.g. 127.0.0.1 or pzh.webinos.org" value="" type="text" />
+        </div>
+        <a data-role="button" id="cmdRegister">
+            Register to your PZH
+        </a>
+        <a data-rel="dialog" data-role="button" href="#errorDialog" style="display:none" id="showError"></a>
+    </div>
+</div>
+<div data-role="page" id="errorDialog">
+    <div data-role="content">
+        <div style="text-align:center;">
+            <p id="errorMessage">An error occurred</p>
+            <a href="#"  data-role="button" data-rel="back">Ok</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
