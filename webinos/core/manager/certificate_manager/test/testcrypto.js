@@ -16,14 +16,18 @@
 * Copyright 2011 University of Oxford
 *******************************************************************************/
 
+// This is a manual test script, it can be run from the Webinos-Platform 
+// directory and demonstrates some example outputs.
+
 var cacert = 0;
 var pzpcert = 2;
 
-var certman = null;
-if (process.platform != 'android')
-  certman = require("../src/build/Release/certificate_manager");
-else
-  certman = require('certificate_manager');
+var path = require ("path");
+var fs = require ("fs");
+var os = require ("os");
+var util = require ("util");
+
+var certman = require ("certificate_manager");
 
 var debug = true;
 var caKey = null;
@@ -62,8 +66,12 @@ var crlWithKey = null;
 crlWithKey = certman.addToCRL(caKey, crl, pzpCert);
 if (debug) console.log("PZP Certificate revoked, new CRL: \n[" + crlWithKey + "]\n");
 
+
+// Currently broken.
 var hash = null; 
-hash = certman.getHash("./conn.pem");
+fs.writeFileSync("/tmp/test-cert.pem", pzpCert);
+hash = certman.getHash("/tmp/test-cert.pem");
+fs.unlinkSync("/tmp/test-cert.pem");
 if (debug) console.log("PZP public hash key, hash: \n[" + hash + "]\n");
 
  
