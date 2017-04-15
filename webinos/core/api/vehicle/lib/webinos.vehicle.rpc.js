@@ -21,7 +21,7 @@
     function VehicleModule(rpcHandler, params) {
         var implFile = 'fake';
         var car = null;
-        var conncector = null;
+        var connector = null;
         if (typeof params.connector === 'undefined') {
             connector = 'simulator';
         } else {
@@ -41,6 +41,15 @@
                 implFile = 'sim';
                 console.log('connecting to simulator');
                 console.log('simulator available at http://localhost:9898/simulator/vehicle.html');
+            } catch (e) {
+                console.log(e);
+            }
+        } else if (connector == 'obd') { //OBD-II Addition!
+            //OBD
+            try {
+                car = require('../../vehicle/contrib/vb-obd/vo.js');
+                implFile = 'obd';
+                console.log('connecting to obd');
             } catch (e) {
                 console.log(e);
             }
